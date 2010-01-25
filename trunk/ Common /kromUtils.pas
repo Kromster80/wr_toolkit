@@ -98,6 +98,8 @@ function MakePOT(num:integer):integer;
 function Adler32CRC(TextPointer:Pointer; TextLength:integer):integer;
 function RandomS(Range_Both_Directions:integer):integer; overload;
 function RandomS(Range_Both_Directions:single):single; overload;
+procedure WriteLangFile(Sender:TForm; FileName:string; EraseWritten:boolean);
+procedure ReadLangFile(Sender:TForm; FileName:string; EraseWritten:boolean);
 function RunOpenDialog(Sender:TOpenDialog; Name,Path,Filter:string):boolean;
 function RunSaveDialog(Sender:TSaveDialog; FileName, FilePath, Filter:string; const FileExt:string = ''):boolean;
 
@@ -1033,7 +1035,7 @@ begin
    end;
    Browser := Copy(Browser, Pos('"', Browser) + 1, Length(Browser));
    Browser := Copy(Browser, 1, Pos('"', Browser) - 1);
-   ShellExecute(0, 'open', PChar(@Browser), PChar(@URL), nil, SW_SHOW);
+   ShellExecute(0, 'open', PChar(@Browser[1]), PChar(@URL[1]), nil, SW_SHOW);
 end;
 
 
