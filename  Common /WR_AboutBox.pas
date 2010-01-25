@@ -1,13 +1,6 @@
 unit WR_AboutBox;
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
 interface
-uses
-{$IFDEF FPC}
-  LCLIntf, LResources,
-{$ENDIF}
-  Forms, Classes, Controls, StdCtrls,  ExtCtrls, Graphics, KromUtils, Math;
+uses Forms, ShellApi, Classes, Controls, StdCtrls, Windows, ExtCtrls, Graphics, KromUtils, Math;
 
 type
   TAboutForm = class(TForm)
@@ -26,29 +19,27 @@ type
   private
     ToolVersion:string;
   public
-    procedure Show(aVersionInfo, aText, aToolVersion4URL: string); overload;
+    procedure Show(aVersionInfo,aText,aToolVersion4URL:string); overload;
   end;
 
 var
   AboutForm: TAboutForm;
 
 implementation
-{$IFDEF VER140}
-  {$R *.dfm}
-{$ENDIF}
+{$R *.dfm}
 
-procedure TAboutForm.Show(aVersionInfo, aText, aToolVersion4URL: string);
+procedure TAboutForm.Show(aVersionInfo,aText,aToolVersion4URL:string);
 begin
-  Label_VersionInfo.Caption := aVersionInfo;
-  Label_Text.Caption := aText;
-  ToolVersion := aToolVersion4URL;
-  Width := max(256,Label_VersionInfo.Width+64); //Fit version info
+  Label_VersionInfo.Caption:=aVersionInfo;
+  Label_Text.Caption:=aText;
+  ToolVersion:=aToolVersion4URL;
+  Width:=max(256,Label_VersionInfo.Width+64); //Fit version info
   Show;
 end;
 
 procedure TAboutForm.MailToClick(Sender: TObject);
 begin
-  MailTo('kromster80@gmail.com', '', '');
+  MailTo('kromster80@gmail.com','','');
 end;
 
 procedure TAboutForm.URLClick(Sender: TObject);
@@ -58,14 +49,7 @@ end;
 
 procedure TAboutForm.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if key = 27 then AboutForm.Close;   //ESC
+  if key=27 then AboutForm.Close;   //ESC
 end;
 
-initialization
-{$IFDEF FPC}
-  {$I WR_AboutBox.lrs}
-{$ENDIF}
-
-
 end.
-
