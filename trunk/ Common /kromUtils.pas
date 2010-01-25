@@ -49,6 +49,7 @@ function Max(const A,B,C: single):single; overload;
 function Ceil(const X: Extended):Integer;
 function ArcCos(const X: Extended): Extended;
 function ArcSin(const X: Extended): Extended;
+function ArcTan2(const Y, X: Extended): Extended;
 function Pow(const Base, Exponent: integer): integer;
 
   function GetLengthSQR(ix,iy,iz:integer): integer;
@@ -448,6 +449,14 @@ begin
   Result := ArcTan2(X, Sqrt(1 - X * X))
 end;
 
+function ArcTan2(const Y, X: Extended): Extended;
+asm
+        FLD     Y
+        FLD     X
+        FPATAN
+        FWAIT
+end;
+
 function Pow(const Base, Exponent: integer): integer;
 begin
   if Exponent = 0 then
@@ -814,6 +823,91 @@ begin
 Result:=Random(round(Range_Both_Directions*20000)+1)/10000-Range_Both_Directions;
 end;
 
+procedure WriteLangFile(Sender:TForm; FileName:string; EraseWritten:boolean);
+var ft:textfile; i,k:integer; capt:string;
+begin
+assignfile(ft,FileName); rewrite(ft);
+
+for i:=0 to Sender.ComponentCount-1 do begin
+
+  if(IsPublishedProp(Sender.Components[i],'Caption')) then begin
+  capt:=GetStrProp(Sender.Components[i],'Caption');
+    if capt<>'' then begin
+    writeln(ft,capt+'<=>'+uppercase(capt));
+    if EraseWritten then SetStrProp(Sender.Components[i],'Caption','*');
+    end;
+  end;
+
+  if Sender.Components[i] is TRadioGroup then begin
+  writeln(ft,'//List');
+    for k:=0 to TRadioGroup(Sender.Components[i]).Items.Count-1 do begin
+    capt:=TRadioGroup(Sender.Components[i]).Items[k];
+    writeln(ft,capt+'<=>'+uppercase(capt));
+    if EraseWritten then TRadioGroup(Sender.Components[i]).Items[k]:='*';
+    end;
+  writeln(ft,'//EndList');
+  end;
+  
+end;
+
+closefile(ft);
+end;
+
+procedure ReadLangFile(Sender:TForm; FileName:string; EraseWritten:boolean);
+var ft:textfile; i,k,row:integer; capt,eng,rus:string; IsList:boolean;
+begin     
+if not fileexists(FileName) then begin
+MessageBox(Sender.Handle,@('Can''t find input file '+FileName)[1],'Error',MB_OK);
+exit;
+end;
+
+assignfile(ft,FileName); reset(ft);
+IsList:=false;
+row:=0;
+
+repeat
+inc(row);
+readln(ft,capt);
+if capt='//List' then begin
+IsList:=true;
+readln(ft,capt);
+end;
+if capt='//EndList' then begin
+IsList:=false;
+readln(ft,capt);
+end;
+
+k:=1;
+repeat inc(k) until((k+1>length(capt))or(capt[k-1]+capt[k]+capt[k+1]='<=>'));
+
+if k+1>length(capt) then begin
+MessageBox(Sender.Handle,@('Error on line '+inttostr(row)+'. ')[1],'Error',MB_OK);
+//exit;
+end;
+
+eng:=decs(capt,length(capt)-k+2,0); //+2 means '<=' thing
+rus:=decs(capt,-k-1,0);             //-1 means '>' thing
+
+for i:=0 to Sender.ComponentCount-1 do begin
+
+  if(IsPublishedProp(Sender.Components[i],'Caption')) then begin
+  capt:=GetStrProp(Sender.Components[i],'Caption');
+  if capt=eng then SetStrProp(Sender.Components[i],'Caption',rus);
+  end;
+
+  if IsList then
+  if Sender.Components[i] is TRadioGroup then begin
+    for k:=0 to TRadioGroup(Sender.Components[i]).Items.Count-1 do begin
+    capt:=TRadioGroup(Sender.Components[i]).Items[k];
+    if capt=eng then TRadioGroup(Sender.Components[i]).Items[k]:=rus;
+    end;
+  end;
+  
+end;
+
+until(eof(ft));
+closefile(ft);
+end;
 
 function RunOpenDialog(Sender:TOpenDialog; Name,Path,Filter:string):boolean;
 begin
