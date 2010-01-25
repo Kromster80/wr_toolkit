@@ -1,0 +1,1 @@
+tga2ptx.exe -2 329.tga
