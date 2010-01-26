@@ -394,7 +394,7 @@ type
   end;
 
 
-type TEditingFormat = (fmtMBWR, fmtWR2, fmtAFC, fmtFVR);
+type TEditingFormat = (fmtMBWR, fmtWR2, fmtAFC11N, fmtFVR);
 
 var
   Form1: TForm1;
@@ -659,12 +659,12 @@ DSqty:=2; //2 volumes
 
   if CarFmt=fmtMBWR then TBqty[1]:=75;
   if CarFmt=fmtWR2  then TBqty[1]:=80;//0..80 id of WR2
-  if CarFmt=fmtAFC  then TBqty[1]:=80;
+  if CarFmt=fmtAFC11N  then TBqty[1]:=80;
   if CarFmt=fmtFVR  then TBqty[1]:=80;
 
   if CarFmt=fmtMBWR then TBqty[2]:=98;
   if CarFmt=fmtWR2  then TBqty[2]:=105;//0..105 id of WR2
-  if CarFmt=fmtAFC  then TBqty[2]:=106;//106 is Caravan
+  if CarFmt=fmtAFC11N  then TBqty[2]:=106;//106 is Caravan
   if CarFmt=fmtFVR  then TBqty[2]:=110;
 
 TBLib[1]:='Edit_3DCarsDB';
@@ -699,7 +699,7 @@ if CarFmt=fmtWR2  then begin
   m:=0;
   //COtext[2,7,1]:='CarClassID';   //filled by default
 end;
-if CarFmt=fmtAFC then
+if CarFmt=fmtAFC11N then
   m:=0;
 if CarFmt=fmtFVR then
   m:=0;
@@ -1112,6 +1112,8 @@ SDriverZ1.Value:=DMZ.Value+69;
 end;
 end;
 
+
+//We enable all controls and then disable ones that aren't usable by current EditingFormat
 procedure TForm1.RGFormatClick(Sender: TObject);
 var i:integer;
 begin
@@ -1123,30 +1125,67 @@ if TComponent(Form1.Components[i]).Tag<>888 then begin
   if Form1.Components[i] is TLabel then TLabel(Form1.Components[i]).Enabled:=true;
 end;
 
+case RGFormat.ItemIndex of
+  0: CarFmt := fmtMBWR;
+  1: CarFmt := fmtWR2;
+  2: CarFmt := fmtAFC11N;
+  3: CarFmt := fmtFVR;
+end;
+
+  //Identity tab
+  Label31.Enabled       := CarFmt in [fmtMBWR]; //Cabrio Folder
+  Edit8.Enabled         := CarFmt in [fmtMBWR]; //Cabrio Folder
+
+  Label56.Enabled       := CarFmt in [fmtMBWR]; //Class Name
+  Edit2.Enabled         := CarFmt in [fmtMBWR]; //Class Name
+
+  CBCabrio1.Enabled     := CarFmt in [fmtMBWR]; //Cabrio checkbox
+  CBCabrio2.Enabled     := CarFmt in [fmtMBWR]; //Cabrio checkbox
+
+  Label33.Enabled       := CarFmt in [fmtMBWR, fmtWR2, fmtAFC11N]; //Menu Class
+  SClassID.Enabled      := CarFmt in [fmtMBWR, fmtWR2, fmtAFC11N]; //Menu Class
+  Label50.Enabled       := CarFmt in [fmtWR2, fmtAFC11N]; //Score to Open
+  SScore.Enabled        := CarFmt in [fmtWR2, fmtAFC11N]; //Score to Open
+
+  //Appearance tab
+  Label41.Enabled       := CarFmt in [fmtMBWR]; //Motor Sound File
+  Edit7.Enabled         := CarFmt in [fmtMBWR]; //Motor Sound File
+
+  Label116.Enabled      := CarFmt in [fmtWR2, fmtAFC11N]; //Engine m_ms
+  SAusID.Enabled        := CarFmt in [fmtWR2, fmtAFC11N]; //Engine m_ms
+  Label117.Enabled      := CarFmt in [fmtWR2, fmtAFC11N]; //Exhaust m_ap
+  SMotID.Enabled        := CarFmt in [fmtWR2, fmtAFC11N]; //Exhaust m_ap
+  Label120.Enabled      := CarFmt in [fmtWR2, fmtAFC11N]; //Saug.. m_saug
+  SSaug.Enabled         := CarFmt in [fmtWR2, fmtAFC11N]; //Saug.. m_saug
+  Label121.Enabled      := CarFmt in [fmtWR2, fmtAFC11N]; //Last.. m_last
+  SLastger.Enabled      := CarFmt in [fmtWR2, fmtAFC11N]; //Last.. m_last
+
+  Label30.Enabled       := CarFmt in [fmtMBWR]; // Cabrio brakelights IDs
+  SappCAB1.Enabled      := CarFmt in [fmtMBWR]; // Cabrio brakelights IDs
+  SappCAB2.Enabled      := CarFmt in [fmtMBWR]; // Cabrio brakelights IDs
+  SappCAB3.Enabled      := CarFmt in [fmtMBWR]; // Cabrio brakelights IDs
+
+  LtachoID.Enabled      := CarFmt in [fmtWR2, fmtAFC11N, fmtFVR]; //Tacho ID
+  STachoID.Enabled      := CarFmt in [fmtWR2, fmtAFC11N, fmtFVR]; //Tacho ID
+
+  Label119.Enabled      := CarFmt in [fmtMBWR, fmtWR2, fmtAFC11N]; // -Special--
+  Label99.Enabled       := CarFmt in [fmtMBWR]; // bez1.tga
+  TypLink.Enabled       := CarFmt in [fmtMBWR]; // bez1.tga
+  Label86.Enabled       := CarFmt in [fmtMBWR]; // bez2.tga
+  Typ2.Enabled          := CarFmt in [fmtMBWR]; // bez2.tga
+
+  Label114.Enabled      := CarFmt in [fmtWR2, fmtAFC11N]; //Default Menu Color
+  SColor.Enabled        := CarFmt in [fmtWR2, fmtAFC11N]; //Default Menu Color
+  Label152.Enabled      := CarFmt in [fmtAFC11N]; //Caravan
+  Caravan.Enabled       := CarFmt in [fmtAFC11N]; //Caravan
+
+
 if RGFormat.ItemIndex=0 then begin
-  CarFmt:=fmtMBWR;
-  Label119.Enabled:=false;
-  Label116.Enabled:=false;
-  SAusID.Enabled:=false;
-  Label117.Enabled:=false;
-  SMotID.Enabled:=false;
-  Label120.Enabled:=false;
-  SSaug.Enabled:=false;
-  Label121.Enabled:=false;
-  SLastger.Enabled:=false;
-  Label33.Enabled:=false;
-  SClassID.Enabled:=false;
-  Label114.Enabled:=false;
-  SColor.Enabled:=false;
   Label118.Enabled:=false;
   Hersteller.Enabled:=false;
   Label153.Enabled:=false;
   Logo.Enabled:=false;
   Label133.Enabled:=false;
-  LtachoID.Enabled:=false;
-  STachoID.Enabled:=false;
-  Caravan.Enabled:=false;
-  Label152.Enabled:=false;
   RaceClass1_4.Items[0]:='Series';
   RaceClass1_4.Items[1]:='Racing';
   RaceClass1_4.Items[2]:='Prototype';
@@ -1154,25 +1193,6 @@ if RGFormat.ItemIndex=0 then begin
 end;
 
 if RGFormat.ItemIndex=1 then begin
-  CarFmt:=fmtWR2;
-  Label31.Enabled:=false;
-  Edit8.Enabled:=false;
-  Label56.Enabled:=false;
-  Edit2.Enabled:=false;
-  Label30.Enabled:=false;
-  SappCAB1.Enabled:=false;
-  SappCAB2.Enabled:=false;
-  SappCAB3.Enabled:=false;
-  CBCabrio1.Enabled:=false;
-  CBCabrio2.Enabled:=false;
-  Label41.Enabled:=false;
-  Edit7.Enabled:=false;
-  Label99.Enabled:=false;
-  TypLink.Enabled:=false;
-  Label86.Enabled:=false;
-  Typ2.Enabled:=false;
-  Caravan.Enabled:=false;
-  Label152.Enabled:=false;
   RaceClass1_4.Items[0]:='Racing';
   RaceClass1_4.Items[1]:='Series';
   RaceClass1_4.Items[2]:='Rally';
@@ -1180,23 +1200,6 @@ if RGFormat.ItemIndex=1 then begin
 end;
 
 if RGFormat.ItemIndex=2 then begin
-  CarFmt:=fmtAFC;
-  Label31.Enabled:=false;
-  Edit8.Enabled:=false;
-  Label56.Enabled:=false;
-  Edit2.Enabled:=false;
-  Label30.Enabled:=false;
-  SappCAB1.Enabled:=false;
-  SappCAB2.Enabled:=false;
-  SappCAB3.Enabled:=false;
-  CBCabrio1.Enabled:=false;
-  CBCabrio2.Enabled:=false;
-  Label41.Enabled:=false;
-  Edit7.Enabled:=false;
-  Label99.Enabled:=false;
-  TypLink.Enabled:=false;
-  Label86.Enabled:=false;
-  Typ2.Enabled:=false;
   RaceClass1_4.Items[0]:='Racing';
   RaceClass1_4.Items[1]:='Series';
   RaceClass1_4.Items[2]:='Rally';
@@ -1204,58 +1207,23 @@ if RGFormat.ItemIndex=2 then begin
 end;
 
 if RGFormat.ItemIndex=3 then begin //Ferrari Virtual Race
-  CarFmt:=fmtFVR;
-  //Identity
-  Label31.Enabled:=false;
-  Edit8.Enabled:=false;
   Label118.Enabled:=false;
   Hersteller.Enabled:=false;
   Label153.Enabled:=false;
   Logo.Enabled:=false;
-  Label56.Enabled:=false;
-  Edit2.Enabled:=false;
-  CBCabrio1.Enabled:=false;
-  CBCabrio2.Enabled:=false;
   RaceClass1_4.Enabled:=false;
   Label127.Enabled:=false;
   SRaceClass.Enabled:=false;
-  Label33.Enabled:=false;
-  SClassID.Enabled:=false;
-  Label50.Enabled:=false;
-  SScore.Enabled:=false;
   //Appearance
-  Label41.Enabled:=false;
-  Edit7.Enabled:=false;
   Label42.Enabled:=false;
   SSrate.Enabled:=false;
   Label54.Enabled:=false;
   SLautstarke.Enabled:=false;
-  Label116.Enabled:=false;
-  SAusID.Enabled:=false;
-  Label117.Enabled:=false;
-  SMotID.Enabled:=false;
-  Label120.Enabled:=false;
-  SSaug.Enabled:=false;
-  Label121.Enabled:=false;
-  SLastger.Enabled:=false;
   Label33.Enabled:=false;
   Label29.Enabled:=false;
   SappBR1.Enabled:=false;
   SappBR2.Enabled:=false;
   SappBR3.Enabled:=false;
-  Label30.Enabled:=false;
-  SappCAB1.Enabled:=false;
-  SappCAB2.Enabled:=false;
-  SappCAB3.Enabled:=false;
-  Label99.Enabled:=false;
-  TypLink.Enabled:=false;
-  Label86.Enabled:=false;
-  Typ2.Enabled:=false;
-  Label114.Enabled:=false;
-  SColor.Enabled:=false;
-  Label152.Enabled:=false;
-  Caravan.Enabled:=false;
-  //
 end;
 
 FSChange(nil);
