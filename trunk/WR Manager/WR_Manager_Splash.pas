@@ -1,7 +1,5 @@
 unit WR_Manager_Splash;
-
 interface
-
 uses
   Forms, Graphics, ExtCtrls, Classes, Controls, StdCtrls;
 
@@ -11,10 +9,6 @@ type
     Shape1: TShape;
     Label1: TLabel;
     Label2: TLabel;
-  private
-    { Private declarations }
-  public
-    { Public declarations }
   end;
 
 var
