@@ -198,6 +198,7 @@ end else out_s:='';
 Result:=out_s;
 end;
 
+//Returns file extension without dot
 function GetFileExt(const FileName: string): string;
 var k:integer; s:string;
 begin
