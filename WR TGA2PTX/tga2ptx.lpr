@@ -24,6 +24,8 @@ var
   {$R *.res}
   {$ENDIF}
 
+  //todo: move everything to external PAS unit so that Lazarus and Delphi wouldn't have duplicate code in DPR and LPR
+
 function ConvertTGA2PTX(tganame:string; MipMapLev:integer):boolean;
 begin
 Result:=false;
