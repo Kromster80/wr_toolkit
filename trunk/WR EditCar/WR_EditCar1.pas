@@ -399,7 +399,6 @@ type TEditingFormat = (fmtMBWR, fmtWR2, fmtAFC11N, fmtFVR);
 
 var
   Form1: TForm1;
-  f:file;
   x:integer;  //Number of parameters(176), temp
   allowFS2,AllowDataUpdate,VLEEdit:boolean; //First Import click, Chapter not found, Mouse spy for TChart, Not First Time, Allow Change
 
@@ -449,7 +448,7 @@ begin
 end;
 
 procedure TForm1.OpenCAR(Sender: TObject);
-var i,j,k,h:integer;
+var i,j,k,h:integer; f:file;
 begin
 AllowDataUpdate:=false;
 
@@ -1252,7 +1251,8 @@ end;
 
 procedure TForm1.ScanWR2DS(Sender:string);
 var DSqty,TBqty,COqty:integer;
-var i,j,k,h,m:integer;
+ i,j,k,h,m:integer;
+ f:file;
 begin
 LB2Model.Enabled:=false;
 ImportWR2Car.Enabled:=false;
