@@ -1,4 +1,5 @@
 unit WR_EditCar_Lang;
+{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
 
 const

@@ -1,6 +1,7 @@
 unit WR_AboutBox;
+{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
-uses Forms, ShellApi, Classes, Controls, StdCtrls, Windows, ExtCtrls, Graphics, KromUtils, Math;
+uses LResources, Forms, Classes, Controls, StdCtrls, LCLIntf, ExtCtrls, Graphics, kromUtils, Math;
 
 type
   TAboutForm = class(TForm)
@@ -26,7 +27,6 @@ var
   AboutForm: TAboutForm;
 
 implementation
-{$R *.dfm}
 
 procedure TAboutForm.Show(aVersionInfo,aText,aToolVersion4URL:string);
 begin
@@ -51,5 +51,10 @@ procedure TAboutForm.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftStat
 begin
   if key=27 then AboutForm.Close;   //ESC
 end;
+
+initialization
+{$IFDEF FPC}
+  {$I WR_AboutBox.lrs}
+{$ENDIF}
 
 end.

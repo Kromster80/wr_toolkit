@@ -1,5 +1,5 @@
-//some new lines
 unit KromUtils;
+{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
 uses sysutils,windows,forms,typinfo,ExtCtrls,Math, Dialogs, Registry, ShellApi;
 
@@ -857,12 +857,13 @@ closefile(ft);
 end;
 
 procedure ReadLangFile(Sender:TForm; FileName:string; EraseWritten:boolean);
-var ft:textfile; i,k,row:integer; capt,eng,rus:string; IsList:boolean;
+var ft:textfile; i,k,row:integer; capt,eng,rus,ErrS:string; IsList:boolean;
 begin     
-if not fileexists(FileName) then begin
-MessageBox(Sender.Handle,@('Can''t find input file '+FileName)[1],'Error',MB_OK);
-exit;
-end;
+  if not fileexists(FileName) then begin
+  ErrS := 'Can''t find input file '+FileName;
+  MessageBox(Sender.Handle,@(ErrS)[1],'Error',MB_OK);
+  exit;
+  end;
 
 assignfile(ft,FileName); reset(ft);
 IsList:=false;
@@ -884,8 +885,9 @@ k:=1;
 repeat inc(k) until((k+1>length(capt))or(capt[k-1]+capt[k]+capt[k+1]='<=>'));
 
 if k+1>length(capt) then begin
-MessageBox(Sender.Handle,@('Error on line '+inttostr(row)+'. ')[1],'Error',MB_OK);
-//exit;
+  ErrS := 'Error on line '+inttostr(row)+'. ';
+  MessageBox(Sender.Handle,@(ErrS)[1],'Error',MB_OK);
+  //exit;
 end;
 
 eng:=decs(capt,length(capt)-k+2,0); //+2 means '<=' thing

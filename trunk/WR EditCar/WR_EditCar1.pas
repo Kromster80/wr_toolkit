@@ -1,10 +1,11 @@
 unit WR_EditCar1;
+{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
 uses
-  SysUtils, Classes, Forms, StdCtrls, Windows, WR_EditCar_Lang,
-  Dialogs, ExtCtrls, Controls, ComCtrls, Spin, FloatSpinEdit,
-  WR_AboutBox, KromUtils, ValEdit, Grids, Chart, Graphics,
-  Buttons, Math, TeEngine, Series, TeeProcs;
+  SysUtils, Classes, Forms, StdCtrls, LCLIntf, WR_EditCar_Lang,
+  Dialogs, ExtCtrls, Controls, ComCtrls, Spin, {FloatSpinEdit,}
+  WR_AboutBox, KromUtils, {ValEdit,} Grids, Chart, Graphics,
+  Buttons, LResources, TAGraph, Math{, TeEngine, Series, TeeProcs};
 
 type
   TForm1 = class(TForm)
@@ -424,7 +425,6 @@ var
   CarFmt:TEditingFormat;
 
 implementation
-{$R *.dfm}
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
@@ -1801,6 +1801,11 @@ begin
   BitBtn4.Enabled:=false;
   BitBtn5.Enabled:=false;
 end;
+
+initialization
+{$IFDEF FPC}
+  {$I WR_EditCar1.lrs}
+{$ENDIF}
 
 end.
 
