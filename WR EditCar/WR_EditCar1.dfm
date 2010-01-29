@@ -56,7 +56,7 @@ object Form1: TForm1
     Tag = 888
     Left = 512
     Top = 302
-    Width = 222
+    Width = 137
     Height = 33
     Caption = 'Open .Car'
     TabOrder = 0
@@ -17855,6 +17855,16 @@ object Form1: TForm1
           210)
       end
     end
+  end
+  object Button2: TButton
+    Tag = 888
+    Left = 648
+    Top = 302
+    Width = 86
+    Height = 33
+    Caption = 'Open .Car'
+    TabOrder = 5
+    OnClick = Button2Click
   end
   object Open1: TOpenDialog
     Filter = '"World Racing" car descriptor (*.car)|*.car|All fles (*.*)|*.*'
