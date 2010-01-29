@@ -3,9 +3,11 @@ unit WR_AboutBox;
 interface
 uses
   {$IFDEF FPC} LResources, LCLIntf, {$ENDIF}
-  Forms, Classes, Controls, StdCtrls, ExtCtrls, Graphics, kromUtils, Math;
+  Forms, Classes, Controls, StdCtrls, ExtCtrls, Graphics, Grids, kromUtils,
+  Math;
 
 type
+  { TAboutForm }
   TAboutForm = class(TForm)
     About_Link: TLabel;
     Label_VersionInfo: TLabel;

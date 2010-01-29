@@ -1,4 +1,5 @@
 unit WR_DataSet;
+{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
 uses KromUtils, SysUtils, Windows;
 
@@ -93,6 +94,7 @@ var
   IgnoreTyp:boolean;
   f:file;
   c:array[1..32768]of char;
+  ErrS:string;
   iDS,iTB,iCO:integer;
   i:integer;
   MsgRes:integer;
@@ -177,7 +179,8 @@ begin
       else begin
             blockread(f,c,4);
             if not IgnoreTyp then begin
-              MsgRes:=MessageBox(HWND(nil),@('Unknown Typ='+inttostr(ord(c[1]))+#10+inttostr(iDS)+':'+inttostr(iTB)+':'+inttostr(iCO))[1],'Error',MB_ABORTRETRYIGNORE or MB_DEFBUTTON3);
+              ErrS := 'Unknown Typ='+inttostr(ord(c[1]))+#10+inttostr(iDS)+':'+inttostr(iTB)+':'+inttostr(iCO);
+              MsgRes:=MessageBox(HWND(nil),@(ErrS)[1],'Error',MB_ABORTRETRYIGNORE or MB_DEFBUTTON3);
               if MsgRes=IDABORT then begin closefile(f); exit; end;
               if MsgRes=IDRETRY then IgnoreTyp:=false;
               if MsgRes=IDIGNORE then IgnoreTyp:=true;
@@ -196,14 +199,12 @@ end;
 procedure TDataSet.SaveDS(FileName:string);
 var
   f:file;
-  c:array[1..32768]of char;
   s:string;
   iDS,iTB,iCO:integer;
   i:integer;
 begin
   assignfile(f,FileName); rewrite(f,1);
 
-  c[1]:=#0;
   blockwrite(f,Header,33); //assume DSQty didn't changed
 
   for iDS:=1 to DSqty do begin
