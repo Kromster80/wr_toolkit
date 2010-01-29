@@ -4,7 +4,7 @@ interface
 uses
   SysUtils, Classes, Forms, StdCtrls, Dialogs, ExtCtrls, Controls, ComCtrls, Spin,
   {$IFDEF FPC} LResources, LCLIntf, TAGraph, {$ENDIF}
-  WR_EditCar_Lang,
+  WR_EditCar_Lang, WR_DataSet,
   {$IFDEF VER140} FloatSpinEdit, {$ENDIF}
   WR_AboutBox, KromUtils,
   Grids, Chart, Graphics, Buttons, Math,
@@ -371,6 +371,7 @@ type
     DMZ: TFloatSpinEdit;
     DMY: TFloatSpinEdit;
     DMX: TFloatSpinEdit;
+    Button2: TButton;
     procedure OpenClick(Sender: TObject);
     procedure OpenCAR(Sender: TObject);
     procedure MouseClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -395,6 +396,8 @@ type
     procedure ImportWRCarClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure BitBtn2Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure UpdateControls();
   end;
 
 
@@ -402,7 +405,9 @@ type TEditingFormat = (fmtMBWR, fmtWR2, fmtAFC11N, fmtFVR);
 
 var
   Form1: TForm1;
-  x:integer;  //Number of parameters(176), temp
+
+  LockControls:boolean=false; //New variable
+
   allowFS2,AllowDataUpdate,VLEEdit:boolean; //First Import click, Chapter not found, Mouse spy for TChart, Not First Time, Allow Change
 
   DSqty:integer; //DS values (2)
@@ -417,12 +422,12 @@ var
     vr:array [1..2,0..512,1..3]of real;
     vs:array [1..2,0..512,1..3]of string;
   c:array [1..2048] of char;
-  ExeDir,carname,s2,s:string;       
+  ExeDir,carname,s2,s:string;
   Title:array of array of string;
   Value:array of array of array of record
-  Int:integer;
-  Rel:single;
-  Str:string;
+    Int:integer;
+    Rel:single;
+    Str:string;
   end;
   CarFmt:TEditingFormat;
 
@@ -431,11 +436,19 @@ implementation
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   DecimalSeparator:='.';
-  carname:=ExtractOpenedFileName(CMDLine);
-  ExeDir:=ExtractFilePath(Application.ExeName);
+  carname := ExtractOpenedFileName(CMDLine);
+  ExeDir := ExtractFilePath(Application.ExeName);
 
-  carname:='editcar.car';
-  if FileExists(carname) then OpenCAR(Form1);
+  fDataSet := TDataSet.Create;
+  fDataSet.LoadDS('editcar.car');
+
+  exit;
+  
+  if not FileExists(carname) then
+    carname := 'editcar.car';
+
+  if FileExists(carname) then
+    OpenCAR(Form1);
 end;
 
 procedure TForm1.OpenClick(Sender: TObject);
@@ -451,7 +464,7 @@ begin
 end;
 
 procedure TForm1.OpenCAR(Sender: TObject);
-var i,j,k,h:integer; f:file;
+var i,j,k,h,x:integer; f:file;
 begin
 AllowDataUpdate:=false;
 
@@ -753,6 +766,7 @@ procedure TForm1.FSChange(Sender: TObject);
 var s1:string; k:integer; z:real;
 //Transfer values from FloatSpins and other editors to memory
 begin
+if LockControls then exit;
 if not AllowDataUpdate then exit;
 
 //Change application title according to opened file path and car name
@@ -1805,9 +1819,33 @@ begin
   BitBtn5.Enabled:=false;
 end;
 
+procedure TForm1.Button2Click(Sender: TObject);
+begin
+  UpdateControls;
+end;
+
+
+procedure TForm1.UpdateControls();
+begin
+  LockControls := true;
+  Edit1.Text := fDataSet.GetValueAsString(1,3,2);  //folder
+  Edit8.Text := fDataSet.GetValueAsString(1,4,2);  //folder
+  Edit2.Text := fDataSet.GetValueAsString(1,23,2); //class
+  Edit3.Text := fDataSet.GetValueAsString(2,4,2); //model}
+{  Edit1.Text :=vs[1,2,2];  //folder
+  Edit8.Text :=vs[1,3,2];  //folder
+  Edit2.Text :=vs[1,22,2]; //class
+  Edit3.Text :=vs[2,3,2]; //model}
+ //
+
+  LockControls := false;
+end;
+
+
 {$IFDEF VER140}
   {$R *.dfm}
 {$ENDIF}
+
 
 initialization
 {$IFDEF FPC}
