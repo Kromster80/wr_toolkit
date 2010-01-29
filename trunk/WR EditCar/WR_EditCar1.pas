@@ -3,12 +3,12 @@ unit WR_EditCar1;
 interface
 uses
   SysUtils, Classes, Forms, StdCtrls, Dialogs, ExtCtrls, Controls, ComCtrls, Spin,
-  {$IFDEF FPC} LResources, LCLIntf, TAGraph, {$ENDIF}
+  {$IFDEF FPC} LResources, LCLIntf, TAGraph, TASeries, {$ENDIF}
   WR_EditCar_Lang, WR_DataSet,
   {$IFDEF VER140} FloatSpinEdit, {$ENDIF}
   WR_AboutBox, KromUtils,
-  Grids, Chart, Graphics, Buttons, Math,
-  {$IFDEF VER140} ValEdit, TeEngine, Series, TeeProcs {$ENDIF};
+  Grids, Chart, Graphics, Buttons, Math
+  {$IFDEF VER140}, ValEdit, TeEngine, Series, TeeProcs {$ENDIF};
 
 type
   TForm1 = class(TForm)
@@ -54,7 +54,7 @@ type
     TabSheet10: TTabSheet;
     TabSheet11: TTabSheet;
     TabSheet12: TTabSheet;
-    ValueListEditor1: TValueListEditor;
+    ValueListEditor1: TValueListEditor;  //Can't be ported to Lazarus for it misses this component and many more in ChartSeries... (
     Image6: TImage;
     ST2Mode: TSpinEdit;
     ST1Mode: TSpinEdit;
