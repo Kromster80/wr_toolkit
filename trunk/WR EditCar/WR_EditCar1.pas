@@ -5,9 +5,9 @@ uses
   SysUtils, Classes, Forms, StdCtrls, Dialogs, ExtCtrls, Controls, ComCtrls, Spin,
   {$IFDEF FPC} LResources, LCLIntf, TAGraph, TASeries, {$ENDIF}
   WR_EditCar_Lang, WR_DataSet,
-  {$IFDEF VER140} FloatSpinEdit, {$ENDIF}
+  {$IFDEF VER140} Chart, FloatSpinEdit, {$ENDIF}
   WR_AboutBox, KromUtils,
-  Grids, Chart, Graphics, Buttons, Math
+  Grids, Graphics, Buttons, Math
   {$IFDEF VER140}, ValEdit, TeEngine, Series, TeeProcs {$ENDIF};
 
 type
@@ -54,7 +54,9 @@ type
     TabSheet10: TTabSheet;
     TabSheet11: TTabSheet;
     TabSheet12: TTabSheet;
-    ValueListEditor1: TValueListEditor;  //Can't be ported to Lazarus for it misses this component and many more in ChartSeries... (
+    {$IFDEF VER140}
+    ValueListEditor1: TValueListEditor;  //Can't be ported to Lazarus for it misses this component and many more in ChartSeries...
+    {$ENDIF}
     Image6: TImage;
     ST2Mode: TSpinEdit;
     ST1Mode: TSpinEdit;
@@ -376,6 +378,7 @@ type
     procedure OpenCAR(Sender: TObject);
     procedure MouseClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState); reintroduce;
+    procedure VLEChange(Sender: TObject);
     procedure SaveClick(Sender: TObject);
     procedure AboutClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -385,7 +388,6 @@ type
     procedure PageChange(Sender: TObject);
     procedure RPMEdit(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure Mup(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure VLEChange(Sender: TObject);
     procedure FSChangeLink(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FSChange2(Sender: TObject);
     procedure RGFormatClick(Sender: TObject);
@@ -576,6 +578,7 @@ end;
 procedure TForm1.RefreshVLE; //Send data to List from memory
 var i,k,Count:integer;
 begin
+  {$IFDEF VER140}
   VLEEdit:=false;
   ValueListEditor1.Strings.Clear;
   for i:=1 to DSqty do begin
@@ -592,12 +595,14 @@ begin
     end;
   end;
   VLEEdit:=true;
+  {$ENDIF}
 end;
 
 procedure TForm1.VLEChange(Sender: TObject);
 var i,k:integer; Key,Val:string;
 begin
-  if VLEEdit=false then exit;    
+  {$IFDEF VER140}
+  if VLEEdit=false then exit;
   Key:=ValueListEditor1.Keys[ValueListEditor1.Row];
   Val:=ValueListEditor1.Values[ValueListEditor1.Keys[ValueListEditor1.Row]];
   if (length(Key)>=6)and(Val<>'') then begin //Format is #-###. at least 6 chars
@@ -609,6 +614,7 @@ begin
       3: vs[i,k,2]:=Val;
     end;
   end;
+  {$ENDIF}
 end;
 
 //Redirect to Keyboard call, cause of different input parameters.
@@ -622,6 +628,7 @@ end;
 procedure TForm1.KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 var i,k:integer;
 begin
+{$IFDEF VER140}
 with ValueListEditor1 do
   if length(Keys[Row])>=6 then begin
     i:=strtoint(Keys[Row][1]);
@@ -657,6 +664,7 @@ with ValueListEditor1 do
     0: Label8.caption:='  -  ';
     end;
   end; //with ... do
+{$ENDIF}
 end;
 
 procedure TForm1.SaveClick(Sender: TObject);
@@ -899,11 +907,13 @@ vi[2,49,2]:=SrpmMax.Value;
 vi[2,29,2]:=SMtorque.Value;
 vr[2,71,2]:=SNMStep.Value;
 
+{$IFDEF VER140}
 Chart1.Series[0].Clear; Chart1.Series[1].Clear;
 for k:=0 to 20 do Chart1.Series[0].AddXY(k*SNMStep.Value,round(vr[2,50+k,2]),'',120);
 for k:=0 to 20 do Chart1.Series[1].AddXY(k*SNMStep.Value,0,'',120*65536);
 Chart1.LeftAxis.Maximum:=round(Chart1.Series[0].MaxYValue*1.2);
 Chart1.BottomAxis.Maximum:=SNMStep.Value*20;
+{$ENDIF}
 
 vi[2,74,2]:=SSrate.Value;
 vs[2,75,2]:=Edit7.Text;
@@ -1043,11 +1053,13 @@ SmphID.Value:=vi[2,48,2];
 SrpmMax.Value:=vi[2,49,2];
 if round(vr[2,71,2])<>0 then SNMStep.Value:=round(vr[2,71,2]);
 
+{$IFDEF VER140}
 Chart1.Series[0].Clear; Chart1.Series[1].Clear;
 for k:=0 to 20 do Chart1.Series[0].AddXY(k*SNMStep.Value,round(vr[2,50+k,2]),'',120);
 for k:=0 to 20 do Chart1.Series[1].AddXY(k*SNMStep.Value,0,'',120*65536);
 Chart1.LeftAxis.Maximum:=round(Chart1.Series[0].MaxYValue*1.2);
 Chart1.BottomAxis.Maximum:=SNMStep.Value*20;
+{$ENDIF}
 
 SSrate.Value:=vi[2,74,2];
 Edit7.Text:=vs[2,75,2];
@@ -1094,6 +1106,7 @@ end;
 procedure TForm1.RPMEdit(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var i,u,v:integer;
 begin
+  {$IFDEF VER140}
   u:=EnsureRange(round(Chart1.Series[0].XScreenToValue(X)/SNMStep.Value),0,20); //u=X
   v:=max(round(Chart1.Series[0].YScreenToValue(Y)),0);
   Chart1.Title.Text.Strings[0]:='Torque/RPM (HP) - '+inttostr(v)+'/'+inttostr(u*SNMStep.Value)+' ('+inttostr(round(v*u*SNMStep.Value/7023.5))+')';
@@ -1103,12 +1116,15 @@ begin
   end;
   for i:=1 to 20 do
     Chart1.Series[1].YValue[i]:=round(i*Chart1.Series[0].YValue[i]*SNMStep.Value/7023.5);
+  {$ENDIF}
 end;
 
 procedure TForm1.Mup(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-Chart1.LeftAxis.Maximum:=round(Chart1.Series[0].MaxYValue*1.2);
-if Chart1.LeftAxis.Maximum=0 then Chart1.LeftAxis.Maximum:=1000;
+{$IFDEF VER140}
+  Chart1.LeftAxis.Maximum:=round(Chart1.Series[0].MaxYValue*1.2);
+  if Chart1.LeftAxis.Maximum=0 then Chart1.LeftAxis.Maximum:=1000;
+{$ENDIF}
 end;
 
 procedure TForm1.FSChangeLink(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -1382,7 +1398,12 @@ LB2Model.Clear;
 for i:=1 to length(Value[23][0])-1 do begin//NumCars
 s:=inttostr(i div 10)+inttostr(i mod 10)+'.';
 for k:=length(Value[23][43][i].Str+' '+Value[23][2][i].Str) to 160 do s:=' '+s; //store ID in 160+
+{$IFDEF VER140}
 LB2Model.AddItem(Value[23][43][i].Str+' '+Value[23][2][i].Str+s,nil);
+{$ENDIF}
+{$IFDEF FPC}
+LB2Model.Items.AddObject(Value[23][43][i].Str+' '+Value[23][2][i].Str+s,nil);
+{$ENDIF}
 end;
 setlength(Value[23][14],96);//special fix
 setlength(Value[23][40],96);//special fix
@@ -1405,7 +1426,12 @@ s2:=Value[0][1][m].Str+' '+Value[0][1][j].Str else
 if (Value[0][6][m].Str+' '+Value[0][6][j].Str)<>' ' then
 s2:=Value[0][6][m].Str+' '+Value[0][6][j].Str;
 for k:=length(s2) to 160 do s:=' '+s; //store ID in 160+
-LBModel.AddItem(s2+s,nil);
+{$IFDEF VER140}
+LB2Model.AddItem(s2+s,nil);
+{$ENDIF}
+{$IFDEF FPC}
+LB2Model.Items.AddObject(s2+s,nil);
+{$ENDIF}
 end;
 LBModel.Enabled:=true;
 ImportWRCar.Enabled:=true;

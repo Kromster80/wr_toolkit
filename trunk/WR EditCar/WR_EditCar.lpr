@@ -15,7 +15,7 @@ uses
 
 begin
   Application.Initialize;
-  Application.Title := 'MBWR\WR2 EditCar';
+  Application.Title := 'MBWR\WR2\AFC11 EditCar';
   Application.CreateForm(TForm1, Form1);
   Application.CreateForm(TAboutForm, AboutForm);
   Application.Run;
