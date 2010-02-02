@@ -1,6 +1,9 @@
 unit Unit2;
+{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
-uses Graphics, Forms, Classes, StdCtrls, ExtCtrls, Controls, jpeg;
+uses
+  {$IFDEF FPC} LResources, {$ENDIF}
+  Graphics, Forms, Classes, StdCtrls, ExtCtrls, Controls;
 
 type
   TForm2 = class(TForm)
@@ -15,6 +18,13 @@ var
 
 implementation
 
-{$R *.dfm}
+{$IFDEF VER140}
+  {$R *.dfm}
+{$ENDIF}
+
+initialization
+{$IFDEF FPC}
+  {$I Unit2.lrs}
+{$ENDIF}
 
 end.
