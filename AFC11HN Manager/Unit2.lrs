@@ -1,0 +1,21 @@
+{ This is an automatically generated lazarus resource file }
+
+LazarusResources.Add('TForm2','FORMDATA',[
+  'TPF0'#6'TForm2'#5'Form2'#4'Left'#3#128#1#6'Height'#3' '#1#3'Top'#3'P'#1#5'Wi'
+  +'dth'#3#0#2#11'BorderIcons'#11#0#11'BorderStyle'#7#6'bsNone'#7'Caption'#6#5
+  +'Form2'#12'ClientHeight'#3' '#1#11'ClientWidth'#3#0#2#11'Font.Height'#2#245#9
+  +'Font.Name'#6#13'MS Sans Serif'#9'FormStyle'#7#11'fsStayOnTop'#8'Position'#7
+  +#14'poScreenCenter'#10'LCLVersion'#6#8'0.9.28.2'#7'Visible'#9#0#6'TImage'#6
+  +'Image1'#4'Left'#2#0#6'Height'#3' '#1#3'Top'#2#0#5'Width'#3#0#2#0#0#6'TLabel'
+  +#6'Label1'#4'Left'#3#165#1#6'Height'#2#14#3'Top'#3#13#1#5'Width'#2'R'#7'Anch'
+  +'ors'#11#7'akRight'#8'akBottom'#0#7'Caption'#6#16'Image by Synetic'#10'Font.'
+  +'Color'#7#7'clWhite'#11'Font.Height'#2#245#9'Font.Name'#6#13'MS Sans Serif'
+  +#11'ParentColor'#8#10'ParentFont'#8#13'ShowAccelChar'#8#0#0#6'TLabel'#6'Labe'
+  +'l2'#4'Left'#2#9#6'Height'#2#14#3'Top'#3#13#1#5'Width'#2'1'#7'Anchors'#11#6
+  +'akLeft'#8'akBottom'#0#7'Caption'#6#9'Scanning:'#10'Font.Color'#7#7'clWhite'
+  +#11'Font.Height'#2#245#9'Font.Name'#6#13'MS Sans Serif'#11'ParentColor'#8#10
+  +'ParentFont'#8#0#0#6'TLabel'#6'Label3'#4'Left'#2'p'#6'Height'#2#14#3'Top'#3
+  +#13#1#5'Width'#2#10#7'Anchors'#11#6'akLeft'#8'akBottom'#0#7'Caption'#6#3'...'
+  +#10'Font.Color'#7#7'clWhite'#11'Font.Height'#2#245#9'Font.Name'#6#13'MS Sans'
+  +' Serif'#11'ParentColor'#8#10'ParentFont'#8#7'Visible'#8#0#0#0
+]);
