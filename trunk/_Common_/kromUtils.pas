@@ -699,7 +699,7 @@ begin  //aka Cross product of 2 vectors
 n:=(u1-u2)*(v1-v3)-(v1-v2)*(u1-u3);
 end;
 
-procedure decs(var AText:string; const Len:integer=1);
+procedure decs(var AText:string; const Len:integer=1); overload;
 begin
 if length(AText)<=abs(Len) then Atext:=''
 else
@@ -707,7 +707,7 @@ if Len>=0 then AText:=Copy(AText, 1, length(AText)-Len)
           else AText:=Copy(AText, 1+abs(Len), length(AText)-abs(Len));
 end;
 
-procedure decs(var AText:widestring; const Len:integer=1);
+procedure decs(var AText:widestring; const Len:integer=1); overload;
 begin
 if length(AText)<=abs(Len) then Atext:=''
 else
