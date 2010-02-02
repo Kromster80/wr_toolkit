@@ -1,0 +1,40 @@
+EventCode	MissionClass	Type
+6		3		SpecialTest
+10		3		MultiBucks
+9		3		Championship KnockoutRace
+
+6		6		SpecialTest
+10		6		MultiBucks
+7		6		Championship WayPointRace
+
+8		9		MultiBucks (endless)
+
+6		10		SpecialTest
+7		10		Championship WayPointRace
+
+4		12		Championship KnockoutTournamentRace
+
+10		13		MultiBucks
+6		13		SpecialTest
+6		13		SpecialTest
+
+3		28		Championship 
+
+5		40		Championship 
+5		48		Championship 
+
+11		57		MultiBucks
+
+12		60		MultiBucks
+
+
+3		28		Championship 	Ordinary, independent races
+4		12		Championship KnockoutTournamentRace
+5		40		Championship 
+6		6		SpecialTest
+7		10		Championship WayPointRace
+8		9		MultiBucks (endless)
+9		3		Championship KnockoutRace
+10		6		MultiBucks
+11		57		MultiBucks
+12		60		MultiBucks
