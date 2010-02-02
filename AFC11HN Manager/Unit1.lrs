@@ -445,11 +445,9 @@ LazarusResources.Add('TForm1','FORMDATA',[
   +'l'#7'Caption'#6#10'Select all'#7'OnClick'#7#9'SAllClick'#8'TabOrder'#2#4#0#0
   +#7'TButton'#5'SNone'#4'Left'#3#168#1#6'Height'#2#25#3'Top'#3#0#1#5'Width'#2
   +'l'#7'Caption'#6#11'Select none'#7'OnClick'#7#9'SAllClick'#8'TabOrder'#2#5#0
-  +#0#7'TButton'#7'Button1'#4'Left'#3'e'#1#6'Height'#2#25#3'Top'#2'0'#5'Width'#2
-  +'K'#7'Caption'#6#7'Button1'#7'OnClick'#7#12'Button1Click'#8'TabOrder'#2#6#0#0
-  +#0#11'TSaveDialog'#11'SaveDialog1'#7'Options'#11#17'ofOverwritePrompt'#14'of'
-  +'HideReadOnly'#20'ofExtensionDifferent'#15'ofPathMustExist'#14'ofEnableSizin'
-  ,'g'#0#4'left'#3#152#2#3'top'#3#176#1#0#0#11'TOpenDialog'#11'OpenDialog1'#7'O'
-  +'ptions'#11#14'ofHideReadOnly'#15'ofFileMustExist'#14'ofEnableSizing'#0#4'le'
-  +'ft'#3#128#2#3'top'#3#176#1#0#0#0
+  +#0#0#11'TSaveDialog'#11'SaveDialog1'#7'Options'#11#17'ofOverwritePrompt'#14
+  +'ofHideReadOnly'#20'ofExtensionDifferent'#15'ofPathMustExist'#14'ofEnableSiz'
+  +'ing'#0#4'left'#3#152#2#3'top'#3#176#1#0#0#11'TOpenDialog'#11'OpenDialog1'#7
+  +'Options'#11#14'ofHideReadOnly'#15'ofFileMustExist'#14'ofEnableSizing'#0#4'l'
+  ,'eft'#3#128#2#3'top'#3#176#1#0#0#0
 ]);

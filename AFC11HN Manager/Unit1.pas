@@ -4,14 +4,13 @@ interface
 uses
   {$IFDEF FPC} LResources, LCLIntf, {$ENDIF}
   Windows, SysUtils, Classes, Controls, ExtCtrls, Forms,
-  StdCtrls, KromUtils, ComCtrls, CheckLst, Buttons, Dialogs;
+  StdCtrls, KromUtils, ComCtrls, CheckLst, Buttons, Dialogs, WR_DataSet;
 
 type
 
   { TForm1 }
 
   TForm1 = class(TForm)
-    Button1: TButton;
     SaveDialog1: TSaveDialog;
     OpenDialog1: TOpenDialog;
     Panel1: TPanel;
@@ -46,12 +45,10 @@ const
 
 var
   Form1: TForm1;
-  f:file;
-  ft:textfile;
-  c:array[1..1024000]of char;
-  i,j,k,m,h:integer;
-  s:string;
   WorkDir:string;
+  c:array[1..1024000]of char;
+  j,k,m,h:integer;
+  s:string;
   TimeCode:integer;
   zz:string='     '{;//}+'                                                                                        ';
 
@@ -121,8 +118,8 @@ begin
     exit;
   end;
 
-  s1 := WorkDir+'FrontEnd2\FrontEnd.ds';
-  s2 := WorkDir+'FrontEnd2\FrontEnd.bak';
+  s1 := WorkDir + 'FrontEnd2\FrontEnd.ds';
+  s2 := WorkDir + 'FrontEnd2\FrontEnd.bak';
   if not FileExists(s2) then
     CopyFile(@(s1)[1],@(s2)[1],true);
   OpenDS(nil,WorkDir+'FrontEnd2\FrontEnd.ds');
@@ -139,6 +136,7 @@ begin
 end;
 
 procedure TForm1.OpenDS(Sender: TObject; filename:string);
+var f:file; i:integer;
 begin
 assignfile(f,filename); FileMode:=0; reset(f,1); FileMode:=2;
 blockread(f,Header,33);
@@ -230,6 +228,7 @@ end;
 
 
 procedure TForm1.SaveDS(Sender: TObject);
+var f:file; i:integer;
 begin
 AddTracksToDS(nil);
 assignfile(f,WorkDir+'FrontEnd2\FrontEnd.ds'); rewrite(f,1); c[1]:=#0;
@@ -278,7 +277,7 @@ WriteINI(nil);
 end;
 
 procedure TForm1.AddTracksToDS(Sender: TObject);
-var ID:integer;
+var ID:integer; i:integer;
 begin
   //CarsDB
   for j:=1 to TB[6].Entries do if (j<>16)and(j<>42) then begin   //skip these TypLinks/TypRechts
@@ -533,102 +532,61 @@ end;
 end;
 
 procedure TForm1.SearchAutos(Sender: TObject);
-var SearchRec:TSearchRec; ii:integer;
+var SearchRec:TSearchRec; i:integer;
 begin
-ChDir(WorkDir); AddonCarQty:=0;
-if not DirectoryExists('Autos') then begin
-Form2.FormStyle:=fsNormal;
-MessageBox(Form1.Handle,'"Autos\" not found','Warning',MB_OK);
-Form2.FormStyle:=fsStayOnTop;
-exit;
-end else begin
-ChDir('Autos');
-  FindFirst('*', faAnyFile or faDirectory, SearchRec);
-  h:=1;
-  repeat
-  if (SearchRec.Attr and faDirectory<>0)and(SearchRec.Name<>'.')and(SearchRec.Name<>'..') then
-  if fileexists(WorkDir+'\Autos\'+SearchRec.Name+'\EditCar.car') then begin
-  AddonCar[h].Folder:=SearchRec.Name;
-  inc(h); end;
-  until (FindNext(SearchRec)<>0);
-  FindClose(SearchRec);
-  AddonCarQty:=h-1;
+  AddonCarQty := 0;
+  if not DirectoryExists(WorkDir+'Autos') then begin
+    Form2.FormStyle := fsNormal;
+    MessageBox(Form1.Handle, '".\Autos\" not found', 'Warning', MB_OK);
+    Form2.FormStyle := fsStayOnTop;
+    exit;
+  end else begin
+    ChDir('Autos');
+    FindFirst('*', faAnyFile or faDirectory, SearchRec);
+    repeat
+      if (SearchRec.Attr and faDirectory<>0)and(SearchRec.Name<>'.')and(SearchRec.Name<>'..') then
+      if fileexists(WorkDir+'\Autos\'+SearchRec.Name+'\EditCar.car') then begin
+        inc(AddonCarQty);
+        AddonCar[AddonCarQty].Folder := SearchRec.Name;
+      end;
+    until (FindNext(SearchRec)<>0);
+    FindClose(SearchRec);
+  end;
+
+  Form2.Label3.Visible := true;
+  for i:=1 to AddonCarQty do
+  begin
+    Form2.Label3.Caption := inttostr(i) + '/' + inttostr(AddonCarQty) + ' (' + AddonCar[i].Folder + ')';
+    Form2.Label3.Repaint;
+    GetAutoInfo(AddonCar[i].Folder, i);
+  end;
+
+  Form2.Label3.Visible := false;
 end;
 
-Form2.Label3.Visible:=true;
-for ii:=1 to AddonCarQty do begin //don't use (i) here
-Form2.Label3.Caption:=inttostr(ii)+'/'+inttostr(AddonCarQty)+' ('+AddonCar[ii].Folder+')'; Form2.Label3.Repaint;
-GetAutoInfo(AddonCar[ii].Folder,ii);
-end;
-
-Form2.Label3.Visible:=false;
-end;
 
 procedure TForm1.GetAutoInfo(s1:string;i1:integer);
-var NumRead,Pos:integer;
+var fDataSet:TDataSet;
 begin
-Pos:=0; //reset to 0
-assignfile(f,WorkDir+'\Autos\'+s1+'\EditCar.car'); FileMode:=0; reset(f,128); FileMode:=2;
-blockread(f,c,1000,NumRead); closefile(f); //reading 128kbytes should be enough (usually ~30kb)
-EC_DSqty[i1]:=ord(c[Pos+9]);
-inc(Pos,33);
-for i:=1 to EC_DSqty[i1] do begin
-EC_TB[i1,i].Entries:=ord(c[Pos+9])+ord(c[Pos+10])*256;
-if ord(c[Pos+30])<>0 then inc(Pos,ord(c[Pos+30])+1);//blockread(f,c,ord(c[30])+1);
-inc(Pos,33);
+  fDataSet := TDataSet.Create;
+  fDataSet.LoadDS(WorkDir+'\Autos\'+s1+'\EditCar.car');
 
-for k:=1 to EC_TB[i1,i].Entries do begin
-if (c[Pos+1]+c[Pos+2]+c[Pos+3]+c[Pos+4])<>'NDCO' then begin
-inc(Pos,4);
-EC_TB[i1,i].Cond:=int2(c[Pos+1],c[Pos+2]);
-inc(Pos,4);
-setlength(EC_TB[i1,i].CondText,EC_TB[i1,i].Cond+1);
-  for j:=1 to EC_TB[i1,i].Cond do begin
-  inc(Pos,int2(c[Pos+1],c[Pos+2])+1);  //reading upside-down
-  inc(Pos,4);
-  for m:=1 to h do EC_TB[i1,i].CondText[j]:=EC_TB[i1,i].CondText[j]+c[m];
-  end;
-//read upcoming NDCO
-//inc(Pos,4);
+  AddonCar[i1].Factory := fDataSet.GetValueAsString(2,105,2);
+  AddonCar[i1].Model   := fDataSet.GetValueAsString(2,4,2);
+
+  fDataSet.Free;
+  //AddonCar[i1].ColorID:=EC_Value[i1,1,81,2].Int;}
 end;
-inc(Pos,4);
-//VAEn, VAId, VALb
-EC_CO[i1,i,k].Entries:=ord(c[Pos+5])+ord(c[Pos+6])*256;
-j:=ord(c[Pos+21]); inc(Pos,24); if j<>0 then inc(Pos,j+1);//VAEn, VAId, VALb
-j:=ord(c[Pos+10]); inc(Pos,13); if j<>0 then inc(Pos,j+1);//VASM
-j:=ord(c[Pos+5]);  inc(Pos, 8); if j<>0 then inc(Pos,j+1);//VAST
-j:=ord(c[Pos+5]);  inc(Pos, 8); if j<>0 then inc(Pos,j+1);//VAIC
-j:=ord(c[Pos+5]);  inc(Pos, 8); if j<>0 then inc(Pos,j+1);//VASC
 
-setlength(EC_Value[i1,i,k],EC_CO[i1,i,k].Entries+1);//optimistic way to avoid common length mismatches
-for j:=1 to EC_CO[i1,i,k].Entries do begin
-EC_Value[i1,i,k,j].Typ:=0; EC_Value[i1,i,k,j].Int:=0; EC_Value[i1,i,k,j].Rel:=0; EC_Value[i1,i,k,j].Str:='';
-if c[Pos+1]=#1  then begin
-            EC_Value[i1,i,k,j].Typ:=1; EC_Value[i1,i,k,j].Int:=int2(c[Pos+2],c[Pos+3],c[Pos+4],c[Pos+5]); inc(Pos,5); end;
-if c[Pos+1]=#2  then begin
-            EC_Value[i1,i,k,j].Typ:=2; EC_Value[i1,i,k,j].Rel:=real2(c[Pos+2],c[Pos+3],c[Pos+4],c[Pos+5]); inc(Pos,5); end;
-if c[Pos+1]=#16 then begin
-            EC_Value[i1,i,k,j].Typ:=3; h:=int2(c[Pos+2],c[Pos+3],c[Pos+4],c[Pos+5]); inc(Pos,5);
-            for m:=1 to h do EC_Value[i1,i,k,j].Str:=EC_Value[i1,i,k,j].Str+c[Pos+m];
-            if h<>0 then inc(Pos,h+1); end;
-if EC_Value[i1,i,k,j].Typ=0 then Form1.Close;
-end;//CO.Entries
-end;//TB.Entries
-end; //1..DSqty
-
-if length(EC_Value[i1,2,105])>=2 then //fix for old editcars with few fields
-AddonCar[i1].Factory:=EC_Value[i1,2,105,2].Str
-else AddonCar[i1].Factory:='';
-AddonCar[i1].Model:=EC_Value[i1,2,4,2].Str;
-//AddonCar[i1].ColorID:=EC_Value[i1,1,81,2].Int;
-end;
 
 procedure TForm1.Info(Sender: TObject);
 begin
-  AboutForm.Show(VersionInfo,'Manages AFC11HN addons.','AFC11HNMan');
+  AboutForm.Show(VersionInfo, 'Manages AFC11HN addons.', 'AFC11HNMan');
 end;
 
+
 procedure TForm1.WriteINI(Sender: TObject);
+var ft:textfile; i:integer;
 begin
   assignfile(ft,WorkDir+'HNMan.ini'); rewrite(ft);
   writeln(ft,'AFC11HN Manager INI file');
@@ -650,25 +608,25 @@ begin
 end;
 
 procedure TForm1.ReadINI(Sender: TObject);
-var i:integer; st:widestring;
+var i:integer; st:string; ft:textfile;
 begin
   if not fileexists(WorkDir+'HNMan.ini') then exit;
   assignfile(ft, WorkDir+'HNMan.ini'); reset(ft);
   readln(ft); readln(ft);
 
   repeat
-  readln(ft,s);
-
+    readln(ft,s);
     if s = 'Cars:' then
-    repeat
-      readln(ft, s);
-      //We compare string with AddonCar Folder incase player has some other display format, e.g. RaceClass.Name.Folder
-      for i := 0 to CLBCars.Count-1 do begin
-        st := Copy(CLBCars.Items[i], length(CLBCars.Items[i])-2, 3); //Read last 3 chars
-        CLBCars.Checked[i] := CompareStr(AddonCar[strtoint(st)].Folder,s)=0;
-      end;
-    until(s='');
-
+      repeat
+        readln(ft, s);
+        //We compare string with AddonCar Folder incase player has some other display format, e.g. RaceClass.Name.Folder
+        for i := 0 to CLBCars.Count-1 do
+        begin
+          st := Copy(CLBCars.Items[i], length(CLBCars.Items[i])-2, 3); //Read last 3 chars
+          if AddonCar[strtoint(st)].Folder = s then
+            CLBCars.Checked[i] := true;
+        end;
+      until(s='');
   until(eof(ft));
   closefile(ft);
   CLBCarsClick(nil);
@@ -683,11 +641,12 @@ begin
 end;
 
 procedure TForm1.BitBtn2Click(Sender: TObject);
+var aPath:string;
 begin
   SaveChanges.Click();
   Form1.Close;
-  ChDir(WorkDir);
-  ShellExecute(handle, 'open', 'HighwayNights.exe', nil, nil, SW_SHOWNORMAL);
+  aPath := WorkDir+'HighwayNights.exe';
+  ShellExecute(handle, 'open', @(aPath)[1], nil, nil, SW_SHOWNORMAL);
 end;
 
 procedure TForm1.CLBCarsClick(Sender: TObject);
@@ -698,10 +657,13 @@ begin
 end;
 
 procedure TForm1.SAllClick(Sender: TObject);
+var i:integer;
 begin
   for i:=1 to CLBCars.Count do
-    CLBCars.Checked[i-1]:=(Sender=SAll)and(Sender<>SNone);
-  CLBCarsClick(nil);
+  begin
+    CLBCars.Checked[i-1] := (Sender=SAll) and (Sender<>SNone);
+    AddonCar[i].Install  := (Sender=SAll) and (Sender<>SNone);
+  end;
 end;
 
 {$IFDEF VER140}

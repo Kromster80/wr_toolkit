@@ -1,10 +1,10 @@
 unit WR_DataSet;
 {$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
-uses KromUtils, SysUtils, Windows;
+uses KromUtils, Math, SysUtils, Windows;
 
 type
-  TDSPoint = packed record
+  TDSNode = packed record
     i1: Longint;
     i2: Longint;
     i3: Longint;
@@ -71,7 +71,7 @@ type
 
     procedure AddValueAcrossTB(iDS:integer);
 
-    function FindStringInValues(i1,i2,i3:integer; Input:string):TDSPoint;
+    function FindStringInValues(i1,i2,i3:integer; Input:string):TDSNode; //Return Address of found string DS:TB:CO
 
     function WRTextEn(Input:string):string;
   published
@@ -305,6 +305,8 @@ end;
 
 function TDataSet.GetValueAsString(iDS,iTB,iCO:integer):string;
 begin
+  Result := '';
+  if InRange(iCO,1,CO[iDS,iTB].Entries) then //Make sure it's in the range
   case Value[iDS,iTB,iCO].Typ of
     1: Result := inttostr(Value[iDS,iTB,iCO].Int);
     2: Result := float2fix(Value[iDS,iTB,iCO].Rel,3);
@@ -322,9 +324,9 @@ end;
 procedure TDataSet.SetValueAsString(iDS,iTB,iCO:integer; Text:string);
 begin
   case Value[iDS,iTB,iCO].Typ of
-    1: Value[iDS,iTB,iCO].Int:=strtoint(Text);
-    2: Value[iDS,iTB,iCO].Rel:=strtofloat(Text);
-   16: Value[iDS,iTB,iCO].Str:=Text;
+    1: Value[iDS,iTB,iCO].Int := strtoint(Text);
+    2: Value[iDS,iTB,iCO].Rel := strtofloat(Text);
+   16: Value[iDS,iTB,iCO].Str := Text;
   end;
 end;
 
@@ -341,42 +343,42 @@ end;
 
 
 {Look for string starting from given node}
-function TDataSet.FindStringInValues(i1,i2,i3:integer; Input:string):TDSPoint;
+function TDataSet.FindStringInValues(i1,i2,i3:integer; Input:string):TDSNode;
 var iDS,iTB,iCO:integer; m,l:integer; s:string; Match:boolean;
 begin
-  Input:=UpperCase(Input);
-  Match:=false;
+  Input := UpperCase(Input);
+  Match := false;
 
   for iDS:=i1 to DSqty do begin
     for iTB:=i2 to TB[iDS].Entries do begin
       for iCO:=i3 to CO[iDS,iTB].Entries do begin
 
-        s:=UpperCase(GetValueAsString(iDS,iTB,iCO));
+        s := UpperCase(GetValueAsString(iDS,iTB,iCO));
 
-        Match:=false;
+        Match := false;
         for m:=0 to length(s)-length(Input) do begin
-          Match:=true;
+          Match := true;
           for l:=1 to length(Input) do
             Match := Match and (s[m+l]=Input[l]);
           if Match then break;
         end;
 
         if Match then begin
-          Result.i1:=iDS;
-          Result.i2:=iTB;
-          Result.i3:=iCO;
+          Result.i1 := iDS;
+          Result.i2 := iTB;
+          Result.i3 := iCO;
           exit;
         end;
       end;
-      i3:=1; //Reset
+      i3 := 1; //Reset
     end;
-    i2:=1; //Reset
+    i2 := 1; //Reset
   end;
 
   if not Match then begin
-    Result.i1:=1;
-    Result.i2:=1;
-    Result.i3:=1;
+    Result.i1 := 1;
+    Result.i2 := 1;
+    Result.i3 := 1;
   end;
 end;
 
