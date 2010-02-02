@@ -11,6 +11,7 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    Button1: TButton;
     SaveDialog1: TSaveDialog;
     OpenDialog1: TOpenDialog;
     Panel1: TPanel;
@@ -21,6 +22,7 @@ type
     BitBtn1: TBitBtn;
     SAll: TButton;
     SNone: TButton;
+    procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure OpenDS(Sender: TObject; filename:string);
     procedure SaveDS(Sender: TObject);
@@ -103,6 +105,7 @@ implementation
 uses Unit2, WR_AboutBox;
 
 procedure TForm1.FormCreate(Sender: TObject);
+var s1,s2:string;
 begin
   if Sender<>nil then exit; //Wait until all forms are init
   Form2.Show;
@@ -118,13 +121,21 @@ begin
     exit;
   end;
 
-  if not FileExists(WorkDir+'FrontEnd2\FrontEnd.bak') then CopyFile(WorkDir+'FrontEnd2\FrontEnd.ds',WorkDir+'FrontEnd2\FrontEnd.bak',true);
+  s1 := WorkDir+'FrontEnd2\FrontEnd.ds';
+  s2 := WorkDir+'FrontEnd2\FrontEnd.bak';
+  if not FileExists(s2) then
+    CopyFile(@(s1)[1],@(s2)[1],true);
   OpenDS(nil,WorkDir+'FrontEnd2\FrontEnd.ds');
   ElapsedTime(@TimeCode);
   Form2.Label2.Caption := 'Scanning: Cars ...';     Form2.Label2.Refresh; SearchAutos(nil);         //Form2.Memo1.Lines.Add('Autos - '+ElapsedTime(@TimeCode));
   if Form2.Showing then Form2.Destroy;
   PopulateCarList(nil);
   ReadINI(nil);
+end;
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  WriteINI(nil);
 end;
 
 procedure TForm1.OpenDS(Sender: TObject; filename:string);
@@ -221,8 +232,7 @@ end;
 procedure TForm1.SaveDS(Sender: TObject);
 begin
 AddTracksToDS(nil);
-ChDir(WorkDir);
-assignfile(f,'FrontEnd2\FrontEnd.ds'); rewrite(f,1); c[1]:=#0;
+assignfile(f,WorkDir+'FrontEnd2\FrontEnd.ds'); rewrite(f,1); c[1]:=#0;
 
 blockwrite(f,Header,33); //assume DSQty didn't changed
 for i:=1 to DSqty do begin
@@ -620,27 +630,16 @@ end;
 
 procedure TForm1.WriteINI(Sender: TObject);
 begin
-  chdir(WorkDir);
-  assignfile(ft,'HNMan.ini'); rewrite(ft);
+  assignfile(ft,WorkDir+'HNMan.ini'); rewrite(ft);
   writeln(ft,'AFC11HN Manager INI file');
 
   writeln(ft);
   writeln(ft,'Cars:');
   for i:=1 to AddOnCarQty do
-  if AddonCar[i].Install then begin
-  writeln(ft,AddonCar[i].Folder);
-  //writeln(ft,AddonCar[i].ColorID);
+    if AddonCar[i].Install then begin
+    writeln(ft,AddonCar[i].Folder);
+    //writeln(ft,AddonCar[i].ColorID);
   end;
-
-  {writeln(ft);
-  writeln(ft,'DrivingMode:');
-  if CBSimMissions.Checked then
-  writeln(ft,'Sim') else writeln(ft,'Arcade');}
-
-  {writeln(ft);
-  writeln(ft,'ListingMode:');
-  writeln(ft,inttostr(RGListing.ItemIndex)); }
-
   closefile(ft);
 end;
 
@@ -653,9 +652,8 @@ end;
 procedure TForm1.ReadINI(Sender: TObject);
 var i:integer; st:widestring;
 begin
-  chdir(WorkDir);
-  if not fileexists('HNMan.ini') then exit;
-  assignfile(ft,'HNMan.ini'); reset(ft);
+  if not fileexists(WorkDir+'HNMan.ini') then exit;
+  assignfile(ft, WorkDir+'HNMan.ini'); reset(ft);
   readln(ft); readln(ft);
 
   repeat
@@ -663,18 +661,17 @@ begin
 
     if s = 'Cars:' then
     repeat
-      readln(ft,s);
-      for i:=0 to CLBCars.Count-1 do begin
-      st := CLBCars.Items[i];
-      decs(st,-length(st)+3);
-        if AddonCar[strtoint(st)].Folder = s then begin
-        CLBCars.Checked[i] := true;
-        end;
+      readln(ft, s);
+      //We compare string with AddonCar Folder incase player has some other display format, e.g. RaceClass.Name.Folder
+      for i := 0 to CLBCars.Count-1 do begin
+        st := Copy(CLBCars.Items[i], length(CLBCars.Items[i])-2, 3); //Read last 3 chars
+        CLBCars.Checked[i] := CompareStr(AddonCar[strtoint(st)].Folder,s)=0;
       end;
     until(s='');
 
   until(eof(ft));
   closefile(ft);
+  CLBCarsClick(nil);
 end;
 
 procedure TForm1.PopulateCarList(Sender: TObject);
@@ -697,7 +694,7 @@ procedure TForm1.CLBCarsClick(Sender: TObject);
 var i:integer;
 begin
   for i:=1 to CLBCars.Count do
-    AddonCar[i].Install:=CLBCars.Checked[i-1];
+    AddonCar[i].Install := CLBCars.Checked[i-1];
 end;
 
 procedure TForm1.SAllClick(Sender: TObject);
