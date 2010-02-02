@@ -389,16 +389,15 @@ begin
 ss:=inttostr(Number);
 for x:=length(ss) to Len-1 do
 ss:='0'+ss;
-if length(ss)>Len then ss:='**********';//ss[99999999]:='0'; //generating an error in lame way
+  if length(ss)>Len then
+    ss:='**********';//ss[99999999]:='0'; //generating an error in lame way
 setlength(ss,Len);
-int2fix:=ss;
+  Result := ss;
 end;
 
 function float2fix(Number:single; Digits:integer):string;
-var ss:string;
 begin
-ss:=FloatToStrF(Number,ffGeneral,3,2);
-float2fix:=ss;
+  Result := FloatToStrF(Number,ffGeneral,3,2);
 end;
 
 function int2(c1,c2:char):integer; overload;
