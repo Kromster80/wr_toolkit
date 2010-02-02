@@ -1,0 +1,3 @@
+Script _1O() 
+NDDataSet.Gleich(20:1:18,**); //Sets TrackID for DemoRace
+NDDataSet.Gleich(20:1:19,**); //Sets carID for DemoRace
