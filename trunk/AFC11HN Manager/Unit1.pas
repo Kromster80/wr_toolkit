@@ -1,6 +1,5 @@
 unit Unit1;
 interface
-
 uses
   ShellApi, Windows, Messages, SysUtils, Classes, Controls, ExtCtrls, Forms,
   StdCtrls, KromUtils, ComCtrls, CheckLst, Buttons, Dialogs;
@@ -31,8 +30,6 @@ type
     procedure BitBtn2Click(Sender: TObject);
     procedure CLBCarsClick(Sender: TObject);
     procedure SAllClick(Sender: TObject);
-  private     { Private declarations }
-  public      { Public declarations }
   end;
 
 const
@@ -103,24 +100,24 @@ uses Unit2, WR_AboutBox;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-if Sender<>nil then exit; //Wait until all forms are init
-Form2.Show;
-Form2.Repaint;
-if fileexists('krom.dev') then ChDir('E:\Crash Time III Demo');
-RootDir:=getcurrentdir;
-if not fileexists('FrontEnd2\FrontEnd.ds') then begin
-Form2.FormStyle:=fsNormal;
-MessageBox(Form1.Handle,'"FrontEnd2\FrontEnd.ds" not found. Run HNMan from AFC11HN folder.','Error',MB_OK);
-Form1.Close;
-exit;
-end;
-if not FileExists('FrontEnd2\FrontEnd.bak') then CopyFile('FrontEnd2\FrontEnd.ds','FrontEnd2\FrontEnd.bak',true);
-OpenDS(nil,'FrontEnd2\FrontEnd.ds');
-ElapsedTime(@TimeCode);
-Form2.Label2.Caption:='Scanning: Cars ...';     Form2.Label2.Refresh; SearchAutos(nil);         //Form2.Memo1.Lines.Add('Autos - '+ElapsedTime(@TimeCode));
-if Form2.Showing then Form2.Destroy;
-PopulateCarList(nil);
-ReadINI(nil);
+  if Sender<>nil then exit; //Wait until all forms are init
+  Form2.Show;
+  Form2.Repaint;
+  if fileexists('krom.dev') then ChDir('E:\Crash Time III Demo');
+  RootDir:=getcurrentdir;
+  if not fileexists('FrontEnd2\FrontEnd.ds') then begin
+    Form2.FormStyle:=fsNormal;
+    MessageBox(Form1.Handle,'"FrontEnd2\FrontEnd.ds" not found. Run HNMan from AFC11HN folder.','Error',MB_OK);
+    Form1.Close;
+    exit;
+  end;
+  if not FileExists('FrontEnd2\FrontEnd.bak') then CopyFile('FrontEnd2\FrontEnd.ds','FrontEnd2\FrontEnd.bak',true);
+  OpenDS(nil,'FrontEnd2\FrontEnd.ds');
+  ElapsedTime(@TimeCode);
+  Form2.Label2.Caption:='Scanning: Cars ...';     Form2.Label2.Refresh; SearchAutos(nil);         //Form2.Memo1.Lines.Add('Autos - '+ElapsedTime(@TimeCode));
+  if Form2.Showing then Form2.Destroy;
+  PopulateCarList(nil);
+  ReadINI(nil);
 end;
 
 procedure TForm1.OpenDS(Sender: TObject; filename:string);
@@ -641,8 +638,8 @@ end;
 
 procedure TForm1.CBSimMissionsClick(Sender: TObject);
 begin
-//for i:=2 to 30 do if CBSimMissions.Checked then
-//Value[49,30,i].Int:=0 else Value[49,30,i].Int:=100; //Missions Arcade / Simulation
+  //for i:=2 to 30 do if CBSimMissions.Checked then
+  //Value[49,30,i].Int:=0 else Value[49,30,i].Int:=100; //Missions Arcade / Simulation
 end;
 
 procedure TForm1.ReadINI(Sender: TObject);
@@ -675,31 +672,31 @@ end;
 procedure TForm1.PopulateCarList(Sender: TObject);
 var i:integer;
 begin
-for i:=1 to AddonCarQty do
-  CLBCars.AddItem(AddonCar[i].Folder+zz+int2fix(i,3),nil);
-CLBCars.Refresh;
+  for i:=1 to AddonCarQty do
+    CLBCars.AddItem(AddonCar[i].Folder+zz+int2fix(i,3),nil);
+  CLBCars.Refresh;
 end;
 
 procedure TForm1.BitBtn2Click(Sender: TObject);
 begin
-SaveChanges.Click();
-Form1.Close;
-ChDir(RootDir);
-ShellExecute(handle, 'open', 'HighwayNights.exe', nil, nil, SW_SHOWNORMAL);
+  SaveChanges.Click();
+  Form1.Close;
+  ChDir(RootDir);
+  ShellExecute(handle, 'open', 'HighwayNights.exe', nil, nil, SW_SHOWNORMAL);
 end;
 
 procedure TForm1.CLBCarsClick(Sender: TObject);
 var i:integer;
 begin
-for i:=1 to CLBCars.Count do
-  AddonCar[i].Install:=CLBCars.Checked[i-1];
+  for i:=1 to CLBCars.Count do
+    AddonCar[i].Install:=CLBCars.Checked[i-1];
 end;
 
 procedure TForm1.SAllClick(Sender: TObject);
 begin
-for i:=1 to CLBCars.Count do
-  CLBCars.Checked[i-1]:=(Sender=SAll)and(Sender<>SNone);
-CLBCarsClick(nil);
+  for i:=1 to CLBCars.Count do
+    CLBCars.Checked[i-1]:=(Sender=SAll)and(Sender<>SNone);
+  CLBCarsClick(nil);
 end;
 
 end.

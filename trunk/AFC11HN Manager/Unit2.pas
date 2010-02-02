@@ -1,9 +1,6 @@
 unit Unit2;
-
 interface
-
-uses
-  Graphics, Forms, Classes, StdCtrls, ExtCtrls, Controls, jpeg;
+uses Graphics, Forms, Classes, StdCtrls, ExtCtrls, Controls, jpeg;
 
 type
   TForm2 = class(TForm)
@@ -11,10 +8,6 @@ type
     Label2: TLabel;
     Label3: TLabel;
     Image1: TImage;
-  private
-    { Private declarations }
-  public
-    { Public declarations }
   end;
 
 var
