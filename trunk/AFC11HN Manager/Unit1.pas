@@ -673,7 +673,7 @@ procedure TForm1.PopulateCarList(Sender: TObject);
 var i:integer;
 begin
   for i:=1 to AddonCarQty do
-    CLBCars.AddItem(AddonCar[i].Folder+zz+int2fix(i,3),nil);
+    CLBCars.Items.Add(AddonCar[i].Folder+zz+int2fix(i,3));
   CLBCars.Refresh;
 end;
 
