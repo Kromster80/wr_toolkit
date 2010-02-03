@@ -10,6 +10,13 @@ type
     i3: Longint;
   end;
 
+  TDSValue = packed
+    record
+      Typ:byte;
+      Int:integer;
+      Rel:single;
+      Str:string;
+    end;
 
 type
   TDataSet = class
@@ -37,17 +44,11 @@ type
       SC:string;       //VA_SC
     end;
 
-    Value:array of array of array of record
-      Typ:byte;
-      Int:integer;
-      Rel:single;
-      Str:string;
-    end;
-
-  protected
+    Value:array of array of array of TDSValue;
 
   public
     constructor Create;
+    function IndexInRange(iDS,iTB,iCO:integer):boolean;
     function LoadDS(FileName:string):boolean;
     procedure SaveDS(FileName:string);
 
@@ -64,11 +65,17 @@ type
     function COInfoLines(iDS,iTB:integer):string;
 
     function GetValueType(iDS,iTB,iCO:integer):byte;
+    function GetValue(iDS,iTB,iCO:integer):TDSValue;
     function GetValueAsString(iDS,iTB,iCO:integer):string;
 
     procedure SetValueType(iDS,iTB,iCO:integer; aType:byte);
+    procedure SetValue(iDS,iTB,iCO:integer; aValue:TDSValue); overload;
+    procedure SetValue(iDS,iTB,iCO:integer; aValue:integer); overload;
+    procedure SetValue(iDS,iTB,iCO:integer; aValue:single); overload;
+    procedure SetValue(iDS,iTB,iCO:integer; aValue:string); overload;
     procedure SetValueAsString(iDS,iTB,iCO:integer; Text:string);
 
+    procedure SetTBLength(iDS,aNewLength:integer);
     procedure AddValueAcrossTB(iDS:integer);
 
     function FindStringInValues(i1,i2,i3:integer; Input:string):TDSNode; //Return Address of found string DS:TB:CO
@@ -86,6 +93,12 @@ implementation
 constructor TDataSet.Create;
 begin
 //
+end;
+
+
+function TDataSet.IndexInRange(iDS,iTB,iCO:integer):boolean;
+begin
+  Result := InRange(iDS,1,DSqty) and InRange(iTB,1,TB[iDS].Entries) and InRange(iCO,1,CO[iDS,iTB].Entries);
 end;
 
 
@@ -303,10 +316,16 @@ begin
 end;
 
 
+function TDataSet.GetValue(iDS,iTB,iCO:integer):TDSValue;
+begin
+  Result := Value[iDS,iTB,iCO];
+end;
+
+
 function TDataSet.GetValueAsString(iDS,iTB,iCO:integer):string;
 begin
   Result := '';
-  if InRange(iCO,1,CO[iDS,iTB].Entries) then //Make sure it's in the range
+  if IndexInRange(iDS,iTB,iCO) then //Make sure it's in the range
   case Value[iDS,iTB,iCO].Typ of
     1: Result := inttostr(Value[iDS,iTB,iCO].Int);
     2: Result := float2fix(Value[iDS,iTB,iCO].Rel,3);
@@ -323,6 +342,7 @@ end;
 
 procedure TDataSet.SetValueAsString(iDS,iTB,iCO:integer; Text:string);
 begin
+  if IndexInRange(iDS,iTB,iCO) then
   case Value[iDS,iTB,iCO].Typ of
     1: Value[iDS,iTB,iCO].Int := strtoint(Text);
     2: Value[iDS,iTB,iCO].Rel := strtofloat(Text);
@@ -330,14 +350,45 @@ begin
   end;
 end;
 
+
+procedure TDataSet.SetValue(iDS,iTB,iCO:integer; aValue:TDSValue);
+begin
+  if IndexInRange(iDS,iTB,iCO) then
+    Value[iDS,iTB,iCO] := aValue;
+end;
+
+
+procedure TDataSet.SetValue(iDS,iTB,iCO:integer; aValue:integer);
+begin if not IndexInRange(iDS,iTB,iCO) then exit; Value[iDS,iTB,iCO].Typ:=1; Value[iDS,iTB,iCO].Int := aValue; end;
+
+procedure TDataSet.SetValue(iDS,iTB,iCO:integer; aValue:single);
+begin if not IndexInRange(iDS,iTB,iCO) then exit; Value[iDS,iTB,iCO].Typ:=2; Value[iDS,iTB,iCO].Rel := aValue; end;
+
+procedure TDataSet.SetValue(iDS,iTB,iCO:integer; aValue:string);
+begin if not IndexInRange(iDS,iTB,iCO) then exit; Value[iDS,iTB,iCO].Typ:=16; Value[iDS,iTB,iCO].Str := aValue; end;
+
+
+procedure TDataSet.SetTBLength(iDS,aNewLength:integer);
+var iTB,iCO:integer;
+begin
+  for iTB:=1 to TB[iDS].Entries do
+  if CO[iDS,iTB].Entries<>0 then begin
+    for iCO := CO[iDS,iTB].Entries+1 to aNewLength do
+      Value[iDS,iTB,iCO] := Value[iDS,iTB,iCO-1]; //Duplicate previous Typ and Value
+    CO[iDS,iTB].Entries := aNewLength; //todo: RangeCheck and allocate more space
+  end;
+end;
+
+
 procedure TDataSet.AddValueAcrossTB(iDS:integer);
 var iTB,iCO:integer;
 begin
   for iTB:=1 to TB[iDS].Entries do
   if CO[iDS,iTB].Entries<>0 then begin
     inc(CO[iDS,iTB].Entries); //Add one new entry
-    iCO:=CO[iDS,iTB].Entries;
-    Value[iDS,iTB,iCO]:=Value[iDS,iTB,iCO-1]; //Get previous Typ and Value
+    //todo: RangeCheck and allocate more space
+    iCO := CO[iDS,iTB].Entries;
+    Value[iDS,iTB,iCO] := Value[iDS,iTB,iCO-1]; //Duplicate previous Typ and Value
   end;
 end;
 
