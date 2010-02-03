@@ -1,35 +1,35 @@
 --------------------------------------------------------------------
-     <<Alarm for Cobra 11 - Crash Time>> Manager by Krom v0.1
+     <<Alarm for Cobra 11 - Highway Nights>> Manager by Krom v0.1
 --------------------------------------------------------------------
 
 Description:
-This tool installs and manages AFC11CT add-on cars.
+This tool installs and manages AFC11HN add-on cars.
 
 Key Features:
-- Add-on car installer :-)
+Add-on car installer :-)
 
 Requirements:
-- Manager must be run from AFC11CT folder.
-- Make a backup copy of Your "C11-Saves" folder, 
-  "FrontEnd\C11vol5.ds" and "FrontEnd\runtime.fxp" files, 
-  just in case.
+- Manager must be run from AFC11HN folder.
+- Add-on cars should be placed in "Autos" folder along with editcar.car files inside
+- Make a backup copy of Your "..\FrontEnd2\FrontEnd.ds" file, just in case.
 
 Interface:
-Check player profiles you want to update with addon cars.
+Check the cars you want to be added.
 
 Manager does the following:
-- Changes installed cars info in defined players 
-  profiles "career.wrc" file.
-- Changes installed cars info in AFC11 database "C11vol5.ds" file.
+Changes installed cars info in AFC11HN database "FrontEnd.ds" file.
 
 Credits:
-Image on splash screen by ...
+Image on splash screen by Synetic
 
 Known Bugs:
 All bugs are unknown to me. If you find one - tell me.
 
+Open source:
+This and many other WR tools are available at http://code.google.com/p/wr-toolkit/
+
 Version History:
-0.1	08.07.28	Beta
+0.1	2010.02.03	Initial release
 
 Author: Krom
 E-mail: kromster80@gmail.com

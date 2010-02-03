@@ -3,7 +3,7 @@ unit Unit2;
 interface
 uses
   {$IFDEF FPC} LResources, {$ENDIF}
-  Graphics, Forms, Classes, StdCtrls, ExtCtrls, Controls;
+  Graphics, Forms, Classes, StdCtrls, ExtCtrls, Controls, jpeg;
 
 type
   TForm2 = class(TForm)
