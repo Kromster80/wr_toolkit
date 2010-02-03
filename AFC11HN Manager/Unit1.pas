@@ -565,7 +565,7 @@ begin
 end;
 
 
-procedure TForm1.GetAutoInfo(s1:string;i1:integer);
+procedure TForm1.GetAutoInfo(s1:string; i1:integer);
 var fDataSet:TDataSet;
 begin
   fDataSet := TDataSet.Create;
@@ -646,7 +646,7 @@ begin
   SaveChanges.Click();
   Form1.Close;
   aPath := WorkDir+'HighwayNights.exe';
-  ShellExecute(handle, 'open', @(aPath)[1], nil, nil, SW_SHOWNORMAL);
+  ShellExecute(handle, 'open', @(aPath[1]), nil, nil, SW_SHOWNORMAL);
 end;
 
 procedure TForm1.CLBCarsClick(Sender: TObject);
