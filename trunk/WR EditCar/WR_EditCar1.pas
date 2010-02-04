@@ -1890,10 +1890,15 @@ begin
     SappCAB1.Value        := GetValue(1,29,2).Int;
     SappCAB2.Value        := GetValue(1,30,2).Int;
     SappCAB3.Value        := GetValue(1,31,2).Int;
+    //Appearance - HUD
+    SkmhID.Value          := GetValue(2,48,2).Int;
+    SmphID.Value          := GetValue(2,49,2).Int;
+    STachoID.Value        := GetValue(2,100,2).Int;
     //Appearance - Special
     TypLink.Text        := GetValue(2,16,2).Str;  //TypLink
     TypRech.Text        := GetValue(2,47,2).Str;  //TypRech
     SColor.Value        := GetValue(1,81,2).Int;  //ColorID
+    Caravan.Text        := GetValue(2,107,2).Str; //Caravan
 
     //Suspension - Weight
     Sweight.Value       := GetValue(2,33,2).Int;
@@ -1909,13 +1914,32 @@ begin
     Stabilizat.Value    := GetValue(2,27,2).Rel;
     //Suspension - Drive-Train
     RGdrive.ItemIndex   := GetValue(2,37,2).Int-1;
-
+    //Suspension - Aerodynamics
+    FSAirB.Value        := GetValue(2,39,2).Rel;
+    SSlipF.Value        := GetValue(2,40,2).Int;
+    SSlipR.Value        := GetValue(2,41,2).Int;
 
     //Wheels - Positioning
     STireFT.Value         := round(GetValue(1,6,2).Rel*200);
     STireRT.Value         := round(GetValue(1,7,2).Rel*200);
     STireFZ.Value         := round(GetValue(1,8,2).Rel*100);
     STireRZ.Value         := round(GetValue(1,9,2).Rel*100);
+
+    //Engine - Torque Curve
+    if round(GetValue(2,72,2).Rel)<>0 then
+    SNMStep.Value       := round(GetValue(2,72,2).Rel); //NMStep
+    SrpmMax.Value       := GetValue(2,50,2).Int;
+    SMtorque.Value      := GetValue(2,30,2).Int;
+
+    //Engine - Statistics
+    SSrate.Value        := GetValue(2,75,2).Int;
+    SMhp.Value          := GetValue(2,78,2).Int;
+    Edit5.Text          := GetValue(2,79,2).Str;
+    SMnm.Value          := GetValue(2,81,2).Int;
+    Edit6.Text          := GetValue(2,82,2).Str;
+    Edit4.Text          := GetValue(2,80,2).Str;
+    Stopsp.Value        := GetValue(2,11,2).Int;
+    FS0100.Value        := GetValue(2,45,2).Rel;
 
     //Driver - Male Head
     SDriverX2.Value       := round(GetValue(1,51,2).Rel*100);
@@ -1955,23 +1979,12 @@ begin
 
   end;
 {
-    Stopsp.Value:=vi[2,10,2];
     FSGrip.Value:=vr[2,20,2];
     FSGripFR.Value:=vr[2,21,2];
     FSSlipF.Value:=vr[2,23,2];
     FSSlipR.Value:=vr[2,24,2];
     FS103.Value:=vr[2,25,2];
     FS106.Value:=vr[2,28,2];
-    SMtorque.Value:=vi[2,29,2];
-
-    FSAirB.Value:=vr[2,38,2];
-    SSlipF.Value:=vi[2,39,2];
-    SSlipR.Value:=vi[2,40,2];
-    FS0100.Value:=vr[2,44,2];
-    SkmhID.Value:=vi[2,47,2];
-    SmphID.Value:=vi[2,48,2];
-    SrpmMax.Value:=vi[2,49,2];
-    if round(vr[2,71,2])<>0 then SNMStep.Value:=round(vr[2,71,2]);
 
     //{$IFDEF VER140}
     {
@@ -1982,13 +1995,7 @@ begin
     Chart1.BottomAxis.Maximum:=SNMStep.Value*20;  }
     //{$ENDIF}
     {
-    SSrate.Value:=vi[2,74,2];
-    SMhp.Value:=vi[2,77,2];
-    Edit5.Text:=vs[2,78,2];
-    Edit4.Text:=vs[2,79,2];
-    SMnm.Value:=vi[2,80,2];
 
-    Edit6.Text:=vs[2,81,2];
     SLautstarke.Value:=vi[2,83,2];
     SGearQty.Value:=vi[2,84,2];
     FSGear1.Value:=vr[2,85,2];
@@ -2006,12 +2013,10 @@ begin
     STireRR.Value:=round(vr[2,96,2]*100);
     STireRW.Value:=round(vr[2,97,2]*100);
     STireRD.Value:=round(vr[2,98,2]/0.127);
-    STachoID.Value:=vi[2,99,2];
     SSaug.Value:=vi[2,100,2];
     SLastger.Value:=vi[2,101,2];
     SAusID.Value:=vi[2,102,2];
     SMotID.Value:=vi[2,103,2];
-    Caravan.Text:=vs[2,106,2];
     AllowDataUpdate:=true;
   }
  //
