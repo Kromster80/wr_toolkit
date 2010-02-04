@@ -4,8 +4,8 @@ uses
   Forms,
   WR_EditCar1 in 'WR_EditCar1.pas' {Form1},
   WR_EditCar_Lang in 'WR_EditCar_Lang.pas',
-  WR_AboutBox in '..\ Common \WR_AboutBox.pas' {AboutForm},
-  WR_DataSet in '..\ Common \WR_DataSet.pas';
+  WR_AboutBox in '..\_Common_\WR_AboutBox.pas' {AboutForm},
+  WR_DataSet in '..\_Common_\WR_DataSet.pas';
 
 {$R *.res}
 

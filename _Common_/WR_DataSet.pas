@@ -5,18 +5,18 @@ uses KromUtils, Math, SysUtils, Windows;
 
 type
   TDSNode = packed record
-    i1: Longint;
-    i2: Longint;
-    i3: Longint;
+    i1: cardinal;
+    i2: cardinal;
+    i3: cardinal;
   end;
 
-  TDSValue = packed
-    record
-      Typ:byte;
-      Int:integer;
-      Rel:single;
-      Str:string;
-    end;
+type
+  TDSValue = packed record
+    Typ:byte;
+    Int:integer;
+    Rel:single;
+    Str:string;
+  end;
 
 type
   TDataSet = class
@@ -81,14 +81,20 @@ type
     function FindStringInValues(i1,i2,i3:integer; Input:string):TDSNode; //Return Address of found string DS:TB:CO
 
     function WRTextEn(Input:string):string;
-  published
-
   end;
 
 var
   fDataSet:TDataSet;
 
 implementation
+
+function DSValue(aTyp:byte; aInt:integer; aRel:single; aStr:string):TDSValue;
+begin
+  Result.Typ := aTyp;
+  Result.Int := aInt;
+  Result.Rel := aRel;
+  Result.Str := aStr;
+end;
 
 constructor TDataSet.Create;
 begin
@@ -98,7 +104,9 @@ end;
 
 function TDataSet.IndexInRange(iDS,iTB,iCO:integer):boolean;
 begin
-  Result := InRange(iDS,1,DSqty) and InRange(iTB,1,TB[iDS].Entries) and InRange(iCO,1,CO[iDS,iTB].Entries);
+  Result := InRange(iDS,1,DSqty) and
+            InRange(iTB,1,TB[iDS].Entries) and
+            InRange(iCO,1,CO[iDS,iTB].Entries);
 end;
 
 
@@ -318,7 +326,10 @@ end;
 
 function TDataSet.GetValue(iDS,iTB,iCO:integer):TDSValue;
 begin
-  Result := Value[iDS,iTB,iCO];
+  if IndexInRange(iDS,iTB,iCO) then
+    Result := Value[iDS,iTB,iCO]
+  else
+    Result := DSValue(0,0,0.0,''); //Empty
 end;
 
 
