@@ -1882,7 +1882,14 @@ begin
     ScamHY.Value          := round(GetValue(1,75,2).Rel*100);
     ScamHZ.Value          := round(GetValue(1,76,2).Rel*100);
     //Appearance - Sound
-    Edit7.Text            := GetValue(2,76,2).Str;
+    Edit7.Text          := GetValue(2,76,2).Str;
+    SSrate.Value        := GetValue(2,75,2).Int;
+    SLautstarke.Value   := GetValue(2,84,2).Int;
+    SMotID.Value        := GetValue(2,104,2).Int;
+    SAusID.Value        := GetValue(2,103,2).Int;
+    SSaug.Value         := GetValue(2,101,2).Int;
+    SLastger.Value      := GetValue(2,102,2).Int;
+
     //Appearance - Brakelight Materials
     SappBR1.Value         := GetValue(1,10,2).Int;
     SappBR2.Value         := GetValue(1,11,2).Int;
@@ -1919,20 +1926,32 @@ begin
     SSlipF.Value        := GetValue(2,40,2).Int;
     SSlipR.Value        := GetValue(2,41,2).Int;
 
+    //Wheels - Size
+    STireFR.Value         := round(GetValue(2,94,2).Rel*100);
+    STireFW.Value         := round(GetValue(2,95,2).Rel*100);
+    STireFD.Value         := round(GetValue(2,96,2).Rel/0.127); //Half an inch
+    STireRR.Value         := round(GetValue(2,97,2).Rel*100);
+    STireRW.Value         := round(GetValue(2,98,2).Rel*100);
+    STireRD.Value         := round(GetValue(2,99,2).Rel/0.127); //Half an inch
     //Wheels - Positioning
     STireFT.Value         := round(GetValue(1,6,2).Rel*200);
     STireRT.Value         := round(GetValue(1,7,2).Rel*200);
     STireFZ.Value         := round(GetValue(1,8,2).Rel*100);
     STireRZ.Value         := round(GetValue(1,9,2).Rel*100);
+    //Wheels - Tire Properties
+    FSGrip.Value        := GetValue(2,21,2).Rel;
+    FSGripFR.Value      := GetValue(2,22,2).Rel;
+    FSSlipF.Value       := GetValue(2,24,2).Rel;
+    FSSlipR.Value       := GetValue(2,25,2).Rel;
+    FS103.Value         := GetValue(2,26,2).Rel;
+    FS106.Value         := GetValue(2,29,2).Rel;
 
     //Engine - Torque Curve
     if round(GetValue(2,72,2).Rel)<>0 then
     SNMStep.Value       := round(GetValue(2,72,2).Rel); //NMStep
     SrpmMax.Value       := GetValue(2,50,2).Int;
     SMtorque.Value      := GetValue(2,30,2).Int;
-
     //Engine - Statistics
-    SSrate.Value        := GetValue(2,75,2).Int;
     SMhp.Value          := GetValue(2,78,2).Int;
     Edit5.Text          := GetValue(2,79,2).Str;
     SMnm.Value          := GetValue(2,81,2).Int;
@@ -1940,6 +1959,18 @@ begin
     Edit4.Text          := GetValue(2,80,2).Str;
     Stopsp.Value        := GetValue(2,11,2).Int;
     FS0100.Value        := GetValue(2,45,2).Rel;
+
+    //Gearbox
+    SGearQty.Value      := GetValue(2,85,2).Int;
+    FSGear1.Value       := GetValue(2,86,2).Rel;
+    FSGear2.Value       := GetValue(2,87,2).Rel;
+    FSGear3.Value       := GetValue(2,88,2).Rel;
+    FSGear4.Value       := GetValue(2,89,2).Rel;
+    FSGear5.Value       := GetValue(2,90,2).Rel;
+    FSGear6.Value       := GetValue(2,91,2).Rel;
+    FSGear7.Value       := GetValue(2,92,2).Rel;
+    FSGearR.Value       := GetValue(2,93,2).Rel;
+    FSGearF.Value       := GetValue(2,38,2).Rel;
 
     //Driver - Male Head
     SDriverX2.Value       := round(GetValue(1,51,2).Rel*100);
@@ -1978,14 +2009,6 @@ begin
     SDrwW.Value           := round(GetValue(1,50,2).Rel*180/pi);
 
   end;
-{
-    FSGrip.Value:=vr[2,20,2];
-    FSGripFR.Value:=vr[2,21,2];
-    FSSlipF.Value:=vr[2,23,2];
-    FSSlipR.Value:=vr[2,24,2];
-    FS103.Value:=vr[2,25,2];
-    FS106.Value:=vr[2,28,2];
-
     //{$IFDEF VER140}
     {
     Chart1.Series[0].Clear; Chart1.Series[1].Clear;
@@ -1994,33 +2017,6 @@ begin
     Chart1.LeftAxis.Maximum:=round(Chart1.Series[0].MaxYValue*1.2);
     Chart1.BottomAxis.Maximum:=SNMStep.Value*20;  }
     //{$ENDIF}
-    {
-
-    SLautstarke.Value:=vi[2,83,2];
-    SGearQty.Value:=vi[2,84,2];
-    FSGear1.Value:=vr[2,85,2];
-    FSGear2.Value:=vr[2,86,2];
-    FSGear3.Value:=vr[2,87,2];
-    FSGear4.Value:=vr[2,88,2];
-    FSGear5.Value:=vr[2,89,2];
-    FSGear6.Value:=vr[2,90,2];
-    FSGear7.Value:=vr[2,91,2];
-    FSGearR.Value:=vr[2,92,2];
-    FSGearF.Value:=vr[2,37,2];
-    STireFR.Value:=round(vr[2,93,2]*100);
-    STireFW.Value:=round(vr[2,94,2]*100);
-    STireFD.Value:=round(vr[2,95,2]/0.127);
-    STireRR.Value:=round(vr[2,96,2]*100);
-    STireRW.Value:=round(vr[2,97,2]*100);
-    STireRD.Value:=round(vr[2,98,2]/0.127);
-    SSaug.Value:=vi[2,100,2];
-    SLastger.Value:=vi[2,101,2];
-    SAusID.Value:=vi[2,102,2];
-    SMotID.Value:=vi[2,103,2];
-    AllowDataUpdate:=true;
-  }
- //
-
   LockControls := false;
 end;
 
