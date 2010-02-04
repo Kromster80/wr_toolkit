@@ -726,8 +726,8 @@ object Form1: TForm1
     Top = 8
     Width = 503
     Height = 441
-    ActivePage = TabSheet13
-    TabIndex = 0
+    ActivePage = TabSheet6
+    TabIndex = 2
     TabOrder = 4
     OnChange = PageChange
     object TabSheet13: TTabSheet
@@ -1541,7 +1541,7 @@ object Form1: TForm1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
       end
-      object Typ2: TEdit
+      object TypRech: TEdit
         Left = 292
         Top = 180
         Width = 85
@@ -2825,7 +2825,7 @@ object Form1: TForm1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
       end
-      object Sweightd: TSpinEdit
+      object SweightD: TSpinEdit
         Left = 4
         Top = 50
         Width = 57
@@ -2942,7 +2942,7 @@ object Form1: TForm1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
       end
-      object FS104: TFloatSpinEdit
+      object Stabilizat: TFloatSpinEdit
         Left = 4
         Top = 266
         Width = 57
