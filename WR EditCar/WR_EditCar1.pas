@@ -207,7 +207,7 @@ type
     Label124: TLabel;
     Bevel14: TBevel;
     Sweight: TSpinEdit;
-    Sweightd: TSpinEdit;
+    SweightD: TSpinEdit;
     SAngular: TSpinEdit;
     Label68: TLabel;
     Label61: TLabel;
@@ -223,7 +223,7 @@ type
     SBounce: TSpinEdit;
     SWheelY: TSpinEdit;
     SSperrDif: TSpinEdit;
-    FS104: TFloatSpinEdit;
+    Stabilizat: TFloatSpinEdit;
     Label72: TLabel;
     Label130: TLabel;
     Label27: TLabel;
@@ -285,7 +285,7 @@ type
     Label41: TLabel;
     TypLink: TEdit;
     Label99: TLabel;
-    Typ2: TEdit;
+    TypRech: TEdit;
     Label86: TLabel;
     SColor: TSpinEdit;
     Label114: TLabel;
@@ -880,7 +880,7 @@ vi[2,22,2]:=SAngular.Value;
 vr[2,23,2]:=FSSlipF.Value;
 vr[2,24,2]:=FSSlipR.Value;
 vr[2,25,2]:=FS103.Value;
-vr[2,26,2]:=FS104.Value;
+vr[2,26,2]:=Stabilizat.Value;
 vr[2,28,2]:=FS106.Value;
 
 vs[1,2,2]:=Edit1.Text;
@@ -888,7 +888,7 @@ vs[1,3,2]:=Edit8.Text;
 vs[1,22,2]:=Edit2.Text;
 vs[2,3,2]:=Edit3.Text;
 vs[2,15,2]:=TypLink.Text;
-vs[2,46,2]:=Typ2.Text;
+vs[2,46,2]:=TypRech.Text;
 vi[2,27,2]:=Sweightd.Value;
 vi[2,32,2]:=Sweight.Value;
 vi[2,36,2]:=RGdrive.ItemIndex+1;
@@ -964,7 +964,7 @@ Edit8.Text:=vs[1,3,2];  //folder
 Edit2.Text:=vs[1,22,2]; //class
 Edit3.Text:=vs[2,3,2]; //model
 TypLink.Text:=vs[2,15,2]; //logo
-Typ2.Text:=vs[2,46,2]; //logo
+TypRech.Text:=vs[2,46,2]; //logo
 
 if vi[1,4,2]=1 then CBCabrio1.Checked:=true else CBCabrio1.Checked:=false;
 if vi[1,27,2]=1 then CBCabrio2.Checked:=true else CBCabrio2.Checked:=false;
@@ -1031,7 +1031,7 @@ SAngular.Value:=vi[2,22,2];
 FSSlipF.Value:=vr[2,23,2];
 FSSlipR.Value:=vr[2,24,2];
 FS103.Value:=vr[2,25,2];
-FS104.Value:=vr[2,26,2];
+Stabilizat.Value:=vr[2,26,2];
 Sweightd.Value:=vi[2,27,2];
 FS106.Value:=vr[2,28,2];
 SMtorque.Value:=vi[2,29,2];
@@ -1204,7 +1204,7 @@ end;
   Label99.Enabled       := CarFmt in [fmtMBWR]; // bez1.tga
   TypLink.Enabled       := CarFmt in [fmtMBWR]; // bez1.tga
   Label86.Enabled       := CarFmt in [fmtMBWR]; // bez2.tga
-  Typ2.Enabled          := CarFmt in [fmtMBWR]; // bez2.tga
+  TypRech.Enabled          := CarFmt in [fmtMBWR]; // bez2.tga
 
   Label114.Enabled      := CarFmt in [fmtWR2, fmtAFC11N]; //Default Menu Color
   SColor.Enabled        := CarFmt in [fmtWR2, fmtAFC11N]; //Default Menu Color
@@ -1854,14 +1854,166 @@ end;
 procedure TForm1.UpdateControls();
 begin
   LockControls := true;
-  Edit1.Text := fDataSet.GetValueAsString(1,3,2);  //folder
-  Edit8.Text := fDataSet.GetValueAsString(1,4,2);  //folder
-  Edit2.Text := fDataSet.GetValueAsString(1,23,2); //class
-  Edit3.Text := fDataSet.GetValueAsString(2,4,2); //model}
-{  Edit1.Text :=vs[1,2,2];  //folder
-  Edit8.Text :=vs[1,3,2];  //folder
-  Edit2.Text :=vs[1,22,2]; //class
-  Edit3.Text :=vs[2,3,2]; //model}
+  with fDataSet do begin
+    //Identity - Name
+    Edit1.Text            := GetValue(1,3,2).Str;        //Main Folder
+    Edit8.Text            := GetValue(1,4,2).Str;        //Cabrio Folder
+    Hersteller.Text       := GetValue(2,105,2).Str;      //Hersteller
+    Logo.Text             := GetValue(2,106,2).Str;      //
+    Edit2.Text            := GetValue(1,23,2).Str;       //Class
+    Edit3.Text            := GetValue(2,4,2).Str;        //Model
+    CBCabrio1.Checked     := GetValue(1,5,2).Int = 1;
+    CBCabrio2.Checked     := GetValue(1,28,2).Int = 1;
+    //Identity - Placement
+    RaceClass1_4.ItemIndex := min(GetValue(2,43,2).Int-1,0,4); //1..4 + Custom
+    SRaceClass.Enabled    := not (GetValue(2,43,2).Int in [1..4]);
+    SRaceClass.Value      := GetValue(2,43,2).Int;
+    SScore.Value          := GetValue(2,5,2).Int;
+    SClassID.Value        := GetValue(2,8,2).Int;
+
+    //Appearance - Cameras
+    ScamPY.Value          := round(GetValue(1,16,2).Rel*100);
+    ScamPZ.Value          := round(GetValue(1,17,2).Rel*100);
+    ScamIY.Value          := round(GetValue(1,18,2).Rel*100);
+    ScamIZ.Value          := round(GetValue(1,19,2).Rel*100);
+    ScamCX.Value          := round(GetValue(1,27,2).Rel*100);
+    ScamCY.Value          := round(GetValue(1,20,2).Rel*100);
+    ScamCZ.Value          := round(GetValue(1,21,2).Rel*100);
+    ScamHY.Value          := round(GetValue(1,75,2).Rel*100);
+    ScamHZ.Value          := round(GetValue(1,76,2).Rel*100);
+    //Appearance - Sound
+    Edit7.Text            := GetValue(2,76,2).Str;
+    //Appearance - Brakelight Materials
+    SappBR1.Value         := GetValue(1,10,2).Int;
+    SappBR2.Value         := GetValue(1,11,2).Int;
+    SappBR3.Value         := GetValue(1,12,2).Int;
+    SappCAB1.Value        := GetValue(1,29,2).Int;
+    SappCAB2.Value        := GetValue(1,30,2).Int;
+    SappCAB3.Value        := GetValue(1,31,2).Int;
+    //Appearance - Special
+    TypLink.Text        := GetValue(2,16,2).Str;  //TypLink
+    TypRech.Text        := GetValue(2,47,2).Str;  //TypRech
+    SColor.Value        := GetValue(1,81,2).Int;  //ColorID
+
+    //Suspension - Weight
+    Sweight.Value       := GetValue(2,33,2).Int;
+    SweightD.Value      := GetValue(2,28,2).Int;
+    SAngular.Value      := GetValue(2,23,2).Int;
+    //Suspension - Suspension
+    SDamper.Value       := GetValue(2,17,2).Int;
+    SFeather.Value      := GetValue(2,18,2).Int;
+    SRelease.Value      := round(GetValue(2,19,2).Rel*100);
+    SBounce.Value       := round(GetValue(2,20,2).Rel*100);
+    SSperrDif.Value     := GetValue(2,42,2).Int;
+    SWheelY.Value       := round(GetValue(2,44,2).Rel*100);
+    Stabilizat.Value    := GetValue(2,27,2).Rel;
+    //Suspension - Drive-Train
+    RGdrive.ItemIndex   := GetValue(2,37,2).Int-1;
+
+
+    //Wheels - Positioning
+    STireFT.Value         := round(GetValue(1,6,2).Rel*200);
+    STireRT.Value         := round(GetValue(1,7,2).Rel*200);
+    STireFZ.Value         := round(GetValue(1,8,2).Rel*100);
+    STireRZ.Value         := round(GetValue(1,9,2).Rel*100);
+
+    //Driver - Male Head
+    SDriverX2.Value       := round(GetValue(1,51,2).Rel*100);
+    SDriverY2.Value       := round(GetValue(1,52,2).Rel*100);
+    SDriverZ2.Value       := round(GetValue(1,53,2).Rel*100);
+    SDriverX1.Value       := round(GetValue(1,44,2).Rel*100);
+    SDriverY1.Value       := round(GetValue(1,45,2).Rel*100);
+    SDriverZ1.Value       := round(GetValue(1,46,2).Rel*100);
+
+    //Cockpit - Speedo
+    ST1X.Value            := round(GetValue(1,55,2).Rel*100);
+    ST1Y.Value            := round(GetValue(1,56,2).Rel*100);
+    ST1Z.Value            := round(GetValue(1,57,2).Rel*100);
+    ST1A1.Value           := round(GetValue(1,58,2).Rel*180/pi);
+    ST1A2.Value           := round(GetValue(1,59,2).Rel*180/pi);
+    ST1A3.Value           := round(GetValue(1,60,2).Rel*180/pi);
+    FST1Scale.Value       := GetValue(1,61,2).Rel;
+    ST1Start.Value        := round(GetValue(1,62,2).Rel*180/pi);
+    FST1Size.Value        := GetValue(1,63,2).Rel;
+    ST1Mode.Value         := GetValue(1,54,2).Int;
+    //Cockpit - Tacho
+    ST2X.Value            := round(GetValue(1,65,2).Rel*100);
+    ST2Y.Value            := round(GetValue(1,66,2).Rel*100);
+    ST2Z.Value            := round(GetValue(1,67,2).Rel*100);
+    ST2A1.Value           := round(GetValue(1,68,2).Rel*180/pi);
+    ST2A2.Value           := round(GetValue(1,69,2).Rel*180/pi);
+    ST2A3.Value           := round(GetValue(1,70,2).Rel*180/pi);
+    FST2Scale.Value       := GetValue(1,71,2).Rel;
+    ST2Start.Value        := round(GetValue(1,72,2).Rel*180/pi);
+    FST2Size.Value        := GetValue(1,73,2).Rel;
+    ST2Mode.Value         := GetValue(1,64,2).Int;
+    //Cockpit - Drivewheel
+    SDrwX.Value           := round(GetValue(1,47,2).Rel*100);
+    SDrwY.Value           := round(GetValue(1,48,2).Rel*100);
+    SDrwZ.Value           := round(GetValue(1,49,2).Rel*100);
+    SDrwW.Value           := round(GetValue(1,50,2).Rel*180/pi);
+
+  end;
+{
+    Stopsp.Value:=vi[2,10,2];
+    FSGrip.Value:=vr[2,20,2];
+    FSGripFR.Value:=vr[2,21,2];
+    FSSlipF.Value:=vr[2,23,2];
+    FSSlipR.Value:=vr[2,24,2];
+    FS103.Value:=vr[2,25,2];
+    FS106.Value:=vr[2,28,2];
+    SMtorque.Value:=vi[2,29,2];
+
+    FSAirB.Value:=vr[2,38,2];
+    SSlipF.Value:=vi[2,39,2];
+    SSlipR.Value:=vi[2,40,2];
+    FS0100.Value:=vr[2,44,2];
+    SkmhID.Value:=vi[2,47,2];
+    SmphID.Value:=vi[2,48,2];
+    SrpmMax.Value:=vi[2,49,2];
+    if round(vr[2,71,2])<>0 then SNMStep.Value:=round(vr[2,71,2]);
+
+    //{$IFDEF VER140}
+    {
+    Chart1.Series[0].Clear; Chart1.Series[1].Clear;
+    for k:=0 to 20 do Chart1.Series[0].AddXY(k*SNMStep.Value,round(vr[2,50+k,2]),'',120);
+    for k:=0 to 20 do Chart1.Series[1].AddXY(k*SNMStep.Value,0,'',120*65536);
+    Chart1.LeftAxis.Maximum:=round(Chart1.Series[0].MaxYValue*1.2);
+    Chart1.BottomAxis.Maximum:=SNMStep.Value*20;  }
+    //{$ENDIF}
+    {
+    SSrate.Value:=vi[2,74,2];
+    SMhp.Value:=vi[2,77,2];
+    Edit5.Text:=vs[2,78,2];
+    Edit4.Text:=vs[2,79,2];
+    SMnm.Value:=vi[2,80,2];
+
+    Edit6.Text:=vs[2,81,2];
+    SLautstarke.Value:=vi[2,83,2];
+    SGearQty.Value:=vi[2,84,2];
+    FSGear1.Value:=vr[2,85,2];
+    FSGear2.Value:=vr[2,86,2];
+    FSGear3.Value:=vr[2,87,2];
+    FSGear4.Value:=vr[2,88,2];
+    FSGear5.Value:=vr[2,89,2];
+    FSGear6.Value:=vr[2,90,2];
+    FSGear7.Value:=vr[2,91,2];
+    FSGearR.Value:=vr[2,92,2];
+    FSGearF.Value:=vr[2,37,2];
+    STireFR.Value:=round(vr[2,93,2]*100);
+    STireFW.Value:=round(vr[2,94,2]*100);
+    STireFD.Value:=round(vr[2,95,2]/0.127);
+    STireRR.Value:=round(vr[2,96,2]*100);
+    STireRW.Value:=round(vr[2,97,2]*100);
+    STireRD.Value:=round(vr[2,98,2]/0.127);
+    STachoID.Value:=vi[2,99,2];
+    SSaug.Value:=vi[2,100,2];
+    SLastger.Value:=vi[2,101,2];
+    SAusID.Value:=vi[2,102,2];
+    SMotID.Value:=vi[2,103,2];
+    Caravan.Text:=vs[2,106,2];
+    AllowDataUpdate:=true;
+  }
  //
 
   LockControls := false;
