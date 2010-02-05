@@ -1,137 +1,119 @@
 object Form1: TForm1
   Left = 183
+  Height = 452
   Top = 157
+  Width = 737
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
+  Caption = 'Form1'
   ClientHeight = 452
   ClientWidth = 737
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
-  Font.Style = []
-  Icon.Data = {
-    0000010001002020100000000000E80200001600000028000000200000004000
-    0000010004000000000080020000000000000000000000000000000000000000
-    000000008000008000000080800080000000800080008080000080808000C0C0
-    C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF000000
-    0000000000000000000000000000000000000000007777770000000000000000
-    0000000000000007000000000000000000000000000000070000000000000000
-    0000000000777007000000000000000000077070007770070000700000000000
-    0077000700787000000007000000000007708000077877000070007000000000
-    07088807777777770777000700000000008F88877FFFFF077887700700000000
-    00088888F88888FF08870070000000000000880888877778F070007000000007
-    77088888880007778F770077777000700008F088007777077F07000000700700
-    008F08880800077778F7700000700708888F0880F08F807078F7777700700708
-    F88F0780F070F07078F7887700700708888F0780F077807088F7777700700700
-    008F0788FF00080888F77000007000000008F0780FFFF0088F77007000000000
-    0008F07788000888887700700000000000008F07788888880870007000000000
-    00088FF0077788088887000700000000008F888FF00000F87887700700000000
-    0708F8088FFFFF88078700700000000007708000088888000070070000000000
-    0077007000888007000070000000000000077700008F80070007000000000000
-    0000000000888007000000000000000000000000000000070000000000000000
-    000000000777777700000000000000000000000000000000000000000000FFFF
-    FFFFFFFC0FFFFFFC0FFFFFF80FFFFFF80FFFFE180E7FFC00043FF800001FF800
-    000FF800000FFC00001FFE00001FE0000001C000000180000001800000018000
-    00018000000180000001FC00001FFC00001FFE00001FFC00000FF800000FF800
-    001FF800003FFC180C7FFE380EFFFFF80FFFFFF80FFFFFF80FFFFFFFFFFF}
-  OldCreateOrder = False
+  OnCreate = FormCreate
   Position = poDesktopCenter
   ShowHint = True
-  OnCreate = FormCreate
-  PixelsPerInch = 96
-  TextHeight = 13
+  LCLVersion = '0.9.28.2'
   object Label131: TLabel
     Left = 141
+    Height = 40
     Top = 103
-    Width = 163
-    Height = 39
-    Caption = 
-      'Prior to editing or importing car settings you need to open any ' +
-      '.car file.'
+    Width = 164
+    Caption = 'Prior to editing or importing car settings you need to open any .car file.'
+    ParentColor = False
     WordWrap = True
   end
   object ButtonLoad: TButton
     Tag = 888
     Left = 512
-    Top = 302
-    Width = 222
     Height = 33
+    Top = 302
+    Width = 136
     Caption = 'Open .Car'
-    TabOrder = 0
     OnClick = OpenClick
+    TabOrder = 0
   end
   object ButtonSave: TButton
     Tag = 888
     Left = 512
+    Height = 33
     Top = 416
     Width = 222
-    Height = 33
     Caption = 'Save .Car'
-    TabOrder = 1
     OnClick = SaveClick
+    TabOrder = 1
   end
   object RGFormat: TRadioGroup
     Tag = 888
     Left = 514
+    Height = 73
     Top = 336
     Width = 220
-    Height = 73
+    AutoFill = True
     Caption = '  Editing Format  '
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ClientHeight = 55
+    ClientWidth = 216
     ItemIndex = 1
     Items.Strings = (
       'Mercedes-Benz World Racing'
       'World Racing 2'
       'Alarm for Cobra 11 - Nitro'
-      'Ferrari Virtual Race')
-    TabOrder = 2
+      'Ferrari Virtual Race'
+    )
     OnClick = RGFormatClick
+    TabOrder = 2
   end
   object PageControl1: TPageControl
     Tag = 888
     Left = 512
+    Height = 289
     Top = 8
     Width = 222
-    Height = 289
     ActivePage = TabSheet4
-    MultiLine = True
     TabIndex = 0
     TabOrder = 3
     OnChange = PageControl1Change
     object TabSheet4: TTabSheet
       Caption = 'Help'
+      ClientHeight = 263
+      ClientWidth = 214
       ImageIndex = 3
       object GroupBox3: TGroupBox
         Tag = 888
         Left = 2
+        Height = 257
         Top = 0
         Width = 210
-        Height = 257
         Caption = '  Info  '
+        ClientHeight = 239
+        ClientWidth = 206
         TabOrder = 0
         object Label129: TLabel
           Tag = 888
           Left = 8
+          Height = 39
           Top = 20
           Width = 156
-          Height = 39
-          Caption = 
-            'Keep in mind that some settings are only appliable to MBWR and s' +
-            'ome to WR2.'
+          Caption = 'Keep in mind that some settings are only appliable to MBWR and some to WR2.'
+          ParentColor = False
           WordWrap = True
         end
         object BitBtn4: TBitBtn
           Tag = 888
           Left = 8
+          Height = 41
           Top = 160
           Width = 41
-          Height = 41
           Caption = 'Eng'
           Enabled = False
-          TabOrder = 3
-          Visible = False
-          OnClick = BitBtn2Click
           Glyph.Data = {
             F6060000424DF606000000000000360000002800000018000000180000000100
             180000000000C0060000232E0000232E00000000000000000000FF19FFFF19FF
@@ -188,30 +170,31 @@ object Form1: TForm1
             19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FF
             FF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19
             FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF
-            19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FF}
+            19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FF
+          }
           Layout = blGlyphTop
-          Spacing = -4
+          OnClick = BitBtn2Click
+          TabOrder = 3
+          Visible = False
         end
         object Button1: TButton
           Tag = 888
           Left = 48
+          Height = 17
           Top = 184
           Width = 65
-          Height = 17
           Caption = 'Write lang'
           Enabled = False
+          OnClick = Button1Click
           TabOrder = 4
           Visible = False
-          OnClick = Button1Click
         end
         object BitBtn1: TBitBtn
           Tag = 888
           Left = 152
+          Height = 49
           Top = 200
           Width = 49
-          Height = 49
-          TabOrder = 0
-          OnClick = AboutClick
           Glyph.Data = {
             360C0000424D360C000000000000360000002800000020000000200000000100
             180000000000000C000000000000000000000000000000000000C8D0D4C8D0D4
@@ -310,17 +293,18 @@ object Form1: TForm1
             BEC0C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4
             C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C7CDD0D2D6D7DFD7CEE8E4DEEBEA
             EAEBEBEBEBECECEBECECECEBECECEAE9EEE9E2E4DDD4BCBAB7BABDBEC8D0D4C8
-            D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4}
+            D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4
+          }
+          OnClick = AboutClick
+          TabOrder = 0
         end
         object BitBtn3: TBitBtn
           Tag = 888
           Left = 8
+          Height = 41
           Top = 200
           Width = 41
-          Height = 41
           Caption = 'Deu'
-          TabOrder = 2
-          OnClick = BitBtn2Click
           Glyph.Data = {
             F6060000424DF606000000000000360000002800000018000000180000000100
             180000000000C0060000232E0000232E00000000000000000000FF19FFFF19FF
@@ -377,19 +361,19 @@ object Form1: TForm1
             19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FF
             FF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19
             FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF
-            19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FF}
+            19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FF
+          }
           Layout = blGlyphTop
-          Spacing = -4
+          OnClick = BitBtn2Click
+          TabOrder = 2
         end
         object BitBtn5: TBitBtn
           Tag = 888
           Left = 48
+          Height = 41
           Top = 200
           Width = 41
-          Height = 41
           Caption = 'Hun'
-          TabOrder = 5
-          OnClick = BitBtn2Click
           Glyph.Data = {
             F6060000424DF606000000000000360000002800000018000000180000000100
             180000000000C0060000232E0000232E00000000000000000000FF19FFFF19FF
@@ -446,19 +430,19 @@ object Form1: TForm1
             19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FF
             FF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19
             FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF
-            19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FF}
+            19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FF
+          }
           Layout = blGlyphTop
-          Spacing = -4
+          OnClick = BitBtn2Click
+          TabOrder = 5
         end
         object BitBtn2: TBitBtn
           Tag = 888
           Left = 88
+          Height = 41
           Top = 200
           Width = 41
-          Height = 41
           Caption = 'Rus'
-          TabOrder = 1
-          OnClick = BitBtn2Click
           Glyph.Data = {
             F6060000424DF606000000000000360000002800000018000000180000000100
             180000000000C0060000232E0000232E00000000000000000000FF19FFFF19FF
@@ -515,1194 +499,1256 @@ object Form1: TForm1
             19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FF
             FF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19
             FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF
-            19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FF}
+            19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FFFF19FF
+          }
           Layout = blGlyphTop
-          Spacing = -4
+          OnClick = BitBtn2Click
+          TabOrder = 1
         end
       end
     end
     object TabSheet2: TTabSheet
       Caption = 'MBWR'
+      ClientHeight = 263
+      ClientWidth = 214
       ImageIndex = 1
       object Label128: TLabel
         Tag = 888
         Left = 8
+        Height = 13
         Top = 0
         Width = 60
-        Height = 13
         Caption = 'WR.ds path:'
+        ParentColor = False
       end
       object LBModel: TListBox
         Tag = 888
         Left = 2
+        Height = 193
         Top = 38
         Width = 209
-        Height = 193
-        Enabled = False
         ExtendedSelect = False
-        ItemHeight = 13
+        Enabled = False
+        ItemHeight = 0
         Sorted = True
         TabOrder = 0
       end
       object WRDSPath: TEdit
         Tag = 888
         Left = 2
+        Height = 21
         Top = 14
         Width = 169
-        Height = 21
         Enabled = False
         TabOrder = 1
       end
       object BrowseForWRDS: TButton
         Tag = 888
         Left = 176
+        Height = 26
         Top = 10
         Width = 27
-        Height = 26
         Caption = '...'
-        TabOrder = 2
         OnClick = BrowseForWR2DSClick
+        TabOrder = 2
       end
       object ImportWRCar: TButton
         Tag = 888
         Left = 2
+        Height = 25
         Top = 235
         Width = 75
-        Height = 25
         Caption = 'Import'
         Enabled = False
-        TabOrder = 3
         OnClick = ImportWRCarClick
+        TabOrder = 3
       end
     end
     object TabSheet3: TTabSheet
       Caption = 'WR2'
+      ClientHeight = 263
+      ClientWidth = 214
       ImageIndex = 2
       object Label115: TLabel
         Tag = 888
         Left = 8
+        Height = 13
         Top = 0
         Width = 66
-        Height = 13
         Caption = 'WR2.ds path:'
+        ParentColor = False
       end
       object BrowseForWR2DS: TButton
         Tag = 888
         Left = 176
+        Height = 26
         Top = 10
         Width = 27
-        Height = 26
         Caption = '...'
-        TabOrder = 0
         OnClick = BrowseForWR2DSClick
+        TabOrder = 0
       end
       object WR2DSPath: TEdit
         Tag = 888
         Left = 2
+        Height = 21
         Top = 14
         Width = 169
-        Height = 21
         Enabled = False
         TabOrder = 1
       end
       object LB2Model: TListBox
         Tag = 888
         Left = 2
+        Height = 193
         Top = 38
         Width = 209
-        Height = 193
         Enabled = False
-        ItemHeight = 13
+        ItemHeight = 0
         Sorted = True
         TabOrder = 2
       end
       object ImportWR2Car: TButton
         Tag = 888
         Left = 2
+        Height = 25
         Top = 235
         Width = 75
-        Height = 25
         Caption = 'Import'
         Enabled = False
-        TabOrder = 3
         OnClick = ImportWR2CarClick
+        TabOrder = 3
       end
     end
     object TabSheet1: TTabSheet
       Caption = 'Expert'
+      ClientHeight = 263
+      ClientWidth = 214
       object GroupBox2: TGroupBox
         Tag = 888
         Left = 2
+        Height = 259
         Top = 0
         Width = 202
-        Height = 259
         Caption = '  Info  '
+        ClientHeight = 241
+        ClientWidth = 198
         TabOrder = 0
         object Label8: TLabel
           Tag = 888
           Left = 8
+          Height = 13
           Top = 164
           Width = 53
-          Height = 13
           Caption = 'Description'
           Enabled = False
+          ParentColor = False
         end
         object Label7: TLabel
           Tag = 888
           Left = 8
+          Height = 13
           Top = 148
           Width = 53
-          Height = 13
           Caption = 'Description'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
           Font.Height = -11
           Font.Name = 'MS Sans Serif'
-          Font.Style = []
+          ParentColor = False
           ParentFont = False
         end
         object Label6: TLabel
           Tag = 888
           Left = 8
+          Height = 13
           Top = 132
           Width = 53
-          Height = 13
           Caption = 'Description'
           Enabled = False
+          ParentColor = False
         end
         object Label5: TLabel
           Tag = 888
           Left = 8
+          Height = 13
           Top = 96
           Width = 41
-          Height = 13
           Caption = 'Format  -'
+          ParentColor = False
         end
         object Label4: TLabel
           Tag = 888
           Left = 8
+          Height = 13
           Top = 80
           Width = 42
-          Height = 13
           Caption = 'Info       -'
+          ParentColor = False
         end
         object Label3: TLabel
           Tag = 888
           Left = 8
+          Height = 13
           Top = 64
           Width = 41
-          Height = 13
           Caption = 'Index    -'
+          ParentColor = False
         end
         object Label1: TLabel
           Tag = 888
           Left = 8
+          Height = 13
           Top = 32
           Width = 41
-          Height = 13
           Caption = 'Title      -'
+          ParentColor = False
         end
         object Label0: TLabel
           Tag = 888
           Left = 8
+          Height = 13
           Top = 16
           Width = 39
-          Height = 13
           Caption = 'DB       -'
+          ParentColor = False
         end
         object Label2: TLabel
           Tag = 888
           Left = 8
+          Height = 13
           Top = 48
           Width = 40
-          Height = 13
           Caption = 'Library  -'
+          ParentColor = False
         end
       end
     end
   end
   object PageControl2: TPageControl
     Left = 2
+    Height = 441
     Top = 8
     Width = 503
-    Height = 441
-    ActivePage = TabSheet13
-    TabIndex = 0
+    ActivePage = TabSheet12
+    TabIndex = 8
     TabOrder = 4
     OnChange = PageChange
     object TabSheet13: TTabSheet
       Caption = 'Identity'
+      ClientHeight = 415
+      ClientWidth = 495
       ImageIndex = 8
       object Label57: TLabel
         Left = 177
+        Height = 14
         Top = 150
-        Width = 60
-        Height = 13
+        Width = 61
         Caption = 'Model Name'
+        ParentColor = False
       end
       object Label56: TLabel
         Left = 177
+        Height = 14
         Top = 126
-        Width = 56
-        Height = 13
+        Width = 57
         Caption = 'Class Name'
+        ParentColor = False
       end
       object Label118: TLabel
         Left = 99
+        Height = 14
         Top = 77
-        Width = 59
-        Height = 13
+        Width = 60
         Caption = 'Brand Name'
+        ParentColor = False
         ShowAccelChar = False
       end
       object Label31: TLabel
         Left = 99
+        Height = 14
         Top = 54
-        Width = 150
-        Height = 13
+        Width = 145
         Caption = 'Cabrio Folder & File Name Mask'
+        ParentColor = False
         ShowAccelChar = False
       end
       object Label55: TLabel
         Left = 99
+        Height = 14
         Top = 29
-        Width = 143
-        Height = 13
+        Width = 138
         Caption = 'Main Folder & File Name Mask'
+        ParentColor = False
         ShowAccelChar = False
       end
       object Bevel21: TBevel
         Left = 8
+        Height = 2
         Top = 14
         Width = 185
-        Height = 2
       end
       object Label139: TLabel
         Left = 24
+        Height = 14
         Top = 8
-        Width = 40
-        Height = 13
+        Width = 41
         Caption = '  Name  '
+        ParentColor = False
       end
       object Label33: TLabel
         Left = 65
+        Height = 14
         Top = 345
-        Width = 55
-        Height = 13
+        Width = 56
         Caption = 'Menu Class'
+        ParentColor = False
       end
       object Label127: TLabel
         Left = 74
+        Height = 14
         Top = 317
-        Width = 92
-        Height = 13
+        Width = 93
         Caption = 'Custom Race Class'
+        ParentColor = False
       end
       object Label50: TLabel
         Left = 65
+        Height = 14
         Top = 369
-        Width = 69
-        Height = 13
+        Width = 70
         Caption = 'Score to Open'
+        ParentColor = False
       end
       object Bevel22: TBevel
         Left = 8
+        Height = 2
         Top = 198
         Width = 185
-        Height = 2
       end
       object Label140: TLabel
         Left = 24
+        Height = 14
         Top = 192
-        Width = 62
-        Height = 13
+        Width = 63
         Caption = '  Placement  '
+        ParentColor = False
       end
       object Label153: TLabel
         Left = 99
+        Height = 14
         Top = 101
-        Width = 43
-        Height = 13
+        Width = 44
         Caption = 'Logo File'
+        ParentColor = False
         ShowAccelChar = False
       end
       object Edit1: TEdit
         Left = 4
+        Height = 21
         Top = 26
         Width = 90
-        Height = 21
-        TabOrder = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 0
       end
       object Edit8: TEdit
         Left = 4
+        Height = 21
         Top = 50
         Width = 90
-        Height = 21
-        TabOrder = 1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 1
       end
       object Hersteller: TEdit
         Left = 4
+        Height = 21
         Top = 74
         Width = 90
-        Height = 21
-        TabOrder = 2
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 2
       end
       object Edit2: TEdit
         Left = 4
+        Height = 21
         Top = 122
         Width = 168
-        Height = 21
-        TabOrder = 3
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 3
       end
       object Edit3: TEdit
         Left = 4
+        Height = 21
         Top = 146
         Width = 168
-        Height = 21
-        TabOrder = 4
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 4
       end
       object SRaceClass: TSpinEdit
         Left = 12
+        Height = 21
+        Hint = '5 - 300'
         Top = 314
         Width = 57
-        Height = 22
-        Hint = '5 - 300'
         Enabled = False
         MaxValue = 300
         MinValue = 5
-        TabOrder = 5
-        Value = 5
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 5
+        Value = 5
       end
       object SClassID: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '100 - 999'
         Top = 342
         Width = 57
-        Height = 22
-        Hint = '100 - 999'
         MaxValue = 999
         MinValue = 100
-        TabOrder = 6
-        Value = 100
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 6
+        Value = 100
       end
       object SScore: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '1 - 1000000'
         Top = 366
         Width = 57
-        Height = 22
-        Hint = '1 - 1000000'
         MaxValue = 1000000
         MinValue = 1
-        TabOrder = 7
-        Value = 1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 7
+        Value = 1
       end
       object RaceClass1_4: TRadioGroup
         Left = 4
+        Height = 105
         Top = 208
         Width = 97
-        Height = 105
+        AutoFill = True
         Caption = '  Race Class  '
+        ChildSizing.LeftRightSpacing = 6
+        ChildSizing.TopBottomSpacing = 6
+        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+        ChildSizing.EnlargeVertical = crsHomogenousChildResize
+        ChildSizing.ShrinkHorizontal = crsScaleChilds
+        ChildSizing.ShrinkVertical = crsScaleChilds
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 1
+        ClientHeight = 87
+        ClientWidth = 93
         ItemIndex = 0
         Items.Strings = (
           'Series'
           'Racing'
           'Prototype'
           'Vintage'
-          'Custom')
-        TabOrder = 8
+          'Custom'
+        )
         OnClick = FSChange
+        TabOrder = 8
       end
       object GroupBox4: TGroupBox
         Left = 252
+        Height = 209
         Top = 196
         Width = 237
-        Height = 209
         Caption = '  Score to Open  '
+        ClientHeight = 191
+        ClientWidth = 233
         TabOrder = 9
         object Memo1: TMemo
           Left = 8
+          Height = 185
           Top = 16
           Width = 221
-          Height = 185
-          BevelInner = bvNone
-          BevelOuter = bvNone
           BorderStyle = bsNone
           Color = clMenu
           Lines.Strings = (
-            '    CarScore = 10'#39'000 - LapTime (in '
+            '    CarScore = 10''000 - LapTime (in '
             'milliseconds)'
             ''
             '    How to know cars score ? '
             '    Setup a 1 lap race at 100%sim settings in '
             'Italy2 with 5 AI opponents at 100% strength. '
             'BrakeAssist, ASR, ArcadePlus - off (though it '
-            'doesn'#39't matter for AI cars  ). Follow AI cars, '
-            'but don'#39't ram or block them - they will me your '
+            'doesn''t matter for AI cars  ). Follow AI cars, '
+            'but don''t ram or block them - they will me your '
             'measure.'
             '    When the race is over see first car race time'
             '(not best lap time!). Convert the time to milli-'
             'seconds (1min=6000ms) and compute the '
-            'score using above formula.')
+            'score using above formula.'
+          )
           ReadOnly = True
           TabOrder = 0
         end
       end
       object CBCabrio2: TCheckBox
         Left = 21
-        Top = 170
-        Width = 97
         Height = 17
+        Top = 170
+        Width = 99
         Caption = 'Cabriolet Version'
-        TabOrder = 10
         OnClick = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 10
       end
       object CBCabrio1: TCheckBox
         Left = 4
-        Top = 170
-        Width = 17
         Height = 17
-        TabOrder = 11
+        Top = 170
+        Width = 20
         OnClick = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 11
       end
       object Logo: TEdit
         Left = 4
+        Height = 21
         Top = 98
         Width = 90
-        Height = 21
-        TabOrder = 12
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 12
       end
     end
     object TabSheet5: TTabSheet
       Caption = 'Appearance'
+      ClientHeight = 415
+      ClientWidth = 495
       object Label30: TLabel
         Left = 138
+        Height = 14
         Top = 381
-        Width = 49
-        Height = 13
+        Width = 50
         Caption = 'Cabrio IDs'
+        ParentColor = False
       end
       object Label29: TLabel
         Left = 138
+        Height = 14
         Top = 357
-        Width = 52
-        Height = 13
+        Width = 53
         Caption = 'Normal IDs'
+        ParentColor = False
       end
       object Label76: TLabel
         Left = 292
+        Height = 14
         Top = 26
-        Width = 77
-        Height = 13
+        Width = 78
         Caption = 'Speedometer ID'
+        ParentColor = False
       end
       object Label133: TLabel
         Left = 292
+        Height = 14
         Top = 90
-        Width = 71
-        Height = 13
+        Width = 72
         Caption = 'Tachometer ID'
+        ParentColor = False
       end
       object LtachoID: TLabel
         Left = 345
+        Height = 14
         Top = 109
-        Width = 24
-        Height = 13
+        Width = 25
         Caption = 'none'
+        ParentColor = False
       end
       object LmphID: TLabel
         Left = 345
+        Height = 14
         Top = 69
-        Width = 24
-        Height = 13
+        Width = 25
         Caption = 'none'
+        ParentColor = False
       end
       object LkmhID: TLabel
         Left = 345
+        Height = 14
         Top = 45
-        Width = 24
-        Height = 13
+        Width = 25
         Caption = 'none'
+        ParentColor = False
       end
       object Label43: TLabel
         Left = 194
+        Height = 14
         Top = 45
-        Width = 54
-        Height = 13
+        Width = 55
         Caption = 'Pursuit, mm'
+        ParentColor = False
       end
       object Label45: TLabel
         Left = 194
+        Height = 14
         Top = 69
-        Width = 51
-        Height = 13
+        Width = 52
         Caption = 'Closer, mm'
+        ParentColor = False
       end
       object Label44: TLabel
         Left = 194
+        Height = 14
         Top = 93
-        Width = 58
-        Height = 13
+        Width = 59
         Caption = 'Cockpit, mm'
+        ParentColor = False
       end
       object Label46: TLabel
         Left = 194
+        Height = 14
         Top = 117
-        Width = 48
-        Height = 13
+        Width = 49
         Caption = 'Hood, mm'
+        ParentColor = False
       end
       object Label51: TLabel
         Left = 68
+        Height = 14
         Top = 26
-        Width = 58
-        Height = 13
+        Width = 59
         Caption = 'Distance (Z)'
+        ParentColor = False
       end
       object Label12: TLabel
         Left = 4
+        Height = 14
         Top = 26
-        Width = 47
-        Height = 13
+        Width = 48
         Caption = 'Height (Y)'
+        ParentColor = False
       end
       object Label11: TLabel
         Left = 132
+        Height = 14
         Top = 26
-        Width = 37
-        Height = 13
+        Width = 38
         Caption = 'Side (X)'
+        ParentColor = False
       end
       object Label121: TLabel
         Left = 66
+        Height = 14
         Top = 309
-        Width = 123
-        Height = 13
+        Width = 124
         Caption = 'Lastgeraeusch (m_last_**)'
+        ParentColor = False
       end
       object Label120: TLabel
         Left = 66
+        Height = 14
         Top = 285
-        Width = 135
-        Height = 13
+        Width = 136
         Caption = 'Sauggeraeusch (m_saug_**)'
+        ParentColor = False
       end
       object Label116: TLabel
         Left = 66
+        Height = 14
         Top = 237
-        Width = 83
-        Height = 13
+        Width = 84
         Caption = 'Engine (m_ms_**)'
+        ParentColor = False
       end
       object Label117: TLabel
         Left = 66
+        Height = 14
         Top = 261
-        Width = 101
-        Height = 13
+        Width = 102
         Caption = 'Exhaust ID (m_ap_**)'
+        ParentColor = False
       end
       object Label42: TLabel
         Left = 66
+        Height = 14
         Top = 189
-        Width = 61
-        Height = 13
+        Width = 62
         Caption = 'Sample Rate'
+        ParentColor = False
       end
       object Label41: TLabel
         Left = 86
+        Height = 14
         Top = 165
-        Width = 80
-        Height = 13
+        Width = 81
         Caption = 'Motor Sound File'
+        ParentColor = False
       end
       object Label99: TLabel
         Left = 382
+        Height = 14
         Top = 159
-        Width = 65
-        Height = 13
-        Caption = #39'bez1.tga'#39' text'
+        Width = 66
+        Caption = '''bez1.tga'' text'
+        ParentColor = False
       end
       object Label86: TLabel
         Left = 382
+        Height = 14
         Top = 183
-        Width = 65
-        Height = 13
-        Caption = #39'bez2.tga'#39' text'
+        Width = 66
+        Caption = '''bez2.tga'' text'
+        ParentColor = False
       end
       object Label114: TLabel
         Left = 354
+        Height = 14
         Top = 207
-        Width = 91
-        Height = 13
+        Width = 92
         Caption = 'Default Menu Color'
+        ParentColor = False
       end
       object Bevel23: TBevel
         Left = 8
+        Height = 2
         Top = 14
         Width = 185
-        Height = 2
       end
       object Label141: TLabel
         Left = 24
+        Height = 14
         Top = 8
-        Width = 53
-        Height = 13
+        Width = 54
         Caption = '  Cameras  '
+        ParentColor = False
       end
       object Bevel3: TBevel
         Left = 296
+        Height = 2
         Top = 14
         Width = 185
-        Height = 2
       end
       object Label74: TLabel
         Left = 312
+        Height = 14
         Top = 8
-        Width = 36
-        Height = 13
+        Width = 37
         Caption = '  HUD  '
+        ParentColor = False
       end
       object Bevel2: TBevel
         Left = 8
+        Height = 2
         Top = 342
         Width = 185
-        Height = 2
       end
       object Label32: TLabel
         Left = 24
+        Height = 14
         Top = 336
-        Width = 104
-        Height = 13
+        Width = 105
         Caption = '  Brakelight Materials  '
+        ParentColor = False
       end
       object Bevel4: TBevel
         Left = 8
+        Height = 2
         Top = 150
         Width = 185
-        Height = 2
       end
       object Label75: TLabel
         Left = 24
+        Height = 14
         Top = 144
-        Width = 43
-        Height = 13
+        Width = 44
         Caption = '  Sound  '
+        ParentColor = False
       end
       object Bevel6: TBevel
         Left = 296
+        Height = 2
         Top = 142
         Width = 185
-        Height = 2
       end
       object Label119: TLabel
         Left = 312
+        Height = 14
         Top = 136
-        Width = 47
-        Height = 13
+        Width = 48
         Caption = '  Special  '
+        ParentColor = False
       end
       object Label54: TLabel
         Left = 66
+        Height = 14
         Top = 213
-        Width = 71
-        Height = 13
+        Width = 72
         Caption = 'Engine Volume'
+        ParentColor = False
       end
       object Label152: TLabel
         Left = 382
+        Height = 14
         Top = 231
-        Width = 56
-        Height = 13
+        Width = 57
         Caption = 'Caravan file'
+        ParentColor = False
       end
       object SappCAB2: TSpinEdit
         Left = 47
+        Height = 21
+        Hint = '-1 - 255'
         Top = 378
         Width = 41
-        Height = 22
-        Hint = '-1 - 255'
         MaxValue = 255
         MinValue = -1
-        TabOrder = 0
-        Value = -1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 0
+        Value = -1
       end
       object SappCAB1: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '-1 - 255'
         Top = 378
         Width = 41
-        Height = 22
-        Hint = '-1 - 255'
         MaxValue = 255
         MinValue = -1
-        TabOrder = 1
-        Value = -1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 1
+        Value = -1
       end
       object SappBR1: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '-1 - 255'
         Top = 354
         Width = 41
-        Height = 22
-        Hint = '-1 - 255'
         MaxValue = 255
         MinValue = -1
-        TabOrder = 2
-        Value = -1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 2
+        Value = -1
       end
       object SappBR2: TSpinEdit
         Left = 47
+        Height = 21
+        Hint = '-1 - 255'
         Top = 354
         Width = 41
-        Height = 22
-        Hint = '-1 - 255'
         MaxValue = 255
         MinValue = -1
-        TabOrder = 3
-        Value = -1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 3
+        Value = -1
       end
       object SappBR3: TSpinEdit
         Left = 90
+        Height = 21
+        Hint = '-1 - 255'
         Top = 354
         Width = 43
-        Height = 22
-        Hint = '-1 - 255'
         MaxValue = 255
         MinValue = -1
-        TabOrder = 4
-        Value = -1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 4
+        Value = -1
       end
       object SappCAB3: TSpinEdit
         Left = 90
+        Height = 21
+        Hint = '-1 - 255'
         Top = 378
         Width = 43
-        Height = 22
-        Hint = '-1 - 255'
         MaxValue = 255
         MinValue = -1
-        TabOrder = 5
-        Value = -1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 5
+        Value = -1
       end
       object SkmhID: TSpinEdit
         Left = 292
+        Height = 21
+        Hint = '1 - 9'
         Top = 42
         Width = 48
-        Height = 22
-        Hint = '1 - 9'
         MaxValue = 9
         MinValue = 1
-        TabOrder = 6
-        Value = 1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 6
+        Value = 1
       end
       object SmphID: TSpinEdit
         Left = 292
+        Height = 21
+        Hint = '1 - 7'
         Top = 66
         Width = 48
-        Height = 22
-        Hint = '1 - 7'
         MaxValue = 7
         MinValue = 1
-        TabOrder = 7
-        Value = 1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 7
+        Value = 1
       end
       object STachoID: TSpinEdit
         Left = 292
+        Height = 21
+        Hint = '1 - 7'
         Top = 106
         Width = 48
-        Height = 22
-        Hint = '1 - 7'
         MaxValue = 7
         MinValue = 1
-        TabOrder = 8
-        Value = 1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 8
+        Value = 1
       end
       object ScamPZ: TSpinEdit
         Left = 68
+        Height = 21
         Top = 42
         Width = 57
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 9
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 9
       end
       object ScamPY: TSpinEdit
         Left = 4
+        Height = 21
         Top = 42
         Width = 57
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 10
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 10
       end
       object ScamIY: TSpinEdit
         Left = 4
+        Height = 21
         Top = 66
         Width = 57
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 11
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 11
       end
       object ScamCY: TSpinEdit
         Left = 4
+        Height = 21
         Top = 90
         Width = 57
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 12
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 12
       end
       object ScamHY: TSpinEdit
         Left = 4
+        Height = 21
         Top = 114
         Width = 57
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 13
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 13
       end
       object ScamHZ: TSpinEdit
         Left = 68
+        Height = 21
         Top = 114
         Width = 57
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 14
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 14
       end
       object ScamCZ: TSpinEdit
         Left = 68
+        Height = 21
         Top = 90
         Width = 57
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 15
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 15
       end
       object ScamIZ: TSpinEdit
         Left = 68
+        Height = 21
         Top = 66
         Width = 57
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 16
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 16
       end
       object ScamCX: TSpinEdit
         Left = 132
+        Height = 21
         Top = 90
         Width = 57
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 17
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 17
       end
       object SAusID: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 999'
         Top = 258
         Width = 57
-        Height = 22
-        Hint = '0 - 999'
         MaxValue = 999
-        MinValue = 0
-        TabOrder = 18
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 18
       end
       object SMotID: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 999'
         Top = 234
         Width = 57
-        Height = 22
-        Hint = '0 - 999'
         MaxValue = 999
-        MinValue = 0
-        TabOrder = 19
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 19
       end
       object SSaug: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 999'
         Top = 282
         Width = 57
-        Height = 22
-        Hint = '0 - 999'
         MaxValue = 999
-        MinValue = 0
-        TabOrder = 20
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 20
       end
       object SLastger: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 999'
         Top = 306
         Width = 57
-        Height = 22
-        Hint = '0 - 999'
         MaxValue = 999
-        MinValue = 0
-        TabOrder = 21
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 21
       end
       object Edit7: TEdit
         Left = 4
+        Height = 21
         Top = 162
         Width = 77
-        Height = 21
-        TabOrder = 22
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 22
       end
       object SSrate: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = 'any value'
         Top = 186
         Width = 57
-        Height = 22
-        Hint = 'any value'
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 23
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 23
       end
       object TypLink: TEdit
         Left = 292
+        Height = 21
         Top = 156
         Width = 85
-        Height = 21
-        TabOrder = 24
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 24
       end
-      object Typ2: TEdit
+      object TypRech: TEdit
         Left = 292
+        Height = 21
         Top = 180
         Width = 85
-        Height = 21
-        TabOrder = 25
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 25
       end
       object SColor: TSpinEdit
         Left = 292
+        Height = 21
+        Hint = '1 - 15'
         Top = 204
         Width = 57
-        Height = 22
-        Hint = '1 - 15'
         MaxValue = 15
         MinValue = 1
-        TabOrder = 26
-        Value = 1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 26
+        Value = 1
       end
       object SLautstarke: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = 'any value'
         Top = 210
         Width = 57
-        Height = 22
-        Hint = 'any value'
         MaxValue = 1000
-        MinValue = 0
-        TabOrder = 27
-        Value = 100
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 27
+        Value = 100
       end
       object Caravan: TEdit
         Left = 292
+        Height = 21
         Top = 228
         Width = 85
-        Height = 21
-        TabOrder = 28
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 28
       end
     end
     object TabSheet6: TTabSheet
       Caption = 'Suspension'
+      ClientHeight = 415
+      ClientWidth = 495
       ImageIndex = 1
       object Bevel14: TBevel
         Left = 8
+        Height = 2
         Top = 14
         Width = 185
-        Height = 2
       end
       object Label68: TLabel
         Left = 66
+        Height = 14
         Top = 78
-        Width = 91
-        Height = 13
+        Width = 92
         Caption = 'Angular Momentum'
+        ParentColor = False
       end
       object Label61: TLabel
         Left = 66
+        Height = 14
         Top = 54
-        Width = 87
-        Height = 13
+        Width = 88
         Caption = 'Front Axis Load, %'
+        ParentColor = False
       end
       object Label37: TLabel
         Left = 66
+        Height = 14
         Top = 30
-        Width = 81
-        Height = 13
+        Width = 82
         Caption = 'Vehicle Mass, kg'
+        ParentColor = False
       end
       object Bevel5: TBevel
         Left = 8
+        Height = 2
         Top = 110
         Width = 185
-        Height = 2
       end
       object Label64: TLabel
         Left = 66
+        Height = 14
         Top = 126
-        Width = 37
-        Height = 13
+        Width = 38
         Caption = 'Damper'
+        ParentColor = False
       end
       object Label65: TLabel
         Left = 66
+        Height = 14
         Top = 150
-        Width = 71
-        Height = 13
+        Width = 72
         Caption = 'Feather/Spring'
+        ParentColor = False
       end
       object Label72: TLabel
         Left = 66
+        Height = 14
         Top = 270
-        Width = 92
-        Height = 13
+        Width = 93
         Caption = 'Stiffness of Roll-Bar'
+        ParentColor = False
       end
       object Label130: TLabel
         Left = 66
+        Height = 14
         Top = 246
-        Width = 91
-        Height = 13
+        Width = 92
         Caption = 'Differential Lock, %'
+        ParentColor = False
       end
       object Label27: TLabel
         Left = 66
+        Height = 14
         Top = 222
-        Width = 123
-        Height = 13
+        Width = 124
         Caption = 'Height Compensation, mm'
+        ParentColor = False
       end
       object Label63: TLabel
         Left = 66
+        Height = 14
         Top = 198
-        Width = 89
-        Height = 13
+        Width = 90
         Caption = 'Bounce Move, mm'
+        ParentColor = False
       end
       object Label62: TLabel
         Left = 66
+        Height = 14
         Top = 174
-        Width = 91
-        Height = 13
+        Width = 92
         Caption = 'Release Move, mm'
+        ParentColor = False
       end
       object Bevel9: TBevel
         Left = 296
+        Height = 2
         Top = 14
         Width = 185
-        Height = 2
       end
       object Label83: TLabel
         Left = 354
+        Height = 14
         Top = 30
-        Width = 96
-        Height = 13
+        Width = 97
         Caption = 'Air Brake Coefficient'
+        ParentColor = False
       end
       object Label84: TLabel
         Left = 354
+        Height = 14
         Top = 54
-        Width = 55
-        Height = 13
+        Width = 56
         Caption = 'Slip in Front'
+        ParentColor = False
       end
       object Label85: TLabel
         Left = 354
+        Height = 14
         Top = 78
-        Width = 54
-        Height = 13
+        Width = 55
         Caption = 'Slip in Rear'
+        ParentColor = False
       end
       object Image4: TImage
         Left = 296
+        Height = 191
         Top = 192
         Width = 173
-        Height = 191
         AutoSize = True
         Picture.Data = {
           07544269746D617086870000424D86870000000000003604000028000000AD00
@@ -2789,257 +2835,263 @@ object Form1: TForm1
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000}
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000
+        }
         Transparent = True
       end
       object Label124: TLabel
         Left = 24
+        Height = 14
         Top = 8
-        Width = 46
-        Height = 13
+        Width = 47
         Caption = '  Weight  '
+        ParentColor = False
       end
       object Label123: TLabel
         Left = 24
+        Height = 14
         Top = 104
-        Width = 67
-        Height = 13
+        Width = 68
         Caption = '  Suspension  '
+        ParentColor = False
       end
       object Label122: TLabel
         Left = 312
+        Height = 14
         Top = 8
-        Width = 78
-        Height = 13
+        Width = 79
         Caption = '  Aerodynamics  '
+        ParentColor = False
       end
       object Sweight: TSpinEdit
         Left = 4
+        Height = 21
         Top = 26
         Width = 57
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 0
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 0
       end
       object Sweightd: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 100'
         Top = 50
         Width = 57
-        Height = 22
-        Hint = '0 - 100'
-        MaxValue = 100
-        MinValue = 0
-        TabOrder = 1
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 1
       end
       object SAngular: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 100000'
         Top = 74
         Width = 57
-        Height = 22
-        Hint = '0 - 100000'
         MaxValue = 100000
-        MinValue = 0
-        TabOrder = 2
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 2
       end
       object RGdrive: TRadioGroup
         Left = 4
+        Height = 89
         Top = 292
         Width = 113
-        Height = 89
+        AutoFill = True
         Caption = '  Drive-Train  '
+        ChildSizing.LeftRightSpacing = 6
+        ChildSizing.TopBottomSpacing = 6
+        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+        ChildSizing.EnlargeVertical = crsHomogenousChildResize
+        ChildSizing.ShrinkHorizontal = crsScaleChilds
+        ChildSizing.ShrinkVertical = crsScaleChilds
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 1
+        ClientHeight = 71
+        ClientWidth = 109
         Items.Strings = (
           'Rear-Wheel'
           'Front-Wheel'
-          'All-Wheel')
-        TabOrder = 3
+          'All-Wheel'
+        )
         OnClick = FSChange
+        TabOrder = 3
       end
       object SDamper: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 100000'
         Top = 122
         Width = 57
-        Height = 22
-        Hint = '0 - 100000'
         MaxValue = 100000
-        MinValue = 0
-        TabOrder = 4
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 4
       end
       object SFeather: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 100000'
         Top = 146
         Width = 57
-        Height = 22
-        Hint = '0 - 100000'
         MaxValue = 100000
-        MinValue = 0
-        TabOrder = 5
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 5
       end
       object SRelease: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 1000'
         Top = 170
         Width = 57
-        Height = 22
-        Hint = '0 - 1000'
         MaxValue = 1000
-        MinValue = 0
-        TabOrder = 6
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 6
       end
       object SBounce: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 1000'
         Top = 194
         Width = 57
-        Height = 22
-        Hint = '0 - 1000'
         MaxValue = 1000
-        MinValue = 0
-        TabOrder = 7
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 7
       end
       object SWheelY: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '-1000 - 1000'
         Top = 218
         Width = 57
-        Height = 22
-        Hint = '-1000 - 1000'
         MaxValue = 1000
         MinValue = -1000
-        TabOrder = 8
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 8
       end
       object SSperrDif: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '-1000 - 1000'
         Top = 242
         Width = 57
-        Height = 22
-        Hint = '-1000 - 1000'
         MaxValue = 1000
         MinValue = -1000
-        TabOrder = 9
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 9
       end
-      object FS104: TFloatSpinEdit
+      object Stabilizat: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 266
         Width = 57
-        Height = 22
-        Accuracy = 2
         Increment = 0.01
-        TabOrder = 10
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 10
+        Value = 0
       end
       object FSAirB: TFloatSpinEdit
         Left = 292
+        Height = 21
         Top = 26
         Width = 57
-        Height = 22
-        Accuracy = 2
         Increment = 0.01
-        TabOrder = 11
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 11
+        Value = 0
       end
       object SSlipF: TSpinEdit
         Left = 292
+        Height = 21
+        Hint = '0 - 100000'
         Top = 50
         Width = 57
-        Height = 22
-        Hint = '0 - 100000'
         MaxValue = 100000
-        MinValue = 0
-        TabOrder = 12
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 12
       end
       object SSlipR: TSpinEdit
         Left = 292
+        Height = 21
+        Hint = '0 - 100000'
         Top = 74
         Width = 57
-        Height = 22
-        Hint = '0 - 100000'
         MaxValue = 100000
-        MinValue = 0
-        TabOrder = 13
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 13
       end
     end
     object TabSheet7: TTabSheet
       Caption = 'Wheels'
+      ClientHeight = 415
+      ClientWidth = 495
       ImageIndex = 2
       object TireFrontSize: TLabel
         Left = 4
+        Height = 14
         Top = 101
-        Width = 64
-        Height = 13
+        Width = 65
         Caption = 'Standard size'
+        ParentColor = False
       end
       object TireRearSize: TLabel
         Left = 68
+        Height = 14
         Top = 101
-        Width = 64
-        Height = 13
+        Width = 65
         Caption = 'Standard size'
+        ParentColor = False
       end
       object Label10: TLabel
         Left = 130
+        Height = 14
         Top = 29
-        Width = 71
-        Height = 13
+        Width = 72
         Caption = 'Tire Width, mm'
+        ParentColor = False
       end
       object Label9: TLabel
         Left = 130
+        Height = 14
         Top = 53
-        Width = 76
-        Height = 13
+        Width = 77
         Caption = 'Tire Radius, mm'
+        ParentColor = False
       end
       object Label13: TLabel
         Left = 130
+        Height = 14
         Top = 77
-        Width = 34
-        Height = 13
+        Width = 35
         Caption = 'Rims, "'
+        ParentColor = False
       end
       object Bevel15: TBevel
         Left = 8
+        Height = 2
         Top = 14
         Width = 185
-        Height = 2
       end
       object Image1: TImage
         Left = 256
+        Height = 144
         Top = 8
         Width = 142
-        Height = 144
         AutoSize = True
         Picture.Data = {
           07544269746D6170F6F00000424DF6F000000000000036000000280000008E00
@@ -4970,384 +5022,392 @@ object Form1: TForm1
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-          0000}
+          0000
+        }
         Transparent = True
       end
       object Bevel16: TBevel
         Left = 8
+        Height = 2
         Top = 126
         Width = 185
-        Height = 2
       end
       object Label25: TLabel
         Left = 130
+        Height = 14
         Top = 165
-        Width = 73
-        Height = 13
-        Caption = #39'Z'#39' Position, mm'
+        Width = 74
+        Caption = '''Z'' Position, mm'
+        ParentColor = False
       end
       object Label14: TLabel
         Left = 130
+        Height = 14
         Top = 141
-        Width = 50
-        Height = 13
+        Width = 51
         Caption = 'Tread, mm'
+        ParentColor = False
       end
       object Label70: TLabel
         Left = 66
+        Height = 14
         Top = 302
-        Width = 76
-        Height = 13
+        Width = 77
         Caption = 'Tire Slip In Rear'
+        ParentColor = False
       end
       object Label69: TLabel
         Left = 66
+        Height = 14
         Top = 278
-        Width = 77
-        Height = 13
+        Width = 78
         Caption = 'Tire Slip In Front'
+        ParentColor = False
       end
       object Label67: TLabel
         Left = 66
+        Height = 14
         Top = 254
-        Width = 74
-        Height = 13
+        Width = 75
         Caption = 'Grip Front/Rear'
+        ParentColor = False
       end
       object Label66: TLabel
         Left = 66
+        Height = 14
         Top = 230
-        Width = 45
-        Height = 13
+        Width = 46
         Caption = 'Tires Grip'
+        ParentColor = False
       end
       object Label71: TLabel
         Left = 66
+        Height = 14
         Top = 326
-        Width = 153
-        Height = 13
-        Caption = '103] R'#1100'ckstellkr'#1076'fte for Wheel ?'
+        Width = 154
+        Caption = '103] Rückstellkräfte for Wheel ?'
+        ParentColor = False
       end
       object Label73: TLabel
         Left = 66
+        Height = 14
         Top = 350
-        Width = 107
-        Height = 13
+        Width = 108
         Caption = 'Emphasis Over Radius'
+        ParentColor = False
       end
       object Bevel17: TBevel
         Left = 8
+        Height = 2
         Top = 214
         Width = 185
-        Height = 2
       end
       object Label49: TLabel
         Left = 24
+        Height = 14
         Top = 208
-        Width = 80
-        Height = 13
+        Width = 81
         Caption = '  Tire Properties  '
+        ParentColor = False
       end
       object Label26: TLabel
         Left = 130
+        Height = 14
         Top = 189
-        Width = 57
-        Height = 13
+        Width = 58
         Caption = 'Wheel base'
+        ParentColor = False
       end
       object Label125: TLabel
         Left = 24
+        Height = 14
         Top = 8
-        Width = 32
-        Height = 13
+        Width = 33
         Caption = '  Size  '
         Color = clBtnFace
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
         Font.Height = -11
         Font.Name = 'MS Sans Serif'
-        Font.Style = []
         ParentColor = False
         ParentFont = False
+        Transparent = False
       end
       object Label126: TLabel
         Left = 24
+        Height = 14
         Top = 120
-        Width = 63
-        Height = 13
+        Width = 64
         Caption = '  Positioning  '
+        ParentColor = False
       end
       object Label142: TLabel
         Left = 4
+        Height = 14
         Top = 189
-        Width = 57
-        Height = 13
+        Width = 58
         Caption = 'Wheel base'
+        ParentColor = False
       end
       object STireFW: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 10000'
         Top = 26
         Width = 57
-        Height = 22
-        Hint = '0 - 10000'
         MaxValue = 10000
-        MinValue = 0
-        TabOrder = 0
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 0
       end
       object STireFR: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 10000'
         Top = 50
         Width = 57
-        Height = 22
-        Hint = '0 - 10000'
         MaxValue = 10000
-        MinValue = 0
-        TabOrder = 1
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 1
       end
       object STireFD: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 1000'
         Top = 74
         Width = 57
-        Height = 22
-        Hint = '0 - 1000'
         MaxValue = 1000
-        MinValue = 0
-        TabOrder = 2
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 2
       end
       object STireRD: TSpinEdit
         Left = 68
+        Height = 21
+        Hint = '0 - 1000'
         Top = 74
         Width = 57
-        Height = 22
-        Hint = '0 - 1000'
         MaxValue = 1000
-        MinValue = 0
-        TabOrder = 3
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 3
       end
       object STireRR: TSpinEdit
         Left = 68
+        Height = 21
+        Hint = '0 - 10000'
         Top = 50
         Width = 57
-        Height = 22
-        Hint = '0 - 10000'
         MaxValue = 10000
-        MinValue = 0
-        TabOrder = 4
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 4
       end
       object STireRW: TSpinEdit
         Left = 68
+        Height = 21
+        Hint = '0 - 10000'
         Top = 26
         Width = 57
-        Height = 22
-        Hint = '0 - 10000'
         MaxValue = 10000
-        MinValue = 0
-        TabOrder = 5
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 5
       end
       object STireRT: TSpinEdit
         Left = 68
+        Height = 21
         Top = 138
         Width = 57
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 6
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 6
       end
       object STireFT: TSpinEdit
         Left = 4
+        Height = 21
         Top = 138
         Width = 57
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 7
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 7
       end
       object STireFZ: TSpinEdit
         Left = 4
+        Height = 21
         Top = 162
         Width = 57
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 8
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 8
       end
       object STireRZ: TSpinEdit
         Left = 68
+        Height = 21
         Top = 162
         Width = 57
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 9
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 9
       end
       object FSGrip: TFloatSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 100'
         Top = 226
         Width = 57
-        Height = 22
-        Hint = '0 - 100'
-        Accuracy = 2
         Increment = 0.01
         MaxValue = 100
-        TabOrder = 10
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 10
+        Value = 0
       end
       object FSGripFR: TFloatSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 100'
         Top = 250
         Width = 57
-        Height = 22
-        Hint = '0 - 100'
-        Accuracy = 2
         Increment = 0.01
         MaxValue = 100
-        TabOrder = 11
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 11
+        Value = 0
       end
       object FSSlipF: TFloatSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 100'
         Top = 274
         Width = 57
-        Height = 22
-        Hint = '0 - 100'
-        Accuracy = 2
         Increment = 0.01
         MaxValue = 100
-        TabOrder = 12
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 12
+        Value = 0
       end
       object FSSlipR: TFloatSpinEdit
         Left = 4
+        Height = 21
+        Hint = '0 - 100'
         Top = 298
         Width = 57
-        Height = 22
-        Hint = '0 - 100'
-        Accuracy = 2
         Increment = 0.01
         MaxValue = 100
-        TabOrder = 13
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 13
+        Value = 0
       end
       object FS103: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 322
         Width = 57
-        Height = 22
-        Accuracy = 2
         Increment = 0.01
-        TabOrder = 14
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 14
+        Value = 0
       end
       object FS106: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 346
         Width = 57
-        Height = 22
-        Accuracy = 2
         Increment = 0.01
-        TabOrder = 15
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 15
+        Value = 0
       end
     end
     object TabSheet8: TTabSheet
       Caption = 'Engine'
+      ClientHeight = 415
+      ClientWidth = 495
       ImageIndex = 3
       object Label80: TLabel
         Left = 350
+        Height = 14
         Top = 221
-        Width = 128
-        Height = 13
+        Width = 129
         Caption = 'Acceleration 0-100 km/h, s'
+        ParentColor = False
       end
       object Label79: TLabel
         Left = 350
+        Height = 14
         Top = 197
-        Width = 84
-        Height = 13
+        Width = 85
         Caption = 'Top Speed, km/h'
+        ParentColor = False
       end
       object Label52: TLabel
         Left = 350
+        Height = 14
         Top = 173
-        Width = 59
-        Height = 13
+        Width = 60
         Caption = 'Capacity, cc'
+        ParentColor = False
       end
       object Label39: TLabel
         Left = 348
+        Height = 14
         Top = 149
-        Width = 29
-        Height = 13
+        Width = 30
         Caption = 'NM at'
+        ParentColor = False
       end
       object Label36: TLabel
         Left = 348
+        Height = 14
         Top = 125
-        Width = 27
-        Height = 13
+        Width = 28
         Caption = 'HP at'
+        ParentColor = False
       end
       object Label35: TLabel
         Left = 428
+        Height = 14
         Top = 149
-        Width = 50
-        Height = 13
+        Width = 51
         Caption = 'RPM, Max'
+        ParentColor = False
       end
       object Label34: TLabel
         Left = 428
+        Height = 14
         Top = 125
-        Width = 50
-        Height = 13
+        Width = 51
         Caption = 'RPM, Max'
+        ParentColor = False
       end
       object Bevel8: TBevel
         Left = 292
+        Height = 2
         Top = 110
         Width = 185
-        Height = 2
       end
       object Image3: TImage
         Left = 292
+        Height = 130
         Top = 256
         Width = 172
-        Height = 130
         AutoSize = True
         Picture.Data = {
           07544269746D61703E060100424D3E060100000000003600000028000000AC00
@@ -7448,261 +7508,237 @@ object Form1: TForm1
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-          FFFFFFFFFFFFFFFFFFFF}
+          FFFFFFFFFFFFFFFFFFFF
+        }
         Transparent = True
       end
       object Label40: TLabel
         Left = 354
+        Height = 14
         Top = 77
-        Width = 97
-        Height = 13
+        Width = 98
         Caption = 'Torque Efficiency, %'
+        ParentColor = False
       end
       object Label82: TLabel
         Left = 354
+        Height = 14
         Top = 29
-        Width = 42
-        Height = 13
+        Width = 43
         Caption = 'NM Step'
+        ParentColor = False
       end
       object Label28: TLabel
         Left = 354
+        Height = 14
         Top = 53
-        Width = 47
-        Height = 13
+        Width = 48
         Caption = 'Max RPM'
+        ParentColor = False
       end
       object Label81: TLabel
         Left = 308
+        Height = 14
         Top = 104
-        Width = 90
-        Height = 13
+        Width = 91
         Caption = '  Engine Statistics  '
+        ParentColor = False
       end
       object Bevel7: TBevel
         Left = 296
+        Height = 2
         Top = 14
         Width = 185
-        Height = 2
       end
       object Label78: TLabel
         Left = 312
+        Height = 14
         Top = 8
-        Width = 77
-        Height = 13
+        Width = 78
         Caption = '  Torque Curve  '
+        ParentColor = False
       end
       object FS0100: TFloatSpinEdit
         Left = 292
+        Height = 21
+        Hint = '0 - 100'
         Top = 218
         Width = 52
-        Height = 22
-        Hint = '0 - 100'
-        Accuracy = 1
+        DecimalPlaces = 1
         Increment = 0.1
         MaxValue = 100
-        TabOrder = 0
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 0
+        Value = 0
       end
       object Edit4: TEdit
         Left = 292
+        Height = 21
         Top = 170
         Width = 52
-        Height = 21
-        TabOrder = 1
-        Text = '250 cc'
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 1
+        Text = '250 cc'
       end
       object Stopsp: TSpinEdit
         Left = 292
+        Height = 21
+        Hint = '0 - 10000'
         Top = 194
         Width = 52
-        Height = 22
-        Hint = '0 - 10000'
         MaxValue = 10000
-        MinValue = 0
-        TabOrder = 2
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 2
       end
       object SMnm: TSpinEdit
         Left = 293
+        Height = 21
+        Hint = '0 - 100000'
         Top = 146
         Width = 49
-        Height = 22
-        Hint = '0 - 100000'
         MaxValue = 100000
-        MinValue = 0
-        TabOrder = 3
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 3
       end
       object SMhp: TSpinEdit
         Left = 293
+        Height = 21
+        Hint = '0 - 100000'
         Top = 122
         Width = 49
-        Height = 22
-        Hint = '0 - 100000'
         MaxValue = 100000
-        MinValue = 0
-        TabOrder = 4
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 4
       end
       object Edit5: TEdit
         Left = 382
+        Height = 21
         Top = 122
         Width = 40
-        Height = 21
-        TabOrder = 5
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 5
       end
       object Edit6: TEdit
         Left = 382
+        Height = 21
         Top = 146
         Width = 40
-        Height = 21
-        TabOrder = 6
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 6
       end
       object SMtorque: TSpinEdit
         Left = 292
+        Height = 21
+        Hint = '0 - 1000'
         Top = 74
         Width = 56
-        Height = 22
-        Hint = '0 - 1000'
         MaxValue = 1000
-        MinValue = 0
-        TabOrder = 7
-        Value = 90
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 7
+        Value = 90
       end
       object SrpmMax: TSpinEdit
         Left = 292
+        Height = 21
+        Hint = '2000 - 90000'
         Top = 50
         Width = 56
-        Height = 22
-        Hint = '2000 - 90000'
         Increment = 100
         MaxValue = 90000
         MinValue = 2000
-        TabOrder = 8
-        Value = 10000
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 8
+        Value = 10000
       end
       object SNMStep: TSpinEdit
         Left = 292
+        Height = 21
+        Hint = '100 - 5000'
         Top = 26
         Width = 56
-        Height = 22
-        Hint = '100 - 5000'
         Increment = 10
         MaxValue = 5000
         MinValue = 100
-        TabOrder = 9
-        Value = 500
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 9
+        Value = 500
       end
       object Chart1: TChart
         Left = 2
+        Height = 401
         Top = 8
         Width = 283
-        Height = 401
-        AllowPanning = pmNone
         AllowZoom = False
-        BackImageInside = True
-        BackImageMode = pbmCenter
-        BackWall.Brush.Color = clWhite
-        BackWall.Brush.Style = bsClear
-        BackWall.Color = clSilver
-        BottomWall.Brush.Color = clWhite
-        Gradient.Direction = gdFromCenter
-        Gradient.EndColor = clSilver
-        MarginBottom = 0
-        MarginLeft = 0
-        MarginTop = 0
-        Title.Text.Strings = (
-          'Torque/RPM')
+        AxisList = <        
+          item
+            Alignment = calLeft
+            Offset = 0
+            Scale = 1
+            Title.Font.Orientation = 900
+          end        
+          item
+            Alignment = calBottom
+            Offset = 0
+            Scale = 1
+          end>
         BackColor = clSilver
-        BottomAxis.LabelsAngle = 90
-        BottomAxis.LabelsSeparation = 2
-        BottomAxis.MinorTickCount = 0
-        BottomAxis.MinorTickLength = 0
-        LeftAxis.Automatic = False
-        LeftAxis.AutomaticMaximum = False
-        LeftAxis.AutomaticMinimum = False
-        LeftAxis.Maximum = 1000
-        LeftAxis.Title.Angle = 0
-        View3D = False
-        BevelOuter = bvNone
-        TabOrder = 10
+        Foot.Brush.Color = clBtnFace
+        Foot.Font.Color = clBlue
+        Title.Brush.Color = clBtnFace
+        Title.Font.Color = clBlue
+        Title.Text.Strings = (
+          'Torque/RPM'
+        )
+        ParentColor = False
         OnMouseMove = RPMEdit
         OnMouseUp = Mup
         object Series1: TLineSeries
-          Marks.ArrowLength = 8
           Marks.Visible = False
-          SeriesColor = clMaroon
           ShowInLegend = False
-          Dark3D = False
+          LinePen.Color = clMaroon
           Pointer.HorizSize = 2
-          Pointer.InflateMargins = False
           Pointer.Style = psCircle
           Pointer.VertSize = 2
-          Pointer.Visible = True
-          XValues.DateTime = False
-          XValues.Name = 'X'
-          XValues.Multiplier = 1
-          XValues.Order = loAscending
-          YValues.DateTime = False
-          YValues.Name = 'Y'
-          YValues.Multiplier = 1
-          YValues.Order = loNone
+          SeriesColor = clMaroon
         end
         object Series2: TLineSeries
-          Marks.ArrowLength = 8
           Marks.Visible = False
-          SeriesColor = 10485760
           ShowInLegend = False
-          Dark3D = False
-          Pointer.InflateMargins = True
-          Pointer.Style = psRectangle
+          LinePen.Color = 10485760
           Pointer.Visible = False
-          XValues.DateTime = False
-          XValues.Name = 'X'
-          XValues.Multiplier = 1
-          XValues.Order = loAscending
-          YValues.DateTime = False
-          YValues.Name = 'Y'
-          YValues.Multiplier = 1
-          YValues.Order = loNone
+          SeriesColor = 10485760
         end
       end
     end
     object TabSheet9: TTabSheet
       Caption = 'Gearbox'
+      ClientHeight = 415
+      ClientWidth = 495
       ImageIndex = 4
       object Label24: TLabel
         Left = 66
+        Height = 14
         Top = 29
-        Width = 80
-        Height = 13
+        Width = 81
         Caption = 'Number of Gears'
+        ParentColor = False
       end
       object Image2: TImage
         Left = 208
+        Height = 128
         Top = 244
         Width = 192
-        Height = 128
         AutoSize = True
         Picture.Data = {
           07544269746D617036640000424D36640000000000003604000028000000C000
@@ -8507,275 +8543,324 @@ object Form1: TForm1
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-          FFFF}
+          FFFF
+        }
         Transparent = True
       end
       object Label38: TLabel
         Left = 67
+        Height = 14
         Top = 269
-        Width = 22
-        Height = 13
+        Width = 23
         Caption = 'Final'
+        ParentColor = False
       end
       object Label23: TLabel
         Left = 67
+        Height = 14
         Top = 245
-        Width = 23
-        Height = 13
+        Width = 24
         Caption = 'Rev.'
+        ParentColor = False
       end
       object Label22: TLabel
         Left = 67
+        Height = 14
         Top = 221
-        Width = 15
-        Height = 13
+        Width = 16
         Caption = '7th'
+        ParentColor = False
       end
       object Label21: TLabel
         Left = 67
+        Height = 14
         Top = 197
-        Width = 15
-        Height = 13
+        Width = 16
         Caption = '6th'
+        ParentColor = False
       end
       object Label20: TLabel
         Left = 67
+        Height = 14
         Top = 173
-        Width = 15
-        Height = 13
+        Width = 16
         Caption = '5th'
+        ParentColor = False
       end
       object Label19: TLabel
         Left = 67
+        Height = 14
         Top = 149
-        Width = 15
-        Height = 13
+        Width = 16
         Caption = '4th'
+        ParentColor = False
       end
       object Label18: TLabel
         Left = 67
+        Height = 14
         Top = 125
-        Width = 15
-        Height = 13
+        Width = 16
         Caption = '3rd'
+        ParentColor = False
       end
       object Label17: TLabel
         Left = 67
+        Height = 14
         Top = 101
-        Width = 18
-        Height = 13
+        Width = 19
         Caption = '2nd'
+        ParentColor = False
       end
       object Label16: TLabel
         Left = 67
+        Height = 14
         Top = 77
-        Width = 14
-        Height = 13
+        Width = 15
         Caption = '1st'
+        ParentColor = False
       end
       object Bevel18: TBevel
         Left = 8
+        Height = 2
         Top = 62
         Width = 185
-        Height = 2
       end
       object Label15: TLabel
         Left = 24
+        Height = 14
         Top = 56
-        Width = 124
-        Height = 13
+        Width = 125
         Caption = '  Gear ratios (Max speed)  '
+        ParentColor = False
       end
       object Bevel24: TBevel
         Left = 8
+        Height = 2
         Top = 14
         Width = 185
-        Height = 2
       end
       object Label53: TLabel
         Left = 24
+        Height = 14
         Top = 8
-        Width = 46
-        Height = 13
+        Width = 47
         Caption = '  Weight  '
+        ParentColor = False
       end
       object Label143: TLabel
         Left = 91
+        Height = 14
         Top = 77
-        Width = 14
-        Height = 13
+        Width = 15
         Caption = '1st'
+        ParentColor = False
       end
       object Label144: TLabel
         Left = 91
+        Height = 14
         Top = 101
-        Width = 18
-        Height = 13
+        Width = 19
         Caption = '2nd'
+        ParentColor = False
       end
       object Label145: TLabel
         Left = 91
+        Height = 14
         Top = 125
-        Width = 15
-        Height = 13
+        Width = 16
         Caption = '3rd'
+        ParentColor = False
       end
       object Label146: TLabel
         Left = 91
+        Height = 14
         Top = 149
-        Width = 15
-        Height = 13
+        Width = 16
         Caption = '4th'
+        ParentColor = False
       end
       object Label147: TLabel
         Left = 91
+        Height = 14
         Top = 173
-        Width = 15
-        Height = 13
+        Width = 16
         Caption = '5th'
+        ParentColor = False
       end
       object Label148: TLabel
         Left = 91
+        Height = 14
         Top = 197
-        Width = 15
-        Height = 13
+        Width = 16
         Caption = '6th'
+        ParentColor = False
       end
       object Label149: TLabel
         Left = 91
+        Height = 14
         Top = 221
-        Width = 15
-        Height = 13
+        Width = 16
         Caption = '7th'
+        ParentColor = False
       end
       object Label150: TLabel
         Left = 91
+        Height = 14
         Top = 245
-        Width = 23
-        Height = 13
+        Width = 24
         Caption = 'Rev.'
+        ParentColor = False
       end
       object SGearQty: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '1 - 7'
         Top = 26
         Width = 57
-        Height = 22
-        Hint = '1 - 7'
         MaxValue = 7
         MinValue = 1
-        TabOrder = 0
-        Value = 1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 0
+        Value = 1
       end
       object FSGear1: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 74
         Width = 57
-        Height = 22
-        Accuracy = 3
+        DecimalPlaces = 3
         Increment = 0.001
-        TabOrder = 1
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 1
+        Value = 0
       end
       object FSGear2: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 98
         Width = 57
-        Height = 22
-        Accuracy = 3
+        DecimalPlaces = 3
         Increment = 0.001
-        TabOrder = 2
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 2
+        Value = 0
       end
       object FSGear3: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 122
         Width = 57
-        Height = 22
-        Accuracy = 3
+        DecimalPlaces = 3
         Increment = 0.001
-        TabOrder = 3
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 3
+        Value = 0
       end
       object FSGear4: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 146
         Width = 57
-        Height = 22
-        Accuracy = 3
+        DecimalPlaces = 3
         Increment = 0.001
-        TabOrder = 4
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 4
+        Value = 0
       end
       object FSGear5: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 170
         Width = 57
-        Height = 22
-        Accuracy = 3
+        DecimalPlaces = 3
         Increment = 0.001
-        TabOrder = 5
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 5
+        Value = 0
       end
       object FSGear6: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 194
         Width = 57
-        Height = 22
-        Accuracy = 3
+        DecimalPlaces = 3
         Increment = 0.001
-        TabOrder = 6
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 6
+        Value = 0
       end
       object FSGear7: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 218
         Width = 57
-        Height = 22
-        Accuracy = 3
+        DecimalPlaces = 3
         Increment = 0.001
-        TabOrder = 7
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 7
+        Value = 0
       end
       object FSGearR: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 242
         Width = 57
-        Height = 22
-        Accuracy = 3
+        DecimalPlaces = 3
         Increment = 0.001
-        TabOrder = 8
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 8
+        Value = 0
       end
       object FSGearF: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 266
         Width = 57
-        Height = 22
-        Accuracy = 3
+        DecimalPlaces = 3
         Increment = 0.001
-        TabOrder = 9
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 9
+        Value = 0
       end
     end
     object TabSheet10: TTabSheet
       Caption = 'Driver'
+      ClientHeight = 415
+      ClientWidth = 495
       ImageIndex = 5
       object Image5: TImage
         Left = 8
+        Height = 180
         Top = 208
         Width = 281
-        Height = 180
         AutoSize = True
         Picture.Data = {
           07544269746D6170A6510200424DA65102000000000036000000280000001901
@@ -13527,126 +13612,140 @@ object Form1: TForm1
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00}
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00
+        }
         Transparent = True
       end
       object Label87: TLabel
         Left = 32
+        Height = 14
         Top = 196
-        Width = 85
-        Height = 13
+        Width = 86
         Caption = 'Model upper point'
+        ParentColor = False
       end
       object Label47: TLabel
         Left = 4
+        Height = 14
         Top = 26
-        Width = 39
-        Height = 13
+        Width = 40
         Caption = '"X" Axis'
+        ParentColor = False
       end
       object Label48: TLabel
         Left = 68
+        Height = 14
         Top = 26
-        Width = 39
-        Height = 13
+        Width = 40
         Caption = '"Y" Axis'
+        ParentColor = False
       end
       object Label58: TLabel
         Left = 132
+        Height = 14
         Top = 26
-        Width = 39
-        Height = 13
+        Width = 40
         Caption = '"Z" Axis'
+        ParentColor = False
       end
       object Label60: TLabel
         Left = 196
+        Height = 14
         Top = 46
-        Width = 59
-        Height = 13
+        Width = 60
         Caption = 'Position, mm'
+        ParentColor = False
       end
       object Label88: TLabel
         Left = 196
+        Height = 14
         Top = 70
-        Width = 78
-        Height = 13
+        Width = 79
         Caption = 'Upper Point, mm'
+        ParentColor = False
       end
       object Label59: TLabel
         Left = 196
+        Height = 14
         Top = 134
-        Width = 59
-        Height = 13
+        Width = 60
         Caption = 'Position, mm'
+        ParentColor = False
       end
       object Label89: TLabel
         Left = 196
+        Height = 14
         Top = 158
-        Width = 78
-        Height = 13
+        Width = 79
         Caption = 'Upper Point, mm'
+        ParentColor = False
       end
       object Bevel19: TBevel
         Left = 8
+        Height = 2
         Top = 14
         Width = 185
-        Height = 2
       end
       object Label77: TLabel
         Left = 24
+        Height = 14
         Top = 8
-        Width = 75
-        Height = 13
+        Width = 76
         Caption = '  Female Head  '
+        ParentColor = False
       end
       object Bevel10: TBevel
         Left = 8
+        Height = 2
         Top = 102
         Width = 185
-        Height = 2
       end
       object Label134: TLabel
         Left = 24
+        Height = 14
         Top = 96
-        Width = 64
-        Height = 13
+        Width = 65
         Caption = '  Male Head  '
+        ParentColor = False
       end
       object Label135: TLabel
         Left = 4
+        Height = 14
         Top = 114
-        Width = 39
-        Height = 13
+        Width = 40
         Caption = '"X" Axis'
+        ParentColor = False
       end
       object Label137: TLabel
         Left = 68
+        Height = 14
         Top = 114
-        Width = 39
-        Height = 13
+        Width = 40
         Caption = '"Y" Axis'
+        ParentColor = False
       end
       object Label138: TLabel
         Left = 132
+        Height = 14
         Top = 114
-        Width = 39
-        Height = 13
+        Width = 40
         Caption = '"Z" Axis'
+        ParentColor = False
       end
       object GroupBox5: TGroupBox
         Left = 288
+        Height = 157
         Top = 12
         Width = 201
-        Height = 157
         Caption = '  Upper Point  '
+        ClientHeight = 139
+        ClientWidth = 197
         TabOrder = 0
         object Memo2: TMemo
           Left = 8
+          Height = 125
           Top = 16
           Width = 185
-          Height = 125
-          BevelInner = bvNone
-          BevelOuter = bvNone
           BorderStyle = bsNone
           Color = clMenu
           Lines.Strings = (
@@ -13657,152 +13756,191 @@ object Form1: TForm1
             'values in appropriate field. Head '
             'position will be computed automatically.'
             ''
-            '    I didn'#39't checked, but WR2 uses only '
-            'one driver model for male or female.')
+            '    I didn''t checked, but WR2 uses only '
+            'one driver model for male or female.'
+          )
           TabOrder = 0
         end
       end
       object SDriverX2: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 42
         Width = 57
-        Height = 22
-        Accuracy = 0
+        DecimalPlaces = 0
         Increment = 1
-        TabOrder = 1
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 1
+        Value = 0
       end
       object SDriverY2: TFloatSpinEdit
         Left = 68
+        Height = 21
         Top = 42
         Width = 57
-        Height = 22
-        Accuracy = 0
+        DecimalPlaces = 0
         Increment = 1
-        TabOrder = 2
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 2
+        Value = 0
       end
       object SDriverZ2: TFloatSpinEdit
         Left = 132
+        Height = 21
         Top = 42
         Width = 57
-        Height = 22
-        Accuracy = 0
+        DecimalPlaces = 0
         Increment = 1
-        TabOrder = 3
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 3
+        Value = 0
       end
       object SDriverZ1: TFloatSpinEdit
         Left = 132
+        Height = 21
         Top = 130
         Width = 57
-        Height = 22
-        Accuracy = 0
+        DecimalPlaces = 0
         Increment = 1
-        TabOrder = 4
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 4
+        Value = 0
       end
       object SDriverY1: TFloatSpinEdit
         Left = 68
+        Height = 21
         Top = 130
         Width = 57
-        Height = 22
-        Accuracy = 0
+        DecimalPlaces = 0
         Increment = 1
-        TabOrder = 5
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 5
+        Value = 0
       end
       object SDriverX1: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 130
         Width = 57
-        Height = 22
-        Accuracy = 0
+        DecimalPlaces = 0
         Increment = 1
-        TabOrder = 6
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 6
+        Value = 0
       end
       object DFX: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 66
         Width = 57
-        Height = 22
-        Accuracy = 0
+        DecimalPlaces = 0
         Increment = 1
-        TabOrder = 7
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange2
+        TabOrder = 7
+        Value = 0
       end
       object DFY: TFloatSpinEdit
         Left = 68
+        Height = 21
         Top = 66
         Width = 57
-        Height = 22
-        Accuracy = 0
+        DecimalPlaces = 0
         Increment = 1
-        TabOrder = 8
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange2
+        TabOrder = 8
+        Value = 0
       end
       object DFZ: TFloatSpinEdit
         Left = 132
+        Height = 21
         Top = 66
         Width = 57
-        Height = 22
-        Accuracy = 0
+        DecimalPlaces = 0
         Increment = 1
-        TabOrder = 9
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange2
+        TabOrder = 9
+        Value = 0
       end
       object DMZ: TFloatSpinEdit
         Left = 132
+        Height = 21
         Top = 154
         Width = 57
-        Height = 22
-        Accuracy = 0
+        DecimalPlaces = 0
         Increment = 1
-        TabOrder = 10
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange2
+        TabOrder = 10
+        Value = 0
       end
       object DMY: TFloatSpinEdit
         Left = 68
+        Height = 21
         Top = 154
         Width = 57
-        Height = 22
-        Accuracy = 0
+        DecimalPlaces = 0
         Increment = 1
-        TabOrder = 11
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange2
+        TabOrder = 11
+        Value = 0
       end
       object DMX: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 154
         Width = 57
-        Height = 22
-        Accuracy = 0
+        DecimalPlaces = 0
         Increment = 1
-        TabOrder = 12
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange2
+        TabOrder = 12
+        Value = 0
       end
     end
     object TabSheet11: TTabSheet
       Caption = 'Cockpit'
+      ClientHeight = 415
+      ClientWidth = 495
       ImageIndex = 6
       object Bevel13: TBevel
         Left = 8
+        Height = 2
         Top = 14
         Width = 281
-        Height = 2
       end
       object Image6: TImage
         Left = 218
+        Height = 101
         Top = 302
         Width = 269
-        Height = 101
         AutoSize = True
         Picture.Data = {
           07544269746D6170FE3E0100424DFE3E01000000000036000000280000000D01
@@ -16357,422 +16495,410 @@ object Form1: TForm1
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-          FFFFFFFFFFFFFFFFFF00}
+          FFFFFFFFFFFFFFFFFF00
+        }
         Transparent = True
       end
       object Bevel12: TBevel
         Left = 8
+        Height = 2
         Top = 260
         Width = 280
-        Height = 2
       end
       object Label102: TLabel
         Left = 146
+        Height = 14
         Top = 269
-        Width = 64
-        Height = 13
+        Width = 65
         Caption = 'Display Mode'
+        ParentColor = False
       end
       object Label98: TLabel
         Left = 146
+        Height = 14
         Top = 237
-        Width = 20
-        Height = 13
+        Width = 21
         Caption = 'Size'
+        ParentColor = False
       end
       object Label100: TLabel
         Left = 146
+        Height = 14
         Top = 213
-        Width = 96
-        Height = 13
+        Width = 97
         Caption = 'Start Angle, degrees'
+        ParentColor = False
       end
       object Label101: TLabel
         Left = 146
+        Height = 14
         Top = 189
-        Width = 27
-        Height = 13
+        Width = 28
         Caption = 'Scale'
+        ParentColor = False
       end
       object Bevel11: TBevel
         Left = 8
+        Height = 2
         Top = 180
         Width = 280
-        Height = 2
       end
       object Label97: TLabel
         Left = 218
+        Height = 14
         Top = 157
-        Width = 107
-        Height = 13
+        Width = 108
         Caption = 'Bank (XY), degrees (?)'
+        ParentColor = False
       end
       object Label95: TLabel
         Left = 218
+        Height = 14
         Top = 109
-        Width = 107
-        Height = 13
+        Width = 108
         Caption = 'Heading (XZ), degrees'
+        ParentColor = False
       end
       object Label96: TLabel
         Left = 218
+        Height = 14
         Top = 133
-        Width = 91
-        Height = 13
+        Width = 92
         Caption = 'Pitch (YZ), degrees'
+        ParentColor = False
       end
       object Bevel1: TBevel
         Left = 8
+        Height = 2
         Top = 100
         Width = 280
-        Height = 2
       end
       object Label92: TLabel
         Left = 218
+        Height = 14
         Top = 29
-        Width = 69
-        Height = 13
+        Width = 70
         Caption = 'Position X, mm'
+        ParentColor = False
       end
       object Label93: TLabel
         Left = 218
+        Height = 14
         Top = 53
-        Width = 69
-        Height = 13
+        Width = 70
         Caption = 'Position Y, mm'
+        ParentColor = False
       end
       object Label94: TLabel
         Left = 218
+        Height = 14
         Top = 77
-        Width = 69
-        Height = 13
+        Width = 70
         Caption = 'Position Z, mm'
+        ParentColor = False
       end
       object Label91: TLabel
         Left = 76
+        Height = 14
         Top = 8
-        Width = 43
-        Height = 13
+        Width = 44
         Caption = '  Tacho  '
+        ParentColor = False
       end
       object Label90: TLabel
         Left = 4
+        Height = 14
         Top = 8
-        Width = 49
-        Height = 13
+        Width = 50
         Caption = '  Speedo  '
+        ParentColor = False
       end
       object Label113: TLabel
         Left = 148
+        Height = 14
         Top = 8
-        Width = 65
-        Height = 13
+        Width = 66
         Caption = '  Drivewheel  '
+        ParentColor = False
       end
       object Bevel20: TBevel
         Left = 8
+        Height = 2
         Top = 292
         Width = 140
-        Height = 2
       end
       object ST2Mode: TSpinEdit
         Left = 76
+        Height = 21
+        Hint = '1 - 10'
         Top = 266
         Width = 65
-        Height = 22
-        Hint = '1 - 10'
         MaxValue = 10
         MinValue = 1
-        TabOrder = 0
-        Value = 1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 0
+        Value = 1
       end
       object ST1Mode: TSpinEdit
         Left = 4
+        Height = 21
+        Hint = '1 - 10'
         Top = 266
         Width = 65
-        Height = 22
-        Hint = '1 - 10'
         MaxValue = 10
         MinValue = 1
-        TabOrder = 1
-        Value = 1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 1
+        Value = 1
       end
       object FST2Size: TFloatSpinEdit
         Left = 76
+        Height = 21
         Top = 234
         Width = 65
-        Height = 22
-        Accuracy = 2
         Increment = 0.05
-        TabOrder = 2
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 2
+        Value = 0
       end
       object FST1Size: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 234
         Width = 65
-        Height = 22
-        Accuracy = 2
         Increment = 0.05
-        TabOrder = 3
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 3
+        Value = 0
       end
       object ST1Start: TSpinEdit
         Left = 4
+        Height = 21
         Top = 210
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 4
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 4
       end
       object FST1Scale: TFloatSpinEdit
         Left = 4
+        Height = 21
         Top = 186
         Width = 65
-        Height = 22
-        Accuracy = 2
         Increment = 0.05
-        TabOrder = 5
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 5
+        Value = 0
       end
       object FST2Scale: TFloatSpinEdit
         Left = 76
+        Height = 21
         Top = 186
         Width = 65
-        Height = 22
-        Accuracy = 2
         Increment = 0.05
-        TabOrder = 6
+        MaxValue = 100
+        MinValue = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 6
+        Value = 0
       end
       object ST2Start: TSpinEdit
         Left = 76
+        Height = 21
         Top = 210
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 7
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 7
       end
       object ST2A3: TSpinEdit
         Left = 76
+        Height = 21
         Top = 154
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 8
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 8
       end
       object ST1A3: TSpinEdit
         Left = 4
+        Height = 21
         Top = 154
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 9
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 9
       end
       object ST1A2: TSpinEdit
         Left = 4
+        Height = 21
         Top = 130
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 10
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 10
       end
       object ST1A1: TSpinEdit
         Left = 4
+        Height = 21
         Top = 106
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 11
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 11
       end
       object ST2A1: TSpinEdit
         Left = 76
+        Height = 21
         Top = 106
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 12
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 12
       end
       object ST2A2: TSpinEdit
         Left = 76
+        Height = 21
         Top = 130
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 13
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 13
       end
       object SDrwW: TSpinEdit
         Left = 148
+        Height = 21
         Top = 130
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 14
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 14
       end
       object ST2Z: TSpinEdit
         Left = 76
+        Height = 21
         Top = 74
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 15
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 15
       end
       object ST1Z: TSpinEdit
         Left = 4
+        Height = 21
         Top = 74
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 16
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 16
       end
       object ST1Y: TSpinEdit
         Left = 4
+        Height = 21
         Top = 50
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 17
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 17
       end
       object ST1X: TSpinEdit
         Left = 4
+        Height = 21
         Top = 26
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 18
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 18
       end
       object ST2X: TSpinEdit
         Left = 76
+        Height = 21
         Top = 26
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 19
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 19
       end
       object ST2Y: TSpinEdit
         Left = 76
+        Height = 21
         Top = 50
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 20
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 20
       end
       object SDrwZ: TSpinEdit
         Left = 148
+        Height = 21
         Top = 74
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 21
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 21
       end
       object SDrwY: TSpinEdit
         Left = 148
+        Height = 21
         Top = 50
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 22
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 22
       end
       object SDrwX: TSpinEdit
         Left = 148
+        Height = 21
         Top = 26
         Width = 65
-        Height = 22
         MaxValue = 0
-        MinValue = 0
-        TabOrder = 23
-        Value = 0
         OnChange = FSChange
         OnKeyUp = FSChangeLink
+        TabOrder = 23
       end
       object GroupBox1: TGroupBox
         Left = 390
+        Height = 209
         Top = 4
         Width = 93
-        Height = 209
         Caption = ' Display Modes  '
+        ClientHeight = 191
+        ClientWidth = 89
         TabOrder = 24
         object Image7: TImage
           Left = 24
+          Height = 179
           Top = 20
           Width = 58
-          Height = 179
           AutoSize = True
           Picture.Data = {
             07544269746D6170467B0000424D467B00000000000036000000280000003A00
@@ -17761,112 +17887,118 @@ object Form1: TForm1
             FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
             FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF8C8C8C4F4F4F
             3636362F2F2F3636364F4F4F8C8C8CFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000}
+            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000
+          }
           Transparent = True
         end
         object Label103: TLabel
           Left = 8
+          Height = 14
           Top = 20
-          Width = 9
-          Height = 13
+          Width = 10
           Caption = '1.'
+          ParentColor = False
         end
         object Label104: TLabel
           Left = 8
+          Height = 14
           Top = 36
-          Width = 9
-          Height = 13
+          Width = 10
           Caption = '2.'
+          ParentColor = False
         end
         object Label105: TLabel
           Left = 8
+          Height = 14
           Top = 52
-          Width = 9
-          Height = 13
+          Width = 10
           Caption = '3.'
+          ParentColor = False
         end
         object Label106: TLabel
           Left = 8
+          Height = 14
           Top = 68
-          Width = 9
-          Height = 13
+          Width = 10
           Caption = '4.'
+          ParentColor = False
         end
         object Label107: TLabel
           Left = 8
+          Height = 14
           Top = 84
-          Width = 9
-          Height = 13
+          Width = 10
           Caption = '5.'
+          ParentColor = False
         end
         object Label108: TLabel
           Left = 8
+          Height = 14
           Top = 100
-          Width = 9
-          Height = 13
+          Width = 10
           Caption = '6.'
+          ParentColor = False
         end
         object Label109: TLabel
           Left = 8
+          Height = 14
           Top = 116
-          Width = 9
-          Height = 13
+          Width = 10
           Caption = '7.'
+          ParentColor = False
         end
         object Label110: TLabel
           Left = 8
+          Height = 14
           Top = 132
-          Width = 9
-          Height = 13
+          Width = 10
           Caption = '8.'
+          ParentColor = False
         end
         object Label111: TLabel
           Left = 8
+          Height = 14
           Top = 156
-          Width = 9
-          Height = 13
+          Width = 10
           Caption = '9.'
+          ParentColor = False
         end
         object Label112: TLabel
           Left = 6
+          Height = 14
           Top = 180
-          Width = 15
-          Height = 13
+          Width = 16
           Caption = '10.'
+          ParentColor = False
         end
       end
     end
     object TabSheet12: TTabSheet
       Caption = 'Expert'
       ImageIndex = 7
-      object ValueListEditor1: TValueListEditor
-        Left = 2
-        Top = 2
-        Width = 491
-        Height = 409
-        TabOrder = 0
-        OnKeyDown = KeyDown
-        OnKeyUp = KeyDown
-        OnMouseDown = MouseClick
-        OnStringsChange = VLEChange
-        OnStringsChanging = VLEChange
-        ColWidths = (
-          275
-          210)
-      end
     end
+  end
+  object Button2: TButton
+    Tag = 888
+    Left = 656
+    Height = 33
+    Top = 302
+    Width = 78
+    Caption = 'Open .Car'
+    OnClick = Button2Click
+    TabOrder = 5
   end
   object Open1: TOpenDialog
     Filter = '"World Racing" car descriptor (*.car)|*.car|All fles (*.*)|*.*'
     InitialDir = '.'
     Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
-    Left = 676
-    Top = 416
+    left = 676
+    top = 416
   end
   object Save1: TSaveDialog
-    DefaultExt = 'car'
+    DefaultExt = '.car'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofPathMustExist, ofEnableSizing]
-    Left = 704
-    Top = 416
+    left = 704
+    top = 416
   end
 end
