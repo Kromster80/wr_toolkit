@@ -4,15 +4,19 @@ interface
 uses
   SysUtils, Classes, Forms, StdCtrls, Dialogs, ExtCtrls, Controls, ComCtrls, Spin,
   {$IFDEF FPC} LResources, LCLIntf, TAGraph, TASeries, {$ENDIF}
-  WR_EditCar_Lang, WR_DataSet,
-  {$IFDEF VER140} Chart, FloatSpinEdit, {$ENDIF}
+  WR_EditCar_Lang, WR_DataSet, Chart,
+  {$IFDEF VER140} FloatSpinEdit, {$ENDIF}
   WR_AboutBox, KromUtils,
   Grids, Graphics, Buttons, Math
   {$IFDEF VER140}, ValEdit, TeEngine, Series, TeeProcs {$ENDIF};
 
 type
+
+  { TForm1 }
+
   TForm1 = class(TForm)
     ButtonLoad: TButton;
+    Button2: TButton;
     ButtonSave: TButton;
     Open1: TOpenDialog;
     Save1: TSaveDialog;
@@ -373,7 +377,6 @@ type
     DMZ: TFloatSpinEdit;
     DMY: TFloatSpinEdit;
     DMX: TFloatSpinEdit;
-    Button2: TButton;
     procedure OpenClick(Sender: TObject);
     procedure OpenCAR(Sender: TObject);
     procedure MouseClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -1852,6 +1855,7 @@ end;
 
 
 procedure TForm1.UpdateControls();
+var k:integer;
 begin
   LockControls := true;
   with fDataSet do begin
@@ -1865,7 +1869,7 @@ begin
     CBCabrio1.Checked     := GetValue(1,5,2).Int = 1;
     CBCabrio2.Checked     := GetValue(1,28,2).Int = 1;
     //Identity - Placement
-    RaceClass1_4.ItemIndex := min(GetValue(2,43,2).Int-1,0,4); //1..4 + Custom
+    RaceClass1_4.ItemIndex := Math.min(GetValue(2,43,2).Int-1,4); //1..4 + Custom
     SRaceClass.Enabled    := not (GetValue(2,43,2).Int in [1..4]);
     SRaceClass.Value      := GetValue(2,43,2).Int;
     SScore.Value          := GetValue(2,5,2).Int;
@@ -1889,7 +1893,6 @@ begin
     SAusID.Value        := GetValue(2,103,2).Int;
     SSaug.Value         := GetValue(2,101,2).Int;
     SLastger.Value      := GetValue(2,102,2).Int;
-
     //Appearance - Brakelight Materials
     SappBR1.Value         := GetValue(1,10,2).Int;
     SappBR2.Value         := GetValue(1,11,2).Int;
@@ -2010,12 +2013,12 @@ begin
 
   end;
     //{$IFDEF VER140}
-    {
-    Chart1.Series[0].Clear; Chart1.Series[1].Clear;
+
+    Chart1.ClearSeries;
     for k:=0 to 20 do Chart1.Series[0].AddXY(k*SNMStep.Value,round(vr[2,50+k,2]),'',120);
     for k:=0 to 20 do Chart1.Series[1].AddXY(k*SNMStep.Value,0,'',120*65536);
     Chart1.LeftAxis.Maximum:=round(Chart1.Series[0].MaxYValue*1.2);
-    Chart1.BottomAxis.Maximum:=SNMStep.Value*20;  }
+    Chart1.BottomAxis.Maximum:=SNMStep.Value*20;
     //{$ENDIF}
   LockControls := false;
 end;
