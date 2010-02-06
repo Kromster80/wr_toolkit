@@ -726,8 +726,8 @@ object Form1: TForm1
     Top = 8
     Width = 503
     Height = 441
-    ActivePage = TabSheet7
-    TabIndex = 3
+    ActivePage = TabSheet13
+    TabIndex = 0
     TabOrder = 4
     OnChange = PageChange
     object TabSheet13: TTabSheet
@@ -879,7 +879,7 @@ object Form1: TForm1
         Hint = '5 - 300'
         Enabled = False
         MaxValue = 300
-        MinValue = 5
+        MinValue = 1
         TabOrder = 5
         Value = 5
         OnChange = FSChange
@@ -7646,8 +7646,8 @@ object Form1: TForm1
         View3D = False
         BevelOuter = bvNone
         TabOrder = 10
-        OnMouseMove = RPMEdit
-        OnMouseUp = Mup
+        OnMouseMove = TorqueMouseMove
+        OnMouseUp = TorqueMouseUp
         object Series1: TLineSeries
           Marks.ArrowLength = 8
           Marks.Visible = False

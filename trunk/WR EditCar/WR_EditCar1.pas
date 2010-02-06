@@ -377,6 +377,8 @@ type
     DMZ: TFloatSpinEdit;
     DMY: TFloatSpinEdit;
     DMX: TFloatSpinEdit;
+    procedure FormCreate(Sender: TObject);
+    procedure InitChart();
     procedure OpenClick(Sender: TObject);
     procedure OpenCAR(Sender: TObject);
     procedure MouseClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -384,13 +386,12 @@ type
     procedure VLEChange(Sender: TObject);
     procedure SaveClick(Sender: TObject);
     procedure AboutClick(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
     procedure FSChange(Sender: TObject);
     procedure RefreshVLE;
     procedure RefreshFS;
     procedure PageChange(Sender: TObject);
-    procedure RPMEdit(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-    procedure Mup(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure TorqueMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure TorqueMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FSChangeLink(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FSChange2(Sender: TObject);
     procedure RGFormatClick(Sender: TObject);
@@ -403,6 +404,7 @@ type
     procedure BitBtn2Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure UpdateControls();
+    procedure UpdateDataSet();
   end;
 
 
@@ -411,9 +413,12 @@ type TEditingFormat = (fmtMBWR, fmtWR2, fmtAFC11N, fmtFVR);
 var
   Form1: TForm1;
 
+  LineSerieHP: TLineSeries;
+  LineSerieNM: TLineSeries;
+
   LockControls:boolean=false; //New variable
 
-  allowFS2,AllowDataUpdate,VLEEdit:boolean; //First Import click, Chapter not found, Mouse spy for TChart, Not First Time, Allow Change
+  allowFS2,{AllowDataUpdate,}VLEEdit:boolean; //First Import click, Chapter not found, Mouse spy for TChart, Not First Time, Allow Change
 
   DSqty:integer; //DS values (2)
   TBqty,TBCondQty:array[1..2] of integer;
@@ -440,21 +445,43 @@ implementation
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  DecimalSeparator:='.';
+  DecimalSeparator := '.';
   carname := ExtractOpenedFileName(CMDLine);
   ExeDir := ExtractFilePath(Application.ExeName);
+
+  InitChart();
 
   fDataSet := TDataSet.Create;
   fDataSet.LoadDS('editcar.car');
 
   exit;
-  
+
   if not FileExists(carname) then
     carname := 'editcar.car';
 
   if FileExists(carname) then
     OpenCAR(Form1);
 end;
+
+
+procedure TForm1.InitChart();
+begin
+  FreeAndNil(LineSerieHP);
+  FreeAndNil(LineSerieNM);
+
+  LineSerieHP := TLineSeries.Create(Chart1);
+  LineSerieHP.Pointer.Brush.Color := clRed;
+  LineSerieHP.ShowInLegend := false;
+  LineSerieHP.SeriesColor := clRed;
+  Chart1.AddSeries(LineSerieHP);
+  
+  LineSerieNM := TLineSeries.Create(Chart1);
+  LineSerieNM.Pointer.Brush.Color := clBlue;
+  LineSerieNM.ShowInLegend := false;
+  LineSerieNM.SeriesColor := clBlue;
+  Chart1.AddSeries(LineSerieNM);
+end;
+
 
 procedure TForm1.OpenClick(Sender: TObject);
 begin
@@ -471,7 +498,7 @@ end;
 procedure TForm1.OpenCAR(Sender: TObject);
 var i,j,k,h,x:integer; f:file;
 begin
-AllowDataUpdate:=false;
+{AllowDataUpdate:=false;
 
 assignfile(f,carname); FileMode:=0; reset(f,1); FileMode:=2;
 for i:=1 to 2 do for j:=0 to 512 do for k:=1 to 3 do begin
@@ -575,7 +602,7 @@ RGFormatClick(nil);
   RefreshFS;        //Update FS
   RefreshVLE;       //Update List
   AllowDataUpdate:=true; //FSChange(Form1);
-  FSChange(Form1);
+  FSChange(Form1); }
 end;
 
 procedure TForm1.RefreshVLE; //Send data to List from memory
@@ -777,6 +804,9 @@ procedure TForm1.FSChange(Sender: TObject);
 var s1:string; k:integer; z:real;
 //Transfer values from FloatSpins and other editors to memory
 begin
+  UpdateDataSet();
+
+{
 if LockControls then exit;
 if not AllowDataUpdate then exit;
 
@@ -910,13 +940,6 @@ vi[2,49,2]:=SrpmMax.Value;
 vi[2,29,2]:=SMtorque.Value;
 vr[2,71,2]:=SNMStep.Value;
 
-{$IFDEF VER140}
-Chart1.Series[0].Clear; Chart1.Series[1].Clear;
-for k:=0 to 20 do Chart1.Series[0].AddXY(k*SNMStep.Value,round(vr[2,50+k,2]),'',120);
-for k:=0 to 20 do Chart1.Series[1].AddXY(k*SNMStep.Value,0,'',120*65536);
-Chart1.LeftAxis.Maximum:=round(Chart1.Series[0].MaxYValue*1.2);
-Chart1.BottomAxis.Maximum:=SNMStep.Value*20;
-{$ENDIF}
 
 vi[2,74,2]:=SSrate.Value;
 vs[2,75,2]:=Edit7.Text;
@@ -955,13 +978,13 @@ vi[2,102,2]:=SAusID.Value;
 vi[2,103,2]:=SMotID.Value;
 vs[2,104,2]:=Hersteller.Text;
 vs[2,105,2]:=Logo.Text;
-vs[2,106,2]:=Caravan.Text;
+vs[2,106,2]:=Caravan.Text; }
 end;
 
 procedure TForm1.RefreshFS;
 var k:integer;
 begin //Send data to SpinEditors from memory
-AllowDataUpdate:=false;
+{AllowDataUpdate:=false;
 Edit1.Text:=vs[1,2,2];  //folder
 Edit8.Text:=vs[1,3,2];  //folder
 Edit2.Text:=vs[1,22,2]; //class
@@ -1056,13 +1079,6 @@ SmphID.Value:=vi[2,48,2];
 SrpmMax.Value:=vi[2,49,2];
 if round(vr[2,71,2])<>0 then SNMStep.Value:=round(vr[2,71,2]);
 
-{$IFDEF VER140}
-Chart1.Series[0].Clear; Chart1.Series[1].Clear;
-for k:=0 to 20 do Chart1.Series[0].AddXY(k*SNMStep.Value,round(vr[2,50+k,2]),'',120);
-for k:=0 to 20 do Chart1.Series[1].AddXY(k*SNMStep.Value,0,'',120*65536);
-Chart1.LeftAxis.Maximum:=round(Chart1.Series[0].MaxYValue*1.2);
-Chart1.BottomAxis.Maximum:=SNMStep.Value*20;
-{$ENDIF}
 
 SSrate.Value:=vi[2,74,2];
 Edit7.Text:=vs[2,75,2];
@@ -1097,36 +1113,38 @@ SMotID.Value:=vi[2,103,2];
 Hersteller.Text:=vs[2,104,2];
 Logo.Text:=vs[2,105,2];
 Caravan.Text:=vs[2,106,2];
-AllowDataUpdate:=true;
+AllowDataUpdate:=true;  }
 end;
 
 procedure TForm1.PageChange(Sender: TObject);
 begin
-if PageControl2.ActivePageIndex=PageControl2.PageCount-1 then RefreshVLE else RefreshFS;
-if PageControl2.ActivePage.Caption='Engine' then RPMEdit(nil,[ssShift],0,0);
+if PageControl2.ActivePageIndex = PageControl2.PageCount-1 then RefreshVLE else RefreshFS;
+if PageControl2.ActivePage.Caption = 'Engine' then TorqueMouseMove(nil,[ssShift],0,0);
 end;
 
-procedure TForm1.RPMEdit(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+procedure TForm1.TorqueMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var i,u,v:integer;
 begin
-  {$IFDEF VER140}
-  u:=EnsureRange(round(Chart1.Series[0].XScreenToValue(X)/SNMStep.Value),0,20); //u=X
-  v:=max(round(Chart1.Series[0].YScreenToValue(Y)),0);
-  Chart1.Title.Text.Strings[0]:='Torque/RPM (HP) - '+inttostr(v)+'/'+inttostr(u*SNMStep.Value)+' ('+inttostr(round(v*u*SNMStep.Value/7023.5))+')';
-  if (ssLeft in Shift)and(Chart1.Series[0].XValues.Count=21) then begin
-    vr[2,50+u,2]:=v;
-    Chart1.Series[0].YValue[u]:=v;
+  if (LineSerieHP = nil) or (LineSerieNM = nil) then exit;
+  if LineSerieHP.Count <> 21 then exit; //yet empty
+
+  u := EnsureRange(round(LineSerieHP.XScreenToValue(X)/SNMStep.Value),0,20);
+  v := max(round(LineSerieHP.YScreenToValue(Y)),0);
+
+  Chart1.Title.Text.Strings[0] := 'Torque/RPM (HP) - '+inttostr(v)+'/'+inttostr(u*SNMStep.Value)+' ('+inttostr(round(v*u*SNMStep.Value/7023.5))+')';
+  if (ssLeft in Shift) then begin
+    fDataSet.SetValue(2,51+u,2,v+0.0);
+    LineSerieHP.YValue[u] := v;
   end;
   for i:=1 to 20 do
-    Chart1.Series[1].YValue[i]:=round(i*Chart1.Series[0].YValue[i]*SNMStep.Value/7023.5);
-  {$ENDIF}
+    LineSerieNM.YValue[i] := round(i*LineSerieHP.YValue[i]*SNMStep.Value/7023.5);
 end;
 
-procedure TForm1.Mup(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TForm1.TorqueMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
 {$IFDEF VER140}
-  Chart1.LeftAxis.Maximum:=round(Chart1.Series[0].MaxYValue*1.2);
-  if Chart1.LeftAxis.Maximum=0 then Chart1.LeftAxis.Maximum:=1000;
+  Chart1.LeftAxis.Maximum := round(LineSerieHP.MaxYValue*1.2);
+  if Chart1.LeftAxis.Maximum = 0 then Chart1.LeftAxis.Maximum := 500;
 {$ENDIF}
 end;
 
@@ -1855,7 +1873,8 @@ end;
 
 
 procedure TForm1.UpdateControls();
-var k:integer;
+var
+  k:integer;
 begin
   LockControls := true;
   with fDataSet do begin
@@ -1870,8 +1889,8 @@ begin
     CBCabrio2.Checked     := GetValue(1,28,2).Int = 1;
     //Identity - Placement
     RaceClass1_4.ItemIndex := Math.min(GetValue(2,43,2).Int-1,4); //1..4 + Custom
-    SRaceClass.Enabled    := not (GetValue(2,43,2).Int in [1..4]);
     SRaceClass.Value      := GetValue(2,43,2).Int;
+    SRaceClass.Enabled    := not (GetValue(2,43,2).Int in [1..4]);
     SScore.Value          := GetValue(2,5,2).Int;
     SClassID.Value        := GetValue(2,8,2).Int;
 
@@ -1949,6 +1968,10 @@ begin
     FS103.Value         := GetValue(2,26,2).Rel;
     FS106.Value         := GetValue(2,29,2).Rel;
 
+    //Engine - Chart
+    for k:=0 to 20 do LineSerieHP.AddXY(k*SNMStep.Value,round(GetValue(2,51+k,2).Rel));
+    for k:=0 to 20 do LineSerieNM.AddXY(k*SNMStep.Value,0);
+    {$IFDEF VER140} Chart1.LeftAxis.Maximum:=round(LineSerieHP.MaxYValue*1.2); {$ENDIF}
     //Engine - Torque Curve
     if round(GetValue(2,72,2).Rel)<>0 then
     SNMStep.Value       := round(GetValue(2,72,2).Rel); //NMStep
@@ -2010,17 +2033,178 @@ begin
     SDrwY.Value           := round(GetValue(1,48,2).Rel*100);
     SDrwZ.Value           := round(GetValue(1,49,2).Rel*100);
     SDrwW.Value           := round(GetValue(1,50,2).Rel*180/pi);
-
   end;
-    //{$IFDEF VER140}
 
-    Chart1.ClearSeries;
-    for k:=0 to 20 do Chart1.Series[0].AddXY(k*SNMStep.Value,round(vr[2,50+k,2]),'',120);
-    for k:=0 to 20 do Chart1.Series[1].AddXY(k*SNMStep.Value,0,'',120*65536);
-    Chart1.LeftAxis.Maximum:=round(Chart1.Series[0].MaxYValue*1.2);
-    Chart1.BottomAxis.Maximum:=SNMStep.Value*20;
-    //{$ENDIF}
   LockControls := false;
+end;
+
+
+procedure TForm1.UpdateDataSet();
+var
+  k:integer;
+begin
+  if LockControls then exit;
+  with fDataSet do begin
+    //Identity - Name
+    SetValue(1,3,2,Edit1.Text);         //Main Folder
+    SetValue(1,4,2,Edit8.Text);         //Cabrio Folder
+    SetValue(2,105,2,Hersteller.Text);  //Hersteller
+    SetValue(2,106,2,Logo.Text);        //
+    SetValue(1,23,2,Edit2.Text);        //Class
+    SetValue(2,4,2,Edit3.Text);         //Model
+    SetValue(1,5,2,integer(CBCabrio1.Checked));
+    SetValue(1,28,2,integer(CBCabrio2.Checked));
+
+    //Identity - Placement
+    case RaceClass1_4.ItemIndex of
+      0..3: SetValue(2,43,2,RaceClass1_4.ItemIndex + 1);
+      else  SetValue(2,43,2,SRaceClass.Value);
+    end;
+    SetValue(2,5,2,SScore.Value);
+    SetValue(2,8,2,SClassID.Value);
+
+    //Appearance - Cameras
+    SetValue(1,16,2,ScamPY.Value/100);
+    SetValue(1,17,2,ScamPZ.Value/100);
+    SetValue(1,18,2,ScamIY.Value/100);
+    SetValue(1,19,2,ScamIZ.Value/100);
+    SetValue(1,27,2,ScamCX.Value/100);
+    SetValue(1,20,2,ScamCY.Value/100);
+    SetValue(1,21,2,ScamCZ.Value/100);
+    SetValue(1,75,2,ScamHY.Value/100);
+    SetValue(1,76,2,ScamHZ.Value/100);
+    //Appearance - Sound
+    SetValue(2,76,2,Edit7.Text);
+    SetValue(2,75,2,SSrate.Value);
+    SetValue(2,84,2,SLautstarke.Value);
+    SetValue(2,104,2,SMotID.Value);
+    SetValue(2,103,2,SAusID.Value);
+    SetValue(2,101,2,SSaug.Value);
+    SetValue(2,102,2,SLastger.Value);
+    //Appearance - Brakelight Materials
+    SetValue(1,10,2,SappBR1.Value);
+    SetValue(1,11,2,SappBR2.Value);
+    SetValue(1,12,2,SappBR3.Value);
+    SetValue(1,29,2,SappCAB1.Value);
+    SetValue(1,30,2,SappCAB2.Value);
+    SetValue(1,31,2,SappCAB3.Value);
+    //Appearance - HUD
+    SetValue(2,4,2,SkmhID.Value);
+    SetValue(2,49,2,SmphID.Value);
+    SetValue(2,100,2,STachoID.Value);
+    //Appearance - Special
+    SetValue(2,16,2,TypLink.Text);  //TypLink
+    SetValue(2,47,2,TypRech.Text);  //TypRech
+    SetValue(1,81,2,SColor.Value);  //ColorID
+    SetValue(2,107,2,Caravan.Text); //Caravan
+    //Suspension - Weight
+    SetValue(2,33,2,Sweight.Value);
+    SetValue(2,28,2,SweightD.Value);
+    SetValue(2,23,2,SAngular.Value);
+
+    exit;
+    //Suspension - Suspension
+    SDamper.Value       := GetValue(2,17,2).Int;
+    SFeather.Value      := GetValue(2,18,2).Int;
+    SRelease.Value      := round(GetValue(2,19,2).Rel*100);
+    SBounce.Value       := round(GetValue(2,20,2).Rel*100);
+    SSperrDif.Value     := GetValue(2,42,2).Int;
+    SWheelY.Value       := round(GetValue(2,44,2).Rel*100);
+    Stabilizat.Value    := GetValue(2,27,2).Rel;
+    //Suspension - Drive-Train
+    RGdrive.ItemIndex   := GetValue(2,37,2).Int-1;
+    //Suspension - Aerodynamics
+    FSAirB.Value        := GetValue(2,39,2).Rel;
+    SSlipF.Value        := GetValue(2,40,2).Int;
+    SSlipR.Value        := GetValue(2,41,2).Int;
+
+    //Wheels - Size
+    STireFR.Value         := round(GetValue(2,94,2).Rel*100);
+    STireFW.Value         := round(GetValue(2,95,2).Rel*100);
+    STireFD.Value         := round(GetValue(2,96,2).Rel/0.127); //Half an inch
+    STireRR.Value         := round(GetValue(2,97,2).Rel*100);
+    STireRW.Value         := round(GetValue(2,98,2).Rel*100);
+    STireRD.Value         := round(GetValue(2,99,2).Rel/0.127); //Half an inch
+    //Wheels - Positioning
+    STireFT.Value         := round(GetValue(1,6,2).Rel*200);
+    STireRT.Value         := round(GetValue(1,7,2).Rel*200);
+    STireFZ.Value         := round(GetValue(1,8,2).Rel*100);
+    STireRZ.Value         := round(GetValue(1,9,2).Rel*100);
+    //Wheels - Tire Properties
+    FSGrip.Value        := GetValue(2,21,2).Rel;
+    FSGripFR.Value      := GetValue(2,22,2).Rel;
+    FSSlipF.Value       := GetValue(2,24,2).Rel;
+    FSSlipR.Value       := GetValue(2,25,2).Rel;
+    FS103.Value         := GetValue(2,26,2).Rel;
+    FS106.Value         := GetValue(2,29,2).Rel;
+
+    //Engine - Chart
+    for k:=0 to 20 do LineSerieHP.AddXY(k*SNMStep.Value,round(GetValue(2,51+k,2).Rel));
+    for k:=0 to 20 do LineSerieNM.AddXY(k*SNMStep.Value,0);
+    {$IFDEF VER140} Chart1.LeftAxis.Maximum:=round(LineSerieHP.MaxYValue*1.2); {$ENDIF}
+    //Engine - Torque Curve
+    if round(GetValue(2,72,2).Rel)<>0 then
+    SNMStep.Value       := round(GetValue(2,72,2).Rel); //NMStep
+    SrpmMax.Value       := GetValue(2,50,2).Int;
+    SMtorque.Value      := GetValue(2,30,2).Int;
+    //Engine - Statistics
+    SMhp.Value          := GetValue(2,78,2).Int;
+    Edit5.Text          := GetValue(2,79,2).Str;
+    SMnm.Value          := GetValue(2,81,2).Int;
+    Edit6.Text          := GetValue(2,82,2).Str;
+    Edit4.Text          := GetValue(2,80,2).Str;
+    Stopsp.Value        := GetValue(2,11,2).Int;
+    FS0100.Value        := GetValue(2,45,2).Rel;
+
+    //Gearbox
+    SGearQty.Value      := GetValue(2,85,2).Int;
+    FSGear1.Value       := GetValue(2,86,2).Rel;
+    FSGear2.Value       := GetValue(2,87,2).Rel;
+    FSGear3.Value       := GetValue(2,88,2).Rel;
+    FSGear4.Value       := GetValue(2,89,2).Rel;
+    FSGear5.Value       := GetValue(2,90,2).Rel;
+    FSGear6.Value       := GetValue(2,91,2).Rel;
+    FSGear7.Value       := GetValue(2,92,2).Rel;
+    FSGearR.Value       := GetValue(2,93,2).Rel;
+    FSGearF.Value       := GetValue(2,38,2).Rel;
+
+    //Driver - Male Head
+    SDriverX2.Value       := round(GetValue(1,51,2).Rel*100);
+    SDriverY2.Value       := round(GetValue(1,52,2).Rel*100);
+    SDriverZ2.Value       := round(GetValue(1,53,2).Rel*100);
+    SDriverX1.Value       := round(GetValue(1,44,2).Rel*100);
+    SDriverY1.Value       := round(GetValue(1,45,2).Rel*100);
+    SDriverZ1.Value       := round(GetValue(1,46,2).Rel*100);
+
+    //Cockpit - Speedo
+    ST1X.Value            := round(GetValue(1,55,2).Rel*100);
+    ST1Y.Value            := round(GetValue(1,56,2).Rel*100);
+    ST1Z.Value            := round(GetValue(1,57,2).Rel*100);
+    ST1A1.Value           := round(GetValue(1,58,2).Rel*180/pi);
+    ST1A2.Value           := round(GetValue(1,59,2).Rel*180/pi);
+    ST1A3.Value           := round(GetValue(1,60,2).Rel*180/pi);
+    FST1Scale.Value       := GetValue(1,61,2).Rel;
+    ST1Start.Value        := round(GetValue(1,62,2).Rel*180/pi);
+    FST1Size.Value        := GetValue(1,63,2).Rel;
+    ST1Mode.Value         := GetValue(1,54,2).Int;
+    //Cockpit - Tacho
+    ST2X.Value            := round(GetValue(1,65,2).Rel*100);
+    ST2Y.Value            := round(GetValue(1,66,2).Rel*100);
+    ST2Z.Value            := round(GetValue(1,67,2).Rel*100);
+    ST2A1.Value           := round(GetValue(1,68,2).Rel*180/pi);
+    ST2A2.Value           := round(GetValue(1,69,2).Rel*180/pi);
+    ST2A3.Value           := round(GetValue(1,70,2).Rel*180/pi);
+    FST2Scale.Value       := GetValue(1,71,2).Rel;
+    ST2Start.Value        := round(GetValue(1,72,2).Rel*180/pi);
+    FST2Size.Value        := GetValue(1,73,2).Rel;
+    ST2Mode.Value         := GetValue(1,64,2).Int;
+    //Cockpit - Drivewheel
+    SDrwX.Value           := round(GetValue(1,47,2).Rel*100);
+    SDrwY.Value           := round(GetValue(1,48,2).Rel*100);
+    SDrwZ.Value           := round(GetValue(1,49,2).Rel*100);
+    SDrwW.Value           := round(GetValue(1,50,2).Rel*180/pi);
+  end;
+
 end;
 
 
