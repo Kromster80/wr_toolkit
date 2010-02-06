@@ -18,6 +18,13 @@ type
     BitBtn1: TBitBtn;
     SAll: TButton;
     SNone: TButton;
+    GroupBox1: TGroupBox;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
     procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure OpenDS(Sender: TObject; filename:string);
@@ -44,7 +51,7 @@ const
  StockReifen    = 72; //Tires
 
  MaxCars        = 256;
- VersionInfo    = 'AFC11HN Manager       Version 0.1 (03 Feb 2010)';
+ VersionInfo    = 'AFC11HN Manager       Version 0.1b (06 Feb 2010)';
 
 var
   Form1: TForm1;
@@ -306,6 +313,20 @@ begin
     SetValue(9, 9,ID, fCarDataSet.GetValue(2,91,2));      //6
     SetValue(9,10,ID, fCarDataSet.GetValue(2,92,2));      //7
     SetValue(9,11,ID, fCarDataSet.GetValue(2,93,2));      //R
+
+    ID := COCount(10,2)-1; //Front Tires
+                                                          //1 empty
+    SetValue(10, 2,ID, ID-1);                             //Index
+    SetValue(10, 3,ID, fCarDataSet.GetValue(2,94,2));
+    SetValue(10, 4,ID, fCarDataSet.GetValue(2,95,2));
+    SetValue(10, 5,ID, fCarDataSet.GetValue(2,96,2));
+
+    ID := COCount(10,2); //Rear Tires
+                                                          //1 empty
+    SetValue(10, 2,ID, ID-1);                             //Index
+    SetValue(10, 3,ID, fCarDataSet.GetValue(2,97,2));
+    SetValue(10, 4,ID, fCarDataSet.GetValue(2,98,2));
+    SetValue(10, 5,ID, fCarDataSet.GetValue(2,99,2));
   end;
 
   fCarDataSet.Free;
@@ -438,6 +459,12 @@ var i:integer;
 begin
   for i:=1 to CLBCars.Count do
     AddonCar[i].Install := CLBCars.Checked[i-1];
+
+  if CLBCars.ItemIndex = -1 then exit;
+  i := strtoint(Copy(CLBCars.Items[CLBCars.ItemIndex], length(CLBCars.Items[CLBCars.ItemIndex])-2, 3)); //Read last 3 chars
+  Label1.Caption := AddonCar[i].Folder;
+  Label2.Caption := AddonCar[i].Factory;
+  Label4.Caption := AddonCar[i].Model;
 end;
 
 
