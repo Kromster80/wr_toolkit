@@ -387,6 +387,56 @@ object Form1: TForm1
       TabOrder = 5
       OnClick = SAllClick
     end
+    object GroupBox1: TGroupBox
+      Left = 320
+      Top = 16
+      Width = 209
+      Height = 177
+      Caption = ' Car Info  '
+      TabOrder = 6
+      object Label1: TLabel
+        Left = 56
+        Top = 32
+        Width = 24
+        Height = 13
+        Caption = 'none'
+      end
+      object Label2: TLabel
+        Left = 56
+        Top = 64
+        Width = 24
+        Height = 13
+        Caption = 'none'
+      end
+      object Label4: TLabel
+        Left = 56
+        Top = 96
+        Width = 24
+        Height = 13
+        Caption = 'none'
+      end
+      object Label5: TLabel
+        Left = 8
+        Top = 32
+        Width = 32
+        Height = 13
+        Caption = 'Folder:'
+      end
+      object Label6: TLabel
+        Left = 8
+        Top = 64
+        Width = 38
+        Height = 13
+        Caption = 'Factory:'
+      end
+      object Label7: TLabel
+        Left = 8
+        Top = 96
+        Width = 32
+        Height = 13
+        Caption = 'Model:'
+      end
+    end
   end
   object SaveDialog1: TSaveDialog
     Options = [ofOverwritePrompt, ofHideReadOnly, ofExtensionDifferent, ofPathMustExist, ofEnableSizing]
