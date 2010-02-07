@@ -46,7 +46,12 @@ type
 
     Value:array of array of array of TDSValue;
 
+  private
+    function ConvertDSToIndex(iDS:integer):integer;
+    function ConvertTBToIndex(iDS,iTB:integer):integer;
+
   public
+    DoProperIndexing:boolean;
     constructor Create;
     function IndexInRange(iDS,iTB,iCO:integer):boolean;
     function LoadDS(FileName:string):boolean;
@@ -60,6 +65,7 @@ type
     function GetTBIndexLibString(iDS:integer):string;
 
     function COCount(iDS,iTB:integer):integer;
+    function COIndex(iDS,iTB:integer):integer;
     function GetCOLib(iDS,iTB:integer):string;
     function GetCOIndexLibString(iDS,iTB:integer):string;
     function COInfoLines(iDS,iTB:integer):string;
@@ -98,7 +104,7 @@ end;
 
 constructor TDataSet.Create;
 begin
-//
+  DoProperIndexing := false;
 end;
 
 
@@ -273,61 +279,113 @@ begin
 end;
 
 
+function TDataSet.ConvertDSToIndex(iDS:integer):integer;
+var i:integer;
+begin
+  if not DoProperIndexing then
+    Result:=iDS
+  else begin
+    Result:=0;
+    for i:=1 to DSqty do
+      if TB[i].Index = iDS then
+        Result:=i;
+  end;
+end;
+
+
+function TDataSet.ConvertTBToIndex(iDS,iTB:integer):integer;
+var i:integer;
+begin
+  if not DoProperIndexing then
+    Result:=iTB
+  else begin
+    Result:=0;
+    for i:=1 to TB[iDS].Entries do
+      if CO[iDS,i].Index = iTB then
+        Result:=i;
+  end;
+end;
+
+
 function TDataSet.TBCount(iDS:integer):integer;
 begin
-  Result:=TB[iDS].Entries;
+  iDS := ConvertDSToIndex(iDS);
+  Result := TB[iDS].Entries;
 end;
 
 
 function TDataSet.TBIndex(iDS:integer):integer;
 begin
+  iDS := ConvertDSToIndex(iDS);
   Result:=TB[iDS].Index;
 end;
 
 
 function TDataSet.GetTBLib(iDS:integer):string;
 begin
+  iDS := ConvertDSToIndex(iDS);
   Result:=TB[iDS].Lib;
 end;
 
 function TDataSet.GetTBIndexLibString(iDS:integer):string;
 begin
+  iDS := ConvertDSToIndex(iDS);
   Result:=inttostr(iDS)+'|'+inttostr(TB[iDS].Index)+'. '+TB[iDS].Lib;
 end;
 
 
 function TDataSet.COCount(iDS,iTB:integer):integer;
 begin
+  iDS := ConvertDSToIndex(iDS);
+  iTB := ConvertTBToIndex(iDS,iTB);
   Result:=CO[iDS,iTB].Entries;
+end;
+
+
+function TDataSet.COIndex(iDS,iTB:integer):integer;
+begin
+  iDS := ConvertDSToIndex(iDS);
+  iTB := ConvertTBToIndex(iDS,iTB);
+  Result := CO[iDS,iTB].Index;
 end;
 
 
 function TDataSet.GetCOLib(iDS,iTB:integer):string;
 begin
+  iDS := ConvertDSToIndex(iDS);
+  iTB := ConvertTBToIndex(iDS,iTB);
   Result:=CO[iDS,iTB].Lib;
 end;
 
 
 function TDataSet.GetCOIndexLibString(iDS,iTB:integer):string;
 begin
+  iDS := ConvertDSToIndex(iDS);
+  iTB := ConvertTBToIndex(iDS,iTB);
   Result:=inttostr(iTB)+'|'+inttostr(CO[iDS,iTB].Index)+'. '+CO[iDS,iTB].Lib;
 end;
 
 
 function TDataSet.COInfoLines(iDS,iTB:integer):string;
 begin
+  iDS := ConvertDSToIndex(iDS);
+  iTB := ConvertTBToIndex(iDS,iTB);
   Result:=CO[iDS,iTB].SM+eol+CO[iDS,iTB].ST+eol+CO[iDS,iTB].IC+eol+CO[iDS,iTB].SC;
 end;
 
 
 function TDataSet.GetValueType(iDS,iTB,iCO:integer):byte;
 begin
+  iDS := ConvertDSToIndex(iDS);
+  iTB := ConvertTBToIndex(iDS,iTB);
   Result := Value[iDS,iTB,iCO].Typ;
 end;
 
 
 function TDataSet.GetValue(iDS,iTB,iCO:integer):TDSValue;
 begin
+  iDS := ConvertDSToIndex(iDS);
+  iTB := ConvertTBToIndex(iDS,iTB);
   if IndexInRange(iDS,iTB,iCO) then
     Result := Value[iDS,iTB,iCO]
   else
@@ -337,6 +395,8 @@ end;
 
 function TDataSet.GetValueAsString(iDS,iTB,iCO:integer):string;
 begin
+  iDS := ConvertDSToIndex(iDS);
+  iTB := ConvertTBToIndex(iDS,iTB);
   Result := '';
   if IndexInRange(iDS,iTB,iCO) then //Make sure it's in the range
   case Value[iDS,iTB,iCO].Typ of
@@ -349,12 +409,16 @@ end;
 
 procedure TDataSet.SetValueType(iDS,iTB,iCO:integer; aType:byte);
 begin
+  iDS := ConvertDSToIndex(iDS);
+  iTB := ConvertTBToIndex(iDS,iTB);
   Value[iDS,iTB,iCO].Typ := aType;
 end;
 
 
 procedure TDataSet.SetValueAsString(iDS,iTB,iCO:integer; Text:string);
 begin
+  iDS := ConvertDSToIndex(iDS);
+  iTB := ConvertTBToIndex(iDS,iTB);
   if IndexInRange(iDS,iTB,iCO) then
   case Value[iDS,iTB,iCO].Typ of
     1: Value[iDS,iTB,iCO].Int := strtoint(Text);
@@ -366,36 +430,59 @@ end;
 
 procedure TDataSet.SetValue(iDS,iTB,iCO:integer; aValue:TDSValue);
 begin
+  iDS := ConvertDSToIndex(iDS);
+  iTB := ConvertTBToIndex(iDS,iTB);
   if IndexInRange(iDS,iTB,iCO) then
     Value[iDS,iTB,iCO] := aValue;
 end;
 
 
 procedure TDataSet.SetValue(iDS,iTB,iCO:integer; aValue:integer);
-begin if not IndexInRange(iDS,iTB,iCO) then exit; Value[iDS,iTB,iCO].Typ:=1; Value[iDS,iTB,iCO].Int := aValue; end;
+begin
+  iDS := ConvertDSToIndex(iDS);
+  iTB := ConvertTBToIndex(iDS,iTB);
+  if not IndexInRange(iDS,iTB,iCO) then exit;
+  Value[iDS,iTB,iCO].Typ:=1;
+  Value[iDS,iTB,iCO].Int := aValue;
+end;
 
 procedure TDataSet.SetValue(iDS,iTB,iCO:integer; aValue:single);
-begin if not IndexInRange(iDS,iTB,iCO) then exit; Value[iDS,iTB,iCO].Typ:=2; Value[iDS,iTB,iCO].Rel := aValue; end;
+begin
+  iDS := ConvertDSToIndex(iDS);
+  iTB := ConvertTBToIndex(iDS,iTB);
+  if not IndexInRange(iDS,iTB,iCO) then exit;
+  Value[iDS,iTB,iCO].Typ:=2;
+  Value[iDS,iTB,iCO].Rel := aValue;
+end;
 
 procedure TDataSet.SetValue(iDS,iTB,iCO:integer; aValue:string);
-begin if not IndexInRange(iDS,iTB,iCO) then exit; Value[iDS,iTB,iCO].Typ:=16; Value[iDS,iTB,iCO].Str := aValue; end;
+begin
+  iDS := ConvertDSToIndex(iDS);
+  iTB := ConvertTBToIndex(iDS,iTB);
+  if not IndexInRange(iDS,iTB,iCO) then exit;
+  Value[iDS,iTB,iCO].Typ:=16;
+  Value[iDS,iTB,iCO].Str := aValue;
+end;
 
 
 procedure TDataSet.SetTBLength(iDS,aNewLength:integer);
-var iTB,iCO:integer;
+//var iTB,iCO:integer;
 begin
-  for iTB:=1 to TB[iDS].Entries do
-  if CO[iDS,iTB].Entries<>0 then begin
-    for iCO := CO[iDS,iTB].Entries+1 to aNewLength do
+{  iDS := ConvertDSToIndex(iDS);
+  if TB[iDS].Entries<>0 then begin
+//  for iTB:=1 to TB[iDS].Entries do
+//  if CO[iDS,iTB].Entries<>0 then begin
+    for iTB := TB[iDS].Entries+1 to aNewLength do
       Value[iDS,iTB,iCO] := Value[iDS,iTB,iCO-1]; //Duplicate previous Typ and Value
     CO[iDS,iTB].Entries := aNewLength; //todo: RangeCheck and allocate more space
-  end;
+  end;}
 end;
 
 
 procedure TDataSet.AddValueAcrossTB(iDS:integer);
 var iTB,iCO:integer;
 begin
+  iDS := ConvertDSToIndex(iDS);
   for iTB:=1 to TB[iDS].Entries do
   if CO[iDS,iTB].Entries<>0 then begin
     inc(CO[iDS,iTB].Entries); //Add one new entry

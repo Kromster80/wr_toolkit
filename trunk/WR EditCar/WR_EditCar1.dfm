@@ -1,10 +1,10 @@
 object Form1: TForm1
-  Left = 183
-  Top = 157
+  Left = 190
+  Top = 132
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  ClientHeight = 452
-  ClientWidth = 737
+  ClientHeight = 500
+  ClientWidth = 740
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -42,21 +42,11 @@ object Form1: TForm1
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
-  object Label131: TLabel
-    Left = 141
-    Top = 103
-    Width = 163
-    Height = 39
-    Caption = 
-      'Prior to editing or importing car settings you need to open any ' +
-      '.car file.'
-    WordWrap = True
-  end
   object ButtonLoad: TButton
     Tag = 888
     Left = 512
     Top = 302
-    Width = 137
+    Width = 222
     Height = 33
     Caption = 'Open .Car'
     TabOrder = 0
@@ -65,7 +55,7 @@ object Form1: TForm1
   object ButtonSave: TButton
     Tag = 888
     Left = 512
-    Top = 416
+    Top = 464
     Width = 222
     Height = 33
     Caption = 'Save .Car'
@@ -75,16 +65,17 @@ object Form1: TForm1
   object RGFormat: TRadioGroup
     Tag = 888
     Left = 514
-    Top = 336
+    Top = 344
     Width = 220
-    Height = 73
+    Height = 113
     Caption = '  Editing Format  '
     ItemIndex = 1
     Items.Strings = (
       'Mercedes-Benz World Racing'
       'World Racing 2'
       'Alarm for Cobra 11 - Nitro'
-      'Ferrari Virtual Race')
+      'Ferrari Virtual Race'
+      'Alarm for Cobra 11 - Highway Nights')
     TabOrder = 2
     OnClick = RGFormatClick
   end
@@ -725,9 +716,9 @@ object Form1: TForm1
     Left = 2
     Top = 8
     Width = 503
-    Height = 441
-    ActivePage = TabSheet8
-    TabIndex = 4
+    Height = 489
+    ActivePage = TabSheet13
+    TabIndex = 0
     TabOrder = 4
     OnChange = PageChange
     object TabSheet13: TTabSheet
@@ -739,6 +730,7 @@ object Form1: TForm1
         Width = 60
         Height = 13
         Caption = 'Model Name'
+        Transparent = True
       end
       object Label56: TLabel
         Left = 177
@@ -746,6 +738,7 @@ object Form1: TForm1
         Width = 56
         Height = 13
         Caption = 'Class Name'
+        Transparent = True
       end
       object Label118: TLabel
         Left = 99
@@ -754,6 +747,7 @@ object Form1: TForm1
         Height = 13
         Caption = 'Brand Name'
         ShowAccelChar = False
+        Transparent = True
       end
       object Label31: TLabel
         Left = 99
@@ -762,6 +756,7 @@ object Form1: TForm1
         Height = 13
         Caption = 'Cabrio Folder & File Name Mask'
         ShowAccelChar = False
+        Transparent = True
       end
       object Label55: TLabel
         Left = 99
@@ -770,6 +765,7 @@ object Form1: TForm1
         Height = 13
         Caption = 'Main Folder & File Name Mask'
         ShowAccelChar = False
+        Transparent = True
       end
       object Bevel21: TBevel
         Left = 8
@@ -825,6 +821,7 @@ object Form1: TForm1
         Height = 13
         Caption = 'Logo File'
         ShowAccelChar = False
+        Transparent = True
       end
       object Edit1: TEdit
         Left = 4
@@ -928,24 +925,23 @@ object Form1: TForm1
         OnClick = FSChange
       end
       object GroupBox4: TGroupBox
-        Left = 252
+        Left = 240
         Top = 196
-        Width = 237
-        Height = 209
+        Width = 249
+        Height = 213
         Caption = '  Score to Open  '
         TabOrder = 9
         object Memo1: TMemo
           Left = 8
-          Top = 16
-          Width = 221
-          Height = 185
+          Top = 24
+          Width = 233
+          Height = 177
           BevelInner = bvNone
           BevelOuter = bvNone
           BorderStyle = bsNone
           Color = clMenu
           Lines.Strings = (
-            '    CarScore = 10'#39'000 - LapTime (in '
-            'milliseconds)'
+            '    CarScore = 10'#39'000 - LapTime (in milliseconds)'
             ''
             '    How to know cars score ? '
             '    Setup a 1 lap race at 100%sim settings in '
@@ -17856,27 +17852,17 @@ object Form1: TForm1
       end
     end
   end
-  object Button2: TButton
-    Tag = 888
-    Left = 648
-    Top = 302
-    Width = 86
-    Height = 33
-    Caption = 'Open .Car'
-    TabOrder = 5
-    OnClick = Button2Click
-  end
   object Open1: TOpenDialog
     Filter = '"World Racing" car descriptor (*.car)|*.car|All fles (*.*)|*.*'
     InitialDir = '.'
     Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
     Left = 676
-    Top = 416
+    Top = 464
   end
   object Save1: TSaveDialog
     DefaultExt = 'car'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofPathMustExist, ofEnableSizing]
     Left = 704
-    Top = 416
+    Top = 464
   end
 end

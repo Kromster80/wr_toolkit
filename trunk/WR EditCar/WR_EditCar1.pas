@@ -11,12 +11,8 @@ uses
   {$IFDEF VER140}, ValEdit, TeEngine, Series, TeeProcs {$ENDIF};
 
 type
-
-  { TForm1 }
-
   TForm1 = class(TForm)
     ButtonLoad: TButton;
-    Button2: TButton;
     ButtonSave: TButton;
     Open1: TOpenDialog;
     Save1: TSaveDialog;
@@ -48,7 +44,6 @@ type
     TabSheet4: TTabSheet;
     GroupBox3: TGroupBox;
     Label129: TLabel;
-    Label131: TLabel;
     PageControl2: TPageControl;
     TabSheet5: TTabSheet;
     TabSheet6: TTabSheet;
@@ -388,7 +383,6 @@ type
     procedure AboutClick(Sender: TObject);
     procedure FSChange(Sender: TObject);
     procedure RefreshVLE;
-    procedure RefreshFS;
     procedure PageChange(Sender: TObject);
     procedure TorqueMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure TorqueMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -413,12 +407,14 @@ type TEditingFormat = (fmtMBWR, fmtWR2, fmtAFC11N, fmtFVR);
 var
   Form1: TForm1;
 
+  ExeDir,CarName:string;
+
   LineSerieHP: TLineSeries;
-  LineSerieNM: TLineSeries;
+  LineSerieNM: TLineSeries;  
 
   LockControls:boolean=false; //New variable
 
-  allowFS2,{AllowDataUpdate,}VLEEdit:boolean; //First Import click, Chapter not found, Mouse spy for TChart, Not First Time, Allow Change
+  allowFS2,{AllowDataUpdate,}VLEEdit:boolean; //First Import click, Chapter not found, Not First Time, Allow Change
 
   DSqty:integer; //DS values (2)
   TBqty,TBCondQty:array[1..2] of integer;
@@ -431,8 +427,6 @@ var
     vi:array [1..2,0..512,1..3]of integer;       //Values (empty,value,backup?)
     vr:array [1..2,0..512,1..3]of real;
     vs:array [1..2,0..512,1..3]of string;
-  c:array [1..2048] of char;
-  ExeDir,carname,s2,s:string;
   Title:array of array of string;
   Value:array of array of array of record
     Int:integer;
@@ -446,17 +440,19 @@ implementation
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   DecimalSeparator := '.';
-  carname := ExtractOpenedFileName(CMDLine);
+  CarName := ExtractOpenedFileName(CMDLine);
   ExeDir := ExtractFilePath(Application.ExeName);
 
   InitChart();
   fDataSet := TDataSet.Create;
 
-  if not FileExists(carname) then
-    carname := ExeDir + 'editcar.car';
+  fDataSet.DoProperIndexing := true;
 
-  if FileExists(carname) then
-    OpenCar(carname);
+  if not FileExists(CarName) then
+    CarName := ExeDir + 'editcar.car';
+
+  if FileExists(CarName) then
+    OpenCar(CarName);
 end;
 
 
@@ -482,7 +478,7 @@ end;
 procedure TForm1.OpenClick(Sender: TObject);
 begin
   if not RunOpenDialog(Open1,'','','"World Racing" car descriptor (*.car)|*.car|All Files (*.*)|*.*') then exit;
-  carname := Open1.FileName;
+  CarName := Open1.FileName;
 
   if fileexists(ExeDir+'unlimiter.'+inttostr(846)) then
   begin
@@ -490,27 +486,27 @@ begin
     SClassID.MaxValue:=65535;
   end;
 
-  OpenCar(Open1.FileName);
+  OpenCar(CarName);
 end;
+
 
 procedure TForm1.OpenCAR(aCarFile: string);
 begin
   fDataSet.LoadDS(aCarFile);
 
-  //todo: if fDataSet.TBIndex() MBWR then Insert Index0
-
   //Special fix for Sound SampleRate
-  fDataSet.SetValueType(2,75,2,1); //Integer in all WR cars
-  fDataSet.SetValue(2,75,2,round(fDataSet.GetValue(2,75,2).Rel));
+  fDataSet.SetValueType(105,75,2,1); //Integer in all WR cars
+  fDataSet.SetValue(105,75,2,round(fDataSet.GetValue(105,75,2).Rel));
 
   RGFormat.ItemIndex := 1; //Default to WR2, for it has the most audience
-  if fDataSet.GetCOLib(2,8)='FlagMissionCar' then RGFormat.ItemIndex:=0; //MBWR
-  if fDataSet.GetCOLib(2,8)='CarClassID' then RGFormat.ItemIndex:=1; //WR2
-  if fDataSet.GetCOLib(2,57)='mocod' then RGFormat.ItemIndex:=3; //FVR
+  if fDataSet.GetCOLib(105,8)='FlagMissionCar' then RGFormat.ItemIndex:=0; //MBWR
+  if fDataSet.GetCOLib(105,8)='CarClassID' then RGFormat.ItemIndex:=1; //WR2
+  if fDataSet.GetCOLib(105,57)='mocod' then RGFormat.ItemIndex:=3; //FVR
   RGFormatClick(nil);
 
   UpdateControls;
 end;
+
 
 procedure TForm1.RefreshVLE; //Send data to List from memory
 //var i,k,Count:integer;
@@ -609,12 +605,12 @@ var i,j,k,h,m:integer; f2:textfile;
 begin
   if not RunSaveDialog(Save1,'editcar.car',ExtractFilePath(carname),'"World Racing" car descriptor (*.car)|*.car|All Files (*.*)|*.*') then exit;
 
-  case CarFmt of
-    fmtMBWR:    begin fDataSet.SetTBLength(1,75); fDataSet.SetTBLength(2, 98); end;
-    fmtWR2:     begin fDataSet.SetTBLength(1,80); fDataSet.SetTBLength(2,105); end;
-    fmtAFC11N:  begin fDataSet.SetTBLength(1,80); fDataSet.SetTBLength(2,106); end;
-    fmtFVR:     begin fDataSet.SetTBLength(1,80); fDataSet.SetTBLength(2,110); end;
-  end;
+{  case CarFmt of
+    fmtMBWR:    begin fDataSet.SetTBLength(103,75); fDataSet.SetTBLength(105, 98); end;
+    fmtWR2:     begin fDataSet.SetTBLength(103,80); fDataSet.SetTBLength(105,105); end;
+    fmtAFC11N:  begin fDataSet.SetTBLength(103,80); fDataSet.SetTBLength(105,106); end;
+    fmtFVR:     begin fDataSet.SetTBLength(103,80); fDataSet.SetTBLength(105,110); end;
+  end;}
 
   fDataSet.SaveDS(Save1.FileName);
 
@@ -706,325 +702,49 @@ begin
                           'Russian translation by Krom (incomplete)','EDITCAR');
 end;
 
+
 procedure TForm1.FSChange(Sender: TObject);
-//var s1:string; k:integer; z:real;
-//Transfer values from FloatSpins and other editors to memory
+var s1:string; z:real;
 begin
+  if LockControls then exit;
   UpdateDataSet();
 
-{
-if LockControls then exit;
-if not AllowDataUpdate then exit;
+  //Change application title according to opened file path and car name
+  s1 := carname;
+  if length(s1)>30 then s1 := '...'+decs(s1,-(length(s1)-32),1);
+  Form1.Caption := s1+'  -  '+Edit1.Text; //path - carname
+  Application.Title := Edit1.Text;
 
-//Change application title according to opened file path and car name
-s1:=carname;
-if length(s1)>30 then
-s1:='...'+decs(s1,-(length(s1)-32),1);
-Form1.Caption:=s1+'  -  '+Edit1.Text; //path - carname
-Application.Title:=Edit1.Text;
+  //Fill in max speeds for gears
+  if (SrpmMax.Value<>0)and(STireFR.Value<>0)and(FSGearF.Value<>0) then begin
+    z := STireFR.Value/25.4/168*SrpmMax.Value/FSGearF.Value*1.625;
+    if FSGear1.Value<>0 then Label143.Caption:='('+float2fix(z/FSGear1.Value,3)+' km/h)' else Label143.Caption:='';
+    if FSGear2.Value<>0 then Label144.Caption:='('+float2fix(z/FSGear2.Value,3)+' km/h)' else Label144.Caption:='';
+    if FSGear3.Value<>0 then Label145.Caption:='('+float2fix(z/FSGear3.Value,3)+' km/h)' else Label145.Caption:='';
+    if FSGear4.Value<>0 then Label146.Caption:='('+float2fix(z/FSGear4.Value,3)+' km/h)' else Label146.Caption:='';
+    if FSGear5.Value<>0 then Label147.Caption:='('+float2fix(z/FSGear5.Value,3)+' km/h)' else Label147.Caption:='';
+    if FSGear6.Value<>0 then Label148.Caption:='('+float2fix(z/FSGear6.Value,3)+' km/h)' else Label148.Caption:='';
+    if FSGear7.Value<>0 then Label149.Caption:='('+float2fix(z/FSGear7.Value,3)+' km/h)' else Label149.Caption:='';
+    if FSGearR.Value<>0 then Label150.Caption:='('+float2fix(z/FSGearR.Value,3)+' km/h)' else Label150.Caption:='';
+  end;
 
-//Fill in max speeds for gears
-if (SrpmMax.Value<>0)and(STireFR.Value<>0)and(FSGearF.Value<>0) then begin
-  z:=STireFR.Value/25.4/168*SrpmMax.Value/FSGearF.Value*1.625;
-  if FSGear1.Value<>0 then Label143.Caption:='('+float2fix(z/FSGear1.Value,3)+' km/h)' else Label143.Caption:='';
-  if FSGear2.Value<>0 then Label144.Caption:='('+float2fix(z/FSGear2.Value,3)+' km/h)' else Label144.Caption:='';
-  if FSGear3.Value<>0 then Label145.Caption:='('+float2fix(z/FSGear3.Value,3)+' km/h)' else Label145.Caption:='';
-  if FSGear4.Value<>0 then Label146.Caption:='('+float2fix(z/FSGear4.Value,3)+' km/h)' else Label146.Caption:='';
-  if FSGear5.Value<>0 then Label147.Caption:='('+float2fix(z/FSGear5.Value,3)+' km/h)' else Label147.Caption:='';
-  if FSGear6.Value<>0 then Label148.Caption:='('+float2fix(z/FSGear6.Value,3)+' km/h)' else Label148.Caption:='';
-  if FSGear7.Value<>0 then Label149.Caption:='('+float2fix(z/FSGear7.Value,3)+' km/h)' else Label149.Caption:='';
-  if FSGearR.Value<>0 then Label150.Caption:='('+float2fix(z/FSGearR.Value,3)+' km/h)' else Label150.Caption:='';
-end;
+  //Fill in standard Tire sizes
+  if (STireFW.Text<>'')and(STireRW.Text<>'')and(STireFW.Value<>0)and(STireRW.Value<>0) then begin
+    TireFrontSize.Caption:=STireFW.Text+'/'+
+    inttostr(round((STireFR.Value-STireFD.Value*12.7)/STireFW.Value*100))+' R'+STireFD.Text;
+    TireRearSize.Caption:=STireRW.Text+'/'+
+    inttostr(round((STireRR.Value-STireRD.Value*12.7)/STireRW.Value*100))+' R'+STireRD.Text;
+  end;
 
-//Fill in standard Tire sizes
-if (STireFW.Text<>'')and(STireRW.Text<>'')and(STireFW.Value<>0)and(STireRW.Value<>0) then begin
-  TireFrontSize.Caption:=STireFW.Text+'/'+
-  inttostr(round((STireFR.Value-STireFD.Value*12.7)/STireFW.Value*100))+' R'+STireFD.Text;
-  TireRearSize.Caption:=STireRW.Text+'/'+
-  inttostr(round((STireRR.Value-STireRD.Value*12.7)/STireRW.Value*100))+' R'+STireRD.Text;
-end;
-
-Label142.Caption:=inttostr(STireFZ.Value-STireRZ.Value)+' mm';
-if RGFormat.ItemIndex=0 then LkmhID.Caption:=kmhID[SkmhID.Value] else LkmhID.Caption:=WRkmhID[SkmhID.Value];
-if RGFormat.ItemIndex=0 then LmphID.Caption:=mphID[SmphID.Value] else LmphID.Caption:=WRmphID[SmphID.Value];
-LtachoID.Caption:=WRtachoID[StachoID.Value];
-
-if CBCabrio1.Checked=true then vi[1,4,2]:=1 else vi[1,4,2]:=0;
-if CBCabrio2.Checked=true then vi[1,27,2]:=1 else vi[1,27,2]:=0;
-vi[1,9,2]:=SappBR1.Value;
-vi[1,10,2]:=SappBR2.Value;
-vi[1,11,2]:=SappBR3.Value;
-vi[1,28,2]:=SappCAB1.Value;
-vi[1,29,2]:=SappCAB2.Value;
-vi[1,30,2]:=SappCAB3.Value;
-vr[1,15,2]:=ScamPY.Value/100;
-vr[1,16,2]:=ScamPZ.Value/100;
-vr[1,17,2]:=ScamIY.Value/100;
-vr[1,18,2]:=ScamIZ.Value/100;
-vr[1,26,2]:=ScamCX.Value/100;
-vr[1,19,2]:=ScamCY.Value/100;
-vr[1,20,2]:=ScamCZ.Value/100;
-vr[1,43,2]:=SDriverX1.Value/100;
-vr[1,44,2]:=SDriverY1.Value/100;
-vr[1,45,2]:=SDriverZ1.Value/100;
-vr[1,46,2]:=SDrwX.Value/100;
-vr[1,47,2]:=SDrwY.Value/100;
-vr[1,48,2]:=SDrwZ.Value/100;
-vr[1,49,2]:=SDrwW.Value/180*pi;
-vr[1,50,2]:=SDriverX2.Value/100;
-vr[1,51,2]:=SDriverY2.Value/100;
-vr[1,52,2]:=SDriverZ2.Value/100;
-vi[1,53,2]:=ST1Mode.Value;
-vr[1,54,2]:=ST1X.Value/100;
-vr[1,55,2]:=ST1Y.Value/100;
-vr[1,56,2]:=ST1Z.Value/100;
-vr[1,57,2]:=ST1A1.Value/180*pi;
-vr[1,58,2]:=ST1A2.Value/180*pi;
-vr[1,59,2]:=ST1A3.Value/180*pi;
-vr[1,60,2]:=FST1Scale.Value;
-vr[1,61,2]:=ST1Start.Value/180*pi;
-vr[1,62,2]:=FST1Size.Value;
-vi[1,63,2]:=ST2Mode.Value;
-vr[1,64,2]:=ST2X.Value/100;
-vr[1,65,2]:=ST2Y.Value/100;
-vr[1,66,2]:=ST2Z.Value/100;
-vr[1,67,2]:=ST2A1.Value/180*pi;
-vr[1,68,2]:=ST2A2.Value/180*pi;
-vr[1,69,2]:=ST2A3.Value/180*pi;
-vr[1,70,2]:=FST2Scale.Value;
-vr[1,71,2]:=ST2Start.Value/180*pi;
-vr[1,72,2]:=FST2Size.Value;
-allowFS2:=false;
-DFX.Value:=SDriverX2.Value;
-DFY.Value:=SDriverY2.Value+37;
-DFZ.Value:=SDriverZ2.Value-27;
-DMX.Value:=SDriverX1.Value+1;
-DMY.Value:=SDriverY1.Value+21;
-DMZ.Value:=SDriverZ1.Value-69;
-allowFS2:=true;
-vr[1,74,2]:=ScamHY.Value/100;
-vr[1,75,2]:=ScamHZ.Value/100;
-vi[1,80,2]:=SColor.Value;
-vi[2,4,2]:=SScore.Value;
-vi[2,7,2]:=SClassID.Value;
-vi[2,10,2]:=Stopsp.Value; //Km/h
-vi[2,45,2]:=round(Stopsp.Value/1.61); //mph
-vi[2,16,2]:=SDamper.Value;
-vi[2,17,2]:=SFeather.Value;
-vr[2,18,2]:=SRelease.Value/100;
-vr[2,19,2]:=SBounce.Value/100;
-vr[2,20,2]:=FSGrip.Value;
-vr[2,21,2]:=FSGripFR.Value;
-vi[2,22,2]:=SAngular.Value;
-vr[2,23,2]:=FSSlipF.Value;
-vr[2,24,2]:=FSSlipR.Value;
-vr[2,25,2]:=FS103.Value;
-vr[2,26,2]:=Stabilizat.Value;
-vr[2,28,2]:=FS106.Value;
-
-vs[1,2,2]:=Edit1.Text;
-vs[1,3,2]:=Edit8.Text;
-vs[1,22,2]:=Edit2.Text;
-vs[2,3,2]:=Edit3.Text;
-vs[2,15,2]:=TypLink.Text;
-vs[2,46,2]:=TypRech.Text;
-vi[2,27,2]:=Sweightd.Value;
-vi[2,32,2]:=Sweight.Value;
-vi[2,36,2]:=RGdrive.ItemIndex+1;
-vr[2,38,2]:=FSAirB.Value;
-vi[2,39,2]:=SSlipF.Value;
-vi[2,40,2]:=SSlipR.Value;
-vi[2,41,2]:=SSperrDif.Value;
-case RaceClass1_4.ItemIndex of
-0..3: begin SRaceClass.Enabled:=false; vi[2,42,2]:=RaceClass1_4.ItemIndex+1; end;
-4:    begin SRaceClass.Enabled:=true;  vi[2,42,2]:=SRaceClass.Value; end;
-end;
-vr[2,44,2]:=FS0100.Value;
-vi[2,47,2]:=SkmhID.Value;
-vi[2,48,2]:=SmphID.Value;
-vi[2,49,2]:=SrpmMax.Value;
-vi[2,29,2]:=SMtorque.Value;
-vr[2,71,2]:=SNMStep.Value;
-
-
-vi[2,74,2]:=SSrate.Value;
-vs[2,75,2]:=Edit7.Text;
-vi[2,76,2]:=round(SMhp.Value*0.734); //kW calculation
-vi[2,77,2]:=SMhp.Value;
-vs[2,78,2]:=Edit5.Text;
-vs[2,79,2]:=Edit4.Text;
-vi[2,80,2]:=SMnm.Value;
-vs[2,81,2]:=Edit6.Text;
-vi[2,83,2]:=SLautstarke.Value;
-vi[2,84,2]:=SGearQty.Value;
-vr[2,85,2]:=FSGear1.Value;
-vr[2,86,2]:=FSGear2.Value;
-vr[2,87,2]:=FSGear3.Value;
-vr[2,88,2]:=FSGear4.Value;
-vr[2,89,2]:=FSGear5.Value;
-vr[2,90,2]:=FSGear6.Value;
-vr[2,91,2]:=FSGear7.Value;
-vr[2,92,2]:=FSGearR.Value;
-vr[2,37,2]:=FSGearF.Value;
-vr[1,5,2]:=STireFT.Value/200;
-vr[1,6,2]:=STireRT.Value/200;
-vr[1,7,2]:=STireFZ.Value/100;
-vr[1,8,2]:=STireRZ.Value/100;
-vr[2,43,2]:=SWheelY.Value/100;
-vr[2,93,2]:=STireFR.Value/100;
-vr[2,94,2]:=STireFW.Value/100;
-vr[2,95,2]:=STireFD.Value*0.127;
-vr[2,96,2]:=STireRR.Value/100;
-vr[2,97,2]:=STireRW.Value/100;
-vr[2,98,2]:=STireRD.Value*0.127;
-vi[2,99,2]:=STachoID.Value;
-vi[2,100,2]:=SSaug.Value;
-vi[2,101,2]:=SLastger.Value;
-vi[2,102,2]:=SAusID.Value;
-vi[2,103,2]:=SMotID.Value;
-vs[2,104,2]:=Hersteller.Text;
-vs[2,105,2]:=Logo.Text;
-vs[2,106,2]:=Caravan.Text; }
-end;
-
-procedure TForm1.RefreshFS;
-//var k:integer;
-begin //Send data to SpinEditors from memory
-{AllowDataUpdate:=false;
-Edit1.Text:=vs[1,2,2];  //folder
-Edit8.Text:=vs[1,3,2];  //folder
-Edit2.Text:=vs[1,22,2]; //class
-Edit3.Text:=vs[2,3,2]; //model
-TypLink.Text:=vs[2,15,2]; //logo
-TypRech.Text:=vs[2,46,2]; //logo
-
-if vi[1,4,2]=1 then CBCabrio1.Checked:=true else CBCabrio1.Checked:=false;
-if vi[1,27,2]=1 then CBCabrio2.Checked:=true else CBCabrio2.Checked:=false;
-STireFT.Value:=round(vr[1,5,2]*200);
-STireRT.Value:=round(vr[1,6,2]*200);
-STireFZ.Value:=round(vr[1,7,2]*100);
-STireRZ.Value:=round(vr[1,8,2]*100);
-SappBR1.Value:=vi[1,9,2];
-SappBR2.Value:=vi[1,10,2];
-SappBR3.Value:=vi[1,11,2];
-SappCAB1.Value:=vi[1,28,2];
-SappCAB2.Value:=vi[1,29,2];
-SappCAB3.Value:=vi[1,30,2];
-ScamPY.Value:=round(vr[1,15,2]*100);
-ScamPZ.Value:=round(vr[1,16,2]*100);
-ScamIY.Value:=round(vr[1,17,2]*100);
-ScamIZ.Value:=round(vr[1,18,2]*100);
-ScamCX.Value:=round(vr[1,26,2]*100);
-ScamCY.Value:=round(vr[1,19,2]*100);
-ScamCZ.Value:=round(vr[1,20,2]*100);
-SDriverX1.Value:=round(vr[1,43,2]*100);
-SDriverY1.Value:=round(vr[1,44,2]*100);
-SDriverZ1.Value:=round(vr[1,45,2]*100);
-SDrwX.Value:=round(vr[1,46,2]*100);
-SDrwY.Value:=round(vr[1,47,2]*100);
-SDrwZ.Value:=round(vr[1,48,2]*100);
-SDrwW.Value:=round(vr[1,49,2]*180/pi);
-SDriverX2.Value:=round(vr[1,50,2]*100);
-SDriverY2.Value:=round(vr[1,51,2]*100);
-SDriverZ2.Value:=round(vr[1,52,2]*100);
-ST1Mode.Value:=vi[1,53,2];
-ST1X.Value:=round(vr[1,54,2]*100);
-ST1Y.Value:=round(vr[1,55,2]*100);
-ST1Z.Value:=round(vr[1,56,2]*100);
-ST1A1.Value:=round(vr[1,57,2]*180/pi);
-ST1A2.Value:=round(vr[1,58,2]*180/pi);
-ST1A3.Value:=round(vr[1,59,2]*180/pi);
-FST1Scale.Value:=vr[1,60,2];
-ST1Start.Value:=round(vr[1,61,2]*180/pi);
-FST1Size.Value:=vr[1,62,2];
-ST2Mode.Value:=vi[1,63,2];
-ST2X.Value:=round(vr[1,64,2]*100);
-ST2Y.Value:=round(vr[1,65,2]*100);
-ST2Z.Value:=round(vr[1,66,2]*100);
-ST2A1.Value:=round(vr[1,67,2]*180/pi);
-ST2A2.Value:=round(vr[1,68,2]*180/pi);
-ST2A3.Value:=round(vr[1,69,2]*180/pi);
-FST2Scale.Value:=vr[1,70,2];
-ST2Start.Value:=round(vr[1,71,2]*180/pi);
-FST2Size.Value:=vr[1,72,2];
-ScamHY.Value:=round(vr[1,74,2]*100);
-ScamHZ.Value:=round(vr[1,75,2]*100);
-SColor.Value:=vi[1,80,2];
-SScore.Value:=vi[2,4,2];
-SClassID.Value:=vi[2,7,2];
-Stopsp.Value:=vi[2,10,2];
-SDamper.Value:=vi[2,16,2];
-SFeather.Value:=vi[2,17,2];
-SRelease.Value:=round(vr[2,18,2]*100);
-SBounce.Value:=round(vr[2,19,2]*100);
-FSGrip.Value:=vr[2,20,2];
-FSGripFR.Value:=vr[2,21,2];
-SAngular.Value:=vi[2,22,2];
-FSSlipF.Value:=vr[2,23,2];
-FSSlipR.Value:=vr[2,24,2];
-FS103.Value:=vr[2,25,2];
-Stabilizat.Value:=vr[2,26,2];
-Sweightd.Value:=vi[2,27,2];
-FS106.Value:=vr[2,28,2];
-SMtorque.Value:=vi[2,29,2];
-
-Sweight.Value:=vi[2,32,2];
-RGdrive.ItemIndex:=vi[2,36,2]-1;
-FSAirB.Value:=vr[2,38,2];
-SSlipF.Value:=vi[2,39,2];
-SSlipR.Value:=vi[2,40,2];
-SSperrDif.Value:=vi[2,41,2];
-case vi[2,42,2] of
-1..4: begin SRaceClass.Enabled:=false; RaceClass1_4.ItemIndex:=vi[2,42,2]-1; end;
-else begin RaceClass1_4.ItemIndex:=4; SRaceClass.Enabled:=true;  SRaceClass.Value:=vi[2,42,2]; end;
-end;
-SWheelY.Value:=round(vr[2,43,2]*100);
-FS0100.Value:=vr[2,44,2];
-SkmhID.Value:=vi[2,47,2];
-SmphID.Value:=vi[2,48,2];
-SrpmMax.Value:=vi[2,49,2];
-if round(vr[2,71,2])<>0 then SNMStep.Value:=round(vr[2,71,2]);
-
-
-SSrate.Value:=vi[2,74,2];
-Edit7.Text:=vs[2,75,2];
-SMhp.Value:=vi[2,77,2];
-Edit5.Text:=vs[2,78,2];
-Edit4.Text:=vs[2,79,2];
-SMnm.Value:=vi[2,80,2];
-
-Edit6.Text:=vs[2,81,2];
-SLautstarke.Value:=vi[2,83,2];
-SGearQty.Value:=vi[2,84,2];
-FSGear1.Value:=vr[2,85,2];
-FSGear2.Value:=vr[2,86,2];
-FSGear3.Value:=vr[2,87,2];
-FSGear4.Value:=vr[2,88,2];
-FSGear5.Value:=vr[2,89,2];
-FSGear6.Value:=vr[2,90,2];
-FSGear7.Value:=vr[2,91,2];
-FSGearR.Value:=vr[2,92,2];
-FSGearF.Value:=vr[2,37,2];
-STireFR.Value:=round(vr[2,93,2]*100);
-STireFW.Value:=round(vr[2,94,2]*100);
-STireFD.Value:=round(vr[2,95,2]/0.127);
-STireRR.Value:=round(vr[2,96,2]*100);
-STireRW.Value:=round(vr[2,97,2]*100);
-STireRD.Value:=round(vr[2,98,2]/0.127);
-STachoID.Value:=vi[2,99,2];
-SSaug.Value:=vi[2,100,2];
-SLastger.Value:=vi[2,101,2];
-SAusID.Value:=vi[2,102,2];
-SMotID.Value:=vi[2,103,2];
-Hersteller.Text:=vs[2,104,2];
-Logo.Text:=vs[2,105,2];
-Caravan.Text:=vs[2,106,2];
-AllowDataUpdate:=true;  }
+  Label142.Caption := inttostr(STireFZ.Value-STireRZ.Value)+' mm';
+  if RGFormat.ItemIndex=0 then LkmhID.Caption:=kmhID[SkmhID.Value] else LkmhID.Caption:=WRkmhID[SkmhID.Value];
+  if RGFormat.ItemIndex=0 then LmphID.Caption:=mphID[SmphID.Value] else LmphID.Caption:=WRmphID[SmphID.Value];
+  LtachoID.Caption := WRtachoID[StachoID.Value];
 end;
 
 procedure TForm1.PageChange(Sender: TObject);
 begin
-  if PageControl2.ActivePageIndex = PageControl2.PageCount-1 then RefreshVLE else RefreshFS;
+  if PageControl2.ActivePageIndex = PageControl2.PageCount-1 then RefreshVLE else UpdateControls;
   if PageControl2.ActivePage.Caption = 'Engine' then TorqueMouseMove(nil,[ssShift],0,0);
 end;
 
@@ -1109,6 +829,7 @@ end;
   SClassID.Enabled      := CarFmt in [fmtMBWR, fmtWR2, fmtAFC11N]; //Menu Class
   Label50.Enabled       := CarFmt in [fmtWR2, fmtAFC11N]; //Score to Open
   SScore.Enabled        := CarFmt in [fmtWR2, fmtAFC11N]; //Score to Open
+  Memo1.Enabled         := CarFmt in [fmtWR2, fmtAFC11N];     //Score to Open memo
 
   //Appearance tab
   Label41.Enabled       := CarFmt in [fmtMBWR]; //Motor Sound File
@@ -1217,6 +938,8 @@ end;
 procedure TForm1.ScanWR2DS(Sender:string);
 var DSqty,TBqty,COqty:integer;
  i,j,k,h,m:integer;
+ s,s2:string;
+ c:array [1..2048] of char;
  f:file;
 begin
 LB2Model.Enabled:=false;
@@ -1557,13 +1280,14 @@ vi[2,11,2]:=0;//Motoren
 vi[2,12,2]:=0;//Gearbox
 vi[2,13,2]:=0;//TiresF
 vi[2,14,2]:=0;//TiresR
-RefreshFS;
-RefreshVLE;       //Update List
-FSChange(Form1);
+//RefreshFS;
+//RefreshVLE;       //Update List
+//FSChange(Form1);
 end;
 
 procedure TForm1.ImportWRCarClick(Sender: TObject);
 var i,k,m,id:integer;
+  s:string;
 begin
 id:=strtoint(LBModel.Items[LBModel.ItemIndex][162]+LBModel.Items[LBModel.ItemIndex][163]+LBModel.Items[LBModel.ItemIndex][164]);
 vi[2,1,2]:=Value[23][0][id].Int;//
@@ -1758,15 +1482,17 @@ vi[2,11,2]:=0;//Motoren
 vi[2,12,2]:=0;//Gearbox
 vi[2,13,2]:=0;//TiresF
 vi[2,14,2]:=0;//TiresR
-RefreshFS;
-RefreshVLE;       //Update List
-FSChange(Form1);
+//RefreshFS;
+//RefreshVLE;       //Update List
+//FSChange(Form1);
 end;
+
 
 procedure TForm1.Button1Click(Sender: TObject);
 begin
   //WriteLangFile(Form1,'Lang.txt',true);
 end;
+
 
 procedure TForm1.BitBtn2Click(Sender: TObject);
 begin
@@ -1776,6 +1502,7 @@ begin
   BitBtn4.Enabled:=false;
   BitBtn5.Enabled:=false;
 end;
+
 
 procedure TForm1.Button2Click(Sender: TObject);
 begin
@@ -1790,161 +1517,161 @@ begin
   LockControls := true;
   with fDataSet do begin
     //Identity - Name
-    Edit1.Text            := GetValue(1,3,2).Str;        //Main Folder
-    Edit8.Text            := GetValue(1,4,2).Str;        //Cabrio Folder
-    Hersteller.Text       := GetValue(2,105,2).Str;      //Hersteller
-    Logo.Text             := GetValue(2,106,2).Str;      //
-    Edit2.Text            := GetValue(1,23,2).Str;       //Class
-    Edit3.Text            := GetValue(2,4,2).Str;        //Model
-    CBCabrio1.Checked     := GetValue(1,5,2).Int = 1;
-    CBCabrio2.Checked     := GetValue(1,28,2).Int = 1;
+    Edit1.Text            := GetValue(103,2,2).Str;        //Main Folder
+    Edit8.Text            := GetValue(103,3,2).Str;        //Cabrio Folder
+    Hersteller.Text       := GetValue(105,104,2).Str;      //Hersteller
+    Logo.Text             := GetValue(105,105,2).Str;      //
+    Edit2.Text            := GetValue(103,22,2).Str;       //Class
+    Edit3.Text            := GetValue(105,3,2).Str;        //Model
+    CBCabrio1.Checked     := GetValue(103,4,2).Int = 1;
+    CBCabrio2.Checked     := GetValue(103,27,2).Int = 1;
     //Identity - Placement
-    RaceClass1_4.ItemIndex := Math.min(GetValue(2,43,2).Int-1,4); //1..4 + Custom
-    SRaceClass.Value      := GetValue(2,43,2).Int;
-    SRaceClass.Enabled    := not (GetValue(2,43,2).Int in [1..4]);
-    SScore.Value          := GetValue(2,5,2).Int;
-    SClassID.Value        := GetValue(2,8,2).Int;
+    RaceClass1_4.ItemIndex := Math.min(GetValue(105,42,2).Int-1,4); //1..4 + Custom
+    SRaceClass.Value      := GetValue(105,42,2).Int;
+    SRaceClass.Enabled    := not (GetValue(105,42,2).Int in [1..4]);
+    SScore.Value          := GetValue(105,4,2).Int;
+    SClassID.Value        := GetValue(105,7,2).Int;
 
     //Appearance - Cameras
-    ScamPY.Value          := round(GetValue(1,16,2).Rel*100);
-    ScamPZ.Value          := round(GetValue(1,17,2).Rel*100);
-    ScamIY.Value          := round(GetValue(1,18,2).Rel*100);
-    ScamIZ.Value          := round(GetValue(1,19,2).Rel*100);
-    ScamCX.Value          := round(GetValue(1,27,2).Rel*100);
-    ScamCY.Value          := round(GetValue(1,20,2).Rel*100);
-    ScamCZ.Value          := round(GetValue(1,21,2).Rel*100);
-    ScamHY.Value          := round(GetValue(1,75,2).Rel*100);
-    ScamHZ.Value          := round(GetValue(1,76,2).Rel*100);
+    ScamPY.Value          := round(GetValue(103,15,2).Rel*100);
+    ScamPZ.Value          := round(GetValue(103,16,2).Rel*100);
+    ScamIY.Value          := round(GetValue(103,17,2).Rel*100);
+    ScamIZ.Value          := round(GetValue(103,18,2).Rel*100);
+    ScamCX.Value          := round(GetValue(103,26,2).Rel*100);
+    ScamCY.Value          := round(GetValue(103,19,2).Rel*100);
+    ScamCZ.Value          := round(GetValue(103,20,2).Rel*100);
+    ScamHY.Value          := round(GetValue(103,74,2).Rel*100);
+    ScamHZ.Value          := round(GetValue(103,75,2).Rel*100);
     //Appearance - Sound
-    Edit7.Text          := GetValue(2,76,2).Str;
-    SSrate.Value        := GetValue(2,75,2).Int;
-    SLautstarke.Value   := GetValue(2,84,2).Int;
-    SMotID.Value        := GetValue(2,104,2).Int;
-    SAusID.Value        := GetValue(2,103,2).Int;
-    SSaug.Value         := GetValue(2,101,2).Int;
-    SLastger.Value      := GetValue(2,102,2).Int;
+    Edit7.Text          := GetValue(105,75,2).Str;
+    SSrate.Value        := GetValue(105,74,2).Int;
+    SLautstarke.Value   := GetValue(105,83,2).Int;
+    SMotID.Value        := GetValue(105,103,2).Int;
+    SAusID.Value        := GetValue(105,102,2).Int;
+    SSaug.Value         := GetValue(105,100,2).Int;
+    SLastger.Value      := GetValue(105,101,2).Int;
     //Appearance - Brakelight Materials
-    SappBR1.Value         := GetValue(1,10,2).Int;
-    SappBR2.Value         := GetValue(1,11,2).Int;
-    SappBR3.Value         := GetValue(1,12,2).Int;
-    SappCAB1.Value        := GetValue(1,29,2).Int;
-    SappCAB2.Value        := GetValue(1,30,2).Int;
-    SappCAB3.Value        := GetValue(1,31,2).Int;
+    SappBR1.Value         := GetValue(103,9,2).Int;
+    SappBR2.Value         := GetValue(103,10,2).Int;
+    SappBR3.Value         := GetValue(103,11,2).Int;
+    SappCAB1.Value        := GetValue(103,28,2).Int;
+    SappCAB2.Value        := GetValue(103,29,2).Int;
+    SappCAB3.Value        := GetValue(103,30,2).Int;
     //Appearance - HUD
-    SkmhID.Value          := GetValue(2,48,2).Int;
-    SmphID.Value          := GetValue(2,49,2).Int;
-    STachoID.Value        := GetValue(2,100,2).Int;
+    SkmhID.Value          := GetValue(105,47,2).Int;
+    SmphID.Value          := GetValue(105,48,2).Int;
+    STachoID.Value        := GetValue(105,99,2).Int;
     //Appearance - Special
-    TypLink.Text        := GetValue(2,16,2).Str;  //TypLink
-    TypRech.Text        := GetValue(2,47,2).Str;  //TypRech
-    SColor.Value        := GetValue(1,81,2).Int;  //ColorID
-    Caravan.Text        := GetValue(2,107,2).Str; //Caravan
+    TypLink.Text        := GetValue(105,17,2).Str;  //TypLink
+    TypRech.Text        := GetValue(105,46,2).Str;  //TypRech
+    SColor.Value        := GetValue(103,80,2).Int;  //ColorID
+    Caravan.Text        := GetValue(105,106,2).Str; //Caravan
 
     //Suspension - Weight
-    Sweight.Value       := GetValue(2,33,2).Int;
-    SweightD.Value      := GetValue(2,28,2).Int;
-    SAngular.Value      := GetValue(2,23,2).Int;
+    Sweight.Value       := GetValue(105,32,2).Int;
+    SweightD.Value      := GetValue(105,27,2).Int;
+    SAngular.Value      := GetValue(105,22,2).Int;
     //Suspension - Suspension
-    SDamper.Value       := GetValue(2,17,2).Int;
-    SFeather.Value      := GetValue(2,18,2).Int;
-    SRelease.Value      := round(GetValue(2,19,2).Rel*100);
-    SBounce.Value       := round(GetValue(2,20,2).Rel*100);
-    SSperrDif.Value     := GetValue(2,42,2).Int;
-    SWheelY.Value       := round(GetValue(2,44,2).Rel*100);
-    Stabilizat.Value    := GetValue(2,27,2).Rel;
+    SDamper.Value       := GetValue(105,16,2).Int;
+    SFeather.Value      := GetValue(105,17,2).Int;
+    SRelease.Value      := round(GetValue(105,18,2).Rel*100);
+    SBounce.Value       := round(GetValue(105,19,2).Rel*100);
+    SSperrDif.Value     := GetValue(105,41,2).Int;
+    SWheelY.Value       := round(GetValue(105,43,2).Rel*100);
+    Stabilizat.Value    := GetValue(105,26,2).Rel;
     //Suspension - Drive-Train
-    RGdrive.ItemIndex   := GetValue(2,37,2).Int-1;
+    RGdrive.ItemIndex   := GetValue(105,36,2).Int-1;
     //Suspension - Aerodynamics
-    FSAirB.Value        := GetValue(2,39,2).Rel;
-    SSlipF.Value        := GetValue(2,40,2).Int;
-    SSlipR.Value        := GetValue(2,41,2).Int;
+    FSAirB.Value        := GetValue(105,38,2).Rel;
+    SSlipF.Value        := GetValue(105,39,2).Int;
+    SSlipR.Value        := GetValue(105,40,2).Int;
 
     //Wheels - Size
-    STireFR.Value         := round(GetValue(2,94,2).Rel*100);
-    STireFW.Value         := round(GetValue(2,95,2).Rel*100);
-    STireFD.Value         := round(GetValue(2,96,2).Rel/0.127); //Half an inch
-    STireRR.Value         := round(GetValue(2,97,2).Rel*100);
-    STireRW.Value         := round(GetValue(2,98,2).Rel*100);
-    STireRD.Value         := round(GetValue(2,99,2).Rel/0.127); //Half an inch
+    STireFR.Value         := round(GetValue(105,93,2).Rel*100);
+    STireFW.Value         := round(GetValue(105,94,2).Rel*100);
+    STireFD.Value         := round(GetValue(105,95,2).Rel/0.127); //Half an inch
+    STireRR.Value         := round(GetValue(105,96,2).Rel*100);
+    STireRW.Value         := round(GetValue(105,97,2).Rel*100);
+    STireRD.Value         := round(GetValue(105,98,2).Rel/0.127); //Half an inch
     //Wheels - Positioning
-    STireFT.Value         := round(GetValue(1,6,2).Rel*200);
-    STireRT.Value         := round(GetValue(1,7,2).Rel*200);
-    STireFZ.Value         := round(GetValue(1,8,2).Rel*100);
-    STireRZ.Value         := round(GetValue(1,9,2).Rel*100);
+    STireFT.Value         := round(GetValue(103,5,2).Rel*200);
+    STireRT.Value         := round(GetValue(103,6,2).Rel*200);
+    STireFZ.Value         := round(GetValue(103,7,2).Rel*100);
+    STireRZ.Value         := round(GetValue(103,8,2).Rel*100);
     //Wheels - Tire Properties
-    FSGrip.Value        := GetValue(2,21,2).Rel;
-    FSGripFR.Value      := GetValue(2,22,2).Rel;
-    FSSlipF.Value       := GetValue(2,24,2).Rel;
-    FSSlipR.Value       := GetValue(2,25,2).Rel;
-    FS103.Value         := GetValue(2,26,2).Rel;
-    FS106.Value         := GetValue(2,29,2).Rel;
+    FSGrip.Value        := GetValue(105,20,2).Rel;
+    FSGripFR.Value      := GetValue(105,21,2).Rel;
+    FSSlipF.Value       := GetValue(105,23,2).Rel;
+    FSSlipR.Value       := GetValue(105,24,2).Rel;
+    FS103.Value         := GetValue(105,25,2).Rel;
+    FS106.Value         := GetValue(105,28,2).Rel;
 
     //Engine - Chart
     LineSerieHP.Clear;
     LineSerieNM.Clear;
-    for k:=0 to 20 do LineSerieHP.AddXY(k*SNMStep.Value, round(GetValue(2,51+k,2).Rel));
+    for k:=0 to 20 do LineSerieHP.AddXY(k*SNMStep.Value, round(GetValue(105,50+k,2).Rel));
     for k:=0 to 20 do LineSerieNM.AddXY(k*SNMStep.Value, 0);
     {$IFDEF VER140} Chart1.LeftAxis.Maximum := round(LineSerieHP.MaxYValue*1.2); {$ENDIF}
     //Engine - Torque Curve
-    SNMStep.Value       := round(GetValue(2,72,2).Rel); //NMStep
-    SrpmMax.Value       := GetValue(2,50,2).Int;
-    SMtorque.Value      := GetValue(2,30,2).Int;
+    SNMStep.Value       := round(GetValue(105,71,2).Rel); //NMStep
+    SrpmMax.Value       := GetValue(105,49,2).Int;
+    SMtorque.Value      := GetValue(105,29,2).Int;
     //Engine - Statistics
-    SMhp.Value          := GetValue(2,78,2).Int;
-    Edit5.Text          := GetValue(2,79,2).Str;
-    SMnm.Value          := GetValue(2,81,2).Int;
-    Edit6.Text          := GetValue(2,82,2).Str;
-    Edit4.Text          := GetValue(2,80,2).Str;
-    Stopsp.Value        := GetValue(2,11,2).Int;
-    FS0100.Value        := GetValue(2,45,2).Rel;
+    SMhp.Value          := GetValue(105,77,2).Int;
+    Edit5.Text          := GetValue(105,78,2).Str;
+    SMnm.Value          := GetValue(105,80,2).Int;
+    Edit6.Text          := GetValue(105,81,2).Str;
+    Edit4.Text          := GetValue(105,79,2).Str;
+    Stopsp.Value        := GetValue(105,10,2).Int;
+    FS0100.Value        := GetValue(105,44,2).Rel;
 
     //Gearbox
-    SGearQty.Value      := GetValue(2,85,2).Int;
-    FSGear1.Value       := GetValue(2,86,2).Rel;
-    FSGear2.Value       := GetValue(2,87,2).Rel;
-    FSGear3.Value       := GetValue(2,88,2).Rel;
-    FSGear4.Value       := GetValue(2,89,2).Rel;
-    FSGear5.Value       := GetValue(2,90,2).Rel;
-    FSGear6.Value       := GetValue(2,91,2).Rel;
-    FSGear7.Value       := GetValue(2,92,2).Rel;
-    FSGearR.Value       := GetValue(2,93,2).Rel;
-    FSGearF.Value       := GetValue(2,38,2).Rel;
+    SGearQty.Value      := GetValue(105,84,2).Int;
+    FSGear1.Value       := GetValue(105,85,2).Rel;
+    FSGear2.Value       := GetValue(105,86,2).Rel;
+    FSGear3.Value       := GetValue(105,87,2).Rel;
+    FSGear4.Value       := GetValue(105,88,2).Rel;
+    FSGear5.Value       := GetValue(105,89,2).Rel;
+    FSGear6.Value       := GetValue(105,90,2).Rel;
+    FSGear7.Value       := GetValue(105,91,2).Rel;
+    FSGearR.Value       := GetValue(105,92,2).Rel;
+    FSGearF.Value       := GetValue(105,37,2).Rel;
 
     //Driver - Male Head
-    SDriverX2.Value       := round(GetValue(1,51,2).Rel*100);
-    SDriverY2.Value       := round(GetValue(1,52,2).Rel*100);
-    SDriverZ2.Value       := round(GetValue(1,53,2).Rel*100);
-    SDriverX1.Value       := round(GetValue(1,44,2).Rel*100);
-    SDriverY1.Value       := round(GetValue(1,45,2).Rel*100);
-    SDriverZ1.Value       := round(GetValue(1,46,2).Rel*100);
+    SDriverX2.Value       := round(GetValue(103,50,2).Rel*100);
+    SDriverY2.Value       := round(GetValue(103,51,2).Rel*100);
+    SDriverZ2.Value       := round(GetValue(103,52,2).Rel*100);
+    SDriverX1.Value       := round(GetValue(103,43,2).Rel*100);
+    SDriverY1.Value       := round(GetValue(103,44,2).Rel*100);
+    SDriverZ1.Value       := round(GetValue(103,45,2).Rel*100);
 
     //Cockpit - Speedo
-    ST1X.Value            := round(GetValue(1,55,2).Rel*100);
-    ST1Y.Value            := round(GetValue(1,56,2).Rel*100);
-    ST1Z.Value            := round(GetValue(1,57,2).Rel*100);
-    ST1A1.Value           := round(GetValue(1,58,2).Rel*180/pi);
-    ST1A2.Value           := round(GetValue(1,59,2).Rel*180/pi);
-    ST1A3.Value           := round(GetValue(1,60,2).Rel*180/pi);
-    FST1Scale.Value       := GetValue(1,61,2).Rel;
-    ST1Start.Value        := round(GetValue(1,62,2).Rel*180/pi);
-    FST1Size.Value        := GetValue(1,63,2).Rel;
-    ST1Mode.Value         := GetValue(1,54,2).Int;
+    ST1X.Value            := round(GetValue(103,54,2).Rel*100);
+    ST1Y.Value            := round(GetValue(103,55,2).Rel*100);
+    ST1Z.Value            := round(GetValue(103,56,2).Rel*100);
+    ST1A1.Value           := round(GetValue(103,57,2).Rel*180/pi);
+    ST1A2.Value           := round(GetValue(103,58,2).Rel*180/pi);
+    ST1A3.Value           := round(GetValue(103,59,2).Rel*180/pi);
+    FST1Scale.Value       := GetValue(103,60,2).Rel;
+    ST1Start.Value        := round(GetValue(103,61,2).Rel*180/pi);
+    FST1Size.Value        := GetValue(103,62,2).Rel;
+    ST1Mode.Value         := GetValue(103,53,2).Int;
     //Cockpit - Tacho
-    ST2X.Value            := round(GetValue(1,65,2).Rel*100);
-    ST2Y.Value            := round(GetValue(1,66,2).Rel*100);
-    ST2Z.Value            := round(GetValue(1,67,2).Rel*100);
-    ST2A1.Value           := round(GetValue(1,68,2).Rel*180/pi);
-    ST2A2.Value           := round(GetValue(1,69,2).Rel*180/pi);
-    ST2A3.Value           := round(GetValue(1,70,2).Rel*180/pi);
-    FST2Scale.Value       := GetValue(1,71,2).Rel;
-    ST2Start.Value        := round(GetValue(1,72,2).Rel*180/pi);
-    FST2Size.Value        := GetValue(1,73,2).Rel;
-    ST2Mode.Value         := GetValue(1,64,2).Int;
+    ST2X.Value            := round(GetValue(103,64,2).Rel*100);
+    ST2Y.Value            := round(GetValue(103,65,2).Rel*100);
+    ST2Z.Value            := round(GetValue(103,66,2).Rel*100);
+    ST2A1.Value           := round(GetValue(103,67,2).Rel*180/pi);
+    ST2A2.Value           := round(GetValue(103,68,2).Rel*180/pi);
+    ST2A3.Value           := round(GetValue(103,69,2).Rel*180/pi);
+    FST2Scale.Value       := GetValue(103,70,2).Rel;
+    ST2Start.Value        := round(GetValue(103,71,2).Rel*180/pi);
+    FST2Size.Value        := GetValue(103,72,2).Rel;
+    ST2Mode.Value         := GetValue(103,63,2).Int;
     //Cockpit - Drivewheel
-    SDrwX.Value           := round(GetValue(1,47,2).Rel*100);
-    SDrwY.Value           := round(GetValue(1,48,2).Rel*100);
-    SDrwZ.Value           := round(GetValue(1,49,2).Rel*100);
-    SDrwW.Value           := round(GetValue(1,50,2).Rel*180/pi);
+    SDrwX.Value           := round(GetValue(103,46,2).Rel*100);
+    SDrwY.Value           := round(GetValue(103,47,2).Rel*100);
+    SDrwZ.Value           := round(GetValue(103,48,2).Rel*100);
+    SDrwW.Value           := round(GetValue(103,49,2).Rel*180/pi);
   end;
 
   LockControls := false;
@@ -1958,159 +1685,159 @@ begin
   if LockControls then exit;
   with fDataSet do begin
     //Identity - Name
-    SetValue(1,3,2,Edit1.Text);         //Main Folder
-    SetValue(1,4,2,Edit8.Text);         //Cabrio Folder
-    SetValue(2,105,2,Hersteller.Text);  //Hersteller
-    SetValue(2,106,2,Logo.Text);        //
-    SetValue(1,23,2,Edit2.Text);        //Class
-    SetValue(2,4,2,Edit3.Text);         //Model
-    SetValue(1,5,2,integer(CBCabrio1.Checked));
-    SetValue(1,28,2,integer(CBCabrio2.Checked));
+    SetValue(103,2,2,Edit1.Text);         //Main Folder
+    SetValue(103,3,2,Edit8.Text);         //Cabrio Folder
+    SetValue(105,104,2,Hersteller.Text);  //Hersteller
+    SetValue(105,105,2,Logo.Text);        //
+    SetValue(103,22,2,Edit2.Text);        //Class
+    SetValue(105,3,2,Edit3.Text);         //Model
+    SetValue(103,4,2,integer(CBCabrio1.Checked));
+    SetValue(103,27,2,integer(CBCabrio2.Checked));
 
     //Identity - Placement
     case RaceClass1_4.ItemIndex of
-      0..3: SetValue(2,43,2,RaceClass1_4.ItemIndex + 1);
-      else  SetValue(2,43,2,SRaceClass.Value);
+      0..3: SetValue(105,42,2,RaceClass1_4.ItemIndex + 1);
+      else  SetValue(105,42,2,SRaceClass.Value);
     end;
-    SetValue(2,5,2,SScore.Value);
-    SetValue(2,8,2,SClassID.Value);
+    SetValue(105,4,2,SScore.Value);
+    SetValue(105,7,2,SClassID.Value);
 
     //Appearance - Cameras
-    SetValue(1,16,2,ScamPY.Value/100);
-    SetValue(1,17,2,ScamPZ.Value/100);
-    SetValue(1,18,2,ScamIY.Value/100);
-    SetValue(1,19,2,ScamIZ.Value/100);
-    SetValue(1,27,2,ScamCX.Value/100);
-    SetValue(1,20,2,ScamCY.Value/100);
-    SetValue(1,21,2,ScamCZ.Value/100);
-    SetValue(1,75,2,ScamHY.Value/100);
-    SetValue(1,76,2,ScamHZ.Value/100);
+    SetValue(103,15,2,ScamPY.Value/100);
+    SetValue(103,16,2,ScamPZ.Value/100);
+    SetValue(103,17,2,ScamIY.Value/100);
+    SetValue(103,18,2,ScamIZ.Value/100);
+    SetValue(103,26,2,ScamCX.Value/100);
+    SetValue(103,19,2,ScamCY.Value/100);
+    SetValue(103,20,2,ScamCZ.Value/100);
+    SetValue(103,74,2,ScamHY.Value/100);
+    SetValue(103,75,2,ScamHZ.Value/100);
     //Appearance - Sound
-    SetValue(2,76,2,Edit7.Text);
-    SetValue(2,75,2,SSrate.Value);
-    SetValue(2,84,2,SLautstarke.Value);
-    SetValue(2,104,2,SMotID.Value);
-    SetValue(2,103,2,SAusID.Value);
-    SetValue(2,101,2,SSaug.Value);
-    SetValue(2,102,2,SLastger.Value);
+    SetValue(105,76,2,Edit7.Text);
+    SetValue(105,74,2,SSrate.Value);
+    SetValue(105,83,2,SLautstarke.Value);
+    SetValue(105,103,2,SMotID.Value);
+    SetValue(105,102,2,SAusID.Value);
+    SetValue(105,100,2,SSaug.Value);
+    SetValue(105,101,2,SLastger.Value);
     //Appearance - Brakelight Materials
-    SetValue(1,10,2,SappBR1.Value);
-    SetValue(1,11,2,SappBR2.Value);
-    SetValue(1,12,2,SappBR3.Value);
-    SetValue(1,29,2,SappCAB1.Value);
-    SetValue(1,30,2,SappCAB2.Value);
-    SetValue(1,31,2,SappCAB3.Value);
+    SetValue(103,9,2,SappBR1.Value);
+    SetValue(103,10,2,SappBR2.Value);
+    SetValue(103,11,2,SappBR3.Value);
+    SetValue(103,28,2,SappCAB1.Value);
+    SetValue(103,29,2,SappCAB2.Value);
+    SetValue(103,30,2,SappCAB3.Value);
     //Appearance - HUD
-    SetValue(2,4,2,SkmhID.Value);
-    SetValue(2,49,2,SmphID.Value);
-    SetValue(2,100,2,STachoID.Value);
+    SetValue(105,3,2,SkmhID.Value);
+    SetValue(105,48,2,SmphID.Value);
+    SetValue(105,99,2,STachoID.Value);
     //Appearance - Special
-    SetValue(2,16,2,TypLink.Text);  //TypLink
-    SetValue(2,47,2,TypRech.Text);  //TypRech
-    SetValue(1,81,2,SColor.Value);  //ColorID
-    SetValue(2,107,2,Caravan.Text); //Caravan
+    SetValue(105,15,2,TypLink.Text);  //TypLink
+    SetValue(105,46,2,TypRech.Text);  //TypRech
+    SetValue(103,80,2,SColor.Value);  //ColorID
+    SetValue(105,106,2,Caravan.Text); //Caravan
     //Suspension - Weight
-    SetValue(2,33,2,Sweight.Value);
-    SetValue(2,28,2,SweightD.Value);
-    SetValue(2,23,2,SAngular.Value);
+    SetValue(105,32,2,Sweight.Value);
+    SetValue(105,27,2,SweightD.Value);
+    SetValue(105,22,2,SAngular.Value);
     //Suspension - Suspension
-    SetValue(2,17,2,SDamper.Value);
-    SetValue(2,18,2,SFeather.Value);
-    SetValue(2,19,2,SRelease.Value/100);
-    SetValue(2,20,2,SBounce.Value/100);
-    SetValue(2,42,2,SSperrDif.Value);
-    SetValue(2,44,2,SWheelY.Value/100);
-    SetValue(2,27,2,Stabilizat.Value);
+    SetValue(105,16,2,SDamper.Value);
+    SetValue(105,17,2,SFeather.Value);
+    SetValue(105,18,2,SRelease.Value/100);
+    SetValue(105,19,2,SBounce.Value/100);
+    SetValue(105,41,2,SSperrDif.Value);
+    SetValue(105,43,2,SWheelY.Value/100);
+    SetValue(105,26,2,Stabilizat.Value);
     //Suspension - Drive-Train
-    SetValue(2,37,2,RGdrive.ItemIndex + 1);
+    SetValue(105,36,2,RGdrive.ItemIndex + 1);
     //Suspension - Aerodynamics
-    SetValue(2,39,2,FSAirB.Value);
-    SetValue(2,40,2,SSlipF.Value);
-    SetValue(2,41,2,SSlipR.Value);
+    SetValue(105,38,2,FSAirB.Value);
+    SetValue(105,39,2,SSlipF.Value);
+    SetValue(105,40,2,SSlipR.Value);
 
     //Wheels - Size
-    SetValue(2,94,2,STireFR.Value/100);
-    SetValue(2,95,2,STireFW.Value/100);
-    SetValue(2,96,2,STireFD.Value*0.127);
-    SetValue(2,97,2,STireRR.Value/100);
-    SetValue(2,98,2,STireRW.Value/100);
-    SetValue(2,99,2,STireRD.Value*0.127);
+    SetValue(105,93,2,STireFR.Value/100);
+    SetValue(105,94,2,STireFW.Value/100);
+    SetValue(105,95,2,STireFD.Value*0.127);
+    SetValue(105,96,2,STireRR.Value/100);
+    SetValue(105,97,2,STireRW.Value/100);
+    SetValue(105,98,2,STireRD.Value*0.127);
     //Wheels - Positioning
-    SetValue(1,6,2,STireFT.Value/200);
-    SetValue(1,7,2,STireRT.Value/200);
-    SetValue(1,8,2,STireFZ.Value/100);
-    SetValue(1,9,2,STireRZ.Value/100);
+    SetValue(103,5,2,STireFT.Value/200);
+    SetValue(103,6,2,STireRT.Value/200);
+    SetValue(103,7,2,STireFZ.Value/100);
+    SetValue(103,8,2,STireRZ.Value/100);
     //Wheels - Tire Properties
-    SetValue(2,21,2,FSGrip.Value);
-    SetValue(2,22,2,FSGripFR.Value);
-    SetValue(2,24,2,FSSlipF.Value);
-    SetValue(2,25,2,FSSlipR.Value);
-    SetValue(2,26,2,FS103.Value);
-    SetValue(2,29,2,FS106.Value);
+    SetValue(105,20,2,FSGrip.Value);
+    SetValue(105,21,2,FSGripFR.Value);
+    SetValue(105,23,2,FSSlipF.Value);
+    SetValue(105,24,2,FSSlipR.Value);
+    SetValue(105,25,2,FS103.Value);
+    SetValue(105,28,2,FS106.Value);
 
     //Engine - Chart
-    for k:=0 to 20 do SetValue(2,51+k,2,LineSerieHP.YValues[k]);
+    for k:=0 to 20 do SetValue(105,50+k,2,LineSerieHP.YValues[k]);
     //Engine - Torque Curve
-    SetValue(2,72,2,SNMStep.Value+0.0); //NMStep
-    SetValue(2,50,2,SrpmMax.Value);
-    SetValue(2,30,2,SMtorque.Value);
+    SetValue(105,71,2,SNMStep.Value+0.0); //NMStep
+    SetValue(105,49,2,SrpmMax.Value);
+    SetValue(105,29,2,SMtorque.Value);
     //Engine - Statistics
-    SetValue(2,78,2,SMhp.Value);
-    SetValue(2,79,2,Edit5.Text);
-    SetValue(2,81,2,SMnm.Value);
-    SetValue(2,82,2,Edit6.Text);
-    SetValue(2,80,2,Edit4.Text);
-    SetValue(2,11,2,Stopsp.Value);
-    SetValue(2,45,2,FS0100.Value);
+    SetValue(105,77,2,SMhp.Value);
+    SetValue(105,78,2,Edit5.Text);
+    SetValue(105,80,2,SMnm.Value);
+    SetValue(105,81,2,Edit6.Text);
+    SetValue(105,79,2,Edit4.Text);
+    SetValue(105,10,2,Stopsp.Value);
+    SetValue(105,44,2,FS0100.Value);
 
     //Gearbox
-    SetValue(2,85,2,SGearQty.Value);
-    SetValue(2,86,2,FSGear1.Value);
-    SetValue(2,87,2,FSGear2.Value);
-    SetValue(2,88,2,FSGear3.Value);
-    SetValue(2,89,2,FSGear4.Value);
-    SetValue(2,90,2,FSGear5.Value);
-    SetValue(2,91,2,FSGear6.Value);
-    SetValue(2,92,2,FSGear7.Value);
-    SetValue(2,93,2,FSGearR.Value);
-    SetValue(2,38,2,FSGearF.Value);
+    SetValue(105,84,2,SGearQty.Value);
+    SetValue(105,85,2,FSGear1.Value);
+    SetValue(105,86,2,FSGear2.Value);
+    SetValue(105,87,2,FSGear3.Value);
+    SetValue(105,88,2,FSGear4.Value);
+    SetValue(105,89,2,FSGear5.Value);
+    SetValue(105,90,2,FSGear6.Value);
+    SetValue(105,91,2,FSGear7.Value);
+    SetValue(105,92,2,FSGearR.Value);
+    SetValue(105,37,2,FSGearF.Value);
 
     //Driver - Male Head
-    SetValue(1,51,2,SDriverX2.Value/100);
-    SetValue(1,52,2,SDriverY2.Value/100);
-    SetValue(1,53,2,SDriverZ2.Value/100);
-    SetValue(1,44,2,SDriverX1.Value/100);
-    SetValue(1,45,2,SDriverY1.Value/100);
-    SetValue(1,46,2,SDriverZ1.Value/100);
+    SetValue(103,50,2,SDriverX2.Value/100);
+    SetValue(103,51,2,SDriverY2.Value/100);
+    SetValue(103,52,2,SDriverZ2.Value/100);
+    SetValue(103,43,2,SDriverX1.Value/100);
+    SetValue(103,44,2,SDriverY1.Value/100);
+    SetValue(103,45,2,SDriverZ1.Value/100);
 
     //Cockpit - Speedo
-    SetValue(1,55,2,ST1X.Value/100);
-    SetValue(1,56,2,ST1Y.Value/100);
-    SetValue(1,57,2,ST1Z.Value/100);
-    SetValue(1,58,2,ST1A1.Value/180*pi);
-    SetValue(1,59,2,ST1A2.Value/180*pi);
-    SetValue(1,60,2,ST1A3.Value/180*pi);
-    SetValue(1,61,2,FST1Scale.Value);
-    SetValue(1,62,2,ST1Start.Value/180*pi);
-    SetValue(1,64,2,FST1Size.Value);
-    SetValue(1,54,2,ST1Mode.Value);
+    SetValue(103,54,2,ST1X.Value/100);
+    SetValue(103,55,2,ST1Y.Value/100);
+    SetValue(103,56,2,ST1Z.Value/100);
+    SetValue(103,57,2,ST1A1.Value/180*pi);
+    SetValue(103,58,2,ST1A2.Value/180*pi);
+    SetValue(103,59,2,ST1A3.Value/180*pi);
+    SetValue(103,60,2,FST1Scale.Value);
+    SetValue(103,61,2,ST1Start.Value/180*pi);
+    SetValue(103,62,2,FST1Size.Value);
+    SetValue(103,53,2,ST1Mode.Value);
 
     //Cockpit - Tacho
-    SetValue(1,65,2,ST2X.Value/100);
-    SetValue(1,66,2,ST2Y.Value/100);
-    SetValue(1,67,2,ST2Z.Value/100);
-    SetValue(1,68,2,ST2A1.Value/180*pi);
-    SetValue(1,69,2,ST2A2.Value/180*pi);
-    SetValue(1,70,2,ST2A3.Value/180*pi);
-    SetValue(1,71,2,FST2Scale.Value);
-    SetValue(1,72,2,ST2Start.Value/180*pi);
-    SetValue(1,74,2,FST2Size.Value);
-    SetValue(1,64,2,ST2Mode.Value);
+    SetValue(103,64,2,ST2X.Value/100);
+    SetValue(103,65,2,ST2Y.Value/100);
+    SetValue(103,66,2,ST2Z.Value/100);
+    SetValue(103,67,2,ST2A1.Value/180*pi);
+    SetValue(103,68,2,ST2A2.Value/180*pi);
+    SetValue(103,69,2,ST2A3.Value/180*pi);
+    SetValue(103,70,2,FST2Scale.Value);
+    SetValue(103,71,2,ST2Start.Value/180*pi);
+    SetValue(103,72,2,FST2Size.Value);
+    SetValue(103,63,2,ST2Mode.Value);
     //Cockpit - Drivewheel
-    SetValue(1,47,2,SDrwX.Value/100);
-    SetValue(1,48,2,SDrwY.Value/100);
-    SetValue(1,49,2,SDrwZ.Value/100);
-    SetValue(1,50,2,SDrwW.Value/180*pi);
+    SetValue(103,46,2,SDrwX.Value/100);
+    SetValue(103,47,2,SDrwY.Value/100);
+    SetValue(103,48,2,SDrwZ.Value/100);
+    SetValue(103,49,2,SDrwW.Value/180*pi);
   end;
 
 end;
