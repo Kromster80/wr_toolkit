@@ -25,19 +25,17 @@ type
     Label5: TLabel;
     Label6: TLabel;
     Label7: TLabel;
-    procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure OpenDS(Sender: TObject; filename:string);
     procedure SaveDS(Sender: TObject);
     procedure AddCarsToDS(aEditCar:string);
     procedure SearchAutos(Sender: TObject);
     procedure GetAutoInfo(s1:string;i1:integer);
-    procedure Info(Sender: TObject);
+    procedure AboutClick(Sender: TObject);
     procedure WriteINI(Sender: TObject);
-    procedure CBSimMissionsClick(Sender: TObject);
     procedure ReadINI(Sender: TObject);
-    procedure PopulateCarList(Sender: TObject);
-    procedure BitBtn2Click(Sender: TObject);
+    procedure PopulateCarList();
+    procedure SaveDSRun(Sender: TObject);
     procedure CLBCarsClick(Sender: TObject);
     procedure SAllClick(Sender: TObject);
   end;
@@ -51,7 +49,7 @@ const
  StockReifen    = 72; //Tires
 
  MaxCars        = 256;
- VersionInfo    = 'AFC11HN Manager       Version 0.1b (06 Feb 2010)';
+ VersionInfo    = 'AFC11HN Manager       Version 0.1c (07 Feb 2010)';
 
 var
   Form1: TForm1;
@@ -97,14 +95,17 @@ begin
 
   Form2.Label2.Caption := 'Scanning: Cars ...';     Form2.Label2.Refresh; SearchAutos(nil);         //Form2.Memo1.Lines.Add('Autos - '+ElapsedTime(@TimeCode));
   if Form2.Showing then Form2.Destroy;
-  PopulateCarList(nil);
+  PopulateCarList();
   ReadINI(nil);
 end;
 
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TForm1.PopulateCarList();
+var i:integer;
 begin
-  WriteINI(nil);
+  for i:=1 to AddonCarQty do
+    CLBCars.Items.Add(AddonCar[i].Folder+zz+int2fix(i,3));
+  CLBCars.Refresh;
 end;
 
 
@@ -133,6 +134,7 @@ begin
   fHighwayDataSet.SaveDS(WorkDir+'FrontEnd2\FrontEnd.ds');
   WriteINI(nil);
 end;
+
 
 procedure TForm1.AddCarsToDS(aEditCar:string);
 var
@@ -301,6 +303,8 @@ begin
     SetValue(8,47,ID, 0.0);      //14000rpm
     SetValue(8,48,ID, 0.0);      //14500rpm
     SetValue(8,49,ID, 0.0);      //15000rpm
+    SetValue(8,50,ID, '');      //ommit SampleMOT
+    SetValue(8,51,ID, '');      //ommit SampleAP
 
     ID := COCount(9,2); //GearboxDB
                                                           //1 empty
@@ -372,15 +376,13 @@ var fDataSet:TDataSet;
 begin
   fDataSet := TDataSet.Create;
   fDataSet.LoadDS(WorkDir+'\Autos\'+s1+'\EditCar.car');
-
   AddonCar[i1].Factory := fDataSet.GetValueAsString(2,105,2);
   AddonCar[i1].Model   := fDataSet.GetValueAsString(2,4,2);
-
   fDataSet.Free;
 end;
 
 
-procedure TForm1.Info(Sender: TObject);
+procedure TForm1.AboutClick(Sender: TObject);
 begin
   AboutForm.Show(VersionInfo, 'Manages AFC11HN addon cars.', 'AFC11HNMan');
 end;
@@ -399,14 +401,6 @@ begin
     writeln(ft,AddonCar[i].Folder);
   end;
   closefile(ft);
-end;
-
-
-{I wonder if it works in HN that way?}
-procedure TForm1.CBSimMissionsClick(Sender: TObject);
-begin
-  //for i:=2 to 30 do if CBSimMissions.Checked then
-  //Value[49,30,i].Int:=0 else Value[49,30,i].Int:=100; //Missions Arcade / Simulation
 end;
 
 
@@ -436,16 +430,7 @@ begin
 end;
 
 
-procedure TForm1.PopulateCarList(Sender: TObject);
-var i:integer;
-begin
-  for i:=1 to AddonCarQty do
-    CLBCars.Items.Add(AddonCar[i].Folder+zz+int2fix(i,3));
-  CLBCars.Refresh;
-end;
-
-
-procedure TForm1.BitBtn2Click(Sender: TObject);
+procedure TForm1.SaveDSRun(Sender: TObject);
 var aPath:string;
 begin
   SaveChanges.Click();

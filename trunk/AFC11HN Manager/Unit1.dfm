@@ -160,7 +160,7 @@ object Form1: TForm1
       Height = 41
       Caption = 'Apply && Run Cobra11'
       TabOrder = 2
-      OnClick = BitBtn2Click
+      OnClick = SaveDSRun
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
         180000000000000C000000000000000000000000000000000000FFFFFFFFFFFF
@@ -268,7 +268,7 @@ object Form1: TForm1
       Height = 41
       Caption = 'About manager ...'
       TabOrder = 3
-      OnClick = Info
+      OnClick = AboutClick
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
         180000000000000C000000000000000000000000000000000000C8D0D4C8D0D4
