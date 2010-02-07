@@ -236,9 +236,11 @@ begin
     blockwrite(f,s[1],length(s));
 
     for iTB:=1 to TB[iDS].Entries do begin
-      s:='NDCOVAEn'+chr2(CO[iDS,iTB].Entries,4)+'VAId'+chr2(CO[iDS,iTB].Index,4)
-      +'VALb'+chr2(length(CO[iDS,iTB].Lib),4)+CO[iDS,iTB].Lib+#0
-      +'VAiU'+chr(CO[iDS,iTB].iU);
+      s := 'NDCOVAEn'+chr2(CO[iDS,iTB].Entries,4);
+      s := s+'VAId'+chr2(CO[iDS,iTB].Index,4);
+      s := s+'VALb'+chr2(length(CO[iDS,iTB].Lib),4);
+      if CO[iDS,iTB].Lib<>'' then s:=s+CO[iDS,iTB].Lib+#0;
+      s := s+'VAiU'+chr(CO[iDS,iTB].iU);
 
       s:=s+'VASM'+chr2(length(CO[iDS,iTB].SM),4);
       if CO[iDS,iTB].SM<>'' then s:=s+CO[iDS,iTB].SM+#0;
