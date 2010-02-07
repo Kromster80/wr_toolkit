@@ -380,7 +380,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure InitChart();
     procedure OpenClick(Sender: TObject);
-    procedure OpenCAR(Sender: TObject);
+    procedure OpenCAR(aCarFile: string);
     procedure MouseClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState); reintroduce;
     procedure VLEChange(Sender: TObject);
@@ -450,17 +450,13 @@ begin
   ExeDir := ExtractFilePath(Application.ExeName);
 
   InitChart();
-
   fDataSet := TDataSet.Create;
-  fDataSet.LoadDS('editcar.car');
-
-  exit;
 
   if not FileExists(carname) then
-    carname := 'editcar.car';
+    carname := ExeDir + 'editcar.car';
 
   if FileExists(carname) then
-    OpenCAR(Form1);
+    OpenCar(carname);
 end;
 
 
@@ -474,7 +470,7 @@ begin
   LineSerieHP.ShowInLegend := false;
   LineSerieHP.SeriesColor := clRed;
   Chart1.AddSeries(LineSerieHP);
-  
+
   LineSerieNM := TLineSeries.Create(Chart1);
   LineSerieNM.Pointer.Brush.Color := clBlue;
   LineSerieNM.ShowInLegend := false;
@@ -486,129 +482,40 @@ end;
 procedure TForm1.OpenClick(Sender: TObject);
 begin
   if not RunOpenDialog(Open1,'','','"World Racing" car descriptor (*.car)|*.car|All Files (*.*)|*.*') then exit;
-  carname:=Open1.FileName;
+  carname := Open1.FileName;
+
   if fileexists(ExeDir+'unlimiter.'+inttostr(846)) then
   begin
     SRaceClass.MaxValue:=65535;
     SClassID.MaxValue:=65535;
   end;
-  OpenCAR(Form1);
+
+  OpenCar(Open1.FileName);
 end;
 
-procedure TForm1.OpenCAR(Sender: TObject);
-var i,j,k,h,x:integer; f:file;
+procedure TForm1.OpenCAR(aCarFile: string);
 begin
-{AllowDataUpdate:=false;
+  fDataSet.LoadDS(aCarFile);
 
-assignfile(f,carname); FileMode:=0; reset(f,1); FileMode:=2;
-for i:=1 to 2 do for j:=0 to 512 do for k:=1 to 3 do begin
-vi[i,j,k]:=0; //clearing 2 tables, 256 entries, 3 values
-vr[i,j,k]:=0;
-vs[i,j,k]:='';
-end;
+  //todo: if fDataSet.TBIndex() MBWR then Insert Index0
 
-blockread(f,c,12); DSqty:=ord(c[9]);
-blockread(f,c,21); // VAst VAau ?
+  //Special fix for Sound SampleRate
+  fDataSet.SetValueType(2,75,2,1); //Integer in all WR cars
+  fDataSet.SetValue(2,75,2,round(fDataSet.GetValue(2,75,2).Rel));
 
-for i:=1 to DSqty do begin
-blockread(f,c,12); //TB
-TBqty[i]:=ord(c[9])+ord(c[10])*256;
+  RGFormat.ItemIndex := 1; //Default to WR2, for it has the most audience
+  if fDataSet.GetCOLib(2,8)='FlagMissionCar' then RGFormat.ItemIndex:=0; //MBWR
+  if fDataSet.GetCOLib(2,8)='CarClassID' then RGFormat.ItemIndex:=1; //WR2
+  if fDataSet.GetCOLib(2,57)='mocod' then RGFormat.ItemIndex:=3; //FVR
+  RGFormatClick(nil);
 
-blockread(f,c,8);                                //VAId_139_
-blockread(f,c,5);                                //VAIC_0
-blockread(f,c,8);                                //VALb____
-h:=ord(c[5]);
-blockread(f,c,h+1);
-TBLib[i]:='';
-for k:=1 to h do TBLib[i]:=TBLib[i]+c[k];
-
-blockread(f,c,8);
-TBCondQty[i]:=ord(c[5]); //Cond qty =2
-setlength(TBCond[i],TBCondQty[i]+1); //Cond strings
-
-    for k:=1 to TBCondQty[i] do begin
-    blockread(f,c,4); h:=ord(c[1]);
-    blockread(f,c,h+1); TBCond[i,k]:='';
-    for j:=1 to h do TBCond[i,k]:=TBCond[i,k]+c[j]; //usually VersionPC/VCarsAddOn + WRnoDemo
-    end;
-
-    for k:=1 to TBqty[i] do begin
-    blockread(f,c,12); //CO
-    COqty[i,k]:=ord(c[9]); //usually 2 (3 unused (make backup !))
-    blockread(f,c,8);  //VAid____
-    COid[i,k]:=ord(c[5])+ord(c[6])*256;
-    blockread(f,c,8);  //VAlb____
-    h:=ord(c[5]);
-    if h<>0 then blockread(f,c,h+1);
-    COtext[i,COid[i,k],1]:='';
-    for j:=1 to h do COtext[i,COid[i,k],1]:=COtext[i,COid[i,k],1]+c[j]; //CO Library name
-    blockread(f,c,13); //VAiU_VASM____
-    h:=ord(c[10]);
-    if h<>0 then blockread(f,c,h+1);
-    COtext[i,COid[i,k],2]:='';
-    for j:=1 to h do COtext[i,COid[i,k],2]:=COtext[i,COid[i,k],2]+c[j]; //CO input Unit ?
-    blockread(f,c,8);  //VAST
-    h:=ord(c[5]);
-    if h<>0 then blockread(f,c,h+1);
-    COtext[i,COid[i,k],3]:='';
-    for j:=1 to h do COtext[i,COid[i,k],3]:=COtext[i,COid[i,k],3]+c[j]; //CO String value ?
-    blockread(f,c,8);  //VAIC
-    h:=ord(c[5]);
-    if h<>0 then blockread(f,c,h+1);
-    COtext[i,COid[i,k],4]:='';
-    for j:=1 to h do COtext[i,COid[i,k],4]:=COtext[i,COid[i,k],4]+c[j]; //CO ?
-    blockread(f,c,8);  //VASC
-    h:=ord(c[5]);
-    if h<>0 then blockread(f,c,h+1);
-    COtext[i,COid[i,k],5]:='';
-    for j:=1 to h do COtext[i,COid[i,k],5]:=COtext[i,COid[i,k],5]+c[j]; //CO ?
-
-        for h:=1 to COqty[i,k] do begin //i,k,h
-        data[i,COid[i,k],h]:=0;
-        blockread(f,c,5);
-            if c[1]=#1 then begin
-            vi[i,COid[i,k],h]:=ord(c[2])+ord(c[3])*256+ord(c[4])*65536+ord(c[5])*16777216;
-            data[i,COid[i,k],h]:=1;
-            end else
-            if c[1]=#2 then begin
-            vr[i,COid[i,k],h]:=real2(c[2],c[3],c[4],c[5]);
-            data[i,COid[i,k],h]:=2;
-            end else
-            if c[1]=#16 then begin
-            x:=ord(c[2]);
-            vs[i,COid[i,k],h]:=''; //prepare empty
-            if x<>0 then blockread(f,c,x+1);
-            for j:=1 to x do vs[i,COid[i,k],h]:=vs[i,COid[i,k],h]+c[j];
-            data[i,COid[i,k],h]:=3;
-            end;
-        end; //1..h
-
-    end; //k..TB
-end; //i..DS
-
-closefile(f);
-//Special fix for Sound SampleRate
-if data[2,74,2]<>1 then begin
-data[2,74,2]:=1; //Integer in all WR cars
-vi[2,74,2]:=round(vr[2,74,2]);
-end;
-
-RGFormat.ItemIndex:=1; //Default to WR2
-if COtext[2,7,1]='FlagMissionCar' then RGFormat.ItemIndex:=0; //Reset file format
-if COtext[2,7,1]='CarClassID' then RGFormat.ItemIndex:=1; //Reset file format
-if COtext[2,56,1]='mocod' then RGFormat.ItemIndex:=3; //Reset file format
-RGFormatClick(nil);
-
-  RefreshFS;        //Update FS
-  RefreshVLE;       //Update List
-  AllowDataUpdate:=true; //FSChange(Form1);
-  FSChange(Form1); }
+  UpdateControls;
 end;
 
 procedure TForm1.RefreshVLE; //Send data to List from memory
-var i,k,Count:integer;
+//var i,k,Count:integer;
 begin
-  {$IFDEF VER140}
+  {
   VLEEdit:=false;
   ValueListEditor1.Strings.Clear;
   for i:=1 to DSqty do begin
@@ -625,13 +532,13 @@ begin
     end;
   end;
   VLEEdit:=true;
-  {$ENDIF}
+  }
 end;
 
 procedure TForm1.VLEChange(Sender: TObject);
-var i,k:integer; Key,Val:string;
+//var i,k:integer; Key,Val:string;
 begin
-  {$IFDEF VER140}
+  {
   if VLEEdit=false then exit;
   Key:=ValueListEditor1.Keys[ValueListEditor1.Row];
   Val:=ValueListEditor1.Values[ValueListEditor1.Keys[ValueListEditor1.Row]];
@@ -644,7 +551,7 @@ begin
       3: vs[i,k,2]:=Val;
     end;
   end;
-  {$ENDIF}
+  }
 end;
 
 //Redirect to Keyboard call, cause of different input parameters.
@@ -656,9 +563,9 @@ begin
 end;
 
 procedure TForm1.KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-var i,k:integer;
+//var i,k:integer;
 begin
-{$IFDEF VER140}
+{
 with ValueListEditor1 do
   if length(Keys[Row])>=6 then begin
     i:=strtoint(Keys[Row][1]);
@@ -694,31 +601,30 @@ with ValueListEditor1 do
     0: Label8.caption:='  -  ';
     end;
   end; //with ... do
-{$ENDIF}
+}
 end;
 
 procedure TForm1.SaveClick(Sender: TObject);
-var i,j,k,h,m:integer; Inp:string; f2:textfile;
+var i,j,k,h,m:integer; f2:textfile;
 begin
-if not RunSaveDialog(Save1,'.car',ExtractFilePath(carname),'"World Racing" car descriptor (*.car)|*.car|All Files (*.*)|*.*') then exit;
+  if not RunSaveDialog(Save1,'editcar.car',ExtractFilePath(carname),'"World Racing" car descriptor (*.car)|*.car|All Files (*.*)|*.*') then exit;
+
+  case CarFmt of
+    fmtMBWR:    begin fDataSet.SetTBLength(1,75); fDataSet.SetTBLength(2, 98); end;
+    fmtWR2:     begin fDataSet.SetTBLength(1,80); fDataSet.SetTBLength(2,105); end;
+    fmtAFC11N:  begin fDataSet.SetTBLength(1,80); fDataSet.SetTBLength(2,106); end;
+    fmtFVR:     begin fDataSet.SetTBLength(1,80); fDataSet.SetTBLength(2,110); end;
+  end;
+
+  fDataSet.SaveDS(Save1.FileName);
+
+  exit;
 
 if not fileexists(ExeDir+'unlimiter.'+inttostr(846)) then
 begin
   EnsureRange(vi[2, 7,2],100,999); //restrict ClassID in menu to 100..999 range
   EnsureRange(vi[2,42,2],0,300); //restrict RaceClass in game to 0..300
 end;
-
-DSqty:=2; //2 volumes
-
-  if CarFmt=fmtMBWR then TBqty[1]:=75;
-  if CarFmt=fmtWR2  then TBqty[1]:=80;//0..80 id of WR2
-  if CarFmt=fmtAFC11N  then TBqty[1]:=80;
-  if CarFmt=fmtFVR  then TBqty[1]:=80;
-
-  if CarFmt=fmtMBWR then TBqty[2]:=98;
-  if CarFmt=fmtWR2  then TBqty[2]:=105;//0..105 id of WR2
-  if CarFmt=fmtAFC11N  then TBqty[2]:=106;//106 is Caravan
-  if CarFmt=fmtFVR  then TBqty[2]:=110;
 
 TBLib[1]:='Edit_3DCarsDB';
 TBLib[2]:='Edit_CarsDB';
@@ -801,7 +707,7 @@ begin
 end;
 
 procedure TForm1.FSChange(Sender: TObject);
-var s1:string; k:integer; z:real;
+//var s1:string; k:integer; z:real;
 //Transfer values from FloatSpins and other editors to memory
 begin
   UpdateDataSet();
@@ -982,7 +888,7 @@ vs[2,106,2]:=Caravan.Text; }
 end;
 
 procedure TForm1.RefreshFS;
-var k:integer;
+//var k:integer;
 begin //Send data to SpinEditors from memory
 {AllowDataUpdate:=false;
 Edit1.Text:=vs[1,2,2];  //folder
@@ -1118,13 +1024,14 @@ end;
 
 procedure TForm1.PageChange(Sender: TObject);
 begin
-if PageControl2.ActivePageIndex = PageControl2.PageCount-1 then RefreshVLE else RefreshFS;
-if PageControl2.ActivePage.Caption = 'Engine' then TorqueMouseMove(nil,[ssShift],0,0);
+  if PageControl2.ActivePageIndex = PageControl2.PageCount-1 then RefreshVLE else RefreshFS;
+  if PageControl2.ActivePage.Caption = 'Engine' then TorqueMouseMove(nil,[ssShift],0,0);
 end;
 
 procedure TForm1.TorqueMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var i,u,v:integer;
 begin
+{$IFDEF VER140}
   if (LineSerieHP = nil) or (LineSerieNM = nil) then exit;
   if LineSerieHP.Count <> 21 then exit; //yet empty
 
@@ -1138,6 +1045,7 @@ begin
   end;
   for i:=1 to 20 do
     LineSerieNM.YValue[i] := round(i*LineSerieHP.YValue[i]*SNMStep.Value/7023.5);
+{$ENDIF}
 end;
 
 procedure TForm1.TorqueMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -1145,6 +1053,7 @@ begin
 {$IFDEF VER140}
   Chart1.LeftAxis.Maximum := round(LineSerieHP.MaxYValue*1.2);
   if Chart1.LeftAxis.Maximum = 0 then Chart1.LeftAxis.Maximum := 500;
+  UpdateDataSet;
 {$ENDIF}
 end;
 
@@ -1170,6 +1079,7 @@ end;
 procedure TForm1.RGFormatClick(Sender: TObject);
 var i:integer;
 begin
+  LockControls := true;
 FSChange(nil);
 for i:=0 to Form1.ComponentCount-1 do
 //Components with Tag=888 are protected from enabling
@@ -1279,7 +1189,8 @@ if RGFormat.ItemIndex=3 then begin //Ferrari Virtual Race
   SappBR3.Enabled:=false;
 end;
 
-FSChange(nil);
+  LockControls := false;
+//FSChange(nil);
 end;
 
 procedure TForm1.BrowseForWR2DSClick(Sender: TObject);
@@ -1969,11 +1880,12 @@ begin
     FS106.Value         := GetValue(2,29,2).Rel;
 
     //Engine - Chart
-    for k:=0 to 20 do LineSerieHP.AddXY(k*SNMStep.Value,round(GetValue(2,51+k,2).Rel));
-    for k:=0 to 20 do LineSerieNM.AddXY(k*SNMStep.Value,0);
-    {$IFDEF VER140} Chart1.LeftAxis.Maximum:=round(LineSerieHP.MaxYValue*1.2); {$ENDIF}
+    LineSerieHP.Clear;
+    LineSerieNM.Clear;
+    for k:=0 to 20 do LineSerieHP.AddXY(k*SNMStep.Value, round(GetValue(2,51+k,2).Rel));
+    for k:=0 to 20 do LineSerieNM.AddXY(k*SNMStep.Value, 0);
+    {$IFDEF VER140} Chart1.LeftAxis.Maximum := round(LineSerieHP.MaxYValue*1.2); {$ENDIF}
     //Engine - Torque Curve
-    if round(GetValue(2,72,2).Rel)<>0 then
     SNMStep.Value       := round(GetValue(2,72,2).Rel); //NMStep
     SrpmMax.Value       := GetValue(2,50,2).Int;
     SMtorque.Value      := GetValue(2,30,2).Int;
@@ -2101,108 +2013,104 @@ begin
     SetValue(2,33,2,Sweight.Value);
     SetValue(2,28,2,SweightD.Value);
     SetValue(2,23,2,SAngular.Value);
-
-    exit;
     //Suspension - Suspension
-    SDamper.Value       := GetValue(2,17,2).Int;
-    SFeather.Value      := GetValue(2,18,2).Int;
-    SRelease.Value      := round(GetValue(2,19,2).Rel*100);
-    SBounce.Value       := round(GetValue(2,20,2).Rel*100);
-    SSperrDif.Value     := GetValue(2,42,2).Int;
-    SWheelY.Value       := round(GetValue(2,44,2).Rel*100);
-    Stabilizat.Value    := GetValue(2,27,2).Rel;
+    SetValue(2,17,2,SDamper.Value);
+    SetValue(2,18,2,SFeather.Value);
+    SetValue(2,19,2,SRelease.Value/100);
+    SetValue(2,20,2,SBounce.Value/100);
+    SetValue(2,42,2,SSperrDif.Value);
+    SetValue(2,44,2,SWheelY.Value/100);
+    SetValue(2,27,2,Stabilizat.Value);
     //Suspension - Drive-Train
-    RGdrive.ItemIndex   := GetValue(2,37,2).Int-1;
+    SetValue(2,37,2,RGdrive.ItemIndex + 1);
     //Suspension - Aerodynamics
-    FSAirB.Value        := GetValue(2,39,2).Rel;
-    SSlipF.Value        := GetValue(2,40,2).Int;
-    SSlipR.Value        := GetValue(2,41,2).Int;
+    SetValue(2,39,2,FSAirB.Value);
+    SetValue(2,40,2,SSlipF.Value);
+    SetValue(2,41,2,SSlipR.Value);
 
     //Wheels - Size
-    STireFR.Value         := round(GetValue(2,94,2).Rel*100);
-    STireFW.Value         := round(GetValue(2,95,2).Rel*100);
-    STireFD.Value         := round(GetValue(2,96,2).Rel/0.127); //Half an inch
-    STireRR.Value         := round(GetValue(2,97,2).Rel*100);
-    STireRW.Value         := round(GetValue(2,98,2).Rel*100);
-    STireRD.Value         := round(GetValue(2,99,2).Rel/0.127); //Half an inch
+    SetValue(2,94,2,STireFR.Value/100);
+    SetValue(2,95,2,STireFW.Value/100);
+    SetValue(2,96,2,STireFD.Value*0.127);
+    SetValue(2,97,2,STireRR.Value/100);
+    SetValue(2,98,2,STireRW.Value/100);
+    SetValue(2,99,2,STireRD.Value*0.127);
     //Wheels - Positioning
-    STireFT.Value         := round(GetValue(1,6,2).Rel*200);
-    STireRT.Value         := round(GetValue(1,7,2).Rel*200);
-    STireFZ.Value         := round(GetValue(1,8,2).Rel*100);
-    STireRZ.Value         := round(GetValue(1,9,2).Rel*100);
+    SetValue(1,6,2,STireFT.Value/200);
+    SetValue(1,7,2,STireRT.Value/200);
+    SetValue(1,8,2,STireFZ.Value/100);
+    SetValue(1,9,2,STireRZ.Value/100);
     //Wheels - Tire Properties
-    FSGrip.Value        := GetValue(2,21,2).Rel;
-    FSGripFR.Value      := GetValue(2,22,2).Rel;
-    FSSlipF.Value       := GetValue(2,24,2).Rel;
-    FSSlipR.Value       := GetValue(2,25,2).Rel;
-    FS103.Value         := GetValue(2,26,2).Rel;
-    FS106.Value         := GetValue(2,29,2).Rel;
+    SetValue(2,21,2,FSGrip.Value);
+    SetValue(2,22,2,FSGripFR.Value);
+    SetValue(2,24,2,FSSlipF.Value);
+    SetValue(2,25,2,FSSlipR.Value);
+    SetValue(2,26,2,FS103.Value);
+    SetValue(2,29,2,FS106.Value);
 
     //Engine - Chart
-    for k:=0 to 20 do LineSerieHP.AddXY(k*SNMStep.Value,round(GetValue(2,51+k,2).Rel));
-    for k:=0 to 20 do LineSerieNM.AddXY(k*SNMStep.Value,0);
-    {$IFDEF VER140} Chart1.LeftAxis.Maximum:=round(LineSerieHP.MaxYValue*1.2); {$ENDIF}
+    for k:=0 to 20 do SetValue(2,51+k,2,LineSerieHP.YValues[k]);
     //Engine - Torque Curve
-    if round(GetValue(2,72,2).Rel)<>0 then
-    SNMStep.Value       := round(GetValue(2,72,2).Rel); //NMStep
-    SrpmMax.Value       := GetValue(2,50,2).Int;
-    SMtorque.Value      := GetValue(2,30,2).Int;
+    SetValue(2,72,2,SNMStep.Value+0.0); //NMStep
+    SetValue(2,50,2,SrpmMax.Value);
+    SetValue(2,30,2,SMtorque.Value);
     //Engine - Statistics
-    SMhp.Value          := GetValue(2,78,2).Int;
-    Edit5.Text          := GetValue(2,79,2).Str;
-    SMnm.Value          := GetValue(2,81,2).Int;
-    Edit6.Text          := GetValue(2,82,2).Str;
-    Edit4.Text          := GetValue(2,80,2).Str;
-    Stopsp.Value        := GetValue(2,11,2).Int;
-    FS0100.Value        := GetValue(2,45,2).Rel;
+    SetValue(2,78,2,SMhp.Value);
+    SetValue(2,79,2,Edit5.Text);
+    SetValue(2,81,2,SMnm.Value);
+    SetValue(2,82,2,Edit6.Text);
+    SetValue(2,80,2,Edit4.Text);
+    SetValue(2,11,2,Stopsp.Value);
+    SetValue(2,45,2,FS0100.Value);
 
     //Gearbox
-    SGearQty.Value      := GetValue(2,85,2).Int;
-    FSGear1.Value       := GetValue(2,86,2).Rel;
-    FSGear2.Value       := GetValue(2,87,2).Rel;
-    FSGear3.Value       := GetValue(2,88,2).Rel;
-    FSGear4.Value       := GetValue(2,89,2).Rel;
-    FSGear5.Value       := GetValue(2,90,2).Rel;
-    FSGear6.Value       := GetValue(2,91,2).Rel;
-    FSGear7.Value       := GetValue(2,92,2).Rel;
-    FSGearR.Value       := GetValue(2,93,2).Rel;
-    FSGearF.Value       := GetValue(2,38,2).Rel;
+    SetValue(2,85,2,SGearQty.Value);
+    SetValue(2,86,2,FSGear1.Value);
+    SetValue(2,87,2,FSGear2.Value);
+    SetValue(2,88,2,FSGear3.Value);
+    SetValue(2,89,2,FSGear4.Value);
+    SetValue(2,90,2,FSGear5.Value);
+    SetValue(2,91,2,FSGear6.Value);
+    SetValue(2,92,2,FSGear7.Value);
+    SetValue(2,93,2,FSGearR.Value);
+    SetValue(2,38,2,FSGearF.Value);
 
     //Driver - Male Head
-    SDriverX2.Value       := round(GetValue(1,51,2).Rel*100);
-    SDriverY2.Value       := round(GetValue(1,52,2).Rel*100);
-    SDriverZ2.Value       := round(GetValue(1,53,2).Rel*100);
-    SDriverX1.Value       := round(GetValue(1,44,2).Rel*100);
-    SDriverY1.Value       := round(GetValue(1,45,2).Rel*100);
-    SDriverZ1.Value       := round(GetValue(1,46,2).Rel*100);
+    SetValue(1,51,2,SDriverX2.Value/100);
+    SetValue(1,52,2,SDriverY2.Value/100);
+    SetValue(1,53,2,SDriverZ2.Value/100);
+    SetValue(1,44,2,SDriverX1.Value/100);
+    SetValue(1,45,2,SDriverY1.Value/100);
+    SetValue(1,46,2,SDriverZ1.Value/100);
 
     //Cockpit - Speedo
-    ST1X.Value            := round(GetValue(1,55,2).Rel*100);
-    ST1Y.Value            := round(GetValue(1,56,2).Rel*100);
-    ST1Z.Value            := round(GetValue(1,57,2).Rel*100);
-    ST1A1.Value           := round(GetValue(1,58,2).Rel*180/pi);
-    ST1A2.Value           := round(GetValue(1,59,2).Rel*180/pi);
-    ST1A3.Value           := round(GetValue(1,60,2).Rel*180/pi);
-    FST1Scale.Value       := GetValue(1,61,2).Rel;
-    ST1Start.Value        := round(GetValue(1,62,2).Rel*180/pi);
-    FST1Size.Value        := GetValue(1,63,2).Rel;
-    ST1Mode.Value         := GetValue(1,54,2).Int;
+    SetValue(1,55,2,ST1X.Value/100);
+    SetValue(1,56,2,ST1Y.Value/100);
+    SetValue(1,57,2,ST1Z.Value/100);
+    SetValue(1,58,2,ST1A1.Value/180*pi);
+    SetValue(1,59,2,ST1A2.Value/180*pi);
+    SetValue(1,60,2,ST1A3.Value/180*pi);
+    SetValue(1,61,2,FST1Scale.Value);
+    SetValue(1,62,2,ST1Start.Value/180*pi);
+    SetValue(1,64,2,FST1Size.Value);
+    SetValue(1,54,2,ST1Mode.Value);
+
     //Cockpit - Tacho
-    ST2X.Value            := round(GetValue(1,65,2).Rel*100);
-    ST2Y.Value            := round(GetValue(1,66,2).Rel*100);
-    ST2Z.Value            := round(GetValue(1,67,2).Rel*100);
-    ST2A1.Value           := round(GetValue(1,68,2).Rel*180/pi);
-    ST2A2.Value           := round(GetValue(1,69,2).Rel*180/pi);
-    ST2A3.Value           := round(GetValue(1,70,2).Rel*180/pi);
-    FST2Scale.Value       := GetValue(1,71,2).Rel;
-    ST2Start.Value        := round(GetValue(1,72,2).Rel*180/pi);
-    FST2Size.Value        := GetValue(1,73,2).Rel;
-    ST2Mode.Value         := GetValue(1,64,2).Int;
+    SetValue(1,65,2,ST2X.Value/100);
+    SetValue(1,66,2,ST2Y.Value/100);
+    SetValue(1,67,2,ST2Z.Value/100);
+    SetValue(1,68,2,ST2A1.Value/180*pi);
+    SetValue(1,69,2,ST2A2.Value/180*pi);
+    SetValue(1,70,2,ST2A3.Value/180*pi);
+    SetValue(1,71,2,FST2Scale.Value);
+    SetValue(1,72,2,ST2Start.Value/180*pi);
+    SetValue(1,74,2,FST2Size.Value);
+    SetValue(1,64,2,ST2Mode.Value);
     //Cockpit - Drivewheel
-    SDrwX.Value           := round(GetValue(1,47,2).Rel*100);
-    SDrwY.Value           := round(GetValue(1,48,2).Rel*100);
-    SDrwZ.Value           := round(GetValue(1,49,2).Rel*100);
-    SDrwW.Value           := round(GetValue(1,50,2).Rel*180/pi);
+    SetValue(1,47,2,SDrwX.Value/100);
+    SetValue(1,48,2,SDrwY.Value/100);
+    SetValue(1,49,2,SDrwZ.Value/100);
+    SetValue(1,50,2,SDrwW.Value/180*pi);
   end;
 
 end;
