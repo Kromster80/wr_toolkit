@@ -80,6 +80,8 @@ begin
 
   WorkDir := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName));
 
+  //WorkDir := 'E:\AFC11 - HighwayNights\';
+
   if not fileexists(WorkDir+'FrontEnd2\FrontEnd.ds') then begin
     Form2.FormStyle := fsNormal;
     MessageBox(Form1.Handle,'".\FrontEnd2\FrontEnd.ds" not found. Run HNMan from AFC11HN folder.','Error',MB_OK);
@@ -118,16 +120,16 @@ var i:integer;
 begin
 
   //Restore stock count
-  fHighwayDataSet.SetTBLength(6, StockCars);
-  fHighwayDataSet.SetTBLength(7, Stock3DCars);
-  fHighwayDataSet.SetTBLength(8, StockMotoren);
-  fHighwayDataSet.SetTBLength(9, StockGetriebe);
-  fHighwayDataSet.SetTBLength(10,StockReifen);
+  fHighwayDataSet.SetCOLengths(6, StockCars);
+  fHighwayDataSet.SetCOLengths(7, Stock3DCars);
+  fHighwayDataSet.SetCOLengths(8, StockMotoren);
+  fHighwayDataSet.SetCOLengths(9, StockGetriebe);
+  fHighwayDataSet.SetCOLengths(10,StockReifen);
 
   for i:=1 to AddonCarQty do
   if AddonCar[i].Install then
     AddCarsToDS(WorkDir+'\Autos\'+AddonCar[i].Folder+'\EditCar.car');
-
+                             
   fHighwayDataSet.SaveDS(WorkDir+'FrontEnd2\FrontEnd.ds');
   WriteINI(nil);
 end;
@@ -142,12 +144,11 @@ begin
   fCarDataSet := TDataSet.Create;
   fCarDataSet.LoadDS(aEditCar);
 
-  fHighwayDataSet.AddValueAcrossTB(6);
-  fHighwayDataSet.AddValueAcrossTB(7);
-  fHighwayDataSet.AddValueAcrossTB(8);
-  fHighwayDataSet.AddValueAcrossTB(9);
-  fHighwayDataSet.AddValueAcrossTB(10); //Front tires
-  fHighwayDataSet.AddValueAcrossTB(10); //Rear tires
+  fHighwayDataSet.SetCOLengths(6,  fHighwayDataSet.COCount(6, 2)+1);
+  fHighwayDataSet.SetCOLengths(7,  fHighwayDataSet.COCount(7, 2)+1);
+  fHighwayDataSet.SetCOLengths(8,  fHighwayDataSet.COCount(8, 2)+1);
+  fHighwayDataSet.SetCOLengths(9,  fHighwayDataSet.COCount(9, 2)+1);
+  fHighwayDataSet.SetCOLengths(10, fHighwayDataSet.COCount(10,2)+2); //Front&Rear tires
 
   with fHighwayDataSet do begin
     ID := COCount(6,2); //CarsDB

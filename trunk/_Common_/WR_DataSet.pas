@@ -53,9 +53,10 @@ type
   public
     DoProperIndexing:boolean;
     constructor Create;
-    function IndexInRange(iDS,iTB,iCO:integer):boolean;
     function LoadDS(FileName:string):boolean;
     procedure SaveDS(FileName:string);
+
+    function IndexInRange(iDS,iTB,iCO:integer):boolean;
 
     property DSCount:integer read DSQty;
 
@@ -82,7 +83,7 @@ type
     procedure SetValueAsString(iDS,iTB,iCO:integer; Text:string);
 
     procedure SetTBLength(iDS,aNewLength:integer);
-    procedure AddValueAcrossTB(iDS:integer);
+    procedure SetCOLengths(iDS,aNewLength:integer);
 
     function FindStringInValues(i1,i2,i3:integer; Input:string):TDSNode; //Return Address of found string DS:TB:CO
 
@@ -105,14 +106,6 @@ end;
 constructor TDataSet.Create;
 begin
   DoProperIndexing := false;
-end;
-
-
-function TDataSet.IndexInRange(iDS,iTB,iCO:integer):boolean;
-begin
-  Result := InRange(iDS,1,DSqty) and
-            InRange(iTB,1,TB[iDS].Entries) and
-            InRange(iCO,1,CO[iDS,iTB].Entries);
 end;
 
 
@@ -191,10 +184,7 @@ begin
   setlength(Value[iDS,iTB],CO[iDS,iTB].Entries+100);//optimistic way to avoid common length mismatches
 
     for iCO:=1 to CO[iDS,iTB].Entries do begin
-    Value[iDS,iTB,iCO].Typ:=0;
-    Value[iDS,iTB,iCO].Int:=0;
-    Value[iDS,iTB,iCO].Rel:=0;
-    Value[iDS,iTB,iCO].Str:='';
+    Value[iDS,iTB,iCO] := DSValue(0,0,0,''); //reset
     blockread(f,Value[iDS,iTB,iCO].Typ,1);
     case Value[iDS,iTB,iCO].Typ of
       1:  blockread(f,Value[iDS,iTB,iCO].Int,4);
@@ -276,6 +266,14 @@ begin
   end; //1..DSqty
   closefile(f);
 
+end;
+
+
+function TDataSet.IndexInRange(iDS,iTB,iCO:integer):boolean;
+begin
+  Result := InRange(iDS,1,DSqty) and
+            InRange(iTB,1,TB[iDS].Entries) and
+            InRange(iCO,1,CO[iDS,iTB].Entries);
 end;
 
 
@@ -389,7 +387,7 @@ begin
   if IndexInRange(iDS,iTB,iCO) then
     Result := Value[iDS,iTB,iCO]
   else
-    Result := DSValue(0,0,0.0,''); //Empty
+    Result := DSValue(1,0,0.0,''); //Empty
 end;
 
 
@@ -479,16 +477,16 @@ begin
 end;
 
 
-procedure TDataSet.AddValueAcrossTB(iDS:integer);
+procedure TDataSet.SetCOLengths(iDS,aNewLength:integer);
 var iTB,iCO:integer;
 begin
   iDS := ConvertDSToIndex(iDS);
   for iTB:=1 to TB[iDS].Entries do
   if CO[iDS,iTB].Entries<>0 then begin
-    inc(CO[iDS,iTB].Entries); //Add one new entry
-    //todo: RangeCheck and allocate more space
-    iCO := CO[iDS,iTB].Entries;
-    Value[iDS,iTB,iCO] := Value[iDS,iTB,iCO-1]; //Duplicate previous Typ and Value
+    setlength(Value[iDS,iTB],aNewLength+1);
+    for iCO := CO[iDS,iTB].Entries+1 to aNewLength do
+      Value[iDS,iTB,iCO] := Value[iDS,iTB,iCO-1]; //Duplicate previous Typ and Value
+    CO[iDS,iTB].Entries := aNewLength;
   end;
 end;
 
