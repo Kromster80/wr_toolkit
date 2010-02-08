@@ -402,7 +402,7 @@ type
   end;
 
 
-type TEditingFormat = (fmtMBWR, fmtWR2, fmtAFC11N, fmtFVR);
+type TEditingFormat = (fmtMBWR, fmtWR2, fmtAFC11N, fmtFVR, fmtAFC11HN);
 
 var
   Form1: TForm1;
@@ -495,8 +495,16 @@ begin
   fDataSet.LoadDS(aCarFile);
 
   //Special fix for Sound SampleRate
-  fDataSet.SetValueType(105,75,2,1); //Integer in all WR cars
-  fDataSet.SetValue(105,75,2,round(fDataSet.GetValue(105,75,2).Rel));
+  if fDataSet.GetValueType(105,74,2)<>1 then begin
+    fDataSet.SetValueType(105,74,2,1); //Integer in all WR cars
+    fDataSet.SetValue(105,74,2,round(fDataSet.GetValue(105,74,2).Rel));
+  end;
+
+  //Add missing field to MBWR cars
+  if fDataSet.COIndex(103,0) = -1 then
+    fDataSet.InsertCOEntry(103, 0, fDataSet.COCount(103,1), 'Kommentar', 16);
+  if fDataSet.COIndex(105,0) = -1 then
+    fDataSet.InsertCOEntry(105, 0, fDataSet.COCount(105,1), 'Kommentar', 16);
 
   RGFormat.ItemIndex := 1; //Default to WR2, for it has the most audience
   if fDataSet.GetCOLib(105,8)='FlagMissionCar' then RGFormat.ItemIndex:=0; //MBWR
@@ -813,6 +821,7 @@ case RGFormat.ItemIndex of
   1: CarFmt := fmtWR2;
   2: CarFmt := fmtAFC11N;
   3: CarFmt := fmtFVR;
+  4: CarFmt := fmtAFC11HN;
 end;
 
   //Identity tab
@@ -856,7 +865,7 @@ end;
   Label99.Enabled       := CarFmt in [fmtMBWR]; // bez1.tga
   TypLink.Enabled       := CarFmt in [fmtMBWR]; // bez1.tga
   Label86.Enabled       := CarFmt in [fmtMBWR]; // bez2.tga
-  TypRech.Enabled          := CarFmt in [fmtMBWR]; // bez2.tga
+  TypRech.Enabled       := CarFmt in [fmtMBWR]; // bez2.tga
 
   Label114.Enabled      := CarFmt in [fmtWR2, fmtAFC11N]; //Default Menu Color
   SColor.Enabled        := CarFmt in [fmtWR2, fmtAFC11N]; //Default Menu Color
