@@ -85,6 +85,8 @@ type
     procedure SetTBLength(iDS,aNewLength:integer);
     procedure SetCOLengths(iDS,aNewLength:integer);
 
+    procedure InsertCOEntry(iDS:integer; Index,EntriesCount:integer; Lib:string; aType:byte);
+
     function FindStringInValues(i1,i2,i3:integer; Input:string):TDSNode; //Return Address of found string DS:TB:CO
 
     function WRTextEn(Input:string):string;
@@ -342,8 +344,11 @@ end;
 
 function TDataSet.COIndex(iDS,iTB:integer):integer;
 begin
+  Result:=-1; //not found
   iDS := ConvertDSToIndex(iDS);
   iTB := ConvertTBToIndex(iDS,iTB);
+  if iDS=0 then exit;
+  if iTB=0 then exit;
   Result := CO[iDS,iTB].Index;
 end;
 
@@ -488,6 +493,54 @@ begin
       Value[iDS,iTB,iCO] := Value[iDS,iTB,iCO-1]; //Duplicate previous Typ and Value
     CO[iDS,iTB].Entries := aNewLength;
   end;
+end;
+
+
+procedure TDataSet.InsertCOEntry(iDS:integer; Index,EntriesCount:integer; Lib:string; aType:byte);
+var i,k,h:integer; InsertTo:integer;
+begin
+  i := ConvertDSToIndex(iDS);
+
+  //expand
+  if TB[i].Entries <> 0 then begin
+    TB[i].Entries := TB[i].Entries + 1;
+    setlength(CO[i],TB[i].Entries+1);
+    setlength(Value[i],TB[i].Entries+1);
+  end;
+
+  //shift
+  for h:=TB[i].Entries downto 1 do begin
+    if h = 1 then begin
+      InsertTo:=h;
+      break;
+    end;
+
+    CO[i,h] := CO[i,h-1];
+
+    setlength(Value[i,h], length(Value[i,h-1]));
+    for k:=0 to length(Value[i,h])-1 do
+      Value[i,h,k] := Value[i,h-1,k];
+
+    //break if we reached neighbour index
+    if CO[i,h-1].Index <= Index then begin
+      InsertTo:=h;
+      break;
+    end;
+  end;
+
+  //Fill in CO data
+  CO[i,InsertTo].Entries := EntriesCount;
+  CO[i,InsertTo].Index   := Index;
+  CO[i,InsertTo].Lib     := Lib;
+  {CO[i,InsertTo].iU
+  CO[i,InsertTo].SM
+  CO[i,InsertTo].ST
+  CO[i,InsertTo].IC
+  CO[i,InsertTo].SC}
+  setlength(Value[i,InsertTo],EntriesCount+1);
+
+  for h:=1 to EntriesCount do
+    Value[i,InsertTo,h] := DSValue(aType,0,0,'');
 end;
 
 
