@@ -792,7 +792,9 @@ object Form1: TForm1
         Top = 8
         Width = 41
         Caption = '  Name  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Label33: TLabel
         Left = 65
@@ -830,7 +832,9 @@ object Form1: TForm1
         Top = 192
         Width = 63
         Caption = '  Placement  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Label153: TLabel
         Left = 99
@@ -1219,7 +1223,9 @@ object Form1: TForm1
         Top = 8
         Width = 54
         Caption = '  Cameras  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Bevel3: TBevel
         Left = 296
@@ -1233,7 +1239,9 @@ object Form1: TForm1
         Top = 8
         Width = 37
         Caption = '  HUD  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Bevel2: TBevel
         Left = 8
@@ -1247,7 +1255,9 @@ object Form1: TForm1
         Top = 336
         Width = 105
         Caption = '  Brakelight Materials  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Bevel4: TBevel
         Left = 8
@@ -1261,7 +1271,9 @@ object Form1: TForm1
         Top = 144
         Width = 44
         Caption = '  Sound  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Bevel6: TBevel
         Left = 296
@@ -1275,7 +1287,9 @@ object Form1: TForm1
         Top = 136
         Width = 48
         Caption = '  Special  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Label54: TLabel
         Left = 66
@@ -2845,7 +2859,9 @@ object Form1: TForm1
         Top = 8
         Width = 47
         Caption = '  Weight  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Label123: TLabel
         Left = 24
@@ -2853,7 +2869,9 @@ object Form1: TForm1
         Top = 104
         Width = 68
         Caption = '  Suspension  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Label122: TLabel
         Left = 312
@@ -2861,7 +2879,9 @@ object Form1: TForm1
         Top = 8
         Width = 79
         Caption = '  Aerodynamics  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Sweight: TSpinEdit
         Left = 4
@@ -5108,7 +5128,9 @@ object Form1: TForm1
         Top = 208
         Width = 81
         Caption = '  Tire Properties  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Label26: TLabel
         Left = 130
@@ -5124,7 +5146,7 @@ object Form1: TForm1
         Top = 8
         Width = 33
         Caption = '  Size  '
-        Color = clBtnFace
+        Color = clMenu
         Font.Height = -11
         Font.Name = 'MS Sans Serif'
         ParentColor = False
@@ -5137,7 +5159,9 @@ object Form1: TForm1
         Top = 120
         Width = 64
         Caption = '  Positioning  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Label142: TLabel
         Left = 4
@@ -7542,7 +7566,9 @@ object Form1: TForm1
         Top = 104
         Width = 91
         Caption = '  Engine Statistics  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Bevel7: TBevel
         Left = 296
@@ -7556,7 +7582,9 @@ object Form1: TForm1
         Top = 8
         Width = 78
         Caption = '  Torque Curve  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object FS0100: TFloatSpinEdit
         Left = 292
@@ -7701,8 +7729,8 @@ object Form1: TForm1
           'Torque/RPM'
         )
         ParentColor = False
-        OnMouseMove = RPMEdit
-        OnMouseUp = Mup
+        OnMouseMove = TorqueMouseMove
+        OnMouseUp = TorqueMouseUp
         object Series1: TLineSeries
           Marks.Visible = False
           ShowInLegend = False
@@ -8631,7 +8659,9 @@ object Form1: TForm1
         Top = 56
         Width = 125
         Caption = '  Gear ratios (Max speed)  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Bevel24: TBevel
         Left = 8
@@ -8645,7 +8675,9 @@ object Form1: TForm1
         Top = 8
         Width = 47
         Caption = '  Weight  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Label143: TLabel
         Left = 91
@@ -13692,7 +13724,9 @@ object Form1: TForm1
         Top = 8
         Width = 76
         Caption = '  Female Head  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Bevel10: TBevel
         Left = 8
@@ -13706,7 +13740,9 @@ object Form1: TForm1
         Top = 96
         Width = 65
         Caption = '  Male Head  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Label135: TLabel
         Left = 4
@@ -16603,7 +16639,9 @@ object Form1: TForm1
         Top = 8
         Width = 44
         Caption = '  Tacho  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Label90: TLabel
         Left = 4
@@ -16611,7 +16649,9 @@ object Form1: TForm1
         Top = 8
         Width = 50
         Caption = '  Speedo  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Label113: TLabel
         Left = 148
@@ -16619,7 +16659,9 @@ object Form1: TForm1
         Top = 8
         Width = 66
         Caption = '  Drivewheel  '
+        Color = clMenu
         ParentColor = False
+        Transparent = False
       end
       object Bevel20: TBevel
         Left = 8
