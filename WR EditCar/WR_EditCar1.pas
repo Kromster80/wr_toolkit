@@ -4,13 +4,16 @@ interface
 uses
   SysUtils, Classes, Forms, StdCtrls, Dialogs, ExtCtrls, Controls, ComCtrls, Spin,
   {$IFDEF FPC} LResources, LCLIntf, TAGraph, TASeries, {$ENDIF}
-  WR_EditCar_Lang, WR_DataSet, Chart,
-  {$IFDEF VER140} FloatSpinEdit, {$ENDIF}
+  WR_EditCar_Lang, WR_DataSet,
+  {$IFDEF VER140}Chart, FloatSpinEdit, {$ENDIF}
   WR_AboutBox, KromUtils,
   Grids, Graphics, Buttons, Math
   {$IFDEF VER140}, ValEdit, TeEngine, Series, TeeProcs {$ENDIF};
 
 type
+
+  { TForm1 }
+
   TForm1 = class(TForm)
     ButtonLoad: TButton;
     ButtonSave: TButton;
@@ -767,12 +770,14 @@ begin
   v := max(round(LineSerieHP.YScreenToValue(Y)),0);
 
   Chart1.Title.Text.Strings[0] := 'Torque/RPM (HP) - '+inttostr(v)+'/'+inttostr(u*SNMStep.Value)+' ('+inttostr(round(v*u*SNMStep.Value/7023.5))+')';
-  if (ssLeft in Shift) then begin
+   if (ssLeft in Shift) then begin
     fDataSet.SetValue(2,51+u,2,v+0.0);
-    LineSerieHP.YValue[u] := v;
+    //LineSerieHP.YValue[u] := v;
+    LineSerieHP.SetYValue(u,v);
   end;
   for i:=1 to 20 do
-    LineSerieNM.YValue[i] := round(i*LineSerieHP.YValue[i]*SNMStep.Value/7023.5);
+    //LineSerieNM.YValue[i] := round(i*LineSerieHP.YValue[i]*SNMStep.Value/7023.5);
+    LineSerieNM.SetYValue(i, round(i*LineSerieHP.GetYValue(i)*SNMStep.Value/7023.5));
 {$ENDIF}
 end;
 
@@ -1785,7 +1790,7 @@ begin
     SetValue(105,28,2,FS106.Value);
 
     //Engine - Chart
-    for k:=0 to 20 do SetValue(105,50+k,2,LineSerieHP.YValues[k]);
+    for k:=0 to 20 do SetValue(105,50+k,2,LineSerieHP.GetYValue(k));// .YValues[k]);
     //Engine - Torque Curve
     SetValue(105,71,2,SNMStep.Value+0.0); //NMStep
     SetValue(105,49,2,SrpmMax.Value);
