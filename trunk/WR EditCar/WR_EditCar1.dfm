@@ -85,9 +85,9 @@ object Form1: TForm1
     Top = 8
     Width = 222
     Height = 289
-    ActivePage = TabSheet4
+    ActivePage = TabSheet1
     MultiLine = True
-    TabIndex = 0
+    TabIndex = 3
     TabOrder = 3
     OnChange = PageControl1Change
     object TabSheet4: TTabSheet
@@ -717,220 +717,20 @@ object Form1: TForm1
     Top = 8
     Width = 503
     Height = 489
-    ActivePage = TabSheet13
-    TabIndex = 0
+    ActivePage = TabSheet5
+    TabIndex = 1
     TabOrder = 4
     OnChange = PageChange
     object TabSheet13: TTabSheet
       Caption = 'Identity'
       ImageIndex = 8
-      object Label57: TLabel
-        Left = 177
-        Top = 150
-        Width = 60
-        Height = 13
-        Caption = 'Model Name'
-        Transparent = True
-      end
-      object Label56: TLabel
-        Left = 177
-        Top = 126
-        Width = 56
-        Height = 13
-        Caption = 'Class Name'
-        Transparent = True
-      end
-      object Label118: TLabel
-        Left = 99
-        Top = 77
-        Width = 59
-        Height = 13
-        Caption = 'Brand Name'
-        ShowAccelChar = False
-        Transparent = True
-      end
-      object Label31: TLabel
-        Left = 99
-        Top = 54
-        Width = 150
-        Height = 13
-        Caption = 'Cabrio Folder & File Name Mask'
-        ShowAccelChar = False
-        Transparent = True
-      end
-      object Label55: TLabel
-        Left = 99
-        Top = 29
-        Width = 143
-        Height = 13
-        Caption = 'Main Folder & File Name Mask'
-        ShowAccelChar = False
-        Transparent = True
-      end
-      object Bevel21: TBevel
-        Left = 8
-        Top = 14
-        Width = 185
-        Height = 2
-      end
-      object Label139: TLabel
-        Left = 24
-        Top = 8
-        Width = 40
-        Height = 13
-        Caption = '  Name  '
-      end
-      object Label33: TLabel
-        Left = 65
-        Top = 345
-        Width = 55
-        Height = 13
-        Caption = 'Menu Class'
-      end
-      object Label127: TLabel
-        Left = 74
-        Top = 317
-        Width = 92
-        Height = 13
-        Caption = 'Custom Race Class'
-      end
-      object Label50: TLabel
-        Left = 65
-        Top = 369
-        Width = 69
-        Height = 13
-        Caption = 'Score to Open'
-      end
-      object Bevel22: TBevel
-        Left = 8
-        Top = 198
-        Width = 185
-        Height = 2
-      end
-      object Label140: TLabel
-        Left = 24
-        Top = 192
-        Width = 62
-        Height = 13
-        Caption = '  Placement  '
-      end
-      object Label153: TLabel
-        Left = 99
-        Top = 101
-        Width = 43
-        Height = 13
-        Caption = 'Logo File'
-        ShowAccelChar = False
-        Transparent = True
-      end
-      object Edit1: TEdit
-        Left = 4
-        Top = 26
-        Width = 90
-        Height = 21
-        TabOrder = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object Edit8: TEdit
-        Left = 4
-        Top = 50
-        Width = 90
-        Height = 21
-        TabOrder = 1
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object Hersteller: TEdit
-        Left = 4
-        Top = 74
-        Width = 90
-        Height = 21
-        TabOrder = 2
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object Edit2: TEdit
-        Left = 4
-        Top = 122
-        Width = 168
-        Height = 21
-        TabOrder = 3
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object Edit3: TEdit
-        Left = 4
-        Top = 146
-        Width = 168
-        Height = 21
-        TabOrder = 4
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SRaceClass: TSpinEdit
-        Left = 12
-        Top = 314
-        Width = 57
-        Height = 22
-        Hint = '5 - 300'
-        Enabled = False
-        MaxValue = 300
-        MinValue = 1
-        TabOrder = 5
-        Value = 5
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SClassID: TSpinEdit
-        Left = 4
-        Top = 342
-        Width = 57
-        Height = 22
-        Hint = '100 - 999'
-        MaxValue = 999
-        MinValue = 100
-        TabOrder = 6
-        Value = 100
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SScore: TSpinEdit
-        Left = 4
-        Top = 366
-        Width = 57
-        Height = 22
-        Hint = '1 - 1000000'
-        MaxValue = 1000000
-        MinValue = 1
-        TabOrder = 7
-        Value = 1
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object RaceClass1_4: TRadioGroup
-        Left = 4
-        Top = 208
-        Width = 97
-        Height = 105
-        Caption = '  Race Class  '
-        ItemIndex = 0
-        Items.Strings = (
-          'Series'
-          'Racing'
-          'Prototype'
-          'Vintage'
-          'Custom')
-        TabOrder = 8
-        OnClick = FSChange
-      end
       object GroupBox4: TGroupBox
         Left = 240
-        Top = 196
+        Top = 216
         Width = 249
-        Height = 213
-        Caption = '  Score to Open  '
-        TabOrder = 9
+        Height = 217
+        Caption = '  Score to open  '
+        TabOrder = 0
         object Memo1: TMemo
           Left = 8
           Top = 24
@@ -958,745 +758,807 @@ object Form1: TForm1
           TabOrder = 0
         end
       end
-      object CBCabrio2: TCheckBox
-        Left = 21
-        Top = 170
-        Width = 97
-        Height = 17
-        Caption = 'Cabriolet Version'
-        TabOrder = 10
-        OnClick = FSChange
-        OnKeyUp = FSChangeLink
+      object GroupName: TGroupBox
+        Left = 8
+        Top = 8
+        Width = 481
+        Height = 193
+        Caption = ' Name  '
+        TabOrder = 1
+        object Label55: TLabel
+          Left = 107
+          Top = 25
+          Width = 143
+          Height = 13
+          Caption = 'Main Folder & File Name Mask'
+          ShowAccelChar = False
+          Transparent = True
+        end
+        object Label31: TLabel
+          Left = 107
+          Top = 50
+          Width = 150
+          Height = 13
+          Caption = 'Cabrio Folder & File Name Mask'
+          ShowAccelChar = False
+          Transparent = True
+        end
+        object Label118: TLabel
+          Left = 107
+          Top = 73
+          Width = 59
+          Height = 13
+          Caption = 'Brand Name'
+          ShowAccelChar = False
+          Transparent = True
+        end
+        object Label153: TLabel
+          Left = 107
+          Top = 97
+          Width = 43
+          Height = 13
+          Caption = 'Logo File'
+          ShowAccelChar = False
+          Transparent = True
+        end
+        object Label56: TLabel
+          Left = 185
+          Top = 122
+          Width = 56
+          Height = 13
+          Caption = 'Class Name'
+          Transparent = True
+        end
+        object Label57: TLabel
+          Left = 185
+          Top = 146
+          Width = 60
+          Height = 13
+          Caption = 'Model Name'
+          Transparent = True
+        end
+        object Label152: TLabel
+          Left = 350
+          Top = 145
+          Width = 56
+          Height = 13
+          Caption = 'Caravan file'
+        end
+        object CBCabrio2: TCheckBox
+          Left = 29
+          Top = 166
+          Width = 97
+          Height = 17
+          Caption = 'Cabriolet Version'
+          TabOrder = 0
+          OnClick = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object CBCabrio1: TCheckBox
+          Left = 12
+          Top = 166
+          Width = 17
+          Height = 17
+          TabOrder = 1
+          OnClick = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object Edit3: TEdit
+          Left = 12
+          Top = 142
+          Width = 168
+          Height = 21
+          TabOrder = 2
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object Edit2: TEdit
+          Left = 12
+          Top = 118
+          Width = 168
+          Height = 21
+          TabOrder = 3
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object Logo: TEdit
+          Left = 12
+          Top = 94
+          Width = 90
+          Height = 21
+          TabOrder = 4
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object Hersteller: TEdit
+          Left = 12
+          Top = 70
+          Width = 90
+          Height = 21
+          TabOrder = 5
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object Edit8: TEdit
+          Left = 12
+          Top = 46
+          Width = 90
+          Height = 21
+          TabOrder = 6
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object Edit1: TEdit
+          Left = 12
+          Top = 22
+          Width = 90
+          Height = 21
+          TabOrder = 7
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object Caravan: TEdit
+          Left = 260
+          Top = 142
+          Width = 85
+          Height = 21
+          TabOrder = 8
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
       end
-      object CBCabrio1: TCheckBox
-        Left = 4
-        Top = 170
-        Width = 17
-        Height = 17
-        TabOrder = 11
-        OnClick = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object Logo: TEdit
-        Left = 4
-        Top = 98
-        Width = 90
-        Height = 21
-        TabOrder = 12
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
+      object GroupClass: TGroupBox
+        Left = 8
+        Top = 216
+        Width = 217
+        Height = 217
+        Caption = ' Class  '
+        TabOrder = 2
+        object Label127: TLabel
+          Left = 82
+          Top = 189
+          Width = 92
+          Height = 13
+          Caption = 'Custom Race Class'
+        end
+        object Label33: TLabel
+          Left = 73
+          Top = 53
+          Width = 55
+          Height = 13
+          Caption = 'Menu Class'
+        end
+        object Label50: TLabel
+          Left = 73
+          Top = 25
+          Width = 69
+          Height = 13
+          Caption = 'Score to Open'
+        end
+        object RaceClass1_4: TRadioGroup
+          Left = 12
+          Top = 80
+          Width = 97
+          Height = 105
+          Caption = ' Race class  '
+          ItemIndex = 0
+          Items.Strings = (
+            'Series'
+            'Racing'
+            'Prototype'
+            'Vintage'
+            'Custom')
+          TabOrder = 0
+          OnClick = FSChange
+        end
+        object SRaceClass: TSpinEdit
+          Left = 20
+          Top = 186
+          Width = 57
+          Height = 22
+          Hint = '5 - 300'
+          Enabled = False
+          MaxValue = 300
+          MinValue = 1
+          TabOrder = 1
+          Value = 5
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SClassID: TSpinEdit
+          Left = 12
+          Top = 50
+          Width = 57
+          Height = 22
+          Hint = '100 - 999'
+          MaxValue = 999
+          MinValue = 100
+          TabOrder = 2
+          Value = 100
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SScore: TSpinEdit
+          Left = 12
+          Top = 22
+          Width = 57
+          Height = 22
+          Hint = '1 - 1000000'
+          MaxValue = 1000000
+          MinValue = 1
+          TabOrder = 3
+          Value = 1
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
       end
     end
     object TabSheet5: TTabSheet
       Caption = 'Appearance'
-      object Label30: TLabel
-        Left = 138
-        Top = 381
-        Width = 49
-        Height = 13
-        Caption = 'Cabrio IDs'
-      end
-      object Label29: TLabel
-        Left = 138
-        Top = 357
-        Width = 52
-        Height = 13
-        Caption = 'Normal IDs'
-      end
-      object Label76: TLabel
-        Left = 292
-        Top = 26
-        Width = 77
-        Height = 13
-        Caption = 'Speedometer ID'
-      end
-      object Label133: TLabel
-        Left = 292
-        Top = 90
-        Width = 71
-        Height = 13
-        Caption = 'Tachometer ID'
-      end
-      object LtachoID: TLabel
-        Left = 345
-        Top = 109
-        Width = 24
-        Height = 13
-        Caption = 'none'
-      end
-      object LmphID: TLabel
-        Left = 345
-        Top = 69
-        Width = 24
-        Height = 13
-        Caption = 'none'
-      end
-      object LkmhID: TLabel
-        Left = 345
-        Top = 45
-        Width = 24
-        Height = 13
-        Caption = 'none'
-      end
-      object Label43: TLabel
-        Left = 194
-        Top = 45
-        Width = 54
-        Height = 13
-        Caption = 'Pursuit, mm'
-      end
-      object Label45: TLabel
-        Left = 194
-        Top = 69
-        Width = 51
-        Height = 13
-        Caption = 'Closer, mm'
-      end
-      object Label44: TLabel
-        Left = 194
-        Top = 93
-        Width = 58
-        Height = 13
-        Caption = 'Cockpit, mm'
-      end
-      object Label46: TLabel
-        Left = 194
-        Top = 117
-        Width = 48
-        Height = 13
-        Caption = 'Hood, mm'
-      end
-      object Label51: TLabel
-        Left = 68
-        Top = 26
-        Width = 58
-        Height = 13
-        Caption = 'Distance (Z)'
-      end
-      object Label12: TLabel
-        Left = 4
-        Top = 26
-        Width = 47
-        Height = 13
-        Caption = 'Height (Y)'
-      end
-      object Label11: TLabel
-        Left = 132
-        Top = 26
-        Width = 37
-        Height = 13
-        Caption = 'Side (X)'
-      end
-      object Label121: TLabel
-        Left = 66
-        Top = 309
-        Width = 123
-        Height = 13
-        Caption = 'Lastgeraeusch (m_last_**)'
-      end
-      object Label120: TLabel
-        Left = 66
-        Top = 285
-        Width = 135
-        Height = 13
-        Caption = 'Sauggeraeusch (m_saug_**)'
-      end
-      object Label116: TLabel
-        Left = 66
-        Top = 237
-        Width = 83
-        Height = 13
-        Caption = 'Engine (m_ms_**)'
-      end
-      object Label117: TLabel
-        Left = 66
-        Top = 261
-        Width = 101
-        Height = 13
-        Caption = 'Exhaust ID (m_ap_**)'
-      end
-      object Label42: TLabel
-        Left = 66
-        Top = 189
-        Width = 61
-        Height = 13
-        Caption = 'Sample Rate'
-      end
-      object Label41: TLabel
-        Left = 86
-        Top = 165
-        Width = 80
-        Height = 13
-        Caption = 'Motor Sound File'
-      end
-      object Label99: TLabel
-        Left = 382
-        Top = 159
-        Width = 65
-        Height = 13
-        Caption = #39'bez1.tga'#39' text'
-      end
-      object Label86: TLabel
-        Left = 382
-        Top = 183
-        Width = 65
-        Height = 13
-        Caption = #39'bez2.tga'#39' text'
-      end
-      object Label114: TLabel
-        Left = 354
-        Top = 207
-        Width = 91
-        Height = 13
-        Caption = 'Default Menu Color'
-      end
-      object Bevel23: TBevel
+      object GroupSound: TGroupBox
         Left = 8
-        Top = 14
-        Width = 185
-        Height = 2
-      end
-      object Label141: TLabel
-        Left = 24
-        Top = 8
-        Width = 53
-        Height = 13
-        Caption = '  Cameras  '
-      end
-      object Bevel3: TBevel
-        Left = 296
-        Top = 14
-        Width = 185
-        Height = 2
-      end
-      object Label74: TLabel
-        Left = 312
-        Top = 8
-        Width = 36
-        Height = 13
-        Caption = '  HUD  '
-      end
-      object Bevel2: TBevel
-        Left = 8
-        Top = 342
-        Width = 185
-        Height = 2
-      end
-      object Label32: TLabel
-        Left = 24
-        Top = 336
-        Width = 104
-        Height = 13
-        Caption = '  Brakelight Materials  '
-      end
-      object Bevel4: TBevel
-        Left = 8
-        Top = 150
-        Width = 185
-        Height = 2
-      end
-      object Label75: TLabel
-        Left = 24
-        Top = 144
-        Width = 43
-        Height = 13
-        Caption = '  Sound  '
-      end
-      object Bevel6: TBevel
-        Left = 296
-        Top = 142
-        Width = 185
-        Height = 2
-      end
-      object Label119: TLabel
-        Left = 312
-        Top = 136
-        Width = 47
-        Height = 13
-        Caption = '  Special  '
-      end
-      object Label54: TLabel
-        Left = 66
-        Top = 213
-        Width = 71
-        Height = 13
-        Caption = 'Engine Volume'
-      end
-      object Label152: TLabel
-        Left = 382
-        Top = 231
-        Width = 56
-        Height = 13
-        Caption = 'Caravan file'
-      end
-      object SappCAB2: TSpinEdit
-        Left = 47
-        Top = 378
-        Width = 41
-        Height = 22
-        Hint = '-1 - 255'
-        MaxValue = 255
-        MinValue = -1
+        Top = 176
+        Width = 241
+        Height = 201
+        Caption = ' Sound  '
         TabOrder = 0
-        Value = -1
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
+        object Label41: TLabel
+          Left = 94
+          Top = 25
+          Width = 80
+          Height = 13
+          Caption = 'Motor Sound File'
+        end
+        object Label42: TLabel
+          Left = 74
+          Top = 49
+          Width = 61
+          Height = 13
+          Caption = 'Sample Rate'
+        end
+        object Label54: TLabel
+          Left = 74
+          Top = 73
+          Width = 71
+          Height = 13
+          Caption = 'Engine Volume'
+        end
+        object Label116: TLabel
+          Left = 74
+          Top = 97
+          Width = 97
+          Height = 13
+          Caption = 'Engine ID (m_ms_**)'
+        end
+        object Label117: TLabel
+          Left = 74
+          Top = 121
+          Width = 101
+          Height = 13
+          Caption = 'Exhaust ID (m_ap_**)'
+        end
+        object Label120: TLabel
+          Left = 74
+          Top = 145
+          Width = 149
+          Height = 13
+          Caption = 'Sauggeraeusch ID (m_saug_**)'
+        end
+        object Label121: TLabel
+          Left = 74
+          Top = 169
+          Width = 137
+          Height = 13
+          Caption = 'Lastgeraeusch ID (m_last_**)'
+        end
+        object Edit7: TEdit
+          Left = 12
+          Top = 22
+          Width = 77
+          Height = 21
+          TabOrder = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SSrate: TSpinEdit
+          Left = 12
+          Top = 46
+          Width = 57
+          Height = 22
+          Hint = 'any value'
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 1
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SLautstarke: TSpinEdit
+          Left = 12
+          Top = 70
+          Width = 57
+          Height = 22
+          Hint = 'any value'
+          MaxValue = 1000
+          MinValue = 0
+          TabOrder = 2
+          Value = 100
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SMotID: TSpinEdit
+          Left = 12
+          Top = 94
+          Width = 57
+          Height = 22
+          Hint = '0 - 999'
+          MaxValue = 999
+          MinValue = 0
+          TabOrder = 3
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SAusID: TSpinEdit
+          Left = 12
+          Top = 118
+          Width = 57
+          Height = 22
+          Hint = '0 - 999'
+          MaxValue = 999
+          MinValue = 0
+          TabOrder = 4
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SSaug: TSpinEdit
+          Left = 12
+          Top = 142
+          Width = 57
+          Height = 22
+          Hint = '0 - 999'
+          MaxValue = 999
+          MinValue = 0
+          TabOrder = 5
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SLastger: TSpinEdit
+          Left = 12
+          Top = 166
+          Width = 57
+          Height = 22
+          Hint = '0 - 999'
+          MaxValue = 999
+          MinValue = 0
+          TabOrder = 6
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
       end
-      object SappCAB1: TSpinEdit
-        Left = 4
-        Top = 378
-        Width = 41
-        Height = 22
-        Hint = '-1 - 255'
-        MaxValue = 255
-        MinValue = -1
+      object GroupLooks: TGroupBox
+        Left = 264
+        Top = 176
+        Width = 209
+        Height = 201
+        Caption = ' Looks  '
         TabOrder = 1
-        Value = -1
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
+        object Label29: TLabel
+          Left = 146
+          Top = 37
+          Width = 52
+          Height = 13
+          Caption = 'Normal IDs'
+        end
+        object Label30: TLabel
+          Left = 146
+          Top = 61
+          Width = 49
+          Height = 13
+          Caption = 'Cabrio IDs'
+        end
+        object Label32: TLabel
+          Left = 16
+          Top = 18
+          Width = 92
+          Height = 13
+          Caption = 'Brakelight Materials'
+        end
+        object Label99: TLabel
+          Left = 102
+          Top = 103
+          Width = 65
+          Height = 13
+          Caption = #39'bez1.tga'#39' text'
+        end
+        object Label86: TLabel
+          Left = 102
+          Top = 127
+          Width = 65
+          Height = 13
+          Caption = #39'bez2.tga'#39' text'
+        end
+        object Label75: TLabel
+          Left = 16
+          Top = 84
+          Width = 41
+          Height = 13
+          Caption = 'Markups'
+        end
+        object Label114: TLabel
+          Left = 74
+          Top = 167
+          Width = 61
+          Height = 13
+          Caption = 'Default Color'
+        end
+        object SappBR1: TSpinEdit
+          Left = 12
+          Top = 34
+          Width = 41
+          Height = 22
+          Hint = '-1 - 255'
+          MaxValue = 255
+          MinValue = -1
+          TabOrder = 0
+          Value = -1
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SappBR2: TSpinEdit
+          Left = 55
+          Top = 34
+          Width = 41
+          Height = 22
+          Hint = '-1 - 255'
+          MaxValue = 255
+          MinValue = -1
+          TabOrder = 1
+          Value = -1
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SappBR3: TSpinEdit
+          Left = 98
+          Top = 34
+          Width = 43
+          Height = 22
+          Hint = '-1 - 255'
+          MaxValue = 255
+          MinValue = -1
+          TabOrder = 2
+          Value = -1
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SappCAB3: TSpinEdit
+          Left = 98
+          Top = 58
+          Width = 43
+          Height = 22
+          Hint = '-1 - 255'
+          MaxValue = 255
+          MinValue = -1
+          TabOrder = 3
+          Value = -1
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SappCAB2: TSpinEdit
+          Left = 55
+          Top = 58
+          Width = 41
+          Height = 22
+          Hint = '-1 - 255'
+          MaxValue = 255
+          MinValue = -1
+          TabOrder = 4
+          Value = -1
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SappCAB1: TSpinEdit
+          Left = 12
+          Top = 58
+          Width = 41
+          Height = 22
+          Hint = '-1 - 255'
+          MaxValue = 255
+          MinValue = -1
+          TabOrder = 5
+          Value = -1
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object TypLink: TEdit
+          Left = 12
+          Top = 100
+          Width = 85
+          Height = 21
+          TabOrder = 6
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object TypRech: TEdit
+          Left = 12
+          Top = 124
+          Width = 85
+          Height = 21
+          TabOrder = 7
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SColor: TSpinEdit
+          Left = 12
+          Top = 164
+          Width = 57
+          Height = 22
+          Hint = '1 - 15'
+          MaxValue = 15
+          MinValue = 1
+          TabOrder = 8
+          Value = 1
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
       end
-      object SappBR1: TSpinEdit
-        Left = 4
-        Top = 354
-        Width = 41
-        Height = 22
-        Hint = '-1 - 255'
-        MaxValue = 255
-        MinValue = -1
+      object GroupHUD: TGroupBox
+        Left = 296
+        Top = 16
+        Width = 161
+        Height = 145
+        Caption = ' HUD  '
         TabOrder = 2
-        Value = -1
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
+        object LtachoID: TLabel
+          Left = 65
+          Top = 103
+          Width = 24
+          Height = 13
+          Caption = 'none'
+        end
+        object Label133: TLabel
+          Left = 16
+          Top = 84
+          Width = 71
+          Height = 13
+          Caption = 'Tachometer ID'
+        end
+        object LmphID: TLabel
+          Left = 65
+          Top = 61
+          Width = 24
+          Height = 13
+          Caption = 'none'
+        end
+        object LkmhID: TLabel
+          Left = 65
+          Top = 37
+          Width = 24
+          Height = 13
+          Caption = 'none'
+        end
+        object Label76: TLabel
+          Left = 16
+          Top = 18
+          Width = 77
+          Height = 13
+          Caption = 'Speedometer ID'
+        end
+        object STachoID: TSpinEdit
+          Left = 12
+          Top = 100
+          Width = 48
+          Height = 22
+          Hint = '1 - 7'
+          MaxValue = 7
+          MinValue = 1
+          TabOrder = 0
+          Value = 1
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SmphID: TSpinEdit
+          Left = 12
+          Top = 58
+          Width = 48
+          Height = 22
+          Hint = '1 - 7'
+          MaxValue = 7
+          MinValue = 1
+          TabOrder = 1
+          Value = 1
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SkmhID: TSpinEdit
+          Left = 12
+          Top = 34
+          Width = 48
+          Height = 22
+          Hint = '1 - 9'
+          MaxValue = 9
+          MinValue = 1
+          TabOrder = 2
+          Value = 1
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
       end
-      object SappBR2: TSpinEdit
-        Left = 47
-        Top = 354
-        Width = 41
-        Height = 22
-        Hint = '-1 - 255'
-        MaxValue = 255
-        MinValue = -1
+      object GroupCameras: TGroupBox
+        Left = 8
+        Top = 16
+        Width = 273
+        Height = 145
+        Caption = ' Cameras  '
         TabOrder = 3
-        Value = -1
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SappBR3: TSpinEdit
-        Left = 90
-        Top = 354
-        Width = 43
-        Height = 22
-        Hint = '-1 - 255'
-        MaxValue = 255
-        MinValue = -1
-        TabOrder = 4
-        Value = -1
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SappCAB3: TSpinEdit
-        Left = 90
-        Top = 378
-        Width = 43
-        Height = 22
-        Hint = '-1 - 255'
-        MaxValue = 255
-        MinValue = -1
-        TabOrder = 5
-        Value = -1
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SkmhID: TSpinEdit
-        Left = 292
-        Top = 42
-        Width = 48
-        Height = 22
-        Hint = '1 - 9'
-        MaxValue = 9
-        MinValue = 1
-        TabOrder = 6
-        Value = 1
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SmphID: TSpinEdit
-        Left = 292
-        Top = 66
-        Width = 48
-        Height = 22
-        Hint = '1 - 7'
-        MaxValue = 7
-        MinValue = 1
-        TabOrder = 7
-        Value = 1
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object STachoID: TSpinEdit
-        Left = 292
-        Top = 106
-        Width = 48
-        Height = 22
-        Hint = '1 - 7'
-        MaxValue = 7
-        MinValue = 1
-        TabOrder = 8
-        Value = 1
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ScamPZ: TSpinEdit
-        Left = 68
-        Top = 42
-        Width = 57
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 9
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ScamPY: TSpinEdit
-        Left = 4
-        Top = 42
-        Width = 57
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 10
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ScamIY: TSpinEdit
-        Left = 4
-        Top = 66
-        Width = 57
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 11
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ScamCY: TSpinEdit
-        Left = 4
-        Top = 90
-        Width = 57
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 12
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ScamHY: TSpinEdit
-        Left = 4
-        Top = 114
-        Width = 57
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 13
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ScamHZ: TSpinEdit
-        Left = 68
-        Top = 114
-        Width = 57
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 14
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ScamCZ: TSpinEdit
-        Left = 68
-        Top = 90
-        Width = 57
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 15
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ScamIZ: TSpinEdit
-        Left = 68
-        Top = 66
-        Width = 57
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 16
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ScamCX: TSpinEdit
-        Left = 132
-        Top = 90
-        Width = 57
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 17
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SAusID: TSpinEdit
-        Left = 4
-        Top = 258
-        Width = 57
-        Height = 22
-        Hint = '0 - 999'
-        MaxValue = 999
-        MinValue = 0
-        TabOrder = 18
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SMotID: TSpinEdit
-        Left = 4
-        Top = 234
-        Width = 57
-        Height = 22
-        Hint = '0 - 999'
-        MaxValue = 999
-        MinValue = 0
-        TabOrder = 19
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SSaug: TSpinEdit
-        Left = 4
-        Top = 282
-        Width = 57
-        Height = 22
-        Hint = '0 - 999'
-        MaxValue = 999
-        MinValue = 0
-        TabOrder = 20
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SLastger: TSpinEdit
-        Left = 4
-        Top = 306
-        Width = 57
-        Height = 22
-        Hint = '0 - 999'
-        MaxValue = 999
-        MinValue = 0
-        TabOrder = 21
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object Edit7: TEdit
-        Left = 4
-        Top = 162
-        Width = 77
-        Height = 21
-        TabOrder = 22
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SSrate: TSpinEdit
-        Left = 4
-        Top = 186
-        Width = 57
-        Height = 22
-        Hint = 'any value'
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 23
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object TypLink: TEdit
-        Left = 292
-        Top = 156
-        Width = 85
-        Height = 21
-        TabOrder = 24
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object TypRech: TEdit
-        Left = 292
-        Top = 180
-        Width = 85
-        Height = 21
-        TabOrder = 25
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SColor: TSpinEdit
-        Left = 292
-        Top = 204
-        Width = 57
-        Height = 22
-        Hint = '1 - 15'
-        MaxValue = 15
-        MinValue = 1
-        TabOrder = 26
-        Value = 1
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SLautstarke: TSpinEdit
-        Left = 4
-        Top = 210
-        Width = 57
-        Height = 22
-        Hint = 'any value'
-        MaxValue = 1000
-        MinValue = 0
-        TabOrder = 27
-        Value = 100
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object Caravan: TEdit
-        Left = 292
-        Top = 228
-        Width = 85
-        Height = 21
-        TabOrder = 28
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
+        object Label11: TLabel
+          Left = 144
+          Top = 18
+          Width = 61
+          Height = 13
+          Caption = 'Sideways (X)'
+        end
+        object Label12: TLabel
+          Left = 16
+          Top = 18
+          Width = 47
+          Height = 13
+          Caption = 'Height (Y)'
+        end
+        object Label51: TLabel
+          Left = 80
+          Top = 18
+          Width = 58
+          Height = 13
+          Caption = 'Distance (Z)'
+        end
+        object Label46: TLabel
+          Left = 202
+          Top = 109
+          Width = 48
+          Height = 13
+          Caption = 'Hood, mm'
+        end
+        object Label44: TLabel
+          Left = 202
+          Top = 85
+          Width = 58
+          Height = 13
+          Caption = 'Cockpit, mm'
+        end
+        object Label45: TLabel
+          Left = 202
+          Top = 61
+          Width = 51
+          Height = 13
+          Caption = 'Closer, mm'
+        end
+        object Label43: TLabel
+          Left = 202
+          Top = 37
+          Width = 54
+          Height = 13
+          Caption = 'Pursuit, mm'
+        end
+        object ScamCX: TSpinEdit
+          Left = 140
+          Top = 82
+          Width = 57
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 4
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ScamIZ: TSpinEdit
+          Left = 76
+          Top = 58
+          Width = 57
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 6
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ScamCZ: TSpinEdit
+          Left = 76
+          Top = 82
+          Width = 57
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 3
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ScamHZ: TSpinEdit
+          Left = 76
+          Top = 106
+          Width = 57
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 7
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ScamHY: TSpinEdit
+          Left = 12
+          Top = 106
+          Width = 57
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 8
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ScamCY: TSpinEdit
+          Left = 12
+          Top = 82
+          Width = 57
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 2
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ScamIY: TSpinEdit
+          Left = 12
+          Top = 58
+          Width = 57
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 5
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ScamPY: TSpinEdit
+          Left = 12
+          Top = 34
+          Width = 57
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 0
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ScamPZ: TSpinEdit
+          Left = 76
+          Top = 34
+          Width = 57
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 1
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
       end
     end
     object TabSheet6: TTabSheet
       Caption = 'Suspension'
       ImageIndex = 1
-      object Bevel14: TBevel
-        Left = 8
-        Top = 14
-        Width = 185
-        Height = 2
-      end
-      object Label68: TLabel
-        Left = 66
-        Top = 78
-        Width = 91
-        Height = 13
-        Caption = 'Angular Momentum'
-      end
-      object Label61: TLabel
-        Left = 66
-        Top = 54
-        Width = 87
-        Height = 13
-        Caption = 'Front Axis Load, %'
-      end
-      object Label37: TLabel
-        Left = 66
-        Top = 30
-        Width = 81
-        Height = 13
-        Caption = 'Vehicle Mass, kg'
-      end
-      object Bevel5: TBevel
-        Left = 8
-        Top = 110
-        Width = 185
-        Height = 2
-      end
-      object Label64: TLabel
-        Left = 66
-        Top = 126
-        Width = 37
-        Height = 13
-        Caption = 'Damper'
-      end
-      object Label65: TLabel
-        Left = 66
-        Top = 150
-        Width = 71
-        Height = 13
-        Caption = 'Feather/Spring'
-      end
-      object Label72: TLabel
-        Left = 66
-        Top = 270
-        Width = 92
-        Height = 13
-        Caption = 'Stiffness of Roll-Bar'
-      end
-      object Label130: TLabel
-        Left = 66
-        Top = 246
-        Width = 91
-        Height = 13
-        Caption = 'Differential Lock, %'
-      end
-      object Label27: TLabel
-        Left = 66
-        Top = 222
-        Width = 123
-        Height = 13
-        Caption = 'Height Compensation, mm'
-      end
-      object Label63: TLabel
-        Left = 66
-        Top = 198
-        Width = 89
-        Height = 13
-        Caption = 'Bounce Move, mm'
-      end
-      object Label62: TLabel
-        Left = 66
-        Top = 174
-        Width = 91
-        Height = 13
-        Caption = 'Release Move, mm'
-      end
-      object Bevel9: TBevel
-        Left = 296
-        Top = 14
-        Width = 185
-        Height = 2
-      end
-      object Label83: TLabel
-        Left = 354
-        Top = 30
-        Width = 96
-        Height = 13
-        Caption = 'Air Brake Coefficient'
-      end
-      object Label84: TLabel
-        Left = 354
-        Top = 54
-        Width = 55
-        Height = 13
-        Caption = 'Slip in Front'
-      end
-      object Label85: TLabel
-        Left = 354
-        Top = 78
-        Width = 54
-        Height = 13
-        Caption = 'Slip in Rear'
-      end
       object Image4: TImage
         Left = 296
-        Top = 192
+        Top = 240
         Width = 173
         Height = 191
         AutoSize = True
@@ -2788,252 +2650,305 @@ object Form1: TForm1
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000}
         Transparent = True
       end
-      object Label124: TLabel
-        Left = 24
-        Top = 8
-        Width = 46
-        Height = 13
-        Caption = '  Weight  '
-      end
-      object Label123: TLabel
-        Left = 24
-        Top = 104
-        Width = 67
-        Height = 13
-        Caption = '  Suspension  '
-      end
-      object Label122: TLabel
-        Left = 312
-        Top = 8
-        Width = 78
-        Height = 13
-        Caption = '  Aerodynamics  '
-      end
-      object Sweight: TSpinEdit
-        Left = 4
-        Top = 26
-        Width = 57
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 0
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SweightD: TSpinEdit
-        Left = 4
-        Top = 50
-        Width = 57
-        Height = 22
-        Hint = '0 - 100'
-        MaxValue = 100
-        MinValue = 0
-        TabOrder = 1
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SAngular: TSpinEdit
-        Left = 4
-        Top = 74
-        Width = 57
-        Height = 22
-        Hint = '0 - 100000'
-        MaxValue = 100000
-        MinValue = 0
-        TabOrder = 2
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
       object RGdrive: TRadioGroup
-        Left = 4
-        Top = 292
-        Width = 113
+        Left = 8
+        Top = 344
+        Width = 209
         Height = 89
         Caption = '  Drive-Train  '
         Items.Strings = (
           'Rear-Wheel'
           'Front-Wheel'
           'All-Wheel')
-        TabOrder = 3
+        TabOrder = 0
         OnClick = FSChange
       end
-      object SDamper: TSpinEdit
-        Left = 4
-        Top = 122
-        Width = 57
-        Height = 22
-        Hint = '0 - 100000'
-        MaxValue = 100000
-        MinValue = 0
-        TabOrder = 4
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
+      object GroupWeight: TGroupBox
+        Left = 8
+        Top = 8
+        Width = 209
+        Height = 105
+        Caption = ' Weight  '
+        TabOrder = 1
+        object Label37: TLabel
+          Left = 74
+          Top = 26
+          Width = 81
+          Height = 13
+          Caption = 'Vehicle Mass, kg'
+        end
+        object Label61: TLabel
+          Left = 74
+          Top = 50
+          Width = 87
+          Height = 13
+          Caption = 'Front Axis Load, %'
+        end
+        object Label68: TLabel
+          Left = 74
+          Top = 74
+          Width = 91
+          Height = 13
+          Caption = 'Angular Momentum'
+        end
+        object Sweight: TSpinEdit
+          Left = 12
+          Top = 22
+          Width = 57
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 0
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SweightD: TSpinEdit
+          Left = 12
+          Top = 46
+          Width = 57
+          Height = 22
+          Hint = '0 - 100'
+          MaxValue = 100
+          MinValue = 0
+          TabOrder = 1
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SAngular: TSpinEdit
+          Left = 12
+          Top = 70
+          Width = 57
+          Height = 22
+          Hint = '0 - 100000'
+          MaxValue = 100000
+          MinValue = 0
+          TabOrder = 2
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
       end
-      object SFeather: TSpinEdit
-        Left = 4
-        Top = 146
-        Width = 57
-        Height = 22
-        Hint = '0 - 100000'
-        MaxValue = 100000
-        MinValue = 0
-        TabOrder = 5
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
+      object GroupSuspension: TGroupBox
+        Left = 8
+        Top = 128
+        Width = 209
+        Height = 201
+        Caption = ' Suspension  '
+        TabOrder = 2
+        object Label64: TLabel
+          Left = 74
+          Top = 26
+          Width = 37
+          Height = 13
+          Caption = 'Damper'
+        end
+        object Label65: TLabel
+          Left = 74
+          Top = 50
+          Width = 71
+          Height = 13
+          Caption = 'Feather/Spring'
+        end
+        object Label72: TLabel
+          Left = 74
+          Top = 170
+          Width = 92
+          Height = 13
+          Caption = 'Stiffness of Roll-Bar'
+        end
+        object Label130: TLabel
+          Left = 74
+          Top = 146
+          Width = 91
+          Height = 13
+          Caption = 'Differential Lock, %'
+        end
+        object Label27: TLabel
+          Left = 74
+          Top = 122
+          Width = 123
+          Height = 13
+          Caption = 'Height Compensation, mm'
+        end
+        object Label63: TLabel
+          Left = 74
+          Top = 98
+          Width = 89
+          Height = 13
+          Caption = 'Bounce Move, mm'
+        end
+        object Label62: TLabel
+          Left = 74
+          Top = 74
+          Width = 91
+          Height = 13
+          Caption = 'Release Move, mm'
+        end
+        object SDamper: TSpinEdit
+          Left = 12
+          Top = 22
+          Width = 57
+          Height = 22
+          Hint = '0 - 100000'
+          MaxValue = 100000
+          MinValue = 0
+          TabOrder = 0
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SFeather: TSpinEdit
+          Left = 12
+          Top = 46
+          Width = 57
+          Height = 22
+          Hint = '0 - 100000'
+          MaxValue = 100000
+          MinValue = 0
+          TabOrder = 1
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SRelease: TSpinEdit
+          Left = 12
+          Top = 70
+          Width = 57
+          Height = 22
+          Hint = '0 - 1000'
+          MaxValue = 1000
+          MinValue = 0
+          TabOrder = 2
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SBounce: TSpinEdit
+          Left = 12
+          Top = 94
+          Width = 57
+          Height = 22
+          Hint = '0 - 1000'
+          MaxValue = 1000
+          MinValue = 0
+          TabOrder = 3
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SWheelY: TSpinEdit
+          Left = 12
+          Top = 118
+          Width = 57
+          Height = 22
+          Hint = '-1000 - 1000'
+          MaxValue = 1000
+          MinValue = -1000
+          TabOrder = 4
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SSperrDif: TSpinEdit
+          Left = 12
+          Top = 142
+          Width = 57
+          Height = 22
+          Hint = '-1000 - 1000'
+          MaxValue = 1000
+          MinValue = -1000
+          TabOrder = 5
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object Stabilizat: TFloatSpinEdit
+          Left = 12
+          Top = 166
+          Width = 57
+          Height = 22
+          Accuracy = 2
+          Increment = 0.01
+          TabOrder = 6
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
       end
-      object SRelease: TSpinEdit
-        Left = 4
-        Top = 170
-        Width = 57
-        Height = 22
-        Hint = '0 - 1000'
-        MaxValue = 1000
-        MinValue = 0
-        TabOrder = 6
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SBounce: TSpinEdit
-        Left = 4
-        Top = 194
-        Width = 57
-        Height = 22
-        Hint = '0 - 1000'
-        MaxValue = 1000
-        MinValue = 0
-        TabOrder = 7
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SWheelY: TSpinEdit
-        Left = 4
-        Top = 218
-        Width = 57
-        Height = 22
-        Hint = '-1000 - 1000'
-        MaxValue = 1000
-        MinValue = -1000
-        TabOrder = 8
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SSperrDif: TSpinEdit
-        Left = 4
-        Top = 242
-        Width = 57
-        Height = 22
-        Hint = '-1000 - 1000'
-        MaxValue = 1000
-        MinValue = -1000
-        TabOrder = 9
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object Stabilizat: TFloatSpinEdit
-        Left = 4
-        Top = 266
-        Width = 57
-        Height = 22
-        Accuracy = 2
-        Increment = 0.01
-        TabOrder = 10
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FSAirB: TFloatSpinEdit
-        Left = 292
-        Top = 26
-        Width = 57
-        Height = 22
-        Accuracy = 2
-        Increment = 0.01
-        TabOrder = 11
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SSlipF: TSpinEdit
-        Left = 292
-        Top = 50
-        Width = 57
-        Height = 22
-        Hint = '0 - 100000'
-        MaxValue = 100000
-        MinValue = 0
-        TabOrder = 12
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SSlipR: TSpinEdit
-        Left = 292
-        Top = 74
-        Width = 57
-        Height = 22
-        Hint = '0 - 100000'
-        MaxValue = 100000
-        MinValue = 0
-        TabOrder = 13
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
+      object GroupAerodynamics: TGroupBox
+        Left = 232
+        Top = 8
+        Width = 209
+        Height = 105
+        Caption = ' Aerodynamics  '
+        TabOrder = 3
+        object Label85: TLabel
+          Left = 74
+          Top = 74
+          Width = 54
+          Height = 13
+          Caption = 'Slip in Rear'
+        end
+        object Label84: TLabel
+          Left = 74
+          Top = 50
+          Width = 55
+          Height = 13
+          Caption = 'Slip in Front'
+        end
+        object Label83: TLabel
+          Left = 74
+          Top = 26
+          Width = 96
+          Height = 13
+          Caption = 'Air Brake Coefficient'
+        end
+        object SSlipR: TSpinEdit
+          Left = 12
+          Top = 70
+          Width = 57
+          Height = 22
+          Hint = '0 - 100000'
+          MaxValue = 100000
+          MinValue = 0
+          TabOrder = 0
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SSlipF: TSpinEdit
+          Left = 12
+          Top = 46
+          Width = 57
+          Height = 22
+          Hint = '0 - 100000'
+          MaxValue = 100000
+          MinValue = 0
+          TabOrder = 1
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FSAirB: TFloatSpinEdit
+          Left = 12
+          Top = 22
+          Width = 57
+          Height = 22
+          Accuracy = 2
+          Increment = 0.01
+          TabOrder = 2
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
       end
     end
     object TabSheet7: TTabSheet
       Caption = 'Wheels'
       ImageIndex = 2
-      object TireFrontSize: TLabel
-        Left = 4
-        Top = 101
-        Width = 64
-        Height = 13
-        Caption = 'Standard size'
-      end
-      object TireRearSize: TLabel
-        Left = 68
-        Top = 101
-        Width = 64
-        Height = 13
-        Caption = 'Standard size'
-      end
-      object Label10: TLabel
-        Left = 130
-        Top = 29
-        Width = 71
-        Height = 13
-        Caption = 'Tire Width, mm'
-      end
-      object Label9: TLabel
-        Left = 130
-        Top = 53
-        Width = 76
-        Height = 13
-        Caption = 'Tire Radius, mm'
-      end
-      object Label13: TLabel
-        Left = 130
-        Top = 77
-        Width = 34
-        Height = 13
-        Caption = 'Rims, "'
-      end
-      object Bevel15: TBevel
-        Left = 8
-        Top = 14
-        Width = 185
-        Height = 2
-      end
       object Image1: TImage
-        Left = 256
-        Top = 8
+        Left = 328
+        Top = 16
         Width = 142
         Height = 144
         AutoSize = True
@@ -4969,379 +4884,342 @@ object Form1: TForm1
           0000}
         Transparent = True
       end
-      object Bevel16: TBevel
+      object GroupTireSize: TGroupBox
         Left = 8
-        Top = 126
-        Width = 185
-        Height = 2
-      end
-      object Label25: TLabel
-        Left = 130
-        Top = 165
-        Width = 73
-        Height = 13
-        Caption = #39'Z'#39' Position, mm'
-      end
-      object Label14: TLabel
-        Left = 130
-        Top = 141
-        Width = 50
-        Height = 13
-        Caption = 'Tread, mm'
-      end
-      object Label70: TLabel
-        Left = 66
-        Top = 302
-        Width = 76
-        Height = 13
-        Caption = 'Tire Slip In Rear'
-      end
-      object Label69: TLabel
-        Left = 66
-        Top = 278
-        Width = 77
-        Height = 13
-        Caption = 'Tire Slip In Front'
-      end
-      object Label67: TLabel
-        Left = 66
-        Top = 254
-        Width = 74
-        Height = 13
-        Caption = 'Grip Front/Rear'
-      end
-      object Label66: TLabel
-        Left = 66
-        Top = 230
-        Width = 45
-        Height = 13
-        Caption = 'Tires Grip'
-      end
-      object Label71: TLabel
-        Left = 66
-        Top = 326
-        Width = 153
-        Height = 13
-        Caption = '103] R'#1100'ckstellkr'#1076'fte for Wheel ?'
-      end
-      object Label73: TLabel
-        Left = 66
-        Top = 350
-        Width = 107
-        Height = 13
-        Caption = 'Emphasis Over Radius'
-      end
-      object Bevel17: TBevel
-        Left = 8
-        Top = 214
-        Width = 185
-        Height = 2
-      end
-      object Label49: TLabel
-        Left = 24
-        Top = 208
-        Width = 80
-        Height = 13
-        Caption = '  Tire Properties  '
-      end
-      object Label26: TLabel
-        Left = 130
-        Top = 189
-        Width = 57
-        Height = 13
-        Caption = 'Wheel base'
-      end
-      object Label125: TLabel
-        Left = 24
         Top = 8
-        Width = 32
-        Height = 13
-        Caption = '  Size  '
-        Color = clBtnFace
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = []
-        ParentColor = False
-        ParentFont = False
-      end
-      object Label126: TLabel
-        Left = 24
-        Top = 120
-        Width = 63
-        Height = 13
-        Caption = '  Positioning  '
-      end
-      object Label142: TLabel
-        Left = 4
-        Top = 189
-        Width = 57
-        Height = 13
-        Caption = 'Wheel base'
-      end
-      object STireFW: TSpinEdit
-        Left = 4
-        Top = 26
-        Width = 57
-        Height = 22
-        Hint = '0 - 10000'
-        MaxValue = 10000
-        MinValue = 0
+        Width = 257
+        Height = 121
+        Caption = ' Tires size  '
         TabOrder = 0
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
+        object Label10: TLabel
+          Left = 138
+          Top = 25
+          Width = 71
+          Height = 13
+          Caption = 'Tire Width, mm'
+        end
+        object Label9: TLabel
+          Left = 138
+          Top = 49
+          Width = 76
+          Height = 13
+          Caption = 'Tire Radius, mm'
+        end
+        object Label13: TLabel
+          Left = 138
+          Top = 73
+          Width = 34
+          Height = 13
+          Caption = 'Rims, "'
+        end
+        object TireFrontSize: TLabel
+          Left = 12
+          Top = 97
+          Width = 64
+          Height = 13
+          Caption = 'Standard size'
+        end
+        object TireRearSize: TLabel
+          Left = 76
+          Top = 97
+          Width = 64
+          Height = 13
+          Caption = 'Standard size'
+        end
+        object STireFW: TSpinEdit
+          Left = 12
+          Top = 22
+          Width = 57
+          Height = 22
+          Hint = '0 - 10000'
+          MaxValue = 10000
+          MinValue = 0
+          TabOrder = 0
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object STireRW: TSpinEdit
+          Left = 76
+          Top = 22
+          Width = 57
+          Height = 22
+          Hint = '0 - 10000'
+          MaxValue = 10000
+          MinValue = 0
+          TabOrder = 1
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object STireRR: TSpinEdit
+          Left = 76
+          Top = 46
+          Width = 57
+          Height = 22
+          Hint = '0 - 10000'
+          MaxValue = 10000
+          MinValue = 0
+          TabOrder = 2
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object STireFR: TSpinEdit
+          Left = 12
+          Top = 46
+          Width = 57
+          Height = 22
+          Hint = '0 - 10000'
+          MaxValue = 10000
+          MinValue = 0
+          TabOrder = 3
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object STireFD: TSpinEdit
+          Left = 12
+          Top = 70
+          Width = 57
+          Height = 22
+          Hint = '0 - 1000'
+          MaxValue = 1000
+          MinValue = 0
+          TabOrder = 4
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object STireRD: TSpinEdit
+          Left = 76
+          Top = 70
+          Width = 57
+          Height = 22
+          Hint = '0 - 1000'
+          MaxValue = 1000
+          MinValue = 0
+          TabOrder = 5
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
       end
-      object STireFR: TSpinEdit
-        Left = 4
-        Top = 50
-        Width = 57
-        Height = 22
-        Hint = '0 - 10000'
-        MaxValue = 10000
-        MinValue = 0
+      object GroupWheelbase: TGroupBox
+        Left = 8
+        Top = 136
+        Width = 257
+        Height = 97
+        Caption = ' Wheelbase  '
         TabOrder = 1
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
+        object Label14: TLabel
+          Left = 138
+          Top = 25
+          Width = 50
+          Height = 13
+          Caption = 'Tread, mm'
+        end
+        object Label25: TLabel
+          Left = 138
+          Top = 49
+          Width = 73
+          Height = 13
+          Caption = #39'Z'#39' Position, mm'
+        end
+        object Label142: TLabel
+          Left = 12
+          Top = 73
+          Width = 57
+          Height = 13
+          Caption = 'Wheel base'
+        end
+        object Label26: TLabel
+          Left = 138
+          Top = 73
+          Width = 57
+          Height = 13
+          Caption = 'Wheel base'
+        end
+        object STireFT: TSpinEdit
+          Left = 12
+          Top = 22
+          Width = 57
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 0
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object STireRT: TSpinEdit
+          Left = 76
+          Top = 22
+          Width = 57
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 1
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object STireRZ: TSpinEdit
+          Left = 76
+          Top = 46
+          Width = 57
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 2
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object STireFZ: TSpinEdit
+          Left = 12
+          Top = 46
+          Width = 57
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 3
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
       end
-      object STireFD: TSpinEdit
-        Left = 4
-        Top = 74
-        Width = 57
-        Height = 22
-        Hint = '0 - 1000'
-        MaxValue = 1000
-        MinValue = 0
+      object GroupTireProps: TGroupBox
+        Left = 8
+        Top = 240
+        Width = 257
+        Height = 177
+        Caption = ' Tire properties  '
         TabOrder = 2
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object STireRD: TSpinEdit
-        Left = 68
-        Top = 74
-        Width = 57
-        Height = 22
-        Hint = '0 - 1000'
-        MaxValue = 1000
-        MinValue = 0
-        TabOrder = 3
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object STireRR: TSpinEdit
-        Left = 68
-        Top = 50
-        Width = 57
-        Height = 22
-        Hint = '0 - 10000'
-        MaxValue = 10000
-        MinValue = 0
-        TabOrder = 4
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object STireRW: TSpinEdit
-        Left = 68
-        Top = 26
-        Width = 57
-        Height = 22
-        Hint = '0 - 10000'
-        MaxValue = 10000
-        MinValue = 0
-        TabOrder = 5
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object STireRT: TSpinEdit
-        Left = 68
-        Top = 138
-        Width = 57
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 6
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object STireFT: TSpinEdit
-        Left = 4
-        Top = 138
-        Width = 57
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 7
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object STireFZ: TSpinEdit
-        Left = 4
-        Top = 162
-        Width = 57
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 8
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object STireRZ: TSpinEdit
-        Left = 68
-        Top = 162
-        Width = 57
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 9
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FSGrip: TFloatSpinEdit
-        Left = 4
-        Top = 226
-        Width = 57
-        Height = 22
-        Hint = '0 - 100'
-        Accuracy = 2
-        Increment = 0.01
-        MaxValue = 100
-        TabOrder = 10
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FSGripFR: TFloatSpinEdit
-        Left = 4
-        Top = 250
-        Width = 57
-        Height = 22
-        Hint = '0 - 100'
-        Accuracy = 2
-        Increment = 0.01
-        MaxValue = 100
-        TabOrder = 11
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FSSlipF: TFloatSpinEdit
-        Left = 4
-        Top = 274
-        Width = 57
-        Height = 22
-        Hint = '0 - 100'
-        Accuracy = 2
-        Increment = 0.01
-        MaxValue = 100
-        TabOrder = 12
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FSSlipR: TFloatSpinEdit
-        Left = 4
-        Top = 298
-        Width = 57
-        Height = 22
-        Hint = '0 - 100'
-        Accuracy = 2
-        Increment = 0.01
-        MaxValue = 100
-        TabOrder = 13
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FS103: TFloatSpinEdit
-        Left = 4
-        Top = 322
-        Width = 57
-        Height = 22
-        Accuracy = 2
-        Increment = 0.01
-        TabOrder = 14
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FS106: TFloatSpinEdit
-        Left = 4
-        Top = 346
-        Width = 57
-        Height = 22
-        Accuracy = 2
-        Increment = 0.01
-        TabOrder = 15
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
+        object Label66: TLabel
+          Left = 74
+          Top = 26
+          Width = 45
+          Height = 13
+          Caption = 'Tires Grip'
+        end
+        object Label67: TLabel
+          Left = 74
+          Top = 50
+          Width = 74
+          Height = 13
+          Caption = 'Grip Front/Rear'
+        end
+        object Label69: TLabel
+          Left = 74
+          Top = 74
+          Width = 77
+          Height = 13
+          Caption = 'Tire Slip In Front'
+        end
+        object Label70: TLabel
+          Left = 74
+          Top = 98
+          Width = 76
+          Height = 13
+          Caption = 'Tire Slip In Rear'
+        end
+        object Label71: TLabel
+          Left = 74
+          Top = 122
+          Width = 153
+          Height = 13
+          Caption = '103] R'#1100'ckstellkr'#1076'fte for Wheel ?'
+        end
+        object Label73: TLabel
+          Left = 74
+          Top = 146
+          Width = 107
+          Height = 13
+          Caption = 'Emphasis Over Radius'
+        end
+        object FSSlipR: TFloatSpinEdit
+          Left = 12
+          Top = 94
+          Width = 57
+          Height = 22
+          Hint = '0 - 100'
+          Accuracy = 2
+          Increment = 0.01
+          MaxValue = 100
+          TabOrder = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FSSlipF: TFloatSpinEdit
+          Left = 12
+          Top = 70
+          Width = 57
+          Height = 22
+          Hint = '0 - 100'
+          Accuracy = 2
+          Increment = 0.01
+          MaxValue = 100
+          TabOrder = 1
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FSGripFR: TFloatSpinEdit
+          Left = 12
+          Top = 46
+          Width = 57
+          Height = 22
+          Hint = '0 - 100'
+          Accuracy = 2
+          Increment = 0.01
+          MaxValue = 100
+          TabOrder = 2
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FSGrip: TFloatSpinEdit
+          Left = 12
+          Top = 22
+          Width = 57
+          Height = 22
+          Hint = '0 - 100'
+          Accuracy = 2
+          Increment = 0.01
+          MaxValue = 100
+          TabOrder = 3
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FS106: TFloatSpinEdit
+          Left = 12
+          Top = 142
+          Width = 57
+          Height = 22
+          Accuracy = 2
+          Increment = 0.01
+          TabOrder = 4
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FS103: TFloatSpinEdit
+          Left = 12
+          Top = 118
+          Width = 57
+          Height = 22
+          Accuracy = 2
+          Increment = 0.01
+          TabOrder = 5
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
       end
     end
     object TabSheet8: TTabSheet
       Caption = 'Engine'
       ImageIndex = 3
-      object Label80: TLabel
-        Left = 350
-        Top = 221
-        Width = 128
-        Height = 13
-        Caption = 'Acceleration 0-100 km/h, s'
-      end
-      object Label79: TLabel
-        Left = 350
-        Top = 197
-        Width = 84
-        Height = 13
-        Caption = 'Top Speed, km/h'
-      end
-      object Label52: TLabel
-        Left = 350
-        Top = 173
-        Width = 59
-        Height = 13
-        Caption = 'Capacity, cc'
-      end
-      object Label39: TLabel
-        Left = 348
-        Top = 149
-        Width = 29
-        Height = 13
-        Caption = 'NM at'
-      end
-      object Label36: TLabel
-        Left = 348
-        Top = 125
-        Width = 27
-        Height = 13
-        Caption = 'HP at'
-      end
-      object Label35: TLabel
-        Left = 428
-        Top = 149
-        Width = 50
-        Height = 13
-        Caption = 'RPM, Max'
-      end
-      object Label34: TLabel
-        Left = 428
-        Top = 125
-        Width = 50
-        Height = 13
-        Caption = 'RPM, Max'
-      end
-      object Bevel8: TBevel
-        Left = 292
-        Top = 110
-        Width = 185
-        Height = 2
-      end
       object Image3: TImage
-        Left = 292
-        Top = 256
+        Left = 300
+        Top = 304
         Width = 172
         Height = 130
         AutoSize = True
@@ -7447,256 +7325,302 @@ object Form1: TForm1
           FFFFFFFFFFFFFFFFFFFF}
         Transparent = True
       end
-      object Label40: TLabel
-        Left = 354
-        Top = 77
-        Width = 97
-        Height = 13
-        Caption = 'Torque Efficiency, %'
-      end
-      object Label82: TLabel
-        Left = 354
-        Top = 29
-        Width = 42
-        Height = 13
-        Caption = 'NM Step'
-      end
-      object Label28: TLabel
-        Left = 354
-        Top = 53
-        Width = 47
-        Height = 13
-        Caption = 'Max RPM'
-      end
-      object Label81: TLabel
-        Left = 308
-        Top = 104
-        Width = 90
-        Height = 13
-        Caption = '  Engine Statistics  '
-      end
-      object Bevel7: TBevel
-        Left = 296
-        Top = 14
-        Width = 185
-        Height = 2
-      end
-      object Label78: TLabel
-        Left = 312
+      object GroupTorqueCurve: TGroupBox
+        Left = 8
         Top = 8
-        Width = 77
-        Height = 13
-        Caption = '  Torque Curve  '
-      end
-      object FS0100: TFloatSpinEdit
-        Left = 292
-        Top = 218
-        Width = 52
-        Height = 22
-        Hint = '0 - 100'
-        Accuracy = 1
-        Increment = 0.1
-        MaxValue = 100
+        Width = 273
+        Height = 441
+        Caption = ' Torque curve  '
         TabOrder = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object Edit4: TEdit
-        Left = 292
-        Top = 170
-        Width = 52
-        Height = 21
-        TabOrder = 1
-        Text = '250 cc'
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object Stopsp: TSpinEdit
-        Left = 292
-        Top = 194
-        Width = 52
-        Height = 22
-        Hint = '0 - 10000'
-        MaxValue = 10000
-        MinValue = 0
-        TabOrder = 2
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SMnm: TSpinEdit
-        Left = 293
-        Top = 146
-        Width = 49
-        Height = 22
-        Hint = '0 - 100000'
-        MaxValue = 100000
-        MinValue = 0
-        TabOrder = 3
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SMhp: TSpinEdit
-        Left = 293
-        Top = 122
-        Width = 49
-        Height = 22
-        Hint = '0 - 100000'
-        MaxValue = 100000
-        MinValue = 0
-        TabOrder = 4
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object Edit5: TEdit
-        Left = 382
-        Top = 122
-        Width = 40
-        Height = 21
-        TabOrder = 5
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object Edit6: TEdit
-        Left = 382
-        Top = 146
-        Width = 40
-        Height = 21
-        TabOrder = 6
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SMtorque: TSpinEdit
-        Left = 292
-        Top = 74
-        Width = 56
-        Height = 22
-        Hint = '0 - 1000'
-        MaxValue = 1000
-        MinValue = 0
-        TabOrder = 7
-        Value = 90
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SrpmMax: TSpinEdit
-        Left = 292
-        Top = 50
-        Width = 56
-        Height = 22
-        Hint = '2000 - 90000'
-        Increment = 100
-        MaxValue = 90000
-        MinValue = 2000
-        TabOrder = 8
-        Value = 10000
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SNMStep: TSpinEdit
-        Left = 292
-        Top = 26
-        Width = 56
-        Height = 22
-        Hint = '100 - 5000'
-        Increment = 10
-        MaxValue = 5000
-        MinValue = 100
-        TabOrder = 9
-        Value = 500
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object Chart1: TChart
-        Left = 2
-        Top = 8
-        Width = 283
-        Height = 401
-        AllowPanning = pmNone
-        AllowZoom = False
-        BackImageInside = True
-        BackImageMode = pbmCenter
-        BackWall.Brush.Color = clWhite
-        BackWall.Brush.Style = bsClear
-        BackWall.Color = clSilver
-        BottomWall.Brush.Color = clWhite
-        Gradient.Direction = gdFromCenter
-        Gradient.EndColor = clSilver
-        MarginBottom = 0
-        MarginLeft = 0
-        MarginTop = 0
-        Title.Text.Strings = (
-          'Torque/RPM')
-        BackColor = clSilver
-        BottomAxis.LabelsAngle = 90
-        BottomAxis.LabelsSeparation = 2
-        BottomAxis.MinorTickCount = 0
-        BottomAxis.MinorTickLength = 0
-        LeftAxis.Automatic = False
-        LeftAxis.AutomaticMaximum = False
-        LeftAxis.AutomaticMinimum = False
-        LeftAxis.Maximum = 1000
-        LeftAxis.Title.Angle = 0
-        View3D = False
-        BevelOuter = bvNone
-        TabOrder = 10
-        OnMouseMove = TorqueMouseMove
-        OnMouseUp = TorqueMouseUp
-        object Series1: TLineSeries
-          Marks.ArrowLength = 8
-          Marks.Visible = False
-          SeriesColor = clMaroon
-          ShowInLegend = False
-          Dark3D = False
-          Pointer.HorizSize = 2
-          Pointer.InflateMargins = False
-          Pointer.Style = psCircle
-          Pointer.VertSize = 2
-          Pointer.Visible = True
-          XValues.DateTime = False
-          XValues.Name = 'X'
-          XValues.Multiplier = 1
-          XValues.Order = loAscending
-          YValues.DateTime = False
-          YValues.Name = 'Y'
-          YValues.Multiplier = 1
-          YValues.Order = loNone
+        object Chart1: TChart
+          Left = 8
+          Top = 16
+          Width = 257
+          Height = 417
+          AllowPanning = pmNone
+          AllowZoom = False
+          BackImageInside = True
+          BackImageMode = pbmCenter
+          BackWall.Brush.Color = clWhite
+          BackWall.Brush.Style = bsClear
+          BackWall.Color = clSilver
+          BottomWall.Brush.Color = clWhite
+          Gradient.Direction = gdFromCenter
+          Gradient.EndColor = clSilver
+          MarginBottom = 0
+          MarginLeft = 0
+          MarginTop = 0
+          Title.Text.Strings = (
+            'Torque/RPM')
+          BackColor = clSilver
+          BottomAxis.LabelsAngle = 90
+          BottomAxis.LabelsSeparation = 2
+          BottomAxis.MinorTickCount = 0
+          BottomAxis.MinorTickLength = 0
+          LeftAxis.Automatic = False
+          LeftAxis.AutomaticMaximum = False
+          LeftAxis.AutomaticMinimum = False
+          LeftAxis.Maximum = 1000
+          LeftAxis.Title.Angle = 0
+          View3D = False
+          BevelOuter = bvNone
+          TabOrder = 0
+          OnMouseMove = TorqueMouseMove
+          OnMouseUp = TorqueMouseUp
+          object Series1: TLineSeries
+            Marks.ArrowLength = 8
+            Marks.Visible = False
+            SeriesColor = clMaroon
+            ShowInLegend = False
+            Dark3D = False
+            Pointer.HorizSize = 2
+            Pointer.InflateMargins = False
+            Pointer.Style = psCircle
+            Pointer.VertSize = 2
+            Pointer.Visible = True
+            XValues.DateTime = False
+            XValues.Name = 'X'
+            XValues.Multiplier = 1
+            XValues.Order = loAscending
+            YValues.DateTime = False
+            YValues.Name = 'Y'
+            YValues.Multiplier = 1
+            YValues.Order = loNone
+          end
+          object Series2: TLineSeries
+            Marks.ArrowLength = 8
+            Marks.Visible = False
+            SeriesColor = 10485760
+            ShowInLegend = False
+            Dark3D = False
+            Pointer.InflateMargins = True
+            Pointer.Style = psRectangle
+            Pointer.Visible = False
+            XValues.DateTime = False
+            XValues.Name = 'X'
+            XValues.Multiplier = 1
+            XValues.Order = loAscending
+            YValues.DateTime = False
+            YValues.Name = 'Y'
+            YValues.Multiplier = 1
+            YValues.Order = loNone
+          end
         end
-        object Series2: TLineSeries
-          Marks.ArrowLength = 8
-          Marks.Visible = False
-          SeriesColor = 10485760
-          ShowInLegend = False
-          Dark3D = False
-          Pointer.InflateMargins = True
-          Pointer.Style = psRectangle
-          Pointer.Visible = False
-          XValues.DateTime = False
-          XValues.Name = 'X'
-          XValues.Multiplier = 1
-          XValues.Order = loAscending
-          YValues.DateTime = False
-          YValues.Name = 'Y'
-          YValues.Multiplier = 1
-          YValues.Order = loNone
+      end
+      object GroupEngineStats: TGroupBox
+        Left = 288
+        Top = 128
+        Width = 201
+        Height = 153
+        Caption = ' Engine statistics  '
+        TabOrder = 1
+        object Label80: TLabel
+          Left = 74
+          Top = 121
+          Width = 66
+          Height = 13
+          Caption = '0-100 km/h, s'
+        end
+        object Label79: TLabel
+          Left = 74
+          Top = 97
+          Width = 84
+          Height = 13
+          Caption = 'Top Speed, km/h'
+        end
+        object Label36: TLabel
+          Left = 74
+          Top = 25
+          Width = 27
+          Height = 13
+          Caption = 'HP at'
+        end
+        object Label39: TLabel
+          Left = 74
+          Top = 49
+          Width = 29
+          Height = 13
+          Caption = 'NM at'
+        end
+        object Label35: TLabel
+          Left = 162
+          Top = 49
+          Width = 24
+          Height = 13
+          Caption = 'RPM'
+        end
+        object Label34: TLabel
+          Left = 162
+          Top = 25
+          Width = 24
+          Height = 13
+          Caption = 'RPM'
+        end
+        object Label52: TLabel
+          Left = 74
+          Top = 73
+          Width = 59
+          Height = 13
+          Caption = 'Capacity, cc'
+        end
+        object FS0100: TFloatSpinEdit
+          Left = 12
+          Top = 118
+          Width = 56
+          Height = 22
+          Hint = '0 - 100'
+          Accuracy = 1
+          Increment = 0.1
+          MaxValue = 100
+          TabOrder = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object Stopsp: TSpinEdit
+          Left = 12
+          Top = 94
+          Width = 56
+          Height = 22
+          Hint = '0 - 10000'
+          MaxValue = 10000
+          MinValue = 0
+          TabOrder = 1
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object Edit4: TEdit
+          Left = 12
+          Top = 70
+          Width = 56
+          Height = 21
+          TabOrder = 2
+          Text = '250 cc'
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SMnm: TSpinEdit
+          Left = 12
+          Top = 46
+          Width = 56
+          Height = 22
+          Hint = '0 - 100000'
+          MaxValue = 100000
+          MinValue = 0
+          TabOrder = 3
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SMhp: TSpinEdit
+          Left = 12
+          Top = 22
+          Width = 56
+          Height = 22
+          Hint = '0 - 100000'
+          MaxValue = 100000
+          MinValue = 0
+          TabOrder = 4
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object Edit5: TEdit
+          Left = 108
+          Top = 22
+          Width = 48
+          Height = 21
+          TabOrder = 5
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object Edit6: TEdit
+          Left = 108
+          Top = 46
+          Width = 48
+          Height = 21
+          TabOrder = 6
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+      end
+      object GroupTorque: TGroupBox
+        Left = 288
+        Top = 8
+        Width = 201
+        Height = 113
+        Caption = ' Torque  '
+        TabOrder = 2
+        object Label82: TLabel
+          Left = 74
+          Top = 25
+          Width = 42
+          Height = 13
+          Caption = 'NM Step'
+        end
+        object Label40: TLabel
+          Left = 74
+          Top = 81
+          Width = 97
+          Height = 13
+          Caption = 'Torque Efficiency, %'
+        end
+        object Label28: TLabel
+          Left = 74
+          Top = 53
+          Width = 47
+          Height = 13
+          Caption = 'Max RPM'
+        end
+        object SNMStep: TSpinEdit
+          Left = 12
+          Top = 22
+          Width = 56
+          Height = 22
+          Hint = '100 - 5000'
+          Increment = 10
+          MaxValue = 5000
+          MinValue = 100
+          TabOrder = 0
+          Value = 500
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SrpmMax: TSpinEdit
+          Left = 12
+          Top = 50
+          Width = 56
+          Height = 22
+          Hint = '2000 - 90000'
+          Increment = 100
+          MaxValue = 90000
+          MinValue = 2000
+          TabOrder = 1
+          Value = 10000
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SMtorque: TSpinEdit
+          Left = 12
+          Top = 78
+          Width = 56
+          Height = 22
+          Hint = '0 - 1000'
+          MaxValue = 1000
+          MinValue = 0
+          TabOrder = 2
+          Value = 90
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
         end
       end
     end
     object TabSheet9: TTabSheet
       Caption = 'Gearbox'
       ImageIndex = 4
-      object Label24: TLabel
-        Left = 66
-        Top = 29
-        Width = 80
-        Height = 13
-        Caption = 'Number of Gears'
-      end
       object Image2: TImage
-        Left = 208
-        Top = 244
+        Left = 280
+        Top = 308
         Width = 192
         Height = 128
         AutoSize = True
@@ -8506,262 +8430,258 @@ object Form1: TForm1
           FFFF}
         Transparent = True
       end
-      object Label38: TLabel
-        Left = 67
-        Top = 269
-        Width = 22
-        Height = 13
-        Caption = 'Final'
-      end
-      object Label23: TLabel
-        Left = 67
-        Top = 245
-        Width = 23
-        Height = 13
-        Caption = 'Rev.'
-      end
-      object Label22: TLabel
-        Left = 67
-        Top = 221
-        Width = 15
-        Height = 13
-        Caption = '7th'
-      end
-      object Label21: TLabel
-        Left = 67
-        Top = 197
-        Width = 15
-        Height = 13
-        Caption = '6th'
-      end
-      object Label20: TLabel
-        Left = 67
-        Top = 173
-        Width = 15
-        Height = 13
-        Caption = '5th'
-      end
-      object Label19: TLabel
-        Left = 67
-        Top = 149
-        Width = 15
-        Height = 13
-        Caption = '4th'
-      end
-      object Label18: TLabel
-        Left = 67
-        Top = 125
-        Width = 15
-        Height = 13
-        Caption = '3rd'
-      end
-      object Label17: TLabel
-        Left = 67
-        Top = 101
-        Width = 18
-        Height = 13
-        Caption = '2nd'
-      end
-      object Label16: TLabel
-        Left = 67
-        Top = 77
-        Width = 14
-        Height = 13
-        Caption = '1st'
-      end
-      object Bevel18: TBevel
+      object GroupGears: TGroupBox
         Left = 8
-        Top = 62
-        Width = 185
-        Height = 2
-      end
-      object Label15: TLabel
-        Left = 24
-        Top = 56
-        Width = 124
-        Height = 13
-        Caption = '  Gear ratios (Max speed)  '
-      end
-      object Bevel24: TBevel
-        Left = 8
-        Top = 14
-        Width = 185
-        Height = 2
-      end
-      object Label53: TLabel
-        Left = 24
         Top = 8
-        Width = 46
-        Height = 13
-        Caption = '  Weight  '
-      end
-      object Label143: TLabel
-        Left = 91
-        Top = 77
-        Width = 14
-        Height = 13
-        Caption = '1st'
-      end
-      object Label144: TLabel
-        Left = 91
-        Top = 101
-        Width = 18
-        Height = 13
-        Caption = '2nd'
-      end
-      object Label145: TLabel
-        Left = 91
-        Top = 125
-        Width = 15
-        Height = 13
-        Caption = '3rd'
-      end
-      object Label146: TLabel
-        Left = 91
-        Top = 149
-        Width = 15
-        Height = 13
-        Caption = '4th'
-      end
-      object Label147: TLabel
-        Left = 91
-        Top = 173
-        Width = 15
-        Height = 13
-        Caption = '5th'
-      end
-      object Label148: TLabel
-        Left = 91
-        Top = 197
-        Width = 15
-        Height = 13
-        Caption = '6th'
-      end
-      object Label149: TLabel
-        Left = 91
-        Top = 221
-        Width = 15
-        Height = 13
-        Caption = '7th'
-      end
-      object Label150: TLabel
-        Left = 91
-        Top = 245
-        Width = 23
-        Height = 13
-        Caption = 'Rev.'
-      end
-      object SGearQty: TSpinEdit
-        Left = 4
-        Top = 26
-        Width = 57
-        Height = 22
-        Hint = '1 - 7'
-        MaxValue = 7
-        MinValue = 1
+        Width = 225
+        Height = 297
+        Caption = ' Gears  '
         TabOrder = 0
-        Value = 1
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FSGear1: TFloatSpinEdit
-        Left = 4
-        Top = 74
-        Width = 57
-        Height = 22
-        Accuracy = 3
-        Increment = 0.001
-        TabOrder = 1
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FSGear2: TFloatSpinEdit
-        Left = 4
-        Top = 98
-        Width = 57
-        Height = 22
-        Accuracy = 3
-        Increment = 0.001
-        TabOrder = 2
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FSGear3: TFloatSpinEdit
-        Left = 4
-        Top = 122
-        Width = 57
-        Height = 22
-        Accuracy = 3
-        Increment = 0.001
-        TabOrder = 3
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FSGear4: TFloatSpinEdit
-        Left = 4
-        Top = 146
-        Width = 57
-        Height = 22
-        Accuracy = 3
-        Increment = 0.001
-        TabOrder = 4
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FSGear5: TFloatSpinEdit
-        Left = 4
-        Top = 170
-        Width = 57
-        Height = 22
-        Accuracy = 3
-        Increment = 0.001
-        TabOrder = 5
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FSGear6: TFloatSpinEdit
-        Left = 4
-        Top = 194
-        Width = 57
-        Height = 22
-        Accuracy = 3
-        Increment = 0.001
-        TabOrder = 6
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FSGear7: TFloatSpinEdit
-        Left = 4
-        Top = 218
-        Width = 57
-        Height = 22
-        Accuracy = 3
-        Increment = 0.001
-        TabOrder = 7
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FSGearR: TFloatSpinEdit
-        Left = 4
-        Top = 242
-        Width = 57
-        Height = 22
-        Accuracy = 3
-        Increment = 0.001
-        TabOrder = 8
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FSGearF: TFloatSpinEdit
-        Left = 4
-        Top = 266
-        Width = 57
-        Height = 22
-        Accuracy = 3
-        Increment = 0.001
-        TabOrder = 9
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
+        object Label150: TLabel
+          Left = 99
+          Top = 241
+          Width = 23
+          Height = 13
+          Caption = 'Rev.'
+        end
+        object Label149: TLabel
+          Left = 99
+          Top = 217
+          Width = 15
+          Height = 13
+          Caption = '7th'
+        end
+        object Label148: TLabel
+          Left = 99
+          Top = 193
+          Width = 15
+          Height = 13
+          Caption = '6th'
+        end
+        object Label147: TLabel
+          Left = 99
+          Top = 169
+          Width = 15
+          Height = 13
+          Caption = '5th'
+        end
+        object Label146: TLabel
+          Left = 99
+          Top = 145
+          Width = 15
+          Height = 13
+          Caption = '4th'
+        end
+        object Label145: TLabel
+          Left = 99
+          Top = 121
+          Width = 15
+          Height = 13
+          Caption = '3rd'
+        end
+        object Label144: TLabel
+          Left = 99
+          Top = 97
+          Width = 18
+          Height = 13
+          Caption = '2nd'
+        end
+        object Label143: TLabel
+          Left = 99
+          Top = 73
+          Width = 14
+          Height = 13
+          Caption = '1st'
+        end
+        object Label16: TLabel
+          Left = 75
+          Top = 73
+          Width = 14
+          Height = 13
+          Caption = '1st'
+        end
+        object Label17: TLabel
+          Left = 75
+          Top = 97
+          Width = 18
+          Height = 13
+          Caption = '2nd'
+        end
+        object Label18: TLabel
+          Left = 75
+          Top = 121
+          Width = 15
+          Height = 13
+          Caption = '3rd'
+        end
+        object Label19: TLabel
+          Left = 75
+          Top = 145
+          Width = 15
+          Height = 13
+          Caption = '4th'
+        end
+        object Label20: TLabel
+          Left = 75
+          Top = 169
+          Width = 15
+          Height = 13
+          Caption = '5th'
+        end
+        object Label21: TLabel
+          Left = 75
+          Top = 193
+          Width = 15
+          Height = 13
+          Caption = '6th'
+        end
+        object Label22: TLabel
+          Left = 75
+          Top = 217
+          Width = 15
+          Height = 13
+          Caption = '7th'
+        end
+        object Label23: TLabel
+          Left = 75
+          Top = 241
+          Width = 23
+          Height = 13
+          Caption = 'Rev.'
+        end
+        object Label38: TLabel
+          Left = 75
+          Top = 265
+          Width = 46
+          Height = 13
+          Caption = 'Final gear'
+        end
+        object Label24: TLabel
+          Left = 74
+          Top = 25
+          Width = 80
+          Height = 13
+          Caption = 'Number of Gears'
+        end
+        object Label15: TLabel
+          Left = 16
+          Top = 52
+          Width = 111
+          Height = 13
+          Caption = 'Gear ratios (max speed)'
+        end
+        object FSGearF: TFloatSpinEdit
+          Left = 12
+          Top = 262
+          Width = 57
+          Height = 22
+          Accuracy = 3
+          Increment = 0.001
+          TabOrder = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FSGearR: TFloatSpinEdit
+          Left = 12
+          Top = 238
+          Width = 57
+          Height = 22
+          Accuracy = 3
+          Increment = 0.001
+          TabOrder = 1
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FSGear7: TFloatSpinEdit
+          Left = 12
+          Top = 214
+          Width = 57
+          Height = 22
+          Accuracy = 3
+          Increment = 0.001
+          TabOrder = 2
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FSGear6: TFloatSpinEdit
+          Left = 12
+          Top = 190
+          Width = 57
+          Height = 22
+          Accuracy = 3
+          Increment = 0.001
+          TabOrder = 3
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FSGear5: TFloatSpinEdit
+          Left = 12
+          Top = 166
+          Width = 57
+          Height = 22
+          Accuracy = 3
+          Increment = 0.001
+          TabOrder = 4
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FSGear4: TFloatSpinEdit
+          Left = 12
+          Top = 142
+          Width = 57
+          Height = 22
+          Accuracy = 3
+          Increment = 0.001
+          TabOrder = 5
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FSGear3: TFloatSpinEdit
+          Left = 12
+          Top = 118
+          Width = 57
+          Height = 22
+          Accuracy = 3
+          Increment = 0.001
+          TabOrder = 6
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FSGear2: TFloatSpinEdit
+          Left = 12
+          Top = 94
+          Width = 57
+          Height = 22
+          Accuracy = 3
+          Increment = 0.001
+          TabOrder = 7
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FSGear1: TFloatSpinEdit
+          Left = 12
+          Top = 70
+          Width = 57
+          Height = 22
+          Accuracy = 3
+          Increment = 0.001
+          TabOrder = 8
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SGearQty: TSpinEdit
+          Left = 12
+          Top = 22
+          Width = 57
+          Height = 22
+          Hint = '1 - 7'
+          MaxValue = 7
+          MinValue = 1
+          TabOrder = 9
+          Value = 1
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
       end
     end
     object TabSheet10: TTabSheet
@@ -13788,15 +13708,9 @@ object Form1: TForm1
     object TabSheet11: TTabSheet
       Caption = 'Cockpit'
       ImageIndex = 6
-      object Bevel13: TBevel
-        Left = 8
-        Top = 14
-        Width = 281
-        Height = 2
-      end
       object Image6: TImage
-        Left = 218
-        Top = 302
+        Left = 210
+        Top = 342
         Width = 269
         Height = 101
         AutoSize = True
@@ -16356,414 +16270,13 @@ object Form1: TForm1
           FFFFFFFFFFFFFFFFFF00}
         Transparent = True
       end
-      object Bevel12: TBevel
-        Left = 8
-        Top = 260
-        Width = 280
-        Height = 2
-      end
-      object Label102: TLabel
-        Left = 146
-        Top = 269
-        Width = 64
-        Height = 13
-        Caption = 'Display Mode'
-      end
-      object Label98: TLabel
-        Left = 146
-        Top = 237
-        Width = 20
-        Height = 13
-        Caption = 'Size'
-      end
-      object Label100: TLabel
-        Left = 146
-        Top = 213
-        Width = 96
-        Height = 13
-        Caption = 'Start Angle, degrees'
-      end
-      object Label101: TLabel
-        Left = 146
-        Top = 189
-        Width = 27
-        Height = 13
-        Caption = 'Scale'
-      end
-      object Bevel11: TBevel
-        Left = 8
-        Top = 180
-        Width = 280
-        Height = 2
-      end
-      object Label97: TLabel
-        Left = 218
-        Top = 157
-        Width = 107
-        Height = 13
-        Caption = 'Bank (XY), degrees (?)'
-      end
-      object Label95: TLabel
-        Left = 218
-        Top = 109
-        Width = 107
-        Height = 13
-        Caption = 'Heading (XZ), degrees'
-      end
-      object Label96: TLabel
-        Left = 218
-        Top = 133
-        Width = 91
-        Height = 13
-        Caption = 'Pitch (YZ), degrees'
-      end
-      object Bevel1: TBevel
-        Left = 8
-        Top = 100
-        Width = 280
-        Height = 2
-      end
-      object Label92: TLabel
-        Left = 218
-        Top = 29
-        Width = 69
-        Height = 13
-        Caption = 'Position X, mm'
-      end
-      object Label93: TLabel
-        Left = 218
-        Top = 53
-        Width = 69
-        Height = 13
-        Caption = 'Position Y, mm'
-      end
-      object Label94: TLabel
-        Left = 218
-        Top = 77
-        Width = 69
-        Height = 13
-        Caption = 'Position Z, mm'
-      end
-      object Label91: TLabel
-        Left = 76
+      object GroupDisplayModes: TGroupBox
+        Left = 384
         Top = 8
-        Width = 43
-        Height = 13
-        Caption = '  Tacho  '
-      end
-      object Label90: TLabel
-        Left = 4
-        Top = 8
-        Width = 49
-        Height = 13
-        Caption = '  Speedo  '
-      end
-      object Label113: TLabel
-        Left = 148
-        Top = 8
-        Width = 65
-        Height = 13
-        Caption = '  Drivewheel  '
-      end
-      object Bevel20: TBevel
-        Left = 8
-        Top = 292
-        Width = 140
-        Height = 2
-      end
-      object ST2Mode: TSpinEdit
-        Left = 76
-        Top = 266
-        Width = 65
-        Height = 22
-        Hint = '1 - 10'
-        MaxValue = 10
-        MinValue = 1
-        TabOrder = 0
-        Value = 1
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ST1Mode: TSpinEdit
-        Left = 4
-        Top = 266
-        Width = 65
-        Height = 22
-        Hint = '1 - 10'
-        MaxValue = 10
-        MinValue = 1
-        TabOrder = 1
-        Value = 1
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FST2Size: TFloatSpinEdit
-        Left = 76
-        Top = 234
-        Width = 65
-        Height = 22
-        Accuracy = 2
-        Increment = 0.05
-        TabOrder = 2
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FST1Size: TFloatSpinEdit
-        Left = 4
-        Top = 234
-        Width = 65
-        Height = 22
-        Accuracy = 2
-        Increment = 0.05
-        TabOrder = 3
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ST1Start: TSpinEdit
-        Left = 4
-        Top = 210
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 4
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FST1Scale: TFloatSpinEdit
-        Left = 4
-        Top = 186
-        Width = 65
-        Height = 22
-        Accuracy = 2
-        Increment = 0.05
-        TabOrder = 5
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object FST2Scale: TFloatSpinEdit
-        Left = 76
-        Top = 186
-        Width = 65
-        Height = 22
-        Accuracy = 2
-        Increment = 0.05
-        TabOrder = 6
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ST2Start: TSpinEdit
-        Left = 76
-        Top = 210
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 7
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ST2A3: TSpinEdit
-        Left = 76
-        Top = 154
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 8
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ST1A3: TSpinEdit
-        Left = 4
-        Top = 154
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 9
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ST1A2: TSpinEdit
-        Left = 4
-        Top = 130
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 10
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ST1A1: TSpinEdit
-        Left = 4
-        Top = 106
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 11
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ST2A1: TSpinEdit
-        Left = 76
-        Top = 106
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 12
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ST2A2: TSpinEdit
-        Left = 76
-        Top = 130
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 13
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SDrwW: TSpinEdit
-        Left = 148
-        Top = 130
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 14
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ST2Z: TSpinEdit
-        Left = 76
-        Top = 74
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 15
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ST1Z: TSpinEdit
-        Left = 4
-        Top = 74
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 16
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ST1Y: TSpinEdit
-        Left = 4
-        Top = 50
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 17
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ST1X: TSpinEdit
-        Left = 4
-        Top = 26
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 18
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ST2X: TSpinEdit
-        Left = 76
-        Top = 26
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 19
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object ST2Y: TSpinEdit
-        Left = 76
-        Top = 50
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 20
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SDrwZ: TSpinEdit
-        Left = 148
-        Top = 74
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 21
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SDrwY: TSpinEdit
-        Left = 148
-        Top = 50
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 22
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object SDrwX: TSpinEdit
-        Left = 148
-        Top = 26
-        Width = 65
-        Height = 22
-        MaxValue = 0
-        MinValue = 0
-        TabOrder = 23
-        Value = 0
-        OnChange = FSChange
-        OnKeyUp = FSChangeLink
-      end
-      object GroupBox1: TGroupBox
-        Left = 390
-        Top = 4
-        Width = 93
+        Width = 97
         Height = 209
         Caption = ' Display Modes  '
-        TabOrder = 24
+        TabOrder = 0
         object Image7: TImage
           Left = 24
           Top = 20
@@ -17829,6 +17342,421 @@ object Form1: TForm1
           Width = 15
           Height = 13
           Caption = '10.'
+        end
+      end
+      object GroupCockpit: TGroupBox
+        Left = 8
+        Top = 8
+        Width = 361
+        Height = 321
+        Caption = ' Cockpit  '
+        TabOrder = 1
+        object Bevel12: TBevel
+          Left = 16
+          Top = 270
+          Width = 280
+          Height = 2
+        end
+        object Bevel11: TBevel
+          Left = 16
+          Top = 190
+          Width = 280
+          Height = 2
+        end
+        object Bevel1: TBevel
+          Left = 16
+          Top = 110
+          Width = 280
+          Height = 2
+        end
+        object Bevel13: TBevel
+          Left = 16
+          Top = 24
+          Width = 281
+          Height = 2
+        end
+        object Bevel20: TBevel
+          Left = 16
+          Top = 302
+          Width = 140
+          Height = 2
+        end
+        object Label113: TLabel
+          Left = 156
+          Top = 18
+          Width = 65
+          Height = 13
+          Caption = '  Drivewheel  '
+        end
+        object Label91: TLabel
+          Left = 84
+          Top = 18
+          Width = 43
+          Height = 13
+          Caption = '  Tacho  '
+        end
+        object Label94: TLabel
+          Left = 226
+          Top = 87
+          Width = 69
+          Height = 13
+          Caption = 'Position Z, mm'
+        end
+        object Label93: TLabel
+          Left = 226
+          Top = 63
+          Width = 69
+          Height = 13
+          Caption = 'Position Y, mm'
+        end
+        object Label92: TLabel
+          Left = 226
+          Top = 39
+          Width = 69
+          Height = 13
+          Caption = 'Position X, mm'
+        end
+        object Label96: TLabel
+          Left = 226
+          Top = 143
+          Width = 91
+          Height = 13
+          Caption = 'Pitch (YZ), degrees'
+        end
+        object Label95: TLabel
+          Left = 226
+          Top = 119
+          Width = 107
+          Height = 13
+          Caption = 'Heading (XZ), degrees'
+        end
+        object Label97: TLabel
+          Left = 226
+          Top = 167
+          Width = 107
+          Height = 13
+          Caption = 'Bank (XY), degrees (?)'
+        end
+        object Label101: TLabel
+          Left = 154
+          Top = 199
+          Width = 27
+          Height = 13
+          Caption = 'Scale'
+        end
+        object Label100: TLabel
+          Left = 154
+          Top = 223
+          Width = 96
+          Height = 13
+          Caption = 'Start Angle, degrees'
+        end
+        object Label98: TLabel
+          Left = 154
+          Top = 247
+          Width = 20
+          Height = 13
+          Caption = 'Size'
+        end
+        object Label102: TLabel
+          Left = 154
+          Top = 279
+          Width = 64
+          Height = 13
+          Caption = 'Display Mode'
+        end
+        object Label90: TLabel
+          Left = 12
+          Top = 18
+          Width = 49
+          Height = 13
+          Caption = '  Speedo  '
+        end
+        object SDrwX: TSpinEdit
+          Left = 156
+          Top = 36
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 0
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SDrwY: TSpinEdit
+          Left = 156
+          Top = 60
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 1
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SDrwZ: TSpinEdit
+          Left = 156
+          Top = 84
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 2
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ST2Y: TSpinEdit
+          Left = 84
+          Top = 60
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 3
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ST2X: TSpinEdit
+          Left = 84
+          Top = 36
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 4
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ST1X: TSpinEdit
+          Left = 12
+          Top = 36
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 5
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ST1Y: TSpinEdit
+          Left = 12
+          Top = 60
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 6
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ST1Z: TSpinEdit
+          Left = 12
+          Top = 84
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 7
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ST2Z: TSpinEdit
+          Left = 84
+          Top = 84
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 8
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object SDrwW: TSpinEdit
+          Left = 156
+          Top = 140
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 9
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ST2A2: TSpinEdit
+          Left = 84
+          Top = 140
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 10
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ST2A1: TSpinEdit
+          Left = 84
+          Top = 116
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 11
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ST1A1: TSpinEdit
+          Left = 12
+          Top = 116
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 12
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ST1A2: TSpinEdit
+          Left = 12
+          Top = 140
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 13
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ST1A3: TSpinEdit
+          Left = 12
+          Top = 164
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 14
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ST2A3: TSpinEdit
+          Left = 84
+          Top = 164
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 15
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ST2Start: TSpinEdit
+          Left = 84
+          Top = 220
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 16
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FST2Scale: TFloatSpinEdit
+          Left = 84
+          Top = 196
+          Width = 65
+          Height = 22
+          Accuracy = 2
+          Increment = 0.05
+          TabOrder = 17
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FST1Scale: TFloatSpinEdit
+          Left = 12
+          Top = 196
+          Width = 65
+          Height = 22
+          Accuracy = 2
+          Increment = 0.05
+          TabOrder = 18
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ST1Start: TSpinEdit
+          Left = 12
+          Top = 220
+          Width = 65
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 19
+          Value = 0
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FST1Size: TFloatSpinEdit
+          Left = 12
+          Top = 244
+          Width = 65
+          Height = 22
+          Accuracy = 2
+          Increment = 0.05
+          TabOrder = 20
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object FST2Size: TFloatSpinEdit
+          Left = 84
+          Top = 244
+          Width = 65
+          Height = 22
+          Accuracy = 2
+          Increment = 0.05
+          TabOrder = 21
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ST1Mode: TSpinEdit
+          Left = 12
+          Top = 276
+          Width = 65
+          Height = 22
+          Hint = '1 - 10'
+          MaxValue = 10
+          MinValue = 1
+          TabOrder = 22
+          Value = 1
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
+        end
+        object ST2Mode: TSpinEdit
+          Left = 84
+          Top = 276
+          Width = 65
+          Height = 22
+          Hint = '1 - 10'
+          MaxValue = 10
+          MinValue = 1
+          TabOrder = 23
+          Value = 1
+          OnChange = FSChange
+          OnKeyUp = FSChangeLink
         end
       end
     end
