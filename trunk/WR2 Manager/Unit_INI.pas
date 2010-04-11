@@ -8,7 +8,7 @@ procedure WriteINI();
 implementation
 
 procedure ReadINI();
-var i:integer;
+var i:integer; s:string;
 begin
 chdir(RootDir);
 if not fileexists('WR2Man.ini') then exit;

@@ -51,7 +51,7 @@ type
     function ConvertTBToIndex(iDS,iTB:integer):integer;
 
   public
-    DoProperIndexing:boolean;
+    DoProperIndexing:boolean; //This means that indixes will be accessed by Index value, rather than absolute position in table
     constructor Create;
     function LoadDS(FileName:string):boolean;
     procedure SaveDS(FileName:string);

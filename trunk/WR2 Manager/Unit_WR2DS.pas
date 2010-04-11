@@ -12,7 +12,7 @@ uses Unit1, KromUtils, FileCtrl, SysUtils, Windows;
 implementation
 
 procedure OpenDS(filename:string);
-var i,k,h,j,m:integer;
+var i,k,h,j,m:integer; s:string;
 begin
 assignfile(f,filename); FileMode:=0; reset(f,1); FileMode:=2;
 blockread(f,Header,33);
@@ -103,7 +103,7 @@ closefile(f);
 end;
 
 procedure SaveDS(filename:string);
-var i,k,j:integer;
+var i,k,j:integer; s:string;
 begin
 assignfile(f,filename); rewrite(f,1);
 c[1]:=#0;
@@ -150,17 +150,17 @@ var ID,scnID,j,i,k:integer;
 begin
 
 for j:=1 to TB[14].Entries do if (j<>14)and(j<>15) then begin   //skip these
-CO[14,j].Entries:=184;                                          //reset original Qty
-for i:=1 to AddonSceneryQty do if AddonScenery[i].Install then
-inc(CO[14,j].Entries,AddonScenery[i].TrackQty);
+  CO[14,j].Entries:=BaseTracks;                                 //reset original Qty
+  for i:=1 to AddonSceneryQty do if AddonScenery[i].Install then
+  inc(CO[14,j].Entries,AddonScenery[i].TrackQty);
 end;
 
-ID:=184; scnID:=0;
+ID:=BaseTracks; scnID:=0;
 for i:=1 to AddonSceneryQty do if AddonScenery[i].Install then begin
 AddonScenery[i].FreeRideID_abs:=ID+AddonScenery[i].FreeRideID-1;
 inc(scnID);
 for k:=1 to AddonScenery[i].TrackQty do begin
-inc(ID);  //185..+
+inc(ID);  //BaseTracks..+
 for j:=1 to TB[14].Entries do if (j<>14)and(j<>15) then Value[14,j,ID].Typ:=Value[14,j,ID-1].Typ;
 Value[14,1,ID].Int:=ID-1;                               //Index
 Value[14,2,ID].Int:=6+scnID;                            //SceneryID (installed)
@@ -312,11 +312,11 @@ end;//1..MissionQty
 end;
 
 procedure SaveProfiles();
-var s1,s2:string; ID,i,j,k,h:integer;
+var s1,s2:string; ID,i,j,k,h:integer; s:string;
 begin
 for ID:=1 to ProfileQty do if Profile[ID].Install then begin
 
-  for k:=1 to 10 do P_[ID].CO[8,k].Entries:=184; //184 is base number of WR2 tracks
+  for k:=1 to 10 do P_[ID].CO[8,k].Entries:=BaseTracks;
   for i:=1 to AddonSceneryQty do if AddonScenery[i].Install then begin
     for h:=1 to AddonScenery[i].TrackQty do begin
       for k:=1 to 10 do begin
@@ -337,7 +337,7 @@ for ID:=1 to ProfileQty do if Profile[ID].Install then begin
     end;
   end;
 
-  k:=184; //the last possible LastSelectTrack
+  k:=BaseTracks; //the last possible LastSelectTrack
   P_[ID].CO[9,1].Entries:=6; //Base number of sceneries
   for i:=1 to AddonSceneryQty do
     if AddonScenery[i].Install then begin
