@@ -1,0 +1,34 @@
+ColSetInf "Default"
+
+# 0x0000
+MatClass 00 01 00 00
+Diffuse 0xb4b4b4
+Ambient 0x000000
+Specular 0x323232
+Reflect 0x000000
+Specular2 0x000000
+XDiffuse 0x000000
+XSpecular 0x000000
+Transparency 0.000000
+Tex1Name "catera.tga"
+TexFlags 0x11 0x00 0x00 0x00
+TexOffset 0.000000 0.000000
+TexScale 1.000000 1.000000
+TexAngle 0.000000
+
+# 0x0001
+MatClass 00 01 01 00
+Diffuse 0x000000
+Ambient 0x000000
+Specular 0x000000
+Reflect 0x000000
+Specular2 0x000000
+XDiffuse 0x000000
+XSpecular 0x000000
+Transparency 0.000000
+Tex1Name "carshdw.tga"
+TexFlags 0x11 0x00 0x00 0x00
+TexOffset 0.000000 0.000000
+TexScale 1.000000 1.000000
+TexAngle 0.000000
+

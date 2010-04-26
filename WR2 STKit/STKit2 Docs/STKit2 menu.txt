@@ -1,0 +1,51 @@
+File>
+		-Show map info
+		Opens map info panels, one with list of loaded files. Other panel shows workfolder and savename, aswell some warnings and list of changed files if any.
+		-Save scenery
+		Saves changed scenery files.
+
+Special actions>
+		-MBWR lightning fix
+		Special for MBWR sceneries being converted to WR2. Adds ambient light to scenery preserving tunnel lights.
+		-AFC11N lightning fix
+		Special for AFC11N sceneries being converted to WR2. Fixes excessive blue highlights in lakes and rivers preserving scenery lightning. Aswell applies required blending masks to water materials, otherwise they don't work in WR2. This should be used aswell for custom addon sceneries with water surfaces.
+		-Switch MBWR blending masks
+		Special for MBWR sceneries being converted to WR2. Exchanges vertice blending masks to WR2 format.
+		-Switch AFC11N blending masks
+		Special for AFC11N sceneries being converted to WR2. Exchanges vertice blending masks to WR2 format.
+		-Rebuild lightning
+		Quick shortcut for scenery lightning update. Applies ambient color from LI tab and Sun light from SKY tab, aswell all scenery lights.
+		-Rebuild shadows
+		Quick shortcut for scenery shading update. Applies simple ray-traced per vertice shadows to scenery. If you need better alternative or control over shadow edge sharpness - goto SKY tab.
+		-Apply shadow test to all objects
+		Not implemented yet. Should scan all object instances and determine if thy are in shadow or not.
+		-Land current object instances
+		Puts all selected object instances onto ground level (closest to old level). Especially usefull when editing and reimporting scenery source LWO with changed ground levels.
+		-Rotate current object instances
+		Randomly rotates all selected object instances. Usefull to add sense of disorder to e.g. row of pylons.
+		-Reload all objects/textures
+		Title stands for itself. Usefull when you changed scenery textures or objects and need to reload them without reloading whole scenery.
+		-Duplicate traffic routes
+		Duplicates all traffic routes. Can be used to make three or more lane roads like Autobahn.
+		-Level streets
+		Aligns streets elevations to terrain below.
+		-Show streets length
+		Displays total length of all roads (both directions computed).
+		-Make top-down render 2k x 2k
+		Will make a orthographic render of whole scenery from top and save it in STKit2 folder as TGA image. Image size is 2048x2048 pixels without aspect ratio applied. Usefull for map making and when making grass color texture.
+
+Render mode>
+		-2D
+		Will render in orthographic mode, without perspective distortions. Usefull when making street splines and etc.
+		-Checkers
+		Will replace all scenery textures with checkerboard pattern. May help to notice UV mapping errors and wrong texel sizes.
+		-Wireframe
+		Will render wireframe of scenery and polygon normals. Usefull when you want to know how polys are placed.
+		-Selection buffer
+		Will show selection buffer which contains all click-able objects in viewport in different colors. Used in debug.
+
+Options...>
+		Opens options dialogue where you set WR2 folder path, FPS limit in STKit2, View distance in STKit2 in meters. Two last options affect STKit2 performance, put lower values for better performance.
+
+About...>
+		Shows STKit2 version number and OpenGL version.
