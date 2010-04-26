@@ -1,0 +1,56 @@
+ This is where scenery files are placed and what for. 
+ SCENERY mean your scenery name.
+ ## represents some number.
+--------------------------------------------------------------------------------------
+
+RaceDat>
+	SCENERY.trl				Triggers locations
+	SCENERY_##.cpt				Checkpoint times
+	SCENERY_##.wpt				Waypoint times
+
+Scenarios>
+	SCENERY>
+		V#>				Three different versions (1 - 3)
+			Extra>
+				Env_Cube.tga	Environment map for static reflections
+				ShdwMap.smp	Shadow map depths
+				sun1.ptx	Sun sprite
+
+			Objects>		Objects in scenery
+				Textures>	Textures of objects (lower priority)
+
+			Textures>		Textures of scenery (higher priority)
+
+			Tracks>
+				SCENERY_##.tob	Route specific objects
+				SCENERY_##.trk	Driving route
+				SCENERY_##.wtr	Waypoint route
+				tracks.dat	Number of tracks
+
+			SCENERY.idx		Polys
+			SCENERY.lvl		Sun position
+			SCENERY.qad		Scenery structure
+			SCENERY.sky		Atmosphere and clouds setup
+			SCENERY.sni		Animated objects routes
+			SCENERY.vtx		Vertices
+			SCENERY.ro#		Grass (1 - 4 represents density levels)
+
+Traffic>
+	Streets>
+		SCENERY.slt			Traffic cars list
+		SCENERY.str			Streets
+
+AddOns>
+	Sceneries>
+		SCENERY>
+			EditScenery.sc2		Scenery info for WR2Manager
+
+FrontEnd>
+	Daten>
+		Sceneries>
+			BG_SCENERY.tga		Background menu image
+			FlagSCENERY.tga		Scenery flag image in circle in menu
+
+		TrackMaps>
+			TrackSCENERY##.tga	Track map shown in menu
+			TrackSCENERYWP##.tga	Waypoint track map shown in menu
