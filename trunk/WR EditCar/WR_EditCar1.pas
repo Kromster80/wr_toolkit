@@ -58,6 +58,7 @@ type
     TabSheet12: TTabSheet;
     {$IFDEF VER140}
     ValueListEditor1: TValueListEditor;
+    {$ENDIF}
     GroupDisplayModes: TGroupBox;
     Image7: TImage;
     Label103: TLabel;
