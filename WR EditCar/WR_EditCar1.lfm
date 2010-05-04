@@ -728,8 +728,8 @@ object Form1: TForm1
     Height = 441
     Top = 8
     Width = 503
-    ActivePage = TabSheet12
-    TabIndex = 8
+    ActivePage = TabSheet13
+    TabIndex = 0
     TabOrder = 4
     OnChange = PageChange
     object TabSheet13: TTabSheet
