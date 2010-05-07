@@ -1186,31 +1186,30 @@ if RenderMode<rmFull then glBegin(GL_POINTS) else begin
     end;
 end;
 
-
 for m:=1 to 4 do
-for kk:=1 to RO[In1].Head.sizeZ do for ii:=1 to RO[In1].Head.sizeX do
-if GetLength(((ii-RO[In1].Head.sizeX/2)*256-xPos),((kk-RO[In1].Head.sizeZ/2)*256-zPos))<ViewDistance/6 then
-for h:=RO[In1].Chunks[kk,ii].First+1 to RO[In1].Chunks[kk,ii].First+RO[In1].Chunks[kk,ii].Num do
-if RO[In1].Grass[h].ID+1=m then begin
-  EnsureRange(h,1,RO[In1].Head.Qty);
+  for kk:=1 to RO[In1].Head.sizeZ do for ii:=1 to RO[In1].Head.sizeX do
+    if GetLength(((ii-RO[In1].Head.sizeX/2)*256-xPos),((kk-RO[In1].Head.sizeZ/2)*256-zPos))<ViewDistance/6 then
+      for h:=RO[In1].Chunks[kk,ii].First+1 to RO[In1].Chunks[kk,ii].First+RO[In1].Chunks[kk,ii].Num do
+        if RO[In1].Grass[h].ID+1=m then begin
+          EnsureRange(h,1,RO[In1].Head.Qty);
 
-  case GMode of  //R=0..3, G=0..15, B=BG, A=R0
-  1: SetPresetColorGL(RO[In1].Grass[h].ID+1,1); //Type
-  2: glcolor4f(RO[In1].Grass[h].Size/15,RO[In1].Grass[h].Size/15,RO[In1].Grass[h].Size/15,1);//SetPresetColorGL(RO[In1].Grass[h].Size+1,1); //Size
-  3: glColor3ub((RO[In1].Grass[h].Color and 3840)div 16+15,(RO[In1].Grass[h].Color and 240+15),(RO[In1].Grass[h].Color and 15)*16+15);
-  end;
+          case GMode of  //R=0..3, G=0..15, B=BG, A=R0
+            1: SetPresetColorGL(RO[In1].Grass[h].ID+1,1); //Type
+            2: glcolor4f(RO[In1].Grass[h].Size/15,RO[In1].Grass[h].Size/15,RO[In1].Grass[h].Size/15,1);//SetPresetColorGL(RO[In1].Grass[h].Size+1,1); //Size
+            3: glColor3ub((RO[In1].Grass[h].Color and 3840)div 16+15,(RO[In1].Grass[h].Color and 240+15),(RO[In1].Grass[h].Color and 15)*16+15);
+          end;
 
-      if RenderMode>=rmFull then begin
-      glPushMatrix;
-      glTranslate(RO[In1].Grass[h].X,RO[In1].Grass[h].Y,RO[In1].Grass[h].Z);
-      glRotatef(xRot,0,1,0);
-      if GMode<3 then glRotatef(180+yRot,1,0,0);
-      glScale(0.8+RO[In1].Grass[h].Size/20,0.8+RO[In1].Grass[h].Size/20,0.8+RO[In1].Grass[h].Size/20); //80cm..150cm
-      glCallList(coGrass[m]);
-      glPopMatrix;
-      end else
-      glVertex3f(RO[In1].Grass[h].X,RO[In1].Grass[h].Y+5,RO[In1].Grass[h].Z);
-  end;
+          if RenderMode>=rmFull then begin
+            glPushMatrix;
+            glTranslate(RO[In1].Grass[h].X,RO[In1].Grass[h].Y,RO[In1].Grass[h].Z);
+            glRotatef(xRot,0,1,0);
+            if GMode<3 then glRotatef(180+yRot,1,0,0);
+            glScale(0.8+RO[In1].Grass[h].Size/20,0.8+RO[In1].Grass[h].Size/20,0.8+RO[In1].Grass[h].Size/20); //80cm..150cm
+            glCallList(coGrass[m]);
+            glPopMatrix;
+          end else
+            glVertex3f(RO[In1].Grass[h].X,RO[In1].Grass[h].Y+5,RO[In1].Grass[h].Z);
+        end;
 
 if RenderMode<rmFull then glEnd;
 
