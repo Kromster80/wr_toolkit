@@ -1,6 +1,14 @@
 unit Unit_Render;
+
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
-uses OpenGL,Windows,KromOGLUtils,sysutils,math,dglOpenGL,KromUtils;
+uses
+  {$IFDEF VER140} OpenGL, {$ENDIF}
+  {$IFDEF FPC} GL, {$ENDIF}
+  Windows,KromOGLUtils,sysutils,math,dglOpenGL,KromUtils;
 
 procedure RenderShaders(Func:string; ShowTex:integer; CBReduceView,CBShowFog,CBCheckers,CBGrass:boolean);
 procedure RenderOpenGL(CBCheckers:boolean);
@@ -164,7 +172,7 @@ RenderMat:=true;
       end; //Reloading shader data for new material complete
 
       if (not OutOfSight)and(ScnCall[ii]<>0) then begin
-      //glTranslate(0,-0.25,0); //Thats check for duplicate polys on different materials
+      //glTranslatef(0,-0.25,0); //Thats check for duplicate polys on different materials
       glCallList(ScnCall[ii]);
       end;
 
@@ -440,15 +448,15 @@ for ii:=1 to TRLQty do begin
     glvertex3fv(@TRL[ii].x);
   glEnd;
   Matrix2Angles(TRL[ii].Matrix,9,@h,@p,@b);
-  gltranslate(TRL[ii].x,TRL[ii].y,TRL[ii].z);
-  glrotate(h,1,0,0); glrotate(p,0,1,0); glrotate(b,0,0,1);
-  gltranslate(TRL[ii].xSize*5,TRL[ii].ySize*5,TRL[ii].zSize*5); //corner point
-  glscale(TRL[ii].xSize*10,TRL[ii].ySize*10,TRL[ii].zSize*10);  //trigger size
+  glTranslatef(TRL[ii].x,TRL[ii].y,TRL[ii].z);
+  glRotatef(h,1,0,0); glRotatef(p,0,1,0); glRotatef(b,0,0,1);
+  glTranslatef(TRL[ii].xSize*5,TRL[ii].ySize*5,TRL[ii].zSize*5); //corner point
+  glScalef(TRL[ii].xSize*10,TRL[ii].ySize*10,TRL[ii].zSize*10);  //trigger size
   if A<>1 then glCallList(coBox);
   glCallList(coBoxW);
 
   glPushMatrix;
-    glrotate(90,0,0,1);
+    glRotatef(90,0,0,1);
     if TRL[ii].id1 in [9,11,14] then glCallList(coArrow);
   glPopMatrix;
 
@@ -550,11 +558,11 @@ if (A=1)or(Mode='Objects') then begin
     GetPositionFromSNISpeed(ii,@xyz[1],@xyz[2],@xyz[3],@hpb[1],@hpb[2],@hpb[3]);
     glColor4f(1,1,1,1);
     glPushMatrix;
-      glTranslate(xyz[1],xyz[2],xyz[3]);
-      glRotate(hpb[2],0,1,0);
-      glRotate(hpb[1],1,0,0);
+      glTranslatef(xyz[1],xyz[2],xyz[3]);
+      glRotatef(hpb[2],0,1,0);
+      glRotatef(hpb[1],1,0,0);
       if SNIObj[ii].Mode in [2,4] then
-        glRotate(hpb[3],0,0,1);
+        glRotatef(hpb[3],0,0,1);
 
       RenderObject(SNIObj[ii].objID+1);
     glPopMatrix;
@@ -749,9 +757,9 @@ for Turn:=1 to TRKQty[ID].Turns do begin
     for ii:=1 to TRK[ID].Turns[Turn].ArrowNum do begin
     glPushMatrix;
     Matrix2Angles(TRK[ID].Turns[Turn].Arrows[ii].Matrix,9,@a,@b,@c);
-    gltranslate(TRK[ID].Turns[Turn].Arrows[ii].X,TRK[ID].Turns[Turn].Arrows[ii].Y+20,TRK[ID].Turns[Turn].Arrows[ii].Z);
-    glrotate(a,1,0,0); glrotate(b,0,1,0); glrotate(c,0,0,1);
-    glscale(0,30,30);
+    glTranslatef(TRK[ID].Turns[Turn].Arrows[ii].X,TRK[ID].Turns[Turn].Arrows[ii].Y+20,TRK[ID].Turns[Turn].Arrows[ii].Z);
+    glRotatef(a,1,0,0); glRotatef(b,0,1,0); glRotatef(c,0,0,1);
+    glScalef(0,30,30);
     glCallList(coArrow);
     glPopMatrix;
     end;
@@ -799,9 +807,9 @@ glBlendFunc(GL_SRC_ALPHA, GL_ONE);
   if GetLength(Light[ii].Matrix2[13]-xPos,Light[ii].Matrix2[15]-zPos)<ViewDistance-300 then
   if Light[ii].Mode=8 then begin
     glPushMatrix;
-      glTranslate(Light[ii].Matrix2[13],Light[ii].Matrix2[14],Light[ii].Matrix2[15]);
+      glTranslatef(Light[ii].Matrix2[13],Light[ii].Matrix2[14],Light[ii].Matrix2[15]);
       Matrix2Angles(Light[ii].Matrix2,16,@h,@p,@b);
-      glrotate(h,1,0,0); glrotate(p+90,0,1,0); glrotate(b,0,0,1);
+      glRotatef(h,1,0,0); glRotatef(p+90,0,1,0); glRotatef(b,0,0,1);
       glkScale(Light[ii].Size*10);
       glColor4f(Light[ii].R/255,Light[ii].G/255,Light[ii].B/255,A);
       glBindTexture(GL_TEXTURE_2D,FlareTex);
@@ -817,9 +825,9 @@ if A<>0 then
 for ii:=1 to Qty.Lights do
 if GetLength(Light[ii].Matrix2[13]-xPos,Light[ii].Matrix2[15]-zPos)<ViewDistance-300 then begin
 glPushMatrix;
-  glTranslate(Light[ii].Matrix2[13],Light[ii].Matrix2[14],Light[ii].Matrix2[15]);
+  glTranslatef(Light[ii].Matrix2[13],Light[ii].Matrix2[14],Light[ii].Matrix2[15]);
   glColor4f(1,1,1,A);
-  glScale(LightW[ii].Radius*10,0,LightW[ii].Radius*10);
+  glScalef(LightW[ii].Radius*10,0,LightW[ii].Radius*10);
   glCallList(coCircleXZ);
 glPopMatrix;
 end;
@@ -899,7 +907,7 @@ glEnd;
 glColor4f(1,1,1,A);
 for ii:=1 to Qty.Sounds do begin
 glPushMatrix;
-  glTranslate(Sound[ii].X,Sound[ii].Y,Sound[ii].Z);
+  glTranslatef(Sound[ii].X,Sound[ii].Y,Sound[ii].Z);
   glkScale(Sound[ii].Radius*100);
   glCallList(coCircleXZ);
 glPopMatrix;
@@ -909,7 +917,7 @@ end;
 for ii:=1 to Qty.Sounds do
 if SoundW[ii].InList<>0 then begin
 glPushMatrix;
-  glTranslate(Sound[ii].X,Sound[ii].Y,Sound[ii].Z);
+  glTranslatef(Sound[ii].X,Sound[ii].Y,Sound[ii].Z);
   glkScale(Sound[ii].Radius*100*WaveList[SoundW[ii].InList].Dist);
   glColor4f(byte(SoundW[ii].IsPlaying),byte(SoundW[ii].IsPlaying),byte(SoundW[ii].IsPlaying),A*0.4);
   glCallList(coRoundXZ);
@@ -919,7 +927,7 @@ end;
 for ii:=1 to SNIHead.Obj do begin
 glPushMatrix;
   GetPositionFromSNI(ii,SNILoc[ii],@Dif[1],@Dif[2],@Dif[3]);
-  glTranslate(Dif[1],Dif[2],Dif[3]);
+  glTranslatef(Dif[1],Dif[2],Dif[3]);
   glkScale(SNIObj[ii].Radius*100);
   glColor4f(1,1,0,A);
   glCallList(coCircleXZ);
@@ -962,22 +970,22 @@ if ((not Form1.CBReduceDisplay.Checked)and(RenderMode>=rmFull))or(
 GetLength(Obj[ii].PosX-xPos,Obj[ii].PosZ-zPos)<ViewDistance-500) then begin
 
   glPushMatrix;
-  glTranslate(Obj[ii].PosX,Obj[ii].PosY,Obj[ii].PosZ);
-  glScale(Obj[ii].Size,Obj[ii].Size,Obj[ii].Size);
+  glTranslatef(Obj[ii].PosX,Obj[ii].PosY,Obj[ii].PosZ);
+  glScalef(Obj[ii].Size,Obj[ii].Size,Obj[ii].Size);
 
     case ObjProp[ID].Mode of
-    3,8: glRotatef(xRot,0,1,0); //Sprite
-    4: begin glRotatef(Obj[ii].Angl/pi*180,0,1,0); glRotatef(sin((GetTickCount+RandomArray[ii mod 256])/500)*4,1,0,0.4); end;//Waving on water
-    7: glRotatef((GetTickCount div 10) mod 360,0,0,1); //Rotate
+    3,8: glRotateff(xRot,0,1,0); //Sprite
+    4: begin glRotateff(Obj[ii].Angl/pi*180,0,1,0); glRotateff(sin((GetTickCount+RandomArray[ii mod 256])/500)*4,1,0,0.4); end;//Waving on water
+    7: glRotateff((GetTickCount div 10) mod 360,0,0,1); //Rotate
     16:
-    else glRotatef(Obj[ii].Angl/pi*180,0,1,0);
+    else glRotateff(Obj[ii].Angl/pi*180,0,1,0);
     end;
 
   if A=0 then kSetColorCode(kObject,ii) else
   if Obj[ii].InShadow=0 then glColor4f(1.8,1.8,1.8,1) else glColor4f(0.8,0.8,0.8,1);
 
     for kk:=1 to length(ObjCall[ID].Call) do begin
-    if (Obj[ii].Name[1]+Obj[ii].Name[2]='T\')and(kk=2) then glRotatef(xRot,0,1,0); //Sprite
+    if (Obj[ii].Name[1]+Obj[ii].Name[2]='T\')and(kk=2) then glRotateff(xRot,0,1,0); //Sprite
 
 glUseProgramObjectARB(opo[ObjCall[ID].MTLClass]);
 
@@ -1034,8 +1042,8 @@ if Obj[ii].ID+1<=list_obj then
   CallID:=Obj[ii].ID+1;
 
   glPushMatrix;
-  glTranslate(Obj[ii].PosX,Obj[ii].PosY,Obj[ii].PosZ);
-  glScale(Obj[ii].Size,Obj[ii].Size,Obj[ii].Size);
+  glTranslatef(Obj[ii].PosX,Obj[ii].PosY,Obj[ii].PosZ);
+  glScalef(Obj[ii].Size,Obj[ii].Size,Obj[ii].Size);
 
     case ObjProp[CallID].Mode of
     3,8: glRotatef(xRot,0,1,0); //Sprite
@@ -1117,7 +1125,7 @@ end;
   for ii:=1 to TOBHead[TrackID].Qty do
   if Obj[ii].ID+1<=list_obj then begin
   glPushMatrix;
-  glTranslate(TOB[TrackID,ii].X,TOB[TrackID,ii].Y,TOB[TrackID,ii].Z);
+  glTranslatef(TOB[TrackID,ii].X,TOB[TrackID,ii].Y,TOB[TrackID,ii].Z);
   glRotatef(TOB[TrackID,ii].R1,1,0,0);
   glRotatef(TOB[TrackID,ii].R2,0,1,0);
   glRotatef(TOB[TrackID,ii].R3,0,0,1);
@@ -1139,7 +1147,7 @@ glenable(GL_DEPTH_TEST);
 glenable(gl_Lighting);
 glPushMatrix;
   glColor4f(1,1,1,0.25);
-  glTranslate(CarX,CarY,CarZ); //reset position
+  glTranslatef(CarX,CarY,CarZ); //reset position
   glRotatef(CarH, 0,1,0);
   glRotatef(CarP, 1,0,0);
   glRotatef(CarB, 0,0,1);
@@ -1157,13 +1165,13 @@ glPointSize(2);
 glColor4f(0.63,0.63,0.63,1);
 for kk:=1 to 4 do begin
   glPushMatrix;
-  glTranslate(CarWheels[kk].Pos.X,CarWheels[kk].Pos.Y+3,CarWheels[kk].Pos.Z); //reset position
+  glTranslatef(CarWheels[kk].Pos.X,CarWheels[kk].Pos.Y+3,CarWheels[kk].Pos.Z); //reset position
   glkScale(3);
   glRotatef(CarH+CarWheels[kk].Angle.H , 0,1,0);
   glRotatef(CarWheels[kk].Angle.P , 1,0,0);
-  glTranslate(0.4,0,0);
+  glTranslatef(0.4,0,0);
   glCallList(coCircleYZ);
-  glTranslate(-0.8,0,0);
+  glTranslatef(-0.8,0,0);
   glCallList(coCircleYZ);
   glPopMatrix;
 end;
@@ -1186,30 +1194,31 @@ if RenderMode<rmFull then glBegin(GL_POINTS) else begin
     end;
 end;
 
+
 for m:=1 to 4 do
-  for kk:=1 to RO[In1].Head.sizeZ do for ii:=1 to RO[In1].Head.sizeX do
-    if GetLength(((ii-RO[In1].Head.sizeX/2)*256-xPos),((kk-RO[In1].Head.sizeZ/2)*256-zPos))<ViewDistance/6 then
-      for h:=RO[In1].Chunks[kk,ii].First+1 to RO[In1].Chunks[kk,ii].First+RO[In1].Chunks[kk,ii].Num do
-        if RO[In1].Grass[h].ID+1=m then begin
-          EnsureRange(h,1,RO[In1].Head.Qty);
+for kk:=1 to RO[In1].Head.sizeZ do for ii:=1 to RO[In1].Head.sizeX do
+if GetLength(((ii-RO[In1].Head.sizeX/2)*256-xPos),((kk-RO[In1].Head.sizeZ/2)*256-zPos))<ViewDistance/6 then
+for h:=RO[In1].Chunks[kk,ii].First+1 to RO[In1].Chunks[kk,ii].First+RO[In1].Chunks[kk,ii].Num do
+if RO[In1].Grass[h].ID+1=m then begin
+  EnsureRange(h,1,RO[In1].Head.Qty);
 
-          case GMode of  //R=0..3, G=0..15, B=BG, A=R0
-            1: SetPresetColorGL(RO[In1].Grass[h].ID+1,1); //Type
-            2: glcolor4f(RO[In1].Grass[h].Size/15,RO[In1].Grass[h].Size/15,RO[In1].Grass[h].Size/15,1);//SetPresetColorGL(RO[In1].Grass[h].Size+1,1); //Size
-            3: glColor3ub((RO[In1].Grass[h].Color and 3840)div 16+15,(RO[In1].Grass[h].Color and 240+15),(RO[In1].Grass[h].Color and 15)*16+15);
-          end;
+  case GMode of  //R=0..3, G=0..15, B=BG, A=R0
+  1: SetPresetColorGL(RO[In1].Grass[h].ID+1,1); //Type
+  2: glcolor4f(RO[In1].Grass[h].Size/15,RO[In1].Grass[h].Size/15,RO[In1].Grass[h].Size/15,1);//SetPresetColorGL(RO[In1].Grass[h].Size+1,1); //Size
+  3: glColor3ub((RO[In1].Grass[h].Color and 3840)div 16+15,(RO[In1].Grass[h].Color and 240+15),(RO[In1].Grass[h].Color and 15)*16+15);
+  end;
 
-          if RenderMode>=rmFull then begin
-            glPushMatrix;
-            glTranslate(RO[In1].Grass[h].X,RO[In1].Grass[h].Y,RO[In1].Grass[h].Z);
-            glRotatef(xRot,0,1,0);
-            if GMode<3 then glRotatef(180+yRot,1,0,0);
-            glScale(0.8+RO[In1].Grass[h].Size/20,0.8+RO[In1].Grass[h].Size/20,0.8+RO[In1].Grass[h].Size/20); //80cm..150cm
-            glCallList(coGrass[m]);
-            glPopMatrix;
-          end else
-            glVertex3f(RO[In1].Grass[h].X,RO[In1].Grass[h].Y+5,RO[In1].Grass[h].Z);
-        end;
+      if RenderMode>=rmFull then begin
+      glPushMatrix;
+      glTranslatef(RO[In1].Grass[h].X,RO[In1].Grass[h].Y,RO[In1].Grass[h].Z);
+      glRotatef(xRot,0,1,0);
+      if GMode<3 then glRotatef(180+yRot,1,0,0);
+      glScalef(0.8+RO[In1].Grass[h].Size/20,0.8+RO[In1].Grass[h].Size/20,0.8+RO[In1].Grass[h].Size/20); //80cm..150cm
+      glCallList(coGrass[m]);
+      glPopMatrix;
+      end else
+      glVertex3f(RO[In1].Grass[h].X,RO[In1].Grass[h].Y+5,RO[In1].Grass[h].Z);
+  end;
 
 if RenderMode<rmFull then glEnd;
 
@@ -1287,9 +1296,9 @@ if Mode>0 then begin
   11:begin //glEnable(GL_DEPTH_TEST);
   glColor4f(1,1,1,0.7);
   glPushMatrix;
-//  glTranslate(ii*1024-Qty.BlocksX*512-512,Block[kk,ii].CenterY,kk*1024-Qty.BlocksZ*512-512);
-  glTranslate(Block[kk,ii].CenterX,Block[kk,ii].CenterY,Block[kk,ii].CenterZ);
-  glScale(Block[kk,ii].Rad/3,200,Block[kk,ii].Rad/3);
+//  glTranslatef(ii*1024-Qty.BlocksX*512-512,Block[kk,ii].CenterY,kk*1024-Qty.BlocksZ*512-512);
+  glTranslatef(Block[kk,ii].CenterX,Block[kk,ii].CenterY,Block[kk,ii].CenterZ);
+  glScalef(Block[kk,ii].Rad/3,200,Block[kk,ii].Rad/3);
   glCallList(coCircleXZ);
   glPopMatrix; //glDisable(GL_DEPTH_TEST);
   s:='';
@@ -1297,9 +1306,9 @@ if Mode>0 then begin
   12:begin //glEnable(GL_DEPTH_TEST);
   if Block[kk,ii].CenterY>0 then glColor4f(1,1,1,0.7) else glColor4f(1,0,0,0.7);
   glPushMatrix;
-//  glTranslate(ii*1024-Qty.BlocksX*512-512,Block[kk,ii].CenterY,kk*1024-Qty.BlocksZ*512-512);
-  glTranslate(Block[kk,ii].CenterX,Block[kk,ii].CenterY,Block[kk,ii].CenterZ);
-  glScale(Block[kk,ii].CenterY/3,200,Block[kk,ii].CenterY/3);
+//  glTranslatef(ii*1024-Qty.BlocksX*512-512,Block[kk,ii].CenterY,kk*1024-Qty.BlocksZ*512-512);
+  glTranslatef(Block[kk,ii].CenterX,Block[kk,ii].CenterY,Block[kk,ii].CenterZ);
+  glScalef(Block[kk,ii].CenterY/3,200,Block[kk,ii].CenterY/3);
   glCallList(coCircleXZ);
   glPopMatrix; //glDisable(GL_DEPTH_TEST);
   s:='';
@@ -1338,9 +1347,9 @@ kk:=0;
 glColor4f(1,1,1,0.25);
 repeat
   glPushMatrix;
-  glTranslate(((bi[kk]-1) mod (Qty.BlocksX*4) +0.5)*256-Qty.BlocksX*512,VTX[1].Y,
+  glTranslatef(((bi[kk]-1) mod (Qty.BlocksX*4) +0.5)*256-Qty.BlocksX*512,VTX[1].Y,
               ((bi[kk]-1) div (Qty.BlocksX*4) +0.5)*256-Qty.BlocksZ*512);
-  glScale(256,256,256);
+  glScalef(256,256,256);
   glCallList(coBox);
   glPopMatrix;
   inc(kk);
@@ -1352,10 +1361,10 @@ if length(Trace2Sun)>1 then begin
 for ii:=1 to Trace2Sun[z*Qty.BlocksX*4+x+1,0] do begin
 glColor4f(1,1,1,0.25);
   glPushMatrix;
-  glTranslate(((Trace2Sun[z*Qty.BlocksX*4+x+1,ii]-1) mod (Qty.BlocksX*4) +0.5)*256-Qty.BlocksX*512,
+  glTranslatef(((Trace2Sun[z*Qty.BlocksX*4+x+1,ii]-1) mod (Qty.BlocksX*4) +0.5)*256-Qty.BlocksX*512,
                 BlockHi[z*Qty.BlocksX*4+x+1],
               ((Trace2Sun[z*Qty.BlocksX*4+x+1,ii]-1) div (Qty.BlocksX*4) +0.5)*256-Qty.BlocksZ*512);
-  glScale(256,0.1,256);
+  glScalef(256,0.1,256);
   glCallList(coBox);
   glPopMatrix;
 //  inc(kk);
@@ -1475,8 +1484,8 @@ glBindTexture(GL_TEXTURE_2D,SkyTex[ID,1]);
 if SkyTex[ID,1]<>0 then glCallList(coSkyPlane);
 glBlendFunc(GL_ONE,GL_ONE);
 glPushMatrix;
-glTranslate(xPos+LVL.SunX*100000,yPos+LVL.SunY*100000,zPos+LVL.SunZ*100000);
-glScale(30000,30000,30000); //Sun size
+glTranslatef(xPos+LVL.SunX*100000,yPos+LVL.SunY*100000,zPos+LVL.SunZ*100000);
+glScalef(30000,30000,30000); //Sun size
 glRotatef(xRot,0,1,0);
 glRotatef(180+yRot,1,0,0);
 glBindTexture(GL_TEXTURE_2D,SunTex);
@@ -1677,9 +1686,9 @@ begin
 glLineWidth(1+2*power(zoom,3));
 a:=1/power(zoom,2.5); //inverse applied zoom
 glPushMatrix;
-  glTranslate(x,y,z);
+  glTranslatef(x,y,z);
   glRotatef(-xRot, 0, -1, 0);
-  glScale(8*a,8*a,8*a);
+  glScalef(8*a,8*a,8*a);
   glCallList(coMover);
 glPopMatrix;
 glLineWidth(LineWidth);

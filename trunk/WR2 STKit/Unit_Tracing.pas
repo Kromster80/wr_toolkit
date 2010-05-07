@@ -1,4 +1,9 @@
 unit Unit_Tracing;
+
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
 uses Unit1,sysutils,math,KromUtils;
 

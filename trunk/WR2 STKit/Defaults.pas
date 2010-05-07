@@ -1,7 +1,14 @@
 unit Defaults;
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
 
-uses OpenGL, OpenAL, SysUtils, Graphics;
+uses
+  {$IFDEF VER140} OpenGL, {$ENDIF}
+  {$IFDEF FPC} GL, {$ENDIF}
+  OpenAL, SysUtils, Graphics;
 
 function GetPresetColor(ID:integer):TColor;
 procedure SetPresetColorGL(ID:integer; A:single);
