@@ -266,6 +266,7 @@ begin
   WorkDir := ExtractFilePath(FileListBox1.FileName);
   if GetFileExt(FileName)='PTX' then fDisplayImage.OpenPTX(FileName);
   if GetFileExt(FileName)='DDS' then fDisplayImage.OpenDDS(FileName);
+  if GetFileExt(FileName)='XTX' then fDisplayImage.OpenXTX(FileName);
   if GetFileExt(FileName)='TGA' then fDisplayImage.OpenTGA(FileName);
   if GetFileExt(FileName)='2DB' then fDisplayImage.Open2DB(FileName);
   DisplayChange(nil);

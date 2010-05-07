@@ -4,6 +4,13 @@ interface
 uses KromUtils, Math, SysUtils, Windows;
 
 type
+  TDSVersion = (dsvUnknown, dsvMBWR, dsvWR2, dsvAFC11N, dsvAFC11CT, dsvAFC11BW, dsvAFC11HN, dsvFVR);
+
+const
+  DSVersionName:array[TDSVersion] of string =
+  ('Unknown', 'MBWR', 'WR2', 'AFC11N', 'AFC11CT', 'AFC11BW', 'AFC11HN', 'FVR');
+
+type
   TDSNode = packed record
     i1: cardinal;
     i2: cardinal;
@@ -55,6 +62,8 @@ type
     constructor Create;
     function LoadDS(FileName:string):boolean;
     procedure SaveDS(FileName:string);
+
+    function Version():TDSVersion;
 
     function IndexInRange(iDS,iTB,iCO:integer):boolean;
 
@@ -268,6 +277,23 @@ begin
   end; //1..DSqty
   closefile(f);
 
+end;
+
+
+function TDataSet.Version():TDSVersion;
+var iDS,iTB:integer;
+begin
+  Result := dsvUnknown;
+  iDS := ConvertDSToIndex(0); //Need to get proper indexes
+  iTB := ConvertTBToIndex(iDS,1);
+  if CO[iDS,iTB].SM = 'D:\NxNlocal\MBC Entwicklung\FrontEnd\_Database\MBWR-Texte.mdb' then Result := dsvMBWR;
+  if CO[iDS,iTB].SM = 'D:\NxNlocal\World Racing 2\Database\WR2-Texte.mdb' then Result := dsvWR2;
+  if CO[iDS,iTB].SM = 'D:\NxNlocal\Cobra11\Database\C11-Texte.mdb' then Result := dsvAFC11N;
+  if CO[iDS,iTB].SM = 'D:\NxNlocal\Cobra11Vol5\Database\C11V5-Texte.mdb' then Result := dsvAFC11CT;
+  if CO[iDS,iTB].SM = 'D:\NxNLocal\Cobra11Vol6\Database\C11V6-Texte.mdb' then Result := dsvAFC11BW;
+  if CO[iDS,iTB].SM = 'D:\NxNLocal\Cobra11Vol7\Database\C11V7-Texte.mdb' then Result := dsvAFC11HN;
+
+  if CO[iDS,iTB].SM = 'D:\NxNlocal\Cobra11Vol6\Database\C11V6-Texte.mdb' then Result := dsvFVR;
 end;
 
 

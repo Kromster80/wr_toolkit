@@ -196,7 +196,7 @@ object Form1: TForm1
     Height = 187
     Anchors = [akLeft, akTop, akBottom]
     ItemHeight = 13
-    Mask = '*.ptx;*.dds;*.tga;*.2db'
+    Mask = '*.ptx;*.dds;*.tga;*.2db; *.xtx'
     TabOrder = 2
     OnClick = OpenFile
   end
