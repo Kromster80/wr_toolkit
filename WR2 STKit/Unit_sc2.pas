@@ -1,4 +1,10 @@
-unit Unit_sc2; interface
+unit Unit_sc2;
+
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
+ interface
 uses Unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture;
 
   procedure AutoFill_SC2(Sender: TObject);
@@ -84,7 +90,7 @@ var i:integer;
 begin
 Form1.SC2_TrackList.Clear;
 for i:=1 to AddonScenery.TrackQty do
-Form1.SC2_TrackList.AddItem(inttostr(i)+'. '+AddonScenery.Track[i].Name,nil);
+Form1.SC2_TrackList.Items.Add(inttostr(i)+'. '+AddonScenery.Track[i].Name);
 Form1.SC2_TrackList.ItemIndex:=0;
 SC2TrackListClick(nil);
 end;
