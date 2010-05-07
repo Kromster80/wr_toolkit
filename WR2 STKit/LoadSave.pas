@@ -1,6 +1,11 @@
 unit LoadSave;
+
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
-uses unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_RoutineFunctions;
+uses unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_RoutineFunctions,Defaults;
 
     procedure LoadQAD(Input:string);
     procedure LoadQAD_BW(Input:string);
@@ -79,7 +84,7 @@ blockread(f,ObjProp[i],20);
 blockread(f,c,48); ObjProp[i].HitSound:=StrPas(@c);
 blockread(f,c,48); ObjProp[i].FallSound:=StrPas(@c);
 if (ObjProp[i].x1<>0)or(ObjProp[i].x2<>0)or(ObjProp[i].x3<>0)or(ObjProp[i].p4<>0) then
-MessageBox(Form1.Handle, 'Unknown object entry found. Contact kromster80@gmail.com', 'ObjectsTable', MB_OK or MB_ICONWARNING);
+MyMessageBox(Form1.Handle, 'Unknown object entry found. Contact kromster80@gmail.com', 'ObjectsTable', MB_OK or MB_ICONWARNING);
 end;
 
 for k:=1 to Qty.BlocksZ do for i:=1 to Qty.BlocksX do
@@ -134,16 +139,16 @@ if EditingFormat=ef_CT then
     blockread(f,c,20);
     blockread(f,Obj[i].Matrix2[1],44);
     if not Obj[i].InShadow in [0,1] then
-    MessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectInShadow', MB_OK or MB_ICONWARNING);
+    MyMessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectInShadow', MB_OK or MB_ICONWARNING);
     //if Obj[i].x5<>0 then
-    //MessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectX5', MB_OK or MB_ICONWARNING);
+    //MyMessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectX5', MB_OK or MB_ICONWARNING);
   end
 else
   for i:=1 to Qty.ObjectsTotal do begin
     blockread(f,c,32); Obj[i].Name:=StrPas(@c);
     blockread(f,Obj[i].ID,68);              //Property of object
     if not Obj[i].InShadow in [0,1] then
-    MessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectInShadow', MB_OK or MB_ICONWARNING);
+    MyMessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectInShadow', MB_OK or MB_ICONWARNING);
   end;
 
 blockread(f,Light,Qty.Lights*88);
@@ -160,7 +165,7 @@ blockread(f,Sound[i],12);
 blockread(f,c,32); Sound[i].Name:=StrPas(@c);
 blockread(f,Sound[i].Volume,24);
 if (Sound[i].z4<>EnsureRange(Sound[i].z4,0,3)) then
-MessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'Sounds', MB_OK or MB_ICONWARNING);
+MyMessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'Sounds', MB_OK or MB_ICONWARNING);
 end;
 closefile(f);
 end;
@@ -214,7 +219,7 @@ blockread(f,ObjProp[i],20);
 blockread(f,c,48); ObjProp[i].HitSound:=StrPas(@c);
 blockread(f,c,48); ObjProp[i].FallSound:=StrPas(@c);
 if (ObjProp[i].x1<>0)or(ObjProp[i].x2<>0)or(ObjProp[i].x3<>0)or(ObjProp[i].p4<>0) then
-MessageBox(Form1.Handle, 'Unknown object entry found. Contact kromster80@gmail.com', 'ObjectsTable', MB_OK or MB_ICONWARNING);
+MyMessageBox(Form1.Handle, 'Unknown object entry found. Contact kromster80@gmail.com', 'ObjectsTable', MB_OK or MB_ICONWARNING);
 end;
 
 for k:=1 to Qty.BlocksZ do for i:=1 to Qty.BlocksX do
@@ -266,9 +271,9 @@ Form1.ComputeChunkMode(nil);
     blockread(f,c,20);
     blockread(f,Obj[i].Matrix2[1],44);
     if not Obj[i].InShadow in [0,1] then
-    MessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectInShadow', MB_OK or MB_ICONWARNING);
+    MyMessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectInShadow', MB_OK or MB_ICONWARNING);
     if Obj[i].x5<>0 then
-    MessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectX5', MB_OK or MB_ICONWARNING);
+    MyMessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectX5', MB_OK or MB_ICONWARNING);
   end;
 
 blockread(f,Light,Qty.Lights*88);
@@ -285,7 +290,7 @@ for i:=1 to Qty.Sounds do begin                   //11th
   blockread(f,c,32); Sound[i].Name:=StrPas(@c);
   blockread(f,Sound[i].Volume,24);
   if (Sound[i].z4<>EnsureRange(Sound[i].z4,0,3)) then
-  MessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'Sounds', MB_OK or MB_ICONWARNING);
+  MyMessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'Sounds', MB_OK or MB_ICONWARNING);
 end;
 closefile(f);
 end;
@@ -296,7 +301,7 @@ var i:integer;
 begin
 Result:=false;
 if not fileexists(Input+'.vtx') then begin
-  //MessageBox(Form1.Handle,'VTX file doesn''t exist at supplied path.','Loading error',MB_OK or MB_ICONWARNING);
+  //MyMessageBox(Form1.Handle,'VTX file doesn''t exist at supplied path.','Loading error',MB_OK or MB_ICONWARNING);
   FillChar(VTXQty,sizeof(VTXQty),#0);
   exit;
 end;
@@ -315,14 +320,14 @@ var i,k,j,xt,Pos,preXT:integer;
 begin
 Result:=false;
 if not fileexists(Input+'.idx') then begin
-  //MessageBox(Form1.Handle,'IDX file doesn''t exist at supplied path.','Loading error',MB_OK or MB_ICONWARNING);
+  //MyMessageBox(Form1.Handle,'IDX file doesn''t exist at supplied path.','Loading error',MB_OK or MB_ICONWARNING);
   IDXQty:=0;
   exit;
 end;
 
 assignfile(f,Input+'.idx'); reset(f,1);
 blockread(f,c,length(c),Pos); //16mb should me more than enough
-if Pos>=length(c) then MessageBox(Form1.Handle,'16mb IDX file couldn''t be loaded fully.','Loading error',MB_OK or MB_ICONWARNING);
+if Pos>=length(c) then MyMessageBox(Form1.Handle,'16mb IDX file couldn''t be loaded fully.','Loading error',MB_OK or MB_ICONWARNING);
 closefile(f);
 
 IDXQty:=int2(c[1],c[2],c[3],c[4]);
@@ -381,7 +386,7 @@ end;
 
 IDXQty:=Head.sizeZ;
 blockread(f,c,length(c),Pos); //16mb should me more than enough
-if Pos>=length(c) then MessageBox(Form1.Handle,'16mb IDX file couldn''t be loaded fully.','Loading error',MB_OK or MB_ICONWARNING);
+if Pos>=length(c) then MyMessageBox(Form1.Handle,'16mb IDX file couldn''t be loaded fully.','Loading error',MB_OK or MB_ICONWARNING);
 closefile(f);
 
 setlength(v,IDXQty div 3+1);
@@ -418,7 +423,7 @@ end;
 procedure LoadLVL(Input:string);
 begin
 if not fileexists(Input+'.lvl') then begin
-  //MessageBox(Form1.Handle,'LVL file doesn''t exist at supplied path.','Loading error',MB_OK or MB_ICONWARNING);
+  //MyMessageBox(Form1.Handle,'LVL file doesn''t exist at supplied path.','Loading error',MB_OK or MB_ICONWARNING);
   LVL.SunX:=cos(45*pi/180)*cos(60*pi/180);
   LVL.SunY:=sin(60*pi/180);
   LVL.SunZ:=sin(45*pi/180)*cos(60*pi/180);
@@ -661,7 +666,7 @@ end else begin
   FillChar(TRK[i],sizeof(TRK[i]),#0);
 end;
 if TracksQty=0 then
-MessageBox(Form1.Handle,'No tracks found in ..\Tracks\ folder','Loading error',MB_OK or MB_ICONWARNING);
+MyMessageBox(Form1.Handle,'No tracks found in ..\Tracks\ folder','Loading error',MB_OK or MB_ICONWARNING);
 end;
 
 procedure LoadTOB(Input,Input2:string);
@@ -1106,57 +1111,57 @@ var i,k:integer;
 begin
 assignfile(f,Input); rewrite(f,1);
 
-blockwrite(f,'MATNAM'[1],6);
+blockwrite(f,'MATNAM',6);
 blockwrite(f,Qty.Materials,4); //integer
 for i:=1 to Qty.Materials do
 blockwrite(f,chr2(MaterialW[i].Name,32)[1],32);
 
-blockwrite(f,'LIGHTS'[1],6);
+blockwrite(f,'LIGHTS',6);
 blockwrite(f,Qty.Lights,2); //word
 for i:=1 to Qty.Lights do
 blockwrite(f,LightW[i].Radius,4); //2byte Radius + 2byte Mode
 
-blockwrite(f,'AMBLIT'[1],6);
+blockwrite(f,'AMBLIT',6);
 blockwrite(f,AmbLightW.R,4);
 
-blockwrite(f,'MATENL'[1],6);
+blockwrite(f,'MATENL',6);
 blockwrite(f,Qty.Materials,4); //integer
 //since MaterialW is array of records we can't write all bytes at once
 for i:=1 to Qty.Materials do
 blockwrite(f,MaterialW[i].Enlite,1);
 
-blockwrite(f,'MATGRS'[1],6);
+blockwrite(f,'MATGRS',6);
 blockwrite(f,Qty.Materials,4); //integer
 for i:=1 to Qty.Materials do
 blockwrite(f,MaterialW[i].GrowGrass,1);
 
-blockwrite(f,'MATNSH'[1],6);
+blockwrite(f,'MATNSH',6);
 blockwrite(f,Qty.Materials,4); //integer
 for i:=1 to Qty.Materials do
 blockwrite(f,MaterialW[i].NoShadow,1);
 
-blockwrite(f,'GRSCOL'[1],6);
+blockwrite(f,'GRSCOL',6);
 blockwrite(f,GrassColorW.R,4);
 
-blockwrite(f,'TEXGRS'[1],6);
+blockwrite(f,'TEXGRS',6);
 blockwrite(f,Qty.TexturesFiles,4); //integer
 for i:=1 to Qty.TexturesFiles do
 blockwrite(f,TextureW[i].GrowGrass,1);
 
-blockwrite(f,'SNWSNI'[1],6);
+blockwrite(f,'SNWSNI',6);
 blockwrite(f,SNIHead.Obj,4); //integer
 for i:=1 to SNIHead.Obj do
 blockwrite(f,SNISpawnW[i].Density,12);
 
-blockwrite(f,'LSTTRK'[1],6);
+blockwrite(f,'LSTTRK',6);
 blockwrite(f,TrackID,4); //integer
 
-blockwrite(f,'LWOSRC'[1],6);
+blockwrite(f,'LWOSRC',6);
 i:=length(LWOSceneryFile);
 blockwrite(f,i,4); //integer
 if i<>0 then blockwrite(f,LWOSceneryFile[1],i); //integer
 
-blockwrite(f,'MAKTRK'[1],6);
+blockwrite(f,'MAKTRK',6);
 blockwrite(f,TracksQty,4); //integer
 for i:=1 to TracksQty do begin
 blockwrite(f,MakeTrack[i].NodeQty,4); //integer
