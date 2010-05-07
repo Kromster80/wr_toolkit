@@ -1,4 +1,10 @@
-unit Unit_Streets; interface
+unit Unit_Streets;
+
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
+ interface
 uses Unit1,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_RoutineFunctions, Unit_Tracing;
 
 procedure AddShapeClick_();
@@ -38,11 +44,10 @@ STR_Shape[ID].Options:=0;
 STR_ShRef[ID].Shape:=ID-1;
 STR_ShRef[ID].Speed:=round(60/0.0036);
 STR_ShRef[ID].StartU:=0;
-Form1.ListStreetShape.AddItem(inttostr(STR_Shape[ID].Options)
+Form1.ListStreetShape.Items.Add(inttostr(STR_Shape[ID].Options)
 +' '+inttostr(STR_Shape[ID].NumLanes)
 +' '+inttostr(round(STR_Shape[ID].Offset[1]))
-+' '+inttostr(round(STR_Shape[ID].Offset[2]))
-,nil);
++' '+inttostr(round(STR_Shape[ID].Offset[2])));
 if STRHead.NumShapes>1 then Form1.RemShape.Enabled:=true;
 Form1.STRSplineShape1.MaxValue:=STRHead.NumShapes;
 Form1.STRSplineShape2.MaxValue:=STRHead.NumShapes;

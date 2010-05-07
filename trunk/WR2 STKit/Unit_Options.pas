@@ -54,26 +54,30 @@ implementation
 
 procedure TFormOptions.FormShow(Sender: TObject);
 begin
-FPSLimit.Value:=1000 div FPSLag;
-ViewDist.Value:=round(ViewDistance/10);
-SplineDet.Value:=SNI_LOD;
-case TDRResH of
-1024: CB_ResH.ItemIndex:=0;
-2048: CB_ResH.ItemIndex:=1;
-4096: CB_ResH.ItemIndex:=2;
-8192: CB_ResH.ItemIndex:=3;
-else  CB_ResH.ItemIndex:=1;
+  FPSLimit.Value  := 1000 div FPSLag;
+  ViewDist.Value  := round(ViewDistance/10);
+  SplineDet.Value := SNI_LOD;
+
+  case TDRResH of
+    1024: CB_ResH.ItemIndex:=0;
+    2048: CB_ResH.ItemIndex:=1;
+    4096: CB_ResH.ItemIndex:=2;
+    8192: CB_ResH.ItemIndex:=3;
+    else  CB_ResH.ItemIndex:=1;
+  end;
+  case TDRResV of
+    1024: CB_ResV.ItemIndex:=0;
+    2048: CB_ResV.ItemIndex:=1;
+    4096: CB_ResV.ItemIndex:=2;
+    8192: CB_ResV.ItemIndex:=3;
+    else  CB_ResV.ItemIndex:=1;
+  end;
+
+  WorkFolder.Text := WorkDir;
+  if Form1.RG2.ItemIndex <> -1 then
+    ActiveScenery   := Form1.RG2.Items[Form1.RG2.ItemIndex];
 end;
-case TDRResV of
-1024: CB_ResV.ItemIndex:=0;
-2048: CB_ResV.ItemIndex:=1;
-4096: CB_ResV.ItemIndex:=2;
-8192: CB_ResV.ItemIndex:=3;
-else  CB_ResV.ItemIndex:=1;
-end;
-WorkFolder.Text:=WorkDir;
-ActiveScenery:=Form1.RG2.Items[Form1.RG2.ItemIndex];
-end;
+
 
 procedure TFormOptions.ApplyClick(Sender: TObject);
 var i:integer; SearchRec:TSearchRec;
@@ -119,15 +123,20 @@ if Form1.RG2.Items[i-1]=ActiveScenery then Form1.RG2.ItemIndex:=i-1;
 FormOptions.Hide;
 end;
 
-procedure TFormOptions.CancelButtonClick(Sender: TObject); begin FormOptions.Hide; end;
+
+procedure TFormOptions.CancelButtonClick(Sender: TObject); begin
+  FormOptions.Hide;
+end;
+
 
 procedure TFormOptions.Button1Click(Sender: TObject);
 var fpath:string;
 begin
-fpath:=WorkFolder.Text;
-SelectDirectory('Folder','',fpath);
-if fpath[length(fpath)]<>'\' then fpath:=fpath+'\';
-WorkFolder.Text:=fpath;
+  fpath:=WorkFolder.Text;
+  SelectDirectory('Folder','',fpath);
+  if fpath[length(fpath)]<>'\' then fpath:=fpath+'\';
+  WorkFolder.Text:=fpath;
 end;
+
 
 end.

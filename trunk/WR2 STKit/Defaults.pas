@@ -8,10 +8,13 @@ interface
 uses
   {$IFDEF VER140} OpenGL, {$ENDIF}
   {$IFDEF FPC} GL, {$ENDIF}
+  Windows,
   OpenAL, SysUtils, Graphics;
 
 function GetPresetColor(ID:integer):TColor;
 procedure SetPresetColorGL(ID:integer; A:single);
+
+function MyMessageBox(hWnd:HWND; lpText:string; lpCaption:string; uType:UINT):longint;
 
 type RenderModeTypes=(rmSchem=0,
                       rmBlend=1,
@@ -262,5 +265,12 @@ IDn:=(ID-1)mod length(PresetColor) +1;
 if IDn=0 then glColor4f(0,0,0,A) else
 glColor4f(PresetColor[IDn,1]/255,PresetColor[IDn,2]/255,PresetColor[IDn,3]/255,A)
 end;
+
+function MyMessageBox(hWnd:HWND; lpText:string; lpCaption:string; uType:UINT):longint;
+begin
+  Result := MessageBox(hWnd, @(lpText)[1], @(lpCaption)[1], uType);
+
+end;
+
 
 end.

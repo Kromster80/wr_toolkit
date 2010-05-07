@@ -1,5 +1,4 @@
 unit Unit_RenderInit;
-
 {$IFDEF FPC}
   {$MODE Delphi}
 {$ENDIF}
@@ -8,8 +7,7 @@ interface
 uses
   {$IFDEF VER140} OpenGL, {$ENDIF}
   {$IFDEF FPC} GL, {$ENDIF}
-  Unit1, KromOGLUtils, dglOpenGL, Defaults, PTXTexture, KromUtils,
-Unit_Render, Windows, sysutils;
+  Unit1, KromOGLUtils, dglOpenGL, Defaults, PTXTexture, KromUtils, Unit_Render, Windows, sysutils;
 
 procedure RenderInit();
 procedure KnowFPS();
@@ -91,11 +89,11 @@ Result:=false;
 
 s:=glGetString(GL_VERSION); //return format is "Major.Minor.Minor - Misc"
 if s<'2.0' then begin       //we check first two  numbers as version
-  s :='You need at least OpenGL 2.0 to run STKit2'+zz+
-      'Your OpenGL version is '+glGetString(GL_VERSION)+' by '+glGetString(GL_RENDERER)+zz+zz+
-      'STKit2 will now run in compatibility mode';
   if not fileexists('krom.dev') then
-    MessageBox(Form1.Handle, @s, 'OpenGL', MB_OK);
+    MyMessageBox(Form1.Handle,
+      'You need at least OpenGL 2.0 to run STKit2'+zz+
+      'Your OpenGL version is '+glGetString(GL_VERSION)+' by '+glGetString(GL_RENDERER)+zz+zz+
+      'STKit2 will now run in compatibility mode', 'OpenGL', MB_OK);
   UseShaders:=false;
   exit;
 end;
