@@ -87,6 +87,7 @@ function  decs(AText:string; Len,RunAsFunction:integer):string; overload;
 function GetNumberFromString(AText:string; Position:integer):single;
 function RemoveQuotes(Input:string):string;
 procedure SwapStr(var A,B:string);
+procedure SwapInt(var A,B:byte); overload;
 procedure SwapInt(var A,B:word); overload;
 procedure SwapInt(var A,B:integer); overload;
 procedure SwapInt(var A,B:cardinal); overload;
@@ -769,6 +770,12 @@ end;
 
 procedure SwapStr(var A,B:string);
 var s:string;
+begin
+s:=A; A:=B; B:=s;
+end;
+
+procedure SwapInt(var A,B:byte);
+var s:byte;
 begin
 s:=A; A:=B; B:=s;
 end;
