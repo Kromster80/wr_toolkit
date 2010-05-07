@@ -16,6 +16,15 @@ procedure SetPresetColorGL(ID:integer; A:single);
 
 function MyMessageBox(hWnd:HWND; lpText:string; lpCaption:string; uType:UINT):longint;
 
+//STKit2 constants
+const
+  VersionInfo       = 'Scenery ToolKit 2.3.4           (28 Apr 2009)';
+  FPS_INTERVAL      = 1000;    //Calculate FPS every ---- ms
+  STKit2_Data_Path  = 'STKit2 Data';
+
+
+type TEditingFormat = (ef_WR2, ef_N, ef_CT, ef_BW);
+
 type RenderModeTypes=(rmSchem=0,
                       rmBlend=1,
                       rmFlat=2,

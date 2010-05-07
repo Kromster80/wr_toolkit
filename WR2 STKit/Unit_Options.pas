@@ -5,11 +5,10 @@ unit Unit_Options;
 {$ENDIF}
 
 interface
-
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms,
   Dialogs, Spin, unit1, CheckLst, Math, KromUtils,
-  StdCtrls, FileCtrl, ExtCtrls;
+  StdCtrls, FileCtrl, ExtCtrls, Defaults;
 
 type
   TFormOptions = class(TForm)
@@ -54,7 +53,7 @@ implementation
 
 procedure TFormOptions.FormShow(Sender: TObject);
 begin
-  FPSLimit.Value  := 1000 div FPSLag;
+  FPSLimit.Value  := 1000 div fOptions.FPSLag;
   ViewDist.Value  := round(ViewDistance/10);
   SplineDet.Value := SNI_LOD;
 
@@ -73,7 +72,7 @@ begin
     else  CB_ResV.ItemIndex:=1;
   end;
 
-  WorkFolder.Text := WorkDir;
+  WorkFolder.Text := fOptions.WorkDir;
   if Form1.RG2.ItemIndex <> -1 then
     ActiveScenery   := Form1.RG2.Items[Form1.RG2.ItemIndex];
 end;
@@ -82,9 +81,9 @@ end;
 procedure TFormOptions.ApplyClick(Sender: TObject);
 var i:integer; SearchRec:TSearchRec;
 begin
-WorkDir:=WorkFolder.Text;
-if FPSLimit.Value=100 then FPSLag:=1 //unlimited
-else FPSLag:=round(1000 / FPSLimit.Value);
+fOptions.WorkDir:=WorkFolder.Text;
+if FPSLimit.Value=100 then fOptions.FPSLag:=1 //unlimited
+else fOptions.FPSLag:=round(1000 / FPSLimit.Value);
 ViewDistance:=ViewDist.Value*10;
 SNI_LOD:=SplineDet.Value;
 case CB_ResH.ItemIndex of
@@ -103,13 +102,13 @@ else TDRResV:=1024;
 end;
 
 Form1.RG2.Clear;
-if DirectoryExists(WorkDir+'Scenarios\') then begin
-ChDir(WorkDir+'Scenarios\');
+if DirectoryExists(fOptions.WorkDir+'Scenarios\') then begin
+ChDir(fOptions.WorkDir+'Scenarios\');
 FindFirst('*', faDirectory, SearchRec);
     repeat
     if (SearchRec.Attr and faDirectory=faDirectory)
     and(SearchRec.Name<>'.')and(SearchRec.Name<>'..')
-    and(directoryexists(WorkDir+'Scenarios\'+SearchRec.Name)) then
+    and(directoryexists(fOptions.WorkDir+'Scenarios\'+SearchRec.Name)) then
     Form1.RG2.Items.Add(SearchRec.Name);
     until (FindNext(SearchRec)<>0);
 FindClose(SearchRec);
