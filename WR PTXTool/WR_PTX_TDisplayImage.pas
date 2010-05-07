@@ -56,6 +56,7 @@ type
     procedure RGB2Bitm(Mode:cMode);
     procedure OpenPTX(FileName:string);
     procedure OpenDDS(FileName:string);
+    procedure OpenXTX(FileName:string);
     procedure OpenTGA(FileName:string);
     procedure Open2DB(FileName:string);
     procedure SaveUncompressedPTX(FileName:string);
@@ -422,6 +423,7 @@ closefile(f);
 ComputeFog();
 end;
 
+
 procedure TDisplayImage.OpenDDS(FileName:string);
 var i,k,h:integer; ftype:string[4];
   f:file;
@@ -484,6 +486,79 @@ closefile(f);
 ComputeFog();
 FillChar(RMS,SizeOf(RMS),#0);
 end;
+
+
+procedure TDisplayImage.OpenXTX(FileName:string);
+var i,k,h:integer; ftype:string[4];
+  f:file;
+  c:array[1..128]of byte;
+  T:byte;
+  DXTOut:array[1..48]of byte;
+begin
+ResetAllData;
+assignfile(f,FileName); FileMode:=0; reset(f,1); FileMode:=2;
+blockread(f,c,52);
+
+{if (int2(c[17],c[18])>2048)or(int2(c[13],c[14])>2048) then begin
+  MessageBox(0,'Big images (2048+) are not supported','Error',mb_ok);
+  closefile(f);
+  exit;
+end;  }
+
+IsChanged:=false;
+SetAllPropsAtOnce(
+        decs(ExtractFileName(FileName),4,1),
+        64,64,1,
+        true,false,true);
+
+  fType:='DXT5';//c[85]+c[86]+c[87]+c[88];
+  MipMapQtyUse:=Props.MipMapQty;
+
+for i:=0 to (Props.sizeV div 4)-1 do
+  for k:=0 to (Props.sizeH div 4)-1 do begin
+///////////////////////////////////////////////////////
+//Alpha
+if Props.hasAlpha then begin
+blockread(f,c,8);
+  SwapInt(c[1],c[2]);
+  SwapInt(c[3],c[4]);
+  SwapInt(c[5],c[6]);
+  SwapInt(c[7],c[8]);
+if ftype='DXT5' then begin
+  DXT_A_Decode(@c[1],DXTOut);
+  for h:=1 to 16 do
+    RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
+end else
+if ftype='DXT3' then begin
+  for h:=1 to 16 do begin
+    if h mod 2 = 1 then
+    T:=(ord(c[(h+1)div 2])mod 16)*17 else
+    T:=(ord(c[(h+1)div 2])div 16)*17;
+    RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=T;
+  end;
+end; //Format type DXT3 or DXT5
+end; //if alpha
+////////////////////////////////////////////////////////
+//RGB
+blockread(f,c,8);
+SwapInt(c[1],c[2]);
+SwapInt(c[3],c[4]);
+SwapInt(c[5],c[6]);
+SwapInt(c[7],c[8]);
+DXT_RGB_Decode(@c[1],DXTOut);
+for h:=1 to 16 do begin
+  RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
+  RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
+  RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
+end;
+
+end;
+closefile(f);
+
+ComputeFog();
+FillChar(RMS,SizeOf(RMS),#0);
+end;
+
 
 procedure TDisplayImage.OpenTGA(FileName:string);
 var i,k:integer;

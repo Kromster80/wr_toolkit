@@ -23,7 +23,6 @@ type
     PageControl1: TPageControl;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
-    TabSheet3: TTabSheet;
     GroupBox2: TGroupBox;
     Label8: TLabel;
     Label7: TLabel;
@@ -35,15 +34,9 @@ type
     Label0: TLabel;
     Label2: TLabel;
     LBModel: TListBox;
-    BrowseForWR2DS: TButton;
-    WR2DSPath: TEdit;
-    Label115: TLabel;
-    LB2Model: TListBox;
-    ImportWR2Car: TButton;
     Label128: TLabel;
-    WRDSPath: TEdit;
-    BrowseForWRDS: TButton;
-    ImportWRCar: TButton;
+    BrowseForDS: TButton;
+    ImportDSCar: TButton;
     TabSheet4: TTabSheet;
     GroupBox3: TGroupBox;
     Label129: TLabel;
@@ -56,6 +49,7 @@ type
     TabSheet10: TTabSheet;
     TabSheet11: TTabSheet;
     TabSheet12: TTabSheet;
+    {$IFDEF VER140}
     ValueListEditor1: TValueListEditor;
     {$ENDIF}
     GroupDisplayModes: TGroupBox;
@@ -375,52 +369,39 @@ type
     procedure TorqueMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure TorqueMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FSChangeLink(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure FSChange2(Sender: TObject);
+    procedure FSChangeHead(Sender: TObject);
     procedure RGFormatClick(Sender: TObject);
-    procedure BrowseForWR2DSClick(Sender: TObject);
-    procedure PageControl1Change(Sender: TObject);
-    procedure ScanWR2DS(sender:string);
-    procedure ImportWR2CarClick(Sender: TObject);
-    procedure ImportWRCarClick(Sender: TObject);
+    procedure BrowseForDSClick(Sender: TObject);
+    procedure ScanDS(aDSPath:string);
     procedure Button1Click(Sender: TObject);
     procedure BitBtn2Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure UpdateControls();
     procedure UpdateDataSet();
+    procedure ImportDSCarClick(Sender: TObject);
   end;
 
 
 type TEditingFormat = (fmtMBWR, fmtWR2, fmtAFC11N, fmtFVR, fmtAFC11HN);
 
+const
+  VersionInfo = 'Version 1.6       (** May 2010)';
+
 var
   Form1: TForm1;
+
+  ImportDS:TDataSet; //This DS might be accessed a lot while user chooses a car to import, hence it's practical to read it once and keep in memory
 
   ExeDir,CarName:string;
 
   LineSerieHP: TLineSeries;
-  LineSerieNM: TLineSeries;  
+  LineSerieNM: TLineSeries;
 
-  LockControls:boolean=false; //New variable
+  LockControls:boolean=false; //prevent values change to invoke controls update
+  LockControlsHead:boolean=false; //prevent values change to invoke controls update [for Heads]
 
-  allowFS2,{AllowDataUpdate,}VLEEdit:boolean; //First Import click, Chapter not found, Not First Time, Allow Change
+  VLEEdit:boolean; //First Import click, Chapter not found, Not First Time, Allow Change
 
-  DSqty:integer; //DS values (2)
-  TBqty,TBCondQty:array[1..2] of integer;
-  TBLib:array[1..2] of string;
-  TBCond:array[1..2] of array of string;
-  COqty: array[1..2,0..300] of integer;
-  COid:  array[1..2,0..300] of integer;
-  COtext:array[1..2,0..300,1..5] of string;
-  data:array [1..2,0..512,1..3]of integer;       //Type of data (integer,real,string)
-    vi:array [1..2,0..512,1..3]of integer;       //Values (empty,value,backup?)
-    vr:array [1..2,0..512,1..3]of real;
-    vs:array [1..2,0..512,1..3]of string;
-  Title:array of array of string;
-  Value:array of array of array of record
-    Int:integer;
-    Rel:single;
-    Str:string;
-  end;
   CarFmt:TEditingFormat;
 
 implementation
@@ -596,10 +577,10 @@ with ValueListEditor1 do
 }
 end;
 
+
 procedure TForm1.SaveClick(Sender: TObject);
-var i,j,k,h,m:integer; f2:textfile;
 begin
-  if not RunSaveDialog(Save1,'editcar.car',ExtractFilePath(carname),'"World Racing" car descriptor (*.car)|*.car|All Files (*.*)|*.*') then exit;
+  if not RunSaveDialog(Save1, 'editcar.car', ExtractFilePath(carname), '"World Racing" car descriptor (*.car)|*.car|All Files (*.*)|*.*') then exit;
 
 {  case CarFmt of
     fmtMBWR:    begin fDataSet.SetTBLength(103,75); fDataSet.SetTBLength(105, 98); end;
@@ -609,90 +590,12 @@ begin
   end;}
 
   fDataSet.SaveDS(Save1.FileName);
-
-  exit;
-
-if not fileexists(ExeDir+'unlimiter.'+inttostr(846)) then
-begin
-  EnsureRange(vi[2, 7,2],100,999); //restrict ClassID in menu to 100..999 range
-  EnsureRange(vi[2,42,2],0,300); //restrict RaceClass in game to 0..300
 end;
 
-TBLib[1]:='Edit_3DCarsDB';
-TBLib[2]:='Edit_CarsDB';
-TBCondQty[1]:=2;
-TBCondQty[2]:=2;
-TBCond[1,1]:='VCarsAddOn';//WR2
-TBCond[2,1]:='VCarsAddOn';//WR2
-TBCond[1,2]:='WRnoDemo';  //WR/WR2
-TBCond[2,2]:='WRnoDemo';  //WR/WR2
-for i:=1 to DSqty do
-for k:=0 to TBqty[i] do begin
-  COqty[i,k]:=2; //0,actual,WR2 second car
-  COid[i,k]:=k;//-1;
-  COtext[i,k,1]:=dataText[i,k,1];
-  COtext[i,k,2]:=dataText[i,k,2];
-  COtext[i,k,3]:=dataText[i,k,3];
-  COtext[i,k,4]:=dataText[i,k,4];
-  COtext[i,k,5]:=dataText[i,k,5];
-  for h:=1 to COqty[i,k] do
-    data[i,COid[i,k],h]:=dataType[i,k{-1}];
-end;//TB
-
-m:=0;
-//format specific tweaks, COtext[2,7,1] used to identify format when loading
-if CarFmt=fmtMBWR then begin
-  m:=1; //1..qty, don't use 0 index
-  COtext[2,7,1]:='FlagMissionCar';
-  vi[2,7,2]:=0;
-end;
-if CarFmt=fmtWR2  then begin
-  m:=0;
-  //COtext[2,7,1]:='CarClassID';   //filled by default
-end;
-if CarFmt=fmtAFC11N then
-  m:=0;
-if CarFmt=fmtFVR then
-  m:=0;
-
-assignfile(f2,Save1.FileName); rewrite(f2);
-write(f2,'NDDSVAEn',chr2(DSqty,4),'VAst',#0,#0,#0,#0,#2,#0,#0,#0,#1,#0,#0,#0,'VAau',#0);
-for i:=1 to DSqty do begin                         //103/105            //i?
-  write(f2,'NDTBVAEn',chr2(TBqty[i]+1-m{number of indices},4),'VAId',chr2(101+i*2,4),'VAiC',chr(i),'VALb');
-  write(f2,chr2(length(TBLib[i]),4),TBLib[i],#0,'Cond',chr2(TBCondQty[i],4));
-  for j:=1 to TBCondQty[i] do write(f2,chr2(length(TBCond[i,j]),4),TBCond[i,j],#0);
-
-  for k:=m{index to start with} to TBqty[i] do begin
-    write(f2,'NDCOVAEn',chr2(COqty[i,k],4));
-    write(f2,'VAId',chr2(COid[i,k],4));
-    write(f2,'VALb',chr2(length(COtext[i,COid[i,k],1]),4));
-    if length(COtext[i,COid[i,k],1])<>0 then write(f2,COtext[i,COid[i,k],1],#0);
-    write(f2,'VAiU',#1,'VASM',chr2(length(COtext[i,COid[i,k],2]),4));
-    if length(COtext[i,COid[i,k],2])<>0 then write(f2,COtext[i,COid[i,k],2],#0);
-    write(f2,'VAST',chr2(length(COtext[i,COid[i,k],3]),4));
-    if length(COtext[i,COid[i,k],3])<>0 then write(f2,COtext[i,COid[i,k],3],#0);
-    write(f2,'VAIC',chr2(length(COtext[i,COid[i,k],4]),4));
-    if length(COtext[i,COid[i,k],4])<>0 then write(f2,COtext[i,COid[i,k],4],#0);
-    write(f2,'VASC',chr2(length(COtext[i,COid[i,k],5]),4));
-    if length(COtext[i,COid[i,k],5])<>0 then write(f2,COtext[i,COid[i,k],5],#0);
-    for h:=1 to COqty[i,k] do
-      case data[i,COid[i,k],h] of //2, +1 for each car in WR2
-      1: write(f2,#1,chr2(vi[i,COid[i,k],h],4));
-      2: write(f2,#2,unreal2(vr[i,COid[i,k],h]));
-      3: begin
-           write(f2,#16,chr2(length(vs[i,COid[i,k],h]),4));
-           if length(vs[i,COid[i,k],h])<>0 then
-             write(f2,vs[i,COid[i,k],h],#0);
-         end;
-      end;
-  end;   //k..TBqty
-end;   //i..DSqty
-closefile(f2);
-end;
 
 procedure TForm1.AboutClick(Sender: TObject);
 begin
-  AboutForm.Show('Version 1.5f (29 Sep 2008)','Edit car`s perfomance in "EditCar.car" file.'+eol+eol+
+  AboutForm.Show(VersionInfo,'Edit car`s perfomance in "EditCar.car" file.'+eol+eol+
                           'German translation by Jonas Wolf'+eol+
                           'Hungarian translation by Nagyidai Andor'+eol+
                           'Russian translation by Krom (incomplete)','EDITCAR');
@@ -775,21 +678,23 @@ begin
 {$ENDIF}
 end;
 
+
 procedure TForm1.FSChangeLink(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-FSChange(Form1);
+  FSChange(Form1);
 end;
 
-procedure TForm1.FSChange2(Sender: TObject);
+
+procedure TForm1.FSChangeHead(Sender: TObject);
 begin
-if allowFS2 then begin
-SDriverX2.Value:=DFX.Value;
-SDriverY2.Value:=DFY.Value-37;
-SDriverZ2.Value:=DFZ.Value+27;
-SDriverX1.Value:=DMX.Value-1;
-SDriverY1.Value:=DMY.Value-21;
-SDriverZ1.Value:=DMZ.Value+69;
-end;
+  if LockControlsHead then exit;
+
+  SDriverX2.Value := DFX.Value;
+  SDriverY2.Value := DFY.Value - 37;
+  SDriverZ2.Value := DFZ.Value + 27;
+  SDriverX1.Value := DMX.Value - 1;
+  SDriverY1.Value := DMY.Value - 21;
+  SDriverZ1.Value := DMZ.Value + 69;
 end;
 
 
@@ -912,578 +817,65 @@ end;
 //FSChange(nil);
 end;
 
-procedure TForm1.BrowseForWR2DSClick(Sender: TObject);
+
+procedure TForm1.BrowseForDSClick(Sender: TObject);
 begin
-if Sender=BrowseForWRDS then begin
-  if not RunOpenDialog(Open1,'','','MBWR database (WR.ds)|wr.ds|All Files (*.*)|*.*') then exit;
-  WRDSPath.Text:=Open1.FileName;
-  ScanWR2DS('WR1');
+  if not RunOpenDialog(Open1, '', ExeDir, 'Synetic database (*.ds)|*.ds|All Files (*.*)|*.*') then exit;
+  ScanDS(Open1.FileName);
 end;
 
-if Sender=BrowseForWR2DS then begin
-  if not RunOpenDialog(Open1,'','','WR2 database (WR2.ds)|wr2.ds|All Files (*.*)|*.*') then exit;
-  WR2DSPath.Text:=Open1.FileName;
-  ScanWR2DS('WR2');
-end;
-end;
 
-procedure TForm1.PageControl1Change(Sender: TObject);
+procedure TForm1.ScanDS(aDSPath:string);
+var
+  i:integer;
 begin
-  if PageControl1.ActivePageIndex=1 then ScanWR2DS('WR1');
-  if PageControl1.ActivePageIndex=2 then ScanWR2DS('WR2');
+  ImportDS := TDataSet.Create;
+  ImportDS.DoProperIndexing := true;
+  ImportDS.LoadDS(aDSPath);
+
+  LBModel.Clear;
+
+  if ImportDS.Version = dsvMBWR then
+  for i:=2 to ImportDS.COCount(23,3) do
+    LBModel.Items.Add(ImportDS.WRTextEn(ImportDS.GetValueAsString(23,3,i)));
+
+  if ImportDS.Version = dsvWR2 then
+  for i:=2 to ImportDS.COCount(23,3) do
+    LBModel.Items.Add(ImportDS.GetValueAsString(23,49,i)+' '+ImportDS.GetValueAsString(23,3,i));
+
+  if ImportDS.Version in [dsvAFC11N, dsvAFC11CT, dsvAFC11BW, dsvAFC11HN, dsvFVR] then
+  for i:=2 to ImportDS.COCount(23,3) do
+    LBModel.Items.Add(ImportDS.WRTextEn(ImportDS.GetValueAsString(23,52,i))+' '+ImportDS.WRTextEn(ImportDS.GetValueAsString(23,3,i)));
+
+  if ImportDS.Version = dsvUnknown then exit;
+
+  Label128.Caption := 'DataSet of ' + DSVersionName[ImportDS.Version];
+  LBModel.Enabled := true;
+  ImportDSCar.Enabled := true;
 end;
 
-procedure TForm1.ScanWR2DS(Sender:string);
-var DSqty,TBqty,COqty:integer;
- i,j,k,h,m:integer;
- s,s2:string;
- c:array [1..2048] of char;
- f:file;
+
+procedure TForm1.ImportDSCarClick(Sender: TObject);
+var CarID:integer; i:integer;
 begin
-LB2Model.Enabled:=false;
-ImportWR2Car.Enabled:=false;
-LBModel.Enabled:=false;
-ImportWRCar.Enabled:=false;
 
-if Sender='WR1' then begin
-  if FileExists(WRDSPath.Text) then
-    assignfile(f,WRDSPath.Text)
-  else
-    if FileExists(ExeDir+'WR.ds') then begin
-      assignfile(f,ExeDir+'WR.ds');
-      WRDSPath.Text:='.\WR.ds';
-    end else
-      exit;
-end;
+  CarID := 2;
 
-if Sender='WR2' then begin
-  if FileExists(WR2DSPath.Text) then
-    assignfile(f,WR2DSPath.Text)
-  else
-    if FileExists(ExeDir+'WR2.ds') then begin
-      assignfile(f,ExeDir+'WR2.ds');
-      WR2DSPath.Text:='.\WR2.ds';
-    end else
-      exit;
-end;
+  LBModel.Sorted:=false;
 
-FileMode:=0; reset(f,1); FileMode:=2;
-blockread(f,c,33);
-DSqty:=ord(c[9]);
-setlength(Title,DSqty); //0..DS
-setlength(Value,DSqty); //0..DS
-for i:=1 to 42{DSqty} do begin //(Value[42-1]) to save time
-blockread(f,c,33);
-TBqty:=ord(c[9]);
-j:=ord(c[30]);
-if j<>0 then blockread(f,c,j+1); s:='';
-for m:=1 to j do s:=s+c[m];
-setlength(Title[i-1],TBqty+1);
-setlength(Value[i-1],TBqty);
-Title[i-1][TBqty]:=s; s:='';
+  if ImportDS.Version = dsvMBWR then begin
+    fDataSet.SetValue(103,0,2, ImportDS.GetValue(30,0,CarID)); //Kommentar
+    fDataSet.SetValue(103,1,2, 0); //Index
+    for i:=2 to 75 do
+    fDataSet.SetValue(103,i,2, ImportDS.GetValue(30,i,CarID));
 
-for k:=1 to TBqty do begin
-blockread(f,c,12);//28
-COqty:=ord(c[9])+ord(c[10])*256;
-if c[1]<>'N' then begin
-j:=ord(c[5]);       //Cond
-  for m:=1 to j do begin
-    if m=1 then blockread(f,c,ord(c[9])+1);
-    if m>1 then begin blockread(f,c,4); blockread(f,c,ord(c[1])+1); end;
+    ..wip..
+
   end;
-blockread(f,c,12);//28
-COqty:=ord(c[9])+ord(c[10])*256;
-end;
-blockread(f,c,16);
-j:=ord(c[13]);
-if j<>0 then blockread(f,c,j+1);                //VAlb
-for m:=1 to j do s:=s+c[m];
-//writeln(fo,'Title - '+s);
-Title[i-1][k-1]:=s; s:='';
-blockread(f,c,13);
-j:=ord(c[10]);
-if j<>0 then blockread(f,c,j+1);                //VASM (file path)
-for m:=1 to j do s:=s+c[m];
-//writeln(fo,'DB path - '+s);
-s:='';
-blockread(f,c,8);
-j:=ord(c[5]);
-if j<>0 then blockread(f,c,j+1);               //DB name
-for m:=1 to j do s:=s+c[m];
-//writeln(fo,'DB name - '+s);
-s:='';
-blockread(f,c,8);
-j:=ord(c[5]);
-if j<>0 then blockread(f,c,j+1);               //SC...
-for m:=1 to j do s:=s+c[m];
-//writeln(fo,'... - '+s);
-s:='';
-blockread(f,c,8);
-j:=ord(c[5]);
-if j<>0 then blockread(f,c,j+1);               //IC...
-for m:=1 to j do s:=s+c[m];
-//writeln(fo,'... - '+s);
-s:='';
 
-setlength(Value[i-1][k-1],COqty);
-for j:=1 to COqty do begin
-blockread(f,c,1);
-
-if c[1]=#1 then
-blockread(f,Value[i-1][k-1][j-1].Int,4) else
-
-if c[1]=#2 then
-blockread(f,Value[i-1][k-1][j-1].Rel,4) else
-
-if c[1]=#16 then begin
-blockread(f,h,4); s:='';
-if h<>0 then blockread(f,c,h+1);
-for m:=1 to h do s:=s+c[m]; Value[i-1][k-1][j-1].Str:=s; s:='';
-end;// else
-//s:='0';
-
-end;
-end;
-end; //1..DSqty
-closefile(f);
-if Sender='WR2' then begin
-LB2Model.Clear;
-for i:=1 to length(Value[23][0])-1 do begin//NumCars
-s:=inttostr(i div 10)+inttostr(i mod 10)+'.';
-for k:=length(Value[23][43][i].Str+' '+Value[23][2][i].Str) to 160 do s:=' '+s; //store ID in 160+
-{$IFDEF VER140}
-LB2Model.AddItem(Value[23][43][i].Str+' '+Value[23][2][i].Str+s,nil);
-{$ENDIF}
-{$IFDEF FPC}
-LB2Model.Items.AddObject(Value[23][43][i].Str+' '+Value[23][2][i].Str+s,nil);
-{$ENDIF}
-end;
-setlength(Value[23][14],96);//special fix
-setlength(Value[23][40],96);//special fix
-setlength(Value[38][25],83);//special fix
-LB2Model.Enabled:=true;
-ImportWR2Car.Enabled:=true;
-end;
-if Sender='WR1' then begin
-LBModel.Clear;
-for i:=1 to length(Value[23][0])-1 do begin
-s:=Value[23][2][i].Str; j:=0;
-for k:=1 to length(s)-2 do j:=j*10+strtoint(s[k+1]);
-s:=Value[30][21][Value[23][1][i].Int].Str; m:=0;
-for k:=1 to length(s)-2 do m:=m*10+strtoint(s[k+1]);
-s:=inttostr(i div 100)+inttostr(i div 10 mod 10)+inttostr(i mod 10)+'.';
-if (Value[0][2][m].Str+' '+Value[0][2][j].Str)<>' ' then
-s2:=Value[0][2][m].Str+' '+Value[0][2][j].Str else
-if (Value[0][1][m].Str+' '+Value[0][1][j].Str)<>' ' then
-s2:=Value[0][1][m].Str+' '+Value[0][1][j].Str else
-if (Value[0][6][m].Str+' '+Value[0][6][j].Str)<>' ' then
-s2:=Value[0][6][m].Str+' '+Value[0][6][j].Str;
-for k:=length(s2) to 160 do s:=' '+s; //store ID in 160+
-{$IFDEF VER140}
-LB2Model.AddItem(s2+s,nil);
-{$ENDIF}
-{$IFDEF FPC}
-LB2Model.Items.AddObject(s2+s,nil);
-{$ENDIF}
-end;
-LBModel.Enabled:=true;
-ImportWRCar.Enabled:=true;
-end;
+  UpdateControls;
 end;
 
-procedure TForm1.ImportWR2CarClick(Sender: TObject);
-var i,id:integer;
-begin
-id:=strtoint(LB2Model.Items[LB2Model.ItemIndex][162]+LB2Model.Items[LB2Model.ItemIndex][163]);
-//Label115.Caption:=inttostr(id); //ID stored beyond visibility :-)
-vi[2,1,2]:=Value[23][0][id].Int;//
-vi[2,2,2]:=Value[23][1][id].Int;//
-vs[2,3,2]:=Value[23][2][id].Str;
-vi[2,4,2]:=Value[23][3][id].Int;
-vi[2,5,2]:=Value[23][4][id].Int;//FlagRelease
-vi[2,6,2]:=Value[23][5][id].Int;
-vi[2,7,2]:=Value[23][6][id].Int;//CarClassID (menu)
-vi[2,8,2]:=Value[23][7][id].Int;
-vr[2,9,2]:=Value[23][8][id].Rel;
-vi[2,10,2]:=Value[23][9][id].Int;
-vi[2,11,2]:=Value[23][10][id].Int;//MotorID
-vi[2,12,2]:=Value[23][11][id].Int;//GetriebeID
-vi[2,13,2]:=Value[23][12][id].Int;//WheelsFrontID
-vi[2,14,2]:=Value[23][13][id].Int;//WheelsRearID
-vs[2,15,2]:=Value[23][14][id].Str;//TypLinks
-vi[2,16,2]:=Value[23][15][id].Int;//Damper
-vi[2,17,2]:=Value[23][16][id].Int;//Feather
-vr[2,18,2]:=Value[23][17][id].Rel;//
-vr[2,19,2]:=Value[23][18][id].Rel;//
-vr[2,20,2]:=Value[23][19][id].Rel;//
-vr[2,21,2]:=Value[23][20][id].Rel;//
-vi[2,22,2]:=Value[23][21][id].Int;//
-vr[2,23,2]:=Value[23][22][id].Rel;//SlipF
-vr[2,24,2]:=Value[23][23][id].Rel;//SlipR
-vr[2,25,2]:=Value[23][24][id].Rel;//
-vr[2,26,2]:=Value[23][25][id].Rel;//
-vi[2,27,2]:=Value[23][26][id].Int;//WeightDistr
-vr[2,28,2]:=Value[23][27][id].Rel;//
-vi[2,29,2]:=Value[23][28][id].Int;//
-vi[2,30,2]:=10;//Fuel consumtion rate ?
-vi[2,31,2]:=100;//Fuel tank volume
-vi[2,32,2]:=Value[23][29][id].Int;//Weight_KG
-vi[2,33,2]:=1;// ??
-vi[2,34,2]:=0;// ??
-vr[2,35,2]:=3;// Drivewheel turn rounds
-vi[2,36,2]:=Value[23][30][id].Int;//DriveWheels
-vr[2,37,2]:=Value[23][31][id].Rel;//
-vr[2,38,2]:=Value[23][32][id].Rel;//AirBrake
-vi[2,39,2]:=Value[23][33][id].Int;//
-vi[2,40,2]:=Value[23][34][id].Int;//
-vi[2,41,2]:=Value[23][35][id].Int;//Sperrdiff
-vi[2,42,2]:=Value[23][36][id].Int;//
-vr[2,43,2]:=Value[23][37][id].Rel;//WheelYPOS
-vr[2,44,2]:=Value[23][38][id].Rel;//WheelYPOS
-vi[2,45,2]:=Value[23][39][id].Int;//
-vs[2,46,2]:=Value[23][40][id].Str;//TypRechts
-vi[2,47,2]:=Value[23][41][id].Int;//
-vi[2,48,2]:=Value[23][42][id].Int;//
-vs[2,104,2]:=Value[23][43][id].Str;//Name
-vs[2,105,2]:=Value[23][44][id].Str;//Logo
-vs[2,106,2]:='';//Caravan
-//MotorenDB
-vi[2,49,2]:=Value[38][1][Value[23][10][id].Int].Int;//MaxRPM
-for i:=0 to 20 do
-vr[2,50+i,2]:=Value[38][2+i][Value[23][10][id].Int].Rel;//0-10k
-vr[2,71,2]:=Value[38][23][Value[23][10][id].Int].Rel;//NMStep
-vi[2,72,2]:=0;//MotorBremse
-vi[2,73,2]:=0;//Schwungmasse
-vi[2,74,2]:=Value[38][24][Value[23][10][id].Int].Int;
-vs[2,75,2]:=Value[38][25][Value[23][10][id].Int].Str;
-vi[2,76,2]:=Value[38][26][Value[23][10][id].Int].Int;//
-vi[2,77,2]:=Value[38][27][Value[23][10][id].Int].Int;//
-vs[2,78,2]:=Value[38][28][Value[23][10][id].Int].Str;
-vs[2,79,2]:=Value[38][29][Value[23][10][id].Int].Str;
-vi[2,80,2]:=Value[38][30][Value[23][10][id].Int].Int;
-vs[2,81,2]:=Value[38][31][Value[23][10][id].Int].Str;
-vi[2,82,2]:=2; // ??
-vi[2,83,2]:=Value[38][32][Value[23][10][id].Int].Int;//Laustaerke
-vi[2,99,2]:=Value[38][37][Value[23][10][id].Int].Int;//Drehzahlmesser
-vi[2,100,2]:=Value[38][33][Value[23][10][id].Int].Int;
-vi[2,101,2]:=Value[38][34][Value[23][10][id].Int].Int;
-vi[2,102,2]:=Value[38][35][Value[23][10][id].Int].Int;
-vi[2,103,2]:=Value[38][36][Value[23][10][id].Int].Int;
-//GearboxDB
-vi[2,84,2]:=Value[39][1][Value[23][11][id].Int].Int;//NumGears
-vr[2,85,2]:=Value[39][2][Value[23][11][id].Int].Rel;//
-vr[2,86,2]:=Value[39][3][Value[23][11][id].Int].Rel;//
-vr[2,87,2]:=Value[39][4][Value[23][11][id].Int].Rel;//
-vr[2,88,2]:=Value[39][5][Value[23][11][id].Int].Rel;//
-vr[2,89,2]:=Value[39][6][Value[23][11][id].Int].Rel;//
-vr[2,90,2]:=Value[39][7][Value[23][11][id].Int].Rel;//
-vr[2,91,2]:=Value[39][8][Value[23][11][id].Int].Rel;//
-vr[2,92,2]:=Value[39][9][Value[23][11][id].Int].Rel;//
-//TiresDB
-vr[2,93,2]:=Value[40][1][Value[23][12][id].Int].Rel;//F
-vr[2,94,2]:=Value[40][2][Value[23][12][id].Int].Rel;
-vr[2,95,2]:=Value[40][3][Value[23][12][id].Int].Rel;
-vr[2,96,2]:=Value[40][1][Value[23][13][id].Int].Rel;//R
-vr[2,97,2]:=Value[40][2][Value[23][13][id].Int].Rel;
-vr[2,98,2]:=Value[40][3][Value[23][13][id].Int].Rel;
-//[1]
-vi[1,1,2]:=Value[29][0][Value[23][1][id].Int].Int;//
-vs[1,2,2]:=Value[29][1][Value[23][1][id].Int].Str;//
-vs[1,3,2]:='';//EngineNameClose
-vi[1,4,2]:=0;//FlagCabrio
-vr[1,5,2]:=Value[29][2][Value[23][1][id].Int].Rel;//
-vr[1,6,2]:=Value[29][3][Value[23][1][id].Int].Rel;//
-vr[1,7,2]:=Value[29][4][Value[23][1][id].Int].Rel;//
-vr[1,8,2]:=Value[29][5][Value[23][1][id].Int].Rel;//
-vi[1,9,2]:=Value[29][6][Value[23][1][id].Int].Int;//
-vi[1,10,2]:=Value[29][7][Value[23][1][id].Int].Int;//
-vi[1,11,2]:=Value[29][8][Value[23][1][id].Int].Int;//
-vi[1,12,2]:=-1;//SWLight
-vi[1,13,2]:=-1;//
-vi[1,14,2]:=-1;//
-vr[1,15,2]:=Value[29][9][Value[23][1][id].Int].Rel;//
-vr[1,16,2]:=Value[29][10][Value[23][1][id].Int].Rel;//
-vr[1,17,2]:=Value[29][11][Value[23][1][id].Int].Rel;//
-vr[1,18,2]:=Value[29][12][Value[23][1][id].Int].Rel;//
-vr[1,19,2]:=Value[29][13][Value[23][1][id].Int].Rel;//
-vr[1,20,2]:=Value[29][14][Value[23][1][id].Int].Rel;//
-vi[1,21,2]:=-1;//LastSelectCar
-vs[1,22,2]:='';//ClassName
-vi[1,23,2]:=-1;//Order
-vs[1,24,2]:='';//Ref3DCarsOrder
-vi[1,25,2]:=Value[29][15][Value[23][1][id].Int].Int;//
-vr[1,26,2]:=Value[29][16][Value[23][1][id].Int].Rel;//
-vi[1,27,2]:=Value[29][17][Value[23][1][id].Int].Int;//FlagCabrio?
-vi[1,28,2]:=-1;//CAB.BRLight
-vi[1,29,2]:=-1;//
-vi[1,30,2]:=-1;//
-vi[1,31,2]:=Value[29][18][Value[23][1][id].Int].Int;//Vinyl
-vi[1,32,2]:=Value[29][19][Value[23][1][id].Int].Int;//
-vi[1,33,2]:=Value[29][20][Value[23][1][id].Int].Int;//
-vi[1,34,2]:=Value[29][21][Value[23][1][id].Int].Int;//
-vi[1,35,2]:=Value[29][22][Value[23][1][id].Int].Int;//Color
-vi[1,36,2]:=Value[29][23][Value[23][1][id].Int].Int;//
-vi[1,37,2]:=Value[29][24][Value[23][1][id].Int].Int;//
-vi[1,38,2]:=Value[29][25][Value[23][1][id].Int].Int;//
-vi[1,39,2]:=Value[29][26][Value[23][1][id].Int].Int;//Rims
-vi[1,40,2]:=Value[29][27][Value[23][1][id].Int].Int;//
-vi[1,41,2]:=Value[29][28][Value[23][1][id].Int].Int;//
-vi[1,42,2]:=Value[29][29][Value[23][1][id].Int].Int;//
-
-vr[1,43,2]:=Value[29][30][Value[23][1][id].Int].Rel;//
-vr[1,44,2]:=Value[29][31][Value[23][1][id].Int].Rel;//
-vr[1,45,2]:=Value[29][32][Value[23][1][id].Int].Rel;//
-vr[1,46,2]:=Value[29][33][Value[23][1][id].Int].Rel;//
-vr[1,47,2]:=Value[29][34][Value[23][1][id].Int].Rel;//
-vr[1,48,2]:=Value[29][35][Value[23][1][id].Int].Rel;//
-vr[1,49,2]:=Value[29][36][Value[23][1][id].Int].Rel;//
-vr[1,50,2]:=vr[1,43,2];//Female Head - same
-vr[1,51,2]:=vr[1,44,2];//
-vr[1,52,2]:=vr[1,45,2];//
-vi[1,53,2]:=Value[29][37][Value[23][1][id].Int].Int;//
-vr[1,54,2]:=Value[29][38][Value[23][1][id].Int].Rel;//
-vr[1,55,2]:=Value[29][39][Value[23][1][id].Int].Rel;//
-vr[1,56,2]:=Value[29][40][Value[23][1][id].Int].Rel;//
-vr[1,57,2]:=Value[29][41][Value[23][1][id].Int].Rel;//
-vr[1,58,2]:=Value[29][42][Value[23][1][id].Int].Rel;//
-vr[1,59,2]:=Value[29][43][Value[23][1][id].Int].Rel;//
-vr[1,60,2]:=Value[29][44][Value[23][1][id].Int].Rel;//
-vr[1,61,2]:=Value[29][45][Value[23][1][id].Int].Rel;//
-vr[1,62,2]:=Value[29][46][Value[23][1][id].Int].Rel;//
-vi[1,63,2]:=Value[29][47][Value[23][1][id].Int].Int;//
-vr[1,64,2]:=Value[29][48][Value[23][1][id].Int].Rel;//
-vr[1,65,2]:=Value[29][49][Value[23][1][id].Int].Rel;//
-vr[1,66,2]:=Value[29][50][Value[23][1][id].Int].Rel;//
-vr[1,67,2]:=Value[29][51][Value[23][1][id].Int].Rel;//
-vr[1,68,2]:=Value[29][52][Value[23][1][id].Int].Rel;//
-vr[1,69,2]:=Value[29][53][Value[23][1][id].Int].Rel;//
-vr[1,70,2]:=Value[29][54][Value[23][1][id].Int].Rel;//
-vr[1,71,2]:=Value[29][55][Value[23][1][id].Int].Rel;//
-vr[1,72,2]:=Value[29][56][Value[23][1][id].Int].Rel;//
-vi[1,73,2]:=0;//Order26
-vr[1,74,2]:=Value[29][57][Value[23][1][id].Int].Rel;//
-vr[1,75,2]:=Value[29][58][Value[23][1][id].Int].Rel;//
-//vi[1,76,2]:=
-//vi[1,77,2]:=
-//vi[1,78,2]:=
-//vi[1,79,2]:=
-vi[1,80,2]:=Value[29][63][Value[23][1][id].Int].Int;//ColorIndex
-
-vi[1,1,2]:=0;//Index
-vi[1,23,2]:=0;//Order
-vi[1,73,2]:=0;//Order26
-vi[2,1,2]:=0;//Index
-vi[2,2,2]:=0;//3DCarID
-vi[2,11,2]:=0;//Motoren
-vi[2,12,2]:=0;//Gearbox
-vi[2,13,2]:=0;//TiresF
-vi[2,14,2]:=0;//TiresR
-//RefreshFS;
-//RefreshVLE;       //Update List
-//FSChange(Form1);
-end;
-
-procedure TForm1.ImportWRCarClick(Sender: TObject);
-var i,k,m,id:integer;
-  s:string;
-begin
-id:=strtoint(LBModel.Items[LBModel.ItemIndex][162]+LBModel.Items[LBModel.ItemIndex][163]+LBModel.Items[LBModel.ItemIndex][164]);
-vi[2,1,2]:=Value[23][0][id].Int;//
-vi[2,2,2]:=Value[23][1][id].Int;//
-s:=Value[23][2][id].Str; m:=0;
-for k:=1 to length(s)-2 do m:=m*10+strtoint(s[k+1]);
-if Value[0][2][m].Str<>'' then vs[2,3,2]:=Value[0][2][m].Str else
-if Value[0][1][m].Str<>'' then vs[2,3,2]:=Value[0][1][m].Str else
-if Value[0][6][m].Str<>'' then vs[2,3,2]:=Value[0][6][m].Str;
-vi[2,4,2]:=Value[23][3][id].Int;
-vi[2,5,2]:=Value[23][4][id].Int;//FlagRelease
-vi[2,6,2]:=Value[23][5][id].Int;
-vi[2,7,2]:=Value[23][6][id].Int;//CarClassID (menu)
-vi[2,8,2]:=Value[23][7][id].Int;
-vr[2,9,2]:=Value[23][8][id].Rel;
-vi[2,10,2]:=Value[23][9][id].Int;
-vi[2,11,2]:=Value[23][10][id].Int;//MotorID
-vi[2,12,2]:=Value[23][11][id].Int;//GetriebeID
-vi[2,13,2]:=Value[23][12][id].Int;//WheelsFrontID
-vi[2,14,2]:=Value[23][13][id].Int;//WheelsRearID
-vs[2,15,2]:=Value[23][14][id].Str;//TypLinks
-vi[2,16,2]:=Value[23][15][id].Int;//Damper
-vi[2,17,2]:=Value[23][16][id].Int;//Feather
-vr[2,18,2]:=Value[23][17][id].Rel;//
-vr[2,19,2]:=Value[23][18][id].Rel;//
-vr[2,20,2]:=Value[23][19][id].Rel;//
-vr[2,21,2]:=Value[23][20][id].Rel;//
-vi[2,22,2]:=Value[23][21][id].Int;//
-vr[2,23,2]:=Value[23][22][id].Rel;//SlipF
-vr[2,24,2]:=Value[23][23][id].Rel;//SlipR
-vr[2,25,2]:=Value[23][24][id].Rel;//
-vr[2,26,2]:=Value[23][25][id].Rel;//
-vi[2,27,2]:=Value[23][26][id].Int;//WeightDistr
-vr[2,28,2]:=Value[23][27][id].Rel;//
-vi[2,29,2]:=Value[23][28][id].Int;//
-vr[2,30,2]:=Value[23][29][id].Rel;//Fuel consumtion rate ?
-vi[2,31,2]:=Value[23][30][id].Int;//Fuel tank volume
-vi[2,32,2]:=Value[23][31][id].Int;//Weight_KG
-vi[2,33,2]:=Value[23][32][id].Int;// ??
-vr[2,34,2]:=Value[23][33][id].Rel;// ??
-vr[2,35,2]:=Value[23][34][id].Rel;// Drivewheel turn rounds
-vi[2,36,2]:=Value[23][35][id].Int;//DriveWheels
-vr[2,37,2]:=Value[23][36][id].Rel;//
-vr[2,38,2]:=Value[23][37][id].Rel;//AirBrake
-vi[2,39,2]:=Value[23][38][id].Int;//
-vi[2,40,2]:=Value[23][39][id].Int;//
-vi[2,41,2]:=Value[23][40][id].Int;//Sperrdiff
-vi[2,42,2]:=Value[23][41][id].Int;//RaceClass
-vr[2,43,2]:=Value[23][42][id].Rel;//WheelYPOS
-vr[2,44,2]:=Value[23][43][id].Rel;//
-vi[2,45,2]:=Value[23][44][id].Int;//
-vs[2,46,2]:=Value[23][45][id].Str;//TypRechts
-vi[2,47,2]:=Value[23][46][id].Int;//
-vi[2,48,2]:=Value[23][47][id].Int;//
-vs[2,104,2]:='';//Name
-vs[2,105,2]:='';//Logo
-vs[2,106,2]:='';//Caravan
-//MotorenDB
-vi[2,49,2]:=Value[39][1][Value[23][10][id].Int].Int;//MaxRPM
-for i:=0 to 20 do
-vr[2,50+i,2]:=Value[39][2+i][Value[23][10][id].Int].Rel;//0-10k
-vr[2,71,2]:=Value[39][23][Value[23][10][id].Int].Rel;//NMStep
-vr[2,72,2]:=Value[39][24][Value[23][10][id].Int].Rel;//MotorBremse
-vr[2,73,2]:=Value[39][25][Value[23][10][id].Int].Rel;//Schwungmasse
-vi[2,74,2]:=Value[39][26][Value[23][10][id].Int].Int;
-vs[2,75,2]:=Value[39][27][Value[23][10][id].Int].Str;
-vi[2,76,2]:=Value[39][28][Value[23][10][id].Int].Int;//
-vi[2,77,2]:=Value[39][29][Value[23][10][id].Int].Int;//
-vs[2,78,2]:=Value[39][30][Value[23][10][id].Int].Str;
-vs[2,79,2]:=Value[39][31][Value[23][10][id].Int].Str;
-vi[2,80,2]:=Value[39][32][Value[23][10][id].Int].Int;
-vs[2,81,2]:=Value[39][33][Value[23][10][id].Int].Str;
-vi[2,82,2]:=Value[39][34][Value[23][10][id].Int].Int;// ??
-vi[2,83,2]:=Value[39][35][Value[23][10][id].Int].Int;//Laustaerke
-vi[2,99,2]:=0;//Drehzahlmesser
-vi[2,100,2]:=0;
-vi[2,101,2]:=0;
-vi[2,102,2]:=0;
-vi[2,103,2]:=0;
-//GearboxDB
-vi[2,84,2]:=Value[40][1][Value[23][11][id].Int].Int;//NumGears
-vr[2,85,2]:=Value[40][2][Value[23][11][id].Int].Rel;//
-vr[2,86,2]:=Value[40][3][Value[23][11][id].Int].Rel;//
-vr[2,87,2]:=Value[40][4][Value[23][11][id].Int].Rel;//
-vr[2,88,2]:=Value[40][5][Value[23][11][id].Int].Rel;//
-vr[2,89,2]:=Value[40][6][Value[23][11][id].Int].Rel;//
-vr[2,90,2]:=Value[40][7][Value[23][11][id].Int].Rel;//
-vr[2,91,2]:=Value[40][8][Value[23][11][id].Int].Rel;//
-vr[2,92,2]:=Value[40][9][Value[23][11][id].Int].Rel;//
-//TiresDB
-vr[2,93,2]:=Value[41][1][Value[23][12][id].Int].Rel;//F
-vr[2,94,2]:=Value[41][2][Value[23][12][id].Int].Rel;
-vr[2,95,2]:=Value[41][3][Value[23][12][id].Int].Rel;
-vr[2,96,2]:=Value[41][1][Value[23][13][id].Int].Rel;//R
-vr[2,97,2]:=Value[41][2][Value[23][13][id].Int].Rel;
-vr[2,98,2]:=Value[41][3][Value[23][13][id].Int].Rel;
-//[1]
-vi[1,1,2]:=Value[30][0][Value[23][1][id].Int].Int;//
-vs[1,2,2]:=Value[30][1][Value[23][1][id].Int].Str;//
-vs[1,3,2]:=Value[30][2][Value[23][1][id].Int].Str;//EngineNameClose
-vi[1,4,2]:=Value[30][3][Value[23][1][id].Int].Int;//FlagCabrio
-vr[1,5,2]:=Value[30][4][Value[23][1][id].Int].Rel;//
-vr[1,6,2]:=Value[30][5][Value[23][1][id].Int].Rel;//
-vr[1,7,2]:=Value[30][6][Value[23][1][id].Int].Rel;//
-vr[1,8,2]:=Value[30][7][Value[23][1][id].Int].Rel;//
-vi[1,9,2]:=Value[30][8][Value[23][1][id].Int].Int;//
-vi[1,10,2]:=Value[30][9][Value[23][1][id].Int].Int;//
-vi[1,11,2]:=Value[30][10][Value[23][1][id].Int].Int;//
-vi[1,12,2]:=Value[30][11][Value[23][1][id].Int].Int;//SWLight
-vi[1,13,2]:=Value[30][12][Value[23][1][id].Int].Int;//
-vi[1,14,2]:=Value[30][13][Value[23][1][id].Int].Int;//
-vr[1,15,2]:=Value[30][14][Value[23][1][id].Int].Rel;//
-vr[1,16,2]:=Value[30][15][Value[23][1][id].Int].Rel;//
-vr[1,17,2]:=Value[30][16][Value[23][1][id].Int].Rel;//
-vr[1,18,2]:=Value[30][17][Value[23][1][id].Int].Rel;//
-vr[1,19,2]:=Value[30][18][Value[23][1][id].Int].Rel;//
-vr[1,20,2]:=Value[30][19][Value[23][1][id].Int].Rel;//
-vi[1,21,2]:=Value[30][20][Value[23][1][id].Int].Int;//LastSelectCar
-s:=Value[30][21][Value[23][1][id].Int].Str; m:=0;
-for k:=1 to length(s)-2 do m:=m*10+strtoint(s[k+1]);
-if Value[0][2][m].Str<>'' then vs[1,22,2]:=Value[0][2][m].Str else
-if Value[0][1][m].Str<>'' then vs[1,22,2]:=Value[0][1][m].Str else
-if Value[0][6][m].Str<>'' then vs[1,22,2]:=Value[0][6][m].Str;
-vi[1,23,2]:=Value[30][22][Value[23][1][id].Int].Int;//Order
-vs[1,24,2]:=Value[30][23][Value[23][1][id].Int].Str;//Ref3DCarsOrder
-vi[1,25,2]:=Value[30][24][Value[23][1][id].Int].Int;//
-vr[1,26,2]:=Value[30][25][Value[23][1][id].Int].Rel;//
-vi[1,27,2]:=Value[30][26][Value[23][1][id].Int].Int;//FlagCabrio?
-vi[1,28,2]:=Value[30][27][Value[23][1][id].Int].Int;//CAB.BRLight
-vi[1,29,2]:=Value[30][28][Value[23][1][id].Int].Int;//
-vi[1,30,2]:=Value[30][29][Value[23][1][id].Int].Int;//
-
-vi[1,31,2]:=Value[30][30][Value[23][1][id].Int].Int;//
-vi[1,32,2]:=Value[30][31][Value[23][1][id].Int].Int;//
-vi[1,33,2]:=Value[30][32][Value[23][1][id].Int].Int;//
-vi[1,34,2]:=Value[30][33][Value[23][1][id].Int].Int;//
-vi[1,35,2]:=Value[30][34][Value[23][1][id].Int].Int;//
-vi[1,36,2]:=Value[30][35][Value[23][1][id].Int].Int;//
-vi[1,37,2]:=Value[30][36][Value[23][1][id].Int].Int;//
-vi[1,38,2]:=Value[30][37][Value[23][1][id].Int].Int;//
-vi[1,39,2]:=Value[30][38][Value[23][1][id].Int].Int;//
-vi[1,40,2]:=Value[30][39][Value[23][1][id].Int].Int;//
-vi[1,41,2]:=Value[30][40][Value[23][1][id].Int].Int;//
-vi[1,42,2]:=Value[30][41][Value[23][1][id].Int].Int;//
-
-vr[1,43,2]:=Value[30][42][Value[23][1][id].Int].Rel;//
-vr[1,44,2]:=Value[30][43][Value[23][1][id].Int].Rel;//
-vr[1,45,2]:=Value[30][44][Value[23][1][id].Int].Rel;//
-vr[1,46,2]:=Value[30][45][Value[23][1][id].Int].Rel;//
-vr[1,47,2]:=Value[30][46][Value[23][1][id].Int].Rel;//
-vr[1,48,2]:=Value[30][47][Value[23][1][id].Int].Rel;//
-vr[1,49,2]:=Value[30][48][Value[23][1][id].Int].Rel;//
-vr[1,50,2]:=Value[30][49][Value[23][1][id].Int].Rel;//
-vr[1,51,2]:=Value[30][50][Value[23][1][id].Int].Rel;//
-vr[1,52,2]:=Value[30][51][Value[23][1][id].Int].Rel;//
-
-vi[1,53,2]:=Value[30][52][Value[23][1][id].Int].Int;//
-vr[1,54,2]:=Value[30][53][Value[23][1][id].Int].Rel;//
-vr[1,55,2]:=Value[30][54][Value[23][1][id].Int].Rel;//
-vr[1,56,2]:=Value[30][55][Value[23][1][id].Int].Rel;//
-vr[1,57,2]:=Value[30][56][Value[23][1][id].Int].Rel;//
-vr[1,58,2]:=Value[30][57][Value[23][1][id].Int].Rel;//
-vr[1,59,2]:=Value[30][58][Value[23][1][id].Int].Rel;//
-vr[1,60,2]:=Value[30][59][Value[23][1][id].Int].Rel;//
-vr[1,61,2]:=Value[30][60][Value[23][1][id].Int].Rel;//
-vr[1,62,2]:=Value[30][61][Value[23][1][id].Int].Rel;//
-vi[1,63,2]:=Value[30][62][Value[23][1][id].Int].Int;//
-vr[1,64,2]:=Value[30][63][Value[23][1][id].Int].Rel;//
-vr[1,65,2]:=Value[30][64][Value[23][1][id].Int].Rel;//
-vr[1,66,2]:=Value[30][65][Value[23][1][id].Int].Rel;//
-vr[1,67,2]:=Value[30][66][Value[23][1][id].Int].Rel;//
-vr[1,68,2]:=Value[30][67][Value[23][1][id].Int].Rel;//
-vr[1,69,2]:=Value[30][68][Value[23][1][id].Int].Rel;//
-vr[1,70,2]:=Value[30][69][Value[23][1][id].Int].Rel;//
-vr[1,71,2]:=Value[30][70][Value[23][1][id].Int].Rel;//
-vr[1,72,2]:=Value[30][71][Value[23][1][id].Int].Rel;//
-vi[1,73,2]:=Value[30][72][Value[23][1][id].Int].Int;//Order26
-vr[1,74,2]:=Value[30][73][Value[23][1][id].Int].Rel;//
-vr[1,75,2]:=Value[30][74][Value[23][1][id].Int].Rel;//
-//vi[1,76,2]:=
-//vi[1,77,2]:=
-//vi[1,78,2]:=
-//vi[1,79,2]:=
-vi[1,80,2]:=0;//ColorIndex
-
-vi[1,1,2]:=0;//Index
-vi[1,23,2]:=0;//Order
-vi[1,73,2]:=0;//Order26
-vi[2,1,2]:=0;//Index
-vi[2,2,2]:=0;//3DCarID
-vi[2,11,2]:=0;//Motoren
-vi[2,12,2]:=0;//Gearbox
-vi[2,13,2]:=0;//TiresF
-vi[2,14,2]:=0;//TiresR
-//RefreshFS;
-//RefreshVLE;       //Update List
-//FSChange(Form1);
-end;
 
 
 procedure TForm1.Button1Click(Sender: TObject);
@@ -1642,6 +1034,15 @@ begin
     SDriverX1.Value       := round(GetValue(103,43,2).Rel*100);
     SDriverY1.Value       := round(GetValue(103,44,2).Rel*100);
     SDriverZ1.Value       := round(GetValue(103,45,2).Rel*100);
+
+    LockControlsHead := true;
+    DFX.Value := SDriverX2.Value;
+    DFY.Value := SDriverY2.Value + 37;
+    DFZ.Value := SDriverZ2.Value - 27;
+    DMX.Value := SDriverX1.Value + 1;
+    DMY.Value := SDriverY1.Value + 21;
+    DMZ.Value := SDriverZ1.Value - 69;
+    LockControlsHead := false;
 
     //Cockpit - Speedo
     ST1X.Value            := round(GetValue(103,54,2).Rel*100);
@@ -1807,6 +1208,15 @@ begin
     SetValue(103,43,2,SDriverX1.Value/100);
     SetValue(103,44,2,SDriverY1.Value/100);
     SetValue(103,45,2,SDriverZ1.Value/100);
+
+    LockControlsHead := true;
+    DFX.Value := SDriverX2.Value;
+    DFY.Value := SDriverY2.Value + 37;
+    DFZ.Value := SDriverZ2.Value - 27;
+    DMX.Value := SDriverX1.Value + 1;
+    DMY.Value := SDriverY1.Value + 21;
+    DMZ.Value := SDriverZ1.Value - 69;
+    LockControlsHead := false;
 
     //Cockpit - Speedo
     SetValue(103,54,2,ST1X.Value/100);

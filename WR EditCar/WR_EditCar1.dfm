@@ -85,11 +85,10 @@ object Form1: TForm1
     Top = 8
     Width = 222
     Height = 289
-    ActivePage = TabSheet1
+    ActivePage = TabSheet2
     MultiLine = True
-    TabIndex = 3
+    TabIndex = 1
     TabOrder = 3
-    OnChange = PageControl1Change
     object TabSheet4: TTabSheet
       Caption = 'Help'
       ImageIndex = 3
@@ -517,11 +516,11 @@ object Form1: TForm1
       ImageIndex = 1
       object Label128: TLabel
         Tag = 888
-        Left = 8
-        Top = 0
-        Width = 60
+        Left = 40
+        Top = 16
+        Width = 45
         Height = 13
-        Caption = 'WR.ds path:'
+        Caption = '*.ds path:'
       end
       object LBModel: TListBox
         Tag = 888
@@ -535,26 +534,17 @@ object Form1: TForm1
         Sorted = True
         TabOrder = 0
       end
-      object WRDSPath: TEdit
+      object BrowseForDS: TButton
         Tag = 888
         Left = 2
-        Top = 14
-        Width = 169
-        Height = 21
-        Enabled = False
-        TabOrder = 1
-      end
-      object BrowseForWRDS: TButton
-        Tag = 888
-        Left = 176
         Top = 10
         Width = 27
         Height = 26
         Caption = '...'
-        TabOrder = 2
-        OnClick = BrowseForWR2DSClick
+        TabOrder = 1
+        OnClick = BrowseForDSClick
       end
-      object ImportWRCar: TButton
+      object ImportDSCar: TButton
         Tag = 888
         Left = 2
         Top = 235
@@ -562,61 +552,8 @@ object Form1: TForm1
         Height = 25
         Caption = 'Import'
         Enabled = False
-        TabOrder = 3
-        OnClick = ImportWRCarClick
-      end
-    end
-    object TabSheet3: TTabSheet
-      Caption = 'WR2'
-      ImageIndex = 2
-      object Label115: TLabel
-        Tag = 888
-        Left = 8
-        Top = 0
-        Width = 66
-        Height = 13
-        Caption = 'WR2.ds path:'
-      end
-      object BrowseForWR2DS: TButton
-        Tag = 888
-        Left = 176
-        Top = 10
-        Width = 27
-        Height = 26
-        Caption = '...'
-        TabOrder = 0
-        OnClick = BrowseForWR2DSClick
-      end
-      object WR2DSPath: TEdit
-        Tag = 888
-        Left = 2
-        Top = 14
-        Width = 169
-        Height = 21
-        Enabled = False
-        TabOrder = 1
-      end
-      object LB2Model: TListBox
-        Tag = 888
-        Left = 2
-        Top = 38
-        Width = 209
-        Height = 193
-        Enabled = False
-        ItemHeight = 13
-        Sorted = True
         TabOrder = 2
-      end
-      object ImportWR2Car: TButton
-        Tag = 888
-        Left = 2
-        Top = 235
-        Width = 75
-        Height = 25
-        Caption = 'Import'
-        Enabled = False
-        TabOrder = 3
-        OnClick = ImportWR2CarClick
+        OnClick = ImportDSCarClick
       end
     end
     object TabSheet1: TTabSheet
@@ -717,8 +654,8 @@ object Form1: TForm1
     Top = 8
     Width = 503
     Height = 489
-    ActivePage = TabSheet5
-    TabIndex = 1
+    ActivePage = TabSheet13
+    TabIndex = 0
     TabOrder = 4
     OnChange = PageChange
     object TabSheet13: TTabSheet
@@ -13652,7 +13589,7 @@ object Form1: TForm1
         Accuracy = 0
         Increment = 1
         TabOrder = 7
-        OnChange = FSChange2
+        OnChange = FSChangeHead
       end
       object DFY: TFloatSpinEdit
         Left = 68
@@ -13662,7 +13599,7 @@ object Form1: TForm1
         Accuracy = 0
         Increment = 1
         TabOrder = 8
-        OnChange = FSChange2
+        OnChange = FSChangeHead
       end
       object DFZ: TFloatSpinEdit
         Left = 132
@@ -13672,7 +13609,7 @@ object Form1: TForm1
         Accuracy = 0
         Increment = 1
         TabOrder = 9
-        OnChange = FSChange2
+        OnChange = FSChangeHead
       end
       object DMZ: TFloatSpinEdit
         Left = 132
@@ -13682,7 +13619,7 @@ object Form1: TForm1
         Accuracy = 0
         Increment = 1
         TabOrder = 10
-        OnChange = FSChange2
+        OnChange = FSChangeHead
       end
       object DMY: TFloatSpinEdit
         Left = 68
@@ -13692,7 +13629,7 @@ object Form1: TForm1
         Accuracy = 0
         Increment = 1
         TabOrder = 11
-        OnChange = FSChange2
+        OnChange = FSChangeHead
       end
       object DMX: TFloatSpinEdit
         Left = 4
@@ -13702,7 +13639,7 @@ object Form1: TForm1
         Accuracy = 0
         Increment = 1
         TabOrder = 12
-        OnChange = FSChange2
+        OnChange = FSChangeHead
       end
     end
     object TabSheet11: TTabSheet

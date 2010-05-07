@@ -866,59 +866,60 @@ procedure ReadLangFile(Sender:TForm; FileName:string; EraseWritten:boolean);
 var ft:textfile; i,k,row:integer; capt,eng,rus,ErrS:string; IsList:boolean;
 begin     
   if not fileexists(FileName) then begin
-  ErrS := 'Can''t find input file '+FileName;
-  MessageBox(Sender.Handle,@(ErrS)[1],'Error',MB_OK);
-  exit;
+    ErrS := 'Can''t find input file '+FileName;
+    MessageBox(Sender.Handle,@(ErrS)[1],'Error',MB_OK);
+    exit;
   end;
 
-assignfile(ft,FileName); reset(ft);
-IsList:=false;
-row:=0;
+  assignfile(ft,FileName); reset(ft);
+  IsList:=false;
+  row:=0;
 
-repeat
-inc(row);
-readln(ft,capt);
-if capt='//List' then begin
-IsList:=true;
-readln(ft,capt);
-end;
-if capt='//EndList' then begin
-IsList:=false;
-readln(ft,capt);
-end;
-
-k:=1;
-repeat inc(k) until((k+1>length(capt))or(capt[k-1]+capt[k]+capt[k+1]='<=>'));
-
-if k+1>length(capt) then begin
-  ErrS := 'Error on line '+inttostr(row)+'. ';
-  MessageBox(Sender.Handle,@(ErrS)[1],'Error',MB_OK);
-  //exit;
-end;
-
-eng:=decs(capt,length(capt)-k+2,0); //+2 means '<=' thing
-rus:=decs(capt,-k-1,0);             //-1 means '>' thing
-
-for i:=0 to Sender.ComponentCount-1 do begin
-
-  if(IsPublishedProp(Sender.Components[i],'Caption')) then begin
-  capt:=GetStrProp(Sender.Components[i],'Caption');
-  if capt=eng then SetStrProp(Sender.Components[i],'Caption',rus);
-  end;
-
-  if IsList then
-  if Sender.Components[i] is TRadioGroup then begin
-    for k:=0 to TRadioGroup(Sender.Components[i]).Items.Count-1 do begin
-    capt:=TRadioGroup(Sender.Components[i]).Items[k];
-    if capt=eng then TRadioGroup(Sender.Components[i]).Items[k]:=rus;
+  repeat
+    inc(row);
+    readln(ft,capt);
+    if capt='//List' then begin
+      IsList:=true;
+      readln(ft,capt);
     end;
-  end;
-  
+    if capt='//EndList' then begin
+      IsList:=false;
+      readln(ft,capt);
+    end;
+
+    k:=1;
+    repeat inc(k) until((k+1>length(capt))or(capt[k-1]+capt[k]+capt[k+1]='<=>'));
+
+    if k+1>length(capt) then begin
+      ErrS := 'Error on line '+inttostr(row)+'. ';
+      MessageBox(Sender.Handle,@(ErrS)[1],'Error',MB_OK);
+      //exit;
+    end;
+
+    eng:=decs(capt,length(capt)-k+2,0); //+2 means '<=' thing
+    rus:=decs(capt,-k-1,0);             //-1 means '>' thing
+
+    for i:=0 to Sender.ComponentCount-1 do begin
+
+      if(IsPublishedProp(Sender.Components[i],'Caption')) then begin
+      capt:=GetStrProp(Sender.Components[i],'Caption');
+      if capt=eng then SetStrProp(Sender.Components[i],'Caption',rus);
+      end;
+
+      if IsList then
+      if Sender.Components[i] is TRadioGroup then begin
+        for k:=0 to TRadioGroup(Sender.Components[i]).Items.Count-1 do begin
+        capt:=TRadioGroup(Sender.Components[i]).Items[k];
+        if capt=eng then TRadioGroup(Sender.Components[i]).Items[k]:=rus;
+        end;
+      end;
+
+    end;
+
+  until(eof(ft));
+  closefile(ft);
 end;
 
-until(eof(ft));
-closefile(ft);
-end;
 
 function RunOpenDialog(Sender:TOpenDialog; Name,Path,Filter:string):boolean;
 begin
