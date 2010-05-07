@@ -1,8 +1,7 @@
 unit ColorPicker;
-
 interface
-
 uses
+  {$IFDEF FPC} LResources, {$ENDIF}
   SysUtils, Classes, Graphics, Forms, Spin, StdCtrls, ExtCtrls, Controls, Math, KromUtils;
 
 type
@@ -47,6 +46,7 @@ type
     procedure SpinHSBChange(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   end;
 
 procedure DefineInputColor(R,G,B:byte; Sender:TObject); overload;
@@ -66,9 +66,9 @@ var
   HSBRefresh:boolean;
 
 implementation
-
-
+{$IFDEF VER140}
 {$R *.dfm}
+{$ENDIF}
 
 procedure TForm_ColorPicker.FormShow(Sender: TObject);
 begin
@@ -112,18 +112,23 @@ end;
 procedure TForm_ColorPicker.DrawHueSatQuad();
 var P : PByteArray; R,G,B:integer; ii,kk:integer;
 begin //Fill area with Hue and Saturation data respecting Brightness
-for ii:=0 to 255 do begin
-P:=BitmapHueSat.ScanLine[ii];
-for kk:=0 to 359 do begin
-ApplyHue2RGB(kk, R,G,B);
-ApplySat2RGB(ii, R,G,B);
-ApplyBri2RGB(R,G,B, Bri, R,G,B);
-P[kk*3+0]:=B;
-P[kk*3+1]:=G;
-P[kk*3+2]:=R;
-end;
-end;
-HSImage.Canvas.Draw(0,0,BitmapHueSat);
+  for ii := 0 to 255 do begin
+    {$IFDEF VER140} P := BitmapHueSat.ScanLine[ii]; {$ENDIF}
+    for kk := 0 to 359 do begin
+      ApplyHue2RGB(kk, R, G, B);
+      ApplySat2RGB(ii, R, G, B);
+      ApplyBri2RGB(R, G, B, Bri, R, G, B);
+      {$IFDEF VER140}
+        P[kk*3+0] := B;
+        P[kk*3+1] := G;
+        P[kk*3+2] := R;
+      {$ENDIF}
+      {$IFDEF FPC}
+        BitmapHueSat.Canvas.Pixels[kk, ii] := R + G shl 8 + B shl 16;
+      {$ENDIF}
+    end;
+  end;
+  HSImage.Canvas.Draw(0, 0, BitmapHueSat);
 end;
 
 procedure TForm_ColorPicker.DrawBriRow();
@@ -337,5 +342,16 @@ BitmapBri.PixelFormat:=pf24bit;
 BitmapBri.Width:=1;
 BitmapBri.Height:=BriImage.Height;
 end;
+
+procedure TForm_ColorPicker.FormDestroy(Sender: TObject);
+begin
+  BitmapHueSat.Free;
+  BitmapBri.Free;
+end;
+
+{$IFDEF FPC}
+initialization
+{$I ColorPicker.lrs}
+{$ENDIF}
 
 end.

@@ -51,10 +51,10 @@ begin
   Form1.MemoLWO.Lines.Add('Attempt to init GLSL ');
   LoadShader();
   Form1.MemoLWO.Lines.Add('Load shaders in '+ElapsedTime(@OldTime));
-  LoadTexturePTX(ExeDir+'STKit2 Data\EnvMap.ptx', EnvMap);
-  LoadTexturePTX(ExeDir+'STKit2 Data\FlareTex.ptx', FlareTex);
-  LoadTexturePTX(ExeDir+'STKit2 Data\Black.ptx', BlackTex);
-  LoadTexturePTX(ExeDir+'STKit2 Data\White.ptx', WhiteTex);
+  LoadTexturePTX(fOptions.ExeDir+STKit2_Data_Path+'\EnvMap.ptx', EnvMap);
+  LoadTexturePTX(fOptions.ExeDir+STKit2_Data_Path+'\FlareTex.ptx', FlareTex);
+  LoadTexturePTX(fOptions.ExeDir+STKit2_Data_Path+'\Black.ptx', BlackTex);
+  LoadTexturePTX(fOptions.ExeDir+STKit2_Data_Path+'\White.ptx', WhiteTex);
   glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
   glPointSize(PointSize);
 end;
@@ -63,15 +63,15 @@ procedure KnowFPS();
 begin
   FrameTime:=GetTickCount-OldTickCount;
   OldTickCount:=GetTickCount;
-    if (FPSLag<>1)and(FrameTime<FPSLag) then begin
-    sleep(FPSLag-FrameTime);
-    FrameTime:=FPSLag;
+    if (fOptions.FPSLag<>1)and(FrameTime<fOptions.FPSLag) then begin
+    sleep(fOptions.FPSLag-FrameTime);
+    FrameTime := fOptions.FPSLag;
     end;
   if FrameTime>1000 then FrameTime:=1000;
   inc(OldFrameTimes,FrameTime);
   inc(FrameCount);
   if OldFrameTimes>=FPS_INTERVAL then begin
-    Form1.StatusBar1.Panels[0].Text:=' '+floattostr(round((1000/(OldFrameTimes/FrameCount))*10)/10)+' fps ('+inttostr(1000 div FPSLag)+')';
+    Form1.StatusBar1.Panels[0].Text:=' '+floattostr(round((1000/(OldFrameTimes/FrameCount))*10)/10)+' fps ('+inttostr(1000 div fOptions.FPSLag)+')';
     OldFrameTimes:=0; FrameCount:=0;
   end; //FPS calculation complete
 end;
@@ -99,7 +99,7 @@ if s<'2.0' then begin       //we check first two  numbers as version
 end;
 
     vs:=glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
-    s:=ExeDir+'STKit2 Data\Shaders\Mat_GLSL.vert';
+    s:=fOptions.ExeDir+STKit2_Data_Path+'\Shaders\Mat_GLSL.vert';
         if fileexists(s) then begin
         assignfile(ff,s); reset(ff,1);
         blockread(ff,c,16384,NumRead); closefile(ff);
@@ -110,7 +110,7 @@ end;
     for i:=1 to ShadQty do begin
     po[i]:=glCreateProgramObjectARB;
     fs[i]:=glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-    s:=ExeDir+'STKit2 Data\Shaders\'+MatModeF[i]+'.frag';
+    s:=fOptions.ExeDir+STKit2_Data_Path+'\Shaders\'+MatModeF[i]+'.frag';
         if fileexists(s) then begin
         assignfile(ff,s); reset(ff,1);
         blockread(ff,c,16384,NumRead); closefile(ff);
@@ -135,7 +135,7 @@ CheckGLSLError(Form1.Handle, vs, GL_OBJECT_COMPILE_STATUS_ARB, ShowGLSLWarning,'
 Form1.MemoLWO.Lines.Add('Compiled GLSL files');
 
     ovs:=glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
-    s:=ExeDir+'STKit2 Data\Shaders\Obj_GLSL.vert';
+    s:=fOptions.ExeDir+STKit2_Data_Path+'\Shaders\Obj_GLSL.vert';
     assignfile(ff,s); reset(ff,1);
     blockread(ff,c,16384,NumRead); closefile(ff);
     c[NumRead+1]:=#0; src:=PChar(StrPas(@c));
@@ -144,8 +144,8 @@ Form1.MemoLWO.Lines.Add('Compiled GLSL files');
     for i:=0 to ObjShadQty do begin
     opo[i]:=glCreateProgramObjectARB;
     ofs[i]:=glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-    s:=ExeDir+'STKit2 Data\Shaders\Obj'+int2fix(i,2)+'00.frag';
-    if not fileexists(s) then s:=ExeDir+'STKit2 Data\Shaders\Obj_GLSL.frag';
+    s:=fOptions.ExeDir+STKit2_Data_Path+'\Shaders\Obj'+int2fix(i,2)+'00.frag';
+    if not fileexists(s) then s:=fOptions.ExeDir+STKit2_Data_Path+'\Shaders\Obj_GLSL.frag';
         assignfile(ff,s); reset(ff,1);
         blockread(ff,c,16384,NumRead); closefile(ff);
         c[NumRead+1]:=#0; src:=PChar(StrPas(@c));

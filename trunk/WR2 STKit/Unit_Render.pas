@@ -1501,7 +1501,7 @@ var ii,h,step:integer;
 begin
 
 //Car
-LoadObjectMOX(ExeDir+'STKit2 Data\Car\Car',0);
+LoadObjectMOX(fOptions.ExeDir+STKit2_Data_Path+'\Car\Car',0);
 
 //Arrow
 coArrow:=glGenLists(1);
