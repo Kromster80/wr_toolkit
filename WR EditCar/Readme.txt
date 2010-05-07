@@ -4,12 +4,14 @@
 
 Description:
 Edit car properties that stored in EditCar.car files of 
-Mercedes-Benz World Racing, World Racing 2, Alarm For Cobra 11 games.
+Mercedes-Benz World Racing and World Racing 2 games.
 
 Usage:
 Open any EditCar.car file
-Define editing format (MBWR/WR2/AFC11)
+Enter password if prompted and press [OK] button
+Define editing format (MBWR/WR2/C11N)
 Edit values
+Define new password if needed or remove checkmark
 Save new EditCar.car file
 
 Notes:
@@ -18,8 +20,7 @@ Deutch translation by Jonas Wolf <jw30192@googlemail.com>
 Hungarian translation by Nagyidai Andor and Hykao
 
 Version history:
-v1.6  10.01.26	Removed password protection
-		Prepared project for uploading to SVN
+		No changes
 v1.5e 08.05.06	Fixed bugs
 v1.5d 08.03.23	Fixed bug
 v1.5c 07.12.03	Added template EditCar.car file
@@ -99,4 +100,4 @@ v0.1  04.04.15	First release
 Have any questions, answers, comments ? Send me an E-Mail :-)
 Author: Krom
 E-mail: kromster80@gmail.com
-Site: http://krom.reveur.de/
+Site: http://krom.rscsites.org/
