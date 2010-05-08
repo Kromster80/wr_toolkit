@@ -856,20 +856,50 @@ end;
 
 
 procedure TForm1.ImportDSCarClick(Sender: TObject);
-var CarID:integer; i:integer;
+var
+  CarID:integer;
+  i:integer;
+  TempID:integer;
 begin
 
   CarID := 2;
 
   LBModel.Sorted:=false;
 
+  //Let's sketch it for MBWR first, then we'll see how it goes
   if ImportDS.Version = dsvMBWR then begin
-    fDataSet.SetValue(103,0,2, ImportDS.GetValue(30,0,CarID)); //Kommentar
+
+    fDataSet.SetValue(105,0,2, ImportDS.GetValue(23,0,CarID)); //Kommentar
+    fDataSet.SetValue(105,1,2, 0); //Index
+    fDataSet.SetValue(105,2,2, 0); //3DCarID
+    fDataSet.SetValue(105,3,2, ImportDS.WRTextEn(ImportDS.GetValueAsString(23,3,CarID)));
+    for i:=4 to 48 do
+      fDataSet.SetValue(105,i,2, ImportDS.GetValue(23,i,CarID));
+    //Overrides
+    fDataSet.SetValue(105,11,2, 0); //MotorID
+    fDataSet.SetValue(105,12,2, 0); //GearboxID
+    fDataSet.SetValue(105,13,2, 0); //TiresID
+    fDataSet.SetValue(105,14,2, 0); //TiresID
+
+    //MotorDB
+    TempID := ImportDS.GetValue(23,11,CarID).Int + 1; //todo: Access CO by 0..n indexes!!
+    for i:=2 to 36 do //MAXDREHZAHL..Lautstaerke
+      fDataSet.SetValue(105,i+47,2, ImportDS.GetValue(39,i,TempID));
+
+    //Clearup
+    for i:=84 to 105 do
+      fDataSet.SetValueAsString(105,i,2,'0');
+
+    //3DCarsDB
+    TempID := ImportDS.GetValue(23,2,CarID).Int + 1; //todo: Access CO by 0..n indexes!!
+    fDataSet.SetValue(103,0,2, ImportDS.GetValue(30,0,TempID)); //Kommentar
     fDataSet.SetValue(103,1,2, 0); //Index
     for i:=2 to 75 do
-    fDataSet.SetValue(103,i,2, ImportDS.GetValue(30,i,CarID));
-
-    ..wip..
+      fDataSet.SetValue(103,i,2, ImportDS.GetValue(30,i,TempID));
+    fDataSet.SetValue(103,22,2, ImportDS.WRTextEn(ImportDS.GetValueAsString(30,22,TempID)));
+    fDataSet.SetValue(103,23,2, 0); //Order
+    fDataSet.SetValue(103,24,2, ''); //Ref3DCarsOrder
+    fDataSet.SetValue(103,73,2, 0); //Order26
 
   end;
 
