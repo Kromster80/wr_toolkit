@@ -111,6 +111,7 @@ object Form1: TForm1
         ItemHeight = 13
         Sorted = True
         TabOrder = 0
+        OnClick = ImportDSCarClick
       end
       object BrowseForDS: TButton
         Tag = 888
