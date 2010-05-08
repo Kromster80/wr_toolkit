@@ -87,8 +87,53 @@ object Form1: TForm1
     Height = 289
     ActivePage = TabSheet2
     MultiLine = True
-    TabIndex = 1
+    TabIndex = 0
     TabOrder = 3
+    object TabSheet2: TTabSheet
+      Caption = 'Import'
+      ImageIndex = 1
+      object Label128: TLabel
+        Tag = 888
+        Left = 40
+        Top = 16
+        Width = 63
+        Height = 13
+        Caption = 'DataSet of ...'
+      end
+      object LBModel: TListBox
+        Tag = 888
+        Left = 2
+        Top = 38
+        Width = 209
+        Height = 193
+        Enabled = False
+        ExtendedSelect = False
+        ItemHeight = 13
+        Sorted = True
+        TabOrder = 0
+      end
+      object BrowseForDS: TButton
+        Tag = 888
+        Left = 2
+        Top = 10
+        Width = 27
+        Height = 26
+        Caption = '...'
+        TabOrder = 1
+        OnClick = BrowseForDSClick
+      end
+      object ImportDSCar: TButton
+        Tag = 888
+        Left = 2
+        Top = 235
+        Width = 75
+        Height = 25
+        Caption = 'Import'
+        Enabled = False
+        TabOrder = 2
+        OnClick = ImportDSCarClick
+      end
+    end
     object TabSheet4: TTabSheet
       Caption = 'Help'
       ImageIndex = 3
@@ -509,51 +554,6 @@ object Form1: TForm1
           Layout = blGlyphTop
           Spacing = -4
         end
-      end
-    end
-    object TabSheet2: TTabSheet
-      Caption = 'MBWR'
-      ImageIndex = 1
-      object Label128: TLabel
-        Tag = 888
-        Left = 40
-        Top = 16
-        Width = 45
-        Height = 13
-        Caption = '*.ds path:'
-      end
-      object LBModel: TListBox
-        Tag = 888
-        Left = 2
-        Top = 38
-        Width = 209
-        Height = 193
-        Enabled = False
-        ExtendedSelect = False
-        ItemHeight = 13
-        Sorted = True
-        TabOrder = 0
-      end
-      object BrowseForDS: TButton
-        Tag = 888
-        Left = 2
-        Top = 10
-        Width = 27
-        Height = 26
-        Caption = '...'
-        TabOrder = 1
-        OnClick = BrowseForDSClick
-      end
-      object ImportDSCar: TButton
-        Tag = 888
-        Left = 2
-        Top = 235
-        Width = 75
-        Height = 25
-        Caption = 'Import'
-        Enabled = False
-        TabOrder = 2
-        OnClick = ImportDSCarClick
       end
     end
     object TabSheet1: TTabSheet
