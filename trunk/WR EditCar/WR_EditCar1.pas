@@ -862,9 +862,8 @@ var
   TempID:integer;
 begin
 
-  CarID := 2;
-
-  LBModel.Sorted:=false;
+  if LBModel.ItemIndex = -1 then exit;
+  CarID := LBModel.ItemIndex + 2;
 
   //Let's sketch it for MBWR first, then we'll see how it goes
   if ImportDS.Version = dsvMBWR then begin
@@ -886,8 +885,24 @@ begin
     for i:=2 to 36 do //MAXDREHZAHL..Lautstaerke
       fDataSet.SetValue(105,i+47,2, ImportDS.GetValue(39,i,TempID));
 
-    //Clearup
-    for i:=84 to 105 do
+    //GearboxDB
+    TempID := ImportDS.GetValue(23,12,CarID).Int + 1; //todo: Access CO by 0..n indexes!!
+    for i:=2 to 10 do //AnzahlGaenge..RWGang
+      fDataSet.SetValue(105,i+82,2, ImportDS.GetValue(40,i,TempID));
+
+    //TiresID
+    TempID := ImportDS.GetValue(23,13,CarID).Int + 1; //todo: Access CO by 0..n indexes!!
+    for i:=2 to 4 do //reifenradius..ENGINE_FELGENHOEHE
+      fDataSet.SetValue(105,i+91,2, ImportDS.GetValue(41,i,TempID));
+
+    //TiresID
+    TempID := ImportDS.GetValue(23,14,CarID).Int + 1; //todo: Access CO by 0..n indexes!!
+    for i:=2 to 4 do //reifenradius..ENGINE_FELGENHOEHE
+      fDataSet.SetValue(105,i+94,2, ImportDS.GetValue(41,i,TempID));
+
+      //todo: Sort this out
+    //Clearup unused fields
+    for i:=99 to 105 do
       fDataSet.SetValueAsString(105,i,2,'0');
 
     //3DCarsDB
