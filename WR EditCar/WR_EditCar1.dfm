@@ -73,9 +73,11 @@ object Form1: TForm1
     Items.Strings = (
       'Mercedes-Benz World Racing'
       'World Racing 2'
-      'Alarm for Cobra 11 - Nitro'
+      'Alarm For Cobra 11 - Nitro'
+      'Alarm For Cobra 11 - Crash Time'
+      'Alarm For Cobra 11 - Burning Wheels'
       'Ferrari Virtual Race'
-      'Alarm for Cobra 11 - Highway Nights')
+      'Alarm For Cobra 11 - Highway Nights')
     TabOrder = 2
     OnClick = RGFormatClick
   end
@@ -94,8 +96,8 @@ object Form1: TForm1
       ImageIndex = 1
       object Label128: TLabel
         Tag = 888
-        Left = 40
-        Top = 16
+        Left = 88
+        Top = 8
         Width = 63
         Height = 13
         Caption = 'DataSet of ...'
@@ -103,9 +105,9 @@ object Form1: TForm1
       object LBModel: TListBox
         Tag = 888
         Left = 2
-        Top = 38
+        Top = 32
         Width = 209
-        Height = 193
+        Height = 226
         Enabled = False
         ExtendedSelect = False
         ItemHeight = 13
@@ -116,23 +118,12 @@ object Form1: TForm1
       object BrowseForDS: TButton
         Tag = 888
         Left = 2
-        Top = 10
-        Width = 27
+        Top = 2
+        Width = 79
         Height = 26
-        Caption = '...'
+        Caption = 'Import DS ...'
         TabOrder = 1
         OnClick = BrowseForDSClick
-      end
-      object ImportDSCar: TButton
-        Tag = 888
-        Left = 2
-        Top = 235
-        Width = 75
-        Height = 25
-        Caption = 'Import'
-        Enabled = False
-        TabOrder = 2
-        OnClick = ImportDSCarClick
       end
     end
     object TabSheet4: TTabSheet

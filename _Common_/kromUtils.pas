@@ -723,32 +723,43 @@ if Len>=0 then result:=Copy(AText, 1, length(AText)-Len)
           else result:=Copy(AText, 1+abs(Len), length(AText)-abs(Len));
 end;
 
+
+//Will extract a number at given position from a string
+//Numbers should be embraced in: Whitespaces, Tabs, Slashes
+//String format is xxxxx xxx xx 11 xxxxx #9 222 xxxxx / 33333
+//If position is negative number, it will do a search "From the end"
 function GetNumberFromString(AText:string; Position:integer):single;
 var i,Pos1,Pos2:integer; s:string;
 begin
-  AText:=' '+AText;
 
-  Pos1:=0;
+  if Position < 0 then AText := ReverseString(AText); //Reverse the string to get reversed number from the end
+
+  AText := ' '+AText;
+
+  Pos1:=0; //Find first digit of required number
   for i:=1 to Position do
   repeat
-  inc(Pos1);
+    inc(Pos1);
   until((Pos1+1>length(AText))or(
   ((AText[Pos1]=' ')or(AText[Pos1]=#9)or(AText[Pos1]='/'))and(AText[Pos1+1] in [','..'.','0'..'9']) //,-.0..9
   ));
 
-  Pos2:=Pos1+1;
+  Pos2:=Pos1+1; //Find last digit of required number
   repeat
-    if (Pos2<=length(AText))and( AText[Pos2] in [',','.'] ) then AText[Pos2]:=DecimalSeparator;
+    if (Pos2<=length(AText))and(AText[Pos2] in [',','.']) then AText[Pos2] := DecimalSeparator;
     inc(Pos2);
   until((Pos2>length(AText))or(
   ((AText[Pos2]=' ')or(AText[Pos2]=#9)or(AText[Pos2]='/'))and(AText[Pos2-1] in [','..'.','0'..'9'])
   ));
 
-  s:=Copy(AText,Pos1+1,Pos2-1 - Pos1);
+  s := Copy(AText, Pos1+1, Pos2-1-Pos1);
 
-  if s='' then Result:=0 else
-  Result:=strtofloat(s);
+  if Position < 0 then s := ReverseString(s); //Reverse the reversed number
 
+  if s='' then
+    Result := 0
+  else
+    Result := strtofloat(s);
 end;
 
 

@@ -4,11 +4,20 @@ interface
 uses KromUtils, Math, SysUtils, Windows;
 
 type
-  TDSVersion = (dsvUnknown, dsvMBWR, dsvWR2, dsvAFC11N, dsvAFC11CT, dsvAFC11BW, dsvAFC11HN, dsvFVR);
+  TDSVersion = (dsvUnknown=0, dsvMBWR, dsvWR2, dsvAFC11N, dsvAFC11CT, dsvAFC11BW, dsvFVR, dsvAFC11HN);
 
 const
-  DSVersionName:array[TDSVersion] of string =
-  ('Unknown', 'MBWR', 'WR2', 'AFC11N', 'AFC11CT', 'AFC11BW', 'AFC11HN', 'FVR');
+  DSVersionNameShort:array[TDSVersion] of string =
+  ('Unknown', 'MBWR', 'WR2', 'AFC11N', 'AFC11CT', 'AFC11BW', 'FVR', 'AFC11HN');
+  DSVersionNameLong:array[TDSVersion] of string = (
+    'Unknown',
+    'Mercedes-Benz World Racing',
+    'World Racing 2',
+    'Alarm For Cobra 11 - Nitro',
+    'Alarm For Cobra 11 - Crash Time',
+    'Alarm For Cobra 11 - Burning Wheels',
+    'Ferrari Virtual Race',
+    'Alarm For Cobra 11 - Highway Nights');
 
 type
   TDSNode = packed record
