@@ -36,7 +36,6 @@ type
     LBModel: TListBox;
     Label128: TLabel;
     BrowseForDS: TButton;
-    ImportDSCar: TButton;
     TabSheet4: TTabSheet;
     GroupBox3: TGroupBox;
     Label129: TLabel;
@@ -386,6 +385,8 @@ type TEditingFormat = (fmtMBWR, fmtWR2, fmtAFC11N, fmtFVR, fmtAFC11HN);
 
 const
   VersionInfo = 'Version 1.6       (** May 2010)';
+  MaxFieldsCarsDB = 105; //EditCar.car capacity
+  MaxFields3DCarsDB = 80; //EditCar.car capacity
 
 var
   Form1: TForm1;
@@ -834,7 +835,7 @@ begin
   ImportDS.LoadDS(aDSPath);
 
   LBModel.Clear;
-
+                                 
   if ImportDS.Version = dsvMBWR then
   for i:=2 to ImportDS.COCount(23,3) do
     LBModel.Items.Add(ImportDS.WRTextEn(ImportDS.GetValueAsString(23,3,i)));
@@ -849,9 +850,8 @@ begin
 
   if ImportDS.Version = dsvUnknown then exit;
 
-  Label128.Caption := 'DataSet of ' + DSVersionName[ImportDS.Version];
+  Label128.Caption := 'DataSet of ' + DSVersionNameShort[ImportDS.Version];
   LBModel.Enabled := true;
-  ImportDSCar.Enabled := true;
 end;
 
 
@@ -900,7 +900,6 @@ begin
     for i:=2 to 4 do //reifenradius..ENGINE_FELGENHOEHE
       fDataSet.SetValue(105,i+94,2, ImportDS.GetValue(41,i,TempID));
 
-      //todo: Sort this out
     //Clearup unused fields
     for i:=99 to 105 do
       fDataSet.SetValueAsString(105,i,2,'0');
@@ -916,9 +915,15 @@ begin
     fDataSet.SetValue(103,24,2, ''); //Ref3DCarsOrder
     fDataSet.SetValue(103,73,2, 0); //Order26
 
+    //Clearup unused fields
+    for i:=76 to 80 do
+      fDataSet.SetValueAsString(103,i,2,'0');
+
   end;
 
   UpdateControls;
+  RGFormat.ItemIndex := byte(ImportDS.Version)-1;
+  RGFormatClick(nil);
 end;
 
 
