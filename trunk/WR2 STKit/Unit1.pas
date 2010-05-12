@@ -900,10 +900,7 @@ const
   CarWidth=9.5;         //Half width of car (used in: TRK ideal-line generation, streets width display)
   CarLength=13;
   CarTrackWidth=7;      //Halfwidth for driving sim
-  MaxObjInst=10000;     //Limit on object instances - 65k
-  MaxSNI=300;           //256 in fact I reserve 44 for Spawn routes
-  MaxSNINodes=MaxSNI*5+100;        //number of SNI nodes
-  MaxGrounds=12;        //Limit is 12, tested by Curry
+
 
 var //temp
 BlockHi:array of single;
@@ -1424,7 +1421,7 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-ElapsedTime(@OldTime);
+  ElapsedTime(@OldTime);
 
   fOptions := TSKOptions.Create;
   CBTrace.Checked := fOptions.TraceSurface;
@@ -3662,7 +3659,7 @@ SNIHead.Node:=h-1;
 Changes.SNI:=true;
 Changes.WRK:=true;
 
-//todo: ListObjects.DeleteSelected; //remove from list
+ListObjects.Items.Delete(ListObjects.ItemIndex); //remove from list
 ListObjects.ItemIndex:=EnsureRange(ID,1,Qty.ObjectFiles)-1;
 ObjectsRefresh:=false;
 ListObjectsClick(nil);
@@ -4335,7 +4332,7 @@ exit; end;
 
 ID:=ListTextures.ItemIndex+1;
 if ID=0 then exit;
-//todo: ListTextures.DeleteSelected;
+ListTextures.Items.Delete(ListTextures.ItemIndex);
 for i:=1 to Qty.Materials do begin
 if Material[i].Tex1+1=ID then Material[i].Tex1:=0;
 if Material[i].Tex2+1=ID then Material[i].Tex2:=0;
@@ -4527,7 +4524,7 @@ begin
 ID:=ListSounds.ItemIndex;
 if ID<1 then exit;
 SoundsRefresh:=true;
-//todo: ListSounds.DeleteSelected;
+ListSounds.Items.Delete(ListSounds.ItemIndex);
 dec(Qty.Sounds);
 for i:=ID to Qty.Sounds do Sound[i]:=Sound[i+1];
 SoundsRefresh:=false;
@@ -4873,7 +4870,7 @@ if ListTOB2.ItemIndex<0 then exit;
 ID:=TrackID;
 ID2:=ListTOB2.ItemIndex+1;
 TOBRefresh:=true;
-//todo: ListTOB2.DeleteSelected;
+ListTOB2.Items.Delete(ListTOB2.ItemIndex);
 dec(TOBHead[ID].Qty);
 for i:=ID2 to TOBHead[ID].Qty do TOB[ID,i]:=TOB[ID,i+1];
 TOBRefresh:=false;
@@ -5091,7 +5088,7 @@ ID:=strtoint(ss);
 for i:=ID to Qty.ObjectsTotal-1 do //shift up
 Obj[i]:=Obj[i+1];
 dec(Qty.ObjectsTotal);
-//todo: ListObjects2.DeleteSelected;
+ListObjects2.Items.Delete(ListObjects2.ItemIndex);
 ListObjects2.ItemIndex:=EnsureRange(ID2,1,ListObjects2.Count)-1;
 RemakeQADTable(nil); //Rebuild objects
 Changes.QAD:=true;
@@ -7545,7 +7542,7 @@ begin
 if SKYQty<=1 then exit;
 for i:=SKYIndex to SKYQty-1 do SKY[i]:=SKY[i+1];
 CompileLoaded('Sky',SKYIndex-1,SKYQty-SKYIndex);
-//todo: ListSKY.DeleteSelected;
+ListSKY.Items.Delete(ListSKY.ItemIndex);
 dec(SKYQty);
 SKYIndex:=EnsureRange(SKYIndex,1,SKYQty);
 ListSKY.ItemIndex:=SKYIndex-1;

@@ -1,14 +1,9 @@
 unit Unit_Options;
-
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
+{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 
 interface
 uses
-  Windows, Messages, SysUtils, Classes, Controls, Forms,
-  Dialogs, Spin, unit1, CheckLst, Math, KromUtils,
-  StdCtrls, FileCtrl, ExtCtrls, Defaults;
+  SysUtils, Classes, Controls, Forms, Dialogs, Spin, unit1, KromUtils, StdCtrls, ExtCtrls;
 
 type
   TFormOptions = class(TForm)
@@ -49,27 +44,28 @@ implementation
 
 procedure TFormOptions.FormShow(Sender: TObject);
 begin
+  WorkFolder.Text := fOptions.WorkDir;
+
   FPSLimit.Value  := 1000 div fOptions.FPSLag;
   ViewDist.Value  := round(fOptions.ViewDistance/10);
   SplineDet.Value := fOptions.SplineDetail;
 
   case fOptions.TopDownRenderH of
-    1024: CB_ResH.ItemIndex:=0;
-    2048: CB_ResH.ItemIndex:=1;
-    4096: CB_ResH.ItemIndex:=2;
-    8192: CB_ResH.ItemIndex:=3;
-    else  CB_ResH.ItemIndex:=1;
+    1024: CB_ResH.ItemIndex := 0;
+    2048: CB_ResH.ItemIndex := 1;
+    4096: CB_ResH.ItemIndex := 2;
+    8192: CB_ResH.ItemIndex := 3;
+    else  CB_ResH.ItemIndex := 1;
   end;
   case fOptions.TopDownRenderV of
-    1024: CB_ResV.ItemIndex:=0;
-    2048: CB_ResV.ItemIndex:=1;
-    4096: CB_ResV.ItemIndex:=2;
-    8192: CB_ResV.ItemIndex:=3;
-    else  CB_ResV.ItemIndex:=1;
+    1024: CB_ResV.ItemIndex := 0;
+    2048: CB_ResV.ItemIndex := 1;
+    4096: CB_ResV.ItemIndex := 2;
+    8192: CB_ResV.ItemIndex := 3;
+    else  CB_ResV.ItemIndex := 1;
   end;
 
-  WorkFolder.Text := fOptions.WorkDir;
-  if Form1.RG2.ItemIndex <> -1 then
+  if Form1.RG2.ItemIndex <> -1 then //
     ActiveScenery   := Form1.RG2.Items[Form1.RG2.ItemIndex];
 end;
 
@@ -127,12 +123,11 @@ end;
 
 
 procedure TFormOptions.Button1Click(Sender: TObject);
-var fpath:string;
+var aPath:string;
 begin
-  fpath:=WorkFolder.Text;
-  SelectDirectory('Folder','',fpath);
-  if fpath[length(fpath)]<>'\' then fpath:=fpath+'\';
-  WorkFolder.Text:=fpath;
+  aPath := WorkFolder.Text;
+  if not SelectDirectory('Folder', '', aPath) then exit; //Do no changes if user clicked Cancel
+  WorkFolder.Text := IncludeTrailingPathDelimiter(aPath);
 end;
 
 

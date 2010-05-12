@@ -1,11 +1,11 @@
 unit SK_Options;
-{$mode objfpc}{$H+}
+{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 
 interface
-
 uses
   Windows, Classes, Forms, SysUtils, INIFiles, Defaults, Dialogs, KromUtils;
 
+{STKit2 global options}
 type
   TSKOptions = class
   private
