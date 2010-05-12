@@ -20,6 +20,9 @@ uses
   Grids, ColorPicker, ImgList, OpenAL, WR_AboutBox, SK_Options;
 
 type
+
+  { TForm1 }
+
   TForm1 = class(TForm)
     OpenDialog: TOpenDialog;
     Panel1: TPanel;
@@ -641,7 +644,8 @@ type
     Label166: TLabel;
     Panel11: TPanel;
     Show2ndFrame: TMenuItem;
-    function ReadSettingsFromFile(path:string):boolean;
+    procedure CBReduceDisplayChange(Sender: TObject);
+    procedure CBTraceChange(Sender: TObject);
 //    procedure RenderInit();
     procedure RenderResize(Sender: TObject);
     procedure RenderResize2(Sender: TObject);
@@ -912,10 +916,6 @@ var
   h_RC: HGLRC;
   h_DC2: HDC;
   h_RC2: HGLRC;
-  ViewDistance:integer=6500;
-  SNI_LOD:integer=16;           //How many interpolated points are between Nodes (SNI, Streets, etc..)
-  TDRResH:integer=2048;          //Top-down render resolution
-  TDRResV:integer=2048;          //Top-down render resolution
   OldTickCount,FrameCount,OldFrameTimes,FrameTime:cardinal;
   OldTime:integer;//time from last call
   PlayTrack:boolean=false;
@@ -1002,7 +1002,6 @@ var
   SaveButton:boolean=true;
 
   ActivePage:ActivePageTypes;
-  RenderMode:RenderModeTypes;
 
   IDXQty:integer;
   v:array of array[1..3]of integer;
@@ -1428,6 +1427,9 @@ begin
 ElapsedTime(@OldTime);
 
   fOptions := TSKOptions.Create;
+  CBTrace.Checked := fOptions.TraceSurface;
+  CBReduceDisplay.Checked := fOptions.ReduceDisplay;
+
   MemoLWO.Lines.Add('ExeDir: '+fOptions.ExeDir);
   MemoLWO.Lines.Add('WorkDir: '+fOptions.WorkDir);
 
@@ -1489,62 +1491,19 @@ begin
   FindClose(SearchRec);
 
   for i:=0 to RG2.Items.Count-1 do
-    if UpperCase(RG2.Items[i])=UpperCase(fOptions.ActiveScenery) then RG2.ItemIndex:=i;
+    if UpperCase(RG2.Items[i]) = UpperCase(fOptions.ActiveScenery) then RG2.ItemIndex := i;
 
 end;
 
 
-function TForm1.ReadSettingsFromFile(path:string):boolean;
-var i:integer; st:string; SearchRec:TSearchRec;
+procedure TForm1.CBReduceDisplayChange(Sender: TObject);
 begin
-{Result:=false;
-if not fileexists(path) then exit;
-assignfile(ft,path); reset(ft);
-MemoLWO.Lines.Add('Reading Options.ini ...');
+  fOptions.ReduceDisplay := CBReduceDisplay.Checked;
+end;
 
-repeat
-readln(ft,st);
-
-if (length(st)<2)or(st[1]+st[2]='//') then
-repeat readln(ft,st);
-until((eof(ft))or((st<>'')and(st[1]+st[2]<>'//')));
-
-  if st='WR2Folder' then begin
-  readln(ft,st);
-  WorkDir:=st;
-  RG2.Clear;
-      if DirectoryExists(WorkDir+'Scenarios\') then begin
-      ChDir(WorkDir+'Scenarios\');
-      FindFirst('*', faDirectory, SearchRec);
-          repeat
-          if (SearchRec.Attr and faDirectory=faDirectory)
-          and(SearchRec.Name<>'.')and(SearchRec.Name<>'..')
-          and(directoryexists(WorkDir+'Scenarios\'+SearchRec.Name)) then
-          RG2.Items.Add(SearchRec.Name);
-          until (FindNext(SearchRec)<>0);
-      Result:=true;
-      FindClose(SearchRec);
-      end;
-  end;
-
-  if st='ActiveScenery' then begin
-  readln(ft,st);
-  for i:=0 to RG2.Items.Count-1 do
-  if RG2.Items[i]=st then RG2.ItemIndex:=i;
-  end;
-
-  if st='FrameLimit' then begin readln(ft,st); FPSLag:=1000 div strtoint(st); end;
-  if st='ViewDistance' then begin readln(ft,st); ViewDistance:=strtoint(st); end;
-  if st='SplineDetail' then begin readln(ft,st); SNI_LOD:=EnsureRange(strtoint(st),6,24); end;
-  if st='TopDownRenderH' then begin readln(ft,st); TDRResH:=strtoint(st); end;
-  if st='TopDownRenderV' then begin readln(ft,st); TDRResV:=strtoint(st); end;
-  if st='RenderMode' then begin readln(ft,st); CBRenderMode.ItemIndex:=strtoint(st); end;
-  if st='ReduceDisplay' then begin readln(ft,st); CBReduceDisplay.Checked:=st='TRUE'; end;
-  if st='TraceSurface' then begin readln(ft,st); CBTrace.Checked:=st='TRUE'; end;
-
-until(eof(ft));
-closefile(ft);
-if RG2.ItemIndex<>-1 then SceneryReload(nil);}
+procedure TForm1.CBTraceChange(Sender: TObject);
+begin
+  fOptions.TraceSurface := CBTrace.Checked;
 end;
 
 procedure TForm1.RenderResize(Sender: TObject);
@@ -1768,7 +1727,7 @@ vx.Value:=vx.Value+(-(ObjectX-X)*ObjectMoveScale*cos(xRot/180*pi)
                     +(ObjectY-Y)*ObjectMoveScale*sin(xRot/180*pi))/power(zoom,3)/4;
 vz.Value:=vz.Value+( (ObjectX-X)*ObjectMoveScale*sin(xRot/180*pi)
                     +(ObjectY-Y)*ObjectMoveScale*cos(xRot/180*pi))/power(zoom,3)/4*sign(yRot-180);
-if (CBTrace.Checked)and(not ScnRefresh)and(Qty.Polys>0) then begin
+if (fOptions.TraceSurface)and(not ScnRefresh)and(Qty.Polys>0) then begin
   //if sign(yRot-180)>0 then ss:='Top' else ss:='Bottom';
   ss:='Near';
   TraceHeight(vx.Value,vy.Value,vz.Value,ss,@ty,@tmp);
@@ -1939,7 +1898,7 @@ if not CBSelectionBuffer.Checked then begin
 
   glDisable(GL_DEPTH_TEST);
   if (Sender<>MakeSMP)and(Sender<>ScreenRender)   then
-  if (ActivePage=apSky)or(RenderMode>=rmFull)     then RenderSky(SKYIndex);
+  if (ActivePage=apSky)or(fOptions.RenderMode>=rmFull)     then RenderSky(SKYIndex);
   if (Sender<>MakeSMP)and(Sender<>ScreenRender)   then RenderBounds();
 
   gldisable(gl_Lighting);
@@ -1951,15 +1910,15 @@ if not CBSelectionBuffer.Checked then begin
   if ActivePage=apTracksMT                        then RenderMakeTrack(1,ListMakeTrack.ItemIndex+1);
   if ActivePage=apStreets                         then RenderStreets(1,STRPointID.Value,STRSplineID1.Value);
   if ActivePage=apAnimated                        then RenderAnimated(1,'Paths',ListSNIObjects.ItemIndex+1,ListSNINodes.ItemIndex+1)
-  else if (RenderMode>=rmFull)                    then RenderAnimated(1,'Objects',0,0);
+  else if (fOptions.RenderMode>=rmFull)                    then RenderAnimated(1,'Objects',0,0);
   if ActivePage=apTriggers                        then RenderTriggers(1,ListTrig.ItemIndex+1);
 
   //Render scenery in shaders
-  if(RenderMode<>rmSchem)and(RenderMode<>rmOpenGL)then RenderShaders(
+  if(fOptions.RenderMode<>rmSchem)and(fOptions.RenderMode<>rmOpenGL)then RenderShaders(
                                                        'Normal',
                                                        ListTextures.ItemIndex*byte(CBShowTexInMat.Checked),
-                                                       CBReduceDisplay.Checked,
-                                                       (Sender<>ScreenRender)and((RenderMode=rmPrev)or(ActivePage=apSky)),
+                                                       fOptions.ReduceDisplay,
+                                                       (Sender<>ScreenRender)and((fOptions.RenderMode=rmPrev)or(ActivePage=apSky)),
                                                        CBCheckers.Checked,
                                                        CBShowTexGrass.Checked);
 
@@ -1967,19 +1926,19 @@ if not CBSelectionBuffer.Checked then begin
   glenable(gl_Lighting);
   Dif[0]:=Sky[SKYIndex].AmbCol.R/255; Dif[1]:=Sky[SKYIndex].AmbCol.G/255; Dif[2]:=Sky[SKYIndex].AmbCol.B/255;
   glLightfv(GL_LIGHT0, GL_AMBIENT, @Dif);
-  if RenderMode=rmOpenGL                          then RenderOpenGL(CBCheckers.Checked);
-  if (ActivePage=apObjects)or(RenderMode>=rmFull) then RenderObjects(1,ListObjects.ItemIndex+1,ListObjects2.ItemIndex+1);
-  //   (RenderMode>=rmFull)  then RenderObjectsShaders(1,ListObjects.ItemIndex+1,ListObjects2.ItemIndex+1);
-  if (ActivePage=apTOB)or(RenderMode>=rmFull)     then RenderTOB_Objects(TrackID,ListTOB2.ItemIndex+1,1);
+  if fOptions.RenderMode=rmOpenGL                          then RenderOpenGL(CBCheckers.Checked);
+  if (ActivePage=apObjects)or(fOptions.RenderMode>=rmFull) then RenderObjects(1,ListObjects.ItemIndex+1,ListObjects2.ItemIndex+1);
+  //   (fOptions.RenderMode>=rmFull)  then RenderObjectsShaders(1,ListObjects.ItemIndex+1,ListObjects2.ItemIndex+1);
+  if (ActivePage=apTOB)or(fOptions.RenderMode>=rmFull)     then RenderTOB_Objects(TrackID,ListTOB2.ItemIndex+1,1);
   gldisable(gl_Lighting);
 
-  if (ActivePage=apGrass)or(RenderMode>=rmFull)   then RenderGrass(RG_GrassLOD.ItemIndex+1,RG_GrassMode.ItemIndex+1);
+  if (ActivePage=apGrass)or(fOptions.RenderMode>=rmFull)   then RenderGrass(RG_GrassLOD.ItemIndex+1,RG_GrassMode.ItemIndex+1);
 
   if CBWire.Checked                               then RenderWire();
 
   gldisable(GL_DEPTH_TEST);
 
-  if RenderMode>=rmFull                           then RenderLights(1,'OnlyFlares',ListLights.ItemIndex+1);
+  if fOptions.RenderMode>=rmFull                           then RenderLights(1,'OnlyFlares',ListLights.ItemIndex+1);
 
   if(CBShowTrack.Checked)or(ActivePage=apTracksWP)or(ActivePage=apTracksAR)or
     (ActivePage=apAddonInfo) then if TrackID<>0  then RenderTracks(TrackID,ListTurns.ItemIndex+1,1,TRKQty[TrackID].Nodes)
@@ -1994,7 +1953,7 @@ if not CBSelectionBuffer.Checked then begin
   if ActivePage=apSounds          then RenderSounds(0.2,ListSounds.ItemIndex);
   if ActivePage=apStructure       then RenderGrid(StructMode.ItemIndex);
   if ActivePage=apSky             then RenderSunVector();
-  if CBTrace.Checked              then RenderTarget();
+  if fOptions.TraceSurface        then RenderTarget();
   if (Sender=CBShowCar)
   or(CBShowCar.Checked)           then RenderCar();
 
@@ -2032,10 +1991,10 @@ MPos.Z:=V.z;
   if ActivePage=apObjects               then RenderObjects(0,ListObjects.ItemIndex+1,ListObjects2.ItemIndex+1);
   if(ActivePage=apTracksWP)and(TrackWP>0) then RenderTracksWP(0,TrackWP,ListWPNodes.ItemIndex+1);
   if ActivePage=apTOB                   then RenderTOB_Objects(TrackID,0,0);
-  if ActivePage=apMaterials             then RenderShaders('Materials',0,CBReduceDisplay.Checked,false,true,false);
+  if ActivePage=apMaterials             then RenderShaders('Materials',0,fOptions.ReduceDisplay,false,true,false);
   if CBSelectionBuffer.Checked          then swapBuffers(h_DC);              //show result on screen (optional)
 
-if RenderMode=rmSchem then exit; //do not upload data in this mode, removes loading lag
+if fOptions.RenderMode=rmSchem then exit; //do not upload data in this mode, removes loading lag
 
 //compile map pieces upon rendering new frames, makes it feel faster
 //than waiting few seconds to load all at once instead
@@ -2043,11 +2002,11 @@ if RenderMode=rmSchem then exit; //do not upload data in this mode, removes load
 if Sender=Panel1 then Num:=5 else Num:=10;
 
 if list_id<Qty.BlocksTotal        then CompileLoaded('Scenery',list_id,Num);
-if RenderMode=rmBlend             then exit; //do not upload data in this mode, removes loading lag
+if fOptions.RenderMode=rmBlend             then exit; //do not upload data in this mode, removes loading lag
 if list_ogl<Qty.Materials         then CompileLoaded('OpenGLScenery',list_ogl,Num);
 if list_tx<Qty.TexturesFiles      then CompileLoaded('Textures',list_tx,Num div 2);
 if list_obj<Qty.ObjectFiles       then CompileLoaded('Objects',list_obj,Num div 4);
-if(RenderMode>=rmFull)
+if(fOptions.RenderMode>=rmFull)
 or(ActivePage=apSky)or(list_sky=0)then
                if list_sky<SKYQty then CompileLoaded('Sky',list_sky,1);
 
@@ -3727,8 +3686,8 @@ if Sender=MakeSMP then begin
 end;
 
 if Sender=ScreenRender then begin
-  SizeH:=TDRResH;
-  SizeV:=TDRResV;
+  SizeH := fOptions.TopDownRenderV;
+  SizeV := fOptions.TopDownRenderV;
 end;
 
 glGenTextures(1, @img);
@@ -4121,7 +4080,7 @@ case MouseAction of
         end;
 end;
 
-if CBTrace.Checked then if (not ScnRefresh)and(Qty.Polys>0) then
+if fOptions.TraceSurface then if (not ScnRefresh)and(Qty.Polys>0) then
 TraceHeight(xPos,yPos,zPos,'Near',@yPos,@TracePt);
 
 if yRot<0 then yRot:=yRot+360;
@@ -4486,7 +4445,7 @@ var ID:integer;
 begin
 SoundsRefresh:=true;
 ID:=ListSounds.ItemIndex;
-CBTrace.Checked:=(ID=0);
+fOptions.TraceSurface:=(ID=0);
 if ID<>0 then begin
 EditSoundName.Text:=Sound[ID].Name;
 SoundPosX.Value:=Sound[ID].X;
@@ -5826,53 +5785,18 @@ MemoLog.Lines.Add('Click here to remove this frame');
 Changes.VTX:=true;
 end;
 
+
 procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  CanClose:=false;
+  CanClose := false;
   fOptions.Save;
-{
-if not DirectoryExists(ExeDir+'STKit2 Data') then begin
-  MyMessageBox(Form1.Handle,'STKit2 Data\Options.ini can''t be located. Make sure you have unpacked STKit2 from archive fully.','Error',MB_OK or MB_ICONEXCLAMATION);
-end else begin
-  assignfile(ft,ExeDir+'STKit2 Data\Options.ini'); rewrite(ft);
-  //Memo1.Lines.Add('Writing Options.ini ...');
-  writeln(ft,'WR2Folder');
-  writeln(ft,WorkDir);
-  writeln(ft);
-  writeln(ft,'ActiveScenery');
-  writeln(ft,RG2.Items[RG2.ItemIndex]);
-  writeln(ft);
-  writeln(ft,'RenderMode');
-  writeln(ft,CBRenderMode.ItemIndex);
-  writeln(ft);
-  writeln(ft,'FrameLimit');
-  writeln(ft,inttostr(1000 div FPSLag));
-  writeln(ft);
-  writeln(ft,'ViewDistance');
-  writeln(ft,inttostr(ViewDistance));
-  writeln(ft);
-  writeln(ft,'SplineDetail');
-  writeln(ft,inttostr(SNI_LOD));
-  writeln(ft);
-  writeln(ft,'TopDownRenderH');
-  writeln(ft,inttostr(TDRResH));
-  writeln(ft);
-  writeln(ft,'TopDownRenderV');
-  writeln(ft,inttostr(TDRResV));
-  writeln(ft);
-  writeln(ft,'ReduceDisplay');
-  writeln(ft,CBReduceDisplay.Checked);
-  writeln(ft);
-  writeln(ft,'TraceSurface');
-  writeln(ft,CBTrace.Checked);
-  writeln(ft);
-  closefile(ft);
+  CanClose := true;
+
+  //Do not exit if user chose "Cancel"
+  if not fileexists(fOptions.ExeDir+'unlimiter.'+inttostr(846)) then
+    CanClose := MyMessageBox(Form1.Handle,'Any unsaved changes will be lost!'+eol+'Exit?','Warning',MB_OKCANCEL or MB_ICONEXCLAMATION)=IDOK;
 end;
-               }
-CanClose:=true;
-if not fileexists(fOptions.ExeDir+'unlimiter.'+inttostr(846)) then
-if MyMessageBox(Form1.Handle,'Any unsaved changes will be lost','Warning',MB_OKCANCEL or MB_ICONEXCLAMATION)=IDCANCEL then CanClose:=false;
-end;
+
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
@@ -6806,8 +6730,8 @@ inc(SNIObj[i].firstNode);
 for k:=SNIObj[ID].NumNodes downto ID2 do
 SNINode[SNIObj[ID].firstNode+k+1]:=SNINode[SNIObj[ID].firstNode+k];
 
-k:=round((ID2-1.5)*SNI_LOD);
-if k<=0 then k:=round((SNIObj[ID].NumNodes-1.5)*SNI_LOD); //-1.5 since SubNode data not updated till now
+k:=round((ID2-1.5)*fOptions.SplineDetail);
+if k<=0 then k:=round((SNIObj[ID].NumNodes-1.5)*fOptions.SplineDetail); //-1.5 since SubNode data not updated till now
 
 SNINode[SNIObj[ID].firstNode+ID2].X:=SNISubNode[ID,k].X;
 SNINode[SNIObj[ID].firstNode+ID2].Y:=SNISubNode[ID,k].Y;
@@ -6826,16 +6750,16 @@ procedure TForm1.MakeSMPClick(Sender: TObject);
 var ReduceDisplay:boolean; x,y:single;
 begin
 //Remember how it was
-ReduceDisplay:=CBReduceDisplay.Checked;
+ReduceDisplay:=fOptions.ReduceDisplay;
 x:=xRot; y:=yRot;
 
-CBReduceDisplay.Checked:=false;
+fOptions.ReduceDisplay := false;
 MemoLog.Show; MemoLog.Clear;
 PrepareSMP(nil); //sets viewport
 ButtonPrintScreenClick(MakeSMP); //renders and writes to SMPData
 
 //Restore viewport parameters
-CBReduceDisplay.Checked:=ReduceDisplay;
+fOptions.ReduceDisplay := ReduceDisplay;
 xRot:=x; yRot:=y;
 SMPPreviewRedraw(nil);
 MemoLog.Lines.Add('Done');
@@ -7144,7 +7068,7 @@ end;
 procedure TForm1.PlayTrackControlMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
 PlayTrack:=true;
-//CBTrace.Checked:=false;
+//fOptions.TraceSurface:=false;
 PlayTrackPrevX:=X;
 end;
 
@@ -7166,28 +7090,34 @@ end;
 
 procedure TForm1.CBRenderModeClick(Sender: TObject);
 begin
-if UseShaders=false then //Disable unsupported modes for OpenGL-only GPUs
-if CBRenderMode.ItemIndex>=3 then CBRenderMode.ItemIndex:=3 else
-if CBRenderMode.ItemIndex>=0 then CBRenderMode.ItemIndex:=0;
-case CBRenderMode.ItemIndex of
-0:RenderMode:=rmSchem;
-1:RenderMode:=rmBlend;
-2:RenderMode:=rmFlat;
-3:RenderMode:=rmOpenGL;
-4:RenderMode:=rmShader;
-5:RenderMode:=rmFull;
-6:RenderMode:=rmPrev;
-end;
-if RenderMode=rmPrev then begin
-PageControl1.Hide;
-F_Top.Hide; F_Bottom.Hide; F_Left.Hide; F_Right.Hide;
-Panel1.Left:=2; Panel1.Width:=Form1.ClientWidth-2-2; //952-2-2
-end else begin
-PageControl1.Show;
-F_Top.Show; F_Bottom.Show; F_Left.Show; F_Right.Show;
-Panel1.Left:=300; Panel1.Width:=Form1.ClientWidth-300-2; //952-300-2
-end;
-RenderResize(nil);
+  if not UseShaders then //Disable unsupported modes for OpenGL-only GPUs
+    if CBRenderMode.ItemIndex>=3 then
+      CBRenderMode.ItemIndex := 3
+    else
+    if CBRenderMode.ItemIndex>=0 then
+      CBRenderMode.ItemIndex := 0;
+
+  case CBRenderMode.ItemIndex of
+    0: fOptions.RenderMode := rmSchem;
+    1: fOptions.RenderMode := rmBlend;
+    2: fOptions.RenderMode := rmFlat;
+    3: fOptions.RenderMode := rmOpenGL;
+    4: fOptions.RenderMode := rmShader;
+    5: fOptions.RenderMode := rmFull;
+    6: fOptions.RenderMode := rmPrev;
+  end;
+
+  if fOptions.RenderMode=rmPrev then begin
+    PageControl1.Hide;
+    F_Top.Hide; F_Bottom.Hide; F_Left.Hide; F_Right.Hide;
+    Panel1.Left:=2; Panel1.Width:=Form1.ClientWidth-2-2; //952-2-2
+  end else begin
+    PageControl1.Show;
+    F_Top.Show; F_Bottom.Show; F_Left.Show; F_Right.Show;
+    Panel1.Left:=300; Panel1.Width:=Form1.ClientWidth-300-2; //952-300-2
+  end;
+
+  RenderResize(nil);
 end;
 
 procedure TForm1.CB2DClick(Sender: TObject); begin
@@ -8266,7 +8196,7 @@ begin
 
   for kk:=1 to MakeTrack[TrackID].NodeQty do
   with MakeTrack[TrackID] do begin
-    setlength(Node[kk].Sub,SNI_LOD+1);
+    setlength(Node[kk].Sub,fOptions.SplineDetail+1);
 
     n0:=kk-1; n1:=kk; n2:=kk+1; //n0-prev, n1-this, n2-next
     if n0=0 then n0:=1;//NodeQty;
@@ -8301,8 +8231,8 @@ begin
     //Treat the track as Looped, this grants smooth transition between last/first Nodes
     //if it's not Looped it doesn't matter whats inbetween last/first anyway 
 
-    for h:=1 to SNI_LOD do begin
-      t:=(h-1)/SNI_LOD; //0..0.9
+    for h:=1 to fOptions.SplineDetail do begin
+      t:=(h-1)/fOptions.SplineDetail; //0..0.9
       x0:=Node[n1].X; x1:=x0+TangA[n1].X;  //this
       x3:=Node[n2].X; x2:=x3-TangB[n2].X;  //next
       cx:=3*(x1-x0); bx:=3*(x2-x1)-cx; ax:=x3-x0-cx-bx;
@@ -8335,7 +8265,7 @@ if TRK_Loop.Checked then
 else
   NodeCount:=MakeTrack[TrackID].NodeQty-1;
 
-TRKQty[TrackID].Nodes:=NodeCount*SNI_LOD;
+TRKQty[TrackID].Nodes:=NodeCount*fOptions.SplineDetail;
 TRKQty[TrackID].LoopFlag:=byte(TRK_Loop.Checked);
 //switching to WR2 format right away
 TRKQty[TrackID].WR2Flag1:=1;
@@ -8352,7 +8282,7 @@ TRK[TrackID].Route[1].Delta2:=0;
 
 ci:=0;
 for ii:=1 to NodeCount do
-for kk:=1 to SNI_LOD do begin
+for kk:=1 to fOptions.SplineDetail do begin
   inc(ci);
   TRK[TrackID].Route[ci].X:=MakeTrack[TrackID].Node[ii].Sub[kk].X;
   TRK[TrackID].Route[ci].Y:=MakeTrack[TrackID].Node[ii].Sub[kk].Y;
@@ -8366,7 +8296,7 @@ for kk:=1 to SNI_LOD do begin
   end;
   len:=mix(MakeTrack[TrackID].Node[ii].RoadWidth,
            MakeTrack[TrackID].Node[ii mod MakeTrack[TrackID].NodeQty +1].RoadWidth,
-           1-(kk-1)/SNI_LOD)/2;
+           1-(kk-1)/fOptions.SplineDetail)/2;
   TRK[TrackID].Route[ci].Margin1:=EnsureRange(-round(len*10),-32768,32767);
   TRK[TrackID].Route[ci].Margin2:=EnsureRange( round(len*10),-32768,32767);
 

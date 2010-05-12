@@ -41,7 +41,7 @@ CarZ:=(Route[p0].Z+Route[p0].Ideal*Route[p0].Matrix[7])*(1-dt)+
       (Route[p1].Z+Route[p1].Ideal*Route[p1].Matrix[7])*dt;
 
 //Choose wherever car should follow Track or terrain
-if Form1.CBTrace.Checked then
+if fOptions.TraceSurface then
 TraceHeight(CarX,CarY,CarZ,'Near',@CarY,@TracePt);
 
 xPos:=CarX;
@@ -248,8 +248,10 @@ Z^:=SNISubNode[SNINumber,K].Z*(1-Fract)+SNISubNode[SNINumber,K+1].Z*Fract;
 end;
 
 procedure GetPositionFromSNISpeed(SNINumber:integer; X,Y,Z,H,P,B:psingle);
-var n1,n2:integer; SpeedMS,Delta,tx,tz:single; SubN,sn0,sn1,sn2:integer;
+var n1,n2:integer; SpeedMS,Delta,tx,tz:single; SubN,sn0,sn1,sn2:integer; SNI_LOD:integer;
 begin
+
+  SNI_LOD := fOptions.SplineDetail;
 
   SNILoc[SNINumber]:=frac(SNILoc[SNINumber]/SNILen[SNINumber])*SNILen[SNINumber];
 
@@ -294,7 +296,11 @@ var ii,kk,h,n0,n1,n2,n,ci:integer; t:single;
     ax,bx,cx,x0,x1,x2,x3:single;
     ay,by,cy,y0,y1,y2,y3:single;
     az,bz,cz,z0,z1,z2,z3:single;
+    SNI_LOD:integer;
 begin
+
+  SNI_LOD := fOptions.SplineDetail;
+
   for ii:=1 to SNIHead.Obj do begin
 
   setlength(TangA,SNIObj[ii].NumNodes+1);
