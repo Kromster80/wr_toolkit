@@ -1,10 +1,7 @@
 unit Defaults;
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
+{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 
 interface
-
 uses
   {$IFDEF VER140} OpenGL, {$ENDIF}
   {$IFDEF FPC} GL, {$ENDIF}
@@ -21,6 +18,12 @@ const
   VersionInfo       = 'Scenery ToolKit 2.3.4           (28 Apr 2009)';
   FPS_INTERVAL      = 1000;    //Calculate FPS every ---- ms
   STKit2_Data_Path  = 'STKit2 Data';
+
+  MaxObjInst        = 10000;               //Limit on object instances in theory is 65k
+  MaxSNI            = 300;                 //256 in fact I reserve 44 for Spawn routes
+  MaxSNINodes       = MaxSNI*5+100;        //number of SNI nodes
+  MaxGrounds        = 12;                  //Limit is 12, tested by Curry
+
 
 
 type TEditingFormat = (ef_WR2, ef_N, ef_CT, ef_BW);

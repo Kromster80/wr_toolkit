@@ -81,7 +81,7 @@ begin
 ID:=Form1.ListTrig.ItemIndex+1;
 if ID<1 then exit;
 TriggersRefresh:=true;
-//todo: Form1.ListTrig.Items.DeleteSelected;
+Form1.ListTrig.Items.Delete(Form1.ListTrig.ItemIndex);
 dec(TRLQty);
 for i:=ID to TRLQty do TRL[i]:=TRL[i+1];
 TriggersRefresh:=false;
