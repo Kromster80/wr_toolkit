@@ -32,10 +32,6 @@ type
     procedure FormShow(Sender: TObject);
     procedure CancelButtonClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
-  private
-    { Private declarations }
-  public
-    { Public declarations }
   end;
 
 var
@@ -54,17 +50,17 @@ implementation
 procedure TFormOptions.FormShow(Sender: TObject);
 begin
   FPSLimit.Value  := 1000 div fOptions.FPSLag;
-  ViewDist.Value  := round(ViewDistance/10);
-  SplineDet.Value := SNI_LOD;
+  ViewDist.Value  := round(fOptions.ViewDistance/10);
+  SplineDet.Value := fOptions.SplineDetail;
 
-  case TDRResH of
+  case fOptions.TopDownRenderH of
     1024: CB_ResH.ItemIndex:=0;
     2048: CB_ResH.ItemIndex:=1;
     4096: CB_ResH.ItemIndex:=2;
     8192: CB_ResH.ItemIndex:=3;
     else  CB_ResH.ItemIndex:=1;
   end;
-  case TDRResV of
+  case fOptions.TopDownRenderV of
     1024: CB_ResV.ItemIndex:=0;
     2048: CB_ResV.ItemIndex:=1;
     4096: CB_ResV.ItemIndex:=2;
@@ -82,23 +78,25 @@ procedure TFormOptions.ApplyClick(Sender: TObject);
 var i:integer; SearchRec:TSearchRec;
 begin
 fOptions.WorkDir:=WorkFolder.Text;
-if FPSLimit.Value=100 then fOptions.FPSLag:=1 //unlimited
-else fOptions.FPSLag:=round(1000 / FPSLimit.Value);
-ViewDistance:=ViewDist.Value*10;
-SNI_LOD:=SplineDet.Value;
+if FPSLimit.Value=100 then
+  fOptions.FPSLag:=1 //unlimited
+else
+  fOptions.FPSLag:=round(1000 / FPSLimit.Value);
+fOptions.ViewDistance := ViewDist.Value*10;
+fOptions.SplineDetail := SplineDet.Value;
 case CB_ResH.ItemIndex of
-0: TDRResH:=1024;
-1: TDRResH:=2048;
-2: TDRResH:=4096;
-3: TDRResH:=8192;
-else TDRResH:=1024;
+  0:   fOptions.TopDownRenderH := 1024;
+  1:   fOptions.TopDownRenderH := 2048;
+  2:   fOptions.TopDownRenderH := 4096;
+  3:   fOptions.TopDownRenderH := 8192;
+  else fOptions.TopDownRenderH := 1024;
 end;
 case CB_ResV.ItemIndex of
-0: TDRResV:=1024;
-1: TDRResV:=2048;
-2: TDRResV:=4096;
-3: TDRResV:=8192;
-else TDRResV:=1024;
+  0:   fOptions.TopDownRenderV := 1024;
+  1:   fOptions.TopDownRenderV := 2048;
+  2:   fOptions.TopDownRenderV := 4096;
+  3:   fOptions.TopDownRenderV := 8192;
+  else fOptions.TopDownRenderV := 1024;
 end;
 
 Form1.RG2.Clear;

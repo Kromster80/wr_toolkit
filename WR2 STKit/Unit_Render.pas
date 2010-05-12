@@ -88,14 +88,14 @@ RenderMat:=true;
       ii:=ChunkMode[k,i];
 
       if (CBReduceView)and
-      (GetLength(ChunkModeParent[k,i].x-x0,ChunkModeParent[k,i].z-z0) > ViewDistance/1024) then
+      (GetLength(ChunkModeParent[k,i].x-x0,ChunkModeParent[k,i].z-z0) > fOptions.ViewDistance/1024) then
       OutOfSight:=true else OutOfSight:=false;
 
       if ReloadShaderData and (not OutOfSight) then begin //SetNewMat for first chunk in list of chunks using same material
         MatMode:=Material[K].Mode AND $F0; //11110000
         ID:=MatMode shr 4 +1; //>>>>4bytes 1..16
-        if RenderMode=rmBlend then ID:=17 else
-        if RenderMode=rmFlat  then ID:=18;
+        if fOptions.RenderMode=rmBlend then ID:=17 else
+        if fOptions.RenderMode=rmFlat  then ID:=18;
         if Func='Materials'  then ID:=19;
 
         glUseProgramObjectARB(po[ID]);
@@ -124,7 +124,7 @@ RenderMat:=true;
 
         if SKYIndex=0 then glUniform3fARB(S_FogCol,0.5,0.5,0.5) else
         glUniform3fARB(S_FogCol,SKY[SKYIndex].FogCol.R/255,SKY[SKYIndex].FogCol.G/255,SKY[SKYIndex].FogCol.B/255);
-        glUniform4fARB(S_FogPos,xPos,yPos,Zpos,ViewDistance*byte(CBShowFog)); //Position and FogRange
+        glUniform4fARB(S_FogPos,xPos,yPos,Zpos,fOptions.ViewDistance*byte(CBShowFog)); //Position and FogRange
 
         //using CRC checks doesn't affect perfomance
         glUniform4fvARB(T_TA1,1,@Material[K].Matrix[1,1]); glUniform4fvARB(T_TA2,1,@Material[K].Matrix[1,2]);
@@ -220,7 +220,11 @@ var ii,kk,j,h,PA,PB,Col,ShapeID:integer; Speed,LA,LB,T,Offset:single;// A,B,C:in
     Tang:record x,y,z,n:single; end;
     ti:cardinal;
     DT:boolean;
+    SNI_LOD:integer;
 begin
+
+  SNI_LOD := fOptions.SplineDetail;
+
 //glGetBooleanv(GL_DEPTH_TEST,@DT);
 
 //Prepare Splines
@@ -506,11 +510,11 @@ for ii:=1 to SNIHead.Obj do begin
     SetPresetColorGL(ii,A);
     if SNIObj[ii].Mode<5 then begin
       glbegin(gl_line_loop);
-      for kk:=1 to SNIObj[ii].NumNodes*SNI_LOD do
+      for kk:=1 to SNIObj[ii].NumNodes*fOptions.SplineDetail do
       glvertex3fv(@SNISubNode[ii,kk]);
     end else if SNIObj[ii].Mode=5 then begin
       glbegin(gl_line_strip);
-      for kk:=1 to (SNIObj[ii].NumNodes-1)*SNI_LOD+1 do
+      for kk:=1 to (SNIObj[ii].NumNodes-1)*fOptions.SplineDetail+1 do
       glvertex3fv(@SNISubNode[ii,kk]);
     end else if (SNIObj[ii].Mode=6)and(SNISpawnW[ii].TrackID<>0) then begin
       glbegin(gl_line_strip);
@@ -794,7 +798,7 @@ glLineWidth(1);
 if Mode<>'OnlyFlares' then begin
   glbegin(gl_points);
   for ii:=1 to Qty.Lights do
-  if GetLength(Light[ii].Matrix2[13]-xPos,Light[ii].Matrix2[15]-zPos)<ViewDistance-300 then begin
+  if GetLength(Light[ii].Matrix2[13]-xPos,Light[ii].Matrix2[15]-zPos)<fOptions.ViewDistance-300 then begin
     if A<>0 then glColor4f(Light[ii].R/255,Light[ii].G/255,Light[ii].B/255,A)
     else kSetColorCode(KPoint,ii);
     glvertex3fv(@Light[ii].Matrix2[13]);
@@ -804,7 +808,7 @@ end;
 
 glBlendFunc(GL_SRC_ALPHA, GL_ONE);
   for ii:=1 to Qty.Lights do
-  if GetLength(Light[ii].Matrix2[13]-xPos,Light[ii].Matrix2[15]-zPos)<ViewDistance-300 then
+  if GetLength(Light[ii].Matrix2[13]-xPos,Light[ii].Matrix2[15]-zPos)<fOptions.ViewDistance-300 then
   if Light[ii].Mode=8 then begin
     glPushMatrix;
       glTranslatef(Light[ii].Matrix2[13],Light[ii].Matrix2[14],Light[ii].Matrix2[15]);
@@ -823,7 +827,7 @@ glBindTexture(GL_TEXTURE_2D,0);
 if Mode<>'OnlyFlares' then begin
 if A<>0 then 
 for ii:=1 to Qty.Lights do
-if GetLength(Light[ii].Matrix2[13]-xPos,Light[ii].Matrix2[15]-zPos)<ViewDistance-300 then begin
+if GetLength(Light[ii].Matrix2[13]-xPos,Light[ii].Matrix2[15]-zPos)<fOptions.ViewDistance-300 then begin
 glPushMatrix;
   glTranslatef(Light[ii].Matrix2[13],Light[ii].Matrix2[14],Light[ii].Matrix2[15]);
   glColor4f(1,1,1,A);
@@ -860,7 +864,7 @@ if A=0 then exit;
     glColor4f(1,1,1,A);
     for ii:=1 to MakeTrack[TrackID].NodeQty do
     if (ii<MakeTrack[TrackID].NodeQty)or(TRKQty[TrackID].LoopFlag=1) then
-      for kk:=1 to SNI_LOD do
+      for kk:=1 to fOptions.SplineDetail do
         glvertex3fv(@MakeTrack[TrackID].Node[ii].Sub[kk]);
   glEnd;
 
@@ -868,11 +872,11 @@ if A=0 then exit;
     glColor4f(1,0,0,A);
     for ii:=1 to MakeTrack[TrackID].NodeQty do
       if (ii<MakeTrack[TrackID].NodeQty)or(TRKQty[TrackID].LoopFlag=1) then
-      for kk:=1 to SNI_LOD do begin
-        n0:=EnsureRange(kk-1,1,SNI_LOD);
-        n2:=EnsureRange(kk+1,1,SNI_LOD);
+      for kk:=1 to fOptions.SplineDetail do begin
+        n0:=EnsureRange(kk-1,1,fOptions.SplineDetail);
+        n2:=EnsureRange(kk+1,1,fOptions.SplineDetail);
         with MakeTrack[TrackID].Node[ii] do
-        Tmp:=Perpendecular2D(Sub[n0],Sub[kk],Sub[n2],mix(RoadWidth,MakeTrack[TrackID].Node[ii mod MakeTrack[TrackID].NodeQty +1].RoadWidth,1-(kk-1)/SNI_LOD)/2);
+        Tmp:=Perpendecular2D(Sub[n0],Sub[kk],Sub[n2],mix(RoadWidth,MakeTrack[TrackID].Node[ii mod MakeTrack[TrackID].NodeQty +1].RoadWidth,1-(kk-1)/fOptions.SplineDetail)/2);
         glvertex3fv(@Tmp);
       end;
   glEnd;
@@ -880,11 +884,11 @@ if A=0 then exit;
     glColor4f(0,0,1,A);
     for ii:=1 to MakeTrack[TrackID].NodeQty do
       if (ii<MakeTrack[TrackID].NodeQty)or(TRKQty[TrackID].LoopFlag=1) then
-      for kk:=1 to SNI_LOD do begin
-        n0:=EnsureRange(kk-1,1,SNI_LOD);
-        n2:=EnsureRange(kk+1,1,SNI_LOD);
+      for kk:=1 to fOptions.SplineDetail do begin
+        n0:=EnsureRange(kk-1,1,fOptions.SplineDetail);
+        n2:=EnsureRange(kk+1,1,fOptions.SplineDetail);
         with MakeTrack[TrackID].Node[ii] do
-        Tmp:=Perpendecular2D(Sub[n0],Sub[kk],Sub[n2],-mix(RoadWidth,MakeTrack[TrackID].Node[ii mod MakeTrack[TrackID].NodeQty +1].RoadWidth,1-(kk-1)/SNI_LOD)/2);
+        Tmp:=Perpendecular2D(Sub[n0],Sub[kk],Sub[n2],-mix(RoadWidth,MakeTrack[TrackID].Node[ii mod MakeTrack[TrackID].NodeQty +1].RoadWidth,1-(kk-1)/fOptions.SplineDetail)/2);
         glvertex3fv(@Tmp);
       end;
   glEnd;
@@ -966,7 +970,7 @@ begin
 Not yet completed
 ID:=Obj[ii].ID+1;
 for ii:=1 to Qty.ObjectsTotal do if ID<=list_obj then
-if ((not Form1.CBReduceDisplay.Checked)and(RenderMode>=rmFull))or(
+if ((not fOptions.ReduceDisplay)and(RenderMode>=rmFull))or(
 GetLength(Obj[ii].PosX-xPos,Obj[ii].PosZ-zPos)<ViewDistance-500) then begin
 
   glPushMatrix;
@@ -1036,8 +1040,8 @@ end;
 
 for ii:=1 to Qty.ObjectsTotal do // if ObjProp[Obj[ii].ID+1].Pro1<>3 then
 if Obj[ii].ID+1<=list_obj then
-  if ((not Form1.CBReduceDisplay.Checked)and(RenderMode>=rmFull))or(
-  GetLength(Obj[ii].PosX-xPos,Obj[ii].PosZ-zPos)<ViewDistance-300) then begin
+  if ((not fOptions.ReduceDisplay)and(fOptions.RenderMode>=rmFull))or(
+  GetLength(Obj[ii].PosX-xPos,Obj[ii].PosZ-zPos)<fOptions.ViewDistance-300) then begin
 
   CallID:=Obj[ii].ID+1;
 
@@ -1108,7 +1112,7 @@ procedure RenderTOB_Objects(TrackID,ObjID,A:integer);
 var ii,kk:integer;
 begin
 if TrackID=0 then exit;
-if RenderMode<rmFull then begin
+if fOptions.RenderMode<rmFull then begin
   glDisable(gl_Lighting);
   if ObjID<>0 then RenderMover(TOB[TrackID,ObjID].X,TOB[TrackID,ObjID].Y,TOB[TrackID,ObjID].Z);
   glColor4f(1,1,0,1);
@@ -1183,7 +1187,7 @@ begin
 if In1=0 then exit;
 if RO[In1].Head.Qty=0 then exit;
 
-if RenderMode<rmFull then glBegin(GL_POINTS) else begin
+if fOptions.RenderMode<rmFull then glBegin(GL_POINTS) else begin
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER,0.5);
     glBlendFunc(GL_ONE, GL_ZERO);
@@ -1197,7 +1201,7 @@ end;
 
 for m:=1 to 4 do
 for kk:=1 to RO[In1].Head.sizeZ do for ii:=1 to RO[In1].Head.sizeX do
-if GetLength(((ii-RO[In1].Head.sizeX/2)*256-xPos),((kk-RO[In1].Head.sizeZ/2)*256-zPos))<ViewDistance/6 then
+if GetLength(((ii-RO[In1].Head.sizeX/2)*256-xPos),((kk-RO[In1].Head.sizeZ/2)*256-zPos))<fOptions.ViewDistance/6 then
 for h:=RO[In1].Chunks[kk,ii].First+1 to RO[In1].Chunks[kk,ii].First+RO[In1].Chunks[kk,ii].Num do
 if RO[In1].Grass[h].ID+1=m then begin
   EnsureRange(h,1,RO[In1].Head.Qty);
@@ -1208,7 +1212,7 @@ if RO[In1].Grass[h].ID+1=m then begin
   3: glColor3ub((RO[In1].Grass[h].Color and 3840)div 16+15,(RO[In1].Grass[h].Color and 240+15),(RO[In1].Grass[h].Color and 15)*16+15);
   end;
 
-      if RenderMode>=rmFull then begin
+      if fOptions.RenderMode>=rmFull then begin
       glPushMatrix;
       glTranslatef(RO[In1].Grass[h].X,RO[In1].Grass[h].Y,RO[In1].Grass[h].Z);
       glRotatef(xRot,0,1,0);
@@ -1220,7 +1224,7 @@ if RO[In1].Grass[h].ID+1=m then begin
       glVertex3f(RO[In1].Grass[h].X,RO[In1].Grass[h].Y+5,RO[In1].Grass[h].Z);
   end;
 
-if RenderMode<rmFull then glEnd;
+if fOptions.RenderMode<rmFull then glEnd;
 
 glBindTexture(GL_TEXTURE_2D,0);
 glDisable(GL_ALPHA_TEST);
@@ -1414,7 +1418,7 @@ glLineWidth(1);
 glColor4f(1,1,0,1);
 glBegin(gl_Lines);
 for i:=1 to Qty.Polys do
-  if GetLength(VTX[v[I,1]].X-xPos,VTX[v[I,1]].Z-zPos)<ViewDistance/2 then begin
+  if GetLength(VTX[v[I,1]].X-xPos,VTX[v[I,1]].Z-zPos)<fOptions.ViewDistance/2 then begin
   v1[1]:=VTX[v[I,1]].X; v1[2]:=VTX[v[I,1]].Y; v1[3]:=VTX[v[I,1]].Z;
   v2[1]:=VTX[v[I,2]].X; v2[2]:=VTX[v[I,2]].Y; v2[3]:=VTX[v[I,2]].Z;
   v3[1]:=VTX[v[I,3]].X; v3[2]:=VTX[v[I,3]].Y; v3[3]:=VTX[v[I,3]].Z;
