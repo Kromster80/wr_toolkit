@@ -993,7 +993,6 @@ var
   fo,flog:textfile;
   c:array[1..16777216] of char;
   NumRead:integer;
-  zz:string[2]=#10+#13;
   list_id,list_ogl,list_tx,list_obj,list_sky:integer;
   Scenery,SceneryPath,Version:string;
   SaveButton:boolean=true;
@@ -1126,8 +1125,6 @@ var
   SunTex:GLuint;
 //  SKY_MB,SKY_Y:integer;
   SKYIndex:byte;
-
-  ix,iy,iz,Blur,Blur2,Ideal2:array of single;
 
   TracksQty:integer;
   TRKQty:array[1..32]of record
@@ -2829,7 +2826,6 @@ procedure TForm1.CompileVTX_IDX(Sender: TObject);
 var ii,kk,m,ci,ck:integer; x,z:real;
 tmp:array of array[0..5]of integer;
 tms:array of array[1..6]of single;
-s:string;
 begin
 ////////////////////////////////////////////////////////////////////////////////
 MemoLWO.Lines.Add('Adding Quad data ...');
@@ -3583,7 +3579,7 @@ if Qty.ObjectFiles<=1 then begin {RemObject.Enabled:=false;} exit; end;
         for i:=1 to SNIHead.Obj do if SNIObj[i].objID+1=ID then inc(k);
 
         if MyMessageBox(Form1.Handle,
-        'Please confirm removing of:'+zz+' - '+inttostr(m)+' map objects (QAD),'+zz+' - '+inttostr(h)+' track objects (TOB),'+zz+' - '+inttostr(k)+' animated objcts (SNI) ?',
+        'Please confirm removing of:'+eol+' - '+inttostr(m)+' map objects (QAD),'+eol+' - '+inttostr(h)+' track objects (TOB),'+eol+' - '+inttostr(k)+' animated objcts (SNI) ?',
         'Warning ['+ObjName[ID]+']', MB_OKCANCEL or MB_ICONWARNING)=IDCANCEL then
         exit;
 
@@ -6349,26 +6345,29 @@ DoubleClick:=true;
 end;
 
 procedure TForm1.TRK_MakeIdeal(Sender: TObject);
-var h,i,k,a,b,c:integer; nx1,nx2,nz1,nz2,la,lb,L,M:single;
+var
+  h,i,k,a,b,c:integer;
+  nx1,nx2,nz1,nz2,la,lb,L,M:single;
+  ix,iy,iz,Blur,Blur2,Ideal2:array of single;
 begin
-if TrackID=0 then exit;
+  if TrackID=0 then exit;
 
-setlength(ix,TRKQty[TrackID].Nodes+1);
-setlength(iy,TRKQty[TrackID].Nodes+1);
-setlength(iz,TRKQty[TrackID].Nodes+1);
-setlength(Blur,TRKQty[TrackID].Nodes+1);
-setlength(Blur2,TRKQty[TrackID].Nodes+1);
-setlength(Ideal2,TRKQty[TrackID].Nodes+1);
+  setlength(ix,TRKQty[TrackID].Nodes+1);
+  setlength(iy,TRKQty[TrackID].Nodes+1);
+  setlength(iz,TRKQty[TrackID].Nodes+1);
+  setlength(Blur,TRKQty[TrackID].Nodes+1);
+  setlength(Blur2,TRKQty[TrackID].Nodes+1);
+  setlength(Ideal2,TRKQty[TrackID].Nodes+1);
 
-for k:=1 to TRKQty[TrackID].Nodes do begin
-TRK[TrackID].Route[k].Ideal:=0;
-Blur[k]:=0;
-Blur2[k]:=0;
-Ideal2[k]:=0;
-end;
-ElapsedTime(@OldTime);
+  for k:=1 to TRKQty[TrackID].Nodes do begin
+    TRK[TrackID].Route[k].Ideal:=0;
+    Blur[k]:=0;
+    Blur2[k]:=0;
+    Ideal2[k]:=0;
+  end;
+  ElapsedTime(@OldTime);
 
-Form1.Refresh;
+  Form1.Refresh;
 
 for i:=0 to 9 do begin
 Label78.Caption:='Progress: '+inttostr(i*10)+'%';
@@ -6457,10 +6456,12 @@ Label78.Caption:='Complete in '+ElapsedTime(@OldTime);
 Changes.TRK[TrackID]:=true;
 end;
 
+
 procedure TForm1.ColorShapeMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-DefineInputColor((Sender as TShape).Brush.Color,Sender);
+  DefineInputColor((Sender as TShape).Brush.Color,Sender);
 end;
+
 
 procedure TForm1.SKY_FogColDragDrop(Sender, Source: TObject; X,Y: Integer);
 var ID:integer;
@@ -6923,16 +6924,18 @@ begin
 CBMatFilter.Enabled:=CBShowMode.Checked;
 end;
 
+
 procedure TForm1.StreetsLengthClick(Sender: TObject);
 var i,len:integer;
 begin
-len:=0;
-for i:=1 to STRHead.NumSplines do
-len:=len+round(Str_Spline[i].Length/10);
-MyMessageBox(Form1.Handle, zz+'        '+'Total streets length is - '
-+inttostr(len div 1000)+'.'
-+inttostr(len mod 1000)+'km'+'        '+zz, 'Info', MB_OK or MB_ICONINFORMATION);
+  len:=0;
+  for i:=1 to STRHead.NumSplines do
+    inc(len,round(Str_Spline[i].Length/10));
+  MyMessageBox(Form1.Handle, eol+'        '+'Total streets length is - '
+  +inttostr(len div 1000)+'.'
+  +inttostr(len mod 1000)+'km'+'        '+eol, 'Info', MB_OK or MB_ICONINFORMATION);
 end;
+
 
 procedure TForm1.LandInstancesClick(Sender: TObject);
 var i:integer;
