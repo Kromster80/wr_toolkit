@@ -37,39 +37,41 @@ var
 
 implementation
 
+
 procedure AutoFill_SC2(Sender: TObject);
 var i:integer;
 begin
-Changes.SC2:=true;
+Changes.SC2 := true;
 
 WriteCommonDataToSC2();
 
 with AddonScenery do begin
-EngineName:=UpperCase(Scenery);
-Name:=Scenery;
-FreeRideID:=1;
-Author:='';
-Converter:='';
-Contact:='';
-Comment:='';
+  EngineName := UpperCase(Scenery);
+  Name       := Scenery;
+  FreeRideID := 1;
+  Author     := '';
+  Converter  := '';
+  Contact    := '';
+  Comment    := '';
 end;
 
 for i:=1 to EnsureRange(TracksQty,0,32) do
 with AddonScenery.Track[i] do begin
-Name:=AddonScenery.Name+' '+inttostr(i);
-Direction:=1;
-TypeID:=1;
+  Name:=AddonScenery.Name+' '+inttostr(i);
+  Direction:=1;
+  TypeID:=1;
 end;
 
 for i:=1 to EnsureRange(TracksQtyWP,0,32) do
 with AddonScenery.Track[i+TracksQty] do begin
-Name:=AddonScenery.Name+' WP'+inttostr(i);
-Direction:=1;
-TypeID:=1;
+  Name:=AddonScenery.Name+' WP'+inttostr(i);
+  Direction:=1;
+  TypeID:=1;
 end;
 
-SendDataToSC2();
+  SendDataToSC2();
 end;
+
 
 procedure EditSC2Click(Sender: TObject);
 begin
@@ -85,15 +87,17 @@ AddonScenery.Comment:=Form1.SC2_Comments.Text;
 UpdateSC2TrackList();
 end;
 
+
 procedure UpdateSC2TrackList();
 var i:integer;
 begin
-Form1.SC2_TrackList.Clear;
-for i:=1 to AddonScenery.TrackQty do
-Form1.SC2_TrackList.Items.Add(inttostr(i)+'. '+AddonScenery.Track[i].Name);
-Form1.SC2_TrackList.ItemIndex:=0;
-SC2TrackListClick(nil);
+  Form1.SC2_TrackList.Clear;
+  for i:=1 to AddonScenery.TrackQty do
+    Form1.SC2_TrackList.Items.Add(inttostr(i)+'. '+AddonScenery.Track[i].Name);
+  Form1.SC2_TrackList.ItemIndex:=0;
+  SC2TrackListClick(nil);
 end;
+
 
 procedure SC2TrackListClick(Sender: TObject);
 var ID:integer;
@@ -120,21 +124,24 @@ end;
 SC2TRefresh:=false;
 end;
 
+
 procedure EditSC2TrackClick(Sender: TObject);
 var ID:integer;
 begin
-if SC2TRefresh then exit;
-ID:=Form1.SC2_TrackList.ItemIndex+1;
-if ID=0 then exit;
-Changes.SC2:=true;
-with AddonScenery.Track[ID] do begin
-Name:=Form1.SC2T_Title.Text;
-Direction:=Form1.SC2T_Direction.ItemIndex+1;
-TypeID:=Form1.SC2T_Type.ItemIndex+1;
-Form1.SC2_TrackList.Items[ID-1]:=inttostr(ID)+'. '+Name; //renaming on-the-fly
+  if SC2TRefresh then exit;
+  ID := Form1.SC2_TrackList.ItemIndex+1;
+  if ID=0 then exit;
+  Changes.SC2 := true;
+
+  with AddonScenery.Track[ID] do begin
+    Name      := Form1.SC2T_Title.Text;
+    Direction := Form1.SC2T_Direction.ItemIndex+1;
+    TypeID    := Form1.SC2T_Type.ItemIndex+1;
+    Form1.SC2_TrackList.Items[ID-1] := inttostr(ID)+'. '+Name; //renaming on-the-fly
+  end;
+  SC2TrackListClick(nil);
 end;
-SC2TrackListClick(nil);
-end;
+
 
 function SaveSC2(InFile:string):boolean;
 var k,h:integer;
@@ -171,6 +178,7 @@ closefile(f);
 Changes.SC2:=false;
 Result:=true;
 end;
+
 
 function LoadSC2(InFile:string):boolean;
 var k,h:word;
@@ -210,25 +218,28 @@ SendDataToSC2();
 Result:=true;
 end;
 
+
 procedure SendDataToSC2();
 begin
-SC2TRefresh:=true;
-with AddonScenery do begin
-Form1.SC2_EngName.Text:=EngineName;
-Form1.SC2_Name.Text:=Name;
-Form1.SC2_BGImage.Text:='BG_'+Form1.SC2_EngName.Text+'.tga';
-Form1.SC2_ScnFlag.Text:='Flag'+Form1.SC2_EngName.Text+'.tga';
-Form1.SC2_FreeRideTrack.Value:=FreeRideID;
-Form1.SC2_ScnTracks.Value:=EnsureRange(TracksQty,0,32)+EnsureRange(TracksQtyWP,0,32);//TrackQty;
-Form1.SC2_Author.Text:=Author;
-Form1.SC2_Converter.Text:=Converter;
-Form1.SC2_Contact.Text:=Contact;
-Form1.SC2_Comments.Text:=Comment;
+  SC2TRefresh:=true;
+  with AddonScenery do begin
+    Form1.SC2_EngName.Text        := EngineName;
+    Form1.SC2_Name.Text           := Name; 
+    Form1.SC2_BGImage.Text        :='BG_'+Form1.SC2_EngName.Text+'.tga';
+    Form1.SC2_ScnFlag.Text        := 'Flag'+Form1.SC2_EngName.Text+'.tga';
+    Form1.SC2_FreeRideTrack.Value := FreeRideID;
+    Form1.SC2_ScnTracks.Value     := EnsureRange(TracksQty,0,32)+EnsureRange(TracksQtyWP,0,32);//TrackQty;
+    Form1.SC2_Author.Text         := Author;
+    Form1.SC2_Converter.Text      := Converter;
+    Form1.SC2_Contact.Text        := Contact;
+    Form1.SC2_Comments.Text       := Comment;
+  end;
+
+  SC2TRefresh := false;
+  Form1.SC2_TrackList.ItemIndex := 0;
+  UpdateSC2TrackList();
 end;
-SC2TRefresh:=false;
-Form1.SC2_TrackList.ItemIndex:=0;
-UpdateSC2TrackList();
-end;
+
 
 procedure WriteCommonDataToSC2();
 var i:integer;
