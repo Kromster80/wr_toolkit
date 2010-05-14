@@ -15,38 +15,41 @@ implementation
 
 procedure ListTrigClick_();
 var A,B,C,ID:integer;
-begin with Form1 do begin
-TriggersRefresh:=true;
-ID:=ListTrig.ItemIndex+1;
-CBTriggerType.ItemIndex:=TRL[ID].id1-1;
-TRL_X.Value:=TRL[ID].x;
-TRL_Y.Value:=TRL[ID].y;
-TRL_Z.Value:=TRL[ID].z;
-TRL_S1.Value:=TRL[ID].xSize;
-TRL_S2.Value:=TRL[ID].ySize;
-TRL_S3.Value:=TRL[ID].zSize;
-Matrix2Angles(TRL[ID].Matrix,9,@a,@b,@c);
-TRL_R1.Value:=a; TRL_R2.Value:=b; TRL_R3.Value:=c;
+begin
+  TriggersRefresh := true;
 
-if TRL[ID].id1 in [4,8] then Label17.Caption:='Value' else Label17.Caption:='Target X';
-Label17.Enabled:=TRL[ID].id1 in [4,5,8,11];
-Label16.Enabled:=TRL[ID].id1 in [5,11];
-Label15.Enabled:=TRL[ID].id1 in [5,11];
-TRL_P1.Enabled:=TRL[ID].id1 in [4,5,8,11];
-TRL_P2.Enabled:=TRL[ID].id1 in [5,11];
-TRL_P3.Enabled:=TRL[ID].id1 in [5,11];
+  with Form1 do begin
+    ID:=ListTrig.ItemIndex+1;
+    CBTriggerType.ItemIndex:=TRL[ID].id1-1;
+    TRL_X.Value:=TRL[ID].x;
+    TRL_Y.Value:=TRL[ID].y;
+    TRL_Z.Value:=TRL[ID].z;
+    TRL_S1.Value:=TRL[ID].xSize;
+    TRL_S2.Value:=TRL[ID].ySize;
+    TRL_S3.Value:=TRL[ID].zSize;
+    Matrix2Angles(TRL[ID].Matrix,9,@a,@b,@c);
+    TRL_R1.Value:=a; TRL_R2.Value:=b; TRL_R3.Value:=c;
 
-TRL_P1.Value:=TRL[ID].x2;
-TRL_P2.Value:=TRL[ID].y2;
-TRL_P3.Value:=TRL[ID].z2;
-TRL_Flags.Text:=inttostr(TRL[ID].u1[1])+' '+inttostr(TRL[ID].u1[2])+' '+inttostr(TRL[ID].u1[3])+' '+
-                inttostr(TRL[ID].u1[4])+' '+inttostr(TRL[ID].u1[5])+' '+inttostr(TRL[ID].u1[6])+'. '+
-                inttostr(TRL[ID].u2[1])+' '+inttostr(TRL[ID].u2[2])+' '+inttostr(TRL[ID].u2[3])+' ';
-xPos:=TRL[ID].x;
-yPos:=TRL[ID].y;
-zPos:=TRL[ID].z;
-TriggersRefresh:=false;
-end;
+    if TRL[ID].id1 in [4,8] then Label17.Caption:='Value' else Label17.Caption:='Target X';
+    Label17.Enabled:=TRL[ID].id1 in [4,5,8,11];
+    Label16.Enabled:=TRL[ID].id1 in [5,11];
+    Label15.Enabled:=TRL[ID].id1 in [5,11];
+    TRL_P1.Enabled:=TRL[ID].id1 in [4,5,8,11];
+    TRL_P2.Enabled:=TRL[ID].id1 in [5,11];
+    TRL_P3.Enabled:=TRL[ID].id1 in [5,11];
+
+    TRL_P1.Value:=TRL[ID].x2;
+    TRL_P2.Value:=TRL[ID].y2;
+    TRL_P3.Value:=TRL[ID].z2;
+    TRL_Flags.Text:=inttostr(TRL[ID].u1[1])+' '+inttostr(TRL[ID].u1[2])+' '+inttostr(TRL[ID].u1[3])+' '+
+                    inttostr(TRL[ID].u1[4])+' '+inttostr(TRL[ID].u1[5])+' '+inttostr(TRL[ID].u1[6])+'. '+
+                    inttostr(TRL[ID].u2[1])+' '+inttostr(TRL[ID].u2[2])+' '+inttostr(TRL[ID].u2[3])+' ';
+    xPos:=TRL[ID].x;
+    yPos:=TRL[ID].y;
+    zPos:=TRL[ID].z;
+  end;
+
+  TriggersRefresh := false;
 end;
 
 
@@ -71,6 +74,7 @@ begin //Duplicate selected item
   Form1.TRL_Z.Value := zPos;
   TriggersRefresh := false;
   ComputeTriggerClick_(nil);
+
   Changes.TRL := true;
 end;
 
@@ -89,6 +93,7 @@ begin
   TriggersRefresh := false;
   Form1.ListTrig.ItemIndex := EnsureRange(ID,1,TRLQty)-1;
   Form1.ListTrigClick(nil);
+
   Changes.TRL := true;
 end;
 
@@ -171,8 +176,9 @@ begin
       yPos:=TRL[ID].y;
       zPos:=TRL[ID].z;
     end;
-  Changes.TRL:=true;
   end; //with Form1 do begin
+
+  Changes.TRL := true;
 end;
 
 
