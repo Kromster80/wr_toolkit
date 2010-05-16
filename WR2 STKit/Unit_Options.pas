@@ -3,7 +3,7 @@ unit Unit_Options;
 
 interface
 uses
-  SysUtils, Classes, Controls, Forms, Dialogs, Spin, unit1, KromUtils, StdCtrls, ExtCtrls;
+  SysUtils, Classes, Controls, Forms, Dialogs, Spin, unit1, KromUtils, StdCtrls, ExtCtrls, FileCtrl;
 
 type
   TFormOptions = class(TForm)

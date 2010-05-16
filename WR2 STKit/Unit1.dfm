@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 120
-  Top = 82
+  Left = 388
+  Top = 90
   Width = 956
   Height = 730
   Color = clBtnFace
@@ -118,7 +118,7 @@ object Form1: TForm1
     Top = 40
     Width = 296
     Height = 623
-    ActivePage = TabSheet9
+    ActivePage = TabSheet18
     Anchors = [akLeft, akTop, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -129,7 +129,7 @@ object Form1: TForm1
     ParentFont = False
     Style = tsButtons
     TabHeight = 47
-    TabIndex = 0
+    TabIndex = 13
     TabOrder = 1
     TabStop = False
     TabWidth = 34
