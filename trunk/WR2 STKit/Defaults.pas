@@ -23,6 +23,8 @@ const
   MaxSNI            = 300;                 //256 in fact I reserve 44 for Spawn routes
   MaxSNINodes       = MaxSNI*5+100;        //number of SNI nodes
   MaxGrounds        = 12;                  //Limit is 12, tested by Curry
+  MAX_TRACKS        = 32;
+  MAX_WP_TRACKS     = 32;
 
 
 

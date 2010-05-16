@@ -19,9 +19,6 @@ uses
   Buttons, Spin, ComCtrls;
 
 type
-
-  { TForm1 }
-
   TForm1 = class(TForm)
     OpenDialog: TOpenDialog;
     Panel1: TPanel;
@@ -649,7 +646,6 @@ type
     procedure RenderResize(Sender: TObject);
     procedure RenderResize2(Sender: TObject);
     procedure RenderFrame(Sender: TObject);
-    procedure LoadLWO(Input:string);
     procedure CompileLoaded(Sender:string; ID,Num:integer);
     procedure FormCreate(Sender: TObject);
     procedure FillSceneryList();
@@ -670,9 +666,6 @@ type
     procedure ListObjectsClick(Sender: TObject);
     procedure ListObjects2Click(Sender: TObject);
     procedure BrowseLWO(Sender: TObject);
-    procedure PrepareLWOData(Sender: TObject);
-    procedure CompileQAD(Sender: TObject);
-    procedure CompileVTX_IDX(Sender: TObject);
     procedure RemObjectClick(Sender: TObject);
     procedure ButtonPrintScreenClick(Sender: TObject);
     procedure SaveSceneryClick(Sender: TObject);
@@ -752,7 +745,6 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormDestroy(Sender: TObject);
     procedure ComputeChunkMode(Sender: TObject);
-    procedure PrepareOtherData(Sender: TObject);
     procedure OpenLWO_TRKClick(Sender: TObject);
     procedure ImportMaterialsClick(Sender: TObject);
     procedure ExportMaterialsClick(Sender: TObject);
@@ -872,7 +864,6 @@ type
     procedure RebuildMTSplines();
     procedure ReverseMTSplines();
     procedure RemMTNodeClick(Sender: TObject);
-    procedure OptimizeVerticesClick(Sender: TObject);
     procedure ScaleInstancesClick(Sender: TObject);
     procedure CopyLightXYZClick(Sender: TObject);
     procedure PasteLightXYZClick(Sender: TObject);
@@ -889,6 +880,8 @@ type
     procedure ListSNINodesDblClick(Sender: TObject);
     procedure ListTrigDblClick(Sender: TObject);
     procedure Show2ndFrameClick(Sender: TObject);
+    procedure Done(Sender:Tobject);
+    procedure OptimizeVerticesClick(Sender: TObject);
 
   private     { Private declarations }
     procedure OnIdle(Sender: TObject; var Done: Boolean);
@@ -993,7 +986,7 @@ var
   c:array[1..16777216] of char;
   NumRead:integer;
   list_id,list_ogl,list_tx,list_obj,list_sky:integer;
-  Scenery,SceneryPath,Version:string;
+  Scenery,SceneryPath,SceneryVersion:string;
   SaveButton:boolean=true;
 
   ActivePage:ActivePageTypes;
@@ -1011,9 +1004,9 @@ var
 
   SNIHead:record Obj,Node,x1,x2:integer; end; //x1=0 x2=0
   SNIObj:array[1..MaxSNI]of record
-  NumNodes,objID,firstNode,Mode:word;
-  Sound:array[1..32]of char;
-  Volume,Tempo,Radius,x4:word;
+    NumNodes,objID,firstNode,Mode:word;
+    Sound:array[1..32]of char;
+    Volume,Tempo,Radius,x4:word;
   end;
   SNINode:array[1..MaxSNINodes]of record
   X,Y,Z,Speed,B:single;
@@ -1106,12 +1099,12 @@ var
 
   TRLQty:integer;
   TRL:array[1..256]of record
-  id1,id2:word;
-  X,Y,Z,xSize,ySize,zSize:single;
-  u1:array[1..6]of shortint;
-  Matrix:array[1..9]of single; //Rotation
-  x2,y2,z2:single;
-  u2:array[1..3]of smallint;
+    id1,id2:word;
+    X,Y,Z,xSize,ySize,zSize:single;
+    u1:array[1..6]of shortint;
+    Matrix:array[1..9]of single; //Rotation
+    x2,y2,z2:single;
+    u2:array[1..3]of smallint;
   end;
 
   SKYQty:integer;
@@ -1126,34 +1119,34 @@ var
   SKYIndex:byte;
 
   TracksQty:integer;
-  TRKQty:array[1..32]of record
+  TRKQty:array[1..MAX_TRACKS]of record
     Nodes,LoopFlag:integer; WR2Flag1,WR2Flag2,u3,u4:word; //Part1
     a1,a2,Turns,a4,Arrows,a6,a7,a8:word;                  //Part2
-  end;            
-  TRK:array[1..32]of record
+  end;
+  TRK:array[1..MAX_TRACKS]of record
     Route:array of packed record
-    X,Y,Z,Delta,CurveRad:single;
-    Matrix:array[1..9]of single;
-    Ideal,Delta2:single;
-    Margin1,Margin2,Tunnel,Column:smallint;
-    v1,v2,v3,v4:byte;
+      X,Y,Z,Delta,CurveRad:single;
+      Matrix:array[1..9]of single;
+      Ideal,Delta2:single;
+      Margin1,Margin2,Tunnel,Column:smallint;
+      v1,v2,v3,v4:byte;
     end;
     Turns:array[1..256]of record Node1,Node2,Arrow1,ArrowNum,BitFlag,u1:word;
       Arrows:array[1..256]of record
-      X,Y,Z:single;
-      Matrix:array[1..9]of single;
-      Delta:single;
-      BitFlag:integer; //Left/Right/Turn/Junction/etc..
+        X,Y,Z:single;
+        Matrix:array[1..9]of single;
+        Delta:single;
+        BitFlag:integer; //Left/Right/Turn/Junction/etc..
       end;
     end;
   end;
   TrackID,TurnID,TrackWP:integer;
 
-  TOBHead:array[1..32]of record
+  TOBHead:array[1..MAX_TRACKS]of record
     Qty:word;
     Clear:array[1..14]of byte;
   end;
-  TOB:array[1..32]of array of packed record
+  TOB:array[1..MAX_TRACKS]of array of packed record
     Name:string[32];
     ID:word;
     TypeID:smallint;
@@ -1166,7 +1159,7 @@ var
   end;
 
   TracksQtyWP:integer;
-  WTR:array[1..32]of record
+  WTR:array[1..MAX_WP_TRACKS]of record
     NodeQty:integer;
     Empty:array[1..3]of integer;
     Node:array of packed record
@@ -1175,9 +1168,9 @@ var
       M:array[1..9]of single;
     end;
   end;
-  WTRLength:array[1..32]of integer;
+  WTRLength:array[1..MAX_WP_TRACKS]of integer;
 
-  MakeTrack:array[1..32]of record
+  MakeTrack:array[1..MAX_TRACKS]of record
     NodeQty:integer;
     Node:array of packed record
       X,Y,Z:single;
@@ -1345,7 +1338,8 @@ var
 
   Changes:record
     TRL,SMP:boolean;
-    TOB,TRK,WTR:array[1..32]of boolean;
+    TOB,TRK:array[1..MAX_TRACKS]of boolean;
+    WTR:array[1..MAX_WP_TRACKS]of boolean;
     IDX,VTX,QAD,SKY,SNI,LVL:boolean;
     RO:array[1..4]of boolean;
     STR:boolean;
@@ -1401,10 +1395,10 @@ implementation  {$IFNDEF FPC}
 {$ENDIF}
 uses LoadSave, Unit_Render, PTXTexture, Load_TRK, Unit_sc2, Unit_Streets,
 Unit_Triggers, Unit_Options, Unit_RoutineFunctions, Unit_RenderInit, Unit_Tracing,
-  ColorPicker;
+  ColorPicker, SK_ImportLWO;
 
 
-procedure Done(Sender:Tobject);
+procedure TForm1.Done(Sender:Tobject);
 var i:integer; s:string;
 begin with Sender as TMemo do begin
   s:=Lines.Strings[Lines.Count-1];
@@ -1429,7 +1423,7 @@ begin
 
   Form1.Caption:=VersionInfo;
   MemoLog.Left:=Panel1.Left+4;
-//todo: PageControl1.OwnerDraw:=true;   //enable here, to keep tab names displayed in developer time
+  PageControl1.OwnerDraw:=true;   //enable here, to keep tab names displayed in developer time
   InitOpenGL;                               // New call to initialize and bind the OpenGL dll
   h_DC := GetDC(Panel1.Handle);
   if h_DC=0 then begin MyMessageBox(h_DC, 'Unable to get a device context', 'Error', MB_OK or MB_ICONERROR); exit; end;
@@ -1462,9 +1456,12 @@ MemoLWO.Lines.Add('Misc init done in '+ElapsedTime(@OldTime));
 Randomize;
 Form1.WindowState:=wsMaximized;
 
-FillSceneryList();
-if RG2.ItemIndex<>-1 then SceneryReload(nil);
+  FillSceneryList();
+  RG2.ItemIndex := EnsureRange(RG2.ItemIndex,0,RG2.Items.Count-1);
+  if RG2.ItemIndex<>-1 then SceneryReload(nil);
 
+  ResetViewClick(nil);
+  ResetViewClick(nil);
 end;
 
 
@@ -1803,6 +1800,7 @@ end;
 finally ObjectX:=X; ObjectY:=Y; end;
 end;
 
+
 procedure TForm1.Panel1MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin MouseButton:=0;
 SelectionQueue1[1]:=0; //Clear array after use
@@ -1817,9 +1815,10 @@ if EditMode='StreetSplines' then STRSplineID1Change(nil);
 if DoubleClick then DoubleClick:=false;
 end;
 
+
 procedure TForm1.OnIdle(Sender: TObject; var Done: Boolean);
 begin
-  if (not Form1.Active)and(not Form_ColorPicker.Active) then exit;
+  if (Form1=nil)or(Form_ColorPicker=nil)or((not Form1.Active)and(not Form_ColorPicker.Active)) then exit;
   if ScnRefresh then exit;
   done:=false;
   KnowFPS();
@@ -1834,6 +1833,7 @@ begin
 
   RenderFrame(Sender);
 end;
+
 
 procedure TForm1.RenderFrame(Sender: TObject);
 var Num:byte; v:vector; ZoomX:single; ii:integer;
@@ -2044,6 +2044,7 @@ end;
 RenderFrameDone:=true;
 end;
 
+
 procedure TForm1.SceneryReload(Sender: TObject);
 var i:integer;
 begin
@@ -2056,7 +2057,8 @@ begin
 
   EditingFormat:=ef_WR2;
 
-  for i:=1 to 32 do begin Changes.TOB[i]:=false; Changes.TRK[i]:=false; Changes.WTR[i]:=false; end;
+  for i:=1 to MAX_TRACKS do begin Changes.TRK[i]:=false; Changes.TOB[i]:=false; end;
+  for i:=1 to MAX_WP_TRACKS do Changes.WTR[i]:=false;
   for i:=1 to 4 do Changes.RO[i]:=false;
   Changes.TRL:=false; Changes.SMP:=false;
   Changes.IDX:=false; Changes.VTX:=false; Changes.QAD:=false; Changes.SKY:=false;
@@ -2070,7 +2072,7 @@ list_id:=0; list_ogl:=0; list_tx:=0; list_obj:=0; list_sky:=0; TracePt:=0;
 if UseShaders=false then list_id:=65535; //do not compile lists if Shaders are not supported by GPU
 
 Scenery:=RG2.Items.Strings[RG2.ItemIndex];
-Version:='V'+inttostr(RG1.ItemIndex+1);
+SceneryVersion:='V'+inttostr(RG1.ItemIndex+1);
 
 //Disable original maps save
 if ((Scenery='Italien')or(Scenery='HHeimRing')or(Scenery='Miami')or
@@ -2082,7 +2084,7 @@ if ((Scenery='Italien')or(Scenery='HHeimRing')or(Scenery='Miami')or
    end;
 
 ElapsedTime(@OldTime);
-SceneryPath:=fOptions.WorkDir+'Scenarios\'+Scenery+'\'+Version+'\';
+SceneryPath:=fOptions.WorkDir+'Scenarios\'+Scenery+'\'+SceneryVersion+'\';
 LoadQAD(SceneryPath+Scenery);                       MemoLoad.Lines.Add('Load QAD in'+ElapsedTime(@OldTime));
 //Editing format is set now
 
@@ -2272,8 +2274,8 @@ end;
 procedure TForm1.ListTracksClick(Sender: TObject);
 var i:integer;
 begin
-if TrackID=0 then exit; 
 ListTurns.Clear;
+if TrackID=0 then exit; 
 for i:=1 to TRKQty[TrackID].Turns do
 ListTurns.Items.Add(inttostr(i)+'. '+inttostr(TRK[TrackID].Turns[i].Node1)+'>>'+inttostr(TRK[TrackID].Turns[i].Node2));
 ListTurns.ItemIndex:=0;
@@ -2414,1057 +2416,35 @@ procedure TForm1.AddTriggerClick(Sender: TObject); begin AddTriggerClick_(); end
 procedure TForm1.RemTriggerClick(Sender: TObject); begin RemTriggerClick_(); end;
 procedure TForm1.ComputeTriggerClick(Sender: TObject); begin ComputeTriggerClick_(Sender); end;
 
+
 procedure TForm1.BrowseLWO(Sender: TObject);
 begin
-//ChDir(WorkDir+'Scenarios\'+Scenery+'\');
-if not RunOpenDialog(OpenDialog,'',SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
-LWOSceneryFile:=OpenDialog.FileName;
-//LWOSceneryFile:='C:\Documents and Settings\Krom\Desktop\Normandie\Normandie80_v008.lwo';
-//LWOSceneryFile:='C:\H\Sources\Atlantica\Atlantica_v002.lwo';
-LoadLWO(LWOSceneryFile);
+  //ChDir(WorkDir+'Scenarios\'+Scenery+'\');
+  if not RunOpenDialog(OpenDialog,'',SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
+  LWOSceneryFile:=OpenDialog.FileName;
+  //LWOSceneryFile:='C:\Documents and Settings\Krom\Desktop\Normandie\Normandie80_v008.lwo';
+  //LWOSceneryFile:='C:\H\Sources\Atlantica\Atlantica_v002.lwo';
+  LoadLWO(LWOSceneryFile);
 end;
+
 
 procedure TForm1.ReloadLWOClick(Sender: TObject);
 begin
-if FileExists(LWOSceneryFile) then
-LoadLWO(LWOSceneryFile)
-else
-MyMessageBox(Form1.Handle,'Couldn''t find source LWO file.','Error',MB_OK or MB_ICONEXCLAMATION);
+  if FileExists(LWOSceneryFile) then
+  LoadLWO(LWOSceneryFile)
+  else
+  MyMessageBox(Form1.Handle,'Couldn''t find source LWO file.','Error',MB_OK or MB_ICONEXCLAMATION);
 end;
 
-procedure TForm1.LoadLWO(Input:string);
-var
-  ii,kk,j:integer;
-  chsize,m,sz:integer;
-  chname:string[4];
-  lay,stag:integer;           //
-  s:string;
-begin
-if not fileexists(Input) then exit;
-ElapsedTime(@OldTime);
-assignfile(f,Input); reset(f,1);
 
-Lay:=0;
-for ii:=1 to length(LW.ClipTex) do LW.ClipTex[ii]:='';
 
-FillChar(LWQty,SizeOf(LWQty),#0);
 
-stag:=1;
 
-blockread(f,c,12);
-if (c[1]+c[2]+c[3]+c[4]+c[9]+c[10]+c[11]+c[12])<>'FORMLWO2' then begin
-MyMessageBox(Form1.Handle,'Old or unknown LWO format','Error',MB_OK or MB_ICONERROR);
-closefile(f);
-exit;
-end;
-m:=int2(c[8],c[7],c[6],c[5])-4;
 
-repeat
-blockread(f,c,8);
-chname:=c[1]+c[2]+c[3]+c[4];
-chsize:=int2(c[8],c[7],c[6],c[5]);
-m:=m-chsize-8;
-//memo1.Lines.Add(chname+' '+inttostr(chsize)+'byte ('+inttostr(m)+')');
 
-if chname='TAGS' then begin
-blockread(f,c,chsize);
-ii:=0;
-repeat
-inc(ii,2);
-if c[ii]=#0 then inc(LWQty.Tags[0]);
-until(ii=chsize);
-end else
 
-if chname='LAYR' then begin
-blockread(f,c,chsize);
-inc(Lay); //Layers come not sorted
-if Lay>=length(LWQty.Vert) then begin
-MyMessageBox(Form1.Handle,'Too many layers in file','Error',MB_OK or MB_ICONERROR);
-closefile(f); exit;
-end;
-end else
 
-if chname='PNTS' then begin
-LWQty.Vert[lay]:=chsize div 12;
-setlength(LW.XYZ ,LWQty.Vert[0]+LWQty.Vert[lay]+1);
-setlength(LW.UV  ,LWQty.Vert[0]+LWQty.Vert[lay]+1);
-setlength(LW.RGBA,LWQty.Vert[0]+LWQty.Vert[lay]+1);
-setlength(LW.Nv  ,LWQty.Vert[0]+LWQty.Vert[lay]+1);
-setlength(LW.VW  ,LWQty.Vert[0]+LWQty.Vert[lay]+1);
-blockread(f,c,chsize);
-for ii:=1 to LWQty.Vert[lay] do begin
-LW.XYZ[LWQty.Vert[0]+ii,1]:=real2(c[ii*12-8],c[ii*12-9],c[ii*12-10],c[ii*12-11])*10;
-LW.XYZ[LWQty.Vert[0]+ii,2]:=real2(c[ii*12-4],c[ii*12-5],c[ii*12-6],c[ii*12-7])*10;
-LW.XYZ[LWQty.Vert[0]+ii,3]:=real2(c[ii*12-0],c[ii*12-1],c[ii*12-2],c[ii*12-3])*10;
-end;
-inc(LWQty.Vert[0],LWQty.Vert[lay]);
-end else
 
-if chname='VMAP' then begin
-blockread(f,c,6);    //TXUV_2
-chname:=c[1]+c[2]+c[3]+c[4];
-dec(chsize,6);
-  if chname='TXUV' then begin
-  repeat blockread(f,c,2); dec(chsize,2); //UV-map name
-  until((c[1]=#0)or(c[2]=#0));
-  blockread(f,c,chsize);
-  ii:=0;
-    repeat
-    inc(ii,10);
-    inc(LWQty.UV[lay]);
-    if c[ii-9]=#255 then begin
-    kk:=ord(c[ii-8])*65536+1;
-    inc(ii,2);
-    inc(kk,ord(c[ii-8])+ord(c[ii-9])*256);
-    end else
-    kk:=ord(c[ii-8])+ord(c[ii-9])*256+1;
-    LW.UV[LWQty.Vert[0]-LWQty.Vert[lay]+kk,1]:=real2(c[ii-4],c[ii-5],c[ii-6],c[ii-7]);
-    LW.UV[LWQty.Vert[0]-LWQty.Vert[lay]+kk,2]:=real2(c[ii-0],c[ii-1],c[ii-2],c[ii-3]);
-    until(ii>=chsize);
-  inc(LWQty.UV[0],LWQty.UV[lay]);
-  end else
-
-{  if (chname='RGBA')or(chname='RGB ') then begin
-  repeat blockread(f,c,2); dec(chsize,2); //UV-map name
-  until((c[1]=#0)or(c[2]=#0));
-  if chname='RGBA' then sz:=18 else sz:=14;
-  LWQty.RGBA[lay]:=chsize div sz;
-  blockread(f,c,sz*LWQty.RGBA[lay]);
-    for ii:=0 to LWQty.RGBA[lay]-1 do begin
-    if c[ii*sz+1]=#255 then begin
-    MyMessageBox(Form1.Handle,'More than 65k points in one layer.'+#13+'Split model into several layers.','Error',MB_OK or MB_ICONERROR);
-    closefile(f); exit;
-    end;
-    kk:=ord(c[ii*sz+1])*256+ord(c[ii*sz+2])+1;
-    LW.RGBA[LWQty.Vert[0]-LWQty.Vert[lay]+kk,1]:=
-    EnsureRange(round(real2(c[ii*sz+6],c[ii*sz+5],c[ii*sz+4],c[ii*sz+3])*256),0,255);
-    LW.RGBA[LWQty.Vert[0]-LWQty.Vert[lay]+kk,2]:=
-    EnsureRange(round(real2(c[ii*sz+10],c[ii*sz+9],c[ii*sz+8],c[ii*sz+7])*256),0,255);
-    LW.RGBA[LWQty.Vert[0]-LWQty.Vert[lay]+kk,3]:=
-    EnsureRange(round(real2(c[ii*sz+14],c[ii*sz+13],c[ii*sz+12],c[ii*sz+11])*256),0,255);
-    end;
-  inc(LWQty.RGBA[0],LWQty.RGBA[lay]);
-  end else  }
-
-  begin
-  MemoLWO.Lines.Add(c[1]+c[2]+c[3]+c[4]+' vertex map skipped');
-  blockread(f,c,chsize); end;
-
-for ii:=1 to LWQty.Poly[lay] do for kk:=1 to 3 do begin //lqty[0]-lqty[lay] >> lqty[0]
-LW.DUV[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk,1]:=LW.UV[LW.Poly[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk],1];
-LW.DUV[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk,2]:=LW.UV[LW.Poly[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk],2];
-end;
-end else
-
-if chname='POLS' then begin
-blockread(f,c,4);
-dec(chsize,4);
-  if (c[1]+c[2]+c[3]+c[4])<>'FACE' then begin
-  MemoLWO.Lines.Add(c[1]+c[2]+c[3]+c[4]+' POLS skipped');
-  blockread(f,c,chsize);
-  LWQty.Poly[lay]:=0
-  end else begin
-LWQty.Poly[lay]:=0;
-    repeat inc(LWQty.Poly[lay]);
-    if length(LW.Poly)-2<=LWQty.Poly[0]+LWQty.Poly[lay] then setlength(LW.Poly,length(LW.Poly)+1000); //keep (+1) free ahead for multi-point polys
-    blockread(f,c,2); dec(chsize,2);
-    kk:=ord(c[1])*256+ord(c[2]); //# of Vertices (3 or 4)
-
-    if (kk<>3)and(kk<>4) then begin
-    MyMessageBox(Form1.Handle,'Non-triangle/quadrangle polygon encountered','Error',MB_OK or MB_ICONERROR);
-    closefile(f); exit; end;
-
-    LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],0]:=kk;
-    for ii:=1 to 3 do begin
-    blockread(f,c,2); dec(chsize,2);
-        if c[1]=#255 then begin
-        LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],ii]:=ord(c[2])*65536+LWQty.Vert[0]-LWQty.Vert[lay]+1;   //0.1.2
-        blockread(f,c,2); dec(chsize,2);
-        inc(LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],ii],int2(c[2],c[1]));
-        end else
-    LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],ii]:=int2(c[2],c[1])+LWQty.Vert[0]-LWQty.Vert[lay]+1;   //0.1.2
-    end;
-
-    if kk=4 then begin
-    inc(LWQty.AddPoly[0]);
-    //if length(LW.PolyAdd)-2<=LWQty.AddPoly[0] then setlength(LW.PolyAdd,LWQty.AddPoly[0]+100);
-    if length(LW.PolyAdd)<length(LW.Poly)+100 then setlength(LW.PolyAdd,length(LW.Poly)+100); //Needs to be the same
-    LW.PolyAdd[LWQty.AddPoly[0]].id:=LWQty.Poly[0]+LWQty.Poly[lay]; //replicating real polyID
-
-    LW.PolyAdd[LWQty.Poly[0]+LWQty.Poly[lay]].InvID:=LWQty.AddPoly[0]; //replicating real polyID, inverse for VMAD
-
-    LW.PolyAdd[LWQty.AddPoly[0]].v1:=LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],1];
-    LW.PolyAdd[LWQty.AddPoly[0]].v2:=LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],3];
-    blockread(f,c,2); dec(chsize,2);
-        if c[1]=#255 then begin
-        LW.PolyAdd[LWQty.AddPoly[0]].v3:=ord(c[2])*65536+LWQty.Vert[0]-LWQty.Vert[lay]+1;
-        blockread(f,c,2); dec(chsize,2);
-        inc(LW.PolyAdd[LWQty.AddPoly[0]].v3,int2(c[2],c[1]));
-        end else
-    LW.PolyAdd[LWQty.AddPoly[0]].v3:=int2(c[2],c[1])+LWQty.Vert[0]-LWQty.Vert[lay]+1;
-    end;
-    until(chsize<=0);
-inc(LWQty.Poly[0],LWQty.Poly[lay]);
-
-setlength(LW.DUV,LWQty.Poly[0]+1);
-//Mirroring UVs to discontinous UVs, since DUV may not exist, while PTAG exists always :P
-for ii:=1 to LWQty.Poly[lay] do for kk:=1 to 3 do begin //lqty[0]-lqty[lay] >> lqty[0]
-LW.DUV[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk,1]:=LW.UV[LW.Poly[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk],1];
-LW.DUV[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk,2]:=LW.UV[LW.Poly[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk],2];
-end;
-
-end; //'FACE'
-end else
-
-if chname='PTAG' then begin
-blockread(f,c,4);
-dec(chsize,4);
-  if (c[1]+c[2]+c[3]+c[4])<>'SURF' then begin
-  MemoLWO.Lines.Add(c[1]+c[2]+c[3]+c[4]+' PTAG skipped');
-  blockread(f,c,chsize);
-  end else begin
-setlength(LW.Surf,LWQty.Poly[0]+100);
-blockread(f,c,chsize);
-ii:=0;
-repeat
-inc(ii,4);
-if c[ii-3]=#255 then begin
-kk:=ord(c[ii-2])*65536;           //polygon
-inc(ii,2);
-inc(kk,int2(c[ii-2],c[ii-3])+1);
-end else
-kk:=int2(c[ii-2],c[ii-3])+1;           //polygon
-LW.Surf[kk+LWQty.Poly[0]-LWQty.Poly[lay]]:=int2(c[ii-0],c[ii-1])+1;    //surface assignment
-until(ii>=chsize);
-end;
-end else
-
-if chname='VMAD' then begin
-  blockread(f,c,6);    //TXUV_2
-  dec(chsize,6);
-    if (c[1]+c[2]+c[3]+c[4])<>'TXUV' then begin
-      MemoLWO.Lines.Add(c[1]+c[2]+c[3]+c[4]+' VMAD skipped');
-      blockread(f,c,chsize);
-    end else begin
-
-    repeat
-      blockread(f,c,2); chsize:=chsize-2; //UV-map name
-    until((c[1]=#0)or(c[2]=#0));
-
-    repeat
-
-      //point ; poly ; new coord
-      blockread(f,c,2); dec(chsize,2);
-      if c[1]=#255 then begin
-        vmad.Vert:=ord(c[2])*65536+1; //vertex ID
-        blockread(f,c,2); dec(chsize,2);
-        inc(vmad.Vert,int2(c[2],c[1])); //vertex ID
-      end else
-        vmad.Vert:=int2(c[2],c[1])+1; //vertex ID
-
-      blockread(f,c,2); dec(chsize,2);
-      if c[1]=#255 then begin
-        vmad.Poly:=ord(c[2])*65536+1; //poly ID
-        blockread(f,c,2); dec(chsize,2);
-        inc(vmad.Poly,int2(c[2],c[1])); //poly ID
-      end else
-        vmad.Poly:=int2(c[2],c[1])+1; //poly ID
-
-      //This one is assigned to temp var, since it is used frequently here
-      sz:=vmad.Poly+LWQty.Poly[0]-LWQty.Poly[lay];
-
-      blockread(f,c,8); dec(chsize,8);
-      for j:=1 to LW.Poly[sz,0] do begin
-        if (j<4)and(LW.Poly[sz,j]=vmad.Vert+LWQty.Vert[0]-LWQty.Vert[lay]) then begin
-          LW.DUV[sz,j,1]:=real2(c[4],c[3],c[2],c[1]);
-          LW.DUV[sz,j,2]:=real2(c[8],c[7],c[6],c[5]);
-        end;
-
-        //If there's a quad we need to find it's parent
-        if j>3 then begin
-          {kk:=LWQty.AddPoly[0];
-          repeat
-            dec(kk); //Reverse is faster, as always =)
-          until(LW.PolyAdd[kk].id<=sz);}
-
-          kk:=LW.PolyAdd[sz].InvID;
-
-          if LW.PolyAdd[kk].id=sz then
-            if LW.PolyAdd[kk].v3=vmad.Vert+LWQty.Vert[0]-LWQty.Vert[lay] then begin
-              LW.PolyAdd[kk].u:=real2(c[4],c[3],c[2],c[1]);
-              LW.PolyAdd[kk].v:=real2(c[8],c[7],c[6],c[5]);
-              LW.PolyAdd[kk].uv:=-1;
-            end else
-              LW.PolyAdd[kk].uv:=vmad.Vert+LWQty.Vert[0]-LWQty.Vert[lay]; //unused and wrong!
-        end;
-
-      end;
-
-    until(chsize<=0);
-  end;//(c[1]+c[2]+c[3]+c[4])='TXUV'
-end else
-
-if chname='CLIP' then begin
-blockread(f,c,chsize);
-s:=''; ii:=9;
-repeat
-ii:=ii+2;
-if c[ii]<>#0 then s:=s+c[ii];
-if c[ii+1]<>#0 then s:=s+c[ii+1];
-until(c[ii+1]=#0);
-kk:=1;
-repeat
-LW.ClipTex[int2(c[4],c[3])]:=LW.ClipTex[int2(c[4],c[3])]+s[kk];
-if s[kk]='/' then LW.ClipTex[int2(c[4],c[3])]:='';
-inc(kk);
-until(s[kk]='.');
-end else
-
-if chname='SURF' then begin
-blockread(f,c,chsize);
-ii:=1;
-setlength(LW.SName,stag+2);
-setlength(LW.SText,stag+2);
-LW.SName[stag]:=strpas(@c);
-repeat
-  if c[ii]+c[ii+1]+c[ii+2]+c[ii+3]+c[ii+4]+c[ii+5]='IMAG'+#0+#2 then begin
-  inc(ii,6);
-  if int2(c[ii+1],c[ii])<>0 then
-  LW.SText[stag]:=LW.ClipTex[int2(c[ii+1],c[ii])];
-  inc(ii,2);
-  end;
-if ii<chsize then inc(ii); //slow but simple
-until(ii>=chsize);
-inc(stag);
-LWQty.Surf[0]:=stag-1;
-end else
-
-begin
-//memo1.Lines.Add(chname+' '+inttostr(chsize)+'byte ('+inttostr(m)+') skipped');
-for ii:=1 to (chsize div 1024000) do blockread(f,c,1024000);
-blockread(f,c,chsize mod 1024000);
-end;
-until(m<=0);
-closefile(f);
-MemoLWO.Lines.Add('Load LWO in'+ElapsedTime(@OldTime));
-PrepareLWOData(nil);
-end;                                       
-
-procedure TForm1.PrepareLWOData(Sender: TObject);
-var ii,kk,VQty,PQty:integer;
-begin
-
-if LWQty.Surf[0]>256 then begin
-MyMessageBox(Form1.Handle,'Surface count exceeds alowed 256','Fatal Error',MB_OK or MB_ICONERROR);
-exit;
-end;
-
-MemoLWO.Lines.Add('Removing parts ...');
-for ii:=1 to LWQty.Poly[0] do dec(LW.Surf[ii],(LWQty.Tags[0]-LWQty.Surf[0]));
-done(MemoLWO);
-
-MemoLWO.Lines.Add('Setting bounds ...');
-Scn_Bound[1,1]:=0; Scn_Bound[1,2]:=0; Scn_Bound[2,1]:=0; Scn_Bound[2,2]:=0; Scn_Low:=0;
-for ii:=1 to LWQty.Vert[0] do begin
-if LW.XYZ[ii,1]<Scn_Bound[1,1] then Scn_Bound[1,1]:=LW.XYZ[ii,1]; //Defining map boundaries
-if LW.XYZ[ii,1]>Scn_Bound[1,2] then Scn_Bound[1,2]:=LW.XYZ[ii,1];
-if LW.XYZ[ii,3]<Scn_Bound[2,1] then Scn_Bound[2,1]:=LW.XYZ[ii,3];
-if LW.XYZ[ii,3]>Scn_Bound[2,2] then Scn_Bound[2,2]:=LW.XYZ[ii,3];
-if LW.XYZ[ii,2]<Scn_Low then Scn_Low:=LW.XYZ[ii,2];
-end;
-
-if abs(Scn_Bound[1,2])<abs(Scn_Bound[1,1]) then SizeX:=ceil(abs(Scn_Bound[1,1]/1024))*2
-                                           else SizeX:=ceil(abs(Scn_Bound[1,2]/1024))*2;
-if abs(Scn_Bound[2,2])<abs(Scn_Bound[2,1]) then SizeZ:=ceil(abs(Scn_Bound[2,1]/1024))*2
-                                           else SizeZ:=ceil(abs(Scn_Bound[2,2]/1024))*2;
-done(MemoLWO);                               //size should be even numbers
-
-if SizeX*SizeZ>4096 then begin
-MyMessageBox(Form1.Handle, 'Map size is too big for WR2', 'Fatal Error', MB_OK or MB_ICONERROR);
-exit;
-end;
-
-if (SizeX>200)or(SizeZ>200) then begin
-MyMessageBox(Form1.Handle, 'Map size is too big for STKit2', 'Fatal Error', MB_OK or MB_ICONERROR);
-exit;
-end;
-
-MemoLWO.Lines.Add('Drawing BG grid ...');
-VQty:=LWQty.Vert[0]; //Temp vertice counter
-PQty:=LWQty.Poly[0]; //Temp indice counter
-inc(LWQty.Vert[0],SizeZ*SizeX*4);
-inc(LWQty.Poly[0],SizeZ*SizeX*2);
-  setlength(LW.XYZ ,LWQty.Vert[0]+1);
-  setlength(LW.UV  ,LWQty.Vert[0]+1);
-  setlength(LW.RGBA,LWQty.Vert[0]+1);
-  setlength(LW.Nv  ,LWQty.Vert[0]+1);
-  setlength(LW.VW  ,LWQty.Vert[0]+1);
-  setlength(LW.Poly,LWQty.Poly[0]+1);
-  setlength(LW.DUV ,LWQty.Poly[0]+1);
-  setlength(LW.Surf,LWQty.Poly[0]+1);
-for ii:=0 to SizeZ-1 do for kk:=0 to SizeX-1 do begin
-LW.XYZ[VQty+1,1]:=(kk*2-SizeX  )*512+1; LW.XYZ[VQty+1,2]:=Scn_low-50; LW.XYZ[VQty+1,3]:=(ii*2-SizeZ  )*512+1;
-LW.XYZ[VQty+2,1]:=(kk*2-SizeX  )*512+1; LW.XYZ[VQty+2,2]:=Scn_low-50; LW.XYZ[VQty+2,3]:=(ii*2-SizeZ+2)*512-1;
-LW.XYZ[VQty+3,1]:=(kk*2-SizeX+2)*512-1; LW.XYZ[VQty+3,2]:=Scn_low-50; LW.XYZ[VQty+3,3]:=(ii*2-SizeZ+2)*512-1;
-LW.XYZ[VQty+4,1]:=(kk*2-SizeX+2)*512-1; LW.XYZ[VQty+4,2]:=Scn_low-50; LW.XYZ[VQty+4,3]:=(ii*2-SizeZ  )*512+1;
-LW.Poly[PQty+1,0]:=3; LW.Poly[PQty+1,1]:=VQty+3; LW.Poly[PQty+1,2]:=VQty+2; LW.Poly[PQty+1,3]:=VQty+1;
-LW.Poly[PQty+2,0]:=3; LW.Poly[PQty+2,1]:=VQty+1; LW.Poly[PQty+2,2]:=VQty+4; LW.Poly[PQty+2,3]:=VQty+3;
-LW.DUV[PQty+1,1,1]:=1234567;//thats hint for shadowtracing this poly shouldn't be traced
-LW.DUV[PQty+2,1,1]:=1234567;//thats hint for shadowtracing this poly shouldn't be traced
-LW.Surf[PQty+1]:=1;
-LW.Surf[PQty+2]:=1;
-inc(VQty,4);
-inc(PQty,2);
-end;
-done(MemoLWO);
-
-MemoLWO.Lines.Add('Prep LWO in'+ElapsedTime(@OldTime));
-CompileVTX_IDX(nil);
-end;
-
-procedure TForm1.CompileVTX_IDX(Sender: TObject);
-var ii,kk,m,ci,ck:integer; x,z:real;
-tmp:array of array[0..5]of integer;
-tms:array of array[1..6]of single;
-begin
-////////////////////////////////////////////////////////////////////////////////
-MemoLWO.Lines.Add('Adding Quad data ...');
-////////////////////////////////////////////////////////////////////////////////
-setlength(LW.Poly,length(LW.Poly)+LWQty.AddPoly[0]);
-setlength(LW.Surf,length(LW.Surf)+LWQty.AddPoly[0]);
-setlength(LW.duv,length(LW.duv)+LWQty.AddPoly[0]);
-for ii:=1 to LWQty.AddPoly[0] do begin
-ci:=LWQty.Poly[0]+ii;
-LW.Poly[ci,1]:=LW.PolyAdd[ii].v1;
-LW.Poly[ci,2]:=LW.PolyAdd[ii].v2;
-LW.Poly[ci,3]:=LW.PolyAdd[ii].v3;
-LW.Surf[ci]:=LW.Surf[LW.PolyAdd[ii].id];
-LW.duv[ci,1,1]:=LW.duv[LW.PolyAdd[ii].id,1,1]; LW.duv[ci,1,2]:=LW.duv[LW.PolyAdd[ii].id,1,2]; //1<-2 2<-3 3<-Vadd
-LW.duv[ci,2,1]:=LW.duv[LW.PolyAdd[ii].id,3,1]; LW.duv[ci,2,2]:=LW.duv[LW.PolyAdd[ii].id,3,2];
-if LW.PolyAdd[ii].uv=-1 then begin
-LW.duv[ci,3,1]:=LW.PolyAdd[ii].u;              LW.duv[ci,3,2]:=LW.PolyAdd[ii].v;
-end else begin
-LW.duv[ci,3,1]:=LW.uv[LW.PolyAdd[ii].v3,1];    LW.duv[ci,3,2]:=LW.uv[LW.PolyAdd[ii].v3,2];
-end;
-end;
-inc(LWQty.Poly[0],LWQty.AddPoly[0]); //increase polyqty
-done(MemoLWO);
-
-////////////////////////////////////////////////////////////////////////////////
-MemoLWO.Lines.Add('Redistributing polys ...');
-////////////////////////////////////////////////////////////////////////////////
-setlength(tmp,LWQty.Poly[0]+1);
-setlength(tms,LWQty.Poly[0]+1);
-ci:=0;
-for kk:=1 to LWQty.Surf[0]do
-  for ii:=1 to LWQty.Poly[0] do
-    if LW.Surf[ii]=kk then begin
-    inc(ci);
-    tmp[ci,0]:=LW.Poly[ii,0];
-    tmp[ci,1]:=LW.Poly[ii,1];
-    tmp[ci,2]:=LW.Poly[ii,2];
-    tmp[ci,3]:=LW.Poly[ii,3];
-    tmp[ci,4]:=LW.Surf[ii];
-    tms[ci,1]:=LW.duv[ii,1,1];
-    tms[ci,2]:=LW.duv[ii,1,2];
-    tms[ci,3]:=LW.duv[ii,2,1];
-    tms[ci,4]:=LW.duv[ii,2,2];
-    tms[ci,5]:=LW.duv[ii,3,1];
-    tms[ci,6]:=LW.duv[ii,3,2];
-    end;
-
-for ii:=1 to LWQty.Poly[0] do begin
-LW.Poly[ii,0]:=tmp[ii,0];
-LW.Poly[ii,1]:=tmp[ii,1];
-LW.Poly[ii,2]:=tmp[ii,2];
-LW.Poly[ii,3]:=tmp[ii,3];
-LW.Surf[ii]:=tmp[ii,4];
-LW.duv[ii,1,1]:=tms[ii,1];
-LW.duv[ii,1,2]:=tms[ii,2];
-LW.duv[ii,2,1]:=tms[ii,3];
-LW.duv[ii,2,2]:=tms[ii,4];
-LW.duv[ii,3,1]:=tms[ii,5];
-LW.duv[ii,3,2]:=tms[ii,6];
-end;
-
-done(MemoLWO);
-
-////////////////////////////////////////////////////////////////////////////////
-MemoLWO.Lines.Add('Generating Normals ...');
-////////////////////////////////////////////////////////////////////////////////
-setlength(LW.Np,LWQty.Poly[0]+1);
-for ii:=1 to LWQty.Poly[0] do
-Normal2Poly(LW.XYZ[LW.Poly[ii,1]],LW.XYZ[LW.Poly[ii,2]],LW.XYZ[LW.Poly[ii,3]],@LW.Np[ii,1],@LW.Np[ii,2],@LW.Np[ii,3]);
-
-for ii:=1 to LWQty.Vert[0] do for kk:=1 to 3 do LW.Nv[ii,kk]:=0; //Set all to '0'
-
-for ii:=1 to LWQty.Poly[0] do for kk:=1 to 3 do begin //accumulating data to vertices
-LW.Nv[LW.Poly[ii,kk],1]:=LW.Nv[LW.Poly[ii,kk],1]+LW.Np[ii,1];
-LW.Nv[LW.Poly[ii,kk],2]:=LW.Nv[LW.Poly[ii,kk],2]+LW.Np[ii,2];
-LW.Nv[LW.Poly[ii,kk],3]:=LW.Nv[LW.Poly[ii,kk],3]+LW.Np[ii,3];
-end;
-
-for ii:=1 to LWQty.Vert[0] do
-Normalize(LW.Nv[ii,1],LW.Nv[ii,2],LW.Nv[ii,3],@LW.Nv[ii,1],@LW.Nv[ii,2],@LW.Nv[ii,3]);
-
-done(MemoLWO);
-
-////////////////////////////////////////////////////////////////////////////////
-MemoLWO.Lines.Add('Grouping polys to Blocks ...');
-////////////////////////////////////////////////////////////////////////////////
-for ii:=1 to SizeX*SizeZ do pqtyb[ii,2]:=0;
-FillChar(split,SizeOf(split),#0);
-
-setlength(pblock,LWQty.Poly[0]+1);
-for ii:=1 to LWQty.Poly[0] do begin
-x:=(LW.XYZ[LW.Poly[ii,1],1]+LW.XYZ[LW.Poly[ii,2],1]+LW.XYZ[LW.Poly[ii,3],1])/3; //X center of poly
-z:=(LW.XYZ[LW.Poly[ii,1],3]+LW.XYZ[LW.Poly[ii,2],3]+LW.XYZ[LW.Poly[ii,3],3])/3; //Z center of poly
-ci:=trunc(x/1024+SizeX/2)+1;
-ck:=trunc(z/1024+SizeZ/2)+1;
-EnsureRange(ci,1,SizeX);
-EnsureRange(ck,1,SizeZ);
-pblock[ii]:=ci+(ck-1)*SizeX;
-inc(pqtyb[pblock[ii],2]);//number of polys in Block
-end; //Each poly(j) belongs to its block now.
-done(MemoLWO);
-
-MemoLWO.Lines.Add('Splitting to 65k chunks:');
-kk:=1;
-for ii:=1 to SizeX*SizeZ do begin
-pqtyb[ii+1,1]:=pqtyb[ii,1]+pqtyb[ii,2]; //Making list of poly groups
-if (split[kk,2]+pqtyb[ii,2]*3)>65535 then begin
-split[kk,1]:=ii-1;
-inc(kk);
-end;
-inc(split[kk,2],pqtyb[ii,2]*3);
-end;
-split[kk,1]:=SizeX*SizeZ;
-
-for ii:=1 to 64 do begin
-  if split[ii,2]>0 then MemoLWO.Lines.Add('#'+inttostr(ii)+' - '+inttostr(split[ii,2]));
-  if split[ii,2]>=65536 then begin
-    MyMessageBox(Form1.Handle,'Too big chunk made at block '+inttostr(split[ii,1]),'Fatal Error',MB_OK or MB_ICONERROR);
-    exit;
-  end;
-end;
-
-MemoLWO.Lines.Add('Rebuilding block heights ...');
-
-for ii:=1 to SizeZ do for kk:=1 to SizeX do Block[ii,kk].CenterY:=0;
-
-for ii:=1 to LWQty.Poly[0] do if LW.DUV[ii,1,1]<>1234567 then
-Block[((pblock[ii]-1) div SizeX)+1,((pblock[ii]-1) mod SizeX)+1].CenterY:=  //Y center of poly
-Block[((pblock[ii]-1) div SizeX)+1,((pblock[ii]-1) mod SizeX)+1].CenterY+   //accumulating data
-(LW.XYZ[LW.Poly[ii,1],2]+LW.XYZ[LW.Poly[ii,2],2]+LW.XYZ[LW.Poly[ii,3],2])/3;
-
-for ii:=1 to SizeZ do for kk:=1 to SizeX do begin
-Block[ii,kk].CenterY:=Block[ii,kk].CenterY/pqtyb[(kk+(ii-1)*SizeX),2];  //Defining Center Y
-Block[ii,kk].CenterX:=Block[ii,kk].CenterY; //temp place for min height
-Block[ii,kk].CenterZ:=Block[ii,kk].CenterY; //temp place for max height
-end;
-
-for ii:=1 to LWQty.Poly[0] do if LW.DUV[ii,1,1]<>1234567 then begin //Store Block bounds, temp
-ci:=((pblock[ii]-1) div SizeX)+1; ck:=((pblock[ii]-1) mod SizeX)+1;
-Block[ci,ck].CenterX:=min(Block[ci,ck].CenterX,LW.XYZ[LW.Poly[ii,1],2]);
-Block[ci,ck].CenterX:=min(Block[ci,ck].CenterX,LW.XYZ[LW.Poly[ii,2],2]);
-Block[ci,ck].CenterX:=min(Block[ci,ck].CenterX,LW.XYZ[LW.Poly[ii,3],2]);
-Block[ci,ck].CenterZ:=max(Block[ci,ck].CenterX,LW.XYZ[LW.Poly[ii,1],2]);
-Block[ci,ck].CenterZ:=max(Block[ci,ck].CenterX,LW.XYZ[LW.Poly[ii,2],2]);
-Block[ci,ck].CenterZ:=max(Block[ci,ck].CenterX,LW.XYZ[LW.Poly[ii,3],2]);
-end;
-
-for ii:=1 to SizeZ do for kk:=1 to SizeX do begin
-Block[ii,kk].Rad    :=Max((Block[ii,kk].CenterZ-Block[ii,kk].CenterX)*1.5,887); //887 is min radius of square
-//Block[ii,kk].CenterY:=(Block[ii,kk].CenterZ+Block[ii,kk].CenterX)/2;
-Block[ii,kk].CenterX:=(kk-(SizeX div 2 +1))*1024+512;  //Center X Setting grid every 102.4m
-Block[ii,kk].CenterZ:=(ii-(SizeZ div 2 +1))*1024+512;  //Center Z Setting grid every 102.4m
-end;
-
-done(MemoLWO);
-
-////////////////////////////////////////////////////////////////////////////////
-MemoLWO.Lines.Add('Building IDX ...');
-////////////////////////////////////////////////////////////////////////////////
-IDXQty:=LWQty.Poly[0]*3; m:=1; ci:=0;
-setlength(repoint,LWQty.Poly[0]+1);
-setlength(v,IDXQty div 3+1);
-for ii:=1 to SizeX*SizeZ do begin
-  for kk:=1 to LWQty.Poly[0] do if pblock[kk]=ii then begin
-  v[m,1]:=ci+0+1;
-  v[m,2]:=ci+1+1;
-  v[m,3]:=ci+2+1;
-  inc(ci,3);
-  repoint[m]:=kk;              //reverse
-  inc(m);
-  end;
-end;
-done(MemoLWO);
-
-////////////////////////////////////////////////////////////////////////////////
-MemoLWO.Lines.Add('Compiling VTX ...');
-////////////////////////////////////////////////////////////////////////////////
-for ii:=1 to 63 do VTXQty[ii]:=split[ii,2];
-VTXQty[64]:=LWQty.Poly[0]*3;
-
-setlength(VTX,LWQty.Poly[0]*3+1);
-m:=1;
-for ii:=1 to LWQty.Poly[0] do
-for kk:=1 to 3 do begin
-  VTX[m].X:=LW.XYZ[LW.Poly[repoint[ii],kk],1];
-  VTX[m].Y:=LW.XYZ[LW.Poly[repoint[ii],kk],2];
-  VTX[m].Z:=LW.XYZ[LW.Poly[repoint[ii],kk],3];
-  VTX[m].nZ:=round(LW.Nv[LW.Poly[repoint[ii],kk],3]*127+128);
-  VTX[m].nY:=round(LW.Nv[LW.Poly[repoint[ii],kk],2]*127+128);
-  VTX[m].nX:=round(LW.Nv[LW.Poly[repoint[ii],kk],1]*127+128);
-  VTX[m].n0:=0;
-  VTX[m].U:=LW.DUV[repoint[ii],kk,1];
-  VTX[m].V:=1-LW.DUV[repoint[ii],kk,2];
-  VTX[m].BlendR:=LW.RGBA[LW.Poly[repoint[ii],kk],1];//R
-  VTX[m].BlendG:=LW.RGBA[LW.Poly[repoint[ii],kk],2];//G
-  VTX[m].BlendB:=LW.RGBA[LW.Poly[repoint[ii],kk],3];//B
-
-  VTX[m].Shadow:=0;//none
-  VTX[m].B:=45;
-  VTX[m].G:=45;
-  VTX[m].R:=45;
-  VTX[m].A:=0;
-  inc(m);
-end;
-done(MemoLWO);
-MemoLWO.Lines.Add('VTX-IDX in'+ElapsedTime(@OldTime));
-CompileQAD(nil);
-end;
-
-procedure TForm1.CompileQAD(Sender: TObject);
-var ii,kk,m,m2,j,h,BlockID:integer; s:string;
-begin
-MemoLWO.Lines.Add('');
-MemoLWO.Lines.Add('<<< Preparing QAD Data >>>');
-Qty.WidthX :=(SizeX-2)*16;
-Qty.LengthZ:=(SizeZ-2)*16;
-Qty.BlocksX:=SizeX;
-Qty.BlocksZ:=SizeZ;
-Qty.BlocksTotal:=Qty.BlocksX*Qty.BlocksZ;
-Qty.TexturesTotal:=0;                           //Filled later
-Qty.TexturesFiles:=0;                           //Filled later
-Qty.BumpTexturesFiles:=0;                       //Thats AFC11 field, just make sure it's 0
-//Qty.ObjectFiles:=0;                             //Filled later
-Qty.Polys:=LWQty.Poly[0];
-Qty.Materials:=1;                               //Filled later
-//Qty.ObjectsTotal:=0;                            //Filled later
-//Qty.GroundTypes:=1;                           //Keep old grounds
-Qty.ColliSize:=0;                               //Filled later
-//Qty.Lights:=0;                                //Keep old lights
-//WR2
-Qty.x1:=256;
-Qty.x2:=0;
-Qty.x3:=1;
-//Qty.Sounds:=0;                                //Keep old sounds
-
-MemoLWO.Lines.Add('Colliding polys with Blocks ...');
-setlength(Bi,0);
-setlength(Bi,LWQty.Poly[0]+1);
-for ii:=1 to LWQty.Poly[0] do begin //Looking for blocks containing current poly
-krintersect(                 //Shifting scenario, so it start from (0;0)
-LW.XYZ[LW.Poly[repoint[ii],1],1]+SizeX*512,LW.XYZ[LW.Poly[repoint[ii],1],3]+SizeZ*512,
-LW.XYZ[LW.Poly[repoint[ii],2],1]+SizeX*512,LW.XYZ[LW.Poly[repoint[ii],2],3]+SizeZ*512,
-LW.XYZ[LW.Poly[repoint[ii],3],1]+SizeX*512,LW.XYZ[LW.Poly[repoint[ii],3],3]+SizeZ*512,
-SizeX*4,SizeZ*4,Bi[ii]); //list of sub-blocks for current poly
-end;
-done(MemoLWO);
-
-MemoLWO.Lines.Add('Building collision groups ...');
-setlength(Cbl,0);
-setlength(Cbl,SizeZ*4*SizeX*4+1);//
-for ii:=1 to SizeZ*4*SizeX*4 do begin
-setlength(Cbl[ii],2);//
-Cbl[ii,0]:=0; //Resetting counters
-end;
-
-for ii:=1 to LWQty.Poly[0] do begin      //Assigning polys to CollisionBlock they belong
-kk:=1;
-if (bi[ii,1]<>0) then //ghost polys that overlap nothing ?
-repeat
-BlockID:=bi[ii,kk];
-inc(Cbl[BlockID,0]);
-if (Cbl[BlockID,0]+1)>=length(Cbl[BlockID]) then
-setlength(Cbl[BlockID],length(Cbl[BlockID])+1); //+1 to make sure array ends with 0
-Cbl[BlockID,Cbl[BlockID,0]]:=ii; //[Block which poly intersects, current place in array counter[of current poly]] :=
-inc(kk);
-until(bi[ii,kk]=0);
-end;
-
-for ii:=1 to SizeZ*4*SizeX*4 do
-if Cbl[ii,0]=0 then begin
-setlength(Cbl[ii],3);
-Cbl[ii,0]:=1;
-Cbl[ii,1]:=1;
-end;
-
-for ii:=1 to length(v05) do v05[ii]:=0;
-
-kk:=0;         // Polycount; BlockID; ..polys..; Polycount; BlockID; ..polys..; 0-terminator.
-setlength(v06,0);
-setlength(v06,SizeZ*4*SizeX*4+1);
-for ii:=1 to SizeZ*4*SizeX*4 do begin
-inc(kk); j:=0; h:=1; m:=2; m2:=2;
-if Cbl[kk,0]>0 then begin //if there is something to collide with :D
-repeat
-  repeat inc(j); //Finding parent block
-  until((pqtyb[j,1]+pqtyb[j,2]+1)>Cbl[kk,h]);
-if (m+1)>=length(v06[kk]) then setlength(v06[kk],length(v06[kk])+5);
-  v06[kk,m]:=j-1; inc(m);                    //2nd=BlockID; 9th=BlockID
-  inc(v05[kk],4);                            //
-  repeat
-  inc(v06[kk,m-m2]);                         //3rd=qty; 8th=qty
-if (m+1)>=length(v06[kk]) then setlength(v06[kk],length(v06[kk])+5);
-  v06[kk,m]:=Cbl[kk,h]-pqtyb[j,1]-1;         //4th...7th =poly
-  inc(h); inc(m); inc(m2);
-  inc(v05[kk],2);
-  until(((pqtyb[j,1]+pqtyb[j,2]+1)<=Cbl[kk,h])or(Cbl[kk,h]=0));
-if (m+1)>=length(v06[kk]) then setlength(v06[kk],length(v06[kk])+5);
-v06[kk,m]:=0;
-inc(m); m2:=2;                             //f.e. m=8>9
-until(Cbl[kk,h]=0);
-inc(v05[kk],2);                              //0 terminator
-end;
-end;
-
-kk:=0;
-for ii:=1 to Qty.BlocksTotal*16 do
-if v05[ii]>kk then kk:=v05[ii];
-done(MemoLWO);
-MemoLWO.Lines.Add('Longest collision group = '+inttostr(kk div 2));
-
-for kk:=1 to Qty.BlocksTotal*16 do
-v05[kk+1]:=v05[kk+1]+v05[kk];
-for ii:=Qty.BlocksTotal*16 downto 1 do
-v05[ii+1]:=v05[ii]+Qty.BlocksTotal*16*4;
-v05[1]:=Qty.BlocksTotal*16*4;
-Qty.ColliSize:=v05[Qty.BlocksTotal*16+1];
-
-for ii:=1 to length(sqtyb) do begin
-sqtyb[ii,1]:=0;
-sqtyb[ii,2]:=0;
-end;
-
-MemoLWO.Lines.Add('Optimizing surface groups ...');
-setlength(v07,0);
-setlength(v07,100); //start value
-m:=0; ii:=0; h:=1;
-repeat
-inc(ii); //counter for number of groups
-kk:=0;
-if ii>=length(v07) then setlength(v07,length(v07)+100);
-v07[ii].FirstPoly:=m;
-repeat
-inc(kk);     //dramaticaly decreases surface count by aligning neighbour polys surfaces
-if (m+1+kk)>LWQty.Poly[0] then break;                      //Evading range errors
-until((LW.Surf[repoint[m+1]]<>LW.Surf[repoint[m+1+kk]])or(pblock[repoint[m+1]]<>pblock[repoint[m+1+kk]]));
-if (m+1+kk)<=LWQty.Poly[0] then if pblock[repoint[m+1]]<>pblock[repoint[m+1+kk]] then inc(h); //h - block ID
-inc(sqtyb[h,2]);        //one more group of polys - one surfaced
-v07[ii].NumPoly:=kk;
-v07[ii].SurfaceID:=LW.Surf[repoint[m+1]]-1;   //-1
-m:=m+kk;
-until(m>=LWQty.Poly[0]);
-Qty.TexturesTotal:=ii;
-sqtyb[h,2]:=sqtyb[h,2]-1;
-
-inc(sqtyb[1,2]); //First group
-for ii:=1 to SizeX*SizeZ do sqtyb[ii+1,1]:=sqtyb[ii,1]+sqtyb[ii,2];
-done(MemoLWO);
-MemoLWO.Lines.Add('Surface groups - '+inttostr(sqtyb[SizeX*SizeZ,1])+' ('+inttostr(Qty.TexturesTotal)+')');
-
-{Qty.TexturesFiles:=LWQty.Surf[0];
-for ii:=1 to Qty.TexturesFiles do
-if LW.SText[ii]='' then TexName[ii]:='-none'+inttostr(ii)+'-' else TexName[ii]:=LW.SText[ii];}
-
-ii:=1;
-repeat
-TexName[ii]:=LW.ClipTex[ii];//UpperCase(LW.ClipTex[ii][1])+LowerCase(decs(LW.ClipTex[ii],-1,1));
-inc(ii);
-until((LW.ClipTex[ii]='')or(ii=256));
-Qty.TexturesFiles:=ii-1;
-
-for ii:=1 to Qty.TexturesFiles do for kk:=1 to Qty.TexturesFiles do
-if uppercase(TexName[kk])>uppercase(TexName[ii]) then begin //swap
-s:=TexName[ii]; TexName[ii]:=TexName[kk]; TexName[kk]:=s;
-end;
-
-Qty.Materials:=LWQty.Surf[0];
-for ii:=1 to Qty.Materials do with Material[ii] do begin
-for kk:=1 to Qty.TexturesFiles do if uppercase(LW.SText[ii])=uppercase(TexName[kk]) then
-Tex1:=kk-1;
-Tex2:=0;
-Tex3:=0;
-Mode:=32;
-for kk:=1 to 3 do begin
-Matrix[kk,1,1]:=0.1; Matrix[kk,1,2]:=0; Matrix[kk,1,3]:=0; Matrix[kk,1,4]:=0;
-Matrix[kk,2,1]:=0; Matrix[kk,2,2]:=0; Matrix[kk,2,3]:=-0.1; Matrix[kk,2,4]:=0;
-//CRC[kk]:=Adler32CRC(@Matrix[kk,1,1],32); //Matrix checksum
-end;
-MaterialW[ii].Name:=LW.SName[ii];
-MaterialW[ii].GrowGrass:=0;
-MaterialW[ii].Enlite:=0;
-end;
-
-Changes.WRK:=true;
-
-MemoLWO.Lines.Add('Building table of contents ...');
-h:=0;
-for ii:=1 to SizeZ do
-for kk:=1 to SizeX do begin
-  Block[ii,kk].X:=kk-1;
-  Block[ii,kk].Z:=ii-1;
-  Block[ii,kk].FirstPoly :=pqtyb[kk+(ii-1)*SizeX,1];                 //First poly
-  Block[ii,kk].NumPoly   :=pqtyb[kk+(ii-1)*SizeX,2];                 //Length polys
-  Block[ii,kk].FirstTex  :=sqtyb[kk+(ii-1)*SizeX,1];                 //First Surface
-  Block[ii,kk].NumTex    :=sqtyb[kk+(ii-1)*SizeX,2];                 //Number Surfaces
-  Block[ii,kk].FirstObj  :=-1;
-  Block[ii,kk].NumObj    :=0;
-  Block[ii,kk].FirstLight:=-1;
-  Block[ii,kk].NumLight  :=0;
-  if (ii-1)*SizeX+kk>split[h+1,1] then inc(h); //processed block > split block
-  Block[ii,kk].Chunk65k:=h;
-  Block[ii,kk].x1:=0;
-end;
-done(MemoLWO);
-
-FillChar(Tex2Ground,SizeOf(Tex2Ground),#0);
-
-if Qty.GroundTypes=0 then begin
-  Qty.GroundTypes:=1;
-  Ground[1].Name:='Default';
-  Ground[1].Dirt:=0;
-  Ground[1].GripF:=100;
-  Ground[1].GripR:=100;
-  Ground[1].NoiseID:=0;
-  Ground[1].SkidID:=1;
-  Ground[1].NoColliFlag:=0;
-  Ground[1].x8:=0;
-end;
-
-MemoLWO.Lines.Add('QAD in'+ElapsedTime(@OldTime));
-Changes.VTX:=true;
-Changes.IDX:=true;
-Changes.QAD:=true;
-
-OptimizeVerticesClick(nil);
-MemoLWO.Lines.Add('Vertices optimized in'+ElapsedTime(@OldTime));
-PrepareOtherData(nil);
-end;
-
-procedure TForm1.OptimizeVerticesClick(Sender: TObject);
-var
-  i,k,h,x,z:integer;
-  c65k,Ref:integer;
-  UniqV:array of integer; //Uniqueness of vertice
-  DecBy:array of integer; //Decrease by .. for this vertice
-  VertInBlock:array of array of word; //Stores ID of Block in which this vertice is used
-  VCount:array of integer; //Number of vertices per Block
-begin
-setlength(UniqV,VTXQty[64]+1);
-setlength(DecBy,VTXQty[64]+1);
-setlength(VertInBlock,VTXQty[64]+1);
-setlength(VCount,Qty.BlocksX*Qty.BlocksZ+1);
-
-  for K:=4 to VTXQty[64] do begin   //scan all points starting from poly#2
-    UniqV[K]:=0;                    //assume each point is unique
-    for I:=K-1 downto max(1,K-1500) do  //check previous points (starting from nearest, till end of current range)
-    if(VTX[I].X=VTX[K].X)and(VTX[I].Y=VTX[K].Y)and(VTX[I].Z=VTX[K].Z)and
-      (VTX[I].nX=VTX[K].nX)and(VTX[I].nY=VTX[K].nY)and(VTX[I].nZ=VTX[K].nZ)and
-      (VTX[I].U=VTX[K].U)and(VTX[I].V=VTX[K].V)and
-      (VTX[I].BlendR=VTX[K].BlendR)and(VTX[I].BlendG=VTX[K].BlendG)and
-      (VTX[I].BlendB=VTX[K].BlendB)and(VTX[I].Shadow=VTX[K].Shadow)and //Shadows are generated per XYZ, so no need to remove them from check here
-      (VTX[I].B=VTX[K].B)and(VTX[I].G=VTX[K].G)and(VTX[I].R=VTX[K].R)and(VTX[I].A=VTX[K].A)
-    then begin                          //if such point already exist
-      Ref:=I;
-      if UniqV[Ref]<>0 then  //Find original vertice instead of referencing to a reference
-        repeat Ref:=UniqV[Ref]; until(UniqV[Ref]=0);
-      UniqV[K]:=Ref;                    //make reference to it
-      inc(UniqV[0]);                    //Statistic
-      break;                            //break comparision for speedup
-    end;
-  end;
-MemoLWO.Lines.Add(inttostr(VTXQty[64])+' vertices before optimization');
-
-//Remap polys to unique vertices
-for i:=1 to Qty.Polys do
-  for h:=1 to 3 do
-    if UniqV[v[i,h]]<>0 then v[i,h]:=UniqV[v[i,h]];
-
-//Part one is done, all polys redirected to unique vertices,
-//now we can pack vertices and drop unused ones.
-
-//Need to know how much each vertice changes its place when packed up
-Ref:=0;
-for i:=1 to VTXQty[64] do begin
-  if UniqV[i]<>0 then inc(Ref);
-  DecBy[i]:=Ref;
-  if UniqV[i]<>0 then DecBy[i]:=0;
-end;
-
-//Pack vertices
-for i:=1 to VTXQty[64] do
-  VTX[i-DecBy[i]]:=VTX[i];
-
-setlength(VTX,VTXQty[64]-UniqV[0]+1); //Cut the rest
-
-//Update indices to packed vertices
-for i:=1 to Qty.Polys do
-  for h:=1 to 3 do
-    v[i,h]:=v[i,h]-DecBy[v[i,h]];
-
-//Now everything is tightly packed and it's time to deal with splitting to 65k vertices chunks
-//But how?
-//1 - Make each Block vertices independent from neighbour Blocks
-//2 -
-
-//First we need to know in which Blocks each vertice is used (upto 4 Blocks?)
-for i:=1 to Qty.BlocksX*Qty.BlocksZ do begin
-  x:=(i-1) mod Qty.BlocksX+1;
-  z:=(i-1) div Qty.BlocksX+1;
-  //if i= Qty.BlocksX*Qty.BlocksZ then
-  //x:=20;
-  Ref:=0;
-  for k:=Block[z,x].FirstPoly+1 to Block[z,x].FirstPoly+Block[z,x].NumPoly do
-    for h:=1 to 3 do begin
-      if length(VertInBlock[v[k,h]])=0 then begin
-        setlength(VertInBlock[v[k,h]],2); //Init
-        VertInBlock[v[k,h],0]:=1; //Counter
-        VertInBlock[v[k,h],1]:=i; //BlockID
-        inc(Ref);
-      end else begin
-        if VertInBlock[v[k,h],VertInBlock[v[k,h],0]]<>i then begin
-          inc(VertInBlock[v[k,h],0]);
-          if length(VertInBlock[v[k,h]])=VertInBlock[v[k,h],0] then
-            setlength(VertInBlock[v[k,h]],VertInBlock[v[k,h],0]+3);
-          VertInBlock[v[k,h],VertInBlock[v[k,h],0]]:=i;
-          inc(Ref);
-        end;
-      end;
-    end;
-  VCount[i]:=Ref;
-end;
-
-//Using own vertices for each Block adds only ~1% overuse, we can live with that
-FillChar(VTXQty,SizeOf(VTXQty),#0);
-c65k:=1;
-for i:=1 to Qty.BlocksX*Qty.BlocksZ do begin
-  x:=(i-1) mod Qty.BlocksX+1;
-  z:=(i-1) div Qty.BlocksX+1;
-  if VTXQty[c65k]+VCount[i]>65535 then begin
-    inc(c65k);
-    VTXQty[c65k]:=0;
-  end;
-  Block[z,x].Chunk65k:=c65k-1;
-  inc(VTXQty[c65k],VCount[i]);
-end;
-
-for i:=1 to 63 do inc(VTXQty[64],VTXQty[i]);
-
-setlength(VTX,VTXQty[64]*2+1); //Use second half to build new array to save effort on writing smart remap stuff
-
-//Now comes boring part - remap polys
-Ref:=1;
-for i:=1 to Qty.BlocksX*Qty.BlocksZ do begin
-  x:=(i-1) mod Qty.BlocksX+1;
-  z:=(i-1) div Qty.BlocksX+1;
-  setlength(UniqV,0); //Clearup for each new Block
-  setlength(UniqV,VTXQty[64]+1);
-  for k:=Block[z,x].FirstPoly+1 to Block[z,x].FirstPoly+Block[z,x].NumPoly do
-    for h:=1 to 3 do begin
-      if UniqV[v[k,h]]=0 then begin
-        UniqV[v[k,h]]:=Ref;
-        VTX[VTXQty[64]+Ref]:=VTX[v[k,h]];
-        inc(Ref);
-      end;
-        v[k,h]:=UniqV[v[k,h]];
-    end;
-end;
-
-//Final check for error
-for i:=1 to Qty.Polys do
-  for h:=1 to 3 do
-    if (v[i,h]<=0)or(v[i,h]>=Ref) then
-      Assert(false,'Indice out of range');
-
-//Put vertices back in place
-for i:=1 to VTXQty[64] do
-  VTX[i]:=VTX[i+VTXQty[64]];
-
-MemoLWO.Lines.Add(inttostr(VTXQty[64])+' vertices left');
-
-setlength(VTX,VTXQty[64]+1);
-setlength(UniqV,0);
-setlength(DecBy,0);
-setlength(VertInBlock,0);
-setlength(VCount,0);
-
-Changes.QAD:=true;
-Changes.VTX:=true;
-Changes.IDX:=true;
-
-//Reload the scenery
-list_id:=0;
-list_ogl:=0;
-end;
-
-procedure TForm1.PrepareOtherData(Sender: TObject);
-begin
-MemoLWO.Lines.Add('Preparing misc data');
-
-SceneryPath:=fOptions.WorkDir+'Scenarios\'+Scenery+'\'+Version+'\';
-
-AutoImportTexturesList:=SceneryPath+Scenery+'_'+Version+'_TexturesAssignList.dat';
-if (CBLoadTexList.Checked)and(FileExists(AutoImportTexturesList)) then begin
-ImportTexturesClick(nil);
-MemoLWO.Lines.Add('Loaded '+Scenery+'_'+Version+'_TexturesAssignList.dat');
-end;
-
-AutoImportMaterialsList:=SceneryPath+Scenery+'_'+Version+'_MaterialsList.dat';
-if (CBLoadMatList.Checked)and(FileExists(AutoImportMaterialsList)) then begin
-ImportMaterialsClick(nil);
-MemoLWO.Lines.Add('Loaded '+Scenery+'_'+Version+'_MaterialsList.dat');
-end;
-
-MemoLWO.Lines.Add('Applying lightning ...');
-LightApplyClick(LoadLWOScen);
-done(MemoLWO);
-
-MemoLWO.Lines.Add('Rebuilding chunk modes ...');
-ComputeChunkMode(nil);
-done(MemoLWO);
-
-RecalculatematerialCRC1Click(nil);
-
-list_id:=0;
-list_ogl:=0;
-list_tx:=0;
-SendQADtoUI('All');
-ScnRefresh:=false;
-SaveScenery.Enabled:=true;
-SaveButton:=true;
-
-MemoLWO.Lines.Add('['+inttostr(SizeX)+'x'+inttostr(SizeZ)+'] '+floattostr(SizeX*102.4/1000)+' x '+floattostr(SizeZ*102.4/1000)+'km');
-
-setlength(Cbl,0);
-//setlength(cc,0);
-setlength(Bi,0);
-setlength(repoint,0);
-setlength(recreat,0);
-setlength(LW.XYZ,0);
-setlength(LW.UV,0);
-setlength(LW.Nv,0);
-setlength(LW.Np,0);
-setlength(LW.VW,0);
-setlength(LW.DUV,0);
-setlength(LW.RGBA,0);
-setlength(LW.Poly,0);
-setlength(LW.SName,0);
-setlength(LW.SText,0);
-MemoLWO.Lines.Add('LWO data cleared');
-end;
 
 procedure TForm1.ComputeChunkMode(Sender: TObject);
 var i,k,x1,z1:integer;
@@ -3574,7 +2554,7 @@ if Qty.ObjectFiles<=1 then begin {RemObject.Enabled:=false;} exit; end;
 
         m:=0; h:=0; //number of objects to be removed
         for i:=1 to Qty.ObjectsTotal do if Obj[i].ID+1=ID then inc(m);
-        for i:=1 to 32 do for k:=1 to TOBHead[i].Qty do if TOB[i,k].ID+1=ID then inc(h);
+        for i:=1 to MAX_TRACKS do for k:=1 to TOBHead[i].Qty do if TOB[i,k].ID+1=ID then inc(h);
         k:=0;
         for i:=1 to SNIHead.Obj do if SNIObj[i].objID+1=ID then inc(k);
 
@@ -3765,38 +2745,40 @@ var i:integer; WSS:string;
 begin
 if not SaveButton then exit;
 case RG1.ItemIndex of
-0: Version:='V1';
-1: Version:='V2';
-2: Version:='V3';
+0: SceneryVersion:='V1';
+1: SceneryVersion:='V2';
+2: SceneryVersion:='V3';
 end;
 WSS:=fOptions.WorkDir+'Scenarios\'+Scenery+'\';
 CreateDir(fOptions.WorkDir+'AddOns\');
 CreateDir(fOptions.WorkDir+'AddOns\Sceneries\');
 CreateDir(fOptions.WorkDir+'AddOns\Sceneries\'+Scenery+'\');
-CreateDir(fOptions.WorkDir+'Scenarios\'+Scenery+'\');
-CreateDir(fOptions.WorkDir+'Scenarios\'+Scenery+'\'+Version+'\');
-CreateDir(fOptions.WorkDir+'Scenarios\'+Scenery+'\'+Version+'\Extra\');
-CreateDir(fOptions.WorkDir+'Scenarios\'+Scenery+'\'+Version+'\Tracks\');
-if Changes.QAD then SaveQAD(WSS+Version+'\'+Scenery+'.qad');
-if Changes.WRK then SaveWRK(WSS+Version+'\'+Scenery+' WorkFile.wrk'); //save after qad, to get materials sorted
-if Changes.IDX then SaveIDX(WSS+Version+'\'+Scenery+'.idx');
-if Changes.VTX then SaveVTX(WSS+Version+'\'+Scenery+'.vtx');
-if Changes.SNI then SaveSNI(WSS+Version+'\'+Scenery+'.sni');
-if Changes.LVL then SaveLVL(WSS+Version+'\'+Scenery+'.lvl');
-if Changes.SMP then SaveSMP(WSS+Version+'\Extra\ShdwMap.smp');
-if Changes.SKY then SaveSKY(WSS+Version+'\'+Scenery+'.sky');
-for i:=1 to 4 do if Changes.RO[i] then SaveRO_(WSS+Version+'\'+Scenery,i,CBOptimizeGrass.Checked);
-for i:=1 to 32 do if Changes.TOB[i] then SaveTOB(WSS+Version+'\Tracks\'+Scenery+'_'+int2fix(i,2)+'.tob',i);
+CreateDir(WSS);
+CreateDir(WSS+SceneryVersion+'\');
+CreateDir(WSS+SceneryVersion+'\Extra\');
+CreateDir(WSS+SceneryVersion+'\Tracks\');
+if Changes.QAD then SaveQAD(WSS+SceneryVersion+'\'+Scenery+'.qad');
+if Changes.WRK then SaveWRK(WSS+SceneryVersion+'\'+Scenery+' WorkFile.wrk'); //save after qad, to get materials sorted
+if Changes.IDX then SaveIDX(WSS+SceneryVersion+'\'+Scenery+'.idx');
+if Changes.VTX then SaveVTX(WSS+SceneryVersion+'\'+Scenery+'.vtx');
+if Changes.SNI then SaveSNI(WSS+SceneryVersion+'\'+Scenery+'.sni');
+if Changes.LVL then SaveLVL(WSS+SceneryVersion+'\'+Scenery+'.lvl');
+if Changes.SMP then SaveSMP(WSS+SceneryVersion+'\Extra\ShdwMap.smp');
+if Changes.SKY then SaveSKY(WSS+SceneryVersion+'\'+Scenery+'.sky');
+for i:=1 to 4 do if Changes.RO[i] then SaveRO_(WSS+SceneryVersion+'\'+Scenery,i,CBOptimizeGrass.Checked);
+for i:=1 to MAX_TRACKS do if Changes.TOB[i] then SaveTOB(WSS+SceneryVersion+'\Tracks\'+Scenery+'_'+int2fix(i,2)+'.tob',i);
 
 //Files below are same for all Versions
-for i:=1 to 32 do if Changes.TRK[i] then begin
-if DirectoryExists(WSS+'V1\') then SaveTRK(WSS+'V1\Tracks\'+Scenery+'_'+int2fix(i,2)+'.trk',i);
-if DirectoryExists(WSS+'V2\') then SaveTRK(WSS+'V2\Tracks\'+Scenery+'_'+int2fix(i,2)+'.trk',i);
-if DirectoryExists(WSS+'V3\') then SaveTRK(WSS+'V3\Tracks\'+Scenery+'_'+int2fix(i,2)+'.trk',i); end;
-for i:=1 to 32 do if Changes.WTR[i] then begin
-if DirectoryExists(WSS+'V1\') then SaveWTR(WSS+'V1\Tracks\'+Scenery+'_'+int2fix(i,2)+'.wtr',i);
-if DirectoryExists(WSS+'V2\') then SaveWTR(WSS+'V2\Tracks\'+Scenery+'_'+int2fix(i,2)+'.wtr',i);
-if DirectoryExists(WSS+'V3\') then SaveWTR(WSS+'V3\Tracks\'+Scenery+'_'+int2fix(i,2)+'.wtr',i); end;
+for i:=1 to MAX_TRACKS do if Changes.TRK[i] then begin
+  if DirectoryExists(WSS+'V1\') then SaveTRK(WSS+'V1\Tracks\'+Scenery+'_'+int2fix(i,2)+'.trk',i);
+  if DirectoryExists(WSS+'V2\') then SaveTRK(WSS+'V2\Tracks\'+Scenery+'_'+int2fix(i,2)+'.trk',i);
+  if DirectoryExists(WSS+'V3\') then SaveTRK(WSS+'V3\Tracks\'+Scenery+'_'+int2fix(i,2)+'.trk',i);
+end;
+for i:=1 to MAX_WP_TRACKS do if Changes.WTR[i] then begin
+  if DirectoryExists(WSS+'V1\') then SaveWTR(WSS+'V1\Tracks\'+Scenery+'_'+int2fix(i,2)+'.wtr',i);
+  if DirectoryExists(WSS+'V2\') then SaveWTR(WSS+'V2\Tracks\'+Scenery+'_'+int2fix(i,2)+'.wtr',i);
+  if DirectoryExists(WSS+'V3\') then SaveWTR(WSS+'V3\Tracks\'+Scenery+'_'+int2fix(i,2)+'.wtr',i);
+end;
 if DirectoryExists(WSS+'V1\') then SaveTRK_DAT(WSS+'V1\Tracks\tracks.dat');
 if DirectoryExists(WSS+'V2\') then SaveTRK_DAT(WSS+'V2\Tracks\tracks.dat');
 if DirectoryExists(WSS+'V3\') then SaveTRK_DAT(WSS+'V3\Tracks\tracks.dat');
@@ -3848,22 +2830,24 @@ end;
 procedure TForm1.CBTexChange(Sender: TObject);
 var MatID,ID:integer;
 begin
-if MatRefresh then exit;
-ID:=(Sender as TComboBox).ItemIndex;
-MatID:=ListMaterials.ItemIndex+1;
-if MatID=0 then exit;
+  if MatRefresh then exit;
 
-case (Sender as TControl).Name[6] of
-  '1': Material[MatID].Tex1:=ID;
-  '2': Material[MatID].Tex2:=ID;
-  '3': Material[MatID].Tex3:=ID;
-end;
+  MatID:=ListMaterials.ItemIndex+1;
+  if MatID=0 then exit;
+  ID:=(Sender as TComboBox).ItemIndex+1;
+  if ID=0 then exit;
 
-RecalculatematerialCRC1Click(nil);
+  case (Sender as TControl).Name[6] of
+    '1': Material[MatID].Tex1 := ID-1;
+    '2': Material[MatID].Tex2 := ID-1;
+    '3': Material[MatID].Tex3 := ID-1;
+  end;
+
+  RecalculatematerialCRC1Click(nil);
 
 MatTexLay.ActivePageIndex:=strtoint((Sender as TControl).Name[6])-1;
-MatTexLayChange(nil);
-Changes.QAD:=true;
+  MatTexLayChange(nil);
+  Changes.QAD:=true;
 end;
 
 procedure TForm1.QADtoUIClick(Sender: TObject);
@@ -3977,12 +2961,12 @@ Label46.Caption:='Routes list: '+inttostr(SNIHead.Obj);
 end;
 
 if (Sender='All')or(Sender='Triggers') then begin
-CBTriggerType.Clear;
-for i:=1 to 16 do CBTriggerType.AddItem(TRLnames[i],nil);
-ListTrig.Clear;
-for i:=1 to TRLQty do
-ListTrig.Items.Add(inttostr(i)+'. '+TRLNames[TRL[i].id1]);
-ListTrig.ItemIndex:=-1;
+  CBTriggerType.Clear;
+  for i:=1 to 16 do CBTriggerType.AddItem(TRLnames[i],nil);
+  ListTrig.Clear;
+  for i:=1 to TRLQty do
+  ListTrig.Items.Add(inttostr(i)+'. '+TRLNames[TRL[i].id1]);
+  ListTrig.ItemIndex:=-1;
 end;
 
 if (Sender='All')or(Sender='Tracks') then begin
@@ -4375,7 +3359,7 @@ end;
 procedure TForm1.ExportTexturesListClick(Sender: TObject);
 var ii:integer;
 begin
-if not RunSaveDialog(SaveDialog,Scenery+'_'+Version+'_TexturesAssignList.dat',
+if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_TexturesAssignList.dat',
        SceneryPath,'Textures list (TexturesAssignList.dat)|*.dat') then exit;
 assignfile(ft,SaveDialog.FileName); rewrite(ft);
 for ii:=1 to Qty.TexturesFiles do begin
@@ -4531,10 +3515,14 @@ end;
 
 procedure TForm1.ResetViewClick(Sender: TObject);
 begin
-if yRot=270 then begin
-xPos:=0; yPos:=-1000; zPos:=0; Zoom:=0.256;
-end;
-xRot:=0; yRot:=270;
+  if yRot=270 then begin
+    xPos:=0;
+    yPos:=-1000;
+    zPos:=0;
+    Zoom:=0.256;
+  end;
+  xRot:=0;
+  yRot:=270;
 end;
 
 procedure TForm1.PageControl1Change(Sender: TObject);
@@ -4645,7 +3633,7 @@ end;
 procedure TForm1.ExportSoundsClick(Sender: TObject);
 var ii:integer;
 begin
-if not RunSaveDialog(SaveDialog,Scenery+'_'+Version+'_SoundsList.dat',
+if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_SoundsList.dat',
        SceneryPath,'Sounds list (SoundsList.dat)|*.dat') then exit;
 assignfile(f,SaveDialog.FileName); rewrite(f,1);
 blockwrite(f,'STKit2'+#0+#0,8);    //Name
@@ -4875,6 +3863,7 @@ ListTOB2Click(nil);
 Changes.TOB[ID]:=true;
 end;
 
+
 procedure TForm1.ListSNINodesClick(Sender: TObject);
 var ID,ID2:integer;
 begin
@@ -4889,6 +3878,7 @@ SNI_Node_B.Value:=SNINode[SNIObj[ID].firstNode+ID2].B;
 SNINodesRefresh:=false;
 end;
 
+
 procedure TForm1.ListSNINodesDblClick(Sender: TObject);
 var ID,ID2:integer;
 begin
@@ -4898,6 +3888,7 @@ xPos:=SNINode[SNIObj[ID].firstNode+ID2].X;
 yPos:=SNINode[SNIObj[ID].firstNode+ID2].Y;
 zPos:=SNINode[SNIObj[ID].firstNode+ID2].Z;
 end;
+
 
 procedure TForm1.ObjChangeInstance(Sender: TObject);
 var ID,ii:integer; ss:string;
@@ -4927,6 +3918,7 @@ if ObjInShadow.Checked then Obj[ID].InShadow:=1 else Obj[ID].InShadow:=0;
   end;
 Changes.QAD:=true;
 end;
+
 
 procedure TForm1.AddObjectClick(Sender: TObject);
 begin
@@ -5186,7 +4178,7 @@ end;
 procedure TForm1.Button15Click(Sender: TObject);
 var ii:integer;
 begin
-if not RunSaveDialog(SaveDialog,Scenery+'_'+Version+'_InstancesList.dat',
+if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_InstancesList.dat',
        SceneryPath,'Objects list (InstancesList.dat)|*.dat') then exit;
 
 assignfile(f,SaveDialog.FileName); rewrite(f,1);
@@ -5237,7 +4229,7 @@ end;
 procedure TForm1.ExportGroundsClick(Sender: TObject);
 var ii:integer;
 begin
-if not RunSaveDialog(SaveDialog,Scenery+'_'+Version+'_GroundsList.dat',
+if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_GroundsList.dat',
        SceneryPath,'Grounds list (GroundsList.dat)|*.dat') then exit;
 
 assignfile(f,SaveDialog.FileName); rewrite(f,1);
@@ -5281,21 +4273,21 @@ procedure TForm1.MBWRLightBlendFix(Sender: TObject);
 var i:integer;
 begin
 for i:=1 to VTXQty[64] do begin
-if Version='V1' then begin // DarkBlue Morning
-VTX[i].R:=EnsureRange(VTX[i].R+40,0,255); //This way we keep tunnel lights
-VTX[i].G:=EnsureRange(VTX[i].G+45,0,255);
-VTX[i].B:=EnsureRange(VTX[i].B+55,0,255);
-end;
-if Version='V2' then begin // LightBlue Noon
-VTX[i].R:=EnsureRange(VTX[i].R+55,0,255);
-VTX[i].G:=EnsureRange(VTX[i].G+60,0,255);
-VTX[i].B:=EnsureRange(VTX[i].B+75,0,255);
-end;
-if Version='V3' then begin // LightBlue Evening
-VTX[i].R:=EnsureRange(VTX[i].R+60,0,255);
-VTX[i].G:=EnsureRange(VTX[i].G+60,0,255);
-VTX[i].B:=EnsureRange(VTX[i].B+65,0,255);
-end;
+  if SceneryVersion='V1' then begin // DarkBlue Morning
+    VTX[i].R:=EnsureRange(VTX[i].R+40,0,255); //This way we keep tunnel lights
+    VTX[i].G:=EnsureRange(VTX[i].G+45,0,255);
+    VTX[i].B:=EnsureRange(VTX[i].B+55,0,255);
+  end;
+  if SceneryVersion='V2' then begin // LightBlue Noon
+    VTX[i].R:=EnsureRange(VTX[i].R+55,0,255);
+    VTX[i].G:=EnsureRange(VTX[i].G+60,0,255);
+    VTX[i].B:=EnsureRange(VTX[i].B+75,0,255);
+  end;
+  if SceneryVersion='V3' then begin // LightBlue Evening
+    VTX[i].R:=EnsureRange(VTX[i].R+60,0,255);
+    VTX[i].G:=EnsureRange(VTX[i].G+60,0,255);
+    VTX[i].B:=EnsureRange(VTX[i].B+65,0,255);
+  end;
 end;
 list_id:=0;
 Changes.VTX:=true;
@@ -5349,7 +4341,7 @@ end;
 procedure TForm1.Button18Click(Sender: TObject);
 var ii:integer;
 begin
-if not RunSaveDialog(SaveDialog,Scenery+'_'+Version+'_ObjectsList.dat',
+if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_ObjectsList.dat',
        SceneryPath,'Objects list (ObjectsList.dat)|*.dat') then exit;
 
 assignfile(f,SaveDialog.FileName); rewrite(f,1);
@@ -5881,7 +4873,7 @@ end;
 procedure TForm1.ExportMaterialsClick(Sender: TObject);
 var i:integer;
 begin
-if not RunSaveDialog(SaveDialog,Scenery+'_'+Version+'_MaterialsList.dat',
+if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_MaterialsList.dat',
        SceneryPath,'Materials list (MaterialsList.dat)|*.dat') then exit;
 
 assignfile(f,SaveDialog.FileName); rewrite(f,1);
@@ -6221,7 +5213,7 @@ end;
 
 procedure TForm1.ExportLightsClick(Sender: TObject);
 begin
-if not RunSaveDialog(SaveDialog,Scenery+'_'+Version+'_LightsList.dat',
+if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_LightsList.dat',
        SceneryPath,'Lights list (LightsList.dat)|*.dat') then exit;
 
 assignfile(f,SaveDialog.FileName); rewrite(f,1);
@@ -6271,7 +5263,7 @@ end;
 procedure TForm1.AddWPTrackClick(Sender: TObject);
 var i:integer;
 begin
-if TracksQtyWP>=32 then exit;
+if TracksQtyWP>=MAX_WP_TRACKS then exit;
 inc(TracksQtyWP);
 SendQADtoUI('Tracks');
 WTR[TracksQtyWP].NodeQty:=2;
@@ -6294,7 +5286,7 @@ end;
 procedure TForm1.AddTrackClick(Sender: TObject);
 var i:integer;
 begin
-if TracksQty>=32 then exit;
+if TracksQty>=MAX_TRACKS then exit;
 inc(TracksQty);
 for i:=TracksQty to TracksQty+TracksQtyWP-1 do
   AddonScenery.Track[i+1]:=AddonScenery.Track[i];
@@ -6308,35 +5300,36 @@ end;
 procedure TForm1.RemTrackClick(Sender: TObject);
 var i:integer;
 begin
-if TrackID<>0 then begin
-  for i:=TrackID to TracksQty-1 do begin
-    TRKQty[i]:=TRKQty[i+1];
-    TRK[i]:=TRK[i+1];
-    TOBHead[i]:=TOBHead[i+1];
-    TOB[i]:=TOB[i+1];
-    MakeTrack[i]:=MakeTrack[i+1];
-    Changes.TRK[i]:=true;
-    Changes.TOB[i]:=true;
+  if TrackID<>0 then begin
+    for i:=TrackID to TracksQty-1 do begin
+      TRKQty[i]      := TRKQty[i+1];
+      TRK[i]         := TRK[i+1];
+      TOBHead[i]     := TOBHead[i+1];
+      TOB[i]         := TOB[i+1];
+      MakeTrack[i]   := MakeTrack[i+1];
+      Changes.TRK[i] := true;
+      Changes.TOB[i] := true;
+    end;
+    dec(TracksQty);
   end;
-  dec(TracksQty);
-end;
 
-if TrackWP<>0 then begin
-  for i:=TrackWP to TracksQtyWP-1 do begin
-    WTR[i]:=WTR[i+1];
-    Changes.WTR[i]:=true;
+  if TrackWP<>0 then begin
+    for i:=TrackWP to TracksQtyWP-1 do begin
+      WTR[i]         := WTR[i+1];
+      Changes.WTR[i] := true;
+    end;
+    dec(TracksQtyWP);
   end;
-  dec(TracksQtyWP);
-end;
 
-for i:=TrackID+TrackWP to TracksQtyWP+TracksQty do
-  AddonScenery.Track[i]:=AddonScenery.Track[i+1];
+  if (TrackID+TrackWP <> 0) then
+  for i:=TrackID+TrackWP to TracksQtyWP+TracksQty do
+    AddonScenery.Track[i]:=AddonScenery.Track[i+1];
 
-AddonScenery.TrackQty:=TracksQty+TracksQtyWP;
+  AddonScenery.TrackQty := TracksQty+TracksQtyWP;
 
-SendQADtoUI('Tracks');
-Changes.SC2:=true;
-Changes.WRK:=true;
+  SendQADtoUI('Tracks');
+  Changes.SC2 := true;
+  Changes.WRK := true;
 end;
 
 procedure TForm1.Panel1DblClick(Sender: TObject);
@@ -7488,7 +6481,7 @@ begin
 if SKYQty>=32 then exit; //limit to 32
 inc(SKYQty);
 SKYIndex:=SKYQty;
-SKY[SKYIndex].SkyTex:='Clouds'+Version+'_'+int2fix(SKYIndex,2);
+SKY[SKYIndex].SkyTex:='Clouds'+SceneryVersion+'_'+int2fix(SKYIndex,2);
 SKY[SKYIndex].FogTab:='rangefogtable_'+int2fix(SKYIndex,2);
 SKY[SKYIndex].FogCol.R:=$B8;//B8BDCB
 SKY[SKYIndex].FogCol.G:=$BD;
@@ -7569,7 +6562,7 @@ end;
 procedure TForm1.AutoObjectsClick(Sender: TObject);
 var SearchRec:TSearchRec; s:string;
 begin
-ChDir(fOptions.WorkDir+'Scenarios\'+Scenery+'\'+Version+'\Objects\');
+ChDir(fOptions.WorkDir+'Scenarios\'+Scenery+'\'+SceneryVersion+'\Objects\');
 FindFirst('*.mox', faAnyFile, SearchRec);
     repeat
     if (SearchRec.Name<>'')and(SearchRec.Name<>'.')and(SearchRec.Name<>'..') then begin
@@ -7847,7 +6840,7 @@ begin
 
 if not OpenALInitDone then begin
     InitOpenAL; //Initialize OpenAL
-    AlutInit(nil,argv);
+    AlutInit(nil, argv);
 end;
 
 QtyWave:=0;
@@ -7981,7 +6974,7 @@ var SearchRec:TSearchRec; s:string; i,k,count:integer; TexAlreadyExists:boolean;
 begin
 
   //Make a list of textures that can be added to the list
-  ChDir(fOptions.WorkDir+'Scenarios\'+Scenery+'\'+Version+'\Textures\');
+  ChDir(fOptions.WorkDir+'Scenarios\'+Scenery+'\'+SceneryVersion+'\Textures\');
   FindFirst('*.ptx', faAnyFile, SearchRec);
     count:=0;
     repeat
@@ -8367,7 +7360,7 @@ ChDir(Sender);
 for ii:=1 to LWQty.Poly[0] do for h:=1 to 3 do
 LW.DUV[ii,h,2]:=1-LW.DUV[ii,h,2];
 
-PrepareLWOData(nil);
+PrepareLWOData();
 end;
 
 procedure TForm1.LoadSCGTFile(Sender: string);
@@ -8521,6 +7514,11 @@ Panel11.Width:=Panel1.Width div 2;
 Panel11.Height:=Panel1.Height div 2;
 wglMakeCurrent(h_DC, h_RC);
 RenderResize(nil);
+end;
+
+procedure TForm1.OptimizeVerticesClick(Sender: TObject);
+begin
+  OptimizeVerticesClick_();
 end;
 
 end.

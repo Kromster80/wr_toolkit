@@ -5,7 +5,7 @@ unit Unit_sc2;
 {$ENDIF}
 
  interface
-uses Unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture;
+uses Unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture, Defaults;
 
   procedure AutoFill_SC2(Sender: TObject);
   procedure EditSC2Click(Sender: TObject);
@@ -21,7 +21,7 @@ var
     AddonScenery:record
     EngineName,BGround,Name,SceneryFlag:string;
     FreeRideID,TrackQty:integer;
-      Track:array[1..32+32]of record
+      Track:array[1..MAX_TRACKS+MAX_WP_TRACKS]of record
       TrackNo:byte;
       Name:string;
       CheckPoint:byte;
@@ -55,14 +55,14 @@ with AddonScenery do begin
   Comment    := '';
 end;
 
-for i:=1 to EnsureRange(TracksQty,0,32) do
+for i:=1 to EnsureRange(TracksQty, 0, MAX_TRACKS) do
 with AddonScenery.Track[i] do begin
   Name:=AddonScenery.Name+' '+inttostr(i);
   Direction:=1;
   TypeID:=1;
 end;
 
-for i:=1 to EnsureRange(TracksQtyWP,0,32) do
+for i:=1 to EnsureRange(TracksQtyWP, 0, MAX_WP_TRACKS) do
 with AddonScenery.Track[i+TracksQty] do begin
   Name:=AddonScenery.Name+' WP'+inttostr(i);
   Direction:=1;
@@ -228,7 +228,7 @@ begin
     Form1.SC2_BGImage.Text        :='BG_'+Form1.SC2_EngName.Text+'.tga';
     Form1.SC2_ScnFlag.Text        := 'Flag'+Form1.SC2_EngName.Text+'.tga';
     Form1.SC2_FreeRideTrack.Value := FreeRideID;
-    Form1.SC2_ScnTracks.Value     := EnsureRange(TracksQty,0,32)+EnsureRange(TracksQtyWP,0,32);//TrackQty;
+    Form1.SC2_ScnTracks.Value     := EnsureRange(TracksQty, 0, MAX_TRACKS) + EnsureRange(TracksQtyWP, 0, MAX_WP_TRACKS);//TrackQty;
     Form1.SC2_Author.Text         := Author;
     Form1.SC2_Converter.Text      := Converter;
     Form1.SC2_Contact.Text        := Contact;
@@ -250,7 +250,7 @@ with AddonScenery do begin
 BGround:='BG_'+Form1.SC2_EngName.Text+'.tga';
 SceneryFlag:='Flag'+Form1.SC2_EngName.Text+'.tga';
 //FreeRideID:=
-TrackQty:=EnsureRange(TracksQty,0,32)+EnsureRange(TracksQtyWP,0,32);
+TrackQty:=EnsureRange(TracksQty,0,MAX_TRACKS)+EnsureRange(TracksQtyWP,0,MAX_WP_TRACKS);
 //Author:=
 //Converter:=
 //Contact:=

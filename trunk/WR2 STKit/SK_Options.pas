@@ -61,7 +61,7 @@ begin
   fWorkDir       := f.ReadString ('STKit2', 'WR2 Folder',  '');
 
   if not DirectoryExists(fWorkDir) then begin
-    SelectDirectory('Folder', fExeDir, fWorkDir); //it's quite likely that EXE is in WR2 folder
+    SelectDirectory('Browse for World Racing 2 folder', '', fWorkDir); //it's quite likely that EXE is in WR2 folder
     fWorkDir := IncludeTrailingPathDelimiter(fWorkDir);
     if not DirectoryExists(fWorkDir) then
       fWorkDir := ''; //Confirm that it's failed

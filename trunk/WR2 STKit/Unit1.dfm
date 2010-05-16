@@ -118,7 +118,7 @@ object Form1: TForm1
     Top = 40
     Width = 296
     Height = 623
-    ActivePage = TabSheet18
+    ActivePage = TabSheet9
     Anchors = [akLeft, akTop, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -129,7 +129,7 @@ object Form1: TForm1
     ParentFont = False
     Style = tsButtons
     TabHeight = 47
-    TabIndex = 13
+    TabIndex = 0
     TabOrder = 1
     TabStop = False
     TabWidth = 34
@@ -190,7 +190,6 @@ object Form1: TForm1
         Enabled = False
         TabOrder = 1
         Visible = False
-        OnClick = PrepareLWOData
       end
       object Button9: TButton
         Left = 146
@@ -201,7 +200,6 @@ object Form1: TForm1
         Enabled = False
         TabOrder = 3
         Visible = False
-        OnClick = CompileVTX_IDX
       end
       object Button8: TButton
         Left = 146
@@ -212,7 +210,6 @@ object Form1: TForm1
         Enabled = False
         TabOrder = 2
         Visible = False
-        OnClick = CompileQAD
       end
       object Button7: TButton
         Left = 146
@@ -223,7 +220,6 @@ object Form1: TForm1
         Enabled = False
         TabOrder = 5
         Visible = False
-        OnClick = PrepareOtherData
       end
       object ReloadLWO: TBitBtn
         Left = 2
@@ -760,7 +756,7 @@ object Form1: TForm1
         Left = 2
         Top = 376
         Width = 285
-        Height = 25
+        Height = 26
         ActivePage = TabSheet12
         TabIndex = 0
         TabOrder = 6
@@ -822,7 +818,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 2
         OnChange = CBTexChange
       end
@@ -833,7 +829,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 3
         OnChange = CBTexChange
       end
@@ -844,7 +840,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 4
         OnChange = CBTexChange
       end
@@ -1540,7 +1536,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 16
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 23
         OnChange = ObjChangeInstance
       end
@@ -4081,7 +4077,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 16
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 11
         OnChange = TOB_Change
       end
@@ -5508,7 +5504,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 12
-        ItemHeight = 0
+        ItemHeight = 13
         Sorted = True
         TabOrder = 11
         OnChange = EditSkyChange
@@ -5521,7 +5517,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 12
-        ItemHeight = 0
+        ItemHeight = 13
         Sorted = True
         TabOrder = 12
         OnChange = EditSkyChange

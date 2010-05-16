@@ -396,11 +396,12 @@ if Changes.IDX then s:=s+'IDX'+eol;
 if Changes.VTX then s:=s+'VTX'+eol;
 if Changes.SMP then s:=s+'SMP'+eol;
 if Changes.WRK then s:=s+'WRK'+eol;
-for i:=1 to 32 do begin
+for i:=1 to MAX_TRACKS do begin
 if Changes.TOB[i] then s:=s+'TOB'+int2fix(i,2)+eol;
 if Changes.TRK[i] then s:=s+'TRK'+int2fix(i,2)+eol;
-if Changes.WTR[i] then s:=s+'WTR'+int2fix(i,2)+eol;
 end;
+for i:=1 to MAX_WP_TRACKS do
+if Changes.WTR[i] then s:=s+'WTR'+int2fix(i,2)+eol;
 if Changes.SNI then s:=s+'SNI'+eol;
 if Changes.LVL then s:=s+'LVL'+eol;
 if Changes.SKY then s:=s+'SKY'+eol;

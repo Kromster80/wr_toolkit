@@ -126,7 +126,7 @@ procedure TFormOptions.Button1Click(Sender: TObject);
 var aPath:string;
 begin
   aPath := WorkFolder.Text;
-  if not SelectDirectory('Folder', '', aPath) then exit; //Do no changes if user clicked Cancel
+  if not SelectDirectory('Browse for World Racing 2 folder', '', aPath) then exit; //Do no changes if user clicked Cancel
   WorkFolder.Text := IncludeTrailingPathDelimiter(aPath);
 end;
 
