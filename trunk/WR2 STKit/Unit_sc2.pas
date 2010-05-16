@@ -144,7 +144,9 @@ end;
 
 
 function SaveSC2(InFile:string):boolean;
-var k,h:integer;
+var
+  f:file;
+  k,h:integer;
 begin
 WriteCommonDataToSC2();
 assignfile(f,InFile); rewrite(f,1);
@@ -181,7 +183,9 @@ end;
 
 
 function LoadSC2(InFile:string):boolean;
-var k,h:word;
+var
+  f:file;
+  k,h:word;
 begin Result:=false;
 if not fileexists(InFile) then exit;
 assignfile(f,InFile); FileMode:=0; reset(f,1); FileMode:=2; //read-only

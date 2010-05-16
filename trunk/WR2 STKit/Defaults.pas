@@ -26,6 +26,10 @@ const
   MAX_TRACKS        = 32;
   MAX_WP_TRACKS     = 32;
 
+  MAX_LWO_LAYERS    = 128;                 //Maximum allowed LWO layers
+
+  DONT_TRACE_TAG    = 1234567;             //Special tag to exclude certain polys from certain checks
+                                           //(e.g. shadow tracing for backdrop grid of scenery)    
 
 
 type TEditingFormat = (ef_WR2, ef_N, ef_CT, ef_BW);
@@ -283,7 +287,6 @@ end;
 function MyMessageBox(hWnd:HWND; lpText:string; lpCaption:string; uType:UINT):longint;
 begin
   Result := MessageBox(hWnd, @(lpText)[1], @(lpCaption)[1], uType);
-
 end;
 
 

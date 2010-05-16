@@ -44,7 +44,9 @@ uses unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_Ro
 implementation
 
 procedure LoadQAD(Input:string);
-var i,j,k:integer;
+var
+  f:file;
+  i,j,k:integer;
 begin
 if not CheckFileExists(Input+'.qad') then begin
   FillChar(Qty,sizeof(Qty),#0);
@@ -172,7 +174,9 @@ end;
 
 
 procedure LoadQAD_BW(Input:string);
-var i,j,k:integer;
+var
+  f:file;
+  i,j,k:integer;
   Head:record
     Header:array[1..4]of char;
     Version:integer;
@@ -297,7 +301,9 @@ end;
 
 
 function LoadVTX(Input:string):boolean;
-var i:integer;
+var
+  f:file;
+  i:integer;
 begin
 Result:=false;
 if not fileexists(Input+'.vtx') then begin
@@ -316,7 +322,9 @@ Result:=true;
 end;
 
 function LoadIDX(Input:string):boolean;
-var i,k,j,xt,Pos,preXT:integer;
+var
+  f:file;
+  i,k,j,xt,Pos,preXT:integer;
 begin
 Result:=false;
 if not fileexists(Input+'.idx') then begin
@@ -351,6 +359,7 @@ end;
 
 function LoadGEO(Input:string):boolean;
 var
+  f:file;
   Head:record
     Header:array[1..4]of char;
     x2,x3,sizeX,sizeZ,XZ,Qty,Density:integer;
@@ -406,6 +415,8 @@ end;
 
 
 function LoadSNI(Input:string):boolean;
+var
+  f:file;
 begin
 if not fileexists(Input+'.sni') then begin
 SNIHead.Obj:=0; SNIHead.Node:=0;
@@ -421,6 +432,8 @@ Result:=true;
 end;
 
 procedure LoadLVL(Input:string);
+var
+  f:file;
 begin
 if not fileexists(Input+'.lvl') then begin
   //MyMessageBox(Form1.Handle,'LVL file doesn''t exist at supplied path.','Loading error',MB_OK or MB_ICONWARNING);
@@ -436,6 +449,8 @@ closefile(f);
 end;
 
 function LoadSMP(Input:string):boolean;
+var
+  f:file;
 begin
 Result:=false;
     if not fileexists(Input) then begin
@@ -453,7 +468,9 @@ Result:=true;
 end;
 
 function LoadSTR(Input:string):boolean;
-var i:integer;
+var
+  f:file;
+  i:integer;
 begin
 //Input:='C:\Documents and Settings\Krom\Desktop\2';
 Result:=false;
@@ -509,6 +526,8 @@ Result:=true;
 end;
 
 function LoadNET(Input:string):boolean;
+var
+  f:file;
 begin
 Result:=false;
 if not fileexists(Input) then begin
@@ -539,7 +558,9 @@ Result:=true;
 end;
 
 function LoadTRL(Input:string):boolean;
-var ii,NumRead:integer;
+var
+  f:file;
+  ii,NumRead:integer;
 begin
 Result:=false;
 if not fileexists(Input+'.trl') then begin
@@ -563,8 +584,12 @@ closefile(f);
 result:=true;
 end;
 
+
 function LoadSKY(Input:string):boolean;
-var ii,kk:integer; CHname,s:string;
+var
+  ft:textfile;
+  ii,kk:integer;
+  CHname,s:string;
 begin
 result:=false;
 if not fileexists(Input+'.sky') then begin
@@ -628,7 +653,9 @@ Result:=true;
 end;
 
 procedure LoadTRK(Input,Input2:string);
-var i,ii,kk:integer;// T:array[1..2048]of integer;
+var
+  f:file;
+  i,ii,kk:integer;// T:array[1..2048]of integer;
 begin
 TracksQty:=0;
 for i:=1 to MAX_TRACKS do
@@ -651,7 +678,7 @@ if fileexists(Input+Input2+'_'+int2fix(i,2)+'.trk') then begin
     end
   else
   begin
-    blockread(f,TRK[i].Route[1],76*TRKQty[i].Nodes,NumRead);
+    blockread(f,TRK[i].Route[1],76*TRKQty[i].Nodes);
     if (TRKQty[i].WR2Flag1=1)and(TRKQty[i].WR2Flag2=1) then begin
       blockread(f,TRKQty[i].a1,16); //append second header to first one
       for kk:=1 to TRKQty[i].Turns do blockread(f,TRK[i].Turns[kk],12);
@@ -670,7 +697,9 @@ MyMessageBox(Form1.Handle,'No tracks found in ..\Tracks\ folder','Loading error'
 end;
 
 procedure LoadTOB(Input,Input2:string);
-var i,ii:integer;
+var
+  f:file;
+  i,ii:integer;
 begin
 for i:=1 to MAX_TRACKS do
 if fileexists(Input+Input2+'_'+int2fix(i,2)+'.tob') then begin
@@ -693,7 +722,9 @@ TOBHead[i].Qty:=0;
 end;
 
 procedure LoadWTR(Input,Input2:string);
-var i,k:integer;
+var
+  f:file;
+  i,k:integer;
 begin
 TracksQtyWP:=0;
 for i:=1 to MAX_WP_TRACKS do
@@ -747,7 +778,10 @@ Result:=true;
 end;
 
 procedure LoadWRK(Input:string);
-var k,ii,h,nr:integer; iw:word;
+var
+  f:file;
+  k,ii,h,nr:integer;
+  iw:word;
 begin
 if not fileexists(Input) then begin
 for k:=1 to Qty.Materials do MaterialW[k].Name:='';
@@ -835,7 +869,9 @@ closefile(f);
 end;
 
 procedure SaveQAD(Input:string);
-var i,k:integer;
+var
+  f:file;
+  i,k:integer;
 begin
 Form1.SortMaterialModes(nil);
 Form1.RemakeQADTable(nil);
@@ -899,7 +935,10 @@ Changes.QAD:=false;
 end;
 
 procedure SaveIDX(Input:string);
-var i,k,h,Chunk65k,x,z:integer; idx:array[1..3]of word;
+var
+  f:file;
+  i,k,h,Chunk65k,x,z:integer;
+  idx:array[1..3]of word;
 begin
 assignfile(f,Input); rewrite(f,1);
 blockwrite(f,IDXQty,4); //8mb
@@ -925,6 +964,8 @@ Changes.IDX:=false;
 end;
 
 procedure SaveVTX(Input:string);
+var
+  f:file;
 begin
 assignfile(f,Input); rewrite(f,1);
 blockwrite(f,VTXQty[1],252);
@@ -935,6 +976,8 @@ Changes.VTX:=false;
 end;
 
 procedure SaveSNI(Input:string);
+var
+  f:file;
 begin
 assignfile(f,Input); rewrite(f,1);
 blockwrite(f,SNIHead,16);
@@ -945,7 +988,9 @@ Changes.SNI:=false;
 end;
 
 procedure SaveTRL(Input:string);
-var ii:integer;
+var
+  f:file;
+  ii:integer;
 begin
   ElapsedTime(@OldTime);
   assignfile(f,Input); rewrite(f,1);
@@ -964,7 +1009,10 @@ begin
 end;
 
 procedure SaveTRK(Input:string;ID:integer);
-var ii,kk,N:integer; order:array[1..256]of word;
+var
+  f:file;
+  ii,kk,N:integer;
+  order:array[1..256]of word;
 begin
 ElapsedTime(@OldTime);
 
@@ -1000,7 +1048,9 @@ Changes.TRK[ID]:=false;
 end;
 
 procedure SaveTOB(Input:string; ID:integer);
-var ii:integer;
+var
+  f:file;
+  ii:integer;
 begin
 ElapsedTime(@OldTime);
 assignfile(f,Input); rewrite(f,1);
@@ -1015,6 +1065,8 @@ Changes.TOB[ID]:=false;
 end;
 
 procedure SaveWTR(Input:string; ID:integer);
+var
+  f:file;
 begin
 assignfile(f,Input); rewrite(f,1);
 blockwrite(f,WTR[ID].NodeQty,16);
@@ -1024,6 +1076,8 @@ Changes.WTR[ID]:=false;
 end;
 
 procedure SaveTRK_DAT(Input:string);
+var
+  f:file;
 begin
 assignfile(f,Input); rewrite(f,1);
 blockwrite(f,TracksQty,4);
@@ -1033,6 +1087,8 @@ closefile(f);
 end;
 
 procedure SaveSTR(Input:string);
+var
+  f:file;
 begin
 ElapsedTime(@OldTime);
 Form1.STR_PrepareToSaveClick(nil);
@@ -1048,6 +1104,8 @@ Changes.STR:=false;
 end;
 
 procedure SaveLVL(Input:string);
+var
+  f:file;
 begin
 assignfile(f,Input); rewrite(f,1);
 blockwrite(f,LVL,64);
@@ -1056,6 +1114,8 @@ Changes.LVL:=false;
 end;
 
 procedure SaveSMP(Input:string);
+var
+  f:file;
 begin
 if SMPHead.A=0 then exit;
 assignfile(f,Input); rewrite(f,1);
@@ -1066,7 +1126,9 @@ Changes.SMP:=false;
 end;
 
 procedure SaveSKY(Input:string);
-var i:integer;
+var
+  ft:textfile;
+  i:integer;
 begin
 assignfile(ft,Input); rewrite(ft);
 for i:=1 to SKYQty do begin
@@ -1086,7 +1148,9 @@ Changes.SKY:=false;
 end;
 
 procedure SaveRO_(Input:string;V:integer;Optimize:boolean);
-var i:integer;
+var
+  f:file;
+  i:integer;
 begin
 if Optimize=true then
   for i:=1 to RO[V].Head.Qty do begin
@@ -1108,7 +1172,9 @@ Changes.RO[V]:=false;
 end;
 
 procedure SaveWRK(Input:string);
-var i,k:integer;
+var
+  f:file;
+  i,k:integer;
 begin
 assignfile(f,Input); rewrite(f,1);
 

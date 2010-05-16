@@ -12,16 +12,17 @@ implementation
 
 function LoadLWO_TRK(Input:string):boolean;
 var
-    ii,m,chsize:integer; chname:string[4];
+  f:file;
+  ii,m,chsize:integer; chname:string[4];
 
-    LWT:packed record
+  LWT:packed record
     Vqty,Aqty,Bqty:integer;
     XYZ:array of record x,y,z:single; end;
     A,B:array of word; //two guiding arrays of points
     Ax,Bx:array of record x,y,z:single; end;
-    end;
+  end;
 
-    dx,dy,dz,len,ang:single;
+  dx,dy,dz,len,ang:single;
 
 begin
 Result:=false;
