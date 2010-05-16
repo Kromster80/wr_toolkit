@@ -156,7 +156,7 @@ for I:=1 to Qty.Polys do begin
 end;
 
 //Find each blocks high and low bounds,
-//1234567 is a special UV value of background grid
+//DONT_TRACE_TAG is a special UV value of background grid
 //that should be ignored in this case
 if ShowLog then Form1.MemoLog.Lines.Add('Collecting block heights');
 setlength(BlockHi,Qty.BlocksX*Qty.BlocksZ*16+1);
@@ -167,7 +167,7 @@ for K:=1 to Qty.BlocksX*Qty.BlocksZ*16 do begin
     for cv:=1 to v06[K,ci] do begin // Polycount; BlockID; ..polys..; Polycount; BlockID; ..polys..; 0-terminator.
       I:=Block[((v06[K,ci+1])div Qty.BlocksX+1),((v06[K,ci+1])mod Qty.BlocksX+1)].FirstPoly+1+v06[K,ci+1+cv];
       if ((ci=1)and(cv=1))or(BlockHi[K]<H[I]) then BlockHi[K]:=H[I];
-      if ((ci=1)and(cv=1))or((BlockLo[K]>L[I])and(VTX[v[I,1]].U<>1234567)) then BlockLo[K]:=L[I];
+      if ((ci=1)and(cv=1))or((BlockLo[K]>L[I])and(VTX[v[I,1]].U<>DONT_TRACE_TAG)) then BlockLo[K]:=L[I];
     end;
     inc(ci,v06[K,ci]+2); //qty+2
   until(v06[K,ci]=0); //end of list

@@ -980,11 +980,7 @@ var
   pix:array[1..4]of byte;
 
   Form1: TForm1;
-  f,f2:file;
-  ft:textfile;
-  fo,flog:textfile;
   c:array[1..16777216] of char;
-  NumRead:integer;
   list_id,list_ogl,list_tx,list_obj,list_sky:integer;
   Scenery,SceneryPath,SceneryVersion:string;
   SaveButton:boolean=true;
@@ -1285,7 +1281,7 @@ var
 
   LWOSceneryFile:string;
   LWQty:record
-    Vert,Poly,AddPoly,UV,VW,DUV,RGBA,Surf,Tags:array[0..128] of integer; //max 128 layers
+    Vert,Poly,AddPoly,UV,VW,DUV,RGBA,Surf,Tags:array[0..MAX_LWO_LAYERS] of integer; //max 128 layers
   end;
   LW:record
     XYZ:array of array[1..3]of single;
@@ -2130,7 +2126,13 @@ ShowGrassInfo(nil);
 end;
 
 procedure TForm1.CompileLoaded(Sender:string; ID,Num:integer);
-var i,j,k,h,x,z:integer; ap:array[1..2]of pointer; bm:array of integer; t:single; s,s2:string;
+var
+  f:file;
+  i,j,k,h,x,z:integer;
+  ap:array[1..2]of pointer;
+  bm:array of integer;
+  t:single;
+  s,s2:string;
 begin
 if Sender='Scenery' then begin
 if ID+Num>Qty.BlocksTotal then Num:=Qty.BlocksTotal-ID;
@@ -2431,9 +2433,9 @@ end;
 procedure TForm1.ReloadLWOClick(Sender: TObject);
 begin
   if FileExists(LWOSceneryFile) then
-  LoadLWO(LWOSceneryFile)
+    LoadLWO(LWOSceneryFile)
   else
-  MyMessageBox(Form1.Handle,'Couldn''t find source LWO file.','Error',MB_OK or MB_ICONEXCLAMATION);
+    MyMessageBox(Form1.Handle,'Couldn''t find source LWO file.','Error',MB_OK or MB_ICONEXCLAMATION);
 end;
 
 
@@ -2643,7 +2645,9 @@ Changes.QAD:=true;
 end;
 
 procedure TForm1.ButtonPrintScreenClick(Sender: TObject);
-var SizeH,SizeV,i,k:integer; fbo,img,depthbuffer:GLuint; bmp4:pointer;
+var
+  f:file;
+  SizeH,SizeV,i,k:integer; fbo,img,depthbuffer:GLuint; bmp4:pointer;
 begin
 if Sender=MakeSMP then begin
   SizeH:=SMPHead.A;
@@ -3333,7 +3337,11 @@ Changes.QAD:=true;
 end;
 
 procedure TForm1.ImportTexturesClick(Sender: TObject);
-var ii,kk:integer; ID:word; s:string;
+var
+  ft:textfile;
+  ii,kk:integer;
+  ID:word;
+  s:string;
 begin
 if AutoImportTexturesList<>'' then
 OpenDialog.FileName:=AutoImportTexturesList
@@ -3357,7 +3365,9 @@ Changes.QAD:=true;
 end;
 
 procedure TForm1.ExportTexturesListClick(Sender: TObject);
-var ii:integer;
+var
+  ft:textfile;
+  ii:integer;
 begin
 if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_TexturesAssignList.dat',
        SceneryPath,'Textures list (TexturesAssignList.dat)|*.dat') then exit;
@@ -3631,7 +3641,9 @@ Changes.WRK:=true;
 end;
 
 procedure TForm1.ExportSoundsClick(Sender: TObject);
-var ii:integer;
+var
+  f:file;
+  ii:integer;
 begin
 if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_SoundsList.dat',
        SceneryPath,'Sounds list (SoundsList.dat)|*.dat') then exit;
@@ -3647,7 +3659,9 @@ closefile(f);
 end;
 
 procedure TForm1.ImportSoundsClick(Sender: TObject);
-var ii:integer; ss:string;
+var
+  f:file;
+  ii:integer; ss:string;
 begin
 if not RunOpenDialog(OpenDialog,'',SceneryPath,'Sounds list (SoundsList.dat)|*.dat') then exit;
 assignfile(f,OpenDialog.FileName); reset(f,1);
@@ -4176,7 +4190,9 @@ Changes.QAD:=true;
 end;
 
 procedure TForm1.Button15Click(Sender: TObject);
-var ii:integer;
+var
+  f:file;
+  ii:integer;
 begin
 if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_InstancesList.dat',
        SceneryPath,'Objects list (InstancesList.dat)|*.dat') then exit;
@@ -4192,7 +4208,10 @@ closefile(f);
 end;
 
 procedure TForm1.Button12Click(Sender: TObject);
-var ii,kk:integer; ss:string;
+var
+  f:file;
+  ii,kk:integer;
+  ss:string;
 begin
 if not RunOpenDialog(OpenDialog,'',SceneryPath,'Objects list (ObjectsList.dat)|*.dat') then exit;
 assignfile(f,OpenDialog.FileName); reset(f,1);
@@ -4227,7 +4246,9 @@ Changes.QAD:=true;
 end;
 
 procedure TForm1.ExportGroundsClick(Sender: TObject);
-var ii:integer;
+var
+  f:file;
+  ii:integer;
 begin
 if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_GroundsList.dat',
        SceneryPath,'Grounds list (GroundsList.dat)|*.dat') then exit;
@@ -4243,7 +4264,10 @@ closefile(f);
 end;
 
 procedure TForm1.ImportGroundsClick(Sender: TObject);
-var ii:integer; ss:string;
+var
+  f:file;
+  ii:integer;
+  ss:string;
 begin
 //if AutoImportGroundsList<>'' then
 //OpenDialog.FileName:=AutoImportGroundsList
@@ -4339,7 +4363,9 @@ Changes.VTX:=true;
 end;
 
 procedure TForm1.Button18Click(Sender: TObject);
-var ii:integer;
+var
+  f:file;
+  ii:integer;
 begin
 if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_ObjectsList.dat',
        SceneryPath,'Objects list (ObjectsList.dat)|*.dat') then exit;
@@ -4357,7 +4383,10 @@ closefile(f);
 end;
 
 procedure TForm1.ImportObjectsClick(Sender: TObject);
-var ii:integer; ss:string;
+var
+  f:file;
+  ii:integer;
+  ss:string;
 begin
 if not RunOpenDialog(OpenDialog,'',SceneryPath,'Objects list (ObjectsList.dat)|*.dat') then exit;
 assignfile(f,OpenDialog.FileName); reset(f,1);
@@ -4811,7 +4840,11 @@ if fileexists(s) then
 end;
 
 procedure TForm1.ImportMaterialsClick(Sender: TObject);
-var i,k,h,EntryQty,NumRead:integer; remap:array[1..512]of integer; s:string;
+var
+  f:file;
+  i,k,h,EntryQty,NumRead:integer;
+  remap:array[1..512]of integer;
+  s:string;
 begin
 if AutoImportMaterialsList<>'' then
 OpenDialog.FileName:=AutoImportMaterialsList
@@ -4871,7 +4904,9 @@ Changes.QAD:=true;
 end;
 
 procedure TForm1.ExportMaterialsClick(Sender: TObject);
-var i:integer;
+var
+  f:file;
+  i:integer;
 begin
 if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_MaterialsList.dat',
        SceneryPath,'Materials list (MaterialsList.dat)|*.dat') then exit;
@@ -4897,18 +4932,21 @@ end;
 
 procedure TForm1.LVL_SunXChange(Sender: TObject);
 begin
-if LVLRefresh then exit;
-LVL.SunX:=cos(LVL_SunXZ.Value*pi/180)*cos(LVL_SunY.Value*pi/180);
-LVL.SunZ:=sin(LVL_SunXZ.Value*pi/180)*cos(LVL_SunY.Value*pi/180);
-LVL.SunY:=sin(LVL_SunY.Value*pi/180);
-LVL.SunX:=round(LVL.SunX*1000)/1000;
-LVL.SunZ:=round(LVL.SunZ*1000)/1000;
-LVL.SunY:=round(LVL.SunY*1000)/1000;
-Changes.LVL:=true;
-end;  
+  if LVLRefresh then exit;
+  LVL.SunX:=cos(LVL_SunXZ.Value*pi/180)*cos(LVL_SunY.Value*pi/180);
+  LVL.SunZ:=sin(LVL_SunXZ.Value*pi/180)*cos(LVL_SunY.Value*pi/180);
+  LVL.SunY:=sin(LVL_SunY.Value*pi/180);
+  LVL.SunX:=round(LVL.SunX*1000)/1000;
+  LVL.SunZ:=round(LVL.SunZ*1000)/1000;
+  LVL.SunY:=round(LVL.SunY*1000)/1000;
+  Changes.LVL:=true;
+end;
 
 procedure TForm1.ImportNFSPUSoundsClick(Sender: TObject);
-var ii,i1,i2:integer; i3,i4:single;
+var
+  ft:textfile;
+  ii,i1,i2:integer;
+  i3,i4:single;
 begin
 if not RunOpenDialog(OpenDialog,'',SceneryPath,'NFS-PU sounds list (*_aud.scn)|*.scn') then exit;
 //OpenDialog.FileName:=ExeDir+'industrial_aud.scn';
@@ -5107,7 +5145,10 @@ Changes.RO[RG_GrassLOD.ItemIndex+1]:=true;
 end;
 
 procedure TForm1.LoadLWOLights(Sender: TObject);
-var m,ii,chsize:integer; chname:string[4];
+var
+  f:file;
+  m,ii,chsize:integer;
+  chname:string[4];
 begin
 if not RunOpenDialog(OpenDialog,'',SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
 assignfile(f,OpenDialog.FileName); reset(f,1);
@@ -5212,6 +5253,8 @@ begin
 end;
 
 procedure TForm1.ExportLightsClick(Sender: TObject);
+var
+  f:file;
 begin
 if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_LightsList.dat',
        SceneryPath,'Lights list (LightsList.dat)|*.dat') then exit;
@@ -5225,7 +5268,9 @@ closefile(f);
 end;
 
 procedure TForm1.ImportLightsClick(Sender: TObject);
-var ss:string;
+var
+  f:file;
+  ss:string;
 begin
 //if AutoImportLightsList<>'' then
 //OpenDialog.FileName:=AutoImportLightsList
@@ -5566,7 +5611,7 @@ RO[lod].Chunks[i,k].First:=ci;
 // - Has GrowGrass material property
 // - Are faced up
 // - Are highest from all found meeting previous conditions
-            PolyQty:=1; ck:=1; tp[1]:=0; ResultY:=1234567;
+            PolyQty:=1; ck:=1; tp[1]:=0; ResultY:=DONT_TRACE_TAG;
             cb:=                                                                    //CollisionBlock:=
                 (EnsureRange(round(inz/256+0.5+Qty.BlocksZ*2),1,Qty.BlocksZ*4)-1)*  //(Z-1)*
                  Qty.BlocksX*4+                                                     //Qty.BlocksX*4+
@@ -5606,7 +5651,7 @@ RO[lod].Chunks[i,k].First:=ci;
             if ((ytemp > ResultY)and(ny > 0))or(ii=1) then ResultY:=ytemp; //choose highest one
             end;
 
-      if ResultY<>1234567 then begin
+      if ResultY<>DONT_TRACE_TAG then begin
       RO[lod].Grass[ci+1].Y:=ResultY;
       inc(ci);
       RO[lod].Grass[ci].Size:=Random(16);
@@ -5773,7 +5818,10 @@ Changes.SMP:=true;
 end;
 
 procedure TForm1.LoadInstancesFromLWOClick(Sender: TObject);
-var m,ii,chsize:integer; chname:string[4];
+var
+  f:file;
+  m,ii,chsize:integer;
+  chname:string[4];
 begin
 if not RunOpenDialog(OpenDialog,'',SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
 assignfile(f,OpenDialog.FileName); reset(f,1);
@@ -5955,10 +6003,16 @@ Obj[i].Size:=1+RandomS(2)/10;
 end;
 
 procedure TForm1.GrassTGAColorClick(Sender: TObject);
-var ci,i,k:integer; sx,sz:word; HasAlpha:boolean;
-tga:array of array of array[1..4] of byte;
-ix,iz:integer; rx,rz:single; r1,g1,b1:integer;
-LOD:integer;
+var
+  f:file;
+  ci,i,k:integer;
+  sx,sz:word;
+  HasAlpha:boolean;
+  tga:array of array of array[1..4] of byte;
+  ix,iz:integer;
+  rx,rz:single;
+  r1,g1,b1:integer;
+  LOD:integer;
 begin
 if not RunOpenDialog(OpenDialog,'',SceneryPath,'TGA image (*.tga)|*.tga') then exit;
 assignfile(f,OpenDialog.FileName); reset(f,1);
@@ -6368,11 +6422,15 @@ end;
 
 procedure TForm1.GrassTGAMask(Sender: TObject);
 const Num=16; //how many polys to check
-var i,k,x,ci,ck,tmp:integer;
-var TGAx,TGAz:word; HasAlpha:boolean;
-tga:array of array of array[1..4] of byte;
-ix,iz:integer; rx,rz:single;
-LOD:integer;
+var
+  f:file;
+  i,k,x,ci,ck,tmp:integer;
+  TGAx,TGAz:word;
+  HasAlpha:boolean;
+  tga:array of array of array[1..4] of byte;
+  ix,iz:integer;
+  rx,rz:single;
+  LOD:integer;
 begin
 if not RunOpenDialog(OpenDialog,'',SceneryPath,'TGA image (*.tga)|*.tga') then exit;
 
@@ -7333,10 +7391,10 @@ end;
 procedure TForm1.Button3Click(Sender: TObject);
 var s:string;
 begin
-s:=fOptions.ExeDir;
-if not SelectDirectory('','',s) then exit;
-LoadSCGTFolder(IncludeTrailingPathDelimiter(s));
-//LoadSCGTFolder('C:\Documents and Settings\Krom\Desktop\Delphi\+SportsCar GT MASs Extractor\chta\');
+  s:=fOptions.ExeDir;
+  if not SelectDirectory('','',s) then exit;
+  LoadSCGTFolder(IncludeTrailingPathDelimiter(s));
+  //LoadSCGTFolder('C:\Documents and Settings\Krom\Desktop\Delphi\+SportsCar GT MASs Extractor\chta\');
 end;
 
 procedure TForm1.LoadSCGTFolder(Sender: string);
