@@ -631,7 +631,7 @@ procedure LoadTRK(Input,Input2:string);
 var i,ii,kk:integer;// T:array[1..2048]of integer;
 begin
 TracksQty:=0;
-for i:=1 to 32 do
+for i:=1 to MAX_TRACKS do
 if fileexists(Input+Input2+'_'+int2fix(i,2)+'.trk') then begin
   assignfile(f,Input+Input2+'_'+int2fix(i,2)+'.trk'); reset(f,1);
   blockread(f,TRKQty[i],16);
@@ -672,7 +672,7 @@ end;
 procedure LoadTOB(Input,Input2:string);
 var i,ii:integer;
 begin
-for i:=1 to 32 do
+for i:=1 to MAX_TRACKS do
 if fileexists(Input+Input2+'_'+int2fix(i,2)+'.tob') then begin
   assignfile(f,Input+Input2+'_'+int2fix(i,2)+'.tob'); reset(f,1);
   blockread(f,TOBHead[i],16);
@@ -696,7 +696,7 @@ procedure LoadWTR(Input,Input2:string);
 var i,k:integer;
 begin
 TracksQtyWP:=0;
-for i:=1 to 32 do
+for i:=1 to MAX_WP_TRACKS do
 if fileexists(Input+Input2+'_'+int2fix(i,2)+'.wtr') then begin
 assignfile(f,Input+Input2+'_'+int2fix(i,2)+'.wtr'); reset(f,1);
 blockread(f,WTR[i].NodeQty,16);
@@ -947,19 +947,20 @@ end;
 procedure SaveTRL(Input:string);
 var ii:integer;
 begin
-ElapsedTime(@OldTime);
-assignfile(f,Input); rewrite(f,1);
-for ii:=1 to TRLQty do if TRL[ii].id1<>0 then begin
-blockwrite(f,TRL[ii],34);
-case TRL[ii].id1 of
-3,6,7,9,10,14,15,16:blockwrite(f,TRL[ii].Matrix,36);
-4,8:                blockwrite(f,TRL[ii].Matrix,40);
-5,11:               blockwrite(f,TRL[ii].Matrix,54);
-end;
-end;
-closefile(f);
-//Form1.Memo1.Lines.Add('Triggers saved in'+ElapsedTime(@OldTime));
-Changes.TRL:=false;
+  ElapsedTime(@OldTime);
+  assignfile(f,Input); rewrite(f,1);
+  for ii:=1 to TRLQty do
+  if TRL[ii].id1<>0 then begin
+    blockwrite(f,TRL[ii],34);
+    case TRL[ii].id1 of
+      3,6,7,9,10,14,15,16:blockwrite(f,TRL[ii].Matrix,36);
+      4,8:                blockwrite(f,TRL[ii].Matrix,40);
+      5,11:               blockwrite(f,TRL[ii].Matrix,54);
+    end;
+  end;
+  closefile(f);
+  //Form1.Memo1.Lines.Add('Triggers saved in'+ElapsedTime(@OldTime));
+  Changes.TRL:=false;
 end;
 
 procedure SaveTRK(Input:string;ID:integer);

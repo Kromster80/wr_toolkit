@@ -17,7 +17,9 @@ uses
   ColorPicker in '..\_Common_\ColorPicker.pas' {Form_ColorPicker},
   Unit_RenderInit in 'Unit_RenderInit.pas',
   Unit_Tracing in 'Unit_Tracing.pas',
-  WR_AboutBox in '..\_Common_\WR_AboutBox.pas' {AboutForm};
+  WR_AboutBox in '..\_Common_\WR_AboutBox.pas' {AboutForm},
+  SK_Options in 'SK_Options.pas',
+  SK_ImportLWO in 'SK_ImportLWO.pas';
 
 {$R *.RES}
 

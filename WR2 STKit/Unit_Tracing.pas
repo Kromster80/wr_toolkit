@@ -417,6 +417,7 @@ if TraceDetails then begin
       if VTX[ind1].Shadow>VTX[ind2].Shadow then begin ci:=ind2; ind2:=ind1; ind1:=ci; end;
       //Subsequentaly check middle of the edge and then quarter of it.
       for j:=1 to 2 do begin
+        StripQuest := 0;
         case j of
           1:begin
               vp.X:=(VTX[ind1].X+VTX[ind2].X)/2;  //00?SS
@@ -436,7 +437,7 @@ if TraceDetails then begin
               vp.Z:=(VTX[ind1].Z+VTX[ind2].Z*3)/4;
               StripQuest:=3;
             end;
-        end;
+        end; //case j of ...
 
         //vp //POrigin
         sp.X:=vp.X+LVL.SunX*1000000; sp.Y:=vp.Y+LVL.SunY*1000000; sp.Z:=vp.Z+LVL.SunZ*1000000;
