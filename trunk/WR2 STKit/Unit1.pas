@@ -6,18 +6,17 @@ unit Unit1;
 interface
 uses
   dglOpenGL,
+  {$IFDEF VER140} OpenGL, {$ENDIF}
+  {$IFDEF FPC} GL, {$ENDIF}
   {$IFDEF VER140}
   JPEG,
-  OpenGL,
   FloatSpinEdit,
   ValEdit,
   {$ENDIF}
-  {$IFDEF FPC}
-  GL,
-  {$ENDIF}
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, kromUtils, KromOGLUtils, Defaults, Spin, Math, ComCtrls, Menus, LoadObjects, Buttons,
-  Grids, ColorPicker, ImgList, OpenAL, WR_AboutBox, SK_Options;
+  Windows, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, ExtCtrls, kromUtils, KromOGLUtils, Defaults, Math, Menus, LoadObjects,
+  Grids,  ImgList, OpenAL, WR_AboutBox, SK_Options, FileCtrl,
+  Buttons, Spin, ComCtrls;
 
 type
 
@@ -374,7 +373,7 @@ type
     RemSpline: TButton;
     STRShapeOpt1_Always0: TCheckBox;
     STRShapeOpt2_Always0: TCheckBox;
-    VLBInfo: TStringGrid;
+    VLBInfo: TValueListEditor;
     RG_GrassMode: TRadioGroup;
     GrassPlainColor: TButton;
     LightRY: TFloatSpinEdit;
@@ -422,7 +421,7 @@ type
     GenerateGrass: TButton;
     GrassTexture: TEdit;
     Label148: TLabel;
-    VLBGrass: TStringGrid;
+    VLBGrass: TValueListEditor;
     RenObject: TButton;
     ImageList1: TImageList;
     RenGround: TButton;
@@ -1401,7 +1400,8 @@ implementation  {$IFNDEF FPC}
   {$R *.lfm}
 {$ENDIF}
 uses LoadSave, Unit_Render, PTXTexture, Load_TRK, Unit_sc2, Unit_Streets,
-Unit_Triggers, Unit_Options, Unit_RoutineFunctions, Unit_RenderInit, Unit_Tracing;
+Unit_Triggers, Unit_Options, Unit_RoutineFunctions, Unit_RenderInit, Unit_Tracing,
+  ColorPicker;
 
 
 procedure Done(Sender:Tobject);
@@ -6075,7 +6075,7 @@ z:=i div Qty.BlocksX+1;
     end;
 end;
 
-VLBInfo.RowCount := 20;
+//VLBInfo.RowCount := 20;
 VLBInfo.Cells[1,1]:=inttostr(Qty.WidthX)+'   ('+floattostr(round(Qty.BlocksX*1.024)/10)+' km)';
 VLBInfo.Cells[1,2]:=inttostr(Qty.LengthZ)+'   ('+floattostr(round(Qty.BlocksZ*1.024)/10)+' km)';
 VLBInfo.Cells[1,3]:=inttostr(Qty.BlocksX);
@@ -7475,11 +7475,11 @@ jpg.Performance:=jpBestQuality;
 jpg.CompressionQuality:=90;
 jpg.Compress;
 DateTimeToString(s,'yyyy-mm-dd hh-nn-ss',Now); //2007-12-23 15-24-33
-jpg.SaveToFile(ExeDir+'STKit2_screen '+s+'.jpg');
+jpg.SaveToFile(fOptions.ExeDir+'STKit2_screen '+s+'.jpg');
 
 jpg.Free;
 mkbmp.Free;
-MyMessageBox(Form1.Handle, 'Screenshot saved to '+ExeDir+'STKit2_screen '+s+'.jpg', 'Info', MB_OK or MB_ICONINFORMATION);
+MyMessageBox(Form1.Handle, 'Screenshot saved to '+fOptions.ExeDir+'STKit2_screen '+s+'.jpg', 'Info', MB_OK or MB_ICONINFORMATION);
 {$ENDIF}
 end;
 
