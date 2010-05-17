@@ -228,6 +228,7 @@ begin       //todo: scanline
       MipData[i]:=random($FFFFFF);
     pData[0]:=@MipData[0];
     Texture:=CreateTexture(32, 16, 0, 24, 1, pData);
+    Result := false;
     exit;
   end;
 
