@@ -6,7 +6,7 @@ uses
   {$IFDEF FPC} GL, {$ENDIF}
   SysUtils, dglOpenGL,
   {$IFDEF VER140} JPEG, {$ENDIF}
-  Graphics, Defaults;
+  Graphics;
 
 function LoadTexturePTX(Filename:string; var Texture: GLuint): Boolean;
 function LoadTextureBMP(Filename:string; var Texture: GLuint): Boolean;
@@ -109,7 +109,7 @@ begin
   end else
 
   begin
-    MyMessageBox(0, PChar('File not found  - ' + Filename), PChar('PTX Texture'), MB_OK);
+    MessageBox(0, PChar('File not found  - ' + Filename), PChar('PTX Texture'), MB_OK);
     Exit;
   end;
 
@@ -121,7 +121,7 @@ begin
     begin
       Result:=False;
       CloseFile(PTXFile);
-      MyMessageBox(0, PChar('Couldn''t load "'+ Filename +'". Only 16, 24 and 32bit PTX supported.'), PChar('PTX File Error'), MB_OK);
+      MessageBox(0, PChar('Couldn''t load "'+ Filename +'". Only 16, 24 and 32bit PTX supported.'), PChar('PTX File Error'), MB_OK);
       Exit;
     end;
 
@@ -189,9 +189,9 @@ begin
         BlockRead(PTXFile, MipLevel[CurLev]^, MipHead[CurLev].Size, NumRead);
 
         if NumRead <> MipHead[CurLev].Size then begin
-        Result := False;
-        MyMessageBox(0, PChar('Couldn''t read file "'+ Filename +'". Unexpected end of file.'), PChar('PTX File Error'), MB_OK);
-        Exit;
+          Result := False;
+          MessageBox(0, PChar('Couldn''t read file "'+ Filename +'". Unexpected end of file.'), PChar('PTX File Error'), MB_OK);
+          Exit;
         end;
 
       end;
@@ -328,7 +328,7 @@ begin
   JPGi:=TJPEGImage.Create;
 
   if not FileExists(Filename) then begin
-  MyMessageBox(0, PChar('File not found  - ' + Filename), PChar('JPG Texture'), MB_OK);
+  MessageBox(0, PChar('File not found  - ' + Filename), PChar('JPG Texture'), MB_OK);
   exit; end;
 
   JPGi.LoadFromFile(Filename);
