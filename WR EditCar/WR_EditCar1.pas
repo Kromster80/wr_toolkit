@@ -381,7 +381,7 @@ type
   end;
 
 
-type TEditingFormat = (fmtMBWR, fmtWR2, fmtAFC11N, fmtFVR, fmtAFC11HN);
+type TEditingFormat = (fmtMBWR, fmtWR2, fmtAFC11N, fmtAFC11CT, fmtAFC11BW, fmtFVR, fmtAFC11HN);
 
 const
   VersionInfo = 'Version 1.6       (** May 2010)';
@@ -716,8 +716,10 @@ case RGFormat.ItemIndex of
   0: CarFmt := fmtMBWR;
   1: CarFmt := fmtWR2;
   2: CarFmt := fmtAFC11N;
-  3: CarFmt := fmtFVR;
-  4: CarFmt := fmtAFC11HN;
+  3: CarFmt := fmtAFC11CT;
+  4: CarFmt := fmtAFC11BW;
+  5: CarFmt := fmtFVR;
+  6: CarFmt := fmtAFC11HN;
 end;
 
   //Identity tab
@@ -901,8 +903,81 @@ begin
       fDataSet.SetValue(105,i+94,2, ImportDS.GetValue(41,i,TempID));
 
     //Clearup unused fields
-    for i:=99 to 105 do
+    for i:=99 to 110 do
       fDataSet.SetValueAsString(105,i,2,'0');
+
+    //3DCarsDB
+    TempID := ImportDS.GetValue(23,2,CarID).Int + 1; //todo: Access CO by 0..n indexes!!
+    fDataSet.SetValue(103,0,2, ImportDS.GetValue(30,0,TempID)); //Kommentar
+    fDataSet.SetValue(103,1,2, 0); //Index
+    for i:=2 to 75 do
+      fDataSet.SetValue(103,i,2, ImportDS.GetValue(30,i,TempID));
+    fDataSet.SetValue(103,22,2, ImportDS.WRTextEn(ImportDS.GetValueAsString(30,22,TempID)));
+    fDataSet.SetValue(103,23,2, 0); //Order
+    fDataSet.SetValue(103,24,2, ''); //Ref3DCarsOrder
+    fDataSet.SetValue(103,73,2, 0); //Order26
+
+    //Clearup unused fields
+    for i:=76 to 80 do
+      fDataSet.SetValueAsString(103,i,2,'0');
+
+  end;
+
+
+  //Sketch it for AFC11BW
+  if ImportDS.Version = dsvAFC11BW then begin
+
+    fDataSet.SetValue(105,0,2, ImportDS.GetValue(23,0,CarID)); //Kommentar
+    fDataSet.SetValue(105,1,2, 0); //Index
+    fDataSet.SetValue(105,2,2, 0); //3DCarID
+    fDataSet.SetValue(105,3,2, ImportDS.WRTextEn(ImportDS.GetValueAsString(23,3,CarID)));
+    for i:=4 to 48 do
+      fDataSet.SetValue(105,i,2, ImportDS.GetValue(23,i,CarID));
+    //Overrides
+    fDataSet.SetValue(105,11,2, 0); //MotorID
+    fDataSet.SetValue(105,12,2, 0); //GearboxID
+    fDataSet.SetValue(105,13,2, 0); //TiresID
+    fDataSet.SetValue(105,14,2, 0); //TiresID
+
+    //MotorDB
+    TempID := ImportDS.GetValue(23,11,CarID).Int + 1; //todo: Access CO by 0..n indexes!!
+    for i:=2 to 36 do //MAXDREHZAHL..Lautstaerke
+      fDataSet.SetValue(105,i+47,2, ImportDS.GetValue(39,i,TempID));
+
+    //Rename 72-73, they were unused prior to AFC11 (Motorbremse, Schwungmasse)
+    //todo: RenameCO
+    //fDataSet.(105, 72, 'DRM10500Revs');
+    //fDataSet(105, 73, 'DRM11000Revs');
+    fDataSet.SetValueAsString(105,82,2,'0'); //missing in AFC11BW.ds
+
+    //GearboxDB
+    TempID := ImportDS.GetValue(23,12,CarID).Int + 1; //todo: Access CO by 0..n indexes!!
+    for i:=2 to 10 do //AnzahlGaenge..RWGang
+      fDataSet.SetValue(105,i+82,2, ImportDS.GetValue(40,i,TempID));
+
+    //TiresID
+    TempID := ImportDS.GetValue(23,13,CarID).Int + 1; //todo: Access CO by 0..n indexes!!
+    for i:=2 to 4 do //reifenradius..ENGINE_FELGENHOEHE
+      fDataSet.SetValue(105,i+91,2, ImportDS.GetValue(41,i,TempID));
+
+    //TiresID
+    TempID := ImportDS.GetValue(23,14,CarID).Int + 1; //todo: Access CO by 0..n indexes!!
+    for i:=2 to 4 do //reifenradius..ENGINE_FELGENHOEHE
+      fDataSet.SetValue(105,i+94,2, ImportDS.GetValue(41,i,TempID));
+
+    //AFC Addendum
+    fDataSet.SetValue(105, 99,2, ImportDS.GetValue(39,41,TempID)); //Drehzahlmesser
+    for i:=37 to 40 do //SauggeraeuschID..MotorID
+      fDataSet.SetValue(105,i+63,2, ImportDS.GetValue(39,i,TempID));
+    fDataSet.SetValue(105,104,2, ImportDS.GetValue(23,49,CarID)); //HerstellerName
+    fDataSet.SetValue(105,105,2, ImportDS.GetValue(23,50,CarID)); //HerstellerLogo
+
+    fDataSet.SetValue(105,106,2, ImportDS.GetValue(23,51,CarID)); //Anbauten (caravan)
+    fDataSet.SetValue(105,107,2, ImportDS.GetValue(23,52,CarID)); //ClassTextID
+    fDataSet.SetValue(105,108,2, ImportDS.GetValue(23,53,CarID)); //BitmapFilename
+    fDataSet.SetValue(105,109,2, ImportDS.GetValue(23,54,CarID)); //BitmapFilenameX
+    fDataSet.SetValue(105,110,2, ImportDS.GetValue(23,55,CarID)); //BitmapFilenameY
+
 
     //3DCarsDB
     TempID := ImportDS.GetValue(23,2,CarID).Int + 1; //todo: Access CO by 0..n indexes!!
@@ -1185,6 +1260,7 @@ begin
     SetValue(105,46,2,TypRech.Text);  //TypRech
     SetValue(103,80,2,SColor.Value);  //ColorID
     SetValue(105,106,2,Caravan.Text); //Caravan
+
     //Suspension - Weight
     SetValue(105,32,2,Sweight.Value);
     SetValue(105,27,2,SweightD.Value);
@@ -1225,7 +1301,13 @@ begin
     SetValue(105,28,2,FS106.Value);
 
     //Engine - Chart
-    for k:=0 to 20 do SetValue(105,50+k,2,LineSerieHP.YValues[k]);//.GetYValue(k));// .YValues[k]);
+
+    {$IFDEF FPC}
+    for k:=0 to 20 do SetValue(105,50+k,2,LineSerieHP.GetYValue(k));
+    {$ENDIF}
+    {$IFDEF VER140}
+    for k:=0 to 20 do SetValue(105,50+k,2,LineSerieHP.YValues[k]);
+    {$ENDIF}
     //Engine - Torque Curve
     SetValue(105,71,2,SNMStep.Value+0.0); //NMStep
     SetValue(105,49,2,SrpmMax.Value);

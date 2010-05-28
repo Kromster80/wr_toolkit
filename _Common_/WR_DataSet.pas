@@ -300,9 +300,8 @@ begin
   if CO[iDS,iTB].SM = 'D:\NxNlocal\Cobra11\Database\C11-Texte.mdb' then Result := dsvAFC11N;
   if CO[iDS,iTB].SM = 'D:\NxNlocal\Cobra11Vol5\Database\C11V5-Texte.mdb' then Result := dsvAFC11CT;
   if CO[iDS,iTB].SM = 'D:\NxNLocal\Cobra11Vol6\Database\C11V6-Texte.mdb' then Result := dsvAFC11BW;
+  if CO[iDS,iTB].SM = 'D:\NxNlocal\Cobra11Vol6\Database\C11V6-Texte.mdb' then Result := dsvFVR; //todo: find new marker
   if CO[iDS,iTB].SM = 'D:\NxNLocal\Cobra11Vol7\Database\C11V7-Texte.mdb' then Result := dsvAFC11HN;
-
-  if CO[iDS,iTB].SM = 'D:\NxNlocal\Cobra11Vol6\Database\C11V6-Texte.mdb' then Result := dsvFVR;
 end;
 
 
