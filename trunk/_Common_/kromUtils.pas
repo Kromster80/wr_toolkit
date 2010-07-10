@@ -22,6 +22,7 @@ function ElapsedTime(i1: pcardinal): string;
 function ExtractOpenedFileName(in_s: string):string;
 function GetFileExt (const FileName: string): string;
 function AssureFileExt(FileName,Ext:string): string;
+function TruncateExt(FileName:string): string;
 function GetFileSize(const FileName: string): LongInt;
 function CheckFileExists(const FileName: string; const IsSilent:boolean = false):boolean;
 
@@ -222,6 +223,21 @@ if (Ext='')or(GetFileExt(FileName)=UpperCase(Ext)) then
 else
   Result:=FileName+'.'+Ext;
 end;
+
+
+//Look for last dot and truncate it
+function TruncateExt(FileName:string): string;
+var i:word; DotPlace:word;
+begin
+
+  DotPlace := length(FileName) + 1; //In case there's no Extension
+  for i:=1 to length(FileName) do
+    if FileName[i] = '.' then //FileExtension separator is always a .
+      DotPlace := i;
+
+  Result := Copy(FileName, 1, DotPlace - 1);
+end;
+
 
 
 function GetFileSize(const FileName: string): LongInt;

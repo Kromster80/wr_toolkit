@@ -293,6 +293,7 @@ begin
 
   setlength(MipData, BMPi.Width*BMPi.Height); //size in bytes
 
+  //Move TBitmap data to usable array
   for i:=0 to BMPi.Height-1 do begin
     Line:=BMPi.scanline[i];
     for k:=0 to BMPi.Width-1 do begin
