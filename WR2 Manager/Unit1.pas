@@ -128,7 +128,7 @@ const
 
  AddOnCarPrefix='`';
  TrackType:array[1..4] of string=('All','Series','Rally','Off-Road');
- VersionInfo='WR2 Manager       Version 0.3k (11 Apr 2010)';
+ VersionInfo='WR2 Manager       Version 0.3l (14 Jul 2010)';
 
 var
   Form1: TForm1;
