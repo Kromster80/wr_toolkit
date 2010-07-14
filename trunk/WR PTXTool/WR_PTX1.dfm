@@ -16,6 +16,7 @@ object Form1: TForm1
   Menu = MainMenu1
   OldCreateOrder = False
   Position = poDesktopCenter
+  OnCanResize = FormCanResize
   OnCreate = Form1Init
   OnResize = FormResize
   DesignSize = (

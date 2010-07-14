@@ -1,12 +1,8 @@
 unit WR_PTX1;
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
+{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
 uses
-{$IFDEF FPC}
-  LCLIntf, LResources,
-{$ENDIF}
+{$IFDEF FPC} LCLIntf, LResources, {$ENDIF}
 Forms, StdCtrls, Controls, FileCtrl, SysUtils, Graphics, Classes,
 ExtCtrls, Dialogs, ComCtrls, Menus, Spin, kromUtils, Math,
 WR_PTX_TDisplayImage, Buttons;
@@ -25,6 +21,10 @@ type
     Bevel_RGB: TBevel;
     Save1: TSaveDialog;
 {$IFDEF VER140}
+    DriveComboBox1: TDriveComboBox;
+    DirectoryListBox1: TDirectoryListBox;
+{$ENDIF}
+{$IFDEF VER150}
     DriveComboBox1: TDriveComboBox;
     DirectoryListBox1: TDirectoryListBox;
 {$ENDIF}
@@ -92,6 +92,7 @@ type
     procedure Image_RGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure SampleRClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
+    procedure FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer; var Resize: Boolean);
   end;
 
 
@@ -103,6 +104,8 @@ var
   Form1: TForm1;
   BitmA, Bitm:Tbitmap;
   ExeDir, WorkDir:string;
+  StartWidth:integer;
+  StartHeight:integer;
 
   fDisplayImage:TDisplayImage;
 
@@ -110,15 +113,18 @@ var
   ReplaceColorKey:boolean;
 
 implementation
-{$IFDEF VER140}
-  {$R *.dfm}
-{$ENDIF}
+{$IFDEF VER140} {$R *.dfm} {$ENDIF}
+{$IFDEF VER150} {$R *.dfm} {$ENDIF}
 
 uses WR_AboutBox;
 
 
 procedure TForm1.Form1Init(Sender: TObject);
 begin
+  DoClientAreaResize(Self);
+  StartWidth := Width;
+  StartHeight := Height;
+
   Bitm  := Tbitmap.Create;
   BitmA := Tbitmap.Create;
   fDisplayImage := TDisplayImage.Create(Bitm, BitmA, Image_RGB, Image_A);
@@ -345,10 +351,11 @@ begin
     Cursor := crDefault;
 end;
 
+
 procedure TForm1.FormResize(Sender: TObject);
 var AddSize:integer;
 begin
-  AddSize := Math.min((Form1.Width-707) div 2, Form1.Height-401);
+  AddSize := Math.min((Form1.Width-StartWidth) div 2, Form1.Height-StartHeight);
 
   Bevel_RGB.Width := 258 + AddSize;
   Image_RGB.Width := 256 + AddSize;
@@ -362,7 +369,15 @@ begin
   Bevel_A.Height := 258 + AddSize;
   Image_A.Height := 256 + AddSize;
 
-  DisplayChange(nil);
+  if fDisplayImage<>nil then DisplayChange(nil);
+end;
+
+
+procedure TForm1.FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer; var Resize: Boolean);
+begin
+  //Set minimum accepted size
+  NewWidth := max(NewWidth,StartWidth);
+  NewHeight := max(NewHeight,StartHeight);
 end;
 
 initialization

@@ -1,7 +1,6 @@
 unit WR_PTX_TDisplayImage;
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
+{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
+{$IFDEF VER150} {$DEFINE VER140} {$ENDIF}
 
 interface
 uses {LCLIntf,} Windows, ExtCtrls, Graphics, SysUtils,Math, kromUtils, Controls, Forms, WR_PTX_TDXT_Alpha, WR_PTX_TDXT_Color;
