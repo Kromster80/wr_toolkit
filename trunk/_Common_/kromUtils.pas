@@ -1,7 +1,7 @@
 unit KromUtils;
 {$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
-uses sysutils,windows,forms,typinfo,ExtCtrls,Math, Dialogs, Registry, ShellApi;
+uses sysutils,windows,Controls,forms,typinfo,ExtCtrls,Math, Dialogs, Registry, ShellApi;
 
 type
   PSingleArray = ^TSingleArray;
@@ -106,6 +106,8 @@ function RunOpenDialog(Sender:TOpenDialog; Name,Path,Filter:string):boolean;
 function RunSaveDialog(Sender:TSaveDialog; FileName, FilePath, Filter:string; const FileExt:string = ''):boolean;
 
 procedure Triangulate(VerticeCount:integer; Vertice:array of vector3f; out PolyCount:integer; out Polys:array of word; out Result:boolean);
+
+procedure DoClientAreaResize(aForm:TForm);
 
 function BrowseURL(const URL: string) : boolean;
 procedure MailTo(Address,Subject,Body:string);
@@ -1045,6 +1047,26 @@ begin
   PolyCount:=(ci-1) div 3;
 
   Result:= PolyCount <> VerticeCount-2;
+end;
+
+
+procedure DoClientAreaResize(aForm:TForm);
+const DesignHeight = 18;
+var
+  HeightDif:integer;
+  i:integer;
+begin
+  HeightDif := GetSystemMetrics(SM_CYCAPTION) - DesignHeight;
+
+  for i:=0 to aForm.ControlCount-1 do
+    if (akBottom in aForm.Controls[i].Anchors) and
+       (akTop in aForm.Controls[i].Anchors) then
+      aForm.Controls[i].Height := aForm.Controls[i].Height - HeightDif
+    else
+    if (akBottom in aForm.Controls[i].Anchors) then
+      aForm.Controls[i].Top := aForm.Controls[i].Top - HeightDif;
+
+  aForm.ClientHeight := aForm.ClientHeight + HeightDif;
 end;
 
 

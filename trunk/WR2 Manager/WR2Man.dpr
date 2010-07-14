@@ -9,7 +9,7 @@ uses
   Unit_WR2DS in 'Unit_WR2DS.pas',
   Unit_INI in 'Unit_INI.pas',
   Unit_Search in 'Unit_Search.pas',
-  WR_AboutBox in '..\ Common \WR_AboutBox.pas' {AboutForm};
+  WR_AboutBox in '..\_Common_\WR_AboutBox.pas' {AboutForm};
 
 {$R *.res}
 

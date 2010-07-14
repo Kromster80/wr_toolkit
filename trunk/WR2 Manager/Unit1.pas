@@ -97,6 +97,7 @@ type
     Label5: TLabel;
     Label7: TLabel;
     Label9: TLabel;
+    BitBtn1: TBitBtn;
     procedure FormCreate(Sender: TObject);
     procedure CLBSceneriesClick(Sender: TObject);
     procedure LBTracksClick(Sender: TObject);
@@ -112,6 +113,7 @@ type
     procedure ScAllClick(Sender: TObject);
     procedure FormCanResize(Sender: TObject; var NewWidth,NewHeight: Integer; var Resize: Boolean);
     procedure SaveAndRunWR2Click(Sender: TObject);
+    procedure SaveAndRunMPClick(Sender: TObject);
     procedure SaveAllChangesClick(Sender: TObject);
     procedure ListCars2Click(Sender: TObject);
   end;
@@ -293,6 +295,7 @@ uses Unit_WRTools, Unit2, WR_AboutBox, Unit_Search, Unit_RuntimeFXP, Unit_WR2DS,
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+  DoClientAreaResize(Self);
   if Sender<>nil then exit; //Wait until all forms are init
 
   Form1.Hide;
@@ -545,6 +548,15 @@ begin
   SaveAllChangesClick(nil);
   ChDir(RootDir);
   ShellExecute(handle, 'open', 'WR2_PC.exe', NiL, Nil, SW_SHOWNORMAL);
+  Form1.Close;
+end;
+
+
+procedure TForm1.SaveAndRunMPClick(Sender: TObject);
+begin
+  SaveAllChangesClick(nil);
+  ChDir(RootDir);
+  ShellExecute(handle, 'open', 'MP Lounge 2.exe', NiL, Nil, SW_SHOWNORMAL);
   Form1.Close;
 end;
 
