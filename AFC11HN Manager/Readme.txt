@@ -1,5 +1,5 @@
 --------------------------------------------------------------------
-     <<Alarm for Cobra 11 - Highway Nights>> Manager by Krom v0.1c
+     <<Alarm for Cobra 11 - Highway Nights>> Manager by Krom v0.1d
 --------------------------------------------------------------------
 
 Description:
@@ -29,6 +29,7 @@ Open source:
 This and many other WR tools are available at http://code.google.com/p/wr-toolkit/
 
 Version History:
+0.1d	2010.07.14	Raised addon car limit to 2560 cars
 0.1c	2010.02.07	Fixed motor sounds and installing of older editcars
 0.1b	2010.02.06	Fixed wrong tire sizes in-game
 			Added carinfo area into Manager
