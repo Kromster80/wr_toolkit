@@ -1,5 +1,5 @@
 ------------------------------------------------
-World Racing 2 Manager by Krom v0.3k
+World Racing 2 Manager by Krom v0.3l
 ------------------------------------------------
 
 Description:
