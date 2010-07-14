@@ -56,9 +56,8 @@ begin
   if key=27 then AboutForm.Close;   //ESC
 end;
 
-{$IFDEF VER140}
-  {$R *.dfm}
-{$ENDIF}
+{$IFDEF VER140} {$R *.dfm} {$ENDIF}
+{$IFDEF VER150} {$R *.dfm} {$ENDIF}
 
 initialization
 {$IFDEF FPC}
