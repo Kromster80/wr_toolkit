@@ -1,22 +1,15 @@
 unit Unit1;
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
-
 interface
 uses
-  dglOpenGL,
-  {$IFDEF VER140} OpenGL, {$ENDIF}
-  {$IFDEF FPC} GL, {$ENDIF}
-  {$IFDEF VER140}
-  JPEG,
-  FloatSpinEdit,
-  ValEdit,
-  {$ENDIF}
+  dglOpenGL, OpenGL, JPEG, FloatSpinEdit, ValEdit,
   Windows, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, kromUtils, KromOGLUtils, Defaults, Math, Menus, LoadObjects,
-  Grids,  ImgList, OpenAL, WR_AboutBox, SK_Options, FileCtrl,
+  StdCtrls, ExtCtrls, kromUtils, KromOGLUtils, Defaults, Math, Menus,
+  LoadObjects, Grids,  ImgList, OpenAL, WR_AboutBox, SK_Options, FileCtrl,
   Buttons, Spin, ComCtrls;
+
+type TCarDrivingMode = (cdm_Sim, cdm_Arcade);
+const CarDrivingMode: array[TCarDrivingMode] of string = ('Sim', 'Arcade');
+
 
 type
   TForm1 = class(TForm)
@@ -913,7 +906,7 @@ var
   PlayTrackSpeed:single;
 
   Car:record
-    Mode:string;
+    Mode:TCarDrivingMode;
     Speed:single;
     MoveDirection:integer;
     Stopped:boolean;
@@ -1384,11 +1377,9 @@ var
 
   fOptions: TSKOptions;
 
-implementation  {$IFNDEF FPC}
+implementation
   {$R *.dfm}
-{$ELSE}
-  {$R *.lfm}
-{$ENDIF}
+
 uses LoadSave, Unit_Render, PTXTexture, Load_TRK, Unit_sc2, Unit_Streets,
 Unit_Triggers, Unit_Options, Unit_RoutineFunctions, Unit_RenderInit, Unit_Tracing,
   ColorPicker, SK_ImportLWO;
@@ -1408,6 +1399,7 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+  DoClientAreaResize(Self);
   ElapsedTime(@OldTime);
 
   fOptions := TSKOptions.Create;
@@ -1420,15 +1412,8 @@ begin
   Form1.Caption:=VersionInfo;
   MemoLog.Left:=Panel1.Left+4;
   PageControl1.OwnerDraw:=true;   //enable here, to keep tab names displayed in developer time
-  InitOpenGL;                               // New call to initialize and bind the OpenGL dll
-  h_DC := GetDC(Panel1.Handle);
-  if h_DC=0 then begin MyMessageBox(h_DC, 'Unable to get a device context', 'Error', MB_OK or MB_ICONERROR); exit; end;
-  if not SetDCPixelFormat(h_DC) then exit;
-  h_RC := wglCreateContext(h_DC);
-  if h_RC=0 then begin MyMessageBox(h_DC, 'Unable to create an OpenGL rendering context', 'Error', MB_OK or MB_ICONERROR); exit; end;
-  if not wglMakeCurrent(h_DC, h_RC) then begin
-  MyMessageBox(Form1.Handle, 'Unable to activate OpenGL rendering context', 'Error', MB_OK or MB_ICONERROR);
-  exit; end;
+
+  SetRenderFrame(Panel1.Handle, h_DC, h_RC);
 
   RenderInit();
   CompileCommonObjects();
@@ -1488,10 +1473,12 @@ begin
   fOptions.ReduceDisplay := CBReduceDisplay.Checked;
 end;
 
+
 procedure TForm1.CBTraceChange(Sender: TObject);
 begin
   fOptions.TraceSurface := CBTrace.Checked;
 end;
+
 
 procedure TForm1.RenderResize(Sender: TObject);
 begin
@@ -1513,6 +1500,7 @@ if Form1.Height<744 then Form1.Height:=744;
   glLoadIdentity();                   // Reset View
 end;
 
+
 procedure TForm1.RenderResize2(Sender: TObject);
 begin
   if (Panel11.Height = 0) then Panel11.Height := 1;
@@ -1530,6 +1518,7 @@ begin
   glMatrixMode(GL_MODELVIEW);         // Return to the modelview matrix
   glLoadIdentity();                   // Reset View
 end;
+
 
 procedure TForm1.Panel1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var Code:KCode; ID,i,tmp:integer; ss:string; tmpY:single;
@@ -1549,78 +1538,80 @@ if DoubleClick then begin
 //////////////////////////////////////
 if ActivePage=apObjects then
 if Code=kObject then begin
-ListObjects.ItemIndex:=Obj[ID].ID; //0..X range
-ListObjectsClick(nil);
+  ListObjects.ItemIndex:=Obj[ID].ID; //0..X range
+  ListObjectsClick(nil);
   for i:=1 to ListObjects2.Count do begin
-  ss:=ListObjects2.Items[i-1];
-  decs(ss,-length(ss)+4);
+    ss:=ListObjects2.Items[i-1];
+    decs(ss,-length(ss)+4);
     if ID=strtoint(ss) then begin
-    ListObjects2.ItemIndex:=i-1;
-    ListObjects2Click(nil);
+      ListObjects2.ItemIndex:=i-1;
+      ListObjects2Click(nil);
     end;
   end;
 end;
 
 if ActivePage=apTOB then
 if Code=kObject then begin
-ListTOB2.ItemIndex:=ID-1; //0..X range
-ListTOB2Click(nil);
+  ListTOB2.ItemIndex:=ID-1; //0..X range
+  ListTOB2Click(nil);
 end;
 
 if ActivePage=apLights then if Code=kPoint then begin
-ListLights.ItemIndex:=ID-1;
-ListLightsClick(nil);
+  ListLights.ItemIndex:=ID-1;
+  ListLightsClick(nil);
 end;
 
 if ActivePage=apTriggers then if (Code=kObject)or(Code=kPoint) then begin
-if Code=kObject then EditMode:='Object';
-if Code=kPoint  then EditMode:='Pointer';
-ListTrig.ItemIndex:=ID-1;
-ListTrigClick(nil);
+  if Code=kObject then EditMode:='Object';
+  if Code=kPoint  then EditMode:='Pointer';
+  ListTrig.ItemIndex:=ID-1;
+  ListTrigClick(nil);
 end;
 
 if ActivePage=apMaterials then if Code=kSurface then begin
-ListMaterials.ItemIndex:=ID-1;
-ListMaterialsClick(nil);
+  ListMaterials.ItemIndex:=ID-1;
+  ListMaterialsClick(nil);
 end;
 
 if ActivePage=apSounds then if Code=kPoint then begin
-ListSounds.ItemIndex:=ID;
-ListSoundsClick(nil);
+  ListSounds.ItemIndex:=ID;
+  ListSoundsClick(nil);
 end;
 
 if ActivePage=apTracksWP then if Code=kPoint then begin
-ListWPNodes.ItemIndex:=ID-1;
-ListWPNodesClick(nil);
+  ListWPNodes.ItemIndex:=ID-1;
+  ListWPNodesClick(nil);
 end;
 
 if ActivePage=apTracksMT then if Code=kPoint then begin
-ListMakeTrack.ItemIndex:=ID-1;
-ListMakeTrackClick(nil);
+  ListMakeTrack.ItemIndex:=ID-1;
+  ListMakeTrackClick(nil);
 end;
 
 if ActivePage=apAnimated then if Code=kPoint then begin
-for i:=1 to SNIHead.Obj do
-if ID<=SNIObj[i].firstNode then break;
-i:=i-1;
-ListSNIObjects.ItemIndex:=i-1;
-ListSNIObjectsClick(nil);
-ListSNINodes.ItemIndex:=EnsureRange(ID-SNIObj[i].firstNode,1,ListSNINodes.Count)-1;
-ListSNINodesClick(nil);
-ListSNINodes.SetFocus;
+  for i:=1 to SNIHead.Obj do
+  if ID<=SNIObj[i].firstNode then break;
+  i:=i-1;
+  ListSNIObjects.ItemIndex:=i-1;
+  ListSNIObjectsClick(nil);
+  ListSNINodes.ItemIndex:=EnsureRange(ID-SNIObj[i].firstNode,1,ListSNINodes.Count)-1;
+  ListSNINodesClick(nil);
+  ListSNINodes.SetFocus;
 end;
 
 if ActivePage=apStreets then begin
 if Code=kPoint then SetStreetMode('Nodes') else
 if Code=kSpline then SetStreetMode('Splines') else
-                                         
+
   if ((EditMode='StreetNodes')or(EditMode='StreetSplines'))and(MouseButton=1) then
     if (Code=kNil)and(ID=0)and(MPos.x<>0)and(MPos.y<>0)and(MPos.z<>0) then begin //Add new node
     inc(STRHead.NumPoints);
     setlength(STR_Point,STRHead.NumPoints+1);
     STR_Point[STRHead.NumPoints].x:=MPos.X;
-    if yRot>180 then ss:='Top' else ss:='Bottom';
-    TraceHeight(MPos.X,0,MPos.Z,ss,@tmpY,@tmp);
+    if yRot>180 then
+      TraceHeight(MPos.X,0,MPos.Z,pd_Top,@tmpY,@tmp)
+    else
+      TraceHeight(MPos.X,0,MPos.Z,pd_Bottom,@tmpY,@tmp);
     STR_Point[STRHead.NumPoints].y:=tmpY;
     STR_Point[STRHead.NumPoints].z:=MPos.Z;
     STR_Point[STRHead.NumPoints].tx:=0;
@@ -1658,7 +1649,6 @@ var vx,vy,vz:TFloatSpinEdit;
     vxi,vyi:TSpinEdit;
     Code:KCode; ID,tmp,PA,PB:integer;
     tx,ty,tz,px,py,pz,LA,LB:single;
-    ss:string;
 begin
 try
 if MouseButton=0 then exit;
@@ -1715,9 +1705,8 @@ vx.Value:=vx.Value+(-(ObjectX-X)*ObjectMoveScale*cos(xRot/180*pi)
 vz.Value:=vz.Value+( (ObjectX-X)*ObjectMoveScale*sin(xRot/180*pi)
                     +(ObjectY-Y)*ObjectMoveScale*cos(xRot/180*pi))/power(zoom,3)/4*sign(yRot-180);
 if (fOptions.TraceSurface)and(not ScnRefresh)and(Qty.Polys>0) then begin
-  //if sign(yRot-180)>0 then ss:='Top' else ss:='Bottom';
-  ss:='Near';
-  TraceHeight(vx.Value,vy.Value,vz.Value,ss,@ty,@tmp);
+  //if sign(yRot-180)>0 then ss:=pd_Top else ss:=pd_Bottom;
+  TraceHeight(vx.Value,vy.Value,vz.Value,pd_Near,@ty,@tmp);
   vy.Value:=ty;
 end;
 end;
@@ -2535,16 +2524,19 @@ RemakeQADTable(nil);
 ObjInstanceRefresh:=false;
 end;
 
+
 procedure TForm1.ListObjects2DblClick(Sender: TObject);
 var ID:integer; ss:string;
 begin
-ss:=ListObjects2.Items[ListObjects2.ItemIndex];
-decs(ss,-length(ss)+4); //Keep last 4 digits
-ID:=strtoint(ss);
-xPos:=Obj[ID].PosX;
-yPos:=Obj[ID].PosY;
-zPos:=Obj[ID].PosZ;
+  if ListObjects2.ItemIndex = -1 then exit;
+  ss:=ListObjects2.Items[ListObjects2.ItemIndex];
+  decs(ss,-length(ss)+4); //Keep last 4 digits
+  ID:=strtoint(ss);
+  xPos:=Obj[ID].PosX;
+  yPos:=Obj[ID].PosY;
+  zPos:=Obj[ID].PosZ;
 end;
+
 
 procedure TForm1.RemObjectClick(Sender: TObject);
 var h,i,k,m,ID:integer;
@@ -2647,7 +2639,9 @@ end;
 procedure TForm1.ButtonPrintScreenClick(Sender: TObject);
 var
   f:file;
-  SizeH,SizeV,i,k:integer; fbo,img,depthbuffer:GLuint; bmp4:pointer;
+  SizeH,SizeV,i,k:integer;
+  fbo,img,depthbuffer:GLuint;
+  bmp4:pointer;
 begin
 if Sender=MakeSMP then begin
   SizeH:=SMPHead.A;
@@ -2798,20 +2792,20 @@ end;
 procedure TForm1.ListMaterialsClick(Sender: TObject);
 var ID:integer;
 begin
-MatRefresh:=true;
-ID:=ListMaterials.ItemIndex+1;
-if ID=0 then exit;
-Panel6.Caption:='Material ID.'+inttostr(ID)+' - '+MaterialW[ID].Name+', Mode'+inttostr(Material[ID].Mode);
-RGMatMode.ItemIndex:=Material[ID].Mode div 16;
-CBMatGrass.Checked:=MaterialW[ID].GrowGrass=1;
-CBMatEnlite.Checked:=MaterialW[ID].Enlite=1;
-CBMatNoShadow.Checked:=MaterialW[ID].NoShadow=1;
-CBTex1.ItemIndex:=Material[ID].Tex1;
-CBTex2.ItemIndex:=Material[ID].Tex2;
-CBTex3.ItemIndex:=Material[ID].Tex3;
-MatTexLayChange(nil);
-MatRefresh:=false;
-if CBTraceMat.Checked then CBTraceMatClick(nil);
+  MatRefresh:=true;
+  ID:=ListMaterials.ItemIndex+1;
+  if ID=0 then exit;
+  Panel6.Caption:='Material ID.'+inttostr(ID)+' - '+MaterialW[ID].Name+', Mode'+inttostr(Material[ID].Mode);
+  RGMatMode.ItemIndex:=Material[ID].Mode div 16;
+  CBMatGrass.Checked:=MaterialW[ID].GrowGrass=1;
+  CBMatEnlite.Checked:=MaterialW[ID].Enlite=1;
+  CBMatNoShadow.Checked:=MaterialW[ID].NoShadow=1;
+  CBTex1.ItemIndex:=Material[ID].Tex1;
+  CBTex2.ItemIndex:=Material[ID].Tex2;
+  CBTex3.ItemIndex:=Material[ID].Tex3;
+  MatTexLayChange(nil);
+  MatRefresh:=false;
+  if CBTraceMat.Checked then CBTraceMatClick(nil);
 end;
 
 procedure TForm1.RGMatModeClick(Sender: TObject);
@@ -3062,7 +3056,7 @@ case MouseAction of
 end;
 
 if fOptions.TraceSurface then if (not ScnRefresh)and(Qty.Polys>0) then
-TraceHeight(xPos,yPos,zPos,'Near',@yPos,@TracePt);
+TraceHeight(xPos,yPos,zPos,pd_Near,@yPos,@TracePt);
 
 if yRot<0 then yRot:=yRot+360;
 if yRot>=360 then yRot:=yRot-360;
@@ -5983,7 +5977,7 @@ var i:integer;
 begin
 for i:=1 to Qty.ObjectsTotal do
 if Obj[i].ID+1=ListObjects.ItemIndex+1 then
- Obj[i].PosY:=TraceHeightY(Obj[i].PosX,Obj[i].PosY,Obj[i].PosZ,'Near');
+ Obj[i].PosY:=TraceHeightY(Obj[i].PosX,Obj[i].PosY,Obj[i].PosZ,pd_Near);
 end;
 
 procedure TForm1.RotateInstancesClick(Sender: TObject);
@@ -6504,7 +6498,6 @@ end;
 procedure TForm1.PrintScreenJPGClick(Sender: TObject);
 var sh,sw,i,k,h:integer; t:byte; jpg: TJpegImage; mkbmp:TBitmap; s:string;
 begin
-{$IFDEF VER140}
 sh:=Panel1.Height; sw:=Panel1.Width;
 
 setlength(bmp,sw*sh+1);
@@ -6531,7 +6524,6 @@ jpg.SaveToFile(fOptions.ExeDir+'STKit2_screen '+s+'.jpg');
 jpg.Free;
 mkbmp.Free;
 MyMessageBox(Form1.Handle, 'Screenshot saved to '+fOptions.ExeDir+'STKit2_screen '+s+'.jpg', 'Info', MB_OK or MB_ICONINFORMATION);
-{$ENDIF}
 end;
 
 procedure TForm1.AddSkyPresetClick(Sender: TObject);
@@ -6834,25 +6826,25 @@ end;
 
 procedure TForm1.StatusBar1Click(Sender: TObject);
 begin
-StatusBar1.Panels[5].Text:=ReturnListOfChangedFiles(', ');
+  StatusBar1.Panels[5].Text := ReturnListOfChangedFiles(', ');
 end;
 
 procedure TForm1.Memo1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-CBShowCar.Checked:=true;
-if Car.Stopped then begin
-CarX:=xPos;
-CarY:=yPos;
-CarZ:=zPos;
-CarH:=xRot-180;
-Car.Stopped:=false;
-end;
-if Key=VK_UP    then Key1:=true;
-if Key=VK_DOWN  then Key2:=true;
-if Key=VK_LEFT  then Key3:=true;
-if Key=VK_RIGHT then Key4:=true;
-if Key=ord('M') then
-if Car.Mode='Sim' then Car.Mode:='Arc' else Car.Mode:='Sim';
+  CBShowCar.Checked:=true;
+  if Car.Stopped then begin
+    CarX:=xPos;
+    CarY:=yPos;
+    CarZ:=zPos;
+    CarH:=xRot-180;
+    Car.Stopped:=false;
+  end;
+  if Key=VK_UP    then Key1:=true;
+  if Key=VK_DOWN  then Key2:=true;
+  if Key=VK_LEFT  then Key3:=true;
+  if Key=VK_RIGHT then Key4:=true;
+  if Key=ord('M') then
+  if Car.Mode=cdm_Sim then Car.Mode:=cdm_Arcade else Car.Mode:=cdm_Sim;
 end;
 
 procedure TForm1.Memo1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -6872,11 +6864,11 @@ for ID:=1 to STRHead.NumPoints do begin
 TraceHeight(STR_Point[ID].x+STR_Point[ID].tx*100,
             STR_Point[ID].y+STR_Point[ID].ty*100,
             STR_Point[ID].z+STR_Point[ID].tz*100,
-            'Near', @y1, @ti);
+            pd_Near, @y1, @ti);
 TraceHeight(STR_Point[ID].x-STR_Point[ID].tx*100,
             STR_Point[ID].y-STR_Point[ID].ty*100,
             STR_Point[ID].z-STR_Point[ID].tz*100,
-            'Near', @y2, @ti);
+            pd_Near, @y2, @ti);
 
 Normalize(STR_Point[ID].tx,
           (y1-y2)/150,
@@ -7207,7 +7199,7 @@ begin
     Node[3].X:=xPos;
     Node[3].Z:=zPos-200;
     for i:=1 to 3 do begin
-      Node[i].Y:=TraceHeightY(Node[i].X,yPos,Node[i].Z,'Near');
+      Node[i].Y:=TraceHeightY(Node[i].X,yPos,Node[i].Z,pd_Near);
       Node[i].RoadWidth:=10;
     end;
   end;

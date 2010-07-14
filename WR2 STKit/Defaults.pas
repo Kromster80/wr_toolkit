@@ -1,12 +1,7 @@
 unit Defaults;
-{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
-
 interface
 uses
-  {$IFDEF VER140} OpenGL, {$ENDIF}
-  {$IFDEF FPC} GL, {$ENDIF}
-  Windows,
-  OpenAL, SysUtils, Graphics;
+  OpenGL, Windows, OpenAL, SysUtils, Graphics;
 
 function GetPresetColor(ID:integer):TColor;
 procedure SetPresetColorGL(ID:integer; A:single);
@@ -15,7 +10,7 @@ function MyMessageBox(hWnd:HWND; lpText:string; lpCaption:string; uType:UINT):lo
 
 //STKit2 constants
 const
-  VersionInfo       = 'Scenery ToolKit 2.3.4           (28 Apr 2009)';
+  VersionInfo       = 'Scenery ToolKit 2.3.5           (14 Jul 2010)';
   FPS_INTERVAL      = 1000;    //Calculate FPS every ---- ms
   STKit2_Data_Path  = 'STKit2 Data';
 
@@ -26,7 +21,7 @@ const
   MAX_TRACKS        = 32;
   MAX_WP_TRACKS     = 32;
 
-  MAX_LWO_LAYERS    = 128;                 //Maximum allowed LWO layers
+  MAX_LWO_LAYERS    = 1024;                 //Maximum allowed LWO layers
 
   DONT_TRACE_TAG    = 1234567;             //Special tag to exclude certain polys from certain checks
                                            //(e.g. shadow tracing for backdrop grid of scenery)    

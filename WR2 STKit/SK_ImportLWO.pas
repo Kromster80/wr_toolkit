@@ -1,6 +1,4 @@
 unit SK_ImportLWO;
-{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
-
 interface
 uses Unit1,sysutils,Windows,KromUtils,Math,dglOpenGL,Defaults;
 
@@ -292,7 +290,7 @@ begin
       end;//(c[1]+c[2]+c[3]+c[4])='TXUV'
     end else
 
-    if ChapName='CLIP' then begin
+    if (ChapName='CLIP')and(ChapSize<>0) then begin
       blockread(f,c,ChapSize);
       s:=''; ii:=9;
       repeat

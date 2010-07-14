@@ -1,88 +1,87 @@
 unit Unit_Tracing;
-
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
-
 interface
-uses Unit1,sysutils,math,KromUtils;
+uses Unit1, Sysutils, Math, KromUtils, Defaults;
 
-procedure TraceHeight(inx,iny,inz:single; PickDirection:string; ResultY:psingle; ResultPoly:pinteger); overload;
-function TraceHeightY(inx,iny,inz:single; PickDirection:string):single; overload;
+type TPickDirection = (pd_Top, pd_Bottom, pd_Near);
+
+function TraceHeightY(inx,iny,inz:single; aPickDir:TPickDirection):single;
+procedure TraceHeight(inx,iny,inz:single; aPickDir:TPickDirection; ResultY:psingle; ResultPoly:pinteger);
 procedure TraceVectorShadows(ShadowEdgeHardness:byte; TraceDetails:boolean);
 
 implementation
 
-function TraceHeightY(inx,iny,inz:single; PickDirection:string):single; overload;
+function TraceHeightY(inx,iny,inz:single; aPickDir:TPickDirection):single;
 var y:single; i:integer;
 begin
-TraceHeight(inx, iny, inz, PickDirection, @y, @i);
-Result:=y;
+  TraceHeight(inx, iny, inz, aPickDir, @y, @i);
+  Result:=y;
 end;
 
-procedure TraceHeight(inx,iny,inz:single; PickDirection:string; ResultY:psingle; ResultPoly:pinteger); overload;
+
+procedure TraceHeight(inx,iny,inz:single; aPickDir:TPickDirection; ResultY:psingle; ResultPoly:pinteger);
 const Num=16; //how many polys to check
-var i,k,PolyQty,ci,cb:integer;
-x1,z1,x2,z2,x3,z3,ytemp,nx,ny,nz,D:single;
-v1,v2,v3:array[1..3] of single;
-tp:array[1..Num]of integer;
+var
+  i,k,PolyQty,ci,cb:integer;
+  x1,z1,x2,z2,x3,z3,ytemp,nx,ny,nz,D:single;
+  v1,v2,v3:array[1..3] of single;
+  tp:array[1..Num]of integer;
 begin
-PolyQty:=1; ci:=1;
-FillChar(tp,SizeOf(tp),#0);
-cb:=                                                                    //CollisionBlock:=
-    (EnsureRange(round(inz/256+0.5+Qty.BlocksZ*2),1,Qty.BlocksZ*4)-1)*  //(Z-1)*
-     Qty.BlocksX*4+                                                     //Qty.BlocksX*4+
-     EnsureRange(round(inx/256+0.5+Qty.BlocksX*2),1,Qty.BlocksX*4);     //(X-1)+1
+  PolyQty:=1; ci:=1;
+  FillChar(tp,SizeOf(tp),#0);
+  cb:=                                                                    //CollisionBlock:=
+      (EnsureRange(round(inz/256+0.5+Qty.BlocksZ*2),1,Qty.BlocksZ*4)-1)*  //(Z-1)*
+       Qty.BlocksX*4+                                                     //Qty.BlocksX*4+
+       EnsureRange(round(inx/256+0.5+Qty.BlocksX*2),1,Qty.BlocksX*4);     //(X-1)+1
 
-repeat
-  for i:=1 to v06[cb][ci] do begin // Polycount; BlockID; ..polys..; Polycount; BlockID; ..polys..; 0-terminator.
-    k:=Block[((v06[cb,ci+1])div Qty.BlocksX+1),
-             ((v06[cb,ci+1])mod Qty.BlocksX+1)].FirstPoly+1+v06[cb,ci+1+i];
+  repeat
+    for i:=1 to v06[cb][ci] do begin // Polycount; BlockID; ..polys..; Polycount; BlockID; ..polys..; 0-terminator.
+      k:=Block[((v06[cb,ci+1])div Qty.BlocksX+1),
+               ((v06[cb,ci+1])mod Qty.BlocksX+1)].FirstPoly+1+v06[cb,ci+1+i];
 
-    x1:=inx-VTX[v[k,1]].X; z1:=inz-VTX[v[k,1]].Z;
-    x2:=inx-VTX[v[k,2]].X; z2:=inz-VTX[v[k,2]].Z;
-    x3:=inx-VTX[v[k,3]].X; z3:=inz-VTX[v[k,3]].Z;
+      x1:=inx-VTX[v[k,1]].X; z1:=inz-VTX[v[k,1]].Z;
+      x2:=inx-VTX[v[k,2]].X; z2:=inz-VTX[v[k,2]].Z;
+      x3:=inx-VTX[v[k,3]].X; z3:=inz-VTX[v[k,3]].Z;
 
-    if (-x1*z2+z1*x2>=0) //point within triangle makes 3 triangles whose normals face up (nY > 0)
-    and(-x2*z3+z2*x3>=0) //simply check if any of these normals Y>=0
-    and(-x3*z1+z3*x1>=0) then begin
-      tp[PolyQty]:=k;
-      if PolyQty<Num then inc(PolyQty); //avoid overflows
+      if (-x1*z2+z1*x2>=0) //point within triangle makes 3 triangles whose normals face up (nY > 0)
+      and(-x2*z3+z2*x3>=0) //simply check if any of these normals Y>=0
+      and(-x3*z1+z3*x1>=0) then begin
+        tp[PolyQty]:=k;
+        if PolyQty<Num then inc(PolyQty); //avoid overflows
+      end;
+    end;
+    inc(ci,v06[cb,ci]+2); //qty+2
+  until(v06[cb,ci]=0); //end of list
+
+  PolyQty:=PolyQty-1;
+
+  ResultY^:=0;
+  ResultPoly^:=1;
+
+  for i:=1 to PolyQty do begin
+    v1[1]:=VTX[v[tp[i],1]].X; v1[2]:=VTX[v[tp[i],1]].Y; v1[3]:=VTX[v[tp[i],1]].Z;
+    v2[1]:=VTX[v[tp[i],2]].X; v2[2]:=VTX[v[tp[i],2]].Y; v2[3]:=VTX[v[tp[i],2]].Z;
+    v3[1]:=VTX[v[tp[i],3]].X; v3[2]:=VTX[v[tp[i],3]].Y; v3[3]:=VTX[v[tp[i],3]].Z;
+    Normal2Poly(v1,v2,v3,@nx,@ny,@nz);
+    Normalize(nx,ny,nz);
+    D:=-(nx*VTX[v[tp[i],1]].X+ny*VTX[v[tp[i],1]].Y+nz*VTX[v[tp[i],1]].Z);
+    ytemp:=-(inx*nx+inz*nz+D)/ny; //true height respecting poly surface
+
+    case aPickDir of
+      pd_Top:     if ((ytemp > ResultY^)and(ny > 0))or(i = 1) then begin //choose highest one
+                    ResultY^:=ytemp;
+                    ResultPoly^:=tp[i];
+                  end;
+      pd_Bottom:  if ((ytemp < ResultY^)and(ny > 0))or(i = 1) then begin //choose lowest one
+                    ResultY^:=ytemp;
+                    ResultPoly^:=tp[i];
+                  end;
+      pd_Near:    if ((abs(ytemp-iny) < abs(ResultY^-iny))and(ny > 0))or(i = 1) then begin //choose nearest one
+                    ResultY^:=ytemp;
+                    ResultPoly^:=tp[i];
+                  end;
+      else Assert(false,'Unknown pick direction querried');
     end;
   end;
-  inc(ci,v06[cb,ci]+2); //qty+2
-until(v06[cb,ci]=0); //end of list
-
-PolyQty:=PolyQty-1;
-
-ResultY^:=0;
-ResultPoly^:=1;
-
-for i:=1 to PolyQty do begin
-  v1[1]:=VTX[v[tp[i],1]].X; v1[2]:=VTX[v[tp[i],1]].Y; v1[3]:=VTX[v[tp[i],1]].Z;
-  v2[1]:=VTX[v[tp[i],2]].X; v2[2]:=VTX[v[tp[i],2]].Y; v2[3]:=VTX[v[tp[i],2]].Z;
-  v3[1]:=VTX[v[tp[i],3]].X; v3[2]:=VTX[v[tp[i],3]].Y; v3[3]:=VTX[v[tp[i],3]].Z;
-  Normal2Poly(v1,v2,v3,@nx,@ny,@nz);
-  Normalize(nx,ny,nz);
-  D:=-(nx*VTX[v[tp[i],1]].X+ny*VTX[v[tp[i],1]].Y+nz*VTX[v[tp[i],1]].Z);
-  ytemp:=-(inx*nx+inz*nz+D)/ny; //true height respecting poly surface
-
-  if PickDirection='Top' then
-    if ((ytemp > ResultY^)and(ny > 0))or(i = 1) then begin //choose highest one
-    ResultY^:=ytemp;
-    ResultPoly^:=tp[i];
-    end;
-  if PickDirection='Bottom' then
-    if ((ytemp < ResultY^)and(ny > 0))or(i = 1) then begin //choose lowest one
-    ResultY^:=ytemp;
-    ResultPoly^:=tp[i];
-    end;
-  if PickDirection='Near' then
-    if ((abs(ytemp-iny) < abs(ResultY^-iny))and(ny > 0))or(i = 1) then begin //choose lowest one
-    ResultY^:=ytemp;
-    ResultPoly^:=tp[i];
-    end;
-end;
 
 end;
 

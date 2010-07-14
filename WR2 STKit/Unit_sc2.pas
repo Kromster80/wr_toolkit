@@ -1,10 +1,5 @@
 unit Unit_sc2;
-
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
-
- interface
+interface
 uses Unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture, Defaults;
 
   procedure AutoFill_SC2(Sender: TObject);

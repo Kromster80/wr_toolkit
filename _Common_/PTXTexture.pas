@@ -2,10 +2,9 @@ unit PTXTexture;
 interface
 uses
   Windows,
-  {$IFDEF VER140} OpenGL, {$ENDIF}
-  {$IFDEF FPC} GL, {$ENDIF}
+  OpenGL,
   SysUtils, dglOpenGL,
-  {$IFDEF VER140} JPEG, {$ENDIF}
+  JPEG, 
   Graphics;
 
 function LoadTexturePTX(Filename:string; var Texture: GLuint): Boolean;
@@ -220,7 +219,6 @@ var
   i,k:integer;
   Line : ^cardinal;
 begin       //todo: scanline
-  {$IFDEF VER140}
   if not FileExists(Filename) then begin
     //MyMessageBox(0, PChar('File not found  - ' + Filename), PChar('JPG Texture'), MB_OK);
     setlength(MipData, 32*16); //size in bytes
@@ -252,12 +250,10 @@ begin       //todo: scanline
   BMPi.Free;
   setlength(MipData,0);
   Result := TRUE;
-  {$ENDIF}
 end;
 
 
 function LoadTextureJPG(Filename:string; var Texture : GLuint): Boolean;
-{$IFDEF VER140}
 var
   JPGi:TJPEGImage;
   BMPi:TBitmap;
@@ -265,10 +261,8 @@ var
   pData:array[0..1]of pointer;
   i,k:integer;
   Line : ^cardinal;
-{$ENDIF}
 begin
   result :=FALSE;
-  {$IFDEF VER140}
   JPGi:=TJPEGImage.Create;
 
   if not FileExists(Filename) then begin
@@ -309,12 +303,10 @@ begin
   BMPi.Free;
   setlength(MipData,0);
   Result :=TRUE;
-  {$ENDIF}
 end;
 
 
 function LoadTextureJPGa(Filename:string; var Texture : GLuint): Boolean;
-{$IFDEF VER140}
 var
   JPGi:TJPEGImage;
   BMPi:TBitmap;
@@ -322,10 +314,8 @@ var
   pData:array[0..1]of pointer;
   i,k:integer;
   Line : ^cardinal;
-{$ENDIF}
 begin
   result :=FALSE;
-  {$IFDEF VER140}
   JPGi:=TJPEGImage.Create;
 
   if not FileExists(Filename) then begin
@@ -357,7 +347,6 @@ begin
 
   setlength(MipData,0);
   Result :=TRUE;
-  {$ENDIF}
 end;
 
 

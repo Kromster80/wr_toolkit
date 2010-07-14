@@ -1,6 +1,4 @@
 unit Unit_Options;
-{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
-
 interface
 uses
   SysUtils, Classes, Controls, Forms, Dialogs, Spin, unit1, KromUtils, StdCtrls, ExtCtrls, FileCtrl;
@@ -34,13 +32,7 @@ var
   ActiveScenery:string;
 
 implementation
-
-{$IFDEF VER140}
-  {$R *.dfm}
-{$ENDIF}
-{$IFDEF FPC}
-  {$R *.lfm}
-{$ENDIF}
+{$R *.dfm}
 
 procedure TFormOptions.FormShow(Sender: TObject);
 begin
