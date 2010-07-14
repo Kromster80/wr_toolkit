@@ -49,7 +49,7 @@ const
  StockReifen    = 72; //Tires
 
  MaxCars        = 2560;
- VersionInfo    = 'AFC11HN Manager       Version 0.1d (15 Jul 2010)';
+ VersionInfo    = 'AFC11HN Manager       Version 0.1d (14 Jul 2010)';
 
 var
   Form1: TForm1;
