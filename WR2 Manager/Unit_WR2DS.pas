@@ -246,7 +246,7 @@ for i:=1 to AddonMissionQty do if AddonMission[i].Install then begin
   Value[19,18,ID].Int:=AddonMission[i].InitCShip;         //?
 end;//1..AddonMissionQty
 
-for ID:=1 to CO[49,j].Entries do begin //special fix for RefFail/RefSuccess Texts
+for ID:=1 to CO[49,1].Entries do begin //special fix for RefFail/RefSuccess Texts
 Value[49,42,ID].Typ:=Value[49,42,1].Typ;
 Value[49,43,ID].Typ:=Value[49,43,1].Typ;
 end;

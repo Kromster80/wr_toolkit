@@ -134,7 +134,7 @@ begin
 end;
 
 procedure GetProfileInfo(s1:string;i1:integer);
-var NumRead,Pos,i,j,m,k,h:integer; s:string;
+var i,j,m,k,h:integer; s:string;
 begin
 assignfile(f,RootDir+'\WR2-Saves\'+s1+'\career.wrc'); FileMode:=0; reset(f,1); FileMode:=2;
 blockread(f,P_[i1].Header,33);
