@@ -1,10 +1,5 @@
 unit Unit_Streets;
-
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
-
- interface
+interface
 uses Unit1,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_RoutineFunctions, Unit_Tracing;
 
 procedure AddShapeClick_();
@@ -156,11 +151,11 @@ STR_Point[ID].tz:=cos(Form1.STRPointT.Value*pi/180);
 TraceHeight(STR_Point[ID].x+STR_Point[ID].tx*100,
             STR_Point[ID].y+STR_Point[ID].ty*100,
             STR_Point[ID].z+STR_Point[ID].tz*100,
-            'Near', @y1, @ti);
+            pd_Near, @y1, @ti);
 TraceHeight(STR_Point[ID].x-STR_Point[ID].tx*100,
             STR_Point[ID].y-STR_Point[ID].ty*100,
             STR_Point[ID].z-STR_Point[ID].tz*100,
-            'Near', @y2, @ti);
+            pd_Near, @y2, @ti);
 
 Normalize(STR_Point[ID].tx,
           (y1-y2)/150,

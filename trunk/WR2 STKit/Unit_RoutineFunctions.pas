@@ -1,9 +1,4 @@
 unit Unit_RoutineFunctions;
-
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
-
 interface
 uses Unit1,Math, KromUtils, SysUtils, Unit_Tracing, Defaults;
 
@@ -13,7 +8,7 @@ procedure GetPositionFromTRK(TRKNumber:integer; Loc:single; Node:pinteger; X,Y,Z
 procedure GetPositionFromSNI(SNINumber:integer; Loc:single; X,Y,Z:psingle);
 procedure GetPositionFromSNISpeed(SNINumber:integer; X,Y,Z,H,P,B:psingle);
 function ReturnListOfChangedFiles(eol:string):string;
-procedure PlaceCarOnTerrain(var CrX,CrY,CrZ,CrH,CrP,CrB:single; PickDirection:string; var CmX,CmY,CmZ,CmH,CmP:single);
+procedure PlaceCarOnTerrain(var CrX,CrY,CrZ,CrH,CrP,CrB:single; aPickDir:TPickDirection; var CmX,CmY,CmZ,CmH,CmP:single);
 procedure MoveCarSimple();
 procedure MoveCarAlongTrack(TrackID:integer);
 
@@ -42,7 +37,7 @@ CarZ:=(Route[p0].Z+Route[p0].Ideal*Route[p0].Matrix[7])*(1-dt)+
 
 //Choose wherever car should follow Track or terrain
 if fOptions.TraceSurface then
-TraceHeight(CarX,CarY,CarZ,'Near',@CarY,@TracePt);
+TraceHeight(CarX,CarY,CarZ, pd_Near,@CarY,@TracePt);
 
 xPos:=CarX;
 yPos:=CarY+15; //look above roof
@@ -71,13 +66,13 @@ TraceHeight((Route[p0].X+Route[p0].Margin1*Route[p0].Matrix[1]/10)*(1-dt)+
             CarY,
             (Route[p0].Z+Route[p0].Margin1*Route[p0].Matrix[7]/10)*(1-dt)+
             (Route[p1].Z+Route[p1].Margin1*Route[p1].Matrix[7]/10)*dt,
-            'Near',@ay,@k);
+            pd_Near,@ay,@k);
 TraceHeight((Route[p0].X+Route[p0].Margin2*Route[p0].Matrix[1]/10)*(1-dt)+
             (Route[p1].X+Route[p1].Margin2*Route[p1].Matrix[1]/10)*dt,
             CarY,
             (Route[p0].Z+Route[p0].Margin2*Route[p0].Matrix[7]/10)*(1-dt)+
             (Route[p1].Z+Route[p1].Margin2*Route[p1].Matrix[7]/10)*dt,
-            'Near',@by,@k);
+            pd_Near,@by,@k);
 
 CarB:=90-arctan2(
 (Route[p0].Margin2-Route[p0].Margin1)*(1-dt)+
@@ -88,7 +83,7 @@ yRot:=180+15-CarP/2;
 Zoom:=1.6;
 end;
 
-procedure PlaceCarOnTerrain(var CrX,CrY,CrZ,CrH,CrP,CrB:single; PickDirection:string; var CmX,CmY,CmZ,CmH,CmP:single);
+procedure PlaceCarOnTerrain(var CrX,CrY,CrZ,CrH,CrP,CrB:single; aPickDir:TPickDirection; var CmX,CmY,CmZ,CmH,CmP:single);
 var T:integer; //temp
     RetY:single;
     sinH,cosH:single;
@@ -107,21 +102,21 @@ begin
     CarWheels[i].Angle.P:=CarWheels[i].Angle.P-Round(GetLength(CarWheels[i].Pos.X-Tx,CarWheels[i].Pos.Z-Tz)/(CarWheels[i].Diam*pi)*180);
     CarWheels[i].Pos.X:=Tx;
     CarWheels[i].Pos.Z:=Tz;
-    TraceHeight(CarWheels[i].Pos.X,CrY,CarWheels[i].Pos.Z,PickDirection,@RetY,@T);
+    TraceHeight(CarWheels[i].Pos.X,CrY,CarWheels[i].Pos.Z,aPickDir,@RetY,@T);
     CarWheels[i].Pos.Y:=RetY;
   end;
 
-  TraceHeight(CrX-sinH*CarLength,CrY,CrZ-cosH*CarLength,PickDirection,@RetY,@T);
+  TraceHeight(CrX-sinH*CarLength,CrY,CrZ-cosH*CarLength,aPickDir,@RetY,@T);
   deltaP:=RetY;
-  TraceHeight(CrX+sinH*CarLength,CrY,CrZ+cosH*CarLength,PickDirection,@RetY,@T);
+  TraceHeight(CrX+sinH*CarLength,CrY,CrZ+cosH*CarLength,aPickDir,@RetY,@T);
   deltaP:=deltaP-RetY;
 
-  TraceHeight(CrX+cosH*CarTrackWidth,CrY,CrZ-sinH*CarTrackWidth,PickDirection,@RetY,@T);
+  TraceHeight(CrX+cosH*CarTrackWidth,CrY,CrZ-sinH*CarTrackWidth,aPickDir,@RetY,@T);
   deltaB:=RetY;
-  TraceHeight(CrX-cosH*CarTrackWidth,CrY,CrZ+sinH*CarTrackWidth,PickDirection,@RetY,@T);
+  TraceHeight(CrX-cosH*CarTrackWidth,CrY,CrZ+sinH*CarTrackWidth,aPickDir,@RetY,@T);
   deltaB:=deltaB-RetY;
 
-  TraceHeight(CrX,CrY,CrZ,PickDirection,@RetY,@T);
+  TraceHeight(CrX,CrY,CrZ,aPickDir,@RetY,@T);
   CrY:=RetY;
   CrP:=arctan2(deltaP,CarLength*2)*180/pi;
   CrB:=arctan2(deltaB,CarTrackWidth*2)*180/pi;
@@ -141,7 +136,7 @@ begin
 SpeedIncrease:=0;
 SpeedDecrease:=0;
 
-if Car.Mode='Sim' then begin
+if Car.Mode = cdm_Sim then begin
   //All speed is stored as m/s
   //All acceleration is stored as m/s
   //All turning speed is stored as euler/s
@@ -175,7 +170,7 @@ Car.Stopped:=(Car.Speed=0)and(TurnAngle=0)and(not Key1)and(not Key2)and(not Key3
 
 Form1.Memo1.Lines[0]:='Speed '+inttostr(round(Car.Speed*3.6))+'km/h ('+
                       inttostr(round(SpeedIncrease-SpeedDecrease))+')';
-Form1.Memo1.Lines[1]:='M -'+Car.Mode;
+Form1.Memo1.Lines[1]:='M -'+CarDrivingMode[Car.Mode];
 
 CarX:=CarX+(-0*cos(xRot/180*pi)+(Car.Speed*FrameTime*10/1000)*sin(xRot/180*pi));
 CarZ:=CarZ+( 0*sin(xRot/180*pi)+(Car.Speed*FrameTime*10/1000)*cos(xRot/180*pi));
@@ -184,7 +179,7 @@ CarH:=CarH+TurnAngle*FrameTime/1000;
 CarWheels[1].Angle.H:=round(TurnAngle);
 CarWheels[2].Angle.H:=round(TurnAngle);
 
-PlaceCarOnTerrain(CarX,CarY,CarZ,CarH,CarP,CarB,'Near',xPos,yPos,zPos,xRot,yRot);
+PlaceCarOnTerrain(CarX,CarY,CarZ,CarH,CarP,CarB,pd_Near,xPos,yPos,zPos,xRot,yRot);
 
 Zoom:=1.6;
 CarX:=EnsureRange(CarX,-Qty.BlocksX*512,Qty.BlocksX*512);
@@ -391,26 +386,27 @@ end;
 function ReturnListOfChangedFiles(eol:string):string;
 var i:integer; s:string;
 begin
-if Changes.QAD then s:=s+'QAD'+eol;
-if Changes.IDX then s:=s+'IDX'+eol;
-if Changes.VTX then s:=s+'VTX'+eol;
-if Changes.SMP then s:=s+'SMP'+eol;
-if Changes.WRK then s:=s+'WRK'+eol;
-for i:=1 to MAX_TRACKS do begin
-if Changes.TOB[i] then s:=s+'TOB'+int2fix(i,2)+eol;
-if Changes.TRK[i] then s:=s+'TRK'+int2fix(i,2)+eol;
-end;
-for i:=1 to MAX_WP_TRACKS do
-if Changes.WTR[i] then s:=s+'WTR'+int2fix(i,2)+eol;
-if Changes.SNI then s:=s+'SNI'+eol;
-if Changes.LVL then s:=s+'LVL'+eol;
-if Changes.SKY then s:=s+'SKY'+eol;
-for i:=1 to 4 do
-if Changes.RO[i] then s:=s+'RO'+int2fix(i,2)+eol;
-if Changes.STR then s:=s+'STR'+eol;
-if Changes.TRL then s:=s+'TRL'+eol;
-if Changes.SC2 then s:=s+'SC2'+eol;
-Result:=s;
+  s:='';
+  if Changes.QAD then s:=s+'QAD'+eol;
+  if Changes.IDX then s:=s+'IDX'+eol;
+  if Changes.VTX then s:=s+'VTX'+eol;
+  if Changes.SMP then s:=s+'SMP'+eol;
+  if Changes.WRK then s:=s+'WRK'+eol;
+  for i:=1 to MAX_TRACKS do begin
+    if Changes.TOB[i] then s:=s+'TOB'+int2fix(i,2)+eol;
+    if Changes.TRK[i] then s:=s+'TRK'+int2fix(i,2)+eol;
+  end;
+  for i:=1 to MAX_WP_TRACKS do
+    if Changes.WTR[i] then s:=s+'WTR'+int2fix(i,2)+eol;
+  if Changes.SNI then s:=s+'SNI'+eol;
+  if Changes.LVL then s:=s+'LVL'+eol;
+  if Changes.SKY then s:=s+'SKY'+eol;
+  for i:=1 to 4 do
+    if Changes.RO[i] then s:=s+'RO'+int2fix(i,2)+eol;
+  if Changes.STR then s:=s+'STR'+eol;
+  if Changes.TRL then s:=s+'TRL'+eol;
+  if Changes.SC2 then s:=s+'SC2'+eol;
+  Result:=s;
 end;
 
 

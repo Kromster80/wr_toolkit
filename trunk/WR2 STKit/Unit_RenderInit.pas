@@ -1,12 +1,7 @@
 unit Unit_RenderInit;
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
-
 interface
 uses
-  {$IFDEF VER140} OpenGL, {$ENDIF}
-  {$IFDEF FPC} GL, {$ENDIF}
+  OpenGL,
   Unit1, KromOGLUtils, dglOpenGL, Defaults, PTXTexture, KromUtils, Unit_Render, Windows, sysutils;
 
 procedure RenderInit();
@@ -25,8 +20,6 @@ implementation
 
 procedure RenderInit();
 begin
-  ReadExtensions;
-  ReadImplementationProperties;
   BuildFont(h_DC,14);
   Form1.MemoLWO.Lines.Add('Builded fonts in '+ElapsedTime(@OldTime));
 

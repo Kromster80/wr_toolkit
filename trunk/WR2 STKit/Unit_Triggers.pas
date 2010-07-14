@@ -1,6 +1,4 @@
 unit Unit_Triggers;
-{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
-
 interface
 uses Unit1,sysutils,Windows,KromUtils,Math,dglOpenGL,Defaults;
 

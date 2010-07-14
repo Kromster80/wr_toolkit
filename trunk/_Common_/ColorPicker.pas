@@ -1,3 +1,4 @@
+{$IFDEF VER150} {$DEFINE VER140} {$ENDIF}
 unit ColorPicker;
 interface
 uses

@@ -1,6 +1,4 @@
 unit SK_Options;
-{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
-
 interface
 uses
   Windows, Classes, Forms, SysUtils, INIFiles, Defaults, Dialogs, KromUtils, FileCtrl;

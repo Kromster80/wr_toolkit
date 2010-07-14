@@ -1,14 +1,7 @@
 unit Unit_Render;
-
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
-
 interface
 uses
-  {$IFDEF VER140} OpenGL, {$ENDIF}
-  {$IFDEF FPC} GL, {$ENDIF}
-  Windows,KromOGLUtils,sysutils,math,dglOpenGL,KromUtils;
+  OpenGL, Windows,KromOGLUtils,sysutils,math,dglOpenGL,KromUtils;
 
 procedure RenderShaders(Func:string; ShowTex:integer; CBReduceView,CBShowFog,CBCheckers,CBGrass:boolean);
 procedure RenderOpenGL(CBCheckers:boolean);

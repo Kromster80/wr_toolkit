@@ -129,7 +129,6 @@ object Form1: TForm1
     ParentFont = False
     Style = tsButtons
     TabHeight = 47
-    TabIndex = 0
     TabOrder = 1
     TabStop = False
     TabWidth = 34
@@ -758,7 +757,6 @@ object Form1: TForm1
         Width = 285
         Height = 26
         ActivePage = TabSheet12
-        TabIndex = 0
         TabOrder = 6
         OnChange = MatTexLayChange
         object TabSheet12: TTabSheet
@@ -818,7 +816,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 13
+        ItemHeight = 0
         TabOrder = 2
         OnChange = CBTexChange
       end
@@ -829,7 +827,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 13
+        ItemHeight = 0
         TabOrder = 3
         OnChange = CBTexChange
       end
@@ -840,7 +838,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 13
+        ItemHeight = 0
         TabOrder = 4
         OnChange = CBTexChange
       end
@@ -896,7 +894,7 @@ object Form1: TForm1
         Width = 67
         Height = 22
         Accuracy = 1
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 8
         OnChange = TexScaleChange
       end
@@ -906,7 +904,7 @@ object Form1: TForm1
         Width = 67
         Height = 22
         Accuracy = 1
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 9
         OnChange = TexScaleChange
       end
@@ -916,7 +914,7 @@ object Form1: TForm1
         Width = 67
         Height = 22
         Accuracy = 2
-        Increment = 0.1
+        Increment = 0.100000000000000000
         TabOrder = 10
         OnChange = TexScaleChange
       end
@@ -926,7 +924,7 @@ object Form1: TForm1
         Width = 67
         Height = 22
         Accuracy = 2
-        Increment = 0.1
+        Increment = 0.100000000000000000
         TabOrder = 11
         OnChange = TexScaleChange
       end
@@ -974,7 +972,7 @@ object Form1: TForm1
         Width = 67
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 16
         OnChange = TexScaleChange
       end
@@ -984,7 +982,7 @@ object Form1: TForm1
         Width = 67
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 17
         OnChange = TexScaleChange
       end
@@ -994,7 +992,7 @@ object Form1: TForm1
         Width = 67
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 18
         OnChange = TexScaleChange
       end
@@ -1313,7 +1311,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 6
         OnChange = ObjChangeInstance
       end
@@ -1323,7 +1321,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 7
         OnChange = ObjChangeInstance
       end
@@ -1333,7 +1331,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 8
         OnChange = ObjChangeInstance
       end
@@ -1343,7 +1341,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 2
-        Increment = 0.1
+        Increment = 0.100000000000000000
         TabOrder = 9
         OnChange = ObjChangeInstance
       end
@@ -1536,7 +1534,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 16
-        ItemHeight = 13
+        ItemHeight = 0
         TabOrder = 23
         OnChange = ObjChangeInstance
       end
@@ -1882,7 +1880,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 1
         OnChange = SoundsChange
       end
@@ -1892,7 +1890,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 2
         OnChange = SoundsChange
       end
@@ -1902,7 +1900,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 3
         OnChange = SoundsChange
       end
@@ -1995,7 +1993,7 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 1
-        Increment = 0.1
+        Increment = 0.100000000000000000
         TabOrder = 11
         OnChange = SoundsChange
       end
@@ -2398,7 +2396,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 1
         OnChange = LightsChange
       end
@@ -2408,7 +2406,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 2
         OnChange = LightsChange
       end
@@ -2418,7 +2416,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 3
         OnChange = LightsChange
       end
@@ -2498,11 +2496,11 @@ object Form1: TForm1
           Width = 53
           Height = 22
           Accuracy = 2
-          Increment = 0.01
-          MaxValue = 10
-          MinValue = 0.01
+          Increment = 0.010000000000000000
+          MaxValue = 10.000000000000000000
+          MinValue = 0.010000000000000000
           TabOrder = 0
-          Value = 1
+          Value = 1.000000000000000000
         end
         object LE_Mul: TFloatSpinEdit
           Left = 118
@@ -2510,11 +2508,11 @@ object Form1: TForm1
           Width = 53
           Height = 22
           Accuracy = 2
-          Increment = 0.01
-          MaxValue = 10
-          MinValue = 0.01
+          Increment = 0.010000000000000000
+          MaxValue = 10.000000000000000000
+          MinValue = 0.010000000000000000
           TabOrder = 1
-          Value = 1
+          Value = 1.000000000000000000
         end
         object LE_Add: TSpinEdit
           Left = 190
@@ -2551,7 +2549,7 @@ object Form1: TForm1
         Width = 45
         Height = 22
         Accuracy = 0
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 8
         OnChange = LightsChange
       end
@@ -2561,8 +2559,8 @@ object Form1: TForm1
         Width = 61
         Height = 22
         Accuracy = 2
-        Increment = 0.1
-        MaxValue = 1
+        Increment = 0.100000000000000000
+        MaxValue = 1.000000000000000000
         TabOrder = 9
         OnChange = LightsChange
       end
@@ -2572,8 +2570,8 @@ object Form1: TForm1
         Width = 61
         Height = 22
         Accuracy = 2
-        Increment = 0.1
-        MaxValue = 10
+        Increment = 0.100000000000000000
+        MaxValue = 10.000000000000000000
         TabOrder = 10
         OnChange = LightsChange
       end
@@ -2583,8 +2581,8 @@ object Form1: TForm1
         Width = 61
         Height = 22
         Accuracy = 2
-        Increment = 1
-        MaxValue = 50
+        Increment = 1.000000000000000000
+        MaxValue = 50.000000000000000000
         TabOrder = 11
         OnChange = LightsChange
       end
@@ -2962,7 +2960,6 @@ object Form1: TForm1
         Height = 281
         ActivePage = TabSheet22
         Anchors = [akLeft, akTop, akBottom]
-        TabIndex = 0
         TabOrder = 6
         OnChange = PageControl1Change
         object TabSheet22: TTabSheet
@@ -3131,7 +3128,7 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 10
+            Increment = 10.000000000000000000
             TabOrder = 3
             OnChange = MTXChange
           end
@@ -3141,7 +3138,7 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 10
+            Increment = 10.000000000000000000
             TabOrder = 4
             OnChange = MTXChange
           end
@@ -3151,7 +3148,7 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 10
+            Increment = 10.000000000000000000
             TabOrder = 5
             OnChange = MTXChange
           end
@@ -3206,11 +3203,11 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 1
-            MaxValue = 1000
-            MinValue = 5
+            Increment = 1.000000000000000000
+            MaxValue = 1000.000000000000000000
+            MinValue = 5.000000000000000000
             TabOrder = 7
-            Value = 10
+            Value = 10.000000000000000000
             OnChange = MTXChange
           end
           object Button5: TButton
@@ -3385,10 +3382,10 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 0.5
-            MaxValue = 50
+            Increment = 0.500000000000000000
+            MaxValue = 50.000000000000000000
             TabOrder = 3
-            Value = 6
+            Value = 6.000000000000000000
             OnChange = ComputeTurnClick
           end
           object E_Arrows: TSpinEdit
@@ -3642,7 +3639,7 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 10
+            Increment = 10.000000000000000000
             TabOrder = 1
             OnChange = WPNodeChange
           end
@@ -3682,7 +3679,7 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 10
+            Increment = 10.000000000000000000
             TabOrder = 4
             OnChange = WPNodeChange
           end
@@ -3692,7 +3689,7 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 10
+            Increment = 10.000000000000000000
             TabOrder = 5
             OnChange = WPNodeChange
           end
@@ -3713,7 +3710,7 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 10
+            Increment = 10.000000000000000000
             TabOrder = 7
             OnChange = WPNodeChange
           end
@@ -3960,7 +3957,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 1
         OnChange = TOB_Change
       end
@@ -3970,7 +3967,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 2
         OnChange = TOB_Change
       end
@@ -3980,7 +3977,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 3
         OnChange = TOB_Change
       end
@@ -3990,7 +3987,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 4
         OnChange = TOB_Change
       end
@@ -4000,7 +3997,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 5
         OnChange = TOB_Change
       end
@@ -4077,7 +4074,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 16
-        ItemHeight = 13
+        ItemHeight = 0
         TabOrder = 11
         OnChange = TOB_Change
       end
@@ -4406,7 +4403,7 @@ object Form1: TForm1
         Width = 53
         Height = 22
         Accuracy = 0
-        Increment = 5
+        Increment = 5.000000000000000000
         TabOrder = 1
         OnChange = StreetShapeChange
       end
@@ -4416,7 +4413,7 @@ object Form1: TForm1
         Width = 53
         Height = 22
         Accuracy = 0
-        Increment = 5
+        Increment = 5.000000000000000000
         TabOrder = 2
         OnChange = StreetShapeChange
       end
@@ -4426,7 +4423,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 3
         OnChange = STRPointXChange
       end
@@ -4436,7 +4433,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 5
+        Increment = 5.000000000000000000
         TabOrder = 4
         OnChange = STRPointXChange
       end
@@ -4446,7 +4443,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 5
         OnChange = STRPointXChange
       end
@@ -4502,7 +4499,7 @@ object Form1: TForm1
         Width = 61
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 10
         OnChange = STRSplineLenA1Change
       end
@@ -4512,7 +4509,7 @@ object Form1: TForm1
         Width = 61
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 11
         OnChange = STRSplineLenA1Change
       end
@@ -4523,7 +4520,7 @@ object Form1: TForm1
         Height = 22
         Accuracy = 1
         Enabled = False
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 12
         OnChange = STRSplineLenA1Change
       end
@@ -4534,7 +4531,7 @@ object Form1: TForm1
         Height = 22
         Accuracy = 1
         Enabled = False
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 13
         OnChange = STRSplineLenA1Change
       end
@@ -5114,7 +5111,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 7
         OnChange = SNI_Node_Change
       end
@@ -5124,7 +5121,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 8
         OnChange = SNI_Node_Change
       end
@@ -5134,7 +5131,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 9
         OnChange = SNI_Node_Change
       end
@@ -5144,7 +5141,7 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 0
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 10
         OnChange = SNI_Node_Change
       end
@@ -5154,8 +5151,8 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 1
-        Increment = 0.1
-        MaxValue = 18
+        Increment = 0.100000000000000000
+        MaxValue = 18.000000000000000000
         TabOrder = 11
         OnChange = SNI_Node_Change
       end
@@ -5388,8 +5385,8 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 1
-        Increment = 5
-        MaxValue = 90
+        Increment = 5.000000000000000000
+        MaxValue = 90.000000000000000000
         TabOrder = 0
         OnChange = LVL_SunXChange
       end
@@ -5408,9 +5405,9 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 1
-        Increment = 5
+        Increment = 5.000000000000000000
         TabOrder = 2
-        Value = 360
+        Value = 360.000000000000000000
         OnChange = LVL_SunXChange
       end
       object TraceShadows: TButton
@@ -5504,7 +5501,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 12
-        ItemHeight = 13
+        ItemHeight = 0
         Sorted = True
         TabOrder = 11
         OnChange = EditSkyChange
@@ -5517,7 +5514,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 12
-        ItemHeight = 13
+        ItemHeight = 0
         Sorted = True
         TabOrder = 12
         OnChange = EditSkyChange
@@ -6032,7 +6029,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 3
         OnChange = ComputeTriggerClick
       end
@@ -6042,7 +6039,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 4
         OnChange = ComputeTriggerClick
       end
@@ -6052,7 +6049,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 5
         OnChange = ComputeTriggerClick
       end
@@ -6062,11 +6059,11 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 1
-        Increment = 1
-        MaxValue = 1000
-        MinValue = 1
+        Increment = 1.000000000000000000
+        MaxValue = 1000.000000000000000000
+        MinValue = 1.000000000000000000
         TabOrder = 6
-        Value = 1
+        Value = 1.000000000000000000
         OnChange = ComputeTriggerClick
       end
       object TRL_S2: TFloatSpinEdit
@@ -6075,11 +6072,11 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 1
-        Increment = 1
-        MaxValue = 1000
-        MinValue = 1
+        Increment = 1.000000000000000000
+        MaxValue = 1000.000000000000000000
+        MinValue = 1.000000000000000000
         TabOrder = 7
-        Value = 1
+        Value = 1.000000000000000000
         OnChange = ComputeTriggerClick
       end
       object TRL_S3: TFloatSpinEdit
@@ -6088,11 +6085,11 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 1
-        Increment = 1
-        MaxValue = 1000
-        MinValue = 1
+        Increment = 1.000000000000000000
+        MaxValue = 1000.000000000000000000
+        MinValue = 1.000000000000000000
         TabOrder = 8
-        Value = 1
+        Value = 1.000000000000000000
         OnChange = ComputeTriggerClick
       end
       object TRL_R1: TSpinEdit
@@ -6143,7 +6140,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 13
         OnChange = ComputeTriggerClick
       end
@@ -6153,7 +6150,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 14
         OnChange = ComputeTriggerClick
       end
@@ -6163,7 +6160,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 15
         OnChange = ComputeTriggerClick
       end
@@ -6765,7 +6762,6 @@ object Form1: TForm1
         Text = 'QAD, VTX, IDX, '
         Width = 50
       end>
-    SimplePanel = False
     OnClick = StatusBar1Click
   end
   object CBRenderMode: TComboBox
