@@ -48,8 +48,8 @@ const
  StockGetriebe  = 14; //Gearbox
  StockReifen    = 72; //Tires
 
- MaxCars        = 256;
- VersionInfo    = 'AFC11HN Manager       Version 0.1c (07 Feb 2010)';
+ MaxCars        = 2560;
+ VersionInfo    = 'AFC11HN Manager       Version 0.1d (15 Jul 2010)';
 
 var
   Form1: TForm1;
@@ -72,6 +72,8 @@ uses Unit2, WR_AboutBox;
 procedure TForm1.FormCreate(Sender: TObject);
 var s1,s2:string;
 begin
+  DoClientAreaResize(Self);
+
   if Sender<>nil then exit; //Wait until all forms are init
   Form2.Show;
   Form2.Repaint;
@@ -465,9 +467,8 @@ begin
 end;
 
 
-{$IFDEF VER140}
-  {$R *.dfm}
-{$ENDIF}
+{$IFDEF VER140} {$R *.dfm} {$ENDIF}
+{$IFDEF VER150} {$R *.dfm} {$ENDIF}
 
 initialization
 {$IFDEF FPC}
