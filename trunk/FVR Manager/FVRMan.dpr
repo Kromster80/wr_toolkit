@@ -4,8 +4,7 @@ uses
   Forms,
   Unit1 in 'Unit1.pas' {Form1},
   Unit2 in 'Unit2.pas' {Form2},
-  WR_AboutBox in 'WR_AboutBox.pas' {AboutForm},
-  Unit_SyneticDataSet in 'Unit_SyneticDataSet.pas';
+  WR_AboutBox in 'WR_AboutBox.pas' {AboutForm};
 
 {$R *.res}
 
