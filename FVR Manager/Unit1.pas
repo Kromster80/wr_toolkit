@@ -1,6 +1,5 @@
 unit Unit1;
 interface
-
 uses
   ShellApi, Windows, Messages, SysUtils, Classes, Controls, ExtCtrls, Forms,
   StdCtrls, KromUtils, ComCtrls, CheckLst, Buttons, Dialogs;
@@ -40,7 +39,7 @@ const
  StockGears=56;
  StockTires=9;
  MaxCars=256;
- VersionInfo='FVR Manager       Version 0.1 (21 Apr 2009)';
+ VersionInfo='FVR Manager       Version 0.1b (15 Jul 2010)';
 
 var
   Form1: TForm1;
@@ -105,24 +104,25 @@ uses Unit2, WR_AboutBox;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-if Sender<>nil then exit; //Wait until all forms are init
-Form2.Show;
-Form2.Repaint;
-if fileexists('krom.dev') then ChDir('E:\Ferrari Virtual Race');
-RootDir:=getcurrentdir;
-if not fileexists('FrontEnd2\FrontEnd.ds') then begin
-Form2.FormStyle:=fsNormal;
-MessageBox(Form1.Handle,'"FrontEnd2\FrontEnd.ds" not found. Run FVRMan from FVR folder.','Error',MB_OK);
-Form1.Close;
-exit;
-end;
-if not FileExists('FrontEnd2\FrontEnd.bak') then CopyFile('FrontEnd2\FrontEnd.ds','FrontEnd2\FrontEnd.bak',true);
-OpenDS(nil,'FrontEnd2\FrontEnd.ds');
-ElapsedTime(@TimeCode);
-Form2.Label2.Caption:='Scanning: Cars ...';     Form2.Label2.Refresh; SearchAutos(nil);
-if Form2.Showing then Form2.Destroy;
-PopulateCarList(nil);
-ReadINI(nil);
+  DoClientAreaResize(Self);
+  if Sender<>nil then exit; //Wait until all forms are init
+  Form2.Show;
+  Form2.Repaint;
+  if fileexists('krom.dev') then ChDir('E:\Ferrari Virtual Race');
+  RootDir:=getcurrentdir;
+  if not fileexists('FrontEnd2\FrontEnd.ds') then begin
+  Form2.FormStyle:=fsNormal;
+  MessageBox(Form1.Handle,'"FrontEnd2\FrontEnd.ds" not found. You need to run FVRMan from Ferrari Virtual Race folder.','Error',MB_OK);
+  Form1.Close;
+  exit;
+  end;
+  if not FileExists('FrontEnd2\FrontEnd.bak') then CopyFile('FrontEnd2\FrontEnd.ds','FrontEnd2\FrontEnd.bak',true);
+  OpenDS(nil,'FrontEnd2\FrontEnd.ds');
+  ElapsedTime(@TimeCode);
+  Form2.Label2.Caption:='Scanning: Cars ...';     Form2.Label2.Refresh; SearchAutos(nil);
+  if Form2.Showing then Form2.Destroy;
+  PopulateCarList(nil);
+  ReadINI(nil);
 end;
 
 procedure TForm1.OpenDS(Sender: TObject; filename:string);
