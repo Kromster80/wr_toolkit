@@ -81,7 +81,7 @@ blockread(f,ObjProp[i],20);
 blockread(f,c,48); ObjProp[i].HitSound:=StrPas(@c);
 blockread(f,c,48); ObjProp[i].FallSound:=StrPas(@c);
 if (ObjProp[i].x1<>0)or(ObjProp[i].x2<>0)or(ObjProp[i].x3<>0)or(ObjProp[i].p4<>0) then
-MyMessageBox(Form1.Handle, 'Unknown object entry found. Contact kromster80@gmail.com', 'ObjectsTable', MB_OK or MB_ICONWARNING);
+MessageBox(Form1.Handle, 'Unknown object entry found. Contact kromster80@gmail.com', 'ObjectsTable', MB_OK or MB_ICONWARNING);
 end;
 
 for k:=1 to Qty.BlocksZ do for i:=1 to Qty.BlocksX do
@@ -136,7 +136,7 @@ if EditingFormat=ef_CT then
     blockread(f,c,20);
     blockread(f,Obj[i].Matrix2[1],44);
     if not Obj[i].InShadow in [0,1] then
-    MyMessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectInShadow', MB_OK or MB_ICONWARNING);
+    MessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectInShadow', MB_OK or MB_ICONWARNING);
     //if Obj[i].x5<>0 then
     //MyMessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectX5', MB_OK or MB_ICONWARNING);
   end
@@ -145,7 +145,7 @@ else
     blockread(f,c,32); Obj[i].Name:=StrPas(@c);
     blockread(f,Obj[i].ID,68);              //Property of object
     if not Obj[i].InShadow in [0,1] then
-    MyMessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectInShadow', MB_OK or MB_ICONWARNING);
+    MessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectInShadow', MB_OK or MB_ICONWARNING);
   end;
 
 blockread(f,Light,Qty.Lights*88);
@@ -162,7 +162,7 @@ blockread(f,Sound[i],12);
 blockread(f,c,32); Sound[i].Name:=StrPas(@c);
 blockread(f,Sound[i].Volume,24);
 if (Sound[i].z4<>EnsureRange(Sound[i].z4,0,3)) then
-MyMessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'Sounds', MB_OK or MB_ICONWARNING);
+MessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'Sounds', MB_OK or MB_ICONWARNING);
 end;
 closefile(f);
 end;
@@ -218,7 +218,7 @@ blockread(f,ObjProp[i],20);
 blockread(f,c,48); ObjProp[i].HitSound:=StrPas(@c);
 blockread(f,c,48); ObjProp[i].FallSound:=StrPas(@c);
 if (ObjProp[i].x1<>0)or(ObjProp[i].x2<>0)or(ObjProp[i].x3<>0)or(ObjProp[i].p4<>0) then
-MyMessageBox(Form1.Handle, 'Unknown object entry found. Contact kromster80@gmail.com', 'ObjectsTable', MB_OK or MB_ICONWARNING);
+MessageBox(Form1.Handle, 'Unknown object entry found. Contact kromster80@gmail.com', 'ObjectsTable', MB_OK or MB_ICONWARNING);
 end;
 
 for k:=1 to Qty.BlocksZ do for i:=1 to Qty.BlocksX do
@@ -270,9 +270,9 @@ Form1.ComputeChunkMode(nil);
     blockread(f,c,20);
     blockread(f,Obj[i].Matrix2[1],44);
     if not Obj[i].InShadow in [0,1] then
-    MyMessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectInShadow', MB_OK or MB_ICONWARNING);
+    MessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectInShadow', MB_OK or MB_ICONWARNING);
     if Obj[i].x5<>0 then
-    MyMessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectX5', MB_OK or MB_ICONWARNING);
+    MessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectX5', MB_OK or MB_ICONWARNING);
   end;
 
 blockread(f,Light,Qty.Lights*88);
@@ -289,7 +289,7 @@ for i:=1 to Qty.Sounds do begin                   //11th
   blockread(f,c,32); Sound[i].Name:=StrPas(@c);
   blockread(f,Sound[i].Volume,24);
   if (Sound[i].z4<>EnsureRange(Sound[i].z4,0,3)) then
-  MyMessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'Sounds', MB_OK or MB_ICONWARNING);
+  MessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'Sounds', MB_OK or MB_ICONWARNING);
 end;
 closefile(f);
 end;
@@ -330,7 +330,7 @@ end;
 
 assignfile(f,Input+'.idx'); reset(f,1);
 blockread(f,c,length(c),Pos); //16mb should me more than enough
-if Pos>=length(c) then MyMessageBox(Form1.Handle,'16mb IDX file couldn''t be loaded fully.','Loading error',MB_OK or MB_ICONWARNING);
+if Pos>=length(c) then MessageBox(Form1.Handle,'16mb IDX file couldn''t be loaded fully.','Loading error',MB_OK or MB_ICONWARNING);
 closefile(f);
 
 IDXQty:=int2(c[1],c[2],c[3],c[4]);
@@ -390,7 +390,7 @@ end;
 
 IDXQty:=Head.sizeZ;
 blockread(f,c,length(c),Pos); //16mb should me more than enough
-if Pos>=length(c) then MyMessageBox(Form1.Handle,'16mb IDX file couldn''t be loaded fully.','Loading error',MB_OK or MB_ICONWARNING);
+if Pos>=length(c) then MessageBox(Form1.Handle,'16mb IDX file couldn''t be loaded fully.','Loading error',MB_OK or MB_ICONWARNING);
 closefile(f);
 
 setlength(v,IDXQty div 3+1);
@@ -688,7 +688,7 @@ end else begin
   FillChar(TRK[i],sizeof(TRK[i]),#0);
 end;
 if TracksQty=0 then
-MyMessageBox(Form1.Handle,'No tracks found in ..\Tracks\ folder','Loading error',MB_OK or MB_ICONWARNING);
+  MessageBox(Form1.Handle,'No tracks found in ..\Tracks\ folder','Loading error',MB_OK or MB_ICONWARNING);
 end;
 
 procedure LoadTOB(Input,Input2:string);

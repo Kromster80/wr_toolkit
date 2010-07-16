@@ -35,7 +35,7 @@ begin
 
   blockread(f,c,12);
   if (c[1]+c[2]+c[3]+c[4]+c[9]+c[10]+c[11]+c[12])<>'FORMLWO2' then begin
-    MyMessageBox(Form1.Handle,'Old or unknown LWO format','Error',MB_OK or MB_ICONERROR);
+    MessageBox(Form1.Handle,'Old or unknown LWO format','Error',MB_OK or MB_ICONERROR);
     closefile(f);
     exit;
   end;
@@ -60,7 +60,7 @@ begin
       blockread(f,c,ChapSize);
       inc(Lay); //Layers come not sorted
       if Lay > MAX_LWO_LAYERS then begin
-        MyMessageBox(Form1.Handle,'Too many layers in file','Error',MB_OK or MB_ICONERROR);
+        MessageBox(Form1.Handle,'Too many layers in file','Error',MB_OK or MB_ICONERROR);
         closefile(f);
         exit;
       end;
@@ -153,7 +153,7 @@ begin
         kk:=ord(c[1])*256+ord(c[2]); //# of Vertices (3 or 4)
 
         if (kk<>3)and(kk<>4) then begin
-        MyMessageBox(Form1.Handle,'Non-triangle/quadrangle polygon encountered','Error',MB_OK or MB_ICONERROR);
+        MessageBox(Form1.Handle,'Non-triangle/quadrangle polygon encountered','Error',MB_OK or MB_ICONERROR);
         closefile(f); exit; end;
 
         LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],0]:=kk;
@@ -345,7 +345,7 @@ var ii,kk,VQty,PQty:integer;
 begin
 
   if LWQty.Surf[0]>256 then begin
-    MyMessageBox(Form1.Handle, 'Surface count exceeds alowed 256', 'Fatal Error', MB_OK or MB_ICONERROR);
+    MessageBox(Form1.Handle, 'Surface count exceeds alowed 256', 'Fatal Error', MB_OK or MB_ICONERROR);
     exit;
   end;
 
@@ -373,12 +373,12 @@ begin
   Form1.Done(Form1.MemoLWO);                               //size should be even numbers
 
   if SizeX*SizeZ>4096 then begin
-    MyMessageBox(Form1.Handle, 'Map size is too big for WR2', 'Fatal Error', MB_OK or MB_ICONERROR);
+    MessageBox(Form1.Handle, 'Map size is too big for WR2', 'Fatal Error', MB_OK or MB_ICONERROR);
     exit;
   end;
 
   if (SizeX>200)or(SizeZ>200) then begin
-    MyMessageBox(Form1.Handle, 'Map size is too big for STKit2', 'Fatal Error', MB_OK or MB_ICONERROR);
+    MessageBox(Form1.Handle, 'Map size is too big for STKit2', 'Fatal Error', MB_OK or MB_ICONERROR);
     exit;
   end;
 
@@ -539,7 +539,7 @@ split[kk,1]:=SizeX*SizeZ;
 for ii:=1 to 64 do begin
   if split[ii,2]>0 then Form1.MemoLWO.Lines.Add('#'+inttostr(ii)+' - '+inttostr(split[ii,2]));
   if split[ii,2]>=65536 then begin
-    MyMessageBox(Form1.Handle,'Too big chunk made at block '+inttostr(split[ii,1]),'Fatal Error',MB_OK or MB_ICONERROR);
+    MessageBox(Form1.Handle,PChar('Too big chunk made at block '+inttostr(split[ii,1])),'Fatal Error',MB_OK or MB_ICONERROR);
     exit;
   end;
 end;

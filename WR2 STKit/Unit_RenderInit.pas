@@ -83,10 +83,10 @@ Result:=false;
 s:=glGetString(GL_VERSION); //return format is "Major.Minor.Minor - Misc"
 if s<'2.0' then begin       //we check first two  numbers as version
   if not fileexists('krom.dev') then
-    MyMessageBox(Form1.Handle,
-      'You need at least OpenGL 2.0 to run STKit2'+eol+
+    MessageBox(Form1.Handle,
+      PChar('You need at least OpenGL 2.0 to run STKit2'+eol+
       'Your OpenGL version is '+glGetString(GL_VERSION)+' by '+glGetString(GL_RENDERER)+eol+eol+
-      'STKit2 will now run in compatibility mode', 'OpenGL', MB_OK);
+      'STKit2 will now run in compatibility mode'), 'OpenGL', MB_OK);
   UseShaders:=false;
   exit;
 end;
