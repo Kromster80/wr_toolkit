@@ -1419,7 +1419,7 @@ begin
   CompileCommonObjects();
 
   h_DC2 := GetDC(Panel11.Handle);
-  if h_DC2=0 then begin MyMessageBox(h_DC2, 'Unable to get a device context', 'Error', MB_OK or MB_ICONERROR); exit; end;
+  if h_DC2=0 then begin MessageBox(h_DC2, 'Unable to get a device context', 'Error', MB_OK or MB_ICONERROR); exit; end;
   if not SetDCPixelFormat(h_DC2) then exit;
   
 if not fileexists(fOptions.ExeDir+'unlimiter.'+inttostr(846)) then begin
@@ -2034,7 +2034,7 @@ procedure TForm1.SceneryReload(Sender: TObject);
 var i:integer;
 begin
   if (Sender<>nil)and(not fileexists(fOptions.ExeDir+'unlimiter.'+inttostr(846))) then
-    if MyMessageBox(Form1.Handle,'Any unsaved changes will be lost','Warning',MB_OKCANCEL or MB_ICONEXCLAMATION)=IDCANCEL then exit;
+    if MessageBox(Form1.Handle,'Any unsaved changes will be lost','Warning',MB_OKCANCEL or MB_ICONEXCLAMATION)=IDCANCEL then exit;
 
   if RG2.ItemIndex = -1 then exit;
 
@@ -2205,7 +2205,7 @@ for i:=ID+1 to ID+Num do begin
     s2:=s2+s+eol;
 end;
 if s2<>'' then
-  MyMessageBox(Form1.Handle,eol+s2+eol+'above textures are missing','Texture is missing',MB_OK or MB_ICONEXCLAMATION);
+  MessageBox(Form1.Handle,PChar(eol+s2+eol+'above textures are missing'),'Texture is missing',MB_OK or MB_ICONEXCLAMATION);
 inc(list_tx,Num);
 end;
 
@@ -2424,17 +2424,8 @@ begin
   if FileExists(LWOSceneryFile) then
     LoadLWO(LWOSceneryFile)
   else
-    MyMessageBox(Form1.Handle,'Couldn''t find source LWO file.','Error',MB_OK or MB_ICONEXCLAMATION);
+    MessageBox(Form1.Handle,'Couldn''t find source LWO file.','Error',MB_OK or MB_ICONEXCLAMATION);
 end;
-
-
-
-
-
-
-
-
-
 
 
 procedure TForm1.ComputeChunkMode(Sender: TObject);
@@ -2552,9 +2543,9 @@ if Qty.ObjectFiles<=1 then begin {RemObject.Enabled:=false;} exit; end;
         k:=0;
         for i:=1 to SNIHead.Obj do if SNIObj[i].objID+1=ID then inc(k);
 
-        if MyMessageBox(Form1.Handle,
-        'Please confirm removing of:'+eol+' - '+inttostr(m)+' map objects (QAD),'+eol+' - '+inttostr(h)+' track objects (TOB),'+eol+' - '+inttostr(k)+' animated objcts (SNI) ?',
-        'Warning ['+ObjName[ID]+']', MB_OKCANCEL or MB_ICONWARNING)=IDCANCEL then
+        if MessageBox(Form1.Handle,PChar(
+        'Please confirm removing of:'+eol+' - '+inttostr(m)+' map objects (QAD),'+eol+' - '+inttostr(h)+' track objects (TOB),'+eol+' - '+inttostr(k)+' animated objcts (SNI) ?'),
+        PChar('Warning ['+ObjName[ID]+']'), MB_OKCANCEL or MB_ICONWARNING)=IDCANCEL then
         exit;
 
 for i:=ID to Qty.ObjectFiles-1 do begin //shift up
@@ -2728,7 +2719,7 @@ if Sender=ScreenRender then begin
   blockwrite(f,pinteger(bmp4)^,SizeH*SizeV*4);
   closefile(f);
   FreeMem(bmp4);
-  MyMessageBox(Form1.Handle, 'Screenshot saved to '+fOptions.ExeDir+'\STKit2_screen.tga', 'Info', MB_OK or MB_ICONINFORMATION);
+  MessageBox(Form1.Handle, PChar('Screenshot saved to '+fOptions.ExeDir+'\STKit2_screen.tga'), 'Info', MB_OK or MB_ICONINFORMATION);
 end;
 
 if Sender=MakeSMP then begin
@@ -3245,12 +3236,12 @@ var i,k,ID:integer;
   TexString:string;
 begin
 if Qty.TexturesFiles>=256 then begin
-MyMessageBox(Form1.Handle, 'WR2 can''t handle more than 256 textures in scenery.', 'Info', MB_OK or MB_ICONINFORMATION);
+MessageBox(Form1.Handle, 'WR2 can''t handle more than 256 textures in scenery.', 'Info', MB_OK or MB_ICONINFORMATION);
 exit; end;
 
 ID:=ListTextures.ItemIndex+1;
 if Sender=ts_RenTex then if ID=0 then begin
-MyMessageBox(Form1.Handle, 'Please select texture to rename first.', 'Info', MB_OK or MB_ICONINFORMATION);
+MessageBox(Form1.Handle, 'Please select texture to rename first.', 'Info', MB_OK or MB_ICONINFORMATION);
 exit; end;
 
 if (Sender=ts_AddTex)and(aText='') then TexString:=InputBox('Add texture','Texture name:','');
@@ -3261,7 +3252,7 @@ if Sender=ts_RenTex then ListTextures.Items[ID-1]:=TexString;
 if aText='' then
 for i:=1 to Qty.TexturesFiles do
 if (TexString='')or(TexName[i]=TexString) then begin
-MyMessageBox(Form1.Handle, 'Texture "'+TexString+'" already exists.', 'Info', MB_OK or MB_ICONINFORMATION);
+MessageBox(Form1.Handle, PChar('Texture "'+TexString+'" already exists.'), 'Info', MB_OK or MB_ICONINFORMATION);
 exit; end;
 
 for i:=1 to Qty.TexturesFiles do st[i]:=TexName[i];
@@ -3305,7 +3296,7 @@ procedure TForm1.RemTextureClick(Sender: TObject);
 var i,ID:integer;
 begin
 if Qty.TexturesFiles=1 then begin
-MyMessageBox(Form1.Handle, 'Can''t remove last texture. At least one should remain.', 'Info', MB_OK or MB_ICONINFORMATION);
+MessageBox(Form1.Handle, 'Can''t remove last texture. At least one should remain.', 'Info', MB_OK or MB_ICONINFORMATION);
 exit; end;
 
 ID:=ListTextures.ItemIndex+1;
@@ -3662,7 +3653,7 @@ assignfile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,8); ss:=c[1]+c[2]+c[3]+c[4]+c[5]+c[6]+c[7]+c[8];
 if ss<>'STKit2'+#0+#0 then begin
-MyMessageBox(Form1.Handle, 'Unknown version.', 'Error', MB_OK or MB_ICONERROR);
+MessageBox(Form1.Handle, 'Unknown version.', 'Error', MB_OK or MB_ICONERROR);
 closefile(f);
 exit;
 end;
@@ -3719,10 +3710,10 @@ begin
 GroundsRefresh:=true;
 ss:=InputBox('New Ground','Ground name','');
 if ss='' then begin
-MyMessageBox(Form1.Handle, 'Please input new ground name.', 'Info', MB_OK or MB_ICONINFORMATION);
+MessageBox(Form1.Handle, 'Please input new ground name.', 'Info', MB_OK or MB_ICONINFORMATION);
 exit; end;
 if Qty.GroundTypes=MaxGrounds then begin
-MyMessageBox(Form1.Handle, 'Number of grounds limited to - '+inttostr(MaxGrounds), 'Info', MB_OK or MB_ICONINFORMATION);
+MessageBox(Form1.Handle, PChar('Number of grounds limited to - '+inttostr(MaxGrounds)), 'Info', MB_OK or MB_ICONINFORMATION);
 exit; end;
 inc(Qty.GroundTypes);
 Ground[Qty.GroundTypes].Name:=ss;
@@ -3742,11 +3733,11 @@ var i,ID:integer;
 begin
 ID:=ListGrounds.ItemIndex+1;
 if ID=0 then begin
-  MyMessageBox(Form1.Handle, 'Please select item to remove.', 'Info', MB_OK or MB_ICONINFORMATION);
+  MessageBox(Form1.Handle, 'Please select item to remove.', 'Info', MB_OK or MB_ICONINFORMATION);
   exit;
 end;
 if Qty.GroundTypes=1 then begin
-  MyMessageBox(Form1.Handle, 'At least one ground should remain.', 'Info', MB_OK or MB_ICONINFORMATION);
+  MessageBox(Form1.Handle, 'At least one ground should remain.', 'Info', MB_OK or MB_ICONINFORMATION);
   exit;
 end;
 dec(Qty.GroundTypes);
@@ -3765,7 +3756,7 @@ var ID:integer;
 begin
 ID:=ListGrounds.ItemIndex+1;
 if ID=0 then begin
-MyMessageBox(Form1.Handle, 'Please select item to rename.', 'Info', MB_OK or MB_ICONINFORMATION);
+MessageBox(Form1.Handle, 'Please select item to rename.', 'Info', MB_OK or MB_ICONINFORMATION);
 exit; end;
 Ground[ID].Name:=InputBox('Rename ground','Set new name',Ground[ID].Name);
 ListGrounds.Items[ID-1]:=Ground[ID].Name;
@@ -3939,11 +3930,11 @@ begin
 //if Sender=RenObject then TexString:=InputBox('Rename object','Object name:',ObjName[ID]);
 
 if length(TexString)<=2 then begin
-if ErrorReport then MyMessageBox(Form1.Handle, 'Object name should be at least 3 characters long.', 'Error', MB_OK or MB_ICONERROR);
+if ErrorReport then MessageBox(Form1.Handle, 'Object name should be at least 3 characters long.', 'Error', MB_OK or MB_ICONERROR);
 exit; end;
 
 for i:=1 to Qty.ObjectFiles do if uppercase(TexString)=uppercase(ObjName[i]) then begin
-if ErrorReport then MyMessageBox(Form1.Handle, 'This object name already exists.', 'Error', MB_OK or MB_ICONERROR);
+if ErrorReport then MessageBox(Form1.Handle, 'This object name already exists.', 'Error', MB_OK or MB_ICONERROR);
 exit; end;
 
 TexString:=UpperCase(TexString[1])+LowerCase(decs(TexString,-1,0));
@@ -4212,7 +4203,7 @@ assignfile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,8); ss:=c[1]+c[2]+c[3]+c[4]+c[5]+c[6]+c[7]+c[8];
 if ss<>('STKit2'+#0+#0) then begin
-MyMessageBox(Form1.Handle, 'Unknown version.', 'Error', MB_OK or MB_ICONERROR);
+MessageBox(Form1.Handle, 'Unknown version.', 'Error', MB_OK or MB_ICONERROR);
 closefile(f);
 exit;
 end;
@@ -4273,7 +4264,7 @@ assignfile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,8); ss:=c[1]+c[2]+c[3]+c[4]+c[5]+c[6]+c[7]+c[8];
 if ss<>'STKit2'+#0+#0 then begin
-MyMessageBox(Form1.Handle, 'Unknown version.', 'Error', MB_OK or MB_ICONERROR);
+MessageBox(Form1.Handle, 'Unknown version.', 'Error', MB_OK or MB_ICONERROR);
 closefile(f); exit;
 end;
 
@@ -4387,7 +4378,7 @@ assignfile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,8); ss:=c[1]+c[2]+c[3]+c[4]+c[5]+c[6]+c[7]+c[8];
 if ss<>('STKit2'+#0+#0) then begin
-MyMessageBox(Form1.Handle, 'Unknown version.', 'Error', MB_OK or MB_ICONERROR);
+MessageBox(Form1.Handle, 'Unknown version.', 'Error', MB_OK or MB_ICONERROR);
 closefile(f); exit;
 end;
 
@@ -4802,7 +4793,7 @@ begin
 
   //Do not exit if user chose "Cancel"
   if not fileexists(fOptions.ExeDir+'unlimiter.'+inttostr(846)) then
-    CanClose := MyMessageBox(Form1.Handle,'Any unsaved changes will be lost!'+eol+'Exit?','Warning',MB_OKCANCEL or MB_ICONEXCLAMATION)=IDOK;
+    CanClose := MessageBox(Form1.Handle,PChar('Any unsaved changes will be lost!'+eol+'Exit?'),'Warning',MB_OKCANCEL or MB_ICONEXCLAMATION)=IDOK;
 end;
 
 
@@ -5149,7 +5140,7 @@ assignfile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,12);
 if (c[1]+c[2]+c[3]+c[4]+c[9]+c[10]+c[11]+c[12])<>'FORMLWO2' then begin
-MyMessageBox(Form1.Handle,'Old or unknown LWO format','Error',MB_OK or MB_ICONERROR);
+MessageBox(Form1.Handle,'Old or unknown LWO format','Error',MB_OK or MB_ICONERROR);
 closefile(f); exit; end;
 
 m:=int2(c[8],c[7],c[6],c[5])-4;
@@ -5276,7 +5267,7 @@ assignfile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,8); ss:=c[1]+c[2]+c[3]+c[4]+c[5]+c[6]+c[7]+c[8];
 if ss<>'STKit2'+#0+#0 then begin
-MyMessageBox(Form1.Handle, 'Unknown version.', 'Error', MB_OK or MB_ICONERROR);
+MessageBox(Form1.Handle, 'Unknown version.', 'Error', MB_OK or MB_ICONERROR);
 closefile(f); exit; end;
 
 blockread(f,Qty.Lights,4);    //Name
@@ -5526,7 +5517,7 @@ procedure TForm1.CreateNewScenClick(Sender: TObject);
 var i:integer; s:string;
 begin
   if not FileExists(fOptions.WorkDir+'WR2_PC.exe') then begin
-    MyMessageBox(Form1.Handle,'Please check if path to WR2 folder specified in Options is correct',
+    MessageBox(Form1.Handle,'Please check if path to WR2 folder specified in Options is correct',
                'Unable to access WR2 folder', MB_OK or MB_ICONERROR);
     exit;
   end;
@@ -5535,7 +5526,7 @@ s:=InputBox('Create new scenery','Scenery name:','');
 if s='' then exit;
 
 for i:=1 to RG2.Items.Count do if RG2.Items[i-1]=s then begin
-  MyMessageBox(Form1.Handle,'Scenery with such name already exists','Error', MB_OK or MB_ICONERROR);
+  MessageBox(Form1.Handle,'Scenery with such name already exists','Error', MB_OK or MB_ICONERROR);
   exit;
 end;
 
@@ -5822,7 +5813,7 @@ assignfile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,12);
 if (c[1]+c[2]+c[3]+c[4]+c[9]+c[10]+c[11]+c[12])<>'FORMLWO2' then begin
-MyMessageBox(Form1.Handle,'Old or unknown LWO format','Error',MB_OK or MB_ICONERROR);
+MessageBox(Form1.Handle,'Old or unknown LWO format','Error',MB_OK or MB_ICONERROR);
 closefile(f); exit; end;
 
 m:=int2(c[8],c[7],c[6],c[5])-4;
@@ -5966,9 +5957,9 @@ begin
   len:=0;
   for i:=1 to STRHead.NumSplines do
     inc(len,round(Str_Spline[i].Length/10));
-  MyMessageBox(Form1.Handle, eol+'        '+'Total streets length is - '
+  MessageBox(Form1.Handle, PChar(eol+'        '+'Total streets length is - '
   +inttostr(len div 1000)+'.'
-  +inttostr(len mod 1000)+'km'+'        '+eol, 'Info', MB_OK or MB_ICONINFORMATION);
+  +inttostr(len mod 1000)+'km'+'        '+eol), 'Info', MB_OK or MB_ICONINFORMATION);
 end;
 
 
@@ -6016,7 +6007,7 @@ blockread(f,sz,2);
 blockread(f,c,2); HasAlpha:=c[1]=#32;
 
 if (sx>2048)or(sz>2048) then begin
-MyMessageBox(Form1.Handle,'Image exceeds 2048px limit', 'Error', MB_OK or MB_ICONWARNING);
+MessageBox(Form1.Handle,'Image exceeds 2048px limit', 'Error', MB_OK or MB_ICONWARNING);
 closefile(f); exit; end;
 
 if HasAlpha then ci:=sx*sz*4 else ci:=sx*sz*3;
@@ -6523,7 +6514,7 @@ jpg.SaveToFile(fOptions.ExeDir+'STKit2_screen '+s+'.jpg');
 
 jpg.Free;
 mkbmp.Free;
-MyMessageBox(Form1.Handle, 'Screenshot saved to '+fOptions.ExeDir+'STKit2_screen '+s+'.jpg', 'Info', MB_OK or MB_ICONINFORMATION);
+MessageBox(Form1.Handle, PChar('Screenshot saved to '+fOptions.ExeDir+'STKit2_screen '+s+'.jpg'), 'Info', MB_OK or MB_ICONINFORMATION);
 end;
 
 procedure TForm1.AddSkyPresetClick(Sender: TObject);
@@ -6656,7 +6647,7 @@ SNINodesRefresh:=true;
 ID:=ListSNIObjects.ItemIndex+1; if ID=0 then exit;
 ID2:=ListSNINodes.ItemIndex+1;  if ID2=0 then exit;
 if SNIObj[ID].NumNodes<=3 then begin
-MyMessageBox(Form1.Handle, 'At least 3 nodes should remain in route.', 'Info', MB_OK or MB_ICONINFORMATION);
+MessageBox(Form1.Handle, 'At least 3 nodes should remain in route.', 'Info', MB_OK or MB_ICONINFORMATION);
 exit;
 end;
 
@@ -7052,9 +7043,9 @@ begin
     if i mod 4 = 0 then s:=s+ArrS[i]+eol else s:=s+ArrS[i]+'     ';
 
   //Now ask if user wants to add them or not
-  if count=0 then MyMessageBox(Form1.Handle, 'No new textures found in Textures folder', 'Info', MB_OK or MB_ICONINFORMATION)
+  if count=0 then MessageBox(Form1.Handle, 'No new textures found in Textures folder', 'Info', MB_OK or MB_ICONINFORMATION)
   else
-    if MyMessageBox(Form1.Handle, s, 'Info', MB_YESNO or MB_ICONINFORMATION) = IDYES then
+    if MessageBox(Form1.Handle, PChar(s), 'Info', MB_YESNO or MB_ICONINFORMATION) = IDYES then
       for i:=1 to count do
         AddTextureToList(ts_AddTex,ArrS[i]);
 
@@ -7072,9 +7063,9 @@ begin
     end;
   end;
 
-  if Arr[0]=0 then MyMessageBox(Form1.Handle, 'No unused textures found in Textures list', 'Info', MB_OK or MB_ICONINFORMATION)
+  if Arr[0]=0 then MessageBox(Form1.Handle, 'No unused textures found in Textures list', 'Info', MB_OK or MB_ICONINFORMATION)
   else
-  if MyMessageBox(Form1.Handle, s, 'Info', MB_YESNO or MB_ICONINFORMATION) = IDYES then
+  if MessageBox(Form1.Handle, PChar(s), 'Info', MB_YESNO or MB_ICONINFORMATION) = IDYES then
     for i:=Arr[0] downto 1 do begin
       ListTextures.ItemIndex:=Arr[i]-1;
       RemTextureClick(nil);

@@ -6,11 +6,9 @@ uses
 function GetPresetColor(ID:integer):TColor;
 procedure SetPresetColorGL(ID:integer; A:single);
 
-function MyMessageBox(hWnd:HWND; lpText:string; lpCaption:string; uType:UINT):longint;
-
 //STKit2 constants
 const
-  VersionInfo       = 'Scenery ToolKit 2.3.5           (14 Jul 2010)';
+  VersionInfo       = 'Scenery ToolKit 2.3.5           (16 Jul 2010)';
   FPS_INTERVAL      = 1000;    //Calculate FPS every ---- ms
   STKit2_Data_Path  = 'STKit2 Data';
 
@@ -267,21 +265,18 @@ uses Unit1;
 
 function GetPresetColor(ID:integer):TColor;
 begin
-ID:=(ID-1)mod length(PresetColor) +1;
-Result:=PresetColor[ID,1]+PresetColor[ID,2]*256+PresetColor[ID,3]*65536; //coloring solution
+  ID := (ID-1) mod length(PresetColor) + 1;
+  Result := PresetColor[ID,1] + PresetColor[ID,2] shl 8 + PresetColor[ID,3] shl 16;
 end;
 
 procedure SetPresetColorGL(ID:integer; A:single);
 var IDn:integer;
 begin
-IDn:=(ID-1)mod length(PresetColor) +1;
-if IDn=0 then glColor4f(0,0,0,A) else
-glColor4f(PresetColor[IDn,1]/255,PresetColor[IDn,2]/255,PresetColor[IDn,3]/255,A)
-end;
-
-function MyMessageBox(hWnd:HWND; lpText:string; lpCaption:string; uType:UINT):longint;
-begin
-  Result := MessageBox(hWnd, @(lpText)[1], @(lpCaption)[1], uType);
+  IDn := (ID-1) mod length(PresetColor) + 1;
+  if IDn = 0 then
+    glColor4f(0,0,0,A)
+  else
+    glColor4f(PresetColor[IDn,1]/255,PresetColor[IDn,2]/255,PresetColor[IDn,3]/255,A)
 end;
 
 

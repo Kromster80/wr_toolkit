@@ -30,7 +30,7 @@ LWT.Bqty:=0;
 
 blockread(f,c,12);
 if (c[1]+c[2]+c[3]+c[4]+c[9]+c[10]+c[11]+c[12])<>'FORMLWO2' then begin
-MyMessageBox(Form1.Handle,'Old or unknown LWO format.','Loading Failed',MB_OK or MB_ICONERROR);
+MessageBox(Form1.Handle,'Old or unknown LWO format.','Loading Failed',MB_OK or MB_ICONERROR);
 closefile(f); exit;
 end;
 m:=int2(c[8],c[7],c[6],c[5])-4;
@@ -82,7 +82,7 @@ dec(chsize,4);
     end;
 
 if chsize<>0 then begin
-MyMessageBox(Form1.Handle,'First two curves accepted, others are ignored.','Warning',MB_OK or MB_ICONWARNING);
+MessageBox(Form1.Handle,'First two curves accepted, others are ignored.','Warning',MB_OK or MB_ICONWARNING);
 blockread(f,c,chsize);
 end;
 
@@ -98,7 +98,7 @@ closefile(f);
 Form1.MemoLoad.Lines.Add('Load LWO_TRK in'+ElapsedTime(@OldTime));
 
 if (LWT.Aqty=0)or(LWT.Bqty=0) then begin
-MyMessageBox(Form1.Handle,'Not enough curves. Should be 2.','Error',MB_OK or MB_ICONSTOP);
+MessageBox(Form1.Handle,'Not enough curves. Should be 2.','Error',MB_OK or MB_ICONSTOP);
 exit;
 end;
 

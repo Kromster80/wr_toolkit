@@ -129,7 +129,7 @@ begin
       while(TRL[ii].id1<>8) do dec(ii);
       TRL[ii].id1:=16;
       ListTrig.Items[ii-1]:=inttostr(ii)+'. '+TRLNames[TRL[ii].id1];
-      MyMessageBox(Form1.Handle,'Nitro triggers limited to 8','Warning',MB_OK or MB_ICONWARNING or MB_TASKMODAL);
+      MessageBox(Form1.Handle,'Nitro triggers limited to 8','Warning',MB_OK or MB_ICONWARNING or MB_TASKMODAL);
     end;
 
     if Fqty>8 then begin
@@ -137,7 +137,7 @@ begin
       while(TRL[ii].id1<>15) do dec(ii);
       TRL[ii].id1:=16;
       ListTrig.Items[ii-1]:=inttostr(ii)+'. '+TRLNames[TRL[ii].id1];
-      MyMessageBox(Form1.Handle,'Refuel triggers limited to 8','Warning',MB_OK or MB_ICONWARNING or MB_TASKMODAL);
+      MessageBox(Form1.Handle,'Refuel triggers limited to 8','Warning',MB_OK or MB_ICONWARNING or MB_TASKMODAL);
     end;
 
     if Rqty>8 then begin
@@ -145,7 +145,7 @@ begin
       while(TRL[ii].id1<>7) do dec(ii);
       TRL[ii].id1:=16;
       ListTrig.Items[ii-1]:=inttostr(ii)+'. '+TRLNames[TRL[ii].id1];
-      MyMessageBox(Form1.Handle,'Repair triggers limited to 8','Warning',MB_OK or MB_ICONWARNING or MB_TASKMODAL);
+      MessageBox(Form1.Handle,'Repair triggers limited to 8','Warning',MB_OK or MB_ICONWARNING or MB_TASKMODAL);
     end;
 
     if (TRL[ID].id1=15)or(TRL[ID].id1=8) then begin

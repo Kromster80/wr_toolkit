@@ -44,7 +44,10 @@ begin
   Inherited;
   fExeDir := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName));
   if not DirectoryExists(fExeDir + STKit2_Data_Path + '\') then
-    MyMessageBox(HWND(nil), 'Unable to locate '+STKit2_Data_Path+' folder.'+eol+'You must unpack all STKit2 package contents into one folder.', 'Error', MB_OK or MB_ICONERROR);
+    MessageBox(HWND(nil),
+    PChar('Unable to locate '+STKit2_Data_Path+' folder.'+eol+
+    'You must unpack all STKit2 package contents into one folder.'),
+    'Error', MB_OK or MB_ICONERROR);
   ReadOptions(fExeDir + STKit2_Data_Path + '\' + 'Options.ini');
 end;
 
