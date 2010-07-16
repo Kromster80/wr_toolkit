@@ -123,31 +123,6 @@ PageShortcut:Array[1..16] of string = (
 'LW','GR','TX','MT','OB','SN','LI','ST',
 'TRK','TOB','STR','SNI','SKY','RO#','TRL','SC2');
 
-TRLnames:Array[1..24] of string = (
-' (1)',
-' (2)',
-'Jump Tunnel (3)',              //3
-'Zero gravity',                 //4
-'Jump "Origin-Aim" (5)',        //5
-'Jump Checkpoint (6)',          //6
-'Car repair',                   //7
-'Nitro bottle',                 //8
-'"Jump Ahead" symbol',          //9
-'Car suspension lift',          //10
-'Teleporter',                   //11
-' (12)',
-' (13)',
-'Carwash',                      //14
-'Refuel nitro',                 //15
-'Parking lot',                  //16
-' (17)',
-' (18)',
-' (19)',
-' (20)',
-' (21)',
-' (22)',
-' (23)',
-' (24)');
 
 OSphere:array[1..92,1..3]of single =(
 (0,5,0),(1.715,4.663,0.557),(0,4.663,1.804),(3.2,3.699,1.04),(1.784,3.973,2.456),

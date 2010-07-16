@@ -118,7 +118,7 @@ object Form1: TForm1
     Top = 40
     Width = 296
     Height = 623
-    ActivePage = TabSheet9
+    ActivePage = TabSheet3
     Anchors = [akLeft, akTop, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -5972,7 +5972,7 @@ object Form1: TForm1
         Left = 2
         Top = 16
         Width = 133
-        Height = 345
+        Height = 353
         Anchors = [akLeft, akTop, akBottom]
         ExtendedSelect = False
         ItemHeight = 13
@@ -6127,7 +6127,7 @@ object Form1: TForm1
       end
       object TRL_Flags: TEdit
         Left = 140
-        Top = 344
+        Top = 348
         Width = 121
         Height = 21
         TabOrder = 12

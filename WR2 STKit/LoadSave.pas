@@ -12,7 +12,6 @@ uses unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_Ro
     function  LoadSMP(Input:string):boolean;
     function  LoadSTR(Input:string):boolean;
     function  LoadNET(Input:string):boolean;
-    function  LoadTRL(Input:string):boolean;
     function  LoadSKY(Input:string):boolean;
     procedure LoadTRK(Input,Input2:string);
     procedure LoadTOB(Input,Input2:string);
@@ -24,7 +23,7 @@ uses unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_Ro
     procedure SaveIDX(Input:string);
     procedure SaveVTX(Input:string);
     procedure SaveSNI(Input:string);
-    procedure SaveTRL(Input:string);
+
     procedure SaveTRK(Input:string;ID:integer);
     procedure SaveTOB(Input:string;ID:integer);
     procedure SaveWTR(Input:string;ID:integer);
@@ -552,33 +551,6 @@ closefile(f);
 Result:=true;
 end;
 
-function LoadTRL(Input:string):boolean;
-var
-  f:file;
-  ii,NumRead:integer;
-begin
-Result:=false;
-if not fileexists(Input+'.trl') then begin
-TRLQty:=0; exit;
-end;
-
-assignfile(f,Input+'.trl'); reset(f,1);
-ii:=0;
-repeat
-inc(ii);
-blockread(f,TRL[ii],34,NumRead); //common part
-if NumRead<>0 then
-case TRL[ii].id1 of
-3,6,7,9,10,14,15,16,17,19,20,22,23:blockread(f,TRL[ii].Matrix,36);
-4,8,18,21:                         blockread(f,TRL[ii].Matrix,40);
-5,11:                              blockread(f,TRL[ii].Matrix,54);
-end;
-until(NumRead=0);
-TRLQty:=ii-1;
-closefile(f);
-result:=true;
-end;
-
 
 function LoadSKY(Input:string):boolean;
 var
@@ -982,26 +954,6 @@ closefile(f);
 Changes.SNI:=false;
 end;
 
-procedure SaveTRL(Input:string);
-var
-  f:file;
-  ii:integer;
-begin
-  ElapsedTime(@OldTime);
-  assignfile(f,Input); rewrite(f,1);
-  for ii:=1 to TRLQty do
-  if TRL[ii].id1<>0 then begin
-    blockwrite(f,TRL[ii],34);
-    case TRL[ii].id1 of
-      3,6,7,9,10,14,15,16:blockwrite(f,TRL[ii].Matrix,36);
-      4,8:                blockwrite(f,TRL[ii].Matrix,40);
-      5,11:               blockwrite(f,TRL[ii].Matrix,54);
-    end;
-  end;
-  closefile(f);
-  //Form1.Memo1.Lines.Add('Triggers saved in'+ElapsedTime(@OldTime));
-  Changes.TRL:=false;
-end;
 
 procedure SaveTRK(Input:string;ID:integer);
 var

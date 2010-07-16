@@ -5,7 +5,7 @@ uses
   Windows, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, kromUtils, KromOGLUtils, Defaults, Math, Menus,
   LoadObjects, Grids,  ImgList, OpenAL, WR_AboutBox, SK_Options, FileCtrl,
-  Buttons, Spin, ComCtrls;
+  Buttons, Spin, ComCtrls, Unit_Triggers;
 
 type TCarDrivingMode = (cdm_Sim, cdm_Arcade);
 const CarDrivingMode: array[TCarDrivingMode] of string = ('Sim', 'Arcade');
@@ -1086,15 +1086,7 @@ var
     d:array[1..32]of single;    //128
     end;
 
-  TRLQty:integer;
-  TRL:array[1..256]of record
-    id1,id2:word;
-    X,Y,Z,xSize,ySize,zSize:single;
-    u1:array[1..6]of shortint;
-    Matrix:array[1..9]of single; //Rotation
-    x2,y2,z2:single;
-    u2:array[1..3]of smallint;
-  end;
+  fTriggers:TSTriggers;
 
   SKYQty:integer;
   SKY:array[1..32]of record
@@ -1381,7 +1373,7 @@ implementation
   {$R *.dfm}
 
 uses LoadSave, Unit_Render, PTXTexture, Load_TRK, Unit_sc2, Unit_Streets,
-Unit_Triggers, Unit_Options, Unit_RoutineFunctions, Unit_RenderInit, Unit_Tracing,
+Unit_Options, Unit_RoutineFunctions, Unit_RenderInit, Unit_Tracing,
   ColorPicker, SK_ImportLWO;
 
 
@@ -1440,6 +1432,8 @@ Form1.WindowState:=wsMaximized;
   FillSceneryList();
   RG2.ItemIndex := EnsureRange(RG2.ItemIndex,0,RG2.Items.Count-1);
   if RG2.ItemIndex<>-1 then SceneryReload(nil);
+
+  fTriggers := TSTriggers.Create;
 
   ResetViewClick(nil);
   ResetViewClick(nil);
@@ -1890,7 +1884,7 @@ if not CBSelectionBuffer.Checked then begin
   if ActivePage=apStreets                         then RenderStreets(1,STRPointID.Value,STRSplineID1.Value);
   if ActivePage=apAnimated                        then RenderAnimated(1,'Paths',ListSNIObjects.ItemIndex+1,ListSNINodes.ItemIndex+1)
   else if (fOptions.RenderMode>=rmFull)                    then RenderAnimated(1,'Objects',0,0);
-  if ActivePage=apTriggers                        then RenderTriggers(1,ListTrig.ItemIndex+1);
+  if ActivePage=apTriggers                        then fTriggers.Render(1,ListTrig.ItemIndex+1);
 
   //Render scenery in shaders
   if(fOptions.RenderMode<>rmSchem)and(fOptions.RenderMode<>rmOpenGL)then RenderShaders(
@@ -1925,7 +1919,7 @@ if not CBSelectionBuffer.Checked then begin
 
   if ActivePage=apStreets         then RenderStreets(0.2,STRPointID.Value,STRSplineID1.Value);
   if ActivePage=apStreets         then RenderRoadNet();
-  if ActivePage=apTriggers        then RenderTriggers(0.2,ListTrig.ItemIndex+1);
+  if ActivePage=apTriggers        then fTriggers.Render(0.2,ListTrig.ItemIndex+1);
   if ActivePage=apAnimated        then RenderAnimated(0.2,'Paths',ListSNIObjects.ItemIndex+1,ListSNINodes.ItemIndex+1);
   if ActivePage=apLights          then RenderLights(0.5,'',ListLights.ItemIndex+1);
   if ActivePage=apTracksMT        then RenderMakeTrack(0.5,ListMakeTrack.ItemIndex+1);
@@ -1963,7 +1957,7 @@ MPos.Z:=V.z;
   glEnable(GL_DEPTH_TEST);
   if ActivePage=apAnimated              then RenderAnimated(0,'Paths',0,0);
 //  if ActivePage='Geometry'        then RenderVTX('Points');
-  if ActivePage=apTriggers              then RenderTriggers(0,ListTrig.ItemIndex+1);
+  if ActivePage=apTriggers              then fTriggers.Render(0,ListTrig.ItemIndex+1);
   if ActivePage=apLights                then RenderLights(0,'',0);
   if ActivePage=apTracksMT              then RenderMakeTrack(0,0);
   if ActivePage=apSounds                then RenderSounds(0,0);
@@ -2089,7 +2083,8 @@ if LoadSNI(SceneryPath+Scenery)                then MemoLoad.Lines.Add('Load SNI
 if LoadSKY(SceneryPath+Scenery)                then MemoLoad.Lines.Add('Load SKY in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('SKY missing');
 if LoadSTR(fOptions.WorkDir+'Traffic\Streets\'+Scenery) then MemoLoad.Lines.Add('Load STR in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('STR missing');
 if LoadNET(SceneryPath+'Tracks\roads.net')     then MemoLoad.Lines.Add('Load NET in'+ElapsedTime(@OldTime));
-if LoadTRL(fOptions.WorkDir+'RaceDat\'+Scenery)         then MemoLoad.Lines.Add('Load TRL in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('TRL missing');
+if fTriggers.LoadFromFile(fOptions.WorkDir+'RaceDat\'+Scenery+'.trl') then MemoLoad.Lines.Add('Load TRL in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('TRL missing');
+//if LoadTRL(fOptions.WorkDir+'RaceDat\'+Scenery)         then MemoLoad.Lines.Add('Load TRL in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('TRL missing');
    LoadWRK(SceneryPath+Scenery+' WorkFile.wrk');    MemoLoad.Lines.Add('Load WRK in'+ElapsedTime(@OldTime));
 if LoadSC2(fOptions.WorkDir+'AddOns\Sceneries\'
                   +Scenery+'\EditScenery.sc2') then MemoLoad.Lines.Add('Load SC2 in'+ElapsedTime(@OldTime));
@@ -2400,12 +2395,12 @@ ComputeTurnClick(nil);
 Changes.TRK[TrackID]:=true;
 end;
 
-procedure TForm1.ListTrigClick(Sender: TObject); begin ListTrigClick_(); end;
-procedure TForm1.ListTrigDblClick(Sender: TObject); begin ListTrigDblClick_(); end;
+procedure TForm1.ListTrigClick(Sender: TObject); begin fTriggers.ListTrigClick_(); end;
+procedure TForm1.ListTrigDblClick(Sender: TObject); begin fTriggers.ListTrigDblClick_(); end;
 
-procedure TForm1.AddTriggerClick(Sender: TObject); begin AddTriggerClick_(); end;
-procedure TForm1.RemTriggerClick(Sender: TObject); begin RemTriggerClick_(); end;
-procedure TForm1.ComputeTriggerClick(Sender: TObject); begin ComputeTriggerClick_(Sender); end;
+procedure TForm1.AddTriggerClick(Sender: TObject); begin fTriggers.AddTriggerClick_(); end;
+procedure TForm1.RemTriggerClick(Sender: TObject); begin fTriggers.RemTriggerClick_(); end;
+procedure TForm1.ComputeTriggerClick(Sender: TObject); begin fTriggers.ComputeTriggerClick_(Sender); end;
 
 
 procedure TForm1.BrowseLWO(Sender: TObject);
@@ -2773,7 +2768,7 @@ if DirectoryExists(WSS+'V2\') then SaveTRK_DAT(WSS+'V2\Tracks\tracks.dat');
 if DirectoryExists(WSS+'V3\') then SaveTRK_DAT(WSS+'V3\Tracks\tracks.dat');
 
 if Changes.SC2 then SaveSC2(fOptions.WorkDir+'AddOns\Sceneries\'+Scenery+'\EditScenery.sc2');
-if Changes.TRL then SaveTRL(fOptions.WorkDir+'RaceDat\'+Scenery+'.trl');
+if Changes.TRL then fTriggers.SaveToFile(fOptions.WorkDir+'RaceDat\'+Scenery+'.trl');
 if Changes.STR then SaveSTR(fOptions.WorkDir+'Traffic\Streets\'+Scenery+'.str');
 
 ShowChangesInfoClick(nil);
@@ -2953,8 +2948,8 @@ if (Sender='All')or(Sender='Triggers') then begin
   CBTriggerType.Clear;
   for i:=1 to 16 do CBTriggerType.AddItem(TRLnames[i],nil);
   ListTrig.Clear;
-  for i:=1 to TRLQty do
-  ListTrig.Items.Add(inttostr(i)+'. '+TRLNames[TRL[i].id1]);
+  for i:=1 to fTriggers.Count do
+  ListTrig.Items.Add(fTriggers.GetName(i));
   ListTrig.ItemIndex:=-1;
 end;
 
@@ -3520,33 +3515,35 @@ begin
   yRot:=270;
 end;
 
+
 procedure TForm1.PageControl1Change(Sender: TObject);
 begin
-case PageControl1.ActivePageIndex of
-0: ActivePage:=apLWO;
-1: ActivePage:=apGrounds;
-2: ActivePage:=apTextures;
-3: ActivePage:=apMaterials;
-4: ActivePage:=apObjects;
-5: ActivePage:=apSounds;
-6: ActivePage:=apLights;
-7: ActivePage:=apStructure;
-8: if TRKProperty.ActivePage.Caption='Make track' then ActivePage:=apTracksMT else
-   if TRKProperty.ActivePage.Caption='Direction arrows' then ActivePage:=apTracksAR else
-   if TRKProperty.ActivePage.Caption='Waypoint nodes' then ActivePage:=apTracksWP else
-   Assert(false,'TRK Property page control captions are wrong!');
-9: ActivePage:=apTOB;
-10:ActivePage:=apStreets;
-11:ActivePage:=apAnimated;
-12:ActivePage:=apSky;
-13:ActivePage:=apGrass;
-14:ActivePage:=apTriggers;
-15:ActivePage:=apAddonInfo;
+  case PageControl1.ActivePageIndex of
+    0: ActivePage:=apLWO;
+    1: ActivePage:=apGrounds;
+    2: ActivePage:=apTextures;
+    3: ActivePage:=apMaterials;
+    4: ActivePage:=apObjects;
+    5: ActivePage:=apSounds;
+    6: ActivePage:=apLights;
+    7: ActivePage:=apStructure;
+    8: if TRKProperty.ActivePage.Caption='Make track' then ActivePage:=apTracksMT else
+       if TRKProperty.ActivePage.Caption='Direction arrows' then ActivePage:=apTracksAR else
+       if TRKProperty.ActivePage.Caption='Waypoint nodes' then ActivePage:=apTracksWP else
+       Assert(false,'TRK Property page control captions are wrong!');
+    9: ActivePage:=apTOB;
+    10:ActivePage:=apStreets;
+    11:ActivePage:=apAnimated;
+    12:ActivePage:=apSky;
+    13:ActivePage:=apGrass;
+    14:ActivePage:=apTriggers;
+    15:ActivePage:=apAddonInfo;
+  end;
+  SendQADtoUI('All'); //?
+  StatusBar1.Panels[4].Text:=PageCaption[PageControl1.ActivePageIndex+1];
+  StatusBar1.Panels[5].Text:=ReturnListOfChangedFiles(', ');
 end;
-SendQADtoUI('All'); //?
-StatusBar1.Panels[4].Text:=PageCaption[PageControl1.ActivePageIndex+1];
-StatusBar1.Panels[5].Text:=ReturnListOfChangedFiles(', ');
-end;
+
 
 procedure TForm1.ListTexturesClick(Sender: TObject);
 var ID:integer;
@@ -4542,57 +4539,61 @@ var i:integer;
   TRKProperty.Pages[2].Enabled:=not A;
   end;
 begin
-if Sender=LBTrack then begin
-  CBTrack.ItemIndex:=LBTrack.ItemIndex;
-  SC2_TrackList.ItemIndex:=LBTrack.ItemIndex;
-end;
-if Sender=CBTrack then begin
-  LBTrack.ItemIndex:=CBTrack.ItemIndex;
-  SC2_TrackList.ItemIndex:=CBTrack.ItemIndex;
-end;
-if Sender=SC2_TrackList then begin
-  CBTrack.ItemIndex:=SC2_TrackList.ItemIndex;
-  LBTrack.ItemIndex:=SC2_TrackList.ItemIndex;
+  if Sender=LBTrack then begin
+    CBTrack.ItemIndex:=LBTrack.ItemIndex;
+    SC2_TrackList.ItemIndex:=LBTrack.ItemIndex;
+  end;
+  if Sender=CBTrack then begin
+    LBTrack.ItemIndex:=CBTrack.ItemIndex;
+    SC2_TrackList.ItemIndex:=CBTrack.ItemIndex;
+  end;
+  if Sender=SC2_TrackList then begin
+    CBTrack.ItemIndex:=SC2_TrackList.ItemIndex;
+    LBTrack.ItemIndex:=SC2_TrackList.ItemIndex;
+  end;
+
+  TrackID:=CBTrack.ItemIndex+1;
+  if TrackID>TracksQty then begin
+    TrackWP:=TrackID-TracksQty;
+    TrackID:=0;
+  end else
+    TrackWP:=0;
+
+  PlayTrackPos:=0;
+  if TrackWP <> 0 then begin
+    TRKProperty.ActivePageIndex:=2; //Waypoint nodes
+    SetWP(false);
+    ListWPNodes.Clear;
+    for i:=1 to WTR[TrackWP].NodeQty do
+    ListWPNodes.Items.Add(int2fix(i,2)+'. '+int2fix(WTR[TrackWP].Node[i].CheckPointID,2));
+  end else begin
+    TrackWP:=0;
+    TRKProperty.ActivePageIndex:=1;
+    SetWP(true);
+    TRKRefresh:=true;
+    TRK_Loop.Checked:=TRKQty[TrackID].LoopFlag=1;
+    ListTracksClick(nil);
+    ListTOBChange(nil);
+    TRKRefresh:=false;
+    MakeTrackRefresh:=true;
+      ListMakeTrack.Clear;
+      for i:=1 to MakeTrack[TrackID].NodeQty do
+      ListMakeTrack.Items.Add(int2fix(i,2)+'. ');
+    Form1.E_Node1.Value:=0;
+    Form1.E_Node2.Value:=0;
+    MakeTrackRefresh:=false;
+  end;
 end;
 
-TrackID:=CBTrack.ItemIndex+1;
-if TrackID>TracksQty then begin
-  TrackWP:=TrackID-TracksQty;
-  TrackID:=0;
-  TRKProperty.ActivePageIndex:=2;
-  SetWP(false);
-  ListWPNodes.Clear;
-  for i:=1 to WTR[TrackWP].NodeQty do
-  ListWPNodes.Items.Add(int2fix(i,2)+'. '+int2fix(WTR[TrackWP].Node[i].CheckPointID,2));
-end else begin
-  TrackWP:=0;
-  TRKProperty.ActivePageIndex:=1;
-  SetWP(true);
-end;
-
-PlayTrackPos:=0;
-if TrackID=0 then exit;
-TRKRefresh:=true;
-TRK_Loop.Checked:=TRKQty[TrackID].LoopFlag=1;
-ListTracksClick(nil);
-ListTOBChange(nil);
-TRKRefresh:=false;
-MakeTrackRefresh:=true;
-  ListMakeTrack.Clear;
-  for i:=1 to MakeTrack[TrackID].NodeQty do
-  ListMakeTrack.Items.Add(int2fix(i,2)+'. ');
-Form1.E_Node1.Value:=0;
-Form1.E_Node2.Value:=0;
-MakeTrackRefresh:=false;
-end;
 
 procedure TForm1.TRK_LoopClick(Sender: TObject);
 begin
-if TrackID=0 then exit;
-if TRKRefresh then exit;
-if TRK_Loop.Checked then TRKQty[TrackID].LoopFlag:=1 else TRKQty[TrackID].LoopFlag:=0;
-Changes.TRK[TrackID]:=true;
+  if TrackID=0 then exit;
+  if TRKRefresh then exit;
+  TRKQty[TrackID].LoopFlag := byte(TRK_Loop.Checked);
+  Changes.TRK[TrackID] := true;
 end;
+
 
 procedure TForm1.LE_RGBClick(Sender: TObject);
 var i:integer; Pow,Mul,Add:single;
@@ -5293,38 +5294,44 @@ end;
 procedure TForm1.AddWPTrackClick(Sender: TObject);
 var i:integer;
 begin
-if TracksQtyWP>=MAX_WP_TRACKS then exit;
-inc(TracksQtyWP);
-SendQADtoUI('Tracks');
-WTR[TracksQtyWP].NodeQty:=2;
-WTR[TracksQtyWP].Empty[1]:=0;
-WTR[TracksQtyWP].Empty[2]:=0;
-WTR[TracksQtyWP].Empty[3]:=0;
-setlength(WTR[TracksQtyWP].Node,2+1);
-for i:=1 to 2 do begin
-WTR[TracksQtyWP].Node[i].CheckPointID:=0;
-WTR[TracksQtyWP].Node[i].X:=i*500;
-WTR[TracksQtyWP].Node[i].Y:=0;
-WTR[TracksQtyWP].Node[i].Z:=i*500;
-Angles2Matrix(0,0,0,@WTR[TracksQtyWP].Node[i].M[1],9);
-end;
-AddonScenery.Track[TracksQty+TracksQtyWP].Name:=''; //Gets auto corrected
-WriteCommonDataToSC2(); //Auto correct wrong data if any
-Changes.WTR[TracksQtyWP]:=true;
+  if TracksQtyWP >= MAX_WP_TRACKS then begin
+    MessageBox(HWND(nil), PChar(Format('World racing 2 can not handle more than %d waypoint tracks.',[MAX_WP_TRACKS])), 'Info', MB_OK);
+    exit;
+  end;
+  inc(TracksQtyWP);
+  SendQADtoUI('Tracks');
+  WTR[TracksQtyWP].NodeQty:=2;
+  WTR[TracksQtyWP].Empty[1]:=0;
+  WTR[TracksQtyWP].Empty[2]:=0;
+  WTR[TracksQtyWP].Empty[3]:=0;
+  setlength(WTR[TracksQtyWP].Node,2+1);
+  for i:=1 to 2 do begin
+  WTR[TracksQtyWP].Node[i].CheckPointID:=0;
+  WTR[TracksQtyWP].Node[i].X:=i*500;
+  WTR[TracksQtyWP].Node[i].Y:=0;
+  WTR[TracksQtyWP].Node[i].Z:=i*500;
+  Angles2Matrix(0,0,0,@WTR[TracksQtyWP].Node[i].M[1],9);
+  end;
+  AddonScenery.Track[TracksQty+TracksQtyWP].Name:=''; //Gets auto corrected
+  WriteCommonDataToSC2(); //Auto correct wrong data if any
+  Changes.WTR[TracksQtyWP] := true;
 end;
 
 procedure TForm1.AddTrackClick(Sender: TObject);
 var i:integer;
 begin
-if TracksQty>=MAX_TRACKS then exit;
-inc(TracksQty);
-for i:=TracksQty to TracksQty+TracksQtyWP-1 do
-  AddonScenery.Track[i+1]:=AddonScenery.Track[i];
-AddonScenery.Track[TracksQty].Name:=''; //Gets auto corrected
-WriteCommonDataToSC2(); //Auto correct wrong data if any
-SendQADtoUI('Tracks');
-Changes.SC2:=true;
-Changes.WRK:=true;
+  if TracksQty >= MAX_TRACKS then begin
+    MessageBox(HWND(nil), PChar(Format('World racing 2 can not handle more than %d racing tracks.',[MAX_TRACKS])), 'Info', MB_OK);
+    exit;
+  end;
+  inc(TracksQty);
+  for i:=TracksQty to TracksQty+TracksQtyWP-1 do
+    AddonScenery.Track[i+1]:=AddonScenery.Track[i];
+  AddonScenery.Track[TracksQty].Name:=''; //Gets auto corrected
+  WriteCommonDataToSC2(); //Auto correct wrong data if any
+  SendQADtoUI('Tracks');
+  Changes.SC2 := true;
+  Changes.WRK := true;
 end;
 
 procedure TForm1.RemTrackClick(Sender: TObject);
