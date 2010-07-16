@@ -1,17 +1,176 @@
 unit Unit_Triggers;
 interface
-uses Unit1,sysutils,Windows,KromUtils,Math,dglOpenGL,Defaults;
+uses sysutils,filectrl,Windows,KromUtils,Math,dglOpenGL,Defaults, KromOGLUtils;
+
+const
+  TRLnames:array[1..24]of string = (
+  ' (1)', ' (2)',
+  'Jump Tunnel (3)',              //3
+  'Zero gravity',                 //4
+  'Jump "Origin-Aim" (5)',        //5
+  'Jump Checkpoint (6)',          //6
+  'Car repair',                   //7
+  'Nitro bottle',                 //8
+  '"Jump Ahead" symbol',          //9
+  'Car suspension lift',          //10
+  'Teleporter',                   //11
+  ' (12)', ' (13)',
+  'Carwash',                      //14
+  'Refuel nitro',                 //15
+  'Parking lot',                  //16
+  ' (17)', ' (18)', ' (19)', ' (20)', ' (21)', ' (22)', ' (23)', ' (24)');
+
+type
+  TSTriggers = class
+  private
+  public
+    Count:integer;
+    TRL:array[1..256]of record
+      id1,id2:word;
+      X,Y,Z,xSize,ySize,zSize:single;
+      u1:array[1..6]of shortint;
+      Matrix:array[1..9]of single; //Rotation
+      x2,y2,z2:single;
+      u2:array[1..3]of smallint;
+    end;
+
+    function LoadFromFile(aFile:string):boolean;
+    procedure SaveToFile(aFile:string);
+
+    function GetName(aItem:integer):string;
+
+    procedure ListTrigClick_();
+    procedure ListTrigDblClick_();
+    procedure AddTriggerClick_();
+    procedure RemTriggerClick_();
+    procedure ComputeTriggerClick_(Sender: TObject);
+
+    procedure Render(A:single; ID:integer);
+  end;
 
 
-procedure ListTrigClick_();
-procedure ListTrigDblClick_();
-procedure AddTriggerClick_();
-procedure RemTriggerClick_();
-procedure ComputeTriggerClick_(Sender: TObject);
 
 implementation
+uses Unit1;
 
-procedure ListTrigClick_();
+function TSTriggers.LoadFromFile(aFile:string):boolean;
+var
+  f:file;
+  NumRead:integer;
+begin
+  Result := false;
+  Count := 0;
+  if not FileExists(aFile) then exit;
+
+  assignfile(f,aFile);
+  reset(f,1);
+
+  repeat
+    inc(Count);
+    blockread(f,TRL[Count],34,NumRead); //common part
+    if NumRead<>0 then
+      case TRL[Count].id1 of
+        3,6,7,9,10,14..17,19,20,22,23: blockread(f,TRL[Count].Matrix,36);
+        4,8,18,21:                     blockread(f,TRL[Count].Matrix,40);
+        5,11:                          blockread(f,TRL[Count].Matrix,54);
+      end;
+  until(NumRead=0);
+  dec(Count);
+  closefile(f);
+  Result := true;
+end;
+
+
+procedure TSTriggers.SaveToFile(aFile:string);
+var
+  f:file;
+  i:integer;
+begin
+  assignfile(f,aFile);
+  rewrite(f,1);
+  for i:=1 to Count do
+  if TRL[i].id1<>0 then begin
+    blockwrite(f,TRL[i],34);
+    case TRL[i].id1 of
+      3,6,7,9,10,14,15,16:blockwrite(f,TRL[i].Matrix,36);
+      4,8:                blockwrite(f,TRL[i].Matrix,40);
+      5,11:               blockwrite(f,TRL[i].Matrix,54);
+    end;
+  end;
+  closefile(f);
+  //Form1.Memo1.Lines.Add('Triggers saved in'+ElapsedTime(@OldTime));
+  Changes.TRL:=false;
+end;
+
+
+function TSTriggers.GetName(aItem:integer):string;
+begin
+  Result := inttostr(aItem)+'. '+TRLNames[fTriggers.TRL[aItem].id1];
+end;
+
+
+procedure TSTriggers.Render(A:single; ID:integer);
+var ii:integer; h,p,b:integer;
+begin
+glLineWidth(2);
+
+for ii:=1 to Count do begin
+  //Render bounding box
+  glPushMatrix;
+  if A<>0 then glColor4f(0,0.5,1,A) else kSetColorCode(kObject,ii);
+  glbegin(gl_points);
+    glvertex3fv(@TRL[ii].x);
+  glEnd;
+  Matrix2Angles(TRL[ii].Matrix,9,@h,@p,@b);
+  glTranslatef(TRL[ii].x,TRL[ii].y,TRL[ii].z);
+  glRotatef(h,1,0,0); glRotatef(p,0,1,0); glRotatef(b,0,0,1);
+  glTranslatef(TRL[ii].xSize*5,TRL[ii].ySize*5,TRL[ii].zSize*5); //corner point
+  glScalef(TRL[ii].xSize*10,TRL[ii].ySize*10,TRL[ii].zSize*10);  //trigger size
+  if A<>1 then glCallList(coBox);
+  glCallList(coBoxW);
+
+  glPushMatrix;
+    glRotatef(90,0,0,1);
+    if TRL[ii].id1 in [9,11,14] then glCallList(coArrow);
+  glPopMatrix;
+
+  if A<>0 then begin
+    glRasterPos3f(0,0,0);
+    glPrint(inttostr(TRL[ii].id1));
+  end;
+  glPopMatrix;
+
+  //Render line for teleport and other thing
+  if TRL[ii].id1 in [5,11] then begin
+    if A<>0 then glColor4f(1,1,1,A) else kSetColorCode(kPoint,ii);
+    glbegin(gl_lines);
+    glvertex3fv(@TRL[ii].x);
+    glvertex3fv(@TRL[ii].x2);
+    glEnd;
+    glbegin(gl_points);
+    glvertex3fv(@TRL[ii].x2);
+    glEnd;
+  end;
+
+end;
+
+glLineWidth(LineWidth);
+
+if ID=0 then exit;
+
+if A<>0 then begin
+glColor4f(1,0,0,1); //highlight either trigger or destination with red
+glbegin(gl_points);
+if EditMode='Pointer' then
+glvertex3fv(@TRL[ID].x2) else
+glvertex3fv(@TRL[ID].x);
+glEnd;
+end;
+
+end;
+
+
+procedure TSTriggers.ListTrigClick_();
 var A,B,C,ID:integer;
 begin
   TriggersRefresh := true;
@@ -51,7 +210,7 @@ begin
 end;
 
 
-procedure ListTrigDblClick_();
+procedure TSTriggers.ListTrigDblClick_();
 var ID:integer;
 begin
   ID   := Form1.ListTrig.ItemIndex+1;
@@ -61,12 +220,12 @@ begin
 end;
 
 
-procedure AddTriggerClick_();
+procedure TSTriggers.AddTriggerClick_();
 begin //Duplicate selected item
   TriggersRefresh := true;
   Form1.ListTrig.Items.Add('new');
-  Form1.ListTrig.ItemIndex := TRLQty;
-  inc(TRLQty);
+  Form1.ListTrig.ItemIndex := Count;
+  inc(Count);
   Form1.TRL_X.Value := xPos;
   Form1.TRL_Y.Value := yPos;
   Form1.TRL_Z.Value := zPos;
@@ -77,7 +236,7 @@ begin //Duplicate selected item
 end;
 
 
-procedure RemTriggerClick_();
+procedure TSTriggers.RemTriggerClick_();
 var i,ID:integer;
 begin
   ID := Form1.ListTrig.ItemIndex+1;
@@ -85,18 +244,18 @@ begin
 
   TriggersRefresh := true;
   Form1.ListTrig.Items.Delete(Form1.ListTrig.ItemIndex);
-  dec(TRLQty);
-  for i:=ID to TRLQty do TRL[i]:=TRL[i+1];
+  dec(Count);
+  for i:=ID to Count do TRL[i]:=TRL[i+1];
 
   TriggersRefresh := false;
-  Form1.ListTrig.ItemIndex := EnsureRange(ID,1,TRLQty)-1;
+  Form1.ListTrig.ItemIndex := EnsureRange(ID,1,Count)-1;
   Form1.ListTrigClick(nil);
 
   Changes.TRL := true;
 end;
 
 
-procedure ComputeTriggerClick_(Sender: TObject);
+procedure TSTriggers.ComputeTriggerClick_(Sender: TObject);
 var A,B,C,ID,ii:integer; Nqty,Fqty,Rqty:integer;
 begin
   if TriggersRefresh then exit;
@@ -120,12 +279,12 @@ begin
     TRL[ID].z:=TRL_Z.Value;
     Nqty:=0; Fqty:=0; Rqty:=0;
 
-    for ii:=1 to TRLQty do if TRL[ii].id1=8 then inc(Nqty) else //Nitro
+    for ii:=1 to Count do if TRL[ii].id1=8 then inc(Nqty) else //Nitro
                            if TRL[ii].id1=15 then inc(Fqty) else//Refuel
                            if TRL[ii].id1=7   then inc(Rqty);   //Repair
 
     if Nqty>8 then begin
-      ii:=TRLQty;
+      ii:=Count;
       while(TRL[ii].id1<>8) do dec(ii);
       TRL[ii].id1:=16;
       ListTrig.Items[ii-1]:=inttostr(ii)+'. '+TRLNames[TRL[ii].id1];
@@ -133,7 +292,7 @@ begin
     end;
 
     if Fqty>8 then begin
-      ii:=TRLQty;
+      ii:=Count;
       while(TRL[ii].id1<>15) do dec(ii);
       TRL[ii].id1:=16;
       ListTrig.Items[ii-1]:=inttostr(ii)+'. '+TRLNames[TRL[ii].id1];
@@ -141,7 +300,7 @@ begin
     end;
 
     if Rqty>8 then begin
-      ii:=TRLQty;
+      ii:=Count;
       while(TRL[ii].id1<>7) do dec(ii);
       TRL[ii].id1:=16;
       ListTrig.Items[ii-1]:=inttostr(ii)+'. '+TRLNames[TRL[ii].id1];

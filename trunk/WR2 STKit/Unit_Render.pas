@@ -7,7 +7,6 @@ procedure RenderShaders(Func:string; ShowTex:integer; CBReduceView,CBShowFog,CBC
 procedure RenderOpenGL(CBCheckers:boolean);
 procedure RenderStreets(A:single; NodeID,SplineID:integer);
 procedure RenderRoadNet();
-procedure RenderTriggers(A:single; ID:integer);
 procedure RenderBounds();
 procedure RenderTracks(ID,Turn,Na,Nz:integer);
 procedure RenderTracksWP(A:single; TrackWP,Node:integer);
@@ -432,64 +431,6 @@ end;
 glEnd;
 end;
 
-procedure RenderTriggers(A:single; ID:integer);
-var ii:integer; h,p,b:integer;
-begin
-glLineWidth(2);
-
-for ii:=1 to TRLQty do begin
-  //Render bounding box
-  glPushMatrix;
-  if A<>0 then glColor4f(0,0.5,1,A) else kSetColorCode(kObject,ii);
-  glbegin(gl_points);
-    glvertex3fv(@TRL[ii].x);
-  glEnd;
-  Matrix2Angles(TRL[ii].Matrix,9,@h,@p,@b);
-  glTranslatef(TRL[ii].x,TRL[ii].y,TRL[ii].z);
-  glRotatef(h,1,0,0); glRotatef(p,0,1,0); glRotatef(b,0,0,1);
-  glTranslatef(TRL[ii].xSize*5,TRL[ii].ySize*5,TRL[ii].zSize*5); //corner point
-  glScalef(TRL[ii].xSize*10,TRL[ii].ySize*10,TRL[ii].zSize*10);  //trigger size
-  if A<>1 then glCallList(coBox);
-  glCallList(coBoxW);
-
-  glPushMatrix;
-    glRotatef(90,0,0,1);
-    if TRL[ii].id1 in [9,11,14] then glCallList(coArrow);
-  glPopMatrix;
-
-  if A<>0 then begin
-    glRasterPos3f(0,0,0);
-    glPrint(inttostr(TRL[ii].id1));
-  end;
-  glPopMatrix;
-
-  //Render line for teleport and other thing
-  if TRL[ii].id1 in [5,11] then begin
-    if A<>0 then glColor4f(1,1,1,A) else kSetColorCode(kPoint,ii);
-    glbegin(gl_lines);
-    glvertex3fv(@TRL[ii].x);
-    glvertex3fv(@TRL[ii].x2);
-    glEnd;
-    glbegin(gl_points);
-    glvertex3fv(@TRL[ii].x2);
-    glEnd;
-  end;
-
-end;
-
-glLineWidth(LineWidth);
-
-if ID=0 then exit;
-
-if A<>0 then begin
-glColor4f(1,0,0,1); //highlight either trigger or destination with red
-glbegin(gl_points);
-if EditMode='Pointer' then
-glvertex3fv(@TRL[ID].x2) else
-glvertex3fv(@TRL[ID].x);
-glEnd;
-end;
-end;
 
 procedure RenderAnimated(A:single; Mode:string; ObjID,NodeID:integer);
 var ii,kk:integer; xyz,hpb:array[1..3]of single;
