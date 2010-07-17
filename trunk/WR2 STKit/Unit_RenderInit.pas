@@ -80,52 +80,60 @@ begin
 ShowGLSLWarning:=false;
 Result:=false;
 
-s:=glGetString(GL_VERSION); //return format is "Major.Minor.Minor - Misc"
-if s<'2.0' then begin       //we check first two  numbers as version
-  if not fileexists('krom.dev') then
-    MessageBox(Form1.Handle,
-      PChar('You need at least OpenGL 2.0 to run STKit2'+eol+
-      'Your OpenGL version is '+glGetString(GL_VERSION)+' by '+glGetString(GL_RENDERER)+eol+eol+
-      'STKit2 will now run in compatibility mode'), 'OpenGL', MB_OK);
-  UseShaders:=false;
-  exit;
-end;
+  if glGetString(GL_VERSION) < '2.0' then begin //return format is "Major.Minor.Minor - Misc", we check first two  numbers as version
+    if not fileexists('krom.dev') then
+      MessageBox(Form1.Handle,
+        PChar('You need at least OpenGL 2.0 to run STKit2'+eol+
+        'Your OpenGL version is '+glGetString(GL_VERSION)+' by '+glGetString(GL_RENDERER)+eol+
+        eol+
+        'STKit2 will now run in compatibility mode'), 'OpenGL', MB_OK);
+    UseShaders := false;
+    exit;
+  end;
 
-    vs:=glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
-    s:=fOptions.ExeDir+STKit2_Data_Path+'\Shaders\Mat_GLSL.vert';
-        if fileexists(s) then begin
-        assignfile(ff,s); reset(ff,1);
-        blockread(ff,c,16384,NumRead); closefile(ff);
-        c[NumRead+1]:=#0; src:=PChar(StrPas(@c));
-        end else src:=@MatModeDefaultV;
+    vs := glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+    s := fOptions.ExeDir+STKit2_Data_Path+'\Shaders\Mat_GLSL.vert';
+    if fileexists(s) then begin
+      assignfile(ff,s);
+      reset(ff,1);
+      blockread(ff,c,16384,NumRead);
+      closefile(ff);
+      c[NumRead+1]:=#0;
+      src:=PChar(StrPas(@c));
+    end else
+      src:=@MatModeDefaultV;
     glShaderSourceARB(vs, 1, @src, @NumRead);
 
     for i:=1 to ShadQty do begin
-    po[i]:=glCreateProgramObjectARB;
-    fs[i]:=glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-    s:=fOptions.ExeDir+STKit2_Data_Path+'\Shaders\'+MatModeF[i]+'.frag';
-        if fileexists(s) then begin
-        assignfile(ff,s); reset(ff,1);
-        blockread(ff,c,16384,NumRead); closefile(ff);
-        c[NumRead+1]:=#0; src:=PChar(StrPas(@c));
-        end else src:=@MatModeDefaultF;
-    glShaderSourceARB(fs[i], 1, @src, @NumRead);
+      po[i]:=glCreateProgramObjectARB;
+      fs[i]:=glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+      s:=fOptions.ExeDir+STKit2_Data_Path+'\Shaders\'+MatModeF[i]+'.frag';
+      if fileexists(s) then begin
+        assignfile(ff,s);
+        reset(ff,1);
+        blockread(ff,c,16384,NumRead);
+        closefile(ff);
+        c[NumRead+1]:=#0;
+        src:=PChar(StrPas(@c));
+      end else
+        src:=@MatModeDefaultF;
+      glShaderSourceARB(fs[i], 1, @src, @NumRead);
     end;
-Form1.MemoLWO.Lines.Add('Loaded GLSL files');
+  Form1.MemoLWO.Lines.Add('Loaded GLSL files');
 
-glCompileShaderARB(vs);
-CheckGLSLError(Form1.Handle, vs, GL_OBJECT_COMPILE_STATUS_ARB, ShowGLSLWarning,'VS ');
+  glCompileShaderARB(vs);
+  CheckGLSLError(Form1.Handle, vs, GL_OBJECT_COMPILE_STATUS_ARB, ShowGLSLWarning,'VS ');
   for i:=1 to ShadQty do begin
-  glCompileShaderARB(fs[i]);
-  CheckGLSLError(Form1.Handle, fs[i], GL_OBJECT_COMPILE_STATUS_ARB, ShowGLSLWarning,'FS '+inttostr(i)+' ');
-  glAttachObjectARB(po[i],vs);
-  glAttachObjectARB(po[i],fs[i]);
-  glLinkProgramARB(po[i]);
-  CheckGLSLError(Form1.Handle, po[i], GL_OBJECT_LINK_STATUS_ARB, ShowGLSLWarning,'PO '+inttostr(i)+' ');
-  glValidateProgramARB(po[i]);
-  CheckGLSLError(Form1.Handle, po[i], GL_OBJECT_VALIDATE_STATUS_ARB, ShowGLSLWarning,'PO '+inttostr(i)+' ');
-  end;
-Form1.MemoLWO.Lines.Add('Compiled GLSL files');
+    glCompileShaderARB(fs[i]);
+    CheckGLSLError(Form1.Handle, fs[i], GL_OBJECT_COMPILE_STATUS_ARB, ShowGLSLWarning,'FS '+inttostr(i)+' ');
+    glAttachObjectARB(po[i],vs);
+    glAttachObjectARB(po[i],fs[i]);
+    glLinkProgramARB(po[i]);
+    CheckGLSLError(Form1.Handle, po[i], GL_OBJECT_LINK_STATUS_ARB, ShowGLSLWarning,'PO '+inttostr(i)+' ');
+    glValidateProgramARB(po[i]);
+    CheckGLSLError(Form1.Handle, po[i], GL_OBJECT_VALIDATE_STATUS_ARB, ShowGLSLWarning,'PO '+inttostr(i)+' ');
+   end;
+  Form1.MemoLWO.Lines.Add('Compiled GLSL files');
 
     ovs:=glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
     s:=fOptions.ExeDir+STKit2_Data_Path+'\Shaders\Obj_GLSL.vert';

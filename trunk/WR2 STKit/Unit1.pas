@@ -1422,6 +1422,9 @@ end else begin
   SE_GripR.MaxValue:=120;
 end;
 
+  fTriggers := TSTriggers.Create;
+
+
 PageControl1Change(nil);        //get ActivePage name
 CBRenderModeClick(nil);             //get RenderMode state    
 Application.OnIdle:=OnIdle;
@@ -1433,7 +1436,6 @@ Form1.WindowState:=wsMaximized;
   RG2.ItemIndex := EnsureRange(RG2.ItemIndex,0,RG2.Items.Count-1);
   if RG2.ItemIndex<>-1 then SceneryReload(nil);
 
-  fTriggers := TSTriggers.Create;
 
   ResetViewClick(nil);
   ResetViewClick(nil);
@@ -3102,13 +3104,14 @@ end;
 procedure TForm1.PageControl1DrawTab(Control: TCustomTabControl; TabIndex: Integer; const Rect: TRect; Active: Boolean);
 var  NewRect:TRect; bm:Tbitmap;
 begin
-NewRect:=Rect;
-bm:=TBitmap.Create;
-ImageList1.GetBitmap(TabIndex,bm);
-Control.Canvas.Draw(NewRect.Left-1,NewRect.Top-1,bm);
-NewRect.Top:=NewRect.Top+31;
-Control.Canvas.Brush.Style:=bsClear;
-Control.Canvas.TextOut(NewRect.Left,NewRect.Top-1,PageShortcut[TabIndex+1]);
+  NewRect:=Rect;
+  bm:=TBitmap.Create;
+  ImageList1.GetBitmap(TabIndex,bm);
+  Control.Canvas.Draw(NewRect.Left-1,NewRect.Top-1,bm);
+  NewRect.Top:=NewRect.Top+31;
+  Control.Canvas.Brush.Style:=bsClear;
+  Control.Canvas.TextOut(NewRect.Left,NewRect.Top-1,PageShortcut[TabIndex+1]);
+  bm.Free;
 end;
 
 procedure TForm1.TexScaleChange(Sender: TObject);
@@ -4803,6 +4806,9 @@ begin
   wglMakeCurrent(0,0);
   wglDeleteContext(h_RC);
   wglDeleteContext(h_RC2);
+
+  fOptions.Free;
+  fTriggers.Free;
 
   if OpenALInitDone then begin
     AlDeleteBuffers(1, @ALBuffer);

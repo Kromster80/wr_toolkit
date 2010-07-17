@@ -79,7 +79,7 @@ begin
   fReduceDisplay := f.ReadBool   ('STKit2', 'ReduceDisplay',  true);
   fTraceSurface  := f.ReadBool   ('STKit2', 'Trace Surface',  true);
 
-  FreeAndNil(f);
+  f.Free;
 
   if IsChanged then //Something's changed, e.g. WorkDir
     WriteOptions(aFileName);
@@ -102,7 +102,7 @@ begin
   f.WriteBool   ('STKit2', 'ReduceDisplay',  fReduceDisplay);
   f.WriteBool   ('STKit2', 'Trace Surface',  fTraceSurface);
 
-  FreeAndNil(f);
+  f.Free;
 end;
 
 

@@ -345,6 +345,8 @@ begin
   pData[0]:=@MipData[0];
   Texture:=CreateTexture(BMPi.Width, BMPi.Height, 0, 32, 1, pData);
 
+  JPGi.Free;
+  BMPi.Free;
   setlength(MipData,0);
   Result :=TRUE;
 end;

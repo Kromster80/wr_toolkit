@@ -125,11 +125,14 @@ PixelDepth:=32;
   end;
   nPixelFormat:=ChoosePixelFormat(h_DC, @pfd);
   if nPixelFormat=0 then begin
-  MessageBox(0, 'Unable to find a suitable pixel format', 'Error', MB_OK or MB_ICONERROR);
-  Result:=false; exit; end;
+    MessageBox(0, 'Unable to find a suitable pixel format', 'Error', MB_OK or MB_ICONERROR);
+    Result:=false;
+    exit;
+  end;
   if not SetPixelFormat(h_DC, nPixelFormat, @pfd) then begin
-  MessageBox(0, 'Unable to set the pixel format', 'Error', MB_OK or MB_ICONERROR);
-  Result:=false; exit;
+    MessageBox(0, 'Unable to set the pixel format', 'Error', MB_OK or MB_ICONERROR);
+    Result:=false;
+    exit;
   end;
 Result:=true;
 end;
@@ -138,7 +141,7 @@ procedure CheckGLSLError(FormHandle:hWND; Handle: GLhandleARB; Param: GLenum; Sh
 var l,glsl_ok:GLint; s:PChar; i:integer; ShowMessage:boolean;
 begin
   glGetObjectParameterivARB(Handle, Param, @glsl_ok);
-  s := StrAlloc(1000);
+  s := StrAlloc(1000); //Allocate space
   glGetInfoLogARB(Handle, StrBufSize(s), l, PGLcharARB(s));
 //Intent to hide all Warning messages
   ShowMessage:=ShowWarnings;
@@ -150,6 +153,7 @@ begin
     s := StrPCopy(s,Text + StrPas(s));
     MessageBox(HWND(nil), s,'GLSL Log', MB_OK);
   end;
+  StrDispose(s); //Free-up space
 end;
 
 procedure BuildFont(h_DC:HDC;FontSize:integer);
