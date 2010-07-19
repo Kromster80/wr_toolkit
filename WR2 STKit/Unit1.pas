@@ -870,7 +870,7 @@ type
     procedure ImportVRLFolderClick(Sender: TObject);
     procedure LoadSCGTFolder(Sender: string);
     procedure LoadSCGTFile(Sender: string);
-    procedure GenTrackFromMT(Sender: TObject);
+    procedure CreateTrackFromMT(Sender: TObject);
     procedure ListObjects2DblClick(Sender: TObject);
     procedure ListLightsDblClick(Sender: TObject);
     procedure ListMakeTrackDblClick(Sender: TObject);
@@ -1165,7 +1165,7 @@ var
       RoadWidth:word;
       ColumnWidth:word; //0 means no column
       Tunnel:boolean;
-      Sub:array of vector3f;
+      Sub:array of vector3f; //runtime temp
     end;
   end;
 
@@ -7150,77 +7150,85 @@ end;
 procedure TForm1.AddMTNodeClick(Sender: TObject);
 var i,MTNode:integer;
 begin
-MTNode:=ListMakeTrack.ItemIndex+1;
-if MTNode=0 then exit;
-MTNode:=EnsureRange(MTNode,1,MakeTrack[TrackID].NodeQty)+1;
-MakeTrackRefresh:=true;
-inc(MakeTrack[TrackID].NodeQty);
-setlength(MakeTrack[TrackID].Node,MakeTrack[TrackID].NodeQty+1);
+  MTNode := ListMakeTrack.ItemIndex+1;
+  if MTNode = 0 then exit;
+  MTNode := EnsureRange(MTNode,1,MakeTrack[TrackID].NodeQty)+1;
+  MakeTrackRefresh := true;
+  inc(MakeTrack[TrackID].NodeQty);
+  setlength(MakeTrack[TrackID].Node,MakeTrack[TrackID].NodeQty+1);
 
-for i:=MakeTrack[TrackID].NodeQty downto MTNode do
-MakeTrack[TrackID].Node[i]:=MakeTrack[TrackID].Node[i-1];
+  for i:=MakeTrack[TrackID].NodeQty downto MTNode do
+  MakeTrack[TrackID].Node[i] := MakeTrack[TrackID].Node[i-1];
 
-//If Node is added inbetween existing nodes - place it inbetween their coords
-//If Node is added after the last Node - place it slightly ahead of last Node
-if MTNode<>MakeTrack[TrackID].NodeQty then begin
-  MakeTrack[TrackID].Node[MTNode].X:=mix(MakeTrack[TrackID].Node[MTNode].X,MakeTrack[TrackID].Node[MTNode+1].X,0.5);
-  MakeTrack[TrackID].Node[MTNode].Y:=mix(MakeTrack[TrackID].Node[MTNode].Y,MakeTrack[TrackID].Node[MTNode+1].Y,0.5);
-  MakeTrack[TrackID].Node[MTNode].Z:=mix(MakeTrack[TrackID].Node[MTNode].Z,MakeTrack[TrackID].Node[MTNode+1].Z,0.5);
-end else begin
-  MakeTrack[TrackID].Node[MTNode].X:=MakeTrack[TrackID].Node[MTNode].X+300;
-  MakeTrack[TrackID].Node[MTNode].Y:=MakeTrack[TrackID].Node[MTNode].Y;
-  MakeTrack[TrackID].Node[MTNode].Z:=MakeTrack[TrackID].Node[MTNode].Z+300;
-end;
+  //If Node is added inbetween existing nodes - place it inbetween their coords
+  //If Node is added after the last Node - place it slightly ahead of last Node
+  with MakeTrack[TrackID] do
+  if MTNode<>MakeTrack[TrackID].NodeQty then begin
+    Node[MTNode].X:=mix(Node[MTNode].X,Node[MTNode+1].X,0.5);
+    Node[MTNode].Z:=mix(Node[MTNode].Z,Node[MTNode+1].Z,0.5);
+    Node[MTNode].Y:=TraceHeightY(Node[MTNode].X,yPos,Node[MTNode].Z,pd_Near);
+  end else begin
+    Node[MTNode].X:=mix(Node[MTNode-2].X,Node[MTNode].X,-0.5);
+    Node[MTNode].Z:=mix(Node[MTNode-2].Z,Node[MTNode].Z,-0.5);
+    Node[MTNode].Y:=TraceHeightY(Node[MTNode].X,yPos,Node[MTNode].Z,pd_Near);
+  end;
 
-MakeTrackRefresh:=false;
+  MakeTrackRefresh:=false;
 
   ListMakeTrack.Clear;
   for i:=1 to MakeTrack[TrackID].NodeQty do
-  ListMakeTrack.Items.Add(int2fix(i,2)+'. ');
+    ListMakeTrack.Items.Add(int2fix(i,2)+'. ');
 
-ListMakeTrack.ItemIndex:=MTNode-1;
-ListMakeTrackClick(nil);
-Changes.WRK:=true;
+  ListMakeTrack.ItemIndex:=MTNode-1;
+  ListMakeTrackClick(nil);
+  RebuildMTSplines;
+  Changes.WRK:=true;
 end;
+
 
 procedure TForm1.RemMTNodeClick(Sender: TObject);
 var i,MTNode:integer;
 begin
-MTNode:=ListMakeTrack.ItemIndex+1;
-if MTNode=0 then exit;
-if MakeTrack[TrackID].NodeQty<=3 then exit;
+  MTNode:=ListMakeTrack.ItemIndex+1;
+  if MTNode=0 then exit;
+  if MakeTrack[TrackID].NodeQty<=3 then begin
+    if MessageBox(HWND(nil), PChar('Track should have a least 3 nodes'+eol+eol+'Delete all nodes?'), 'Warning', MB_YESNO) = IDYES then begin
+      MakeTrack[TrackID].NodeQty := 0;
+      ListMakeTrack.Clear;
+    end;
+    exit;
+  end;
 
-MakeTrackRefresh:=true;
-for i:=MTNode to MakeTrack[TrackID].NodeQty-1 do
-MakeTrack[TrackID].Node[i]:=MakeTrack[TrackID].Node[i+1];
-dec(MakeTrack[TrackID].NodeQty);
-MakeTrackRefresh:=false;
+  MakeTrackRefresh:=true;
+  for i:=MTNode to MakeTrack[TrackID].NodeQty-1 do
+  MakeTrack[TrackID].Node[i]:=MakeTrack[TrackID].Node[i+1];
+  dec(MakeTrack[TrackID].NodeQty);
+  MakeTrackRefresh:=false;
 
-//CBTrackChange(LBTrack);
-  ListMakeTrack.Clear;
-  for i:=1 to MakeTrack[TrackID].NodeQty do
-  ListMakeTrack.Items.Add(int2fix(i,2)+'. ');
-ListMakeTrack.ItemIndex:=MTNode-1;
-ListMakeTrackClick(nil);
-Changes.WRK:=true;
+  //CBTrackChange(LBTrack);
+    ListMakeTrack.Clear;
+    for i:=1 to MakeTrack[TrackID].NodeQty do
+    ListMakeTrack.Items.Add(int2fix(i,2)+'. ');
+  ListMakeTrack.ItemIndex:=MTNode-1;
+  ListMakeTrackClick(nil);
+  Changes.WRK:=true;
 end;
 
 procedure TForm1.InitMTClick(Sender: TObject);
 var i:integer;
-begin
-
-  MakeTrack[TrackID].NodeQty:=3;
+begin   
+  MakeTrack[TrackID].NodeQty := 3;
   setlength(MakeTrack[TrackID].Node,MakeTrack[TrackID].NodeQty+1);
   with MakeTrack[TrackID] do begin
-    Node[1].X:=xPos-200;
-    Node[1].Z:=zPos+100;
-    Node[2].X:=xPos+200;
-    Node[2].Z:=zPos+100;
-    Node[3].X:=xPos;
-    Node[3].Z:=zPos-200;
+    Node[1].X := xPos-200;
+    Node[1].Z := zPos+100;
+    Node[2].X := xPos+200;
+    Node[2].Z := zPos+100;
+    Node[3].X := xPos;
+    Node[3].Z := zPos-200;
     for i:=1 to 3 do begin
       Node[i].Y:=TraceHeightY(Node[i].X,yPos,Node[i].Z,pd_Near);
-      Node[i].RoadWidth:=10;
+      Node[i].RoadWidth := round(MTW.Value*10);
     end;
   end;
 
@@ -7229,7 +7237,8 @@ begin
   ListMakeTrack.Clear;
   for i:=1 to MakeTrack[TrackID].NodeQty do
     ListMakeTrack.Items.Add(int2fix(i,2)+'. ');
-Changes.WRK:=true;
+
+  Changes.WRK := true;
 end;
 
 procedure TForm1.ReverseMTSplines();
@@ -7316,12 +7325,15 @@ begin
 end;
 
 
-procedure TForm1.GenTrackFromMT(Sender: TObject);
+procedure TForm1.CreateTrackFromMT(Sender: TObject);
 var ii,kk,ci:integer; dx,dy,dz,len,ang:single; NodeCount:integer;
 begin
-if MakeTrack[TrackID].NodeQty<2 then exit;
+  if MakeTrack[TrackID].NodeQty<2 then begin
+    MessageBox(HWND(nil), 'Can''t make a track from less that 2 nodes', 'Error', MB_OK);
+    exit;
+  end;
 
-RebuildMTSplines();
+  RebuildMTSplines();
 
 if TRK_Loop.Checked then
   NodeCount:=MakeTrack[TrackID].NodeQty
