@@ -1453,46 +1453,18 @@ glEnd;
 glEndList();
 
 //Grass
-coGrass[1]:=glGenLists(1);
-glNewList (coGrass[1], GL_COMPILE);
-glbegin (gl_polygon);
-glnormal3f(0,0,1);
-glTexCoord2f(0,1); glvertex2f(-5, 0);
-glTexCoord2f(0.25,1); glvertex2f( 5, 0);
-glTexCoord2f(0.25,0); glvertex2f( 5,10);
-glTexCoord2f(0,0); glvertex2f(-5,10);
-glEnd;
-glEndList();
-coGrass[2]:=glGenLists(1);
-glNewList (coGrass[2], GL_COMPILE);
-glbegin (gl_polygon);
-glnormal3f(0,0,1);
-glTexCoord2f(0.25,1); glvertex2f(-5, 0);
-glTexCoord2f(0.5,1); glvertex2f( 5, 0);
-glTexCoord2f(0.5,0); glvertex2f( 5,10);
-glTexCoord2f(0.25,0); glvertex2f(-5,10);
-glEnd;
-glEndList();
-coGrass[3]:=glGenLists(1);
-glNewList (coGrass[3], GL_COMPILE);
-glbegin (gl_polygon);
-glnormal3f(0,0,1);
-glTexCoord2f(0.5,1); glvertex2f(-5, 0);
-glTexCoord2f(0.75,1); glvertex2f( 5, 0);
-glTexCoord2f(0.75,0); glvertex2f( 5,10);
-glTexCoord2f(0.5,0); glvertex2f(-5,10);
-glEnd;
-glEndList();
-coGrass[4]:=glGenLists(1);
-glNewList (coGrass[4], GL_COMPILE);
-glbegin (gl_polygon);
-glnormal3f(0,0,1);
-glTexCoord2f(0.75,1); glvertex2f(-5, 0);
-glTexCoord2f(1,1); glvertex2f( 5, 0);
-glTexCoord2f(1,0); glvertex2f( 5,10);
-glTexCoord2f(0.75,0); glvertex2f(-5,10);
-glEnd;
-glEndList();
+for ii:=1 to 4 do begin
+  coGrass[ii]:=glGenLists(1);
+  glNewList(coGrass[ii], GL_COMPILE);
+  glBegin(GL_QUADS);
+  glNormal3f(0,0,1);
+  glTexCoord2f((ii-1)/4,1); glvertex2f(-5, 0);
+  glTexCoord2f(ii/4,    1); glvertex2f( 5, 0);
+  glTexCoord2f(ii/4,    0); glvertex2f( 5,10);
+  glTexCoord2f((ii-1)/4,0); glvertex2f(-5,10);
+  glEnd;
+  glEndList();
+end;
 
 //Square
 coSquare:=glGenLists(1);
