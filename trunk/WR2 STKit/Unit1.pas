@@ -62,9 +62,6 @@ type
     Label29: TLabel;
     TabSheet9: TTabSheet;
     LoadLWOScen: TButton;
-    Button6: TButton;
-    Button8: TButton;
-    Button9: TButton;
     MemoLWO: TMemo;
     Label31: TLabel;
     ObjHit: TEdit;
@@ -97,12 +94,6 @@ type
     TabSheet14: TTabSheet;
     Label41: TLabel;
     Label42: TLabel;
-    Label49: TLabel;
-    Label50: TLabel;
-    Label51: TLabel;
-    Label43: TLabel;
-    Label44: TLabel;
-    Label45: TLabel;
     ListSNINodes: TListBox;
     Label46: TLabel;
     Label52: TLabel;
@@ -309,7 +300,6 @@ type
     LE_RGB: TButton;
     LE_Shadow: TButton;
     Label130: TLabel;
-    Button7: TButton;
     OpenLWO_TRK: TButton;
     TabSheet20: TTabSheet;
     ImportMatList: TButton;
@@ -429,9 +419,7 @@ type
     MakeSMP: TButton;
     EditSplines: TSpeedButton;
     CBShowObjects: TCheckBox;
-    Label30: TLabel;
     Panel2: TPanel;
-    LoadInstancesFromLWO: TButton;
     ListObjectsInstances: TComboBox;
     CBMatGrass: TCheckBox;
     ScreenRender: TMenuItem;
@@ -615,7 +603,7 @@ type
     Image28: TImage;
     Image29: TImage;
     InitMT: TButton;
-    Button2: TButton;
+    OptimizeVertices: TButton;
     MTW: TFloatSpinEdit;
     Label163: TLabel;
     CB_AutoCross: TCheckBox;
@@ -626,15 +614,34 @@ type
     PasteLightXYZ: TBitBtn;
     Shape12: TShape;
     Shape13: TShape;
-    Button3: TButton;
+    ImportVRLFolder: TButton;
     Button5: TButton;
     Label164: TLabel;
     Label165: TLabel;
     Label166: TLabel;
     Panel11: TPanel;
     Show2ndFrame: TMenuItem;
-    procedure CBReduceDisplayChange(Sender: TObject);
-    procedure CBTraceChange(Sender: TObject);
+    Label43: TLabel;
+    Label44: TLabel;
+    Label45: TLabel;
+    Label50: TLabel;
+    Label51: TLabel;
+    Label49: TLabel;
+    Label167: TLabel;
+    Label168: TLabel;
+    Label169: TLabel;
+    Label170: TLabel;
+    Label171: TLabel;
+    Label172: TLabel;
+    Label173: TLabel;
+    Label174: TLabel;
+    Label175: TLabel;
+    Label176: TLabel;
+    Label177: TLabel;
+    Label178: TLabel;
+    LoadobjectinstancesfromLWO1: TMenuItem;
+    procedure CBReduceDisplayClick(Sender: TObject);
+    procedure CBTraceClick(Sender: TObject);
 //    procedure RenderInit();
     procedure RenderResize(Sender: TObject);
     procedure RenderResize2(Sender: TObject);
@@ -650,7 +657,7 @@ type
     procedure ListLightsClick(Sender: TObject);
     procedure AddTurnClick(Sender: TObject);
     procedure ListTracksClick(Sender: TObject);
-    procedure ListTurnsChange(Sender: TObject);
+    procedure ListTurnsClick(Sender: TObject);
     procedure ComputeTurnClick(Sender: TObject);
     procedure E_Node1Change(Sender: TObject);
     procedure RemTurnClick(Sender: TObject);
@@ -860,7 +867,7 @@ type
     procedure ScaleInstancesClick(Sender: TObject);
     procedure CopyLightXYZClick(Sender: TObject);
     procedure PasteLightXYZClick(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
+    procedure ImportVRLFolderClick(Sender: TObject);
     procedure LoadSCGTFolder(Sender: string);
     procedure LoadSCGTFile(Sender: string);
     procedure GenTrackFromMT(Sender: TObject);
@@ -1464,13 +1471,13 @@ begin
 end;
 
 
-procedure TForm1.CBReduceDisplayChange(Sender: TObject);
+procedure TForm1.CBReduceDisplayClick(Sender: TObject);
 begin
   fOptions.ReduceDisplay := CBReduceDisplay.Checked;
 end;
 
 
-procedure TForm1.CBTraceChange(Sender: TObject);
+procedure TForm1.CBTraceClick(Sender: TObject);
 begin
   fOptions.TraceSurface := CBTrace.Checked;
 end;
@@ -2275,21 +2282,21 @@ if TrackID=0 then exit;
 for i:=1 to TRKQty[TrackID].Turns do
 ListTurns.Items.Add(inttostr(i)+'. '+inttostr(TRK[TrackID].Turns[i].Node1)+'>>'+inttostr(TRK[TrackID].Turns[i].Node2));
 ListTurns.ItemIndex:=0;
-ListTurnsChange(nil);
+ListTurnsClick(nil);
 end;
 
-procedure TForm1.ListTurnsChange(Sender: TObject);
+procedure TForm1.ListTurnsClick(Sender: TObject);
 begin
-if TrackID=0 then exit;
-if ListTurns.ItemIndex<0 then exit;
-TurnsRefresh:=true;
-TurnID:=ListTurns.ItemIndex+1;
-E_Node1.Value:=TRK[TrackID].Turns[TurnID].Node1;
-E_Node2.Value:=TRK[TrackID].Turns[TurnID].Node2;
-E_Arrows.Value:=TRK[TrackID].Turns[TurnID].ArrowNum;
-E_BitSide.ItemIndex:=(TRK[TrackID].Turns[TurnID].BitFlag mod 16)-1;
-E_BitType.ItemIndex:=(TRK[TrackID].Turns[TurnID].BitFlag div 16)-1;
-TurnsRefresh:=false;
+  if TrackID=0 then exit;
+  TurnID := ListTurns.ItemIndex+1;
+  if TurnID = 0 then exit;
+  TurnsRefresh := true;
+  E_Node1.Value:=TRK[TrackID].Turns[TurnID].Node1;
+  E_Node2.Value:=TRK[TrackID].Turns[TurnID].Node2;
+  E_Arrows.Value:=TRK[TrackID].Turns[TurnID].ArrowNum;
+  E_BitSide.ItemIndex:=(TRK[TrackID].Turns[TurnID].BitFlag mod 16)-1;
+  E_BitType.ItemIndex:=(TRK[TrackID].Turns[TurnID].BitFlag div 16)-1;
+  TurnsRefresh:=false;
 end;
 
 procedure TForm1.ListTurnsDblClick(Sender: TObject);
@@ -2322,7 +2329,7 @@ TRK[TrackID].Turns[ID].ArrowNum:=15;
 TRK[TrackID].Turns[ID].BitFlag:=1+32; //Left Turn
 ListTracksClick(nil);                   //redraw Turns list
 ListTurns.ItemIndex:=ListTurns.Items.Count-1;
-ListTurnsChange(nil);
+ListTurnsClick(nil);
 E_Node1Change(nil);
 ComputeTurnClick(nil);
 Changes.TRK[TrackID]:=true;
@@ -2336,7 +2343,7 @@ TRK[TrackID].Turns[TurnID].Node1:=0;
 TRK[TrackID].Turns[TurnID].Node2:=0;
 TRK[TrackID].Turns[TurnID].ArrowNum:=0;
 ListTracksClick(nil);                   //redraw Turns list
-ListTurnsChange(nil);
+ListTurnsClick(nil);
 ComputeTurnClick(nil);
 Changes.TRK[TrackID]:=true;
 end;
@@ -2505,7 +2512,6 @@ ObjInstanceRefresh:=true;
 ss:=ListObjects2.Items[ListObjects2.ItemIndex];
 decs(ss,-length(ss)+4); //Keep last 4 digits
 ID:=strtoint(ss);
-Label30.Caption:=Obj[ID].Name;
 ListObjectsInstances.ItemIndex:=Obj[ID].ID;
 ObjX.Value:=Obj[ID].PosX;
 ObjY.Value:=Obj[ID].PosY;
@@ -6626,25 +6632,25 @@ end;
 procedure TForm1.AutoObjectsClick(Sender: TObject);
 var SearchRec:TSearchRec; s:string;
 begin
-ChDir(fOptions.WorkDir+'Scenarios\'+Scenery+'\'+SceneryVersion+'\Objects\');
-FindFirst('*.mox', faAnyFile, SearchRec);
-    repeat
+  ChDir(fOptions.WorkDir+'Scenarios\'+Scenery+'\'+SceneryVersion+'\Objects\');
+  FindFirst('*.mox', faAnyFile, SearchRec);
+  repeat
     if (SearchRec.Name<>'')and(SearchRec.Name<>'.')and(SearchRec.Name<>'..') then begin
-    s:=SearchRec.Name; decs(s,4); //.mox
-    AddNewObject(s,false);
+      s:=SearchRec.Name; decs(s,4); //.mox
+      AddNewObject(s,false);
     end;
-    until (FindNext(SearchRec)<>0);
-FindClose(SearchRec);
-FindFirst('*.tree', faAnyFile, SearchRec);
-    repeat
+  until (FindNext(SearchRec)<>0);
+  FindClose(SearchRec);
+  FindFirst('*.tree', faAnyFile, SearchRec);
+  repeat
     if (SearchRec.Name<>'')and(SearchRec.Name<>'.')and(SearchRec.Name<>'..') then begin
-    s:='T\'+SearchRec.Name; decs(s,5); //.tree
-    AddNewObject(s,false);
+      s:='T\'+SearchRec.Name; decs(s,5); //.tree
+      AddNewObject(s,false);
     end;
-    until (FindNext(SearchRec)<>0);
-FindClose(SearchRec);
-list_obj:=0;
-Changes.QAD:=true;
+  until (FindNext(SearchRec)<>0);
+  FindClose(SearchRec);
+  list_obj:=0;
+  Changes.QAD:=true;
 end;
 
 procedure TForm1.Button20Click(Sender: TObject);
@@ -7394,7 +7400,7 @@ end;
 end;
 
 
-procedure TForm1.Button3Click(Sender: TObject);
+procedure TForm1.ImportVRLFolderClick(Sender: TObject);
 var s:string;
 begin
   s:=fOptions.ExeDir;

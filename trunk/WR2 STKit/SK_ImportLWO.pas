@@ -2,7 +2,6 @@ unit SK_ImportLWO;
 interface
 uses Unit1,sysutils,Windows,KromUtils,Math,dglOpenGL,Defaults;
 
-
   procedure LoadLWO(Input:string);
   procedure PrepareLWOData();
   procedure CompileVTX_IDX();

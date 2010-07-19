@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 388
-  Top = 90
+  Left = 292
+  Top = 42
   Width = 956
   Height = 730
   Color = clBtnFace
@@ -118,7 +118,7 @@ object Form1: TForm1
     Top = 40
     Width = 296
     Height = 623
-    ActivePage = TabSheet3
+    ActivePage = TabSheet9
     Anchors = [akLeft, akTop, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -129,7 +129,6 @@ object Form1: TForm1
     ParentFont = False
     Style = tsButtons
     TabHeight = 47
-    TabIndex = 14
     TabOrder = 1
     TabStop = False
     TabWidth = 34
@@ -161,7 +160,7 @@ object Form1: TForm1
         Font.Style = []
         ParentFont = False
         ScrollBars = ssVertical
-        TabOrder = 4
+        TabOrder = 1
       end
       object CreateNewScen: TButton
         Left = 2
@@ -169,7 +168,7 @@ object Form1: TForm1
         Width = 137
         Height = 25
         Caption = 'Create new scenery'
-        TabOrder = 6
+        TabOrder = 2
         OnClick = CreateNewScenClick
       end
       object LoadLWOScen: TButton
@@ -181,46 +180,6 @@ object Form1: TForm1
         TabOrder = 0
         OnClick = BrowseLWO
       end
-      object Button6: TButton
-        Left = 146
-        Top = 124
-        Width = 137
-        Height = 17
-        Caption = 'Prepare'
-        Enabled = False
-        TabOrder = 1
-        Visible = False
-      end
-      object Button9: TButton
-        Left = 146
-        Top = 140
-        Width = 137
-        Height = 17
-        Caption = 'Compile VTX\IDX'
-        Enabled = False
-        TabOrder = 3
-        Visible = False
-      end
-      object Button8: TButton
-        Left = 146
-        Top = 156
-        Width = 137
-        Height = 17
-        Caption = 'Compile QAD'
-        Enabled = False
-        TabOrder = 2
-        Visible = False
-      end
-      object Button7: TButton
-        Left = 146
-        Top = 172
-        Width = 137
-        Height = 17
-        Caption = 'Prepare Other Data'
-        Enabled = False
-        TabOrder = 5
-        Visible = False
-      end
       object ReloadLWO: TBitBtn
         Left = 2
         Top = 56
@@ -229,7 +188,7 @@ object Form1: TForm1
         ModalResult = 4
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 7
+        TabOrder = 3
         OnClick = ReloadLWOClick
         Glyph.Data = {
           AA030000424DAA03000000000000360000002800000011000000110000000100
@@ -273,7 +232,7 @@ object Form1: TForm1
         Caption = 'Load TexturesList.dat'
         Checked = True
         State = cbChecked
-        TabOrder = 8
+        TabOrder = 4
       end
       object CBLoadMatList: TCheckBox
         Left = 4
@@ -283,25 +242,25 @@ object Form1: TForm1
         Caption = 'Load MaterialsList.dat'
         Checked = True
         State = cbChecked
-        TabOrder = 9
+        TabOrder = 5
       end
-      object Button2: TButton
+      object OptimizeVertices: TButton
         Left = 146
         Top = 100
         Width = 137
         Height = 17
         Caption = 'Optimize vertices'
-        TabOrder = 10
+        TabOrder = 6
         OnClick = OptimizeVerticesClick
       end
-      object Button3: TButton
+      object ImportVRLFolder: TButton
         Left = 144
         Top = 32
         Width = 137
         Height = 25
         Caption = 'Import VRL folder ...'
-        TabOrder = 11
-        OnClick = Button3Click
+        TabOrder = 7
+        OnClick = ImportVRLFolderClick
       end
     end
     object TabSheet16: TTabSheet
@@ -467,7 +426,7 @@ object Form1: TForm1
       end
       object ExportGrounds: TButton
         Left = 140
-        Top = 397
+        Top = 269
         Width = 133
         Height = 25
         Caption = 'Export grounds list ...'
@@ -476,7 +435,7 @@ object Form1: TForm1
       end
       object ImportGrounds: TButton
         Left = 2
-        Top = 397
+        Top = 269
         Width = 133
         Height = 25
         Caption = 'Import grounds list ...'
@@ -539,7 +498,7 @@ object Form1: TForm1
         Left = 2
         Top = 16
         Width = 133
-        Height = 441
+        Height = 465
         Style = lbOwnerDrawFixed
         Anchors = [akLeft, akTop, akBottom]
         ExtendedSelect = False
@@ -710,67 +669,150 @@ object Form1: TForm1
         Height = 13
         Caption = 'Texture 3'
       end
-      object Label49: TLabel
-        Left = 222
-        Top = 473
-        Width = 27
-        Height = 13
-        Caption = 'Move'
-      end
-      object Label50: TLabel
-        Left = 222
-        Top = 425
-        Width = 32
-        Height = 13
-        Caption = 'Rotate'
-      end
-      object Label51: TLabel
-        Left = 222
-        Top = 449
-        Width = 27
-        Height = 13
-        Caption = 'Scale'
-      end
-      object Label43: TLabel
-        Left = 10
-        Top = 406
-        Width = 28
-        Height = 13
-        Caption = 'X axis'
-      end
-      object Label44: TLabel
-        Left = 82
-        Top = 406
-        Width = 28
-        Height = 13
-        Caption = 'Y axis'
-      end
-      object Label45: TLabel
-        Left = 154
-        Top = 406
-        Width = 28
-        Height = 13
-        Caption = 'Z axis'
-      end
       object MatTexLay: TPageControl
         Left = 2
-        Top = 376
+        Top = 372
         Width = 285
-        Height = 26
+        Height = 115
         ActivePage = TabSheet12
-        TabIndex = 0
         TabOrder = 6
         OnChange = MatTexLayChange
         object TabSheet12: TTabSheet
           Caption = '   Texture 1   '
+          object Label43: TLabel
+            Left = 3
+            Top = 0
+            Width = 28
+            Height = 13
+            Caption = 'X axis'
+          end
+          object Label44: TLabel
+            Left = 75
+            Top = 0
+            Width = 28
+            Height = 13
+            Caption = 'Y axis'
+          end
+          object Label45: TLabel
+            Left = 147
+            Top = 0
+            Width = 28
+            Height = 13
+            Caption = 'Z axis'
+          end
+          object Label50: TLabel
+            Left = 215
+            Top = 19
+            Width = 32
+            Height = 13
+            Caption = 'Rotate'
+          end
+          object Label51: TLabel
+            Left = 215
+            Top = 43
+            Width = 27
+            Height = 13
+            Caption = 'Scale'
+          end
+          object Label49: TLabel
+            Left = 215
+            Top = 67
+            Width = 27
+            Height = 13
+            Caption = 'Move'
+          end
         end
         object TabSheet13: TTabSheet
           Caption = '   Texture 2   '
           ImageIndex = 1
+          object Label167: TLabel
+            Left = 3
+            Top = 0
+            Width = 28
+            Height = 13
+            Caption = 'X axis'
+          end
+          object Label168: TLabel
+            Left = 75
+            Top = 0
+            Width = 28
+            Height = 13
+            Caption = 'Y axis'
+          end
+          object Label169: TLabel
+            Left = 147
+            Top = 0
+            Width = 28
+            Height = 13
+            Caption = 'Z axis'
+          end
+          object Label170: TLabel
+            Left = 215
+            Top = 19
+            Width = 32
+            Height = 13
+            Caption = 'Rotate'
+          end
+          object Label171: TLabel
+            Left = 215
+            Top = 43
+            Width = 27
+            Height = 13
+            Caption = 'Scale'
+          end
+          object Label172: TLabel
+            Left = 215
+            Top = 67
+            Width = 27
+            Height = 13
+            Caption = 'Move'
+          end
         end
         object TabSheet14: TTabSheet
           Caption = '   Texture 3   '
           ImageIndex = 2
+          object Label173: TLabel
+            Left = 3
+            Top = 0
+            Width = 28
+            Height = 13
+            Caption = 'X axis'
+          end
+          object Label174: TLabel
+            Left = 75
+            Top = 0
+            Width = 28
+            Height = 13
+            Caption = 'Y axis'
+          end
+          object Label175: TLabel
+            Left = 147
+            Top = 0
+            Width = 28
+            Height = 13
+            Caption = 'Z axis'
+          end
+          object Label176: TLabel
+            Left = 215
+            Top = 19
+            Width = 32
+            Height = 13
+            Caption = 'Rotate'
+          end
+          object Label177: TLabel
+            Left = 215
+            Top = 43
+            Width = 27
+            Height = 13
+            Caption = 'Scale'
+          end
+          object Label178: TLabel
+            Left = 215
+            Top = 67
+            Width = 27
+            Height = 13
+            Caption = 'Move'
+          end
         end
       end
       object ListMaterials: TListBox
@@ -818,7 +860,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 2
         OnChange = CBTexChange
       end
@@ -829,7 +871,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 3
         OnChange = CBTexChange
       end
@@ -840,7 +882,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 4
         OnChange = CBTexChange
       end
@@ -892,41 +934,41 @@ object Form1: TForm1
       end
       object TexScaleX: TFloatSpinEdit
         Left = 6
-        Top = 446
+        Top = 436
         Width = 67
         Height = 22
         Accuracy = 1
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 8
         OnChange = TexScaleChange
       end
       object TexScaleY: TFloatSpinEdit
         Left = 150
-        Top = 446
+        Top = 436
         Width = 67
         Height = 22
         Accuracy = 1
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 9
         OnChange = TexScaleChange
       end
       object TexMoveX: TFloatSpinEdit
         Left = 6
-        Top = 470
+        Top = 460
         Width = 67
         Height = 22
         Accuracy = 2
-        Increment = 0.1
+        Increment = 0.100000000000000000
         TabOrder = 10
         OnChange = TexScaleChange
       end
       object TexMoveY: TFloatSpinEdit
         Left = 150
-        Top = 470
+        Top = 460
         Width = 67
         Height = 22
         Accuracy = 2
-        Increment = 0.1
+        Increment = 0.100000000000000000
         TabOrder = 11
         OnChange = TexScaleChange
       end
@@ -970,31 +1012,31 @@ object Form1: TForm1
       end
       object TexRotX: TFloatSpinEdit
         Left = 6
-        Top = 422
+        Top = 412
         Width = 67
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 16
         OnChange = TexScaleChange
       end
       object TexRotY: TFloatSpinEdit
         Left = 78
-        Top = 422
+        Top = 412
         Width = 67
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 17
         OnChange = TexScaleChange
       end
       object TexRotZ: TFloatSpinEdit
         Left = 150
-        Top = 422
+        Top = 412
         Width = 67
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 18
         OnChange = TexScaleChange
       end
@@ -1079,42 +1121,42 @@ object Form1: TForm1
       end
       object Label100: TLabel
         Left = 218
-        Top = 415
+        Top = 407
         Width = 47
         Height = 13
         Caption = 'Position Z'
       end
       object Label101: TLabel
         Left = 218
-        Top = 391
+        Top = 383
         Width = 47
         Height = 13
         Caption = 'Position Y'
       end
       object Label102: TLabel
         Left = 218
-        Top = 367
+        Top = 359
         Width = 47
         Height = 13
         Caption = 'Position X'
       end
       object Label103: TLabel
         Left = 218
-        Top = 439
+        Top = 431
         Width = 27
         Height = 13
         Caption = 'Angle'
       end
       object Label104: TLabel
         Left = 218
-        Top = 463
+        Top = 455
         Width = 20
         Height = 13
         Caption = 'Size'
       end
       object Image9: TImage
         Left = 268
-        Top = 365
+        Top = 357
         Width = 17
         Height = 15
         AutoSize = True
@@ -1150,7 +1192,7 @@ object Form1: TForm1
       end
       object Image10: TImage
         Left = 268
-        Top = 389
+        Top = 381
         Width = 17
         Height = 15
         AutoSize = True
@@ -1186,7 +1228,7 @@ object Form1: TForm1
       end
       object Image11: TImage
         Left = 268
-        Top = 413
+        Top = 405
         Width = 17
         Height = 15
         AutoSize = True
@@ -1220,13 +1262,6 @@ object Form1: TForm1
           FFFFFFFFFFFFFFFFFFFFFFFFFF00}
         Transparent = True
       end
-      object Label30: TLabel
-        Left = 144
-        Top = 324
-        Width = 60
-        Height = 13
-        Caption = 'Object name'
-      end
       object Label47: TLabel
         Left = 140
         Top = 500
@@ -1252,7 +1287,7 @@ object Form1: TForm1
       end
       object Shape11: TShape
         Left = 137
-        Top = 362
+        Top = 354
         Width = 80
         Height = 124
         Brush.Color = clSkyBlue
@@ -1272,7 +1307,7 @@ object Form1: TForm1
         Left = 2
         Top = 304
         Width = 133
-        Height = 153
+        Height = 177
         Anchors = [akLeft, akTop, akBottom]
         ItemHeight = 13
         TabOrder = 1
@@ -1309,47 +1344,47 @@ object Form1: TForm1
       end
       object ObjX: TFloatSpinEdit
         Left = 140
-        Top = 364
+        Top = 356
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 6
         OnChange = ObjChangeInstance
       end
       object ObjY: TFloatSpinEdit
         Left = 140
-        Top = 388
+        Top = 380
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 7
         OnChange = ObjChangeInstance
       end
       object ObjZ: TFloatSpinEdit
         Left = 140
-        Top = 412
+        Top = 404
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 8
         OnChange = ObjChangeInstance
       end
       object ObjSize: TFloatSpinEdit
         Left = 140
-        Top = 460
+        Top = 452
         Width = 73
         Height = 22
         Accuracy = 2
-        Increment = 0.1
+        Increment = 0.100000000000000000
         TabOrder = 9
         OnChange = ObjChangeInstance
       end
       object ObjAngl: TSpinEdit
         Left = 140
-        Top = 436
+        Top = 428
         Width = 73
         Height = 22
         Increment = 5
@@ -1519,34 +1554,24 @@ object Form1: TForm1
         Caption = 'Show selected'
         TabOrder = 21
       end
-      object LoadInstancesFromLWO: TButton
-        Left = 2
-        Top = 463
-        Width = 133
-        Height = 25
-        Anchors = [akLeft, akBottom]
-        Caption = 'Load LWO ...'
-        TabOrder = 22
-        OnClick = LoadInstancesFromLWOClick
-      end
       object ListObjectsInstances: TComboBox
         Left = 140
-        Top = 340
+        Top = 332
         Width = 141
         Height = 21
         Style = csDropDownList
         DropDownCount = 16
-        ItemHeight = 0
-        TabOrder = 23
+        ItemHeight = 13
+        TabOrder = 22
         OnChange = ObjChangeInstance
       end
       object ObjInShadow: TCheckBox
         Left = 140
-        Top = 484
+        Top = 476
         Width = 101
         Height = 17
         Caption = 'Dark (in shadow)'
-        TabOrder = 24
+        TabOrder = 23
         OnClick = ObjChangeInstance
       end
       object AutoObjects: TButton
@@ -1554,14 +1579,14 @@ object Form1: TForm1
         Top = 16
         Width = 41
         Height = 21
-        Caption = 'Auto'
+        Caption = 'Scan'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
         Font.Name = 'MS Sans Serif'
         Font.Style = []
         ParentFont = False
-        TabOrder = 25
+        TabOrder = 24
         OnClick = AutoObjectsClick
       end
       object CopyInstance: TBitBtn
@@ -1569,7 +1594,7 @@ object Form1: TForm1
         Top = 304
         Width = 25
         Height = 25
-        TabOrder = 26
+        TabOrder = 25
         OnClick = CopyInstanceClick
         Glyph.Data = {
           5A010000424D5A01000000000000760000002800000013000000130000000100
@@ -1591,7 +1616,7 @@ object Form1: TForm1
         Top = 304
         Width = 25
         Height = 25
-        TabOrder = 27
+        TabOrder = 26
         OnClick = PasteInstanceClick
         Glyph.Data = {
           AA040000424DAA04000000000000360000002800000013000000130000000100
@@ -1869,7 +1894,7 @@ object Form1: TForm1
         Left = 2
         Top = 16
         Width = 133
-        Height = 342
+        Height = 346
         Anchors = [akLeft, akTop, akBottom]
         ItemHeight = 13
         TabOrder = 0
@@ -1882,7 +1907,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 1
         OnChange = SoundsChange
       end
@@ -1892,7 +1917,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 2
         OnChange = SoundsChange
       end
@@ -1902,7 +1927,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 3
         OnChange = SoundsChange
       end
@@ -1995,7 +2020,7 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 1
-        Increment = 0.1
+        Increment = 0.100000000000000000
         TabOrder = 11
         OnChange = SoundsChange
       end
@@ -2135,7 +2160,7 @@ object Form1: TForm1
         516)
       object Shape1: TShape
         Left = 137
-        Top = 141
+        Top = 121
         Width = 32
         Height = 32
         Brush.Color = clSkyBlue
@@ -2144,28 +2169,28 @@ object Form1: TForm1
       end
       object Label120: TLabel
         Left = 218
-        Top = 117
+        Top = 97
         Width = 47
         Height = 13
         Caption = 'Position Z'
       end
       object Label124: TLabel
         Left = 218
-        Top = 93
+        Top = 73
         Width = 47
         Height = 13
         Caption = 'Position Y'
       end
       object Label125: TLabel
         Left = 218
-        Top = 69
+        Top = 49
         Width = 47
         Height = 13
         Caption = 'Position X'
       end
       object Image21: TImage
         Left = 268
-        Top = 67
+        Top = 47
         Width = 17
         Height = 15
         AutoSize = True
@@ -2201,7 +2226,7 @@ object Form1: TForm1
       end
       object Image22: TImage
         Left = 268
-        Top = 91
+        Top = 71
         Width = 17
         Height = 15
         AutoSize = True
@@ -2237,7 +2262,7 @@ object Form1: TForm1
       end
       object Image23: TImage
         Left = 268
-        Top = 115
+        Top = 95
         Width = 17
         Height = 15
         AutoSize = True
@@ -2273,7 +2298,7 @@ object Form1: TForm1
       end
       object Label129: TLabel
         Left = 206
-        Top = 295
+        Top = 275
         Width = 68
         Height = 13
         Caption = 'Light radius, m'
@@ -2287,28 +2312,28 @@ object Form1: TForm1
       end
       object Label153: TLabel
         Left = 190
-        Top = 195
+        Top = 175
         Width = 42
         Height = 13
         Caption = 'Rotate Y'
       end
       object Label155: TLabel
         Left = 206
-        Top = 243
+        Top = 223
         Width = 75
         Height = 13
         Caption = 'Blink duration, s'
       end
       object Label156: TLabel
         Left = 206
-        Top = 219
+        Top = 199
         Width = 63
         Height = 13
         Caption = 'Blink offset, s'
       end
       object Label157: TLabel
         Left = 206
-        Top = 267
+        Top = 247
         Width = 44
         Height = 13
         Caption = 'Blink size'
@@ -2322,7 +2347,7 @@ object Form1: TForm1
       end
       object Light_Col: TShape
         Left = 140
-        Top = 144
+        Top = 124
         Width = 25
         Height = 25
         OnDragDrop = Light_ColDragDrop
@@ -2330,14 +2355,14 @@ object Form1: TForm1
       end
       object Label131: TLabel
         Left = 170
-        Top = 150
+        Top = 130
         Width = 49
         Height = 13
         Caption = 'Light color'
       end
       object Shape3: TShape
         Left = 234
-        Top = 141
+        Top = 121
         Width = 57
         Height = 32
         Brush.Color = clSkyBlue
@@ -2346,7 +2371,7 @@ object Form1: TForm1
       end
       object Shape4: TShape
         Left = 137
-        Top = 289
+        Top = 269
         Width = 68
         Height = 29
         Brush.Color = clSkyBlue
@@ -2355,7 +2380,7 @@ object Form1: TForm1
       end
       object Shape2: TShape
         Left = 137
-        Top = 313
+        Top = 293
         Width = 108
         Height = 24
         Brush.Color = clSkyBlue
@@ -2363,8 +2388,8 @@ object Form1: TForm1
         Pen.Width = 0
       end
       object Shape12: TShape
-        Left = 137
-        Top = 34
+        Left = 233
+        Top = 14
         Width = 56
         Height = 30
         Brush.Color = clCream
@@ -2373,7 +2398,7 @@ object Form1: TForm1
       end
       object Shape13: TShape
         Left = 137
-        Top = 64
+        Top = 44
         Width = 79
         Height = 75
         Brush.Color = clCream
@@ -2384,7 +2409,7 @@ object Form1: TForm1
         Left = 2
         Top = 16
         Width = 133
-        Height = 279
+        Height = 297
         Style = lbOwnerDrawFixed
         ItemHeight = 13
         TabOrder = 0
@@ -2394,37 +2419,37 @@ object Form1: TForm1
       end
       object LightX: TFloatSpinEdit
         Left = 140
-        Top = 66
+        Top = 46
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 1
         OnChange = LightsChange
       end
       object LightY: TFloatSpinEdit
         Left = 140
-        Top = 90
+        Top = 70
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 2
         OnChange = LightsChange
       end
       object LightZ: TFloatSpinEdit
         Left = 140
-        Top = 114
+        Top = 94
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 3
         OnChange = LightsChange
       end
       object AddLight: TButton
-        Left = 246
-        Top = 8
+        Left = 140
+        Top = 16
         Width = 21
         Height = 21
         Caption = '+'
@@ -2438,8 +2463,8 @@ object Form1: TForm1
         OnClick = AddLightClick
       end
       object RemLight: TButton
-        Left = 266
-        Top = 8
+        Left = 160
+        Top = 16
         Width = 21
         Height = 21
         Caption = '-'
@@ -2454,7 +2479,7 @@ object Form1: TForm1
       end
       object LightWRad: TSpinEdit
         Left = 140
-        Top = 292
+        Top = 272
         Width = 61
         Height = 22
         Increment = 5
@@ -2466,7 +2491,7 @@ object Form1: TForm1
       end
       object GroupBox1: TGroupBox
         Left = 2
-        Top = 340
+        Top = 324
         Width = 285
         Height = 71
         Caption = '  Global lightning tweak:  '
@@ -2498,11 +2523,11 @@ object Form1: TForm1
           Width = 53
           Height = 22
           Accuracy = 2
-          Increment = 0.01
-          MaxValue = 10
-          MinValue = 0.01
+          Increment = 0.010000000000000000
+          MaxValue = 10.000000000000000000
+          MinValue = 0.010000000000000000
           TabOrder = 0
-          Value = 1
+          Value = 1.000000000000000000
         end
         object LE_Mul: TFloatSpinEdit
           Left = 118
@@ -2510,11 +2535,11 @@ object Form1: TForm1
           Width = 53
           Height = 22
           Accuracy = 2
-          Increment = 0.01
-          MaxValue = 10
-          MinValue = 0.01
+          Increment = 0.010000000000000000
+          MaxValue = 10.000000000000000000
+          MinValue = 0.010000000000000000
           TabOrder = 1
-          Value = 1
+          Value = 1.000000000000000000
         end
         object LE_Add: TSpinEdit
           Left = 190
@@ -2547,50 +2572,50 @@ object Form1: TForm1
       end
       object LightRY: TFloatSpinEdit
         Left = 140
-        Top = 192
+        Top = 172
         Width = 45
         Height = 22
         Accuracy = 0
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 8
         OnChange = LightsChange
       end
       object LightFreq: TFloatSpinEdit
         Left = 140
-        Top = 240
+        Top = 220
         Width = 61
         Height = 22
         Accuracy = 2
-        Increment = 0.1
-        MaxValue = 1
+        Increment = 0.100000000000000000
+        MaxValue = 1.000000000000000000
         TabOrder = 9
         OnChange = LightsChange
       end
       object LightOffset: TFloatSpinEdit
         Left = 140
-        Top = 216
+        Top = 196
         Width = 61
         Height = 22
         Accuracy = 2
-        Increment = 0.1
-        MaxValue = 10
+        Increment = 0.100000000000000000
+        MaxValue = 10.000000000000000000
         TabOrder = 10
         OnChange = LightsChange
       end
       object LightSize: TFloatSpinEdit
         Left = 140
-        Top = 264
+        Top = 244
         Width = 61
         Height = 22
         Accuracy = 2
-        Increment = 1
-        MaxValue = 50
+        Increment = 1.000000000000000000
+        MaxValue = 50.000000000000000000
         TabOrder = 11
         OnChange = LightsChange
       end
       object LightWMode: TCheckBox
         Left = 140
-        Top = 316
+        Top = 296
         Width = 101
         Height = 17
         Caption = 'Hemisphere light'
@@ -2629,7 +2654,7 @@ object Form1: TForm1
       end
       object CopyLight: TBitBtn
         Left = 238
-        Top = 144
+        Top = 124
         Width = 25
         Height = 25
         TabOrder = 16
@@ -2651,7 +2676,7 @@ object Form1: TForm1
       end
       object PasteLight: TBitBtn
         Left = 262
-        Top = 144
+        Top = 124
         Width = 25
         Height = 25
         Enabled = False
@@ -2701,7 +2726,7 @@ object Form1: TForm1
       end
       object LightMode: TCheckBox
         Left = 140
-        Top = 174
+        Top = 154
         Width = 45
         Height = 17
         Caption = 'Flare'
@@ -2709,8 +2734,8 @@ object Form1: TForm1
         OnClick = LightsChange
       end
       object CopyLightXYZ: TBitBtn
-        Left = 140
-        Top = 36
+        Left = 236
+        Top = 16
         Width = 25
         Height = 25
         TabOrder = 19
@@ -2731,8 +2756,8 @@ object Form1: TForm1
         Spacing = 0
       end
       object PasteLightXYZ: TBitBtn
-        Left = 164
-        Top = 36
+        Left = 260
+        Top = 16
         Width = 25
         Height = 25
         TabOrder = 20
@@ -2962,7 +2987,6 @@ object Form1: TForm1
         Height = 281
         ActivePage = TabSheet22
         Anchors = [akLeft, akTop, akBottom]
-        TabIndex = 0
         TabOrder = 6
         OnChange = PageControl1Change
         object TabSheet22: TTabSheet
@@ -3131,7 +3155,7 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 10
+            Increment = 10.000000000000000000
             TabOrder = 3
             OnChange = MTXChange
           end
@@ -3141,7 +3165,7 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 10
+            Increment = 10.000000000000000000
             TabOrder = 4
             OnChange = MTXChange
           end
@@ -3151,7 +3175,7 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 10
+            Increment = 10.000000000000000000
             TabOrder = 5
             OnChange = MTXChange
           end
@@ -3206,11 +3230,11 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 1
-            MaxValue = 1000
-            MinValue = 5
+            Increment = 1.000000000000000000
+            MaxValue = 1000.000000000000000000
+            MinValue = 5.000000000000000000
             TabOrder = 7
-            Value = 10
+            Value = 10.000000000000000000
             OnChange = MTXChange
           end
           object Button5: TButton
@@ -3349,7 +3373,7 @@ object Form1: TForm1
             Anchors = [akLeft, akTop, akBottom]
             ItemHeight = 13
             TabOrder = 0
-            OnClick = ListTurnsChange
+            OnClick = ListTurnsClick
             OnDblClick = ListTurnsDblClick
           end
           object E_BitType: TRadioGroup
@@ -3385,10 +3409,10 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 0.5
-            MaxValue = 50
+            Increment = 0.500000000000000000
+            MaxValue = 50.000000000000000000
             TabOrder = 3
-            Value = 6
+            Value = 6.000000000000000000
             OnChange = ComputeTurnClick
           end
           object E_Arrows: TSpinEdit
@@ -3642,7 +3666,7 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 10
+            Increment = 10.000000000000000000
             TabOrder = 1
             OnChange = WPNodeChange
           end
@@ -3682,7 +3706,7 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 10
+            Increment = 10.000000000000000000
             TabOrder = 4
             OnChange = WPNodeChange
           end
@@ -3692,7 +3716,7 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 10
+            Increment = 10.000000000000000000
             TabOrder = 5
             OnChange = WPNodeChange
           end
@@ -3713,7 +3737,7 @@ object Form1: TForm1
             Width = 57
             Height = 22
             Accuracy = 1
-            Increment = 10
+            Increment = 10.000000000000000000
             TabOrder = 7
             OnChange = WPNodeChange
           end
@@ -3960,7 +3984,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 1
         OnChange = TOB_Change
       end
@@ -3970,7 +3994,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 2
         OnChange = TOB_Change
       end
@@ -3980,7 +4004,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 3
         OnChange = TOB_Change
       end
@@ -3990,7 +4014,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 4
         OnChange = TOB_Change
       end
@@ -4000,7 +4024,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 5
         OnChange = TOB_Change
       end
@@ -4077,7 +4101,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 16
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 11
         OnChange = TOB_Change
       end
@@ -4406,7 +4430,7 @@ object Form1: TForm1
         Width = 53
         Height = 22
         Accuracy = 0
-        Increment = 5
+        Increment = 5.000000000000000000
         TabOrder = 1
         OnChange = StreetShapeChange
       end
@@ -4416,7 +4440,7 @@ object Form1: TForm1
         Width = 53
         Height = 22
         Accuracy = 0
-        Increment = 5
+        Increment = 5.000000000000000000
         TabOrder = 2
         OnChange = StreetShapeChange
       end
@@ -4426,7 +4450,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 3
         OnChange = STRPointXChange
       end
@@ -4436,7 +4460,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 5
+        Increment = 5.000000000000000000
         TabOrder = 4
         OnChange = STRPointXChange
       end
@@ -4446,7 +4470,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 5
         OnChange = STRPointXChange
       end
@@ -4502,7 +4526,7 @@ object Form1: TForm1
         Width = 61
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 10
         OnChange = STRSplineLenA1Change
       end
@@ -4512,7 +4536,7 @@ object Form1: TForm1
         Width = 61
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 11
         OnChange = STRSplineLenA1Change
       end
@@ -4523,7 +4547,7 @@ object Form1: TForm1
         Height = 22
         Accuracy = 1
         Enabled = False
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 12
         OnChange = STRSplineLenA1Change
       end
@@ -4534,7 +4558,7 @@ object Form1: TForm1
         Height = 22
         Accuracy = 1
         Enabled = False
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 13
         OnChange = STRSplineLenA1Change
       end
@@ -5114,7 +5138,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 7
         OnChange = SNI_Node_Change
       end
@@ -5124,7 +5148,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 8
         OnChange = SNI_Node_Change
       end
@@ -5134,7 +5158,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 9
         OnChange = SNI_Node_Change
       end
@@ -5144,7 +5168,7 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 0
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 10
         OnChange = SNI_Node_Change
       end
@@ -5154,8 +5178,8 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 1
-        Increment = 0.1
-        MaxValue = 18
+        Increment = 0.100000000000000000
+        MaxValue = 18.000000000000000000
         TabOrder = 11
         OnChange = SNI_Node_Change
       end
@@ -5388,8 +5412,8 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 1
-        Increment = 5
-        MaxValue = 90
+        Increment = 5.000000000000000000
+        MaxValue = 90.000000000000000000
         TabOrder = 0
         OnChange = LVL_SunXChange
       end
@@ -5408,9 +5432,9 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 1
-        Increment = 5
+        Increment = 5.000000000000000000
         TabOrder = 2
-        Value = 360
+        Value = 360.000000000000000000
         OnChange = LVL_SunXChange
       end
       object TraceShadows: TButton
@@ -5504,7 +5528,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 12
-        ItemHeight = 0
+        ItemHeight = 13
         Sorted = True
         TabOrder = 11
         OnChange = EditSkyChange
@@ -5517,7 +5541,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 12
-        ItemHeight = 0
+        ItemHeight = 13
         Sorted = True
         TabOrder = 12
         OnChange = EditSkyChange
@@ -6032,7 +6056,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 3
         OnChange = ComputeTriggerClick
       end
@@ -6042,7 +6066,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 4
         OnChange = ComputeTriggerClick
       end
@@ -6052,7 +6076,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 10
+        Increment = 10.000000000000000000
         TabOrder = 5
         OnChange = ComputeTriggerClick
       end
@@ -6062,11 +6086,11 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 1
-        Increment = 1
-        MaxValue = 1000
-        MinValue = 1
+        Increment = 1.000000000000000000
+        MaxValue = 1000.000000000000000000
+        MinValue = 1.000000000000000000
         TabOrder = 6
-        Value = 1
+        Value = 1.000000000000000000
         OnChange = ComputeTriggerClick
       end
       object TRL_S2: TFloatSpinEdit
@@ -6075,11 +6099,11 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 1
-        Increment = 1
-        MaxValue = 1000
-        MinValue = 1
+        Increment = 1.000000000000000000
+        MaxValue = 1000.000000000000000000
+        MinValue = 1.000000000000000000
         TabOrder = 7
-        Value = 1
+        Value = 1.000000000000000000
         OnChange = ComputeTriggerClick
       end
       object TRL_S3: TFloatSpinEdit
@@ -6088,11 +6112,11 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 1
-        Increment = 1
-        MaxValue = 1000
-        MinValue = 1
+        Increment = 1.000000000000000000
+        MaxValue = 1000.000000000000000000
+        MinValue = 1.000000000000000000
         TabOrder = 8
-        Value = 1
+        Value = 1.000000000000000000
         OnChange = ComputeTriggerClick
       end
       object TRL_R1: TSpinEdit
@@ -6143,7 +6167,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 13
         OnChange = ComputeTriggerClick
       end
@@ -6153,7 +6177,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 14
         OnChange = ComputeTriggerClick
       end
@@ -6163,7 +6187,7 @@ object Form1: TForm1
         Width = 73
         Height = 22
         Accuracy = 1
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 15
         OnChange = ComputeTriggerClick
       end
@@ -6765,7 +6789,6 @@ object Form1: TForm1
         Text = 'QAD, VTX, IDX, '
         Width = 50
       end>
-    SimplePanel = False
     OnClick = StatusBar1Click
   end
   object CBRenderMode: TComboBox
@@ -6797,6 +6820,7 @@ object Form1: TForm1
     Height = 17
     Caption = 'Trace surface'
     TabOrder = 22
+    OnClick = CBTraceClick
   end
   object CBReduceDisplay: TCheckBox
     Left = 400
@@ -6805,6 +6829,7 @@ object Form1: TForm1
     Height = 17
     Caption = 'Reduce display'
     TabOrder = 23
+    OnClick = CBReduceDisplayClick
   end
   object CBShowCar: TCheckBox
     Left = 710
@@ -7218,6 +7243,10 @@ object Form1: TForm1
         Caption = 'Apply shadow test to all objects'
         Enabled = False
         OnClick = Applyshadowtesttoobjects1Click
+      end
+      object LoadobjectinstancesfromLWO1: TMenuItem
+        Caption = 'Load object instances from LWO'
+        OnClick = LoadInstancesFromLWOClick
       end
       object LandInstances: TMenuItem
         Bitmap.Data = {
