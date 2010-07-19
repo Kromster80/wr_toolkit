@@ -26,6 +26,8 @@ Policy:
 Use on your own risk.
 
 Version History:
+			Improved MakeTrack workflow
+			Fixed accidentialy disabled checkboxes (reduce view, trace surface)
 2.3.5	16.07.2010	Fixed loading of Blender LWO files
 			Raised LWO layers limit from 128 to 1024
 			Raised scenery size limit to 20km in any one direction

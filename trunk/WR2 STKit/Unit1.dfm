@@ -118,7 +118,7 @@ object Form1: TForm1
     Top = 40
     Width = 296
     Height = 623
-    ActivePage = TabSheet9
+    ActivePage = TabSheet7
     Anchors = [akLeft, akTop, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -3238,11 +3238,11 @@ object Form1: TForm1
             OnChange = MTXChange
           end
           object Button5: TButton
-            Left = 232
-            Top = 16
-            Width = 41
-            Height = 21
-            Caption = 'Gen'
+            Left = 140
+            Top = 152
+            Width = 133
+            Height = 25
+            Caption = 'Create Track from nodes'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
             Font.Height = -11
@@ -3250,7 +3250,7 @@ object Form1: TForm1
             Font.Style = []
             ParentFont = False
             TabOrder = 8
-            OnClick = GenTrackFromMT
+            OnClick = CreateTrackFromMT
           end
         end
         object TabSheet19: TTabSheet

@@ -1177,9 +1177,9 @@ if i<>0 then blockwrite(f,LWOSceneryFile[1],i); //integer
 blockwrite(f,'MAKTRK',6);
 blockwrite(f,TracksQty,4); //integer
 for i:=1 to TracksQty do begin
-blockwrite(f,MakeTrack[i].NodeQty,4); //integer
-for k:=1 to MakeTrack[i].NodeQty do
-  blockwrite(f,MakeTrack[i].Node[k].X,17); //3single+2word+boolean
+  blockwrite(f,MakeTrack[i].NodeQty,4); //integer
+  for k:=1 to MakeTrack[i].NodeQty do
+    blockwrite(f,MakeTrack[i].Node[k].X,17); //3single+2word+boolean
 end;
 
 closefile(f);
