@@ -4569,7 +4569,8 @@ begin
     ListWPNodes.Clear;
     for i:=1 to WTR[TrackWP].NodeQty do
     ListWPNodes.Items.Add(int2fix(i,2)+'. '+int2fix(WTR[TrackWP].Node[i].CheckPointID,2));
-  end else begin
+  end else
+  if TrackID <> 0 then begin
     TrackWP:=0;
     TRKProperty.ActivePageIndex:=1;
     SetWP(true);
