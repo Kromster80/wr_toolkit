@@ -2100,16 +2100,24 @@ MouseMoveScale:=(Qty.BlocksX+Qty.BlocksZ)div 5;
 end;
 
 procedure TForm1.RG_GrassLODClick(Sender: TObject);
-var LOD:integer;
+var LOD:integer; ROLoaded:boolean;
 begin
-LOD:=RG_GrassLOD.ItemIndex+1;
-if LOD=0 then exit;
+  LOD := RG_GrassLOD.ItemIndex+1;
+  if LOD = 0 then exit;
 
-if Changes.RO[LOD]=false then LoadRO_(SceneryPath+Scenery,LOD);
-LoadTexturePTX(SceneryPath+'Textures\'+RO[lod].Tex+'.ptx',coGrassTex[lod]);
+  //Load new grass LOD or just refresh texture
+  if Changes.RO[LOD] = false then begin
+    ROLoaded := LoadRO_(SceneryPath+Scenery,LOD);
+    if ROLoaded then
+      LoadTexturePTX(SceneryPath+'Textures\'+RO[lod].Tex+'.ptx',coGrassTex[lod])
+    else
+      MessageBox(HWND(nil), 'Grass level now yet exists', 'Info', MB_OK);
+  end else
+    LoadTexturePTX(SceneryPath+'Textures\'+RO[lod].Tex+'.ptx',coGrassTex[lod]);
 
-ShowGrassInfo(nil);
+  ShowGrassInfo(nil);
 end;
+
 
 procedure TForm1.CompileLoaded(Sender:string; ID,Num:integer);
 var
@@ -5684,34 +5692,35 @@ end;
 procedure TForm1.ShowGrassInfo(Sender: TObject);
 var LOD:integer;
 begin
-LOD:=RG_GrassLOD.ItemIndex+1;
-if LOD=0 then exit;
+  LOD := RG_GrassLOD.ItemIndex+1;
+  if LOD = 0 then exit;
 
-GrassRefresh:=true;
-
-VLBGrass.Cells[1,1]:=inttostr(RO[lod].Head.x1);
-Form1.VLBGrass.Cells[1,2]:=inttostr(RO[lod].Head.x2);
-Form1.VLBGrass.Cells[1,3]:=inttostr(RO[lod].Head.x3);
-Form1.VLBGrass.Cells[1,4]:=inttostr(RO[lod].Head.sizeX);
-Form1.VLBGrass.Cells[1,5]:=inttostr(RO[lod].Head.sizeZ);
-Form1.VLBGrass.Cells[1,6]:=inttostr(RO[lod].Head.XZ);
-Form1.VLBGrass.Cells[1,7]:=inttostr(RO[lod].Head.Qty);
-Form1.VLBGrass.Cells[1,8]:=inttostr(RO[lod].Head.Density);
-GrassTexture.Text:=RO[lod].Tex;
-GrassRefresh:=false;
+  GrassRefresh := true;
+  VLBGrass.Cells[1,1] := inttostr(RO[lod].Head.x1);
+  VLBGrass.Cells[1,2] := inttostr(RO[lod].Head.x2);
+  VLBGrass.Cells[1,3] := inttostr(RO[lod].Head.x3);
+  VLBGrass.Cells[1,4] := inttostr(RO[lod].Head.sizeX);
+  VLBGrass.Cells[1,5] := inttostr(RO[lod].Head.sizeZ);
+  VLBGrass.Cells[1,6] := inttostr(RO[lod].Head.XZ);
+  VLBGrass.Cells[1,7] := inttostr(RO[lod].Head.Qty);
+  VLBGrass.Cells[1,8] := inttostr(RO[lod].Head.Density);
+  GrassTexture.Text := RO[lod].Tex;
+  GrassRefresh := false;
 end;
+
 
 procedure TForm1.GrassTextureChange(Sender: TObject);
 var s:string;
 begin
-if GrassRefresh then exit;
-s:=GrassTexture.Text;
-decs(s,length(ExtractFileExt(s)));
-GrassTexture.Text:=s;
-RO[RG_GrassLOD.ItemIndex+1].Tex:=GrassTexture.Text;
-//remove .ptx ending
-Changes.RO[RG_GrassLOD.ItemIndex+1]:=true;
+  if GrassRefresh then exit;
+  s := GrassTexture.Text;
+
+  decs(s,length(ExtractFileExt(s)));
+  GrassTexture.Text := s; //remove .ptx ending
+  RO[RG_GrassLOD.ItemIndex+1].Tex := GrassTexture.Text;
+  Changes.RO[RG_GrassLOD.ItemIndex+1] := true;
 end;
+
 
 procedure TForm1.RenObjectClick(Sender: TObject);
 var ID:integer;

@@ -715,33 +715,32 @@ var i,k:integer;
 f:file;
 s:string; c:array[1..1024]of char;
 begin
-Result:=false;
-k:=LOD;
-s:=Input+'.RO'+inttostr(k);
-if not fileexists(s) then begin
-RO[k].Head.Qty:=0;
-RO[k].Head.sizeX:=0;
-RO[k].Head.sizeZ:=0;
-Changes.RO[k]:=false;
-exit;
-    end else begin
+  Result := false;
+  k := LOD;
+  s := Input+'.RO'+inttostr(k);
+  if not fileexists(s) then begin
+    RO[k].Head.Qty:=0;
+    RO[k].Head.sizeX:=0;
+    RO[k].Head.sizeZ:=0;
+    Changes.RO[k]:=false;
+    exit;
+  end else begin
     assignfile(f,s); FileMode:=0; reset(f,1); FileMode:=2;
     blockread(f,RO[k].Head,32);
     setlength(RO[k].Chunks,RO[k].Head.sizeZ+1);
-      for i:=1 to RO[k].Head.sizeZ do
+    for i:=1 to RO[k].Head.sizeZ do
       setlength(RO[k].Chunks[i],RO[k].Head.sizeX+1);
-    blockread(f,c,32); RO[k].Tex:=StrPas(@c);//Name
+    blockread(f,c,32);
+    RO[k].Tex:=StrPas(@c); //Name
     blockread(f,RO[k].UV,128);
-      for i:=1 to RO[k].Head.sizeZ do begin
+    for i:=1 to RO[k].Head.sizeZ do
       blockread(f,RO[k].Chunks[i,1],RO[k].Head.sizeX*8);
-      end;
     setlength(RO[k].Grass,RO[k].Head.Qty+1);
     blockread(f,RO[k].Grass[1],RO[k].Head.Qty*16); //R=0..3, G=0..15, B=0..15 16..255, A=0..15
     closefile(f);
-    Changes.RO[k]:=false;
-    end;
-//end;
-Result:=true;
+    Changes.RO[k] := false;
+  end;
+  Result := true;
 end;
 
 procedure LoadWRK(Input:string);
