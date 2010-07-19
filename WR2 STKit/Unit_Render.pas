@@ -1446,7 +1446,7 @@ LoadObjectMOX(fOptions.ExeDir+STKit2_Data_Path+'\Car\Car',0);
 //Arrow
 coArrow:=glGenLists(1);
 glNewList (coArrow, GL_COMPILE);
-glbegin (gl_quads);
+glBegin (GL_QUADS);
 for ii:=1 to 8 do glvertex3fv(@BArrow[ii,1]);
 for ii:=8 downto 1 do glvertex3fv(@BArrow[ii,1]);
 glEnd;
@@ -1468,8 +1468,8 @@ end;
 
 //Square
 coSquare:=glGenLists(1);
-glNewList (coSquare, GL_COMPILE);
-glbegin (gl_quads);
+glNewList(coSquare, GL_COMPILE);
+glBegin(GL_QUADS);
 glTexCoord2f(0,0); glvertex2f(-0.5,-0.5);
 glTexCoord2f(1,0); glvertex2f( 0.5,-0.5);
 glTexCoord2f(1,1); glvertex2f( 0.5, 0.5);
@@ -1480,7 +1480,7 @@ glEndList();
 //Bounding Box
 coBox:=glGenLists(1);
 glNewList (coBox, GL_COMPILE);
-glbegin (gl_quads);
+glBegin (GL_QUADS);
 for ii:=1 to 6 do
 for h:=4 downto 1 do
 glvertex3fv(@BBox[BBoxI[ii,h],1]);
@@ -1520,7 +1520,7 @@ glEndList();
 //SkyPlane
 coSkyPlane:=glGenLists(1);
 glNewList (coSkyPlane, GL_COMPILE);
-glbegin (gl_quads);
+glbegin (GL_QUADS);
 glColor4f(1,1,1,1);
 glnormal3f(0,-1,0);
 glTexCoord2f(-4,-4); glvertex3f(-100000,5000,-100000);
