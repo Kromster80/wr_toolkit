@@ -15,7 +15,6 @@
 unit TGATexture;
 
 interface
-
 uses
   Windows, OpenGL, SysUtils;
 
@@ -85,8 +84,8 @@ var ii,kk:integer;
 begin
 for kk:=0 to (H div 2)-1 do
 for ii:=0 to W*bpp-1 do begin
-          Front := Pointer(integer(Image)+kk*W*bpp+ii);
-          Back := Pointer(integer(Image)+(H-kk-1)*W*bpp+ii);
+          Front := Pointer(cardinal(Image)+kk*W*bpp+ii);
+          Back := Pointer(cardinal(Image)+(H-kk-1)*W*bpp+ii);
           Temp := Front^;
           Front^ := Back^;
           Back^ := Temp;
