@@ -3718,64 +3718,77 @@ Ground[ID].x8:=EnsureRange(Gr_Unknown.ItemIndex,0,Gr_Unknown.Items.Count-1);
 Changes.QAD:=true;
 end;
 
+
 procedure TForm1.AddGroundClick(Sender: TObject);
 var ss:string;
 begin
-GroundsRefresh:=true;
-ss:=InputBox('New Ground','Ground name','');
-if ss='' then begin
-MessageBox(Form1.Handle, 'Please input new ground name.', 'Info', MB_OK or MB_ICONINFORMATION);
-exit; end;
-if Qty.GroundTypes=MaxGrounds then begin
-MessageBox(Form1.Handle, PChar('Number of grounds limited to - '+inttostr(MaxGrounds)), 'Info', MB_OK or MB_ICONINFORMATION);
-exit; end;
-inc(Qty.GroundTypes);
-Ground[Qty.GroundTypes].Name:=ss;
-Ground[Qty.GroundTypes].GripF:=100;
-Ground[Qty.GroundTypes].GripR:=100;
-Ground[Qty.GroundTypes].NoColliFlag:=0;
-Ground[Qty.GroundTypes].x8:=0;
-ListGrounds.Items.Add(ss);
-ListGrounds.ItemIndex:=Qty.GroundTypes-1;
-ListGroundsClick(nil);
-GroundsRefresh:=false;
-Changes.QAD:=true;
+  GroundsRefresh := true;
+  ss := InputBox('New Ground','Ground name','');
+  if ss='' then begin
+    MessageBox(Form1.Handle, 'Please input new ground name.', 'Info', MB_OK or MB_ICONINFORMATION);
+    GroundsRefresh := false;
+    exit;
+  end;
+  if Qty.GroundTypes=MaxGrounds then begin
+    MessageBox(Form1.Handle, PChar('Number of grounds limited to - '+inttostr(MaxGrounds)), 'Info', MB_OK or MB_ICONINFORMATION);
+    GroundsRefresh := false;
+    exit;
+  end;
+
+  inc(Qty.GroundTypes);
+  Ground[Qty.GroundTypes].Name  :=ss;
+  Ground[Qty.GroundTypes].GripF :=100;
+  Ground[Qty.GroundTypes].GripR :=100;
+  Ground[Qty.GroundTypes].NoColliFlag:=0;
+  Ground[Qty.GroundTypes].x8    :=0;
+  ListGrounds.Items.Add(ss);
+  ListGrounds.ItemIndex := Qty.GroundTypes-1;
+  ListGroundsClick(nil);
+  GroundsRefresh := false;
+  Changes.QAD := true;
 end;
+
 
 procedure TForm1.RemGroundClick(Sender: TObject);
 var i,ID:integer;
 begin
-ID:=ListGrounds.ItemIndex+1;
-if ID=0 then begin
-  MessageBox(Form1.Handle, 'Please select item to remove.', 'Info', MB_OK or MB_ICONINFORMATION);
-  exit;
+  ID := ListGrounds.ItemIndex+1;
+  if ID=0 then begin
+    MessageBox(Form1.Handle, 'Please select item to remove.', 'Info', MB_OK or MB_ICONINFORMATION);
+    exit;
+  end;
+  if Qty.GroundTypes=1 then begin
+    MessageBox(Form1.Handle, 'At least one ground should remain.', 'Info', MB_OK or MB_ICONINFORMATION);
+    exit;
+  end;
+  dec(Qty.GroundTypes);
+  for i:=ID to Qty.GroundTypes do Ground[i]:=Ground[i+1];
+  SendQADtoUI('Grounds');
+  ListGrounds.ItemIndex:=EnsureRange(ID,1,Qty.GroundTypes)-1;
+  ListGroundsClick(nil);
+  for i:=1 to Qty.TexturesFiles do
+    if Tex2Ground[i]=ID-1 then
+      dec(Tex2Ground[i]) //could assign any ground assignment here
+    else
+      if Tex2Ground[i]>ID-1 then
+        dec(Tex2Ground[i]);
+  Changes.QAD := true;
 end;
-if Qty.GroundTypes=1 then begin
-  MessageBox(Form1.Handle, 'At least one ground should remain.', 'Info', MB_OK or MB_ICONINFORMATION);
-  exit;
-end;
-dec(Qty.GroundTypes);
-for i:=ID to Qty.GroundTypes do Ground[i]:=Ground[i+1];
-SendQADtoUI('Grounds');
-ListGrounds.ItemIndex:=EnsureRange(ID,1,Qty.GroundTypes)-1;
-ListGroundsClick(nil);
-for i:=1 to Qty.TexturesFiles do
-if Tex2Ground[i]=ID-1 then dec(Tex2Ground[i]) //could assign any ground assignment here
-else if Tex2Ground[i]>ID-1 then dec(Tex2Ground[i]);
-Changes.QAD:=true;
-end;
+
 
 procedure TForm1.RenGroundClick(Sender: TObject);
 var ID:integer;
 begin
-ID:=ListGrounds.ItemIndex+1;
-if ID=0 then begin
-MessageBox(Form1.Handle, 'Please select item to rename.', 'Info', MB_OK or MB_ICONINFORMATION);
-exit; end;
-Ground[ID].Name:=InputBox('Rename ground','Set new name',Ground[ID].Name);
-ListGrounds.Items[ID-1]:=Ground[ID].Name;
-Changes.QAD:=true;
+  ID := ListGrounds.ItemIndex+1;
+  if ID = 0 then begin
+    MessageBox(Form1.Handle, 'Please select item to rename.', 'Info', MB_OK or MB_ICONINFORMATION);
+    exit;
+  end;
+  Ground[ID].Name := InputBox('Rename ground','Set new name',Ground[ID].Name);
+  ListGrounds.Items[ID-1] := Ground[ID].Name;
+  Changes.QAD := true;
 end;
+
 
 procedure TForm1.ListTOBChange(Sender: TObject);
 var i:integer;
@@ -4832,6 +4845,7 @@ begin
   end;
 end;
 
+
 procedure TForm1.OpenLWO_TRKClick(Sender: TObject);
 var s:string;
 begin
@@ -5541,6 +5555,7 @@ Color2RGB(Light_Amb.Brush.Color,AmbLightW.R,AmbLightW.G,AmbLightW.B);
 Changes.WRK:=true;
 end;
 
+
 procedure TForm1.CreateNewScenClick(Sender: TObject);
 var i:integer; s:string;
 begin
@@ -5550,18 +5565,19 @@ begin
     exit;
   end;
 
-s:=InputBox('Create new scenery','Scenery name:','');
-if s='' then exit;
+  s := InputBox('Create new scenery','Scenery name:','');
+  if s = '' then exit;
 
-for i:=1 to RG2.Items.Count do if RG2.Items[i-1]=s then begin
-  MessageBox(Form1.Handle,'Scenery with such name already exists','Error', MB_OK or MB_ICONERROR);
-  exit;
+  for i:=1 to RG2.Items.Count do if RG2.Items[i-1] = s then begin
+    MessageBox(Form1.Handle,'Scenery with such name already exists','Error', MB_OK or MB_ICONERROR);
+    exit;
+  end;
+
+  RG2.Items.Add(s);
+  RG2.ItemIndex := RG2.Items.Count-1;
+  SceneryReload(nil);
 end;
 
-RG2.Items.Add(s);
-RG2.ItemIndex:=RG2.Items.Count-1;
-SceneryReload(nil);
-end;
 
 procedure TForm1.GenerateGrassClick(Sender: TObject);
 const Num=16;
