@@ -340,7 +340,10 @@ end;
 
 
 procedure PrepareLWOData();
-var ii,kk,VQty,PQty:integer;
+var
+  ii,kk,VQty,PQty:integer;
+  Scn_Bound:array[1..2,1..2]of single;
+  Scn_Low:single;
 begin
 
   if LWQty.Surf[0]>256 then begin
@@ -356,28 +359,26 @@ begin
   Form1.MemoLWO.Lines.Add('Setting bounds ...');
   Scn_Bound[1,1]:=0; Scn_Bound[1,2]:=0; Scn_Bound[2,1]:=0; Scn_Bound[2,2]:=0; Scn_Low:=0;
   for ii:=1 to LWQty.Vert[0] do begin
-    if LW.XYZ[ii,1]<Scn_Bound[1,1] then Scn_Bound[1,1]:=LW.XYZ[ii,1]; //Defining map boundaries
-    if LW.XYZ[ii,1]>Scn_Bound[1,2] then Scn_Bound[1,2]:=LW.XYZ[ii,1];
-    if LW.XYZ[ii,2]<Scn_Low then Scn_Low:=LW.XYZ[ii,2];
-    if LW.XYZ[ii,3]<Scn_Bound[2,1] then Scn_Bound[2,1]:=LW.XYZ[ii,3];
-    if LW.XYZ[ii,3]>Scn_Bound[2,2] then Scn_Bound[2,2]:=LW.XYZ[ii,3];
+    if LW.XYZ[ii,1]<Scn_Bound[1,1] then Scn_Bound[1,1] := LW.XYZ[ii,1]; //Defining map boundaries
+    if LW.XYZ[ii,1]>Scn_Bound[1,2] then Scn_Bound[1,2] := LW.XYZ[ii,1];
+    if LW.XYZ[ii,2]<Scn_Low        then Scn_Low        := LW.XYZ[ii,2];
+    if LW.XYZ[ii,3]<Scn_Bound[2,1] then Scn_Bound[2,1] := LW.XYZ[ii,3];
+    if LW.XYZ[ii,3]>Scn_Bound[2,2] then Scn_Bound[2,2] := LW.XYZ[ii,3];
   end;
 
-  //We don't want to center the map, cos it might be WIP and move away if one adds new structures to it,
-  //and thus whole object/triggers/streets placement will be ruined.
-  if abs(Scn_Bound[1,2])<abs(Scn_Bound[1,1]) then SizeX:=ceil(abs(Scn_Bound[1,1]/1024))*2
-                                             else SizeX:=ceil(abs(Scn_Bound[1,2]/1024))*2;
-  if abs(Scn_Bound[2,2])<abs(Scn_Bound[2,1]) then SizeZ:=ceil(abs(Scn_Bound[2,1]/1024))*2
-                                             else SizeZ:=ceil(abs(Scn_Bound[2,2]/1024))*2;
-  Form1.Done(Form1.MemoLWO);                               //size should be even numbers
+  //We don't want to center the map, cos it might be WIP and move away if one
+  //adds new structures to it, and thus whole object/triggers/streets placement will be ruined.
+  SizeX := ceil(max(abs(Scn_Bound[1,1]),abs(Scn_Bound[1,2]))/1024)*2;
+  SizeZ := ceil(max(abs(Scn_Bound[2,1]),abs(Scn_Bound[2,2]))/1024)*2;
+  Form1.Done(Form1.MemoLWO);
 
   if SizeX*SizeZ>4096 then begin
     MessageBox(Form1.Handle, 'Map size is too big for WR2', 'Fatal Error', MB_OK or MB_ICONERROR);
     exit;
   end;
 
-  if (SizeX>200)or(SizeZ>200) then begin
-    MessageBox(Form1.Handle, 'Map size is too big for STKit2', 'Fatal Error', MB_OK or MB_ICONERROR);
+  if (SizeX>200) or (SizeZ>200) then begin
+    MessageBox(Form1.Handle, 'Map size is too lengthy for STKit2', 'Fatal Error', MB_OK or MB_ICONERROR);
     exit;
   end;
 

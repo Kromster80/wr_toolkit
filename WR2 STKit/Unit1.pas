@@ -1021,9 +1021,9 @@ var
       SNILoc:array[1..MaxSNI]of single; //2nd value controls number of instances per route
 
   LVL:record
-  a,b,c:single;
-  Matrix:array[1..9]of single;
-  SunX,SunY,SunZ,SunO:single;
+    a,b,c:single;
+    Matrix:array[1..9]of single;
+    SunX,SunY,SunZ,SunO:single;
   end;
 
   SMPHead:record
@@ -1310,8 +1310,6 @@ var
   end;
   GrassColorW:record R,G,B,A:byte; end;
 
-  Scn_Bound:array[1..2,1..2]of single;
-  Scn_Low:single;
   SizeX,SizeZ:integer;       //map dimensions
   pblock:array of integer;                       //Parent block of poly
   pqtyb:array[1..4096,1..2]of integer;                    //First Poly/number polys
@@ -3340,11 +3338,11 @@ var
   ID:word;
   s:string;
 begin
-if AutoImportTexturesList<>'' then
-OpenDialog.FileName:=AutoImportTexturesList
-else
-if not RunOpenDialog(OpenDialog,'',SceneryPath,'Textures list (TexturesAssignList.dat)|*.dat') then exit;
-AutoImportTexturesList:='';
+  if AutoImportTexturesList<>'' then
+    OpenDialog.FileName:=AutoImportTexturesList
+  else
+  if not RunOpenDialog(OpenDialog,'',SceneryPath,'Textures list (TexturesAssignList.dat)|*.dat') then exit;
+  AutoImportTexturesList:='';
 
 assignfile(ft,OpenDialog.FileName); reset(ft);
 ii:=0;
@@ -5406,7 +5404,7 @@ end;
 
 procedure TForm1.Panel1DblClick(Sender: TObject);
 begin
-DoubleClick:=true;
+  DoubleClick:=true;
 end;
 
 procedure TForm1.TRK_MakeIdeal(Sender: TObject);
