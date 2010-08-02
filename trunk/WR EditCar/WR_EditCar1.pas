@@ -1,14 +1,12 @@
 unit WR_EditCar1;
-{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
 uses
   SysUtils, Classes, Forms, StdCtrls, Dialogs, ExtCtrls, Controls, ComCtrls, Spin,
-  {$IFDEF FPC} LResources, LCLIntf, TAGraph, TASeries, {$ENDIF}
   WR_EditCar_Lang, WR_DataSet,
-  {$IFDEF VER140}Chart, FloatSpinEdit, {$ENDIF}
+  Chart, FloatSpinEdit,
   WR_AboutBox, KromUtils,
-  Grids, Graphics, Buttons, Math
-  {$IFDEF VER140}, ValEdit, TeEngine, Series, TeeProcs {$ENDIF};
+  Grids, Graphics, Buttons, Math,
+  ValEdit, TeEngine, Series, TeeProcs;
 
 type
 
@@ -48,9 +46,7 @@ type
     TabSheet10: TTabSheet;
     TabSheet11: TTabSheet;
     TabSheet12: TTabSheet;
-    {$IFDEF VER140}
     ValueListEditor1: TValueListEditor;
-    {$ENDIF}
     GroupDisplayModes: TGroupBox;
     Image7: TImage;
     Label103: TLabel;
@@ -384,7 +380,7 @@ type
 type TEditingFormat = (fmtMBWR, fmtWR2, fmtAFC11N, fmtAFC11CT, fmtAFC11BW, fmtFVR, fmtAFC11HN);
 
 const
-  VersionInfo = 'Version 1.6       (** May 2010)';
+  VersionInfo = 'EditCar 2 Beta       (02 Aug 2010)';
   MaxFieldsCarsDB = 105; //EditCar.car capacity
   MaxFields3DCarsDB = 80; //EditCar.car capacity
 
@@ -412,6 +408,8 @@ begin
   DecimalSeparator := '.';
   CarName := ExtractOpenedFileName(CMDLine);
   ExeDir := ExtractFilePath(Application.ExeName);
+
+  Caption := VersionInfo;
 
   InitChart();
   fDataSet := TDataSet.Create;
@@ -651,7 +649,6 @@ end;
 procedure TForm1.TorqueMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var i,u,v:integer;
 begin
-{$IFDEF VER140}
   if (LineSerieHP = nil) or (LineSerieNM = nil) then exit;
   if LineSerieHP.Count <> 21 then exit; //yet empty
 
@@ -667,16 +664,13 @@ begin
   for i:=1 to 20 do
     LineSerieNM.YValue[i] := round(i*LineSerieHP.YValue[i]*SNMStep.Value/7023.5);
     //LineSerieNM.SetYValue(i, round(i*LineSerieHP.GetYValue(i)*SNMStep.Value/7023.5));
-{$ENDIF}
 end;
 
 procedure TForm1.TorqueMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-{$IFDEF VER140}
   Chart1.LeftAxis.Maximum := round(LineSerieHP.MaxYValue*1.2);
   if Chart1.LeftAxis.Maximum = 0 then Chart1.LeftAxis.Maximum := 500;
   UpdateDataSet;
-{$ENDIF}
 end;
 
 
@@ -1126,7 +1120,7 @@ begin
     LineSerieNM.Clear;
     for k:=0 to 20 do LineSerieHP.AddXY(k*SNMStep.Value, round(GetValue(105,50+k,2).Rel));
     for k:=0 to 20 do LineSerieNM.AddXY(k*SNMStep.Value, 0);
-    {$IFDEF VER140} Chart1.LeftAxis.Maximum := round(LineSerieHP.MaxYValue*1.2); {$ENDIF}
+    Chart1.LeftAxis.Maximum := round(LineSerieHP.MaxYValue*1.2);
     //Engine - Torque Curve
     SNMStep.Value       := round(GetValue(105,71,2).Rel); //NMStep
     SrpmMax.Value       := GetValue(105,49,2).Int;
@@ -1302,12 +1296,7 @@ begin
 
     //Engine - Chart
 
-    {$IFDEF FPC}
-    for k:=0 to 20 do SetValue(105,50+k,2,LineSerieHP.GetYValue(k));
-    {$ENDIF}
-    {$IFDEF VER140}
     for k:=0 to 20 do SetValue(105,50+k,2,LineSerieHP.YValues[k]);
-    {$ENDIF}
     //Engine - Torque Curve
     SetValue(105,71,2,SNMStep.Value+0.0); //NMStep
     SetValue(105,49,2,SrpmMax.Value);
@@ -1383,15 +1372,10 @@ begin
 end;
 
 
-{$IFDEF VER140}
-  {$R *.dfm}
-{$ENDIF}
+{$R *.dfm}
 
 
 initialization
-{$IFDEF FPC}
-  {$I WR_EditCar1.lrs}
-{$ENDIF}
 
 end.
 

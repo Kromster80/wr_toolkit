@@ -89,7 +89,6 @@ object Form1: TForm1
     Height = 289
     ActivePage = TabSheet2
     MultiLine = True
-    TabIndex = 0
     TabOrder = 3
     object TabSheet2: TTabSheet
       Caption = 'Import'
@@ -111,7 +110,6 @@ object Form1: TForm1
         Enabled = False
         ExtendedSelect = False
         ItemHeight = 13
-        Sorted = True
         TabOrder = 0
         OnClick = ImportDSCarClick
       end
@@ -647,7 +645,6 @@ object Form1: TForm1
     Width = 503
     Height = 489
     ActivePage = TabSheet13
-    TabIndex = 0
     TabOrder = 4
     OnChange = PageChange
     object TabSheet13: TTabSheet
@@ -2799,7 +2796,7 @@ object Form1: TForm1
           Width = 57
           Height = 22
           Accuracy = 2
-          Increment = 0.01
+          Increment = 0.010000000000000000
           TabOrder = 6
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -2865,7 +2862,7 @@ object Form1: TForm1
           Width = 57
           Height = 22
           Accuracy = 2
-          Increment = 0.01
+          Increment = 0.010000000000000000
           TabOrder = 2
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -5074,8 +5071,8 @@ object Form1: TForm1
           Height = 22
           Hint = '0 - 100'
           Accuracy = 2
-          Increment = 0.01
-          MaxValue = 100
+          Increment = 0.010000000000000000
+          MaxValue = 100.000000000000000000
           TabOrder = 0
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -5087,8 +5084,8 @@ object Form1: TForm1
           Height = 22
           Hint = '0 - 100'
           Accuracy = 2
-          Increment = 0.01
-          MaxValue = 100
+          Increment = 0.010000000000000000
+          MaxValue = 100.000000000000000000
           TabOrder = 1
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -5100,8 +5097,8 @@ object Form1: TForm1
           Height = 22
           Hint = '0 - 100'
           Accuracy = 2
-          Increment = 0.01
-          MaxValue = 100
+          Increment = 0.010000000000000000
+          MaxValue = 100.000000000000000000
           TabOrder = 2
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -5113,8 +5110,8 @@ object Form1: TForm1
           Height = 22
           Hint = '0 - 100'
           Accuracy = 2
-          Increment = 0.01
-          MaxValue = 100
+          Increment = 0.010000000000000000
+          MaxValue = 100.000000000000000000
           TabOrder = 3
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -5125,7 +5122,7 @@ object Form1: TForm1
           Width = 57
           Height = 22
           Accuracy = 2
-          Increment = 0.01
+          Increment = 0.010000000000000000
           TabOrder = 4
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -5136,7 +5133,7 @@ object Form1: TForm1
           Width = 57
           Height = 22
           Accuracy = 2
-          Increment = 0.01
+          Increment = 0.010000000000000000
           TabOrder = 5
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -7289,7 +7286,7 @@ object Form1: TForm1
           LeftAxis.Automatic = False
           LeftAxis.AutomaticMaximum = False
           LeftAxis.AutomaticMinimum = False
-          LeftAxis.Maximum = 1000
+          LeftAxis.Maximum = 1000.000000000000000000
           LeftAxis.Title.Angle = 0
           View3D = False
           BevelOuter = bvNone
@@ -7309,11 +7306,11 @@ object Form1: TForm1
             Pointer.Visible = True
             XValues.DateTime = False
             XValues.Name = 'X'
-            XValues.Multiplier = 1
+            XValues.Multiplier = 1.000000000000000000
             XValues.Order = loAscending
             YValues.DateTime = False
             YValues.Name = 'Y'
-            YValues.Multiplier = 1
+            YValues.Multiplier = 1.000000000000000000
             YValues.Order = loNone
           end
           object Series2: TLineSeries
@@ -7327,11 +7324,11 @@ object Form1: TForm1
             Pointer.Visible = False
             XValues.DateTime = False
             XValues.Name = 'X'
-            XValues.Multiplier = 1
+            XValues.Multiplier = 1.000000000000000000
             XValues.Order = loAscending
             YValues.DateTime = False
             YValues.Name = 'Y'
-            YValues.Multiplier = 1
+            YValues.Multiplier = 1.000000000000000000
             YValues.Order = loNone
           end
         end
@@ -7399,8 +7396,8 @@ object Form1: TForm1
           Height = 22
           Hint = '0 - 100'
           Accuracy = 1
-          Increment = 0.1
-          MaxValue = 100
+          Increment = 0.100000000000000000
+          MaxValue = 100.000000000000000000
           TabOrder = 0
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -8505,7 +8502,7 @@ object Form1: TForm1
           Width = 57
           Height = 22
           Accuracy = 3
-          Increment = 0.001
+          Increment = 0.001000000000000000
           TabOrder = 0
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -8516,7 +8513,7 @@ object Form1: TForm1
           Width = 57
           Height = 22
           Accuracy = 3
-          Increment = 0.001
+          Increment = 0.001000000000000000
           TabOrder = 1
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -8527,7 +8524,7 @@ object Form1: TForm1
           Width = 57
           Height = 22
           Accuracy = 3
-          Increment = 0.001
+          Increment = 0.001000000000000000
           TabOrder = 2
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -8538,7 +8535,7 @@ object Form1: TForm1
           Width = 57
           Height = 22
           Accuracy = 3
-          Increment = 0.001
+          Increment = 0.001000000000000000
           TabOrder = 3
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -8549,7 +8546,7 @@ object Form1: TForm1
           Width = 57
           Height = 22
           Accuracy = 3
-          Increment = 0.001
+          Increment = 0.001000000000000000
           TabOrder = 4
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -8560,7 +8557,7 @@ object Form1: TForm1
           Width = 57
           Height = 22
           Accuracy = 3
-          Increment = 0.001
+          Increment = 0.001000000000000000
           TabOrder = 5
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -8571,7 +8568,7 @@ object Form1: TForm1
           Width = 57
           Height = 22
           Accuracy = 3
-          Increment = 0.001
+          Increment = 0.001000000000000000
           TabOrder = 6
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -8582,7 +8579,7 @@ object Form1: TForm1
           Width = 57
           Height = 22
           Accuracy = 3
-          Increment = 0.001
+          Increment = 0.001000000000000000
           TabOrder = 7
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -8593,7 +8590,7 @@ object Form1: TForm1
           Width = 57
           Height = 22
           Accuracy = 3
-          Increment = 0.001
+          Increment = 0.001000000000000000
           TabOrder = 8
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -13513,7 +13510,7 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 1
         OnChange = FSChange
         OnKeyUp = FSChangeLink
@@ -13524,7 +13521,7 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 2
         OnChange = FSChange
         OnKeyUp = FSChangeLink
@@ -13535,7 +13532,7 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 3
         OnChange = FSChange
         OnKeyUp = FSChangeLink
@@ -13546,7 +13543,7 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 4
         OnChange = FSChange
         OnKeyUp = FSChangeLink
@@ -13557,7 +13554,7 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 5
         OnChange = FSChange
         OnKeyUp = FSChangeLink
@@ -13568,7 +13565,7 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 6
         OnChange = FSChange
         OnKeyUp = FSChangeLink
@@ -13579,7 +13576,7 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 7
         OnChange = FSChangeHead
       end
@@ -13589,7 +13586,7 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 8
         OnChange = FSChangeHead
       end
@@ -13599,7 +13596,7 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 9
         OnChange = FSChangeHead
       end
@@ -13609,7 +13606,7 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 10
         OnChange = FSChangeHead
       end
@@ -13619,7 +13616,7 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 11
         OnChange = FSChangeHead
       end
@@ -13629,7 +13626,7 @@ object Form1: TForm1
         Width = 57
         Height = 22
         Accuracy = 0
-        Increment = 1
+        Increment = 1.000000000000000000
         TabOrder = 12
         OnChange = FSChangeHead
       end
@@ -17611,7 +17608,7 @@ object Form1: TForm1
           Width = 65
           Height = 22
           Accuracy = 2
-          Increment = 0.05
+          Increment = 0.050000000000000000
           TabOrder = 17
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -17622,7 +17619,7 @@ object Form1: TForm1
           Width = 65
           Height = 22
           Accuracy = 2
-          Increment = 0.05
+          Increment = 0.050000000000000000
           TabOrder = 18
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -17645,7 +17642,7 @@ object Form1: TForm1
           Width = 65
           Height = 22
           Accuracy = 2
-          Increment = 0.05
+          Increment = 0.050000000000000000
           TabOrder = 20
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -17656,7 +17653,7 @@ object Form1: TForm1
           Width = 65
           Height = 22
           Accuracy = 2
-          Increment = 0.05
+          Increment = 0.050000000000000000
           TabOrder = 21
           OnChange = FSChange
           OnKeyUp = FSChangeLink
