@@ -372,12 +372,12 @@ begin
   SizeZ := ceil(max(abs(Scn_Bound[2,1]),abs(Scn_Bound[2,2]))/1024)*2;
   Form1.Done(Form1.MemoLWO);
 
-  if SizeX*SizeZ>4096 then begin
+  if SizeX*SizeZ>MAX_BLOCK_COUNT then begin
     MessageBox(Form1.Handle, 'Map size is too big for WR2', 'Fatal Error', MB_OK or MB_ICONERROR);
     exit;
   end;
 
-  if (SizeX>200) or (SizeZ>200) then begin
+  if (SizeX>MAX_BLOCKS_X) or (SizeZ>MAX_BLOCKS_Z) then begin
     MessageBox(Form1.Handle, 'Map size is too lengthy for STKit2', 'Fatal Error', MB_OK or MB_ICONERROR);
     exit;
   end;
@@ -422,6 +422,7 @@ var
   x,z:real;
   tmp:array of array[0..5]of integer;
   tms:array of array[1..6]of single;
+  BlockBounds:array[1..MAX_BLOCKS_X, 1..MAX_BLOCKS_Z, 1..2] of Vector3f;
 begin
   ////////////////////////////////////////////////////////////////////////////////
   Form1.MemoLWO.Lines.Add('Adding Quad data ...');
@@ -544,39 +545,42 @@ for ii:=1 to 64 do begin
   end;
 end;
 
-Form1.MemoLWO.Lines.Add('Rebuilding block heights ...');
+  Form1.MemoLWO.Lines.Add('Rebuilding block spheres ...');
 
-for ii:=1 to SizeZ do for kk:=1 to SizeX do Block[ii,kk].CenterY:=0;
+  //Init minimum and maximum values
+  for ii:=1 to MAX_BLOCKS_X do for kk:=1 to MAX_BLOCKS_Z do begin
+    BlockBounds[ii,kk,1].X := MaxSingle;
+    BlockBounds[ii,kk,1].Y := MaxSingle;
+    BlockBounds[ii,kk,1].Z := MaxSingle;
+    BlockBounds[ii,kk,2].X := MinSingle;
+    BlockBounds[ii,kk,2].Y := MinSingle;
+    BlockBounds[ii,kk,2].Z := MinSingle;
+  end;
 
-for ii:=1 to LWQty.Poly[0] do if LW.DUV[ii,1,1]<>DONT_TRACE_TAG then
-Block[((pblock[ii]-1) div SizeX)+1,((pblock[ii]-1) mod SizeX)+1].CenterY:=  //Y center of poly
-Block[((pblock[ii]-1) div SizeX)+1,((pblock[ii]-1) mod SizeX)+1].CenterY+   //accumulating data
-(LW.XYZ[LW.Poly[ii,1],2]+LW.XYZ[LW.Poly[ii,2],2]+LW.XYZ[LW.Poly[ii,3],2])/3;
+  for ii:=1 to LWQty.Poly[0] do if LW.DUV[ii,1,1]<>DONT_TRACE_TAG then begin //Store Block bounds, temp
+    for kk:=1 to 3 do begin
+      ci:=((pblock[ii]-1) div SizeX)+1;
+      ck:=((pblock[ii]-1) mod SizeX)+1;
+      BlockBounds[ci,ck,1].X := min(BlockBounds[ci,ck,1].X, LW.XYZ[LW.Poly[ii,kk],1]);
+      BlockBounds[ci,ck,1].Y := min(BlockBounds[ci,ck,1].Y, LW.XYZ[LW.Poly[ii,kk],2]);
+      BlockBounds[ci,ck,1].Z := min(BlockBounds[ci,ck,1].Z, LW.XYZ[LW.Poly[ii,kk],3]);
+      BlockBounds[ci,ck,2].X := max(BlockBounds[ci,ck,2].X, LW.XYZ[LW.Poly[ii,kk],1]);
+      BlockBounds[ci,ck,2].Y := max(BlockBounds[ci,ck,2].Y, LW.XYZ[LW.Poly[ii,kk],2]);
+      BlockBounds[ci,ck,2].Z := max(BlockBounds[ci,ck,2].Z, LW.XYZ[LW.Poly[ii,kk],3]);
+    end;
+  end;
 
-for ii:=1 to SizeZ do for kk:=1 to SizeX do begin
-Block[ii,kk].CenterY:=Block[ii,kk].CenterY/pqtyb[(kk+(ii-1)*SizeX),2];  //Defining Center Y
-Block[ii,kk].CenterX:=Block[ii,kk].CenterY; //temp place for min height
-Block[ii,kk].CenterZ:=Block[ii,kk].CenterY; //temp place for max height
-end;
+  for ii:=1 to SizeZ do for kk:=1 to SizeX do begin
+    Block[ii,kk].CenterX := (BlockBounds[ii,kk,1].X + BlockBounds[ii,kk,2].X) / 2;
+    Block[ii,kk].CenterY := (BlockBounds[ii,kk,1].Y + BlockBounds[ii,kk,2].Y) / 2;
+    Block[ii,kk].CenterZ := (BlockBounds[ii,kk,1].Z + BlockBounds[ii,kk,2].Z) / 2;
+    Block[ii,kk].Rad     := GetLength( //Length from center point to any bounding box vertice is the same
+                            (Block[ii,kk].CenterX - BlockBounds[ii,kk,1].X),
+                            (Block[ii,kk].CenterY - BlockBounds[ii,kk,1].Y),
+                            (Block[ii,kk].CenterZ - BlockBounds[ii,kk,1].Z));
+  end;
 
-for ii:=1 to LWQty.Poly[0] do if LW.DUV[ii,1,1]<>DONT_TRACE_TAG then begin //Store Block bounds, temp
-ci:=((pblock[ii]-1) div SizeX)+1; ck:=((pblock[ii]-1) mod SizeX)+1;
-Block[ci,ck].CenterX:=min(Block[ci,ck].CenterX,LW.XYZ[LW.Poly[ii,1],2]);
-Block[ci,ck].CenterX:=min(Block[ci,ck].CenterX,LW.XYZ[LW.Poly[ii,2],2]);
-Block[ci,ck].CenterX:=min(Block[ci,ck].CenterX,LW.XYZ[LW.Poly[ii,3],2]);
-Block[ci,ck].CenterZ:=max(Block[ci,ck].CenterX,LW.XYZ[LW.Poly[ii,1],2]);
-Block[ci,ck].CenterZ:=max(Block[ci,ck].CenterX,LW.XYZ[LW.Poly[ii,2],2]);
-Block[ci,ck].CenterZ:=max(Block[ci,ck].CenterX,LW.XYZ[LW.Poly[ii,3],2]);
-end;
-
-for ii:=1 to SizeZ do for kk:=1 to SizeX do begin
-Block[ii,kk].Rad    :=Max((Block[ii,kk].CenterZ-Block[ii,kk].CenterX)*1.5,887); //887 is min radius of square
-//Block[ii,kk].CenterY:=(Block[ii,kk].CenterZ+Block[ii,kk].CenterX)/2;
-Block[ii,kk].CenterX:=(kk-(SizeX div 2 +1))*1024+512;  //Center X Setting grid every 102.4m
-Block[ii,kk].CenterZ:=(ii-(SizeZ div 2 +1))*1024+512;  //Center Z Setting grid every 102.4m
-end;
-
-Form1.Done(Form1.MemoLWO);
+  Form1.Done(Form1.MemoLWO);
 
 ////////////////////////////////////////////////////////////////////////////////
 Form1.MemoLWO.Lines.Add('Building IDX ...');

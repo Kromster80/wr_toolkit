@@ -118,7 +118,7 @@ object Form1: TForm1
     Top = 40
     Width = 296
     Height = 623
-    ActivePage = TabSheet9
+    ActivePage = TabSheet8
     Anchors = [akLeft, akTop, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -2837,8 +2837,7 @@ object Form1: TForm1
           '# Light'
           'Chunk65k'
           'Unused ?'
-          'BlockRad'
-          'Block-Y')
+          'BlockRad')
         TabOrder = 1
       end
       object CBTracer: TCheckBox

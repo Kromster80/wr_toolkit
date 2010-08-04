@@ -19,6 +19,10 @@ const
   MAX_TRACKS        = 32;
   MAX_WP_TRACKS     = 32;
 
+  MAX_BLOCKS_X      = 200;                  //How many blocks scenery can ahve in length (/102,4 = km)
+  MAX_BLOCKS_Z      = 200;                  //Keeping in mind that max scenery size is 4096 blocks (*16 = 65k sub-block)
+  MAX_BLOCK_COUNT   = 4096;
+
   MAX_LWO_LAYERS    = 1024;                 //Maximum allowed LWO layers
 
   DONT_TRACE_TAG    = 1234567;             //Special tag to exclude certain polys from certain checks
