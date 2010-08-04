@@ -260,7 +260,7 @@ if (A<>0)and(A<>1) then
 for ii:=1 to STRHead.NumSplines do begin
 glColor4f(0,0,0,1);
 glLineWidth(1);
-glbegin (gl_line_strip);
+glbegin (GL_LINE_STRIP);
 for kk:=0 to SNI_LOD do glvertex3fv(@Spline[ii,kk].x);
 glEnd;
 end;
@@ -327,7 +327,7 @@ glEnd;
 //Draw vertice tangents
 if (A<>0)and(A<>1) then begin
 glLineWidth(1);
-glbegin (gl_lines);
+glbegin (GL_LINES);
   for ii:=1 to STRHead.NumPoints do begin
   glColor4f(1,1,0,1);
   glvertex3f(STR_Point[ii].x+STR_Point[ii].tx*100,
@@ -357,7 +357,7 @@ TB1.z:=STR_Point[PB].z+STR_Point[PB].tz*LB;
   //Render Anchor lines
 //  if A<>0 then begin
   glLineWidth(LineWidth/2);
-  glbegin (gl_lines);
+  glbegin (GL_LINES);
   if A=0 then kSetColorCode(kSplineAnchorLength,PA) else glColor4f(1,1,1,1);
   glvertex3f(STR_Point[PA].x-STR_Point[PA].tx*LA, STR_Point[PA].y-STR_Point[PA].ty*LA, STR_Point[PA].z-STR_Point[PA].tz*LA);
   glvertex3fv(@TA1);
@@ -366,7 +366,7 @@ TB1.z:=STR_Point[PB].z+STR_Point[PB].tz*LB;
   glvertex3fv(@TB1);
   glEnd;
 //  end;
-glBegin(gl_points);
+glBegin(GL_POINTS);
 glPointSize(PointSize);
 if A=0 then kSetColorCode(kSplineAnchor,PA) else glColor4f(1,0,1,1);
 glvertex3fv(@TA1);
@@ -377,7 +377,7 @@ end;
 
 if (A<>0)and(A<>1)and(SelectionQueue1[1]<>0) then begin
 glLineWidth(LineWidth/3);
-glbegin (gl_lines);
+glbegin (GL_LINES);
   glColor4f(1,0.5,0,1);
   glvertex3fv(@STR_Point[SelectionQueue1[1]].x);
   glColor4f(1,0,0,1);
@@ -391,7 +391,7 @@ glPointSize(PointSize);
 //All nodes
 if A<>0 then begin
 glColor4f(1,1,0,A);
-glbegin (gl_points);
+glbegin (GL_POINTS);
 for ii:=1 to STRHead.NumPoints do glvertex3fv(@STR_Point[ii].x);
 glColor4f(1,0,0,1); if NodeID<>0 then glvertex3fv(@STR_Point[NodeID].x);
 glColor4f(1,0.5,0,1); if SelectionQueue1[1]<>0 then glvertex3fv(@STR_Point[SelectionQueue1[1]].x);
@@ -400,7 +400,7 @@ end;
 
 //All nodes for selection buffer
 if A=0 then begin
-glbegin (gl_points);
+glbegin (GL_POINTS);
 for ii:=1 to STRHead.NumPoints do begin
 kSetColorCode(kPoint,ii);
 glvertex3fv(@STR_Point[ii].x);
@@ -415,7 +415,7 @@ end;
 procedure RenderRoadNet();
 var ii:integer;
 begin
-glbegin(gl_points);
+glbegin(GL_POINTS);
 for ii:=1 to NETHead.Num1 do begin
 SetPresetColorGL(NET1[ii].f,1);
 //glColor3f(NET1[ii].a/4,NET1[ii].b/4,NET1[ii].c/4);
@@ -423,7 +423,7 @@ SetPresetColorGL(NET1[ii].f,1);
 glvertex3fv(@NET1[ii].x);
 end;
 glEnd;
-glbegin(gl_lines);
+glbegin(GL_LINES);
 for ii:=1 to NETHead.Num2 do begin
 glvertex3fv(@NET1[NET2[ii].a+1].x);
 glvertex3fv(@NET1[NET2[ii].b+1].x);
@@ -443,21 +443,21 @@ for ii:=1 to SNIHead.Obj do begin
 
     SetPresetColorGL(ii,A);
     if SNIObj[ii].Mode<5 then begin
-      glbegin(gl_line_loop);
+      glbegin(GL_LINE_LOOP);
       for kk:=1 to SNIObj[ii].NumNodes*fOptions.SplineDetail do
       glvertex3fv(@SNISubNode[ii,kk]);
     end else if SNIObj[ii].Mode=5 then begin
-      glbegin(gl_line_strip);
+      glbegin(GL_LINE_STRIP);
       for kk:=1 to (SNIObj[ii].NumNodes-1)*fOptions.SplineDetail+1 do
       glvertex3fv(@SNISubNode[ii,kk]);
     end else if (SNIObj[ii].Mode=6)and(SNISpawnW[ii].TrackID<>0) then begin
-      glbegin(gl_line_strip);
+      glbegin(GL_LINE_STRIP);
       for kk:=1 to TRKQty[SNISpawnW[ii].TrackID].Nodes do
       glvertex3fv(@TRK[SNISpawnW[ii].TrackID].Route[kk].X);
     end;
     glEnd;
 
-  glbegin(gl_points);
+  glbegin(GL_POINTS);
     for kk:=1+SNIObj[ii].firstNode to SNIObj[ii].NumNodes+SNIObj[ii].firstNode do
       glvertex3fv(@SNINode[kk].X);
   glEnd;
@@ -470,7 +470,7 @@ end;
     glRasterPos3fv(@SNINode[kk+SNIObj[ObjID].firstNode].X);
     glPrint(' '+inttostr(kk)+' '+inttostr(round(SNINode[kk+SNIObj[ObjID].firstNode].Speed))+'kmh');
       glLineWidth(1);
-      glbegin(gl_lines);
+      glbegin(GL_LINES);
       glvertex3fv(@SNITang[kk+SNIObj[ObjID].firstNode,1]);
       glvertex3fv(@SNITang[kk+SNIObj[ObjID].firstNode,2]);
       glEnd;
@@ -478,7 +478,7 @@ end;
 
 end else begin
 glPointSize(PointSize*2);
-glbegin(gl_points);
+glbegin(GL_POINTS);
   for ii:=1 to SNIHead.Obj do
   for kk:=1+SNIObj[ii].firstNode to SNIObj[ii].NumNodes+SNIObj[ii].firstNode do begin
   kSetColorCode(KPoint,kk); glvertex3fv(@SNINode[kk].X); end;
@@ -528,7 +528,7 @@ begin
 if TrackWP=0 then exit;
 
 if A<>0 then begin
-    glbegin(gl_line_strip);
+    glbegin(GL_LINE_STRIP);
     for ii:=1 to WTR[TrackWP].NodeQty do begin
     glColor4f(1-ii/WTR[TrackWP].NodeQty,ii/WTR[TrackWP].NodeQty,0,1);
     glvertex3fv(@WTR[TrackWP].Node[ii].X);
@@ -537,7 +537,7 @@ if A<>0 then begin
 
     glLineWidth(1);
     glColor4f(1,1,0,1);
-    glbegin(gl_lines);
+    glbegin(GL_LINES);
     for ii:=1 to WTR[TrackWP].NodeQty do begin
     glvertex3f(WTR[TrackWP].Node[ii].X+WTR[TrackWP].Node[ii].M[1]*50,
                WTR[TrackWP].Node[ii].Y+WTR[TrackWP].Node[ii].M[4]*50,
@@ -551,7 +551,7 @@ end;
 
 glLineWidth(LineWidth);
 
-glbegin(gl_points);
+glbegin(GL_POINTS);
 for ii:=1 to WTR[TrackWP].NodeQty do begin
 SetPresetColorGL(WTR[TrackWP].Node[ii].CheckPointID,1);
 if A=0 then kSetColorCode(KPoint,ii);
@@ -637,7 +637,7 @@ while (ii+1<TRKQty[ID].Nodes)and(TRK[ID].Route[ii+1].Column=0) do inc(ii);
 until(ii>=TRKQty[ID].Nodes);
 
 //Draw CenterLine
-if TRKQty[ID].LoopFlag=1 then glbegin(gl_line_loop) else glbegin(gl_line_strip);
+if TRKQty[ID].LoopFlag=1 then glbegin(GL_LINE_LOOP) else glbegin(GL_LINE_STRIP);
 for ii:=1 to TRKQty[ID].Nodes do begin
 //glColor4ub(TRK[ID].Route[ii].v3,TRK[ID].Route[ii].v4,0,255);
 glColor4ub(TRK[ID].Route[ii].v1,TRK[ID].Route[ii].v2,0,255);
@@ -647,7 +647,7 @@ glEnd;
 
 //Draw IdealLine
 glColor4f(1,1,1,1);
-if TRKQty[ID].LoopFlag=1 then glbegin(gl_line_loop) else glbegin(gl_line_strip);
+if TRKQty[ID].LoopFlag=1 then glbegin(GL_LINE_LOOP) else glbegin(GL_LINE_STRIP);
 for ii:=1 to TRKQty[ID].Nodes do begin
 glvertex3f(TRK[ID].Route[ii].X+TRK[ID].Route[ii].Ideal*TRK[ID].Route[ii].Matrix[1],
            TRK[ID].Route[ii].Y+TRK[ID].Route[ii].Ideal*TRK[ID].Route[ii].Matrix[4],
@@ -657,7 +657,7 @@ glEnd;
 
 //Draw RightMargin
 glColor4f(0.3,0.3,1,1);
-if TRKQty[ID].LoopFlag=1 then glbegin(gl_line_loop) else glbegin(gl_line_strip);
+if TRKQty[ID].LoopFlag=1 then glbegin(GL_LINE_LOOP) else glbegin(GL_LINE_STRIP);
 for ii:=1 to TRKQty[ID].Nodes do
 glvertex3f(
 TRK[ID].Route[ii].X+TRK[ID].Route[ii].Margin1/10*TRK[ID].Route[ii].Matrix[1],
@@ -667,7 +667,7 @@ glEnd;
 
 //Draw LeftMargin
 glColor4f(1,0.3,0.3,1);
-if TRKQty[ID].LoopFlag=1 then glbegin(gl_line_loop) else glbegin(gl_line_strip);
+if TRKQty[ID].LoopFlag=1 then glbegin(GL_LINE_LOOP) else glbegin(GL_LINE_STRIP);
 for ii:=1 to TRKQty[ID].Nodes do glvertex3f(
 TRK[ID].Route[ii].X+TRK[ID].Route[ii].Margin2/10*TRK[ID].Route[ii].Matrix[1],
 TRK[ID].Route[ii].Y+TRK[ID].Route[ii].Margin2/10*TRK[ID].Route[ii].Matrix[4],
@@ -677,7 +677,7 @@ glEnd;
 //Draw DirectionArrowsAreas
 glColor4f(0,1,0,1);
 for ii:=1 to TRKQty[ID].Turns do begin
-glbegin(gl_line_strip);
+glbegin(GL_LINE_STRIP);
   for kk:=1 to TRK[ID].Turns[ii].ArrowNum do
   glvertex3fv(@TRK[ID].Turns[ii].Arrows[kk].X);
 glEnd;
@@ -708,7 +708,7 @@ glLineWidth(LineWidth);
 glPointSize(PointSize);
 
 //Draw direction arrows edge nodes
-glbegin(gl_points);
+glbegin(GL_POINTS);
 glColor4f(0.7,0.7,0.7,1);
 glvertex3fv(@TRK[ID].Route[Form1.E_Node1.Value+1].X);
 glColor4f(1,1,1,1);
@@ -716,7 +716,7 @@ glvertex3fv(@TRK[ID].Route[Form1.E_Node2.Value+1].X);
 glEnd;
 
 //Draw Start/Finish
-glbegin(gl_points);
+glbegin(GL_POINTS);
 glColor4f(1,1,0,1);
 glvertex3fv(@TRK[ID].Route[1].X);
 glColor4f(0,1,1,1);
@@ -730,7 +730,7 @@ begin
 //glPointSize(PointSize);
 glLineWidth(1);
 if Mode<>'OnlyFlares' then begin
-  glbegin(gl_points);
+  glbegin(GL_POINTS);
   for ii:=1 to Qty.Lights do
   if GetLength(Light[ii].Matrix2[13]-xPos,Light[ii].Matrix2[15]-zPos)<fOptions.ViewDistance-300 then begin
     if A<>0 then glColor4f(Light[ii].R/255,Light[ii].G/255,Light[ii].B/255,A)
@@ -781,7 +781,7 @@ if TrackID=0  then exit;
 if MakeTrack[TrackID].NodeQty=0 then exit;
 glPointSize(PointSize*2);
 glLineWidth(1);
-  glbegin(gl_points);
+  glbegin(GL_POINTS);
   for ii:=1 to MakeTrack[TrackID].NodeQty do begin
     if A<>0 then
       if ii=ID then glColor4f(1,0.5,0,A) else glColor4f(1,1,1,A)
@@ -794,7 +794,7 @@ glLineWidth(LineWidth);
 glPointSize(PointSize);
 if A=0 then exit;
 
-  glbegin(gl_line_strip);
+  glbegin(GL_LINE_STRIP);
     glColor4f(1,1,1,A);
     for ii:=1 to MakeTrack[TrackID].NodeQty do
     if (ii<MakeTrack[TrackID].NodeQty)or(TRKQty[TrackID].LoopFlag=1) then
@@ -802,7 +802,7 @@ if A=0 then exit;
         glvertex3fv(@MakeTrack[TrackID].Node[ii].Sub[kk]);
   glEnd;
 
-  glbegin(gl_line_strip);
+  glbegin(GL_LINE_STRIP);
     glColor4f(1,0,0,A);
     for ii:=1 to MakeTrack[TrackID].NodeQty do
       if (ii<MakeTrack[TrackID].NodeQty)or(TRKQty[TrackID].LoopFlag=1) then
@@ -814,7 +814,7 @@ if A=0 then exit;
         glvertex3fv(@Tmp);
       end;
   glEnd;
-  glbegin(gl_line_strip);
+  glbegin(GL_LINE_STRIP);
     glColor4f(0,0,1,A);
     for ii:=1 to MakeTrack[TrackID].NodeQty do
       if (ii<MakeTrack[TrackID].NodeQty)or(TRKQty[TrackID].LoopFlag=1) then
@@ -837,7 +837,7 @@ glPointSize(PointSize);
 glLineWidth(1);
 if A<>0 then begin
 glColor4f(1,0,1,A);
-glbegin(gl_points);
+glbegin(GL_POINTS);
 for ii:=1 to Qty.Sounds do
 glvertex3fv(@Sound[ii].X);
 glEnd;
@@ -876,7 +876,7 @@ glPushMatrix;
   end;
   if SoundW[Qty.Sounds+ii].WaveID<>0 then begin
     glColor4f(0,1,1,A);
-    glbegin(gl_points);
+    glbegin(GL_POINTS);
     glvertex3f(0,0,0);
   end;
   glEnd;
@@ -886,15 +886,15 @@ end;
 
 end;
 
-if A=0 then begin
-glbegin(gl_points);
-  for ii:=1 to Qty.Sounds do begin
-  kSetColorCode(kPoint,ii);
-  glvertex3fv(@Sound[ii].X);
+  if A=0 then begin
+  glBegin(GL_POINTS);
+    for ii:=1 to Qty.Sounds do begin
+    kSetColorCode(kPoint,ii);
+    glvertex3fv(@Sound[ii].X);
+    end;
+  glEnd;
   end;
-glEnd;
-end;
-glLineWidth(LineWidth);
+  glLineWidth(LineWidth);
 end;
 
 procedure RenderObjectsShaders(A,In1,In2:integer);
@@ -966,98 +966,97 @@ end;
 procedure RenderObjects(A,In1,In2:integer);
 var ii,kk,CallID:integer;
 begin
-if A<>0 then begin
-glEnable(GL_ALPHA_TEST);
-glAlphaFunc(GL_GREATER,0.5);
-//glBlendFunc(GL_ONE, GL_ONE);
-end;
+  if A<>0 then begin
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER,0.5);
+    //glBlendFunc(GL_ONE, GL_ONE);
+  end;
 
-for ii:=1 to Qty.ObjectsTotal do // if ObjProp[Obj[ii].ID+1].Pro1<>3 then
-if Obj[ii].ID+1<=list_obj then
+  for ii:=1 to Qty.ObjectsTotal do // if ObjProp[Obj[ii].ID+1].Pro1<>3 then
+  if Obj[ii].ID+1<=list_obj then
   if ((not fOptions.ReduceDisplay)and(fOptions.RenderMode>=rmFull))or(
   GetLength(Obj[ii].PosX-xPos,Obj[ii].PosZ-zPos)<fOptions.ViewDistance-300) then begin
 
-  CallID:=Obj[ii].ID+1;
+    CallID := Obj[ii].ID + 1;
 
-  glPushMatrix;
-  glTranslatef(Obj[ii].PosX,Obj[ii].PosY,Obj[ii].PosZ);
-  glScalef(Obj[ii].Size,Obj[ii].Size,Obj[ii].Size);
+    glPushMatrix;
+    glTranslatef(Obj[ii].PosX,Obj[ii].PosY,Obj[ii].PosZ);
+    glScalef(Obj[ii].Size,Obj[ii].Size,Obj[ii].Size);
 
     case ObjProp[CallID].Mode of
-    3,8: glRotatef(xRot,0,1,0); //Sprite
-    4: begin glRotatef(Obj[ii].Angl/pi*180,0,1,0); glRotatef(sin((GetTickCount+RandomArray[ii mod 256])/500)*4,1,0,0.4); end;//Waving on water
-    7: glRotatef((GetTickCount div 10) mod 360,0,0,1); //Rotate
-    16: //handled later
-    else glRotatef(Obj[ii].Angl/pi*180,0,1,0);
+      3,8:  glRotatef(xRot,0,1,0); //Sprite
+      4:    begin glRotatef(Obj[ii].Angl/pi*180,0,1,0); glRotatef(sin((GetTickCount+RandomArray[ii mod 256])/500)*4,1,0,0.4); end;//Waving on water
+      7:    glRotatef((GetTickCount div 10) mod 360,0,0,1); //Rotate
+      16:   //handled later
+      else  glRotatef(Obj[ii].Angl/pi*180,0,1,0);
     end;
 
-  if Obj[ii].InShadow=0 then glColor4f(1.0,1.0,1.0,1) else glColor4f(0.5,0.5,0.5,1);
+    if Obj[ii].InShadow=0 then glColor4f(1.0,1.0,1.0,1) else glColor4f(0.5,0.5,0.5,1);
 
-  if A=0 then kSetColorCode(kObject,ii);
+    if A = 0 then kSetColorCode(kObject,ii);
 
     for kk:=1 to length(ObjCall[CallID].Call) do begin
-    if A<>0 then glBindTexture(GL_TEXTURE_2D,ObjTex[CallID,kk-1]);
-    if (Obj[ii].Name[1]+Obj[ii].Name[2]='T\')and(kk=1) then glRotatef(Obj[ii].Angl/pi*180,0,1,0); //Object
-    if (Obj[ii].Name[1]+Obj[ii].Name[2]='T\')and(kk=2) then glRotatef(xRot-Obj[ii].Angl/pi*180,0,1,0); //Sprite
+      if A<>0 then glBindTexture(GL_TEXTURE_2D,ObjTex[CallID,kk-1]);
+      if (Obj[ii].Name[1]+Obj[ii].Name[2]='T\')and(kk=1) then glRotatef(Obj[ii].Angl/pi*180,0,1,0); //Object
+      if (Obj[ii].Name[1]+Obj[ii].Name[2]='T\')and(kk=2) then glRotatef(xRot-Obj[ii].Angl/pi*180,0,1,0); //Sprite
 
-    //Special case when I want to render a glowing lightflare
-    if (A<>0) and (ObjCall[CallID].Ambi[1]+ObjCall[CallID].Ambi[2]+ObjCall[CallID].Ambi[3]>128) then begin
-      glColor3f(ObjCall[CallID].Ambi[1]*1.8/255,ObjCall[CallID].Ambi[2]*1.8/255,ObjCall[CallID].Ambi[3]*1.8/255);
-      glDisable(GL_ALPHA_TEST);
-      glDisable(GL_LIGHTING);
-      //glDisable(GL_DEPTH_TEST);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-      glCallList(ObjCall[CallID].Call[kk-1]);
-      glEnable(GL_ALPHA_TEST);
-      glEnable(GL_LIGHTING);
-      //glEnable(GL_DEPTH_TEST);
-      glAlphaFunc(GL_GREATER,0.5);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    end else
-
-    glCallList(ObjCall[CallID].Call[kk-1]);
+      //Special case when I want to render a glowing lightflare
+      if (A<>0) and (ObjCall[CallID].Ambi[1]+ObjCall[CallID].Ambi[2]+ObjCall[CallID].Ambi[3]>128) then begin
+        glColor3f(ObjCall[CallID].Ambi[1]*1.8/255,ObjCall[CallID].Ambi[2]*1.8/255,ObjCall[CallID].Ambi[3]*1.8/255);
+        glDisable(GL_ALPHA_TEST);
+        glDisable(GL_LIGHTING);
+        //glDisable(GL_DEPTH_TEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glCallList(ObjCall[CallID].Call[kk-1]);
+        glEnable(GL_ALPHA_TEST);
+        glEnable(GL_LIGHTING);
+        //glEnable(GL_DEPTH_TEST);
+        glAlphaFunc(GL_GREATER,0.5);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      end else
+        glCallList(ObjCall[CallID].Call[kk-1]);
     end;
 
-  glPopMatrix;
+    glPopMatrix;
   end;
 
+  glDisable(GL_ALPHA_TEST);
+  glBindTexture(GL_TEXTURE_2D,0);
 
-glDisable(GL_ALPHA_TEST);
-glBindTexture(GL_TEXTURE_2D,0);
-
-//render objects points
-if Form1.CBShowObjects.Checked then begin
-  glDisable(gl_Lighting);
-  glDisable(GL_DEPTH_TEST);
-  glbegin(gl_points);
-  for ii:=1 to Qty.ObjectsTotal do
-  if Obj[ii].ID+1=In1 then begin
-  if Obj[ii].InShadow=0 then glColor4f(1,1,0,1) else glColor4f(0.4,0.4,0,1);
-  if A=0 then kSetColorCode(kObject,ii);
-  glvertex3fv(@Obj[ii].PosX);
+  //render objects points
+  if Form1.CBShowObjects.Checked then begin
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
+    glBegin(GL_POINTS);
+    for ii:=1 to Qty.ObjectsTotal do
+    if Obj[ii].ID+1=In1 then begin
+      if Obj[ii].InShadow=0 then glColor4f(1,1,0,1) else glColor4f(0.4,0.4,0,1);
+      if A=0 then kSetColorCode(kObject,ii);
+      glvertex3fv(@Obj[ii].PosX);
+    end;
+    glEnd;
+    glEnable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);
   end;
-  glEnd;
-  glEnable(gl_Lighting);
-  glEnable(GL_DEPTH_TEST);
 end;
-end;
+
 
 procedure RenderTOB_Objects(TrackID,ObjID,A:integer);
 var ii,kk:integer;
 begin
 if TrackID=0 then exit;
 if fOptions.RenderMode<rmFull then begin
-  glDisable(gl_Lighting);
+  glDisable(GL_LIGHTING);
   if ObjID<>0 then RenderMover(TOB[TrackID,ObjID].X,TOB[TrackID,ObjID].Y,TOB[TrackID,ObjID].Z);
   glColor4f(1,1,0,1);
-  glbegin(gl_points);
+  glbegin(GL_POINTS);
   for ii:=1 to TOBHead[TrackID].Qty do begin
   if A=0 then kSetColorCode(kObject,ii);
   glvertex3fv(@TOB[TrackID,ii].X);
   end;
   glEnd;
 end;
-  if A<>0 then glEnable(gl_Lighting);
+  if A<>0 then glEnable(GL_LIGHTING);
 
   glColor4f(1,1,1,1);
   for ii:=1 to TOBHead[TrackID].Qty do
@@ -1075,14 +1074,14 @@ end;
   glPopMatrix;
   end;
   glBindTexture(GL_TEXTURE_2D,0);
-//  glEnable(gl_Lighting);
+//  glEnable(GL_LIGHTING);
 end;
 
 procedure RenderCar();
 var kk:integer;
 begin
 glenable(GL_DEPTH_TEST);
-glenable(gl_Lighting);
+glenable(GL_LIGHTING);
 glPushMatrix;
   glColor4f(1,1,1,0.25);
   glTranslatef(CarX,CarY,CarZ); //reset position
@@ -1095,7 +1094,7 @@ glPushMatrix;
   end;
 glPopMatrix;
 glBindTexture(GL_TEXTURE_2D,0);
-gldisable(gl_Lighting);
+gldisable(GL_LIGHTING);
 gldisable(GL_DEPTH_TEST);
 
 glLineWidth(2);
@@ -1172,7 +1171,7 @@ var ii:integer;
 begin
 glEnable(GL_DEPTH_TEST);
   if Mode='Points' then begin
-  glbegin(gl_points);
+  glbegin(GL_POINTS);
     for ii:=1 to VTXQty[64]do begin
     kSetColorCode(kPoint,ii);
     glvertex3fv(@VTX[ii].X);
@@ -1194,7 +1193,7 @@ var ii,kk,x,z,ci:integer; BlockID:integer; bi:array of integer; s:string;
 begin
   if Form1.CBGrid.Checked then begin
   glColor4f(0,1,0,0.25);
-  glbegin(gl_lines);
+  glbegin(GL_LINES);
     for ii:=-Qty.BlocksX*2+1 to Qty.BlocksX*2-1 do begin
     glvertex3f(ii*256,VTX[1].Y,-Qty.BlocksZ*512);  //VTX[1].Y - easy way to get height
     glvertex3f(ii*256,VTX[1].Y, Qty.BlocksZ*512);
@@ -1205,7 +1204,7 @@ begin
     end;
   glEnd;
   glColor4f(0,1,0,0.5);
-  glbegin(gl_lines);
+  glbegin(GL_LINES);
     for ii:=-Qty.BlocksX div 2+1 to Qty.BlocksX div 2-1 do begin
     glvertex3f(ii*1024,VTX[1].Y,-Qty.BlocksZ*512);  //VTX[1].Y - easy way to get height
     glvertex3f(ii*1024,VTX[1].Y, Qty.BlocksZ*512);
@@ -1352,7 +1351,7 @@ for ii:=1 to Qty.Materials do glCallList(ScnCall2[ii]);
 //Render normals
 glLineWidth(1);
 glColor4f(1,1,0,1);
-glBegin(gl_Lines);
+glBegin(GL_LINES);
 for i:=1 to Qty.Polys do
   if GetLength(VTX[v[I,1]].X-xPos,VTX[v[I,1]].Z-zPos)<fOptions.ViewDistance/2 then begin
   v1[1]:=VTX[v[I,1]].X; v1[2]:=VTX[v[I,1]].Y; v1[3]:=VTX[v[I,1]].Z;
@@ -1429,7 +1428,7 @@ glScalef(30000,30000,30000); //Sun size
 glRotatef(xRot,0,1,0);
 glRotatef(180+yRot,1,0,0);
 glBindTexture(GL_TEXTURE_2D,SunTex);
-//glColor3f(1,1,1); glBegin(GL_Points); glVertex3f(0,0,0); glEnd;
+//glColor3f(1,1,1); glBegin(GL_POINTS); glVertex3f(0,0,0); glEnd;
 glCallList(coSquare);
 glPopMatrix;
 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1490,13 +1489,13 @@ glEndList();
 //Box Wire
 coBoxW:=glGenLists(1);
 glNewList (coBoxW, GL_COMPILE);
-glbegin (gl_line_loop);
+glbegin (GL_LINE_LOOP);
 for ii:=1 to 4 do glvertex3fv(@BBox[ii,1]);
 glEnd;
-glbegin (gl_line_loop);
+glbegin (GL_LINE_LOOP);
 for ii:=5 to 8 do glvertex3fv(@BBox[ii,1]);
 glEnd;
-glbegin (gl_lines);
+glbegin (GL_LINES);
 for ii:=1 to 4 do begin
 glvertex3fv(@BBox[ii,1]);
 glvertex3fv(@BBox[ii+4,1]);
@@ -1507,7 +1506,7 @@ glEndList();
 //SkyDome
 coSkyDome:=glGenLists(1);
 glNewList (coSkyDome, GL_COMPILE);
-glbegin (gl_triangles);
+glbegin (GL_TRIANGLES);
 glColor4f(1,1,1,1);
 for ii:=1 to 45 do for h:=1 to 3 do begin
 glTexCoord2f(OSphere[OSphereP[ii,h],1]/10+0.5,OSphere[OSphereP[ii,h],3]/10+0.5); //Planar Top projection 0..1
@@ -1533,17 +1532,17 @@ glEndList();
 //3arrowsXYZ
 coMover:=glGenLists(1);
 glNewList (coMover, GL_COMPILE);
-  glbegin (gl_line_strip);
+  glbegin (GL_LINE_STRIP);
   glColor4f(1,0,0,1);
   for ii:=1 to length(ObjMover) do
   glvertex3f(ObjMover[ii,1],ObjMover[ii,2],ObjMover[ii,3]);
   glEnd;
-  glbegin (gl_line_strip);
+  glbegin (GL_LINE_STRIP);
   glColor4f(0,0,1,1);
   for ii:=1 to length(ObjMover) do
   glvertex3f(ObjMover[ii,3],ObjMover[ii,2],ObjMover[ii,1]);
   glEnd;
-  glbegin (gl_line_strip);
+  glbegin (GL_LINE_STRIP);
   glColor4f(0,1,0,1);
   for ii:=1 to length(ObjMover) do
   glvertex3f(ObjMover[ii,3],ObjMover[ii,1],ObjMover[ii,2]);
@@ -1554,7 +1553,7 @@ glEndList();
 coCircleXZ:=glGenLists(1);
 glNewList (coCircleXZ, GL_COMPILE);
   step:=16;
-  glbegin (gl_line_strip);
+  glbegin (GL_LINE_STRIP);
   for ii:=-step to step do
   glvertex3f(cos(ii/step*pi),0,sin(ii/step*pi));//-1..1
   glEnd;
@@ -1564,11 +1563,11 @@ glEndList();
 coCircleYZ:=glGenLists(1);
 glNewList (coCircleYZ, GL_COMPILE);
   step:=16;
-  glbegin (gl_line_strip);
+  glbegin (GL_LINE_STRIP);
   for ii:=-step to step do
   glvertex3f(0,cos(ii/step*pi),sin(ii/step*pi));//-1..1
   glEnd;
-  glbegin (gl_lines);
+  glbegin (GL_LINES);
   step:=2;
   for ii:=-step to step do begin
   glvertex3f(0.2,cos(ii/step*pi),sin(ii/step*pi));//-1..1
@@ -1581,7 +1580,7 @@ glEndList();
 coRoundXZ:=glGenLists(1);
 glNewList (coRoundXZ, GL_COMPILE);
   step:=16;
-  glbegin (gl_triangles);
+  glbegin (GL_TRIANGLES);
   for ii:=-step to step-1 do begin
   glvertex3f(cos((ii+1)/step*pi),0,sin((ii+1)/step*pi));//-1..1
   glvertex3f(0,0,0);
