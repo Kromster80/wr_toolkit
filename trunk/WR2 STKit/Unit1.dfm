@@ -118,7 +118,7 @@ object Form1: TForm1
     Top = 40
     Width = 296
     Height = 623
-    ActivePage = TabSheet7
+    ActivePage = TabSheet9
     Anchors = [akLeft, akTop, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -860,7 +860,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 13
+        ItemHeight = 0
         TabOrder = 2
         OnChange = CBTexChange
       end
@@ -871,7 +871,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 13
+        ItemHeight = 0
         TabOrder = 3
         OnChange = CBTexChange
       end
@@ -882,7 +882,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 13
+        ItemHeight = 0
         TabOrder = 4
         OnChange = CBTexChange
       end
@@ -1561,7 +1561,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 16
-        ItemHeight = 13
+        ItemHeight = 0
         TabOrder = 22
         OnChange = ObjChangeInstance
       end
@@ -4101,7 +4101,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 16
-        ItemHeight = 13
+        ItemHeight = 0
         TabOrder = 11
         OnChange = TOB_Change
       end
@@ -5528,7 +5528,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 12
-        ItemHeight = 13
+        ItemHeight = 0
         Sorted = True
         TabOrder = 11
         OnChange = EditSkyChange
@@ -5541,7 +5541,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 12
-        ItemHeight = 13
+        ItemHeight = 0
         Sorted = True
         TabOrder = 12
         OnChange = EditSkyChange

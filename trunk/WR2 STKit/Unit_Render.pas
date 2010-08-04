@@ -724,6 +724,7 @@ glvertex3fv(@TRK[ID].Route[TRKQty[ID].Nodes].X);
 glEnd;
 end;
 
+
 procedure RenderLights(A:single; Mode:string; ID:integer);
 var ii:integer; h,p,b:integer;
 begin
@@ -773,6 +774,7 @@ end;
 glLineWidth(LineWidth);
 glPointSize(PointSize);
 end;
+
 
 procedure RenderMakeTrack(A:single; ID:integer);
 var ii,kk:integer; n0,n2:integer; TMP:vector3f;
@@ -1080,38 +1082,38 @@ end;
 procedure RenderCar();
 var kk:integer;
 begin
-glenable(GL_DEPTH_TEST);
-glenable(GL_LIGHTING);
-glPushMatrix;
-  glColor4f(1,1,1,0.25);
-  glTranslatef(CarX,CarY,CarZ); //reset position
-  glRotatef(CarH, 0,1,0);
-  glRotatef(CarP, 1,0,0);
-  glRotatef(CarB, 0,0,1);
-  for kk:=1 to length(ObjCall[0].Call) do begin
-    glBindTexture(GL_TEXTURE_2D,ObjTex[0,kk-1]);
-    glCallList(ObjCall[0].Call[kk-1]);
-  end;
-glPopMatrix;
-glBindTexture(GL_TEXTURE_2D,0);
-gldisable(GL_LIGHTING);
-gldisable(GL_DEPTH_TEST);
-
-glLineWidth(2);
-glPointSize(2);
-glColor4f(0.63,0.63,0.63,1);
-for kk:=1 to 4 do begin
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_LIGHTING);
   glPushMatrix;
-  glTranslatef(CarWheels[kk].Pos.X,CarWheels[kk].Pos.Y+3,CarWheels[kk].Pos.Z); //reset position
-  glkScale(3);
-  glRotatef(CarH+CarWheels[kk].Angle.H , 0,1,0);
-  glRotatef(CarWheels[kk].Angle.P , 1,0,0);
-  glTranslatef(0.4,0,0);
-  glCallList(coCircleYZ);
-  glTranslatef(-0.8,0,0);
-  glCallList(coCircleYZ);
+    glColor4f(1,1,1,0.25);
+    glTranslatef(CarX,CarY,CarZ); //reset position
+    glRotatef(CarH, 0,1,0);
+    glRotatef(CarP, 1,0,0);
+    glRotatef(CarB, 0,0,1);
+    for kk:=1 to length(ObjCall[0].Call) do begin
+      glBindTexture(GL_TEXTURE_2D,ObjTex[0,kk-1]);
+      glCallList(ObjCall[0].Call[kk-1]);
+    end;
   glPopMatrix;
-end;
+  glBindTexture(GL_TEXTURE_2D,0);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_DEPTH_TEST);
+
+  glLineWidth(2);
+  glPointSize(2);
+  glColor4f(0.63,0.63,0.63,1);
+  for kk:=1 to 4 do begin
+    glPushMatrix;
+    glTranslatef(CarWheels[kk].Pos.X,CarWheels[kk].Pos.Y+3,CarWheels[kk].Pos.Z); //reset position
+    glkScale(3);
+    glRotatef(CarH+CarWheels[kk].Angle.H , 0,1,0);
+    glRotatef(CarWheels[kk].Angle.P , 1,0,0);
+    glTranslatef(0.4,0,0);
+    glCallList(coCircleYZ);
+    glTranslatef(-0.8,0,0);
+    glCallList(coCircleYZ);
+    glPopMatrix;
+  end;
 end;
 
 procedure RenderGrass(In1,GMode:integer);
