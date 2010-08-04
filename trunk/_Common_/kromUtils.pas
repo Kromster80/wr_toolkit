@@ -13,11 +13,6 @@ type
   Vector2f = record U,V:single; end;
   PVector3f = ^Vector3f;
 
-  TKMPoint = record X,Y:word; end;
-  TKMPointf = record X,Y:single; end;
-
-  TKMouseButton = (kmb_None, kmb_Left, kmb_Right, kmb_Middle);
-
 function ElapsedTime(i1: pcardinal): string;
 function ExtractOpenedFileName(in_s: string):string;
 function GetFileExt (const FileName: string): string;
@@ -57,7 +52,6 @@ function Pow(const Base, Exponent: integer): integer;
   function GetLength(ix,iy,iz:single): single; overload;
   function GetLength(ix:Vector3f): single; overload;
   function GetLength(ix,iy:single): single; overload;
-  function GetLength(A,B:TKMPoint): single; overload;
 
   function InBetween(A,B,X:single): boolean;
 
@@ -602,11 +596,6 @@ end;
 function GetLength(ix,iy:single): single; overload;
 begin
   Result:=sqrt(sqr(ix)+sqr(iy));
-end;
-
-function GetLength(A,B:TKMPoint): single; overload;
-begin
-  Result:=sqrt(sqr(A.x-B.x)+sqr(A.y-B.y));
 end;
 
 
