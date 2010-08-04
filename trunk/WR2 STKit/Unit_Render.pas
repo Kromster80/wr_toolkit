@@ -1221,41 +1221,34 @@ end;
 if Qty.Polys=0 then exit;
 if Mode>0 then begin
   glColor4f(1,1,1,0.7);
-  for kk:=1 to Qty.BlocksZ do for ii:=1 to Qty.BlocksX do begin
-  glRasterPos3f((ii-Qty.BlocksX div 2-0.7)*1024,VTX[1].Y,(kk-Qty.BlocksZ div 2-0.6)*1024);
-  case Mode of
-  1: s:=inttostr(Block[kk,ii].FirstPoly);
-  2: s:=inttostr(Block[kk,ii].NumPoly);
-  3: s:=inttostr(Block[kk,ii].FirstTex);
-  4: s:=inttostr(Block[kk,ii].NumTex);
-  5: s:=inttostr(Block[kk,ii].FirstObj);
-  6: s:=inttostr(Block[kk,ii].NumObj);
-  7: s:=inttostr(Block[kk,ii].FirstLight);
-  8: s:=inttostr(Block[kk,ii].NumLight);
-  9: s:=inttostr(Block[kk,ii].Chunk65k);
-  10:s:=inttostr(Block[kk,ii].x1);
-  11:begin //glEnable(GL_DEPTH_TEST);
-  glColor4f(1,1,1,0.7);
-  glPushMatrix;
-//  glTranslatef(ii*1024-Qty.BlocksX*512-512,Block[kk,ii].CenterY,kk*1024-Qty.BlocksZ*512-512);
-  glTranslatef(Block[kk,ii].CenterX,Block[kk,ii].CenterY,Block[kk,ii].CenterZ);
-  glScalef(Block[kk,ii].Rad/3,200,Block[kk,ii].Rad/3);
-  glCallList(coCircleXZ);
-  glPopMatrix; //glDisable(GL_DEPTH_TEST);
-  s:='';
-  end;
-  12:begin //glEnable(GL_DEPTH_TEST);
-  if Block[kk,ii].CenterY>0 then glColor4f(1,1,1,0.7) else glColor4f(1,0,0,0.7);
-  glPushMatrix;
-//  glTranslatef(ii*1024-Qty.BlocksX*512-512,Block[kk,ii].CenterY,kk*1024-Qty.BlocksZ*512-512);
-  glTranslatef(Block[kk,ii].CenterX,Block[kk,ii].CenterY,Block[kk,ii].CenterZ);
-  glScalef(Block[kk,ii].CenterY/3,200,Block[kk,ii].CenterY/3);
-  glCallList(coCircleXZ);
-  glPopMatrix; //glDisable(GL_DEPTH_TEST);
-  s:='';
-  end;
-  end;
-  glPrint(s);
+  for kk:=1 to Qty.BlocksZ do for ii:=1 to Qty.BlocksX do
+  if GetLength(((ii-0.5)-Qty.BlocksX/2)*1024 - xPos, ((kk-0.5)-Qty.BlocksZ/2)*1024 - zPos) < fOptions.ViewDistance/2 then begin
+    glRasterPos3f((ii-Qty.BlocksX div 2-0.7)*1024,VTX[1].Y,(kk-Qty.BlocksZ div 2-0.6)*1024);
+    case Mode of
+    1:  s:=inttostr(Block[kk,ii].FirstPoly);
+    2:  s:=inttostr(Block[kk,ii].NumPoly);
+    3:  s:=inttostr(Block[kk,ii].FirstTex);
+    4:  s:=inttostr(Block[kk,ii].NumTex);
+    5:  s:=inttostr(Block[kk,ii].FirstObj);
+    6:  s:=inttostr(Block[kk,ii].NumObj);
+    7:  s:=inttostr(Block[kk,ii].FirstLight);
+    8:  s:=inttostr(Block[kk,ii].NumLight);
+    9:  s:=inttostr(Block[kk,ii].Chunk65k);
+    10: s:=inttostr(Block[kk,ii].x1);
+    11: begin
+          glColor4f(1,1,1,0.25);
+          for ci:=1 to 72 do begin
+          glPushMatrix;
+            glTranslatef(Block[kk,ii].CenterX,Block[kk,ii].CenterY,Block[kk,ii].CenterZ);
+            glScalef(Block[kk,ii].Rad,Block[kk,ii].Rad,Block[kk,ii].Rad);
+            glRotatef(ci*5, 1, 0, 0);
+            glCallList(coCircleXZ);
+          glPopMatrix;
+          end;
+          s:='';
+        end;
+    end;
+    glPrint(s);
   end;
 end;
 x:=round(xPos/256+0.5+Qty.BlocksX * 2);
@@ -1606,5 +1599,6 @@ glPushMatrix;
 glPopMatrix;
 glLineWidth(LineWidth);
 end;
+
 
 end.

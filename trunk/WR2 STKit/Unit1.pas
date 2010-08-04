@@ -1191,7 +1191,7 @@ var
     Mode,Shape,Weight,p4:word;
     x1,x2,x3:integer;
     HitSound,FallSound:string[48]; end;
-  Block:array[1..200,1..200]of record
+  Block:array[1..MAX_BLOCKS_X,1..MAX_BLOCKS_Z]of record
     X,Z:word;
     FirstPoly,NumPoly,FirstTex,NumTex:integer;
     CenterX,CenterY,CenterZ,Rad:single;
@@ -1312,8 +1312,8 @@ var
 
   SizeX,SizeZ:integer;       //map dimensions
   pblock:array of integer;                       //Parent block of poly
-  pqtyb:array[1..4096,1..2]of integer;                    //First Poly/number polys
-  sqtyb:array[1..4096,1..2]of integer;                    //First Surf/number surfs
+  pqtyb:array[1..MAX_BLOCK_COUNT,1..2]of integer;                    //First Poly/number polys
+  sqtyb:array[1..MAX_BLOCK_COUNT,1..2]of integer;                    //First Surf/number surfs
   repoint,recreat:array of integer;             //sorts polys by appearing in Blocks
   split:array[1..64,1..2]of integer;                    //65K poly group split point
   Cbl:array of array of integer;                      //Polys of collision block
