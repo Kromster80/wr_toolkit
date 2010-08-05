@@ -105,7 +105,7 @@ PresetColor:Array[1..30,1..3] of byte = (
 ObjTypes1:array[0..8]of byte = (0,3,4,5,6,7,8,16,17);
 ObjTypes1inv:array[0..17]of byte = (0,0,0,1,2,3,4,5,6,0,0,0,0,0,0,0,7,8);
 
-PageCaption:Array[1..16] of string = (
+PageCaption:Array[ActivePageTypes] of string = (
 '[LW] Convert LWO to Scenery',
 '[GR] Grounds setup',
 '[TX] Textures',
@@ -114,7 +114,9 @@ PageCaption:Array[1..16] of string = (
 '[SN] Sounds',
 '[LI] Lights',
 '[ST] Structure info',
-'[TRK] Tracks',
+'[TRK-MT] Tracks - Make track',
+'[TRK-AR] Tracks - Direction arrows',
+'[TRK-WP] Tracks - Waypoints',
 '[TOB] Track objects',
 '[STR] Traffic streets',
 '[SNI] Animated objects',

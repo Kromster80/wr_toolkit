@@ -527,41 +527,41 @@ end;
 procedure RenderTracksWP(a:single; TrackWP,Node:integer);
 var ii:integer;
 begin
-if TrackWP=0 then exit;
+  if TrackWP=0 then exit;
 
-if A<>0 then begin
-    glbegin(GL_LINE_STRIP);
+  if A<>0 then begin
+    glBegin(GL_LINE_STRIP);
     for ii:=1 to WTR[TrackWP].NodeQty do begin
-    glColor4f(1-ii/WTR[TrackWP].NodeQty,ii/WTR[TrackWP].NodeQty,0,1);
-    glvertex3fv(@WTR[TrackWP].Node[ii].X);
+      glColor4f(1-ii/WTR[TrackWP].NodeQty,ii/WTR[TrackWP].NodeQty,0,1);
+      glVertex3fv(@WTR[TrackWP].Node[ii].X);
     end;
     glEnd;
 
     glLineWidth(1);
     glColor4f(1,1,0,1);
-    glbegin(GL_LINES);
+    glBegin(GL_LINES);
     for ii:=1 to WTR[TrackWP].NodeQty do begin
-    glvertex3f(WTR[TrackWP].Node[ii].X+WTR[TrackWP].Node[ii].M[1]*50,
-               WTR[TrackWP].Node[ii].Y+WTR[TrackWP].Node[ii].M[4]*50,
-               WTR[TrackWP].Node[ii].Z+WTR[TrackWP].Node[ii].M[7]*50);
-    glvertex3f(WTR[TrackWP].Node[ii].X-WTR[TrackWP].Node[ii].M[1]*50,
-               WTR[TrackWP].Node[ii].Y-WTR[TrackWP].Node[ii].M[4]*50,
-               WTR[TrackWP].Node[ii].Z-WTR[TrackWP].Node[ii].M[7]*50);
+      glVertex3f(WTR[TrackWP].Node[ii].X+WTR[TrackWP].Node[ii].M[1]*50,
+                 WTR[TrackWP].Node[ii].Y+WTR[TrackWP].Node[ii].M[4]*50,
+                 WTR[TrackWP].Node[ii].Z+WTR[TrackWP].Node[ii].M[7]*50);
+      glVertex3f(WTR[TrackWP].Node[ii].X-WTR[TrackWP].Node[ii].M[1]*50,
+                 WTR[TrackWP].Node[ii].Y-WTR[TrackWP].Node[ii].M[4]*50,
+                 WTR[TrackWP].Node[ii].Z-WTR[TrackWP].Node[ii].M[7]*50);
     end;
     glEnd;
-end;
+  end;
 
-glLineWidth(LineWidth);
+  glLineWidth(LineWidth);
 
-glbegin(GL_POINTS);
-for ii:=1 to WTR[TrackWP].NodeQty do begin
-SetPresetColorGL(WTR[TrackWP].Node[ii].CheckPointID,1);
-if A=0 then kSetColorCode(KPoint,ii);
-glvertex3fv(@WTR[TrackWP].Node[ii].X);
-end;
-glColor3f(1,0,0);
-if (Node<>0)and(A<>0) then glvertex3fv(@WTR[TrackWP].Node[Node].X);
-glEnd;
+  glBegin(GL_POINTS);
+  for ii:=1 to WTR[TrackWP].NodeQty do begin
+    SetPresetColorGL(WTR[TrackWP].Node[ii].CheckPointID,1);
+    if A=0 then kSetColorCode(KPoint,ii);
+    glVertex3fv(@WTR[TrackWP].Node[ii].X);
+  end;
+  glColor3f(1,0,0);
+  if (Node<>0)and(A<>0) then glvertex3fv(@WTR[TrackWP].Node[Node].X);
+  glEnd;
 
 end;
 
