@@ -2976,19 +2976,19 @@ if (Sender='All')or(Sender='Triggers') then begin
 end;
 
 if (Sender='All')or(Sender='Tracks') then begin
-CBTrack.Clear;
-LBTrack.Clear;
-for i:=1 to TracksQty do begin
-CBTrack.Items.Add(Scenery+' '+inttostr(i));
-LBTrack.Items.Add(Scenery+' '+inttostr(i)+'  '+inttostr(TRKQty[i].a1)+inttostr(TRKQty[i].a2)+inttostr(TRKQty[i].a4)+inttostr(TRKQty[i].a6)+inttostr(TRKQty[i].a7)+inttostr(TRKQty[i].a8));
-end;
-for i:=1 to TracksQtyWP do begin
-CBTrack.Items.Add(Scenery+' WP'+inttostr(i));
-LBTrack.Items.Add(Scenery+' WP'+inttostr(i));
-end;
-TrackID:=EnsureRange(TrackID,1,TracksQty);
-CBTrack.ItemIndex:=TrackID-1;
-LBTrack.ItemIndex:=TrackID-1;
+  CBTrack.Clear;
+  LBTrack.Clear;
+  for i:=1 to TracksQty do begin
+    CBTrack.Items.Add(Scenery+' '+inttostr(i));
+    LBTrack.Items.Add(Scenery+' '+inttostr(i)+'  '+inttostr(TRKQty[i].a1)+inttostr(TRKQty[i].a2)+inttostr(TRKQty[i].a4)+inttostr(TRKQty[i].a6)+inttostr(TRKQty[i].a7)+inttostr(TRKQty[i].a8));
+  end;
+  for i:=1 to TracksQtyWP do begin
+    CBTrack.Items.Add(Scenery+' WP'+inttostr(i));
+    LBTrack.Items.Add(Scenery+' WP'+inttostr(i));
+  end;
+  TrackID:=EnsureRange(TrackID,1,TracksQty);
+  CBTrack.ItemIndex := TrackID-1;
+  LBTrack.ItemIndex := TrackID-1;
 end;
 
 if (Sender='All')or(Sender='Streets') then begin
@@ -3559,7 +3559,7 @@ begin
     15:ActivePage:=apAddonInfo;
   end;
   SendQADtoUI('All'); //?
-  StatusBar1.Panels[4].Text:=PageCaption[PageControl1.ActivePageIndex+1];
+  StatusBar1.Panels[4].Text:=PageCaption[ActivePage];
   StatusBar1.Panels[5].Text:=ReturnListOfChangedFiles(', ');
 end;
 
@@ -4557,13 +4557,13 @@ procedure TForm1.CBTrackChange(Sender: TObject);
 var i:integer;
   procedure SetWP(A:boolean);
   begin
-  OpenLWO_TRK.Enabled:=A;
-  TRK_Loop.Enabled:=A;
-  Button11.Enabled:=A;
-  Button16.Enabled:=A;
-  TRKProperty.Pages[0].Enabled:=A;
-  TRKProperty.Pages[1].Enabled:=A;
-  TRKProperty.Pages[2].Enabled:=not A;
+    OpenLWO_TRK.Enabled:=A;
+    TRK_Loop.Enabled:=A;
+    Button11.Enabled:=A;
+    Button16.Enabled:=A;
+    TRKProperty.Pages[0].Enabled:=A;
+    TRKProperty.Pages[1].Enabled:=A;
+    TRKProperty.Pages[2].Enabled:=not A;
   end;
 begin
   if Sender=LBTrack then begin
@@ -4588,7 +4588,7 @@ begin
 
   PlayTrackPos:=0;
   if TrackWP <> 0 then begin
-    TRKProperty.ActivePageIndex:=2; //Waypoint nodes
+    TRKProperty.ActivePageIndex:=2; ActivePage := apTracksWP; //Tied
     SetWP(false);
     ListWPNodes.Clear;
     for i:=1 to WTR[TrackWP].NodeQty do
@@ -4596,7 +4596,7 @@ begin
   end else
   if TrackID <> 0 then begin
     TrackWP:=0;
-    TRKProperty.ActivePageIndex:=1;
+    TRKProperty.ActivePageIndex:=1; ActivePage := apTracksAR; //Tied
     SetWP(true);
     TRKRefresh:=true;
     TRK_Loop.Checked:=TRKQty[TrackID].LoopFlag=1;
@@ -7341,6 +7341,11 @@ end;
 procedure TForm1.CreateTrackFromMT(Sender: TObject);
 var ii,kk,ci:integer; dx,dy,dz,len,ang:single; NodeCount:integer;
 begin
+  if TrackID = 0 then begin
+    MessageBox(HWND(nil), 'Can''t make a track from nodes when no track is selected', 'Error', MB_OK);
+    exit;
+  end;
+
   if MakeTrack[TrackID].NodeQty<2 then begin
     MessageBox(HWND(nil), 'Can''t make a track from less that 2 nodes', 'Error', MB_OK);
     exit;
