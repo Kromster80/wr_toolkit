@@ -1652,6 +1652,9 @@ var vx,vy,vz:TFloatSpinEdit;
     Code:KCode; ID,tmp,PA,PB:integer;
     tx,ty,tz,px,py,pz,LA,LB:single;
 begin
+  vx:=nil; vy:=nil; vz:=nil; vxi:=nil; vyi:=nil; //Init to calm down Compiler
+  px:=0; py:=0; pz:=0; //Init to calm down Compiler
+
 try
 if MouseButton=0 then exit;
 if DoubleClick then exit;
@@ -1848,23 +1851,24 @@ glClearColor(SKY[SKYIndex].FogCol.R/255,SKY[SKYIndex].FogCol.G/255,SKY[SKYIndex]
   if Sender=MakeSMP then begin //make sun-to-map view
     glRotatef(yRot,-1, 0,0);
     glRotatef(xRot, 0,-1,0);
+    ZoomX:=1;
   end else
-  if CB2D.Checked then begin //make 2D view
-    glTranslatef(0,0,-7); //move away 7m
-    glRotatef(yRot,-1, 0,0); //Rotate in
-    glRotatef(xRot, 0,-1,0);
-    ZoomX:=140*power(zoom,3);
-    glkScale(ZoomX);
-    glTranslatef(-xPos,-yPos,-zPos);
-  end else begin //make normal view
-    glTranslatef(0,0,-7); //move away 7m
-    glRotatef(180 , 0, 0,1);
-    glRotatef(yRot,-1, 0,0); //Rotate in
-    glRotatef(xRot, 0,-1,0);
-    ZoomX:=0.04*power(zoom,3);                       //0,00005324 .. 0,16384  447px x3077
-    glkscale(ZoomX);
-    glTranslatef(-xPos,-yPos,-zPos);
-  end;
+    if CB2D.Checked then begin //make 2D view
+      glTranslatef(0,0,-7); //move away 7m
+      glRotatef(yRot,-1, 0,0); //Rotate in
+      glRotatef(xRot, 0,-1,0);
+      ZoomX:=140*power(zoom,3);
+      glkScale(ZoomX);
+      glTranslatef(-xPos,-yPos,-zPos);
+    end else begin //make normal view
+      glTranslatef(0,0,-7); //move away 7m
+      glRotatef(180 , 0, 0,1);
+      glRotatef(yRot,-1, 0,0); //Rotate in
+      glRotatef(xRot, 0,-1,0);
+      ZoomX:=0.04*power(zoom,3);                       //0,00005324 .. 0,16384  447px x3077
+      glkscale(ZoomX);
+      glTranslatef(-xPos,-yPos,-zPos);
+    end;
 
 LightPos[0]:=LVL.SunX/ZoomX;
 LightPos[1]:=LVL.SunY/ZoomX;
@@ -2707,6 +2711,8 @@ if Sender=MakeSMP then begin
   glGetTexImage(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,GL_FLOAT,@SMPData[1]);
 end;
 
+GetMem(bmp4,1);
+
 if Sender=ScreenRender then begin
   GetMem(bmp4,SizeH*SizeV*4);
   glActiveTexture(GL_TEXTURE0);
@@ -2728,9 +2734,10 @@ if Sender=ScreenRender then begin
   blockwrite(f,#32#0,2);
   blockwrite(f,pinteger(bmp4)^,SizeH*SizeV*4);
   closefile(f);
-  FreeMem(bmp4);
   MessageBox(Form1.Handle, PChar('Screenshot saved to '+fOptions.ExeDir+'\STKit2_screen.tga'), 'Info', MB_OK or MB_ICONINFORMATION);
 end;
+
+FreeMem(bmp4);
 
 if Sender=MakeSMP then begin
   for i:=1 to SMPHead.B do for k:=1 to SMPHead.A do
@@ -3033,40 +3040,41 @@ end;
 procedure TForm1.PanelMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var dx,dy:integer; b:Boolean;
 begin
-if MouseAction=0 then exit;
-case MouseAction of
-1:begin xPos:=xPos+(-(MouseX-X)*MouseMoveScale*cos(xRot/180*pi)
-                    +(MouseY-Y)*sign(yRot-180)*MouseMoveScale*sin(xRot/180*pi))/zoom/2;
-        zPos:=zPos+( (MouseX-X)*MouseMoveScale*sin(xRot/180*pi)
-                    +(MouseY-Y)*sign(yRot-180)*MouseMoveScale*cos(xRot/180*pi))/zoom/2;
-        xPos:=EnsureRange(xPos,-Qty.BlocksX*512,Qty.BlocksX*512);
-        zPos:=EnsureRange(zPos,-Qty.BlocksZ*512,Qty.BlocksZ*512);
-        dx:=Form1.ClientOrigin.X+PanelMove.Left+ImageMove.Left+MouseX;
-        dy:=Form1.ClientOrigin.Y+PanelMove.Top +ImageMove.Top+MouseY;
-        end;
-2:begin xRot:=xRot+(MouseX-X)/2.4; //a bit slower rotation feels better
-        yRot:=yRot+(MouseY-Y)/2.4;
-        dx:=Form1.ClientOrigin.X+PanelRotate.Left+ImageRotate.Left+MouseX;
-        dy:=Form1.ClientOrigin.Y+PanelRotate.Top +ImageRotate.Top+MouseY;
-        end;
-3:begin Zoom:=Zoom-(MouseX-X)/300;
-        Zoom:=EnsureRange(Zoom,ZoomLo,ZoomHi);
-        dx:=Form1.ClientOrigin.X+PanelZoom.Left+ImageZoom.Left+MouseX;
-        dy:=Form1.ClientOrigin.Y+PanelZoom.Top +ImageZoom.Top+MouseY;
-        end;
-end;
+  if MouseAction=0 then exit;
+  dx:=0; dy:=0;
+  case MouseAction of
+    1:begin xPos:=xPos+(-(MouseX-X)*MouseMoveScale*cos(xRot/180*pi)
+                        +(MouseY-Y)*sign(yRot-180)*MouseMoveScale*sin(xRot/180*pi))/zoom/2;
+            zPos:=zPos+( (MouseX-X)*MouseMoveScale*sin(xRot/180*pi)
+                        +(MouseY-Y)*sign(yRot-180)*MouseMoveScale*cos(xRot/180*pi))/zoom/2;
+            xPos:=EnsureRange(xPos,-Qty.BlocksX*512,Qty.BlocksX*512);
+            zPos:=EnsureRange(zPos,-Qty.BlocksZ*512,Qty.BlocksZ*512);
+            dx:=Form1.ClientOrigin.X+PanelMove.Left+ImageMove.Left+MouseX;
+            dy:=Form1.ClientOrigin.Y+PanelMove.Top +ImageMove.Top+MouseY;
+            end;
+    2:begin xRot:=xRot+(MouseX-X)/2.4; //a bit slower rotation feels better
+            yRot:=yRot+(MouseY-Y)/2.4;
+            dx:=Form1.ClientOrigin.X+PanelRotate.Left+ImageRotate.Left+MouseX;
+            dy:=Form1.ClientOrigin.Y+PanelRotate.Top +ImageRotate.Top+MouseY;
+            end;
+    3:begin Zoom:=Zoom-(MouseX-X)/300;
+            Zoom:=EnsureRange(Zoom,ZoomLo,ZoomHi);
+            dx:=Form1.ClientOrigin.X+PanelZoom.Left+ImageZoom.Left+MouseX;
+            dy:=Form1.ClientOrigin.Y+PanelZoom.Top +ImageZoom.Top+MouseY;
+            end;
+  end;
 
-if fOptions.TraceSurface then if (not ScnRefresh)and(Qty.Polys>0) then
-TraceHeight(xPos,yPos,zPos,pd_Near,@yPos,@TracePt);
+  if fOptions.TraceSurface then if (not ScnRefresh)and(Qty.Polys>0) then
+    TraceHeight(xPos,yPos,zPos,pd_Near,@yPos,@TracePt);
 
-if yRot<0 then yRot:=yRot+360;
-if yRot>=360 then yRot:=yRot-360;
-StatusBar1.Panels[2].Text:=' H'+inttostr(round(xRot)mod 360)+
-                           ' P'+inttostr(round(yRot))+
-                           ' Z'+floattostr(round(Zoom*100)/100);
-StatusBar1.Refresh;
-SetCursorPos(dx,dy); //return cursor to start location = "stick it"
-OnIdle(Panel1,b); //RENDER, otherwise it not works
+  if yRot<0 then yRot:=yRot+360;
+  if yRot>=360 then yRot:=yRot-360;
+  StatusBar1.Panels[2].Text:=' H'+inttostr(round(xRot)mod 360)+
+                             ' P'+inttostr(round(yRot))+
+                             ' Z'+floattostr(round(Zoom*100)/100);
+  StatusBar1.Refresh;
+  SetCursorPos(dx,dy); //return cursor to start location = "stick it"
+  OnIdle(Panel1,b); //RENDER, otherwise it not works
 end;
 
 procedure TForm1.ListSNIObjectsClick(Sender: TObject);
@@ -3459,7 +3467,7 @@ zPos:=Sound[ID].Z;
 end;
 
 procedure TForm1.SoundsChange(Sender: TObject);
-var i,ID:integer;
+var ID:integer;
 begin
 if SoundsRefresh then exit;
 ID:=ListSounds.ItemIndex;
@@ -3481,14 +3489,9 @@ if ID>0 then begin
   yPos:=Sound[ID].Y;
   zPos:=Sound[ID].Z;
 end else begin
-//for i:=1 to Qty.Sounds do begin
-//Sound[i].X:=Sound[i].X+SoundPosX.Value;
-//Sound[i].Y:=Sound[i].Y+SoundPosY.Value;
-//Sound[i].Z:=Sound[i].Z+SoundPosZ.Value;
-//end;
-SoundPosX.Value:=0;
-SoundPosY.Value:=0;
-SoundPosZ.Value:=0;
+  SoundPosX.Value:=0;
+  SoundPosY.Value:=0;
+  SoundPosZ.Value:=0;
 end;
 Changes.QAD:=true;
 end;
@@ -3916,7 +3919,7 @@ end;
 
 
 procedure TForm1.ObjChangeInstance(Sender: TObject);
-var ID,ii:integer; ss:string;
+var ID:integer; ss:string;
 begin
 if ObjInstanceRefresh then exit;
 if ListObjects2.ItemIndex=-1 then exit;
@@ -3932,14 +3935,9 @@ Obj[ID].PosZ:=ObjZ.Value;
 Obj[ID].Angl:=ObjAngl.Value/180*pi;
 Obj[ID].Size:=ObjSize.Value;
 if ObjInShadow.Checked then Obj[ID].InShadow:=1 else Obj[ID].InShadow:=0;
-//xPos:=Obj[ID].PosX;
-//yPos:=Obj[ID].PosY;
-//zPos:=Obj[ID].PosZ;
   if Sender=ListObjectsInstances then begin
-  ListObjects.ItemIndex:=ListObjectsInstances.ItemIndex;
-  //ii:=ListObjects2.ItemIndex+1;
-  ListObjectsClick(nil);
-  //ListObjects2.ItemIndex:=EnsureRange(ii,0,ListObjects2.Count)-1; //-1 if none left
+    ListObjects.ItemIndex:=ListObjectsInstances.ItemIndex;
+    ListObjectsClick(nil);
   end;
 Changes.QAD:=true;
 end;
@@ -4968,28 +4966,27 @@ var
   ii,i1,i2:integer;
   i3,i4:single;
 begin
-if not RunOpenDialog(OpenDialog,'',SceneryPath,'NFS-PU sounds list (*_aud.scn)|*.scn') then exit;
-//OpenDialog.FileName:=ExeDir+'industrial_aud.scn';
-assignfile(ft,OpenDialog.FileName); reset(ft);
-Qty.Sounds:=0; ii:=1;
-repeat
-readln(ft);     //AUDIO_ELEMENT 4
-readln(ft,Sound[ii].X,Sound[ii].Y,Sound[ii].Z);
-readln(ft,i1,i2,i3,i4);
-Sound[ii].Name:=inttostr(i2);
-Sound[ii].Radius:=round(i3/10);
+  if not RunOpenDialog(OpenDialog,'',SceneryPath,'NFS-PU sounds list (*_aud.scn)|*.scn') then exit;
+  assignfile(ft,OpenDialog.FileName); reset(ft);
+  Qty.Sounds:=0; ii:=1;
+  repeat
+    readln(ft);     //AUDIO_ELEMENT 4
+    readln(ft,Sound[ii].X,Sound[ii].Y,Sound[ii].Z);
+    readln(ft,i1,i2,i3,i4);
 
-Sound[ii].X:=Sound[ii].X*8.5;
-Sound[ii].Y:=Sound[ii].Y*8.5;
-Sound[ii].Z:=Sound[ii].Z*8.5;
+    Sound[ii].Name   := inttostr(i2);
+    Sound[ii].Radius := round(i3/10);
 
-readln(ft);     //Audio Element
-inc(ii);
-inc(Qty.Sounds);
+    Sound[ii].X := Sound[ii].X*8.5; //I usually had to scale PU sceneries to 85% of original size
+    Sound[ii].Y := Sound[ii].Y*8.5;
+    Sound[ii].Z := Sound[ii].Z*8.5;
 
-until(eof(ft));
-closefile(ft);
-SendQADtoUI('Sounds');
+    readln(ft);     //Audio Element
+    inc(ii);
+    inc(Qty.Sounds);
+  until(eof(ft));
+  closefile(ft);
+  SendQADtoUI('Sounds');
 end;
 
 procedure TForm1.CopySoundClick(Sender: TObject);
@@ -6922,11 +6919,12 @@ var i,k:integer; NewWave:boolean;
   data: TALVoid;
   argv: array of PalByte;
 begin
+  argv := nil;
 
-if not OpenALInitDone then begin
+  if not OpenALInitDone then begin
     InitOpenAL; //Initialize OpenAL
     AlutInit(nil, argv);
-end;
+  end;
 
 QtyWave:=0;
 

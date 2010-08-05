@@ -217,53 +217,55 @@ begin
 
   SNI_LOD := fOptions.SplineDetail;
 
-//glGetBooleanv(GL_DEPTH_TEST,@DT);
+  //Prepare Splines
+  setlength(Spline,STRHEad.NumSplines+1);
+  for ii:=1 to STRHead.NumSplines do begin
+    setlength(Spline[ii],SNI_LOD+1);
 
-//Prepare Splines
-setlength(Spline,STRHEad.NumSplines+1);
-for ii:=1 to STRHead.NumSplines do begin
-setlength(Spline[ii],SNI_LOD+1);
+    x0:=0; z0:=0; x1:=0; x3:=0; z1:=0; z3:=0; //Init to calm down compiler
 
     PA:=STR_Spline[ii].PtA+1;       //point A index
     PB:=STR_Spline[ii].PtB+1;       //point B index
     LA:=STR_Spline[ii].LenA/3;      //anchor A length
     LB:=-STR_Spline[ii].LenB/3;     //anchor B length
-        for kk:=0 to SNI_LOD do begin //Compute basic spline
-        T:=kk/SNI_LOD; //0..1 range
-        x0:=STR_Point[PA].x; x1:=x0+STR_Point[PA].tx*LA;
-        x3:=STR_Point[PB].x; x2:=x3+STR_Point[PB].tx*LB;
-        y0:=STR_Point[PA].y; y1:=y0+STR_Point[PA].ty*LA;
-        y3:=STR_Point[PB].y; y2:=y3+STR_Point[PB].ty*LB;
-        z0:=STR_Point[PA].z; z1:=z0+STR_Point[PA].tz*LA;
-        z3:=STR_Point[PB].z; z2:=z3+STR_Point[PB].tz*LB;
-        cx:=3*(x1-x0); bx:=3*(x2-x1)-cx; ax:=x3-x0-cx-bx; Spline[ii,kk].x:=ax*t*t*t+bx*t*t+cx*t+x0;
-        cy:=3*(y1-y0); by:=3*(y2-y1)-cy; ay:=y3-y0-cy-by; Spline[ii,kk].y:=ay*t*t*t+by*t*t+cy*t+y0;
-        cz:=3*(z1-z0); bz:=3*(z2-z1)-cz; az:=z3-z0-cz-bz; Spline[ii,kk].z:=az*t*t*t+bz*t*t+cz*t+z0;
-        end;
-        for kk:=1 to SNI_LOD-1 do begin //Compute basic spline tangents
-        Spline[ii,kk].tx:=Spline[ii,kk+1].x-Spline[ii,kk-1].x;
-        Spline[ii,kk].tz:=Spline[ii,kk+1].z-Spline[ii,kk-1].z;
-        Normalize(Spline[ii,kk].tx,Spline[ii,kk].tz);
-        T:=arctan2(Spline[ii,kk].tx,Spline[ii,kk].tz); T:=T-0.5*pi; //making tangent into perpendicular
-        Spline[ii,kk].tx:=sin(T); Spline[ii,kk].tz:=cos(T);
-        end; //use nodes tangents for edges
-        Spline[ii,0].tx:=x1-x0; Spline[ii,0].tz:=z1-z0;
-        T:=arctan2(Spline[ii,0].tx,Spline[ii,0].tz); T:=T-0.5*pi;
-        Spline[ii,0].tx:=sin(T); Spline[ii,0].tz:=cos(T);
-        Spline[ii,SNI_LOD].tx:=x2-x3; Spline[ii,SNI_LOD].tz:=z2-z3;
-        T:=arctan2(Spline[ii,SNI_LOD].tx,Spline[ii,SNI_LOD].tz); T:=T+0.5*pi; //opposite direction perpendicular
-        Spline[ii,SNI_LOD].tx:=sin(T); Spline[ii,SNI_LOD].tz:=cos(T);
-end;
 
-//Centerlines
-if (A<>0)and(A<>1) then
-for ii:=1 to STRHead.NumSplines do begin
-glColor4f(0,0,0,1);
-glLineWidth(1);
-glbegin (GL_LINE_STRIP);
-for kk:=0 to SNI_LOD do glvertex3fv(@Spline[ii,kk].x);
-glEnd;
-end;
+    for kk:=0 to SNI_LOD do begin //Compute basic spline
+      T:=kk/SNI_LOD; //0..1 range
+      x0:=STR_Point[PA].x; x1:=x0+STR_Point[PA].tx*LA;
+      x3:=STR_Point[PB].x; x2:=x3+STR_Point[PB].tx*LB;
+      y0:=STR_Point[PA].y; y1:=y0+STR_Point[PA].ty*LA;
+      y3:=STR_Point[PB].y; y2:=y3+STR_Point[PB].ty*LB;
+      z0:=STR_Point[PA].z; z1:=z0+STR_Point[PA].tz*LA;
+      z3:=STR_Point[PB].z; z2:=z3+STR_Point[PB].tz*LB;
+      cx:=3*(x1-x0); bx:=3*(x2-x1)-cx; ax:=x3-x0-cx-bx; Spline[ii,kk].x:=ax*t*t*t+bx*t*t+cx*t+x0;
+      cy:=3*(y1-y0); by:=3*(y2-y1)-cy; ay:=y3-y0-cy-by; Spline[ii,kk].y:=ay*t*t*t+by*t*t+cy*t+y0;
+      cz:=3*(z1-z0); bz:=3*(z2-z1)-cz; az:=z3-z0-cz-bz; Spline[ii,kk].z:=az*t*t*t+bz*t*t+cz*t+z0;
+    end;
+    for kk:=1 to SNI_LOD-1 do begin //Compute basic spline tangents
+      Spline[ii,kk].tx:=Spline[ii,kk+1].x-Spline[ii,kk-1].x;
+      Spline[ii,kk].tz:=Spline[ii,kk+1].z-Spline[ii,kk-1].z;
+      Normalize(Spline[ii,kk].tx,Spline[ii,kk].tz);
+      T:=arctan2(Spline[ii,kk].tx,Spline[ii,kk].tz); T:=T-0.5*pi; //making tangent into perpendicular
+      Spline[ii,kk].tx:=sin(T); Spline[ii,kk].tz:=cos(T);
+    end; //use nodes tangents for edges
+
+    Spline[ii,0].tx:=x1-x0; Spline[ii,0].tz:=z1-z0;
+    T:=arctan2(Spline[ii,0].tx,Spline[ii,0].tz); T:=T-0.5*pi;
+    Spline[ii,0].tx:=sin(T); Spline[ii,0].tz:=cos(T);
+    Spline[ii,SNI_LOD].tx:=x2-x3; Spline[ii,SNI_LOD].tz:=z2-z3;
+    T:=arctan2(Spline[ii,SNI_LOD].tx,Spline[ii,SNI_LOD].tz); T:=T+0.5*pi; //opposite direction perpendicular
+    Spline[ii,SNI_LOD].tx:=sin(T); Spline[ii,SNI_LOD].tz:=cos(T);
+  end;
+
+  //Centerlines
+  if (A<>0)and(A<>1) then
+  for ii:=1 to STRHead.NumSplines do begin
+    glColor4f(0,0,0,1);
+    glLineWidth(1);
+    glbegin (GL_LINE_STRIP);
+    for kk:=0 to SNI_LOD do glvertex3fv(@Spline[ii,kk].x);
+    glEnd;
+  end;
 
 //Splines
 glbegin (gl_quads);
