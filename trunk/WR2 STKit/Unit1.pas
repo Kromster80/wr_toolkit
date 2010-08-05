@@ -1224,7 +1224,7 @@ var
     end;
   ObjW:array[1..MaxObjInst]of record
     ParentBlock:integer; end; //Is not stored in WRK, can be recomputed easily
-  Light:array[1..2048]of record
+  Light:array[1..MAX_LIGHTS]of record
     Mode:integer;
     Size,Offset,Freq:single;
     B,G,R,A:byte;
@@ -1263,7 +1263,7 @@ var
     Dist:single;
   end;
 
-  LightW:array[1..2048]of record
+  LightW:array[1..MAX_LIGHTS]of record
     Radius:word;
     Mode:word;
     ParentBlock:integer;
@@ -4656,31 +4656,36 @@ end;
 
 procedure TForm1.AddLightClick(Sender: TObject);
 begin
-LightsRefresh:=true;
-inc(Qty.Lights);
-ListLights.Items.Add(inttostr(Qty.Lights)+'. ');
-ListLights.ItemIndex:=Qty.Lights-1;
-LightX.Value:=xPos;
-LightY.Value:=yPos;
-LightZ.Value:=zPos;
-LightsRefresh:=false;
-LightsChange(nil); //fill new with data from display
-Changes.QAD:=true;
+  LightsRefresh:=true;
+  if Qty.Lights>=MAX_LIGHTS then begin
+    MessageBox(Form1.Handle,PChar(Format('Can''t have more than %d lights',[MAX_LIGHTS])),'Error',MB_OK or MB_ICONINFORMATION);
+    exit; //Clip
+  end;
+  inc(Qty.Lights);
+  ListLights.Items.Add(inttostr(Qty.Lights)+'. ');
+  ListLights.ItemIndex:=Qty.Lights-1;
+  LightX.Value:=xPos;
+  LightY.Value:=yPos;
+  LightZ.Value:=zPos;
+  LightsRefresh:=false;
+  LightsChange(nil); //fill new with data from display
+  Changes.QAD:=true;
 end;
+
 
 procedure TForm1.RemLightClick(Sender: TObject);
 var i,ID:integer;
 begin
-if ListLights.ItemIndex<0 then exit;
-ID:=ListLights.ItemIndex+1;
-for i:=ID+1 to Qty.Lights do begin
-Light[i-1]:=Light[i];
-LightW[i-1]:=LightW[i];
-end;
-dec(Qty.Lights);
-SendQADtoUI('Lights');
-ListLights.ItemIndex:=EnsureRange(ID-1,0,Qty.Lights-1);
-Changes.QAD:=true;
+  if ListLights.ItemIndex<0 then exit;
+  ID:=ListLights.ItemIndex+1;
+  for i:=ID+1 to Qty.Lights do begin
+    Light[i-1]:=Light[i];
+    LightW[i-1]:=LightW[i];
+  end;
+  dec(Qty.Lights);
+  SendQADtoUI('Lights');
+  ListLights.ItemIndex:=EnsureRange(ID-1,0,Qty.Lights-1);
+  Changes.QAD:=true;
 end;
 
 procedure TForm1.ListLightsClick(Sender: TObject);
@@ -5167,46 +5172,50 @@ var
   m,ii,chsize:integer;
   chname:string[4];
 begin
-if not RunOpenDialog(OpenDialog,'',SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
-assignfile(f,OpenDialog.FileName); reset(f,1);
+  if not RunOpenDialog(OpenDialog,'',SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
+  assignfile(f,OpenDialog.FileName); reset(f,1);
 
-blockread(f,c,12);
-if (c[1]+c[2]+c[3]+c[4]+c[9]+c[10]+c[11]+c[12])<>'FORMLWO2' then begin
-MessageBox(Form1.Handle,'Old or unknown LWO format','Error',MB_OK or MB_ICONERROR);
-closefile(f); exit; end;
+  blockread(f,c,12);
+  if (c[1]+c[2]+c[3]+c[4]+c[9]+c[10]+c[11]+c[12])<>'FORMLWO2' then begin
+    MessageBox(Form1.Handle,'Old or unknown LWO format','Error',MB_OK or MB_ICONERROR);
+    closefile(f);
+    exit;
+  end;
 
-m:=int2(c[8],c[7],c[6],c[5])-4;
+  m:=int2(c[8],c[7],c[6],c[5])-4;
 
-repeat
-blockread(f,c,8);
-chname:=c[1]+c[2]+c[3]+c[4];
-chsize:=int2(c[8],c[7],c[6],c[5]);
-m:=m-chsize-8;
+  repeat
+    blockread(f,c,8);
+    chname:=c[1]+c[2]+c[3]+c[4];
+    chsize:=int2(c[8],c[7],c[6],c[5]);
+    m:=m-chsize-8;
 
-if chname='PNTS' then begin
-Qty.Lights:=chsize div 12;
-blockread(f,c,12*Qty.Lights);
-for ii:=1 to Qty.Lights do begin
-Light[ii].Matrix2[13]:=real2(c[ii*12-8],c[ii*12-9],c[ii*12-10],c[ii*12-11])*10;
-Light[ii].Matrix2[14]:=real2(c[ii*12-4],c[ii*12-5],c[ii*12-6],c[ii*12-7])*10;
-Light[ii].Matrix2[15]:=real2(c[ii*12-0],c[ii*12-1],c[ii*12-2],c[ii*12-3])*10;
+    if chname='PNTS' then begin
+      Qty.Lights:=chsize div 12;
+      Qty.Lights := min(Qty.Lights, MAX_LIGHTS); //Clip
+      blockread(f,c,12*Qty.Lights);
+      for ii:=1 to Qty.Lights do begin
+        Light[ii].Matrix2[13]:=real2(c[ii*12-8],c[ii*12-9],c[ii*12-10],c[ii*12-11])*10;
+        Light[ii].Matrix2[14]:=real2(c[ii*12-4],c[ii*12-5],c[ii*12-6],c[ii*12-7])*10;
+        Light[ii].Matrix2[15]:=real2(c[ii*12-0],c[ii*12-1],c[ii*12-2],c[ii*12-3])*10;
 
-Light[ii].Mode:=0;
-Light[ii].Size:=0;
-Light[ii].Offset:=0;
-Light[ii].Freq:=0;
-Light[ii].R:=255;
-Light[ii].G:=240;
-Light[ii].B:=200;
-LightW[ii].Radius:=30;
-LightW[ii].Mode:=1;
-end;
-end else
+        Light[ii].Mode:=0;
+        Light[ii].Size:=0;
+        Light[ii].Offset:=0;
+        Light[ii].Freq:=0;
+        Light[ii].R:=255;
+        Light[ii].G:=240;
+        Light[ii].B:=200;
+        LightW[ii].Radius:=30;
+        LightW[ii].Mode:=1;
+      end;
+    end else
 
-blockread(f,c,chsize);
-until(m<=0);
-SendQADtoUI('Lights');
-Changes.QAD:=true;
+    blockread(f,c,chsize);
+  until(m<=0);
+
+  SendQADtoUI('Lights');
+  Changes.QAD:=true;
 end;
 
 procedure TForm1.CopyLightClick(Sender: TObject);

@@ -85,23 +85,25 @@ begin
     blockread(f,c,6);    //TXUV_2
     ChapName:=c[1]+c[2]+c[3]+c[4];
     dec(ChapSize,6);
-      if ChapName='TXUV' then begin
-      repeat blockread(f,c,2); dec(ChapSize,2); //UV-map name
+    if ChapName='TXUV' then begin
+      repeat
+        blockread(f,c,2);
+        dec(ChapSize,2); //UV-map name
       until((c[1]=#0)or(c[2]=#0));
       blockread(f,c,ChapSize);
       ii:=0;
-        repeat
+      repeat
         inc(ii,10);
         inc(LWQty.UV[lay]);
         if c[ii-9]=#255 then begin
-        kk:=ord(c[ii-8])*65536+1;
-        inc(ii,2);
-        inc(kk,ord(c[ii-8])+ord(c[ii-9])*256);
+          kk:=ord(c[ii-8])*65536+1;
+          inc(ii,2);
+          inc(kk,ord(c[ii-8])+ord(c[ii-9])*256);
         end else
-        kk:=ord(c[ii-8])+ord(c[ii-9])*256+1;
+          kk:=ord(c[ii-8])+ord(c[ii-9])*256+1;
         LW.UV[LWQty.Vert[0]-LWQty.Vert[lay]+kk,1]:=real2(c[ii-4],c[ii-5],c[ii-6],c[ii-7]);
         LW.UV[LWQty.Vert[0]-LWQty.Vert[lay]+kk,2]:=real2(c[ii-0],c[ii-1],c[ii-2],c[ii-3]);
-        until(ii>=ChapSize);
+      until(ii>=ChapSize);
       inc(LWQty.UV[0],LWQty.UV[lay]);
       end else
 

@@ -19,6 +19,8 @@ const
   MAX_TRACKS        = 32;
   MAX_WP_TRACKS     = 32;
 
+  MAX_LIGHTS        = 2048;                 //Maximum Lights count
+
   MAX_BLOCKS_X      = 200;                  //How many blocks scenery can ahve in length (/102,4 = km)
   MAX_BLOCKS_Z      = 200;                  //Keeping in mind that max scenery size is 4096 blocks (*16 = 65k sub-block)
   MAX_BLOCK_COUNT   = 4096;
