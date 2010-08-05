@@ -8,7 +8,7 @@ procedure SetPresetColorGL(ID:integer; A:single);
 
 //STKit2 constants
 const
-  VersionInfo       = 'Scenery ToolKit 2.3.5           (16 Jul 2010)';
+  VersionInfo       = 'Scenery ToolKit 2.3.6           (05 Aug 2010)';
   FPS_INTERVAL      = 1000;    //Calculate FPS every ---- ms
   STKit2_Data_Path  = 'STKit2 Data';
 
