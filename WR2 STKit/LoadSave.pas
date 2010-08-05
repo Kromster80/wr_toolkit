@@ -622,7 +622,7 @@ end;
 procedure LoadTRK(Input,Input2:string);
 var
   f:file;
-  i,ii,kk:integer;// T:array[1..2048]of integer;
+  i,ii,kk:integer;
 begin
 TracksQty:=0;
 for i:=1 to MAX_TRACKS do
