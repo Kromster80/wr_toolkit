@@ -118,7 +118,7 @@ object Form1: TForm1
     Top = 40
     Width = 296
     Height = 623
-    ActivePage = TabSheet8
+    ActivePage = TabSheet9
     Anchors = [akLeft, akTop, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -246,7 +246,7 @@ object Form1: TForm1
       end
       object OptimizeVertices: TButton
         Left = 146
-        Top = 100
+        Top = 84
         Width = 137
         Height = 17
         Caption = 'Optimize vertices'
@@ -261,6 +261,15 @@ object Form1: TForm1
         Caption = 'Import VRL folder ...'
         TabOrder = 7
         OnClick = ImportVRLFolderClick
+      end
+      object OptimizeCullingSpheres: TButton
+        Left = 146
+        Top = 100
+        Width = 137
+        Height = 17
+        Caption = 'Optimize culling spheres'
+        TabOrder = 8
+        OnClick = OptimizeCullingSpheresClick
       end
     end
     object TabSheet16: TTabSheet
@@ -860,7 +869,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 2
         OnChange = CBTexChange
       end
@@ -871,7 +880,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 3
         OnChange = CBTexChange
       end
@@ -882,7 +891,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 4
         OnChange = CBTexChange
       end
@@ -1561,7 +1570,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 16
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 22
         OnChange = ObjChangeInstance
       end
@@ -4100,7 +4109,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 16
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 11
         OnChange = TOB_Change
       end
@@ -5527,7 +5536,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 12
-        ItemHeight = 0
+        ItemHeight = 13
         Sorted = True
         TabOrder = 11
         OnChange = EditSkyChange
@@ -5540,7 +5549,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 12
-        ItemHeight = 0
+        ItemHeight = 13
         Sorted = True
         TabOrder = 12
         OnChange = EditSkyChange

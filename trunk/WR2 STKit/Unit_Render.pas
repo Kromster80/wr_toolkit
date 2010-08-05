@@ -1236,12 +1236,12 @@ if Mode>0 then begin
     9:  s:=inttostr(Block[kk,ii].Chunk65k);
     10: s:=inttostr(Block[kk,ii].x1);
     11: begin
-          glColor4f(1,1,1,0.25);
-          for ci:=1 to 72 do begin
+          glColor4f(1,1,1,0.3);
+          for ci:=1 to 18 do begin
           glPushMatrix;
             glTranslatef(Block[kk,ii].CenterX,Block[kk,ii].CenterY,Block[kk,ii].CenterZ);
             glScalef(Block[kk,ii].Rad,Block[kk,ii].Rad,Block[kk,ii].Rad);
-            glRotatef(ci*5, 1, 0, 0);
+            glRotatef(ci*10, 1, 0, 0);
             glCallList(coCircleXZ);
           glPopMatrix;
           end;
