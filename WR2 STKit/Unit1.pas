@@ -640,6 +640,7 @@ type
     Label177: TLabel;
     Label178: TLabel;
     LoadobjectinstancesfromLWO1: TMenuItem;
+    OptimizeCullingSpheres: TButton;
     procedure CBReduceDisplayClick(Sender: TObject);
     procedure CBTraceClick(Sender: TObject);
 //    procedure RenderInit();
@@ -882,6 +883,7 @@ type
     procedure Show2ndFrameClick(Sender: TObject);
     procedure Done(Sender:Tobject);
     procedure OptimizeVerticesClick(Sender: TObject);
+    procedure OptimizeCullingSpheresClick(Sender: TObject);
 
   private     { Private declarations }
     procedure OnIdle(Sender: TObject; var Done: Boolean);
@@ -1280,7 +1282,6 @@ var
     UV :array of array[1..2]of single;
     Nv :array of array[1..3]of single; //normal to vertex
     Np :array of array[1..3]of single; //normal to poly
-    VW :array of byte; //vertex weight = shadow
     DUV:array of array[1..3,1..2]of single;
     RGBA:array of array[1..3]of byte;
     Poly:array of array[0..3]of integer;
@@ -7615,6 +7616,11 @@ end;
 procedure TForm1.OptimizeVerticesClick(Sender: TObject);
 begin
   OptimizeVerticesClick_();
+end;
+
+procedure TForm1.OptimizeCullingSpheresClick(Sender: TObject);
+begin
+  OptimizeCullingSpheresClick_();
 end;
 
 end.

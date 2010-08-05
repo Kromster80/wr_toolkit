@@ -7,6 +7,7 @@ uses Unit1,sysutils,Windows,KromUtils,Math,dglOpenGL,Defaults;
   procedure CompileVTX_IDX();
   procedure CompileQAD();
   procedure OptimizeVerticesClick_();
+  procedure OptimizeCullingSpheresClick_();
   procedure PrepareOtherData();
 
 implementation
@@ -71,7 +72,6 @@ begin
       setlength(LW.UV  ,LWQty.Vert[0]+LWQty.Vert[lay]+1);
       setlength(LW.RGBA,LWQty.Vert[0]+LWQty.Vert[lay]+1);
       setlength(LW.Nv  ,LWQty.Vert[0]+LWQty.Vert[lay]+1);
-      setlength(LW.VW  ,LWQty.Vert[0]+LWQty.Vert[lay]+1);
       blockread(f,c,ChapSize);
       for ii:=1 to LWQty.Vert[lay] do begin
         LW.XYZ[LWQty.Vert[0]+ii,1]:=real2(c[ii*12-8],c[ii*12-9],c[ii*12-10],c[ii*12-11])*10;
@@ -391,7 +391,6 @@ begin
     setlength(LW.UV  ,LWQty.Vert[0]+1);
     setlength(LW.RGBA,LWQty.Vert[0]+1);
     setlength(LW.Nv  ,LWQty.Vert[0]+1);
-    setlength(LW.VW  ,LWQty.Vert[0]+1);
     setlength(LW.Poly,LWQty.Poly[0]+1);
     setlength(LW.DUV ,LWQty.Poly[0]+1);
     setlength(LW.Surf,LWQty.Poly[0]+1);
@@ -422,7 +421,6 @@ var
   x,z:real;
   tmp:array of array[0..5]of integer;
   tms:array of array[1..6]of single;
-  BlockBounds:array[1..MAX_BLOCKS_X, 1..MAX_BLOCKS_Z, 1..2] of Vector3f;
 begin
   ////////////////////////////////////////////////////////////////////////////////
   Form1.MemoLWO.Lines.Add('Adding Quad data ...');
@@ -544,43 +542,6 @@ for ii:=1 to 64 do begin
     exit;
   end;
 end;
-
-  Form1.MemoLWO.Lines.Add('Rebuilding block spheres ...');
-
-  //Init minimum and maximum values
-  for ii:=1 to MAX_BLOCKS_X do for kk:=1 to MAX_BLOCKS_Z do begin
-    BlockBounds[ii,kk,1].X := MaxSingle;
-    BlockBounds[ii,kk,1].Y := MaxSingle;
-    BlockBounds[ii,kk,1].Z := MaxSingle;
-    BlockBounds[ii,kk,2].X := MinSingle;
-    BlockBounds[ii,kk,2].Y := MinSingle;
-    BlockBounds[ii,kk,2].Z := MinSingle;
-  end;
-
-  for ii:=1 to LWQty.Poly[0] do if LW.DUV[ii,1,1]<>DONT_TRACE_TAG then begin //Store Block bounds, temp
-    for kk:=1 to 3 do begin
-      ci:=((pblock[ii]-1) div SizeX)+1;
-      ck:=((pblock[ii]-1) mod SizeX)+1;
-      BlockBounds[ci,ck,1].X := min(BlockBounds[ci,ck,1].X, LW.XYZ[LW.Poly[ii,kk],1]);
-      BlockBounds[ci,ck,1].Y := min(BlockBounds[ci,ck,1].Y, LW.XYZ[LW.Poly[ii,kk],2]);
-      BlockBounds[ci,ck,1].Z := min(BlockBounds[ci,ck,1].Z, LW.XYZ[LW.Poly[ii,kk],3]);
-      BlockBounds[ci,ck,2].X := max(BlockBounds[ci,ck,2].X, LW.XYZ[LW.Poly[ii,kk],1]);
-      BlockBounds[ci,ck,2].Y := max(BlockBounds[ci,ck,2].Y, LW.XYZ[LW.Poly[ii,kk],2]);
-      BlockBounds[ci,ck,2].Z := max(BlockBounds[ci,ck,2].Z, LW.XYZ[LW.Poly[ii,kk],3]);
-    end;
-  end;
-
-  for ii:=1 to SizeZ do for kk:=1 to SizeX do begin
-    Block[ii,kk].CenterX := (BlockBounds[ii,kk,1].X + BlockBounds[ii,kk,2].X) / 2;
-    Block[ii,kk].CenterY := (BlockBounds[ii,kk,1].Y + BlockBounds[ii,kk,2].Y) / 2;
-    Block[ii,kk].CenterZ := (BlockBounds[ii,kk,1].Z + BlockBounds[ii,kk,2].Z) / 2;
-    Block[ii,kk].Rad     := GetLength( //Length from center point to any bounding box vertice is the same
-                            (Block[ii,kk].CenterX - BlockBounds[ii,kk,1].X),
-                            (Block[ii,kk].CenterY - BlockBounds[ii,kk,1].Y),
-                            (Block[ii,kk].CenterZ - BlockBounds[ii,kk,1].Z));
-  end;
-
-  Form1.Done(Form1.MemoLWO);
 
 ////////////////////////////////////////////////////////////////////////////////
 Form1.MemoLWO.Lines.Add('Building IDX ...');
@@ -852,6 +813,7 @@ Changes.IDX:=true;
 Changes.QAD:=true;
 
   OptimizeVerticesClick_();
+  OptimizeCullingSpheresClick_();
   Form1.MemoLWO.Lines.Add('Vertices optimized in'+ElapsedTime(@OldTime));
   PrepareOtherData();
 end;
@@ -1014,6 +976,46 @@ list_ogl:=0;
 end;
 
 
+procedure OptimizeCullingSpheresClick_();
+var
+  ii,kk,ci,ck:integer;
+  BlockBounds:array[1..MAX_BLOCKS_X, 1..MAX_BLOCKS_Z, 1..2] of Vector3f;
+begin
+  //Init minimum and maximum values
+  for ii:=1 to MAX_BLOCKS_X do for kk:=1 to MAX_BLOCKS_Z do begin
+    BlockBounds[ii,kk,1].X := MaxSingle;
+    BlockBounds[ii,kk,1].Y := MaxSingle;
+    BlockBounds[ii,kk,1].Z := MaxSingle;
+    BlockBounds[ii,kk,2].X := -MaxSingle;
+    BlockBounds[ii,kk,2].Y := -MaxSingle;
+    BlockBounds[ii,kk,2].Z := -MaxSingle;
+  end;
+
+  for ii:=1 to Qty.BlocksZ do for kk:=1 to Qty.BlocksX do begin
+    for ci:=Block[ii,kk].FirstPoly+1 to Block[ii,kk].FirstPoly + Block[ii,kk].NumPoly do
+    if VTX[v[ci,1]].U <> DONT_TRACE_TAG then
+    for ck := 1 to 3 do begin
+      BlockBounds[ii,kk,1].X := min(BlockBounds[ii,kk,1].X, VTX[v[ci,ck]].X);
+      BlockBounds[ii,kk,1].Y := min(BlockBounds[ii,kk,1].Y, VTX[v[ci,ck]].Y);
+      BlockBounds[ii,kk,1].Z := min(BlockBounds[ii,kk,1].Z, VTX[v[ci,ck]].Z);
+      BlockBounds[ii,kk,2].X := max(BlockBounds[ii,kk,2].X, VTX[v[ci,ck]].X);
+      BlockBounds[ii,kk,2].Y := max(BlockBounds[ii,kk,2].Y, VTX[v[ci,ck]].Y);
+      BlockBounds[ii,kk,2].Z := max(BlockBounds[ii,kk,2].Z, VTX[v[ci,ck]].Z);
+    end;
+  end;
+
+  for ii:=1 to Qty.BlocksZ do for kk:=1 to Qty.BlocksX do begin
+    Block[ii,kk].CenterX := (BlockBounds[ii,kk,1].X + BlockBounds[ii,kk,2].X) / 2;
+    Block[ii,kk].CenterY := (BlockBounds[ii,kk,1].Y + BlockBounds[ii,kk,2].Y) / 2;
+    Block[ii,kk].CenterZ := (BlockBounds[ii,kk,1].Z + BlockBounds[ii,kk,2].Z) / 2;
+    Block[ii,kk].Rad     := GetLength( //Length from center point to any bounding box vertice is the same
+                            (Block[ii,kk].CenterX - BlockBounds[ii,kk,1].X),
+                            (Block[ii,kk].CenterY - BlockBounds[ii,kk,1].Y),
+                            (Block[ii,kk].CenterZ - BlockBounds[ii,kk,1].Z));
+  end;
+end;
+
+
 procedure PrepareOtherData();
 begin
 Form1.MemoLWO.Lines.Add('Preparing misc data');
@@ -1061,7 +1063,6 @@ setlength(LW.XYZ,0);
 setlength(LW.UV,0);
 setlength(LW.Nv,0);
 setlength(LW.Np,0);
-setlength(LW.VW,0);
 setlength(LW.DUV,0);
 setlength(LW.RGBA,0);
 setlength(LW.Poly,0);
