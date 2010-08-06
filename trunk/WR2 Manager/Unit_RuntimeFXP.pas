@@ -11,7 +11,7 @@ implementation
 
 procedure ReadRuntimeFXP(Sender: TObject);
 const BaseLength = 20542; //20542- is default for WR2
-var i:integer;
+var i:integer; ft:textfile;
 begin
   chdir(RootDir);
   assignfile(ft,'FrontEnd\Runtime.fxp'); reset(ft);
@@ -32,6 +32,7 @@ procedure SaveRuntimeFXP(Sender: TObject);
 var
   ir,iw,k,h:integer;
   s:string;
+  ft:textfile;
   Entry:record
     Line:integer;
     AddID:integer;

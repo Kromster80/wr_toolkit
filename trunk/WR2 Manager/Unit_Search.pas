@@ -17,60 +17,59 @@ implementation
 procedure SearchSceneries();
 var SearchRec:TSearchRec; ii,h,i,k:integer;
 begin
-ChDir(RootDir);
-////////////////////////////////////////////////////////////////////////////////
-//Scanning for add-on scenario folders
-////////////////////////////////////////////////////////////////////////////////
-if not DirectoryExists('AddOns\Sceneries') then begin
-  Form2.FormStyle:=fsNormal;
-  MessageBox(Form1.Handle,'"AddOns\Sceneries\" not found','Warning',MB_OK);
-  Form2.FormStyle:=fsStayOnTop;
-  AddonSceneryQty:=0;
-  //exit;
-end else begin
-  ChDir('AddOns\Sceneries');
-  FindFirst('*', faAnyFile or faDirectory, SearchRec);
-  h:=1;
-  repeat
-    if (SearchRec.Attr and faDirectory<>0)and(SearchRec.Name<>'.')and(SearchRec.Name<>'..') then begin
-    if fileexists(RootDir+'\AddOns\Sceneries\'+SearchRec.Name+'\EditScenery.sc2') then begin
-    AddonScenery[h].Folder:=SearchRec.Name;
-    inc(h); end; end;
-  until (FindNext(SearchRec)<>0);
-  FindClose(SearchRec);
-  AddonSceneryQty:=h-1;
+  ChDir(RootDir);
+  ////////////////////////////////////////////////////////////////////////////////
+  //Scanning for add-on scenario folders
+  ////////////////////////////////////////////////////////////////////////////////
+  if not DirectoryExists('AddOns\Sceneries') then begin
+    MessageBox(0, '"AddOns\Sceneries\" not found', 'Warning', MB_ICONWARNING or MB_OK or MB_TOPMOST or MB_APPLMODAL);
+    AddonSceneryQty:=0;
+    //exit;
+  end else begin
+    ChDir('AddOns\Sceneries');
+    FindFirst('*', faAnyFile or faDirectory, SearchRec);
+    h:=1;
+    repeat
+      if (SearchRec.Attr and faDirectory<>0)and(SearchRec.Name<>'.')and(SearchRec.Name<>'..') then begin
+      if fileexists(RootDir+'\AddOns\Sceneries\'+SearchRec.Name+'\EditScenery.sc2') then begin
+      AddonScenery[h].Folder:=SearchRec.Name;
+      inc(h); end; end;
+    until (FindNext(SearchRec)<>0);
+    FindClose(SearchRec);
+    AddonSceneryQty:=h-1;
 
-  //resorting add-on sceneries for Multi-Players
-  for i:=1 to h-1 do //all
-  for k:=i+1 to h-1 do  //all following after
-  if uppercase(AddonScenery[i].Folder)>uppercase(AddonScenery[k].Folder) then
-    SwapStr(AddonScenery[i].Folder, AddonScenery[k].Folder);
-end;
+    //resorting add-on sceneries for Multi-Players
+    for i:=1 to h-1 do //all
+    for k:=i+1 to h-1 do  //all following after
+    if uppercase(AddonScenery[i].Folder)>uppercase(AddonScenery[k].Folder) then
+      SwapStr(AddonScenery[i].Folder, AddonScenery[k].Folder);
+  end;
 
-Form2.Label3.Visible:=true;
-for ii:=1 to AddonSceneryQty do begin
-Form2.Label3.Caption:=inttostr(ii)+'/'+inttostr(AddonSceneryQty)+' ('+AddonScenery[ii].Folder+')'; Form2.Label3.Repaint;
-GetSceneryInfo(AddonScenery[ii].Folder,ii);
-//sleep(100);
-end;
-Form2.Label3.Visible:=false;
+  Form2.Label3.Visible:=true;
+  for ii:=1 to AddonSceneryQty do begin
+    Form2.Label3.Caption:=inttostr(ii)+'/'+inttostr(AddonSceneryQty)+' ('+AddonScenery[ii].Folder+')'; Form2.Label3.Repaint;
+    GetSceneryInfo(AddonScenery[ii].Folder,ii);
+  end;
+  Form2.Label3.Visible:=false;
 
-for i:=2 to 7 do begin  //CO[16,2].Entries
-Form1.CLBSceneries.AddItem(#160+WRTexte(Value[16,5,i].Str)+zz+inttostr(i-1),nil);
-Form1.CLBSceneries.State[i-2]:=cbGrayed;
-Form1.CLBSceneries.ItemEnabled[i-2]:=false;
-end;
+  for i:=2 to 7 do begin  //CO[16,2].Entries
+    Form1.CLBSceneries.AddItem(#160+WRTexte(Value[16,5,i].Str), TObject(i-1));
+    Form1.CLBSceneries.State[i-2]:=cbGrayed;
+    Form1.CLBSceneries.ItemEnabled[i-2]:=false;
+  end;
 
-for ii:=1 to AddonSceneryQty do begin
-Form1.CLBSceneries.AddItem(' '+AddonScenery[ii].Name+zz+inttostr(ii),nil);
-Form1.CLBSceneries.Checked[ii+6-1]:=AddonScenery[ii].Install;
-end;
+  for ii:=1 to AddonSceneryQty do begin
+    Form1.CLBSceneries.AddItem(' '+AddonScenery[ii].Name, TObject(ii));
+    Form1.CLBSceneries.Checked[ii+6-1]:=AddonScenery[ii].Install;
+  end;
 
-Form1.Label127.Caption:='Available sceneries: '+inttostr(6+AddonSceneryQty)+' / '+inttostr(MaxScen);
+  Form1.Label127.Caption:='Available sceneries: '+inttostr(6+AddonSceneryQty)+' / '+inttostr(MaxScen);
 end;
 
 procedure GetSceneryInfo(s1:string; i1:integer);
-var h,k:integer;
+var
+  h,k:integer;
+  f:file;
 begin
 assignfile(f,s1+'\EditScenery.sc2'); FileMode:=0; reset(f,1); FileMode:=2; //read-only
 blockread(f,c,4); if c[1]+c[2]+c[3]+c[4]<>'WR2'+#1 then exit;
@@ -107,9 +106,7 @@ var SearchRec:TSearchRec; ii,h:integer;
 begin
   ChDir(RootDir);
   if not DirectoryExists('WR2-Saves') then begin
-    Form2.FormStyle:=fsNormal;
-    MessageBox(Form1.Handle,'"WR2-Saves\" not found','Error',MB_OK);
-    Form2.FormStyle:=fsStayOnTop;
+    MessageBox(0, '"WR2-Saves\" not found', 'Warning', MB_ICONWARNING or MB_OK or MB_TOPMOST or MB_APPLMODAL);
     exit;
   end;
   ChDir('WR2-Saves');
@@ -134,7 +131,7 @@ begin
 end;
 
 procedure GetProfileInfo(s1:string;i1:integer);
-var i,j,m,k,h:integer; s:string;
+var i,j,m,k,h:integer; s:string; f:file;
 begin
 assignfile(f,RootDir+'\WR2-Saves\'+s1+'\career.wrc'); FileMode:=0; reset(f,1); FileMode:=2;
 blockread(f,P_[i1].Header,33);
@@ -224,9 +221,7 @@ begin
   AddonCarQty:=0;
 
   if not DirectoryExists('AddOns\autos') then begin
-    Form2.FormStyle := fsNormal;
-    MessageBox(Form1.Handle,'"AddOns\autos\" not found','Warning',MB_OK);
-    Form2.FormStyle := fsStayOnTop;
+    MessageBox(0, '"AddOns\autos\" not found', 'Warning', MB_ICONWARNING or MB_OK or MB_TOPMOST or MB_APPLMODAL);
     exit;
   end else begin
     ChDir('AddOns\autos');
@@ -236,7 +231,6 @@ begin
       if (SearchRec.Attr and faDirectory<>0)
       and(SearchRec.Name<>'.')
       and(SearchRec.Name<>'..')
-      //and (SearchRec.Name[1]<>'E') //Elgrand had a bug?
       and fileexists(RootDir+'\AddOns\autos\'+SearchRec.Name+'\EditCar.car') then begin
         AddonCar[h].Folder:=SearchRec.Name;
         inc(h);
@@ -256,7 +250,7 @@ begin
       AddonCar[ii].Name:=' '+AddonCar[ii].Factory+' '+AddonCar[ii].Model
     else
       AddonCar[ii].Name:=' '+AddonCar[ii].Model;
-    Form1.CBCars.AddItem(AddOnCarPrefix+AddonCar[ii].Name+zz+inttostr(ii),nil);
+    Form1.CBCars.AddItem(AddOnCarPrefix+AddonCar[ii].Name, TObject(ii));
     //ChkListCars.AddItem(AddonCar[ii].Name+zz+inttostr(ii),nil);
   end;
 
@@ -324,7 +318,7 @@ end;
 
 
 procedure GetAutoInfo(s1:string;i1:integer);
-var NumRead,Pos,i,k,j,h,m:integer;
+var NumRead,Pos,i,k,j,h,m:integer; f:file;
 begin
   Pos:=0; //reset to 0
   assignfile(f,RootDir+'\AddOns\autos\'+s1+'\EditCar.car'); FileMode:=0; reset(f,128); FileMode:=2;
@@ -396,10 +390,8 @@ ChDir(RootDir);
 //Scanning for add-on missions folders
 ////////////////////////////////////////////////////////////////////////////////
 if not DirectoryExists('AddOns\Missions') then begin
-Form2.FormStyle:=fsNormal;
-MessageBox(Form1.Handle,'"AddOns\Missions\" not found','Warning',MB_OK);
-Form2.FormStyle:=fsStayOnTop;
-AddonMissionQty:=0;
+  MessageBox(0, '"AddOns\Missions\" not found', 'Warning', MB_ICONWARNING or MB_OK or MB_TOPMOST or MB_APPLMODAL);
+  AddonMissionQty:=0;
 end else begin
 ChDir('AddOns\Missions');
 FindFirst('*', faAnyFile or faDirectory, SearchRec);
@@ -445,7 +437,7 @@ end;
 end;
 
 procedure GetMissionInfo(s1:string; i1:integer);
-var Version:byte; h,k:integer;
+var Version:byte; h,k:integer; f:file;
 begin
 assignfile(f,s1); FileMode:=0; reset(f,1); FileMode:=2; //read-only
 blockread(f,c,4);

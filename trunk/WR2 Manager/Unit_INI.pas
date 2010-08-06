@@ -8,7 +8,7 @@ procedure WriteINI();
 implementation
 
 procedure ReadINI();
-var i:integer; s:string;
+var i:integer; s:string; ft:textfile;
 begin
 chdir(RootDir);
 if not fileexists('WR2Man.ini') then exit;
@@ -60,7 +60,7 @@ for i:=1 to AddOnMissionQty do Form1.CLBMissions.Checked[i-1]:=AddonMission[i].I
 end;
 
 procedure WriteINI();
-var i:integer;
+var i:integer; ft:textfile;
 begin
 chdir(RootDir);
 assignfile(ft,'WR2Man.ini'); rewrite(ft);
