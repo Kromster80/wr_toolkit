@@ -5585,96 +5585,98 @@ end;
 
 
 procedure TForm1.GenerateGrassClick(Sender: TObject);
-const Num=16;
-var i,k,ii,kk,x,z,ci,ck,cb,Dens,tmp,lod:integer; ps:array of word;
-inx,ResultY,inz:single; //XYZ for height finding
-PolyQty:integer;
-x1,z1,x2,z2,x3,z3,ytemp,nx,ny,nz,D:single;
-v1,v2,v3:array[1..3] of single;
-tp:array[1..Num]of integer;
-s:string;
+  const Num=16;
+  var
+    i,k,ii,kk,x,z,ci,ck,cb,Dens,tmp,lod:integer; ps:array of word;
+    inx,ResultY,inz:single; //XYZ for height finding
+    PolyQty:integer;
+    x1,z1,x2,z2,x3,z3,ytemp,nx,ny,nz,D:single;
+    v1,v2,v3:array[1..3] of single;
+    tp:array[1..Num]of integer;
+    s:string;
 begin
-ElapsedTime(@OldTime);
-for LOD:=1 to 4 do begin //lod:=RG_GrassLOD.ItemIndex+1;
-case lod of
- 1: begin RO[lod].Head.Density:=2560; Dens:=11; end; //Dens^2 ~= 128,256,512,1024
- 2: begin RO[lod].Head.Density:=5120; Dens:=16; end;
- 3: begin RO[lod].Head.Density:=10231; Dens:=22; end;
- 4: begin RO[lod].Head.Density:=20480; Dens:=32; end;
-else exit; end;
+  ElapsedTime(@OldTime);
+  for lod:=1 to 4 do begin //lod:=RG_GrassLOD.ItemIndex+1;
+    case lod of
+      1: begin RO[lod].Head.Density:=2560; Dens:=11; end; //Dens^2 ~= 128,256,512,1024
+      2: begin RO[lod].Head.Density:=5120; Dens:=16; end;
+      3: begin RO[lod].Head.Density:=10240; Dens:=22; end;
+      4: begin RO[lod].Head.Density:=20480; Dens:=32; end;
+      else exit;
+    end;
 
-RO[lod].Head.x1:=65536;
-RO[lod].Head.x2:=1;
-RO[lod].Head.x3:=4;
-RO[lod].Head.sizeX:=Qty.BlocksX*4;
-RO[lod].Head.sizeZ:=Qty.BlocksZ*4;
-RO[lod].Head.XZ:=RO[lod].Head.sizeX*RO[lod].Head.sizeZ;
-RO[lod].Head.Qty:=0;
-if RO[lod].Tex='' then RO[lod].Tex:='RandObj';
+    RO[lod].Head.x1     := 65536;
+    RO[lod].Head.x2     := 1;
+    RO[lod].Head.x3     := 4;
+    RO[lod].Head.sizeX  := Qty.BlocksX*4;
+    RO[lod].Head.sizeZ  := Qty.BlocksZ*4;
+    RO[lod].Head.XZ     := RO[lod].Head.sizeX*RO[lod].Head.sizeZ;
+    RO[lod].Head.Qty    := 0;
+    if RO[lod].Tex='' then RO[lod].Tex:='RandObj';
 
-setlength(RO[lod].Chunks,RO[lod].Head.sizeZ+1);
-for i:=1 to RO[lod].Head.sizeZ do
-setlength(RO[lod].Chunks[i],RO[lod].Head.sizeX+1);
+    setlength(RO[lod].Chunks,RO[lod].Head.sizeZ+1);
+    for i:=1 to RO[lod].Head.sizeZ do
+    setlength(RO[lod].Chunks[i],RO[lod].Head.sizeX+1);
 
-setlength(RO[lod].Grass,Dens*Dens*RO[lod].Head.sizeZ*RO[lod].Head.sizeX+1);
+    setlength(RO[lod].Grass,Dens*Dens*RO[lod].Head.sizeZ*RO[lod].Head.sizeX+1);
 
-setlength(ps,Qty.Polys+1); k:=1;
-for i:=1 to Qty.Polys do begin
-if i=v07[k+1].FirstPoly+1 then inc(k);
-ps[i]:=v07[k].SurfaceID+1;
-end;
+    setlength(ps,Qty.Polys+1); k:=1;
+    for i:=1 to Qty.Polys do begin
+      if i=v07[k+1].FirstPoly+1 then inc(k);
+      ps[i]:=v07[k].SurfaceID+1;
+    end;
 
-ci:=0; tmp:=0;
-for i:=1 to RO[lod].Head.sizeZ do begin
-Label92.Caption:=inttostr(LOD)+'.'+int2fix(round(i/RO[lod].Head.sizeZ*100),2)+' %';
-Label92.Refresh;
-//RenderFrame(nil); useless slowdown
-for k:=1 to RO[lod].Head.sizeX do begin
-RO[lod].Chunks[i,k].First:=ci;
+    ci:=0; tmp:=0;
+    for i:=1 to RO[lod].Head.sizeZ do begin
+      Label92.Caption:=inttostr(LOD)+'.'+int2fix(round(i/RO[lod].Head.sizeZ*100),2)+' %';
+      Label92.Refresh;
+      //RenderFrame(nil); useless slowdown
+      for k:=1 to RO[lod].Head.sizeX do begin
+        RO[lod].Chunks[i,k].First:=ci;
 
-    for z:=1 to Dens do for x:=1 to Dens do begin
-    RO[lod].Grass[ci+1].X:=((x-0.5)/Dens+(k-1)-Qty.BlocksX*2+RandomS(0.33/Dens))*256; // +/-0.33
-    RO[lod].Grass[ci+1].Z:=((z-0.5)/Dens+(i-1)-Qty.BlocksZ*2+RandomS(0.33/Dens))*256; // +/-0.33
+        for z:=1 to Dens do for x:=1 to Dens do begin
+          RO[lod].Grass[ci+1].X:=((x-0.5)/Dens+(k-1)-Qty.BlocksX*2+RandomS(0.33/Dens))*256; // +/-0.33
+          RO[lod].Grass[ci+1].Z:=((z-0.5)/Dens+(i-1)-Qty.BlocksZ*2+RandomS(0.33/Dens))*256; // +/-0.33
 
-    inx:=RO[lod].Grass[ci+1].X;
-    inz:=RO[lod].Grass[ci+1].Z;
+          inx:=RO[lod].Grass[ci+1].X;
+          inz:=RO[lod].Grass[ci+1].Z;
 
-//Next piece of code
-// - Check polys under given X/Z
-// whenever they meet following requirements:
-// - Has GrowGrass material property
-// - Are faced up
-// - Are highest from all found meeting previous conditions
-            PolyQty:=1; ck:=1; tp[1]:=0; ResultY:=DONT_TRACE_TAG;
-            cb:=                                                                    //CollisionBlock:=
-                (EnsureRange(round(inz/256+0.5+Qty.BlocksZ*2),1,Qty.BlocksZ*4)-1)*  //(Z-1)*
-                 Qty.BlocksX*4+                                                     //Qty.BlocksX*4+
-                 EnsureRange(round(inx/256+0.5+Qty.BlocksX*2),1,Qty.BlocksX*4);     //(X-1)+1
+          //Next piece of code
+          // - Check polys under given X/Z
+          // whenever they meet following requirements:
+          // - Has GrowGrass material property
+          // - Are faced up
+          // - Are highest from all found meeting previous conditions
+          PolyQty:=1; ck:=1; tp[1]:=0; ResultY:=DONT_TRACE_TAG;
+          cb:=                                                                    //CollisionBlock:=
+              (EnsureRange(round(inz/256+0.5+Qty.BlocksZ*2),1,Qty.BlocksZ*4)-1)*  //(Z-1)*
+               Qty.BlocksX*4+                                                     //Qty.BlocksX*4+
+               EnsureRange(round(inx/256+0.5+Qty.BlocksX*2),1,Qty.BlocksX*4);     //(X-1)+1
 
-              repeat
-              for ii:=1 to v06[cb][ck] do begin // Polycount; BlockID; ..polys..; Polycount; BlockID; ..polys..; 0-terminator.
+          repeat
+            for ii:=1 to v06[cb][ck] do begin // Polycount; BlockID; ..polys..; Polycount; BlockID; ..polys..; 0-terminator.
               kk:=Block[((v06[cb,ck+1])div Qty.BlocksX+1),
                         ((v06[cb,ck+1])mod Qty.BlocksX+1)].FirstPoly+1+v06[cb,ck+1+ii];
 
-                  if MaterialW[ps[kk]].GrowGrass=1 then begin
-                  x1:=inx-VTX[v[kk,1]].X; z1:=inz-VTX[v[kk,1]].Z;
-                  x2:=inx-VTX[v[kk,2]].X; z2:=inz-VTX[v[kk,2]].Z;
-                  x3:=inx-VTX[v[kk,3]].X; z3:=inz-VTX[v[kk,3]].Z;
+              if MaterialW[ps[kk]].GrowGrass=1 then begin
+                x1:=inx-VTX[v[kk,1]].X; z1:=inz-VTX[v[kk,1]].Z;
+                x2:=inx-VTX[v[kk,2]].X; z2:=inz-VTX[v[kk,2]].Z;
+                x3:=inx-VTX[v[kk,3]].X; z3:=inz-VTX[v[kk,3]].Z;
 
-                      if (-x1*z2+z1*x2>=0) //point within triangle makes 3 triangles whose normals face up (nY > 0)
-                      and(-x2*z3+z2*x3>=0) //simply check if any of these normals Y>=0
-                      and(-x3*z1+z3*x1>=0) then begin
-                      tp[PolyQty]:=kk;
-                      if PolyQty<Num then inc(PolyQty); //avoid overflows
-                      end;
-                  end;
+                if (-x1*z2+z1*x2>=0) //point within triangle makes 3 triangles whose normals face up (nY > 0)
+                and(-x2*z3+z2*x3>=0) //simply check if any of these normals Y>=0
+                and(-x3*z1+z3*x1>=0) then begin
+                  tp[PolyQty]:=kk;
+                  if PolyQty<Num then inc(PolyQty); //avoid overflows
+                end;
               end;
-              inc(ck,v06[cb,ck]+2); //qty+2
-              until(v06[cb,ck]=0); //end of list
+            end;
+            inc(ck,v06[cb,ck]+2); //qty+2
+          until(v06[cb,ck]=0); //end of list
 
-            dec(PolyQty);
+          dec(PolyQty);
 
-            for ii:=1 to PolyQty do begin
+          for ii:=1 to PolyQty do begin
             v1[1]:=VTX[v[tp[ii],1]].X; v1[2]:=VTX[v[tp[ii],1]].Y; v1[3]:=VTX[v[tp[ii],1]].Z;
             v2[1]:=VTX[v[tp[ii],2]].X; v2[2]:=VTX[v[tp[ii],2]].Y; v2[3]:=VTX[v[tp[ii],2]].Z;
             v3[1]:=VTX[v[tp[ii],3]].X; v3[2]:=VTX[v[tp[ii],3]].Y; v3[3]:=VTX[v[tp[ii],3]].Z;
@@ -5683,37 +5685,37 @@ RO[lod].Chunks[i,k].First:=ci;
             D:=-(nx*VTX[v[tp[ii],1]].X+ny*VTX[v[tp[ii],1]].Y+nz*VTX[v[tp[ii],1]].Z);
             ytemp:=-(inx*nx+inz*nz+D)/ny; //true height respecting poly surface
             if ((ytemp > ResultY)and(ny > 0))or(ii=1) then ResultY:=ytemp; //choose highest one
-            end;
+          end;
 
-      if ResultY<>DONT_TRACE_TAG then begin
-      RO[lod].Grass[ci+1].Y:=ResultY;
-      inc(ci);
-      RO[lod].Grass[ci].Size:=Random(16);
-      RO[lod].Grass[ci].ID:=Random(4); //4 is reserved for fields
-      RO[lod].Grass[ci].Color:=(Random(65536)) mod 65535; //temp colors
-      end;
+          if ResultY<>DONT_TRACE_TAG then begin
+            RO[lod].Grass[ci+1].Y:=ResultY;
+            inc(ci);
+            RO[lod].Grass[ci].Size:=Random(16);
+            RO[lod].Grass[ci].ID:=Random(4); //4 is reserved for fields
+            RO[lod].Grass[ci].Color:=(Random(65536)) mod 65535; //temp colors
+          end;
+        end;
+
+        RO[lod].Chunks[i,k].Num:=ci-RO[lod].Chunks[i,k].First;
+      end; //i
+    end; //k
+    RO[lod].Head.Qty:=ci;
+    ShowGrassInfo(nil);
+    s:=ElapsedTime(@OldTime); decs(s,5); // XX***ms
+    Label92.Caption:=s+'s';
+
+    for i:=1 to 4 do begin
+      RO[lod].UV[i].X[1]:=0;
+      RO[lod].UV[i].X[2]:=(i-1)*0.25;
+      RO[lod].UV[i].X[3]:=0;
+      RO[lod].UV[i].X[4]:=i*0.25;
+      RO[lod].UV[i].X[5]:=1;
+      RO[lod].UV[i].X[6]:=10;
+      RO[lod].UV[i].X[7]:=10;
+      RO[lod].UV[i].X[8]:=0;
     end;
-
-RO[lod].Chunks[i,k].Num:=ci-RO[lod].Chunks[i,k].First;
-end; //i
-end; //k
-RO[lod].Head.Qty:=ci;
-ShowGrassInfo(nil);
-s:=ElapsedTime(@OldTime); decs(s,5); // XX***ms
-Label92.Caption:=s+'s';
-
-for i:=1 to 4 do begin
-RO[lod].UV[i].X[1]:=0;
-RO[lod].UV[i].X[2]:=(i-1)*0.25;
-RO[lod].UV[i].X[3]:=0;
-RO[lod].UV[i].X[4]:=i*0.25;
-RO[lod].UV[i].X[5]:=1;
-RO[lod].UV[i].X[6]:=10;
-RO[lod].UV[i].X[7]:=10;
-RO[lod].UV[i].X[8]:=0;
-end;
-Changes.RO[lod]:=true;
-end;// for LOD:=1 to 4 do begin
+    Changes.RO[lod]:=true;
+  end;// for LOD:=1 to 4 do begin
 end;
 
 procedure TForm1.ShowGrassInfo(Sender: TObject);
