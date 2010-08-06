@@ -128,15 +128,12 @@ const
 
  AddOnCarPrefix='`';
  TrackType:array[1..4] of string=('All','Series','Rally','Off-Road');
- VersionInfo='WR2 Manager       Version 0.3l (14 Jul 2010)';
+ VersionInfo='WR2 Manager       Version 0.3m (06 Aug 2010)';
 
 var
   Form1: TForm1;
-  f:file;
-  ft:textfile;
   c:array[1..1024000]of char;
   RootDir:string;
-  TimeCode:integer;
   zz:string='     '+'                                                                                                     ';
 
   RuntimeQty:integer;
@@ -320,22 +317,19 @@ begin
   if FileExists(RootDir+'FrontEnd\wr2.ds') then
     OpenDS(RootDir+'FrontEnd\wr2.ds')
   else begin
-    if Form2.Showing then Form2.Destroy;
-    Form2.FormStyle := fsNormal;
-    MessageBox(Form1.Handle,'"FrontEnd\wr2.ds" not found. Run WR2Manager from WR2 folder!','Warning',MB_OK);
+    MessageBox(0, PChar('"FrontEnd\wr2.ds" not found.'+eol+'You need to run WR2Manager from WR2 folder!'), 'Error', MB_ICONERROR or MB_OK or MB_TOPMOST or MB_APPLMODAL);
     Form1.Close;
     exit;
   end;
 
   //if Form2.Showing then Form2.Hide;
-  ElapsedTime(@TimeCode);
   Form2.Label2.Caption:='Scanning: Profiles ...'; Form2.Label2.Refresh; SearchProfiles();
-  Form2.Label2.Caption:='Scanning: Cars ...';     Form2.Label2.Refresh; SearchAutos();         //Form2.Memo1.Lines.Add('Autos - '+ElapsedTime(@TimeCode));
-  Form2.Label2.Caption:='Scanning: Sceneries ...';Form2.Label2.Refresh; SearchSceneries();     //Form2.Memo1.Lines.Add('Sceneries - '+ElapsedTime(@TimeCode));
-  Form2.Label2.Caption:='Scanning: Missions ...'; Form2.Label2.Refresh; SearchMissions();      //Form2.Memo1.Lines.Add('Missions - '+ElapsedTime(@TimeCode));
+  Form2.Label2.Caption:='Scanning: Cars ...';     Form2.Label2.Refresh; SearchAutos();
+  Form2.Label2.Caption:='Scanning: Sceneries ...';Form2.Label2.Refresh; SearchSceneries();
+  Form2.Label2.Caption:='Scanning: Missions ...'; Form2.Label2.Refresh; SearchMissions();
   ReadINI();
 
-  if Form2.Showing then Form2.Destroy;
+  if Form2.Showing then Form2.Close;
   Form1.Show;
 end;
 
@@ -349,7 +343,7 @@ begin
     kk := 1;
     for i:=1 to BaseTracks do
       if Value[14,2,i].Int=ID then begin
-        LBTracks.AddItem(inttostr(kk)+'. '+WRTexte(Value[14,4,i].Str)+zz+inttostr(i),nil);
+        LBTracks.AddItem(inttostr(kk)+'. '+WRTexte(Value[14,4,i].Str), TObject(i));
         inc(kk);
       end;
     Label8.Caption    := Value[16,2,ID+1].Str;
@@ -384,7 +378,7 @@ procedure TForm1.LBTracksClick(Sender: TObject);
 var ID,ID2:integer;
 begin
   if CLBSceneries.ItemIndex<=5 then begin //WR2 stock maps
-    ID2:=IDfromSTR(LBTracks.Items[LBTracks.ItemIndex],1);
+    ID2 := integer(LBTracks.Items.Objects[LBTracks.ItemIndex]);
     GBTrack.Caption := '  '+WRTexte(Value[14,4,ID2].Str)+'  ';
     Label21.Caption := inttostr(Value[14,3,ID2].Int);
     Label23.Caption := inttostr(Value[14,5,ID2].Int);
@@ -465,7 +459,7 @@ end;
 procedure TForm1.CBCarsChange(Sender: TObject);
 var ID,i:integer;
 begin
-  ID := IDfromSTR(CBCars.Items[CBCars.ItemIndex],1);
+  ID := integer(CBCars.Items.Objects[CBCars.ItemIndex]);
 
   UpdateCarInfo(ID,CBCars.Items[CBCars.ItemIndex][1] = AddOnCarPrefix);
 

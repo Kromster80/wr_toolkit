@@ -12,7 +12,7 @@ uses Unit1, KromUtils, FileCtrl, SysUtils, Windows;
 implementation
 
 procedure OpenDS(filename:string);
-var i,k,h,j,m:integer; s:string;
+var i,k,h,j,m:integer; s:string; f:file;
 begin
 assignfile(f,filename); FileMode:=0; reset(f,1); FileMode:=2;
 blockread(f,Header,33);
@@ -103,7 +103,7 @@ closefile(f);
 end;
 
 procedure SaveDS(filename:string);
-var i,k,j:integer; s:string;
+var i,k,j:integer; s:string; f:file;
 begin
 assignfile(f,filename); rewrite(f,1);
 c[1]:=#0;
@@ -312,7 +312,7 @@ end;//1..MissionQty
 end;
 
 procedure SaveProfiles();
-var s1,s2:string; ID,i,j,k,h:integer; s:string;
+var s1,s2:string; ID,i,j,k,h:integer; s:string; f:file;
 begin
 for ID:=1 to ProfileQty do if Profile[ID].Install then begin
 
