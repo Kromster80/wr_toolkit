@@ -7,17 +7,15 @@ type
   TDSVersion = (dsvUnknown=0, dsvMBWR, dsvWR2, dsvAFC11N, dsvAFC11CT, dsvAFC11BW, dsvFVR, dsvAFC11HN);
 
 const
-  DSVersionNameShort:array[TDSVersion] of string =
-  ('Unknown', 'MBWR', 'WR2', 'AFC11N', 'AFC11CT', 'AFC11BW', 'FVR', 'AFC11HN');
-  DSVersionNameLong:array[TDSVersion] of string = (
-    'Unknown',
-    'Mercedes-Benz World Racing',
-    'World Racing 2',
-    'Alarm For Cobra 11 - Nitro',
-    'Alarm For Cobra 11 - Crash Time',
-    'Alarm For Cobra 11 - Burning Wheels',
-    'Ferrari Virtual Race',
-    'Alarm For Cobra 11 - Highway Nights');
+  DSVersionName:array[TDSVersion,1..2] of string = (
+    ('Unknown',  'Unknown'),
+    ('MBWR',     'Mercedes-Benz World Racing'),
+    ('WR2',      'World Racing 2'),
+    ('AFC11N',   'Alarm For Cobra 11 - Nitro'),
+    ('AFC11CT',  'Alarm For Cobra 11 - Crash Time'),
+    ('AFC11BW',  'Alarm For Cobra 11 - Burning Wheels'),
+    ('FVR',      'Ferrari Virtual Race'),
+    ('AFC11HN',  'Alarm For Cobra 11 - Highway Nights'));
 
 type
   TDSNode = packed record
@@ -299,8 +297,9 @@ begin
   if CO[iDS,iTB].SM = 'D:\NxNlocal\World Racing 2\Database\WR2-Texte.mdb' then Result := dsvWR2;
   if CO[iDS,iTB].SM = 'D:\NxNlocal\Cobra11\Database\C11-Texte.mdb' then Result := dsvAFC11N;
   if CO[iDS,iTB].SM = 'D:\NxNlocal\Cobra11Vol5\Database\C11V5-Texte.mdb' then Result := dsvAFC11CT;
-  if CO[iDS,iTB].SM = 'D:\NxNLocal\Cobra11Vol6\Database\C11V6-Texte.mdb' then Result := dsvAFC11BW;
-  if CO[iDS,iTB].SM = 'D:\NxNlocal\Cobra11Vol6\Database\C11V6-Texte.mdb' then Result := dsvFVR; //todo: find new marker
+  if CO[iDS,iTB].SM = 'D:\NxNLocal\Cobra11Vol6\Database\C11V6-Texte.mdb' then
+    if TB[iDS].Entries = 10 then Result := dsvAFC11BW
+                            else Result := dsvFVR;
   if CO[iDS,iTB].SM = 'D:\NxNLocal\Cobra11Vol7\Database\C11V7-Texte.mdb' then Result := dsvAFC11HN;
 end;
 
