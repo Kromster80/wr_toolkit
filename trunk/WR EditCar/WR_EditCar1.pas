@@ -831,22 +831,23 @@ begin
   ImportDS.LoadDS(aDSPath);
 
   LBModel.Clear;
-                                 
-  if ImportDS.Version = dsvMBWR then
-  for i:=2 to ImportDS.COCount(23,3) do
-    LBModel.Items.Add(ImportDS.WRTextEn(ImportDS.GetValueAsString(23,3,i)));
 
-  if ImportDS.Version = dsvWR2 then
-  for i:=2 to ImportDS.COCount(23,3) do
-    LBModel.Items.Add(ImportDS.GetValueAsString(23,49,i)+' '+ImportDS.GetValueAsString(23,3,i));
+  case ImportDS.Version of
+    dsvMBWR:    for i:=2 to ImportDS.COCount(23,3) do
+                LBModel.AddItem(ImportDS.WRTextEn(ImportDS.GetValueAsString(23,3,i)),TObject(i-1));
 
-  if ImportDS.Version in [dsvAFC11N, dsvAFC11CT, dsvAFC11BW, dsvAFC11HN, dsvFVR] then
-  for i:=2 to ImportDS.COCount(23,3) do
-    LBModel.Items.Add(ImportDS.WRTextEn(ImportDS.GetValueAsString(23,52,i))+' '+ImportDS.WRTextEn(ImportDS.GetValueAsString(23,3,i)));
+    dsvWR2:     for i:=2 to ImportDS.COCount(23,3) do
+                LBModel.AddItem(ImportDS.GetValueAsString(23,49,i)+' '+ImportDS.GetValueAsString(23,3,i),TObject(i-1));
+    dsvAFC11N,
+    dsvAFC11CT,
+    dsvAFC11BW,
+    dsvFVR,
+    dsvAFC11HN: for i:=2 to ImportDS.COCount(23,3) do
+                LBModel.AddItem(ImportDS.WRTextEn(ImportDS.GetValueAsString(23,52,i))+' '+ImportDS.WRTextEn(ImportDS.GetValueAsString(23,3,i)),TObject(i-1));
+    else exit;
+  end;
 
-  if ImportDS.Version = dsvUnknown then exit;
-
-  Label128.Caption := 'DataSet of ' + DSVersionNameShort[ImportDS.Version];
+  Label128.Caption := 'DataSet of ' + DSVersionName[ImportDS.Version,1];
   LBModel.Enabled := true;
 end;
 
@@ -859,7 +860,7 @@ var
 begin
 
   if LBModel.ItemIndex = -1 then exit;
-  CarID := LBModel.ItemIndex + 2;
+  CarID := Integer(LBModel.Items.Objects[LBModel.ItemIndex]) + 1;
 
   //Let's sketch it for MBWR first, then we'll see how it goes
   if ImportDS.Version = dsvMBWR then begin
