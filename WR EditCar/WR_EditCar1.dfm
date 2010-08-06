@@ -4,7 +4,7 @@ object Form1: TForm1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   ClientHeight = 500
-  ClientWidth = 740
+  ClientWidth = 737
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -72,11 +72,11 @@ object Form1: TForm1
     ItemIndex = 1
     Items.Strings = (
       'Mercedes-Benz World Racing'
-      'World Racing 2'
-      'Alarm For Cobra 11 - Nitro'
-      'Alarm For Cobra 11 - Crash Time'
-      'Alarm For Cobra 11 - Burning Wheels'
-      'Ferrari Virtual Race'
+      '--World Racing 2'
+      '--Alarm For Cobra 11 - Nitro'
+      '--Alarm For Cobra 11 - Crash Time'
+      '--Alarm For Cobra 11 - Burning Wheels'
+      '--Ferrari Virtual Race'
       'Alarm For Cobra 11 - Highway Nights')
     TabOrder = 2
     OnClick = RGFormatClick
@@ -546,98 +546,6 @@ object Form1: TForm1
         end
       end
     end
-    object TabSheet1: TTabSheet
-      Caption = 'Expert'
-      object GroupBox2: TGroupBox
-        Tag = 888
-        Left = 2
-        Top = 0
-        Width = 202
-        Height = 259
-        Caption = '  Info  '
-        TabOrder = 0
-        object Label8: TLabel
-          Tag = 888
-          Left = 8
-          Top = 164
-          Width = 53
-          Height = 13
-          Caption = 'Description'
-          Enabled = False
-        end
-        object Label7: TLabel
-          Tag = 888
-          Left = 8
-          Top = 148
-          Width = 53
-          Height = 13
-          Caption = 'Description'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'MS Sans Serif'
-          Font.Style = []
-          ParentFont = False
-        end
-        object Label6: TLabel
-          Tag = 888
-          Left = 8
-          Top = 132
-          Width = 53
-          Height = 13
-          Caption = 'Description'
-          Enabled = False
-        end
-        object Label5: TLabel
-          Tag = 888
-          Left = 8
-          Top = 96
-          Width = 41
-          Height = 13
-          Caption = 'Format  -'
-        end
-        object Label4: TLabel
-          Tag = 888
-          Left = 8
-          Top = 80
-          Width = 42
-          Height = 13
-          Caption = 'Info       -'
-        end
-        object Label3: TLabel
-          Tag = 888
-          Left = 8
-          Top = 64
-          Width = 41
-          Height = 13
-          Caption = 'Index    -'
-        end
-        object Label1: TLabel
-          Tag = 888
-          Left = 8
-          Top = 32
-          Width = 41
-          Height = 13
-          Caption = 'Title      -'
-        end
-        object Label0: TLabel
-          Tag = 888
-          Left = 8
-          Top = 16
-          Width = 39
-          Height = 13
-          Caption = 'DB       -'
-        end
-        object Label2: TLabel
-          Tag = 888
-          Left = 8
-          Top = 48
-          Width = 40
-          Height = 13
-          Caption = 'Library  -'
-        end
-      end
-    end
   end
   object PageControl2: TPageControl
     Left = 2
@@ -654,7 +562,7 @@ object Form1: TForm1
         Left = 240
         Top = 216
         Width = 249
-        Height = 217
+        Height = 225
         Caption = '  Score to open  '
         TabOrder = 0
         object Memo1: TMemo
@@ -744,8 +652,8 @@ object Form1: TForm1
           Transparent = True
         end
         object Label152: TLabel
-          Left = 350
-          Top = 145
+          Left = 358
+          Top = 25
           Width = 56
           Height = 13
           Caption = 'Caravan file'
@@ -824,8 +732,8 @@ object Form1: TForm1
           OnKeyUp = FSChangeLink
         end
         object Caravan: TEdit
-          Left = 260
-          Top = 142
+          Left = 268
+          Top = 22
           Width = 85
           Height = 21
           TabOrder = 8
@@ -837,15 +745,15 @@ object Form1: TForm1
         Left = 8
         Top = 216
         Width = 217
-        Height = 217
+        Height = 113
         Caption = ' Class  '
         TabOrder = 2
         object Label127: TLabel
-          Left = 82
-          Top = 189
-          Width = 92
+          Left = 74
+          Top = 81
+          Width = 54
           Height = 13
-          Caption = 'Custom Race Class'
+          Caption = 'Race Class'
         end
         object Label33: TLabel
           Left = 73
@@ -861,33 +769,17 @@ object Form1: TForm1
           Height = 13
           Caption = 'Score to Open'
         end
-        object RaceClass1_4: TRadioGroup
-          Left = 12
-          Top = 80
-          Width = 97
-          Height = 105
-          Caption = ' Race class  '
-          ItemIndex = 0
-          Items.Strings = (
-            'Series'
-            'Racing'
-            'Prototype'
-            'Vintage'
-            'Custom')
-          TabOrder = 0
-          OnClick = FSChange
-        end
         object SRaceClass: TSpinEdit
-          Left = 20
-          Top = 186
+          Left = 12
+          Top = 78
           Width = 57
           Height = 22
-          Hint = '5 - 300'
+          Hint = '1 - 300'
           Enabled = False
           MaxValue = 300
           MinValue = 1
-          TabOrder = 1
-          Value = 5
+          TabOrder = 0
+          Value = 1
           OnChange = FSChange
           OnKeyUp = FSChangeLink
         end
@@ -899,7 +791,7 @@ object Form1: TForm1
           Hint = '100 - 999'
           MaxValue = 999
           MinValue = 100
-          TabOrder = 2
+          TabOrder = 1
           Value = 100
           OnChange = FSChange
           OnKeyUp = FSChangeLink
@@ -912,10 +804,72 @@ object Form1: TForm1
           Hint = '1 - 1000000'
           MaxValue = 1000000
           MinValue = 1
-          TabOrder = 3
+          TabOrder = 2
           Value = 1
           OnChange = FSChange
           OnKeyUp = FSChangeLink
+        end
+      end
+      object GroupBox1: TGroupBox
+        Left = 8
+        Top = 336
+        Width = 217
+        Height = 105
+        Caption = '  Race class  '
+        TabOrder = 3
+        object Memo5: TMemo
+          Left = 16
+          Top = 24
+          Width = 17
+          Height = 65
+          BevelInner = bvNone
+          BevelOuter = bvNone
+          BorderStyle = bsNone
+          Color = clMenu
+          Lines.Strings = (
+            ''
+            '1'
+            '2'
+            '3'
+            '4')
+          ReadOnly = True
+          TabOrder = 0
+        end
+        object Memo3: TMemo
+          Left = 32
+          Top = 24
+          Width = 49
+          Height = 65
+          BevelInner = bvNone
+          BevelOuter = bvNone
+          BorderStyle = bsNone
+          Color = clMenu
+          Lines.Strings = (
+            'MBWR'
+            'Racing'
+            'Series'
+            'Prototype'
+            'Vintage')
+          ReadOnly = True
+          TabOrder = 1
+        end
+        object Memo4: TMemo
+          Left = 88
+          Top = 24
+          Width = 57
+          Height = 65
+          BevelInner = bvNone
+          BevelOuter = bvNone
+          BorderStyle = bsNone
+          Color = clMenu
+          Lines.Strings = (
+            'WR2'
+            'Racing'
+            'Series'
+            'Rally'
+            'Off-Roader')
+          ReadOnly = True
+          TabOrder = 2
         end
       end
     end
@@ -923,7 +877,7 @@ object Form1: TForm1
       Caption = 'Appearance'
       object GroupSound: TGroupBox
         Left = 8
-        Top = 176
+        Top = 168
         Width = 241
         Height = 201
         Caption = ' Sound  '
@@ -1067,7 +1021,7 @@ object Form1: TForm1
       end
       object GroupLooks: TGroupBox
         Left = 264
-        Top = 176
+        Top = 168
         Width = 209
         Height = 201
         Caption = ' Looks  '
@@ -1233,7 +1187,7 @@ object Form1: TForm1
       end
       object GroupHUD: TGroupBox
         Left = 296
-        Top = 16
+        Top = 8
         Width = 161
         Height = 145
         Caption = ' HUD  '
@@ -1315,7 +1269,7 @@ object Form1: TForm1
       end
       object GroupCameras: TGroupBox
         Left = 8
-        Top = 16
+        Top = 8
         Width = 273
         Height = 145
         Caption = ' Cameras  '
@@ -17274,7 +17228,7 @@ object Form1: TForm1
         Left = 8
         Top = 8
         Width = 361
-        Height = 321
+        Height = 313
         Caption = ' Cockpit  '
         TabOrder = 1
         object Bevel12: TBevel
@@ -17299,12 +17253,6 @@ object Form1: TForm1
           Left = 16
           Top = 24
           Width = 281
-          Height = 2
-        end
-        object Bevel20: TBevel
-          Left = 16
-          Top = 302
-          Width = 140
           Height = 2
         end
         object Label113: TLabel
@@ -17695,11 +17643,6 @@ object Form1: TForm1
         Width = 491
         Height = 409
         TabOrder = 0
-        OnKeyDown = KeyDown
-        OnKeyUp = KeyDown
-        OnMouseDown = MouseClick
-        OnStringsChange = VLEChange
-        OnStringsChanging = VLEChange
         ColWidths = (
           275
           210)

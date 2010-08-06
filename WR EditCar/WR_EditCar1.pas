@@ -6,12 +6,9 @@ uses
   Chart, FloatSpinEdit,
   WR_AboutBox, KromUtils,
   Grids, Graphics, Buttons, Math,
-  ValEdit, TeEngine, Series, TeeProcs;
+  ValEdit, Series, TeeProcs, TeEngine;
 
 type
-
-  { TForm1 }
-
   TForm1 = class(TForm)
     ButtonLoad: TButton;
     ButtonSave: TButton;
@@ -19,18 +16,7 @@ type
     Save1: TSaveDialog;
     RGFormat: TRadioGroup;
     PageControl1: TPageControl;
-    TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
-    GroupBox2: TGroupBox;
-    Label8: TLabel;
-    Label7: TLabel;
-    Label6: TLabel;
-    Label5: TLabel;
-    Label4: TLabel;
-    Label3: TLabel;
-    Label1: TLabel;
-    Label0: TLabel;
-    Label2: TLabel;
     LBModel: TListBox;
     Label128: TLabel;
     BrowseForDS: TButton;
@@ -306,7 +292,6 @@ type
     FST2Size: TFloatSpinEdit;
     ST1Mode: TSpinEdit;
     ST2Mode: TSpinEdit;
-    Bevel20: TBevel;
     Label113: TLabel;
     Label91: TLabel;
     Label94: TLabel;
@@ -342,24 +327,23 @@ type
     Caravan: TEdit;
     Label152: TLabel;
     GroupClass: TGroupBox;
-    RaceClass1_4: TRadioGroup;
     SRaceClass: TSpinEdit;
     Label127: TLabel;
     Label33: TLabel;
     SClassID: TSpinEdit;
     SScore: TSpinEdit;
     Label50: TLabel;
+    GroupBox1: TGroupBox;
+    Memo5: TMemo;
+    Memo3: TMemo;
+    Memo4: TMemo;
     procedure FormCreate(Sender: TObject);
     procedure InitChart();
     procedure OpenClick(Sender: TObject);
     procedure OpenCAR(aCarFile: string);
-    procedure MouseClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState); reintroduce;
-    procedure VLEChange(Sender: TObject);
     procedure SaveClick(Sender: TObject);
     procedure AboutClick(Sender: TObject);
     procedure FSChange(Sender: TObject);
-    procedure RefreshVLE;
     procedure PageChange(Sender: TObject);
     procedure TorqueMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure TorqueMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -405,6 +389,7 @@ implementation
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+  DoClientAreaResize(Self);
   DecimalSeparator := '.';
   CarName := ExtractOpenedFileName(CMDLine);
   ExeDir := ExtractFilePath(Application.ExeName);
@@ -484,99 +469,6 @@ begin
 end;
 
 
-procedure TForm1.RefreshVLE; //Send data to List from memory
-//var i,k,Count:integer;
-begin
-  {
-  VLEEdit:=false;
-  ValueListEditor1.Strings.Clear;
-  for i:=1 to DSqty do begin
-    if (i=1)and(TBqty[i]>256) then Count:=81 else       //257
-    if (i=2)and(TBqty[i]>256) then Count:=106 else      //287
-    Count:=TBqty[i];
-    for k:=1 to Count do begin
-      s:=inttostr(i)+'-'+int2fix(COid[i,k],3)+'. '+COtext[i,COid[i,k],1];
-      case data[i,COid[i,k],2] of
-        1: ValueListEditor1.InsertRow(s,inttostr(vi[i,COid[i,k],2]),true);
-        2: ValueListEditor1.InsertRow(s,float2fix(vr[i,COid[i,k],2],3),true);
-        3: ValueListEditor1.InsertRow(s,vs[i,COid[i,k],2],true);
-      end;
-    end;
-  end;
-  VLEEdit:=true;
-  }
-end;
-
-procedure TForm1.VLEChange(Sender: TObject);
-//var i,k:integer; Key,Val:string;
-begin
-  {
-  if VLEEdit=false then exit;
-  Key:=ValueListEditor1.Keys[ValueListEditor1.Row];
-  Val:=ValueListEditor1.Values[ValueListEditor1.Keys[ValueListEditor1.Row]];
-  if (length(Key)>=6)and(Val<>'') then begin //Format is #-###. at least 6 chars
-    i:=strtoint(Key[1]);
-    k:=strtoint(Key[3]+Key[4]+Key[5]);
-    case data[i,k,2] of
-      1: vi[i,k,2]:=strtoint(Val);
-      2: vr[i,k,2]:=strtofloat(Val);
-      3: vs[i,k,2]:=Val;
-    end;
-  end;
-  }
-end;
-
-//Redirect to Keyboard call, cause of different input parameters.
-procedure TForm1.MouseClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-var w:word;
-begin
-  w:=0;
-  Form1.KeyDown(Form1,w,Shift);
-end;
-
-procedure TForm1.KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-//var i,k:integer;
-begin
-{
-with ValueListEditor1 do
-  if length(Keys[Row])>=6 then begin
-    i:=strtoint(Keys[Row][1]);
-    k:=strtoint(Keys[Row][3]+Keys[Row][4]+Keys[Row][5]);
-
-    Label0.caption:='DB       -  '+TBLib[i];
-    Label1.caption:='Title      -  '+COtext[i,k,1];
-    Label2.caption:='Library  -  '+COtext[i,k,3];
-    Label3.caption:='Index    -  '+COtext[i,k,4];
-    Label4.caption:='Info       -  '+COtext[i,k,5];
-    case data[i,k,2] of
-    1: Label5.caption:='Format  -  Integer';
-    2: Label5.caption:='Format  -  Float';
-    3: Label5.caption:='Format  -  String';
-    end;
-
-    case data[i,k,1] of
-    1: Label6.caption:='Integer1 -  '+inttostr(vi[i,k,1]);
-    2: Label6.caption:='Real1    -  '+floattostr(vr[i,k,1]);
-    3: Label6.caption:='String1  -  '+vs[i,k,1];
-    0: Label6.caption:='  -  ';
-    end;
-    case data[i,k,2] of
-    1: Label7.caption:='Integer2 -  '+inttostr(vi[i,k,2]);
-    2: Label7.caption:='Real2    -  '+floattostr(vr[i,k,2]);
-    3: Label7.caption:='String2  -  '+vs[i,k,2];
-    0: Label7.caption:='  -  ';
-    end;
-    case data[i,k,3] of
-    1: Label8.caption:='Integer3 -  '+inttostr(vi[i,k,3]);
-    2: Label8.caption:='Real3    -  '+floattostr(vr[i,k,3]);
-    3: Label8.caption:='String3  -  '+vs[i,k,3];
-    0: Label8.caption:='  -  ';
-    end;
-  end; //with ... do
-}
-end;
-
-
 procedure TForm1.SaveClick(Sender: TObject);
 begin
   if not RunSaveDialog(Save1, 'editcar.car', ExtractFilePath(carname), '"World Racing" car descriptor (*.car)|*.car|All Files (*.*)|*.*') then exit;
@@ -594,7 +486,7 @@ end;
 
 procedure TForm1.AboutClick(Sender: TObject);
 begin
-  AboutForm.Show(VersionInfo,'Edit car`s perfomance in "EditCar.car" file.'+eol+eol+
+  AboutForm.Show(VersionInfo,'Edit cars perfomance in "EditCar.car" files.'+eol+eol+
                           'German translation by Jonas Wolf'+eol+
                           'Hungarian translation by Nagyidai Andor'+eol+
                           'Russian translation by Krom (incomplete)','EDITCAR');
@@ -642,7 +534,7 @@ end;
 
 procedure TForm1.PageChange(Sender: TObject);
 begin
-  if PageControl2.ActivePageIndex = PageControl2.PageCount-1 then RefreshVLE else UpdateControls;
+  if PageControl2.ActivePageIndex = PageControl2.PageCount-1 then {} else UpdateControls;
   if PageControl2.ActivePage.Caption = 'Engine' then TorqueMouseMove(nil,[ssShift],0,0);
 end;
 
@@ -698,39 +590,41 @@ procedure TForm1.RGFormatClick(Sender: TObject);
 var i:integer;
 begin
   LockControls := true;
-FSChange(nil);
-for i:=0 to Form1.ComponentCount-1 do
-//Components with Tag=888 are protected from enabling
-if TComponent(Form1.Components[i]).Tag<>888 then begin
-  if Form1.Components[i] is TControl then TControl(Form1.Components[i]).Enabled:=true;
-  if Form1.Components[i] is TLabel then TLabel(Form1.Components[i]).Enabled:=true;
-end;
+  FSChange(nil);
 
-case RGFormat.ItemIndex of
-  0: CarFmt := fmtMBWR;
-  1: CarFmt := fmtWR2;
-  2: CarFmt := fmtAFC11N;
-  3: CarFmt := fmtAFC11CT;
-  4: CarFmt := fmtAFC11BW;
-  5: CarFmt := fmtFVR;
-  6: CarFmt := fmtAFC11HN;
-end;
+  for i:=0 to Form1.ComponentCount-1 do
+  //Components with Tag=888 are protected from enabling
+  if TComponent(Form1.Components[i]).Tag<>888 then begin
+    if Form1.Components[i] is TControl then TControl(Form1.Components[i]).Enabled := true;
+    if Form1.Components[i] is TLabel then   TLabel(Form1.Components[i]).Enabled   := true;
+  end;
+
+  case RGFormat.ItemIndex of
+    0: CarFmt := fmtMBWR;
+    1: CarFmt := fmtWR2;
+    2: CarFmt := fmtAFC11N;
+    3: CarFmt := fmtAFC11CT;
+    4: CarFmt := fmtAFC11BW;
+    5: CarFmt := fmtFVR;
+    6: CarFmt := fmtAFC11HN;
+  end;
 
   //Identity tab
+  Label152.Enabled      := CarFmt in [fmtAFC11N, fmtAFC11CT, fmtAFC11BW, fmtFVR, fmtAFC11HN]; //Caravan
+  Caravan.Enabled       := CarFmt in [fmtAFC11N, fmtAFC11CT, fmtAFC11BW, fmtFVR, fmtAFC11HN]; //Caravan
   Label31.Enabled       := CarFmt in [fmtMBWR]; //Cabrio Folder
   Edit8.Enabled         := CarFmt in [fmtMBWR]; //Cabrio Folder
-
+  Label118.Enabled      := CarFmt in [fmtAFC11N, fmtAFC11CT, fmtAFC11BW, fmtFVR, fmtAFC11HN]; //Brand name
+  Hersteller.Enabled    := CarFmt in [fmtAFC11N, fmtAFC11CT, fmtAFC11BW, fmtFVR, fmtAFC11HN]; //Brand name
+  Label153.Enabled      := CarFmt in [fmtAFC11N, fmtAFC11CT, fmtAFC11BW, fmtFVR, fmtAFC11HN]; //Logo
+  Logo.Enabled          := CarFmt in [fmtAFC11N, fmtAFC11CT, fmtAFC11BW, fmtFVR, fmtAFC11HN]; //Logo
   Label56.Enabled       := CarFmt in [fmtMBWR]; //Class Name
   Edit2.Enabled         := CarFmt in [fmtMBWR]; //Class Name
-
   CBCabrio1.Enabled     := CarFmt in [fmtMBWR]; //Cabrio checkbox
   CBCabrio2.Enabled     := CarFmt in [fmtMBWR]; //Cabrio checkbox
-
-  Label33.Enabled       := CarFmt in [fmtMBWR, fmtWR2, fmtAFC11N]; //Menu Class
-  SClassID.Enabled      := CarFmt in [fmtMBWR, fmtWR2, fmtAFC11N]; //Menu Class
-  Label50.Enabled       := CarFmt in [fmtWR2, fmtAFC11N]; //Score to Open
-  SScore.Enabled        := CarFmt in [fmtWR2, fmtAFC11N]; //Score to Open
-  Memo1.Enabled         := CarFmt in [fmtWR2, fmtAFC11N];     //Score to Open memo
+  Label33.Enabled       := CarFmt in [fmtWR2, fmtAFC11N, fmtAFC11CT, fmtAFC11BW, fmtFVR, fmtAFC11HN]; //Menu Class
+  SClassID.Enabled      := CarFmt in [fmtWR2, fmtAFC11N, fmtAFC11CT, fmtAFC11BW, fmtFVR, fmtAFC11HN]; //Menu Class
+  Memo1.Enabled         := CarFmt in [fmtWR2];     //Score to Open memo
 
   //Appearance tab
   Label41.Enabled       := CarFmt in [fmtMBWR]; //Motor Sound File
@@ -750,6 +644,7 @@ end;
   SappCAB2.Enabled      := CarFmt in [fmtMBWR]; // Cabrio brakelights IDs
   SappCAB3.Enabled      := CarFmt in [fmtMBWR]; // Cabrio brakelights IDs
 
+  Label133.Enabled      := CarFmt in [fmtWR2, fmtAFC11N, fmtFVR]; //Tacho ID
   LtachoID.Enabled      := CarFmt in [fmtWR2, fmtAFC11N, fmtFVR]; //Tacho ID
   STachoID.Enabled      := CarFmt in [fmtWR2, fmtAFC11N, fmtFVR]; //Tacho ID
 
@@ -760,44 +655,9 @@ end;
 
   Label114.Enabled      := CarFmt in [fmtWR2, fmtAFC11N]; //Default Menu Color
   SColor.Enabled        := CarFmt in [fmtWR2, fmtAFC11N]; //Default Menu Color
-  Label152.Enabled      := CarFmt in [fmtAFC11N]; //Caravan
-  Caravan.Enabled       := CarFmt in [fmtAFC11N]; //Caravan
 
-
-if RGFormat.ItemIndex=0 then begin
-  Label118.Enabled:=false;
-  Hersteller.Enabled:=false;
-  Label153.Enabled:=false;
-  Logo.Enabled:=false;
-  Label133.Enabled:=false;
-  RaceClass1_4.Items[0]:='Series';
-  RaceClass1_4.Items[1]:='Racing';
-  RaceClass1_4.Items[2]:='Prototype';
-  RaceClass1_4.Items[3]:='Vintage';
-end;
-
-if RGFormat.ItemIndex=1 then begin
-  RaceClass1_4.Items[0]:='Racing';
-  RaceClass1_4.Items[1]:='Series';
-  RaceClass1_4.Items[2]:='Rally';
-  RaceClass1_4.Items[3]:='Off-Roader';
-end;
-
-if RGFormat.ItemIndex=2 then begin
-  RaceClass1_4.Items[0]:='Racing';
-  RaceClass1_4.Items[1]:='Series';
-  RaceClass1_4.Items[2]:='Rally';
-  RaceClass1_4.Items[3]:='Off-Roader';
-end;
 
 if RGFormat.ItemIndex=3 then begin //Ferrari Virtual Race
-  Label118.Enabled:=false;
-  Hersteller.Enabled:=false;
-  Label153.Enabled:=false;
-  Logo.Enabled:=false;
-  RaceClass1_4.Enabled:=false;
-  Label127.Enabled:=false;
-  SRaceClass.Enabled:=false;
   //Appearance
   Label42.Enabled:=false;
   SSrate.Enabled:=false;
@@ -1036,9 +896,7 @@ begin
     CBCabrio1.Checked     := GetValue(103,4,2).Int = 1;
     CBCabrio2.Checked     := GetValue(103,27,2).Int = 1;
     //Identity - Placement
-    RaceClass1_4.ItemIndex := Math.min(GetValue(105,42,2).Int-1,4); //1..4 + Custom
     SRaceClass.Value      := GetValue(105,42,2).Int;
-    SRaceClass.Enabled    := not (GetValue(105,42,2).Int in [1..4]);
     SScore.Value          := GetValue(105,4,2).Int;
     SClassID.Value        := GetValue(105,7,2).Int;
 
@@ -1214,10 +1072,7 @@ begin
     SetValue(103,27,2,integer(CBCabrio2.Checked));
 
     //Identity - Placement
-    case RaceClass1_4.ItemIndex of
-      0..3: SetValue(105,42,2,RaceClass1_4.ItemIndex + 1);
-      else  SetValue(105,42,2,SRaceClass.Value);
-    end;
+    SetValue(105,42,2,SRaceClass.Value);
     SetValue(105,4,2,SScore.Value);
     SetValue(105,7,2,SClassID.Value);
 
