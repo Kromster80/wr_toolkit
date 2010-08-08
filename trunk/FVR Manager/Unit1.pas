@@ -29,8 +29,6 @@ type
     procedure BitBtn2Click(Sender: TObject);
     procedure CLBCarsClick(Sender: TObject);
     procedure SAllClick(Sender: TObject);
-  private     { Private declarations }
-  public      { Public declarations }
   end;
 
 const
@@ -39,7 +37,7 @@ const
  StockGears=56;
  StockTires=9;
  MaxCars=256;
- VersionInfo='FVR Manager       Version 0.1b (15 Jul 2010)';
+ VersionInfo='FVR Manager       Version 0.1c (08 Aug 2010)';
 
 var
   Form1: TForm1;
@@ -108,7 +106,7 @@ begin
   if Sender<>nil then exit; //Wait until all forms are init
   Form2.Show;
   Form2.Repaint;
-  if fileexists('krom.dev') then ChDir('E:\Ferrari Virtual Race');
+  if fileexists('krom.dev') then ChDir('C:\Ferrari Virtual Race');
   RootDir:=getcurrentdir;
   if not fileexists('FrontEnd2\FrontEnd.ds') then begin
   Form2.FormStyle:=fsNormal;
@@ -126,6 +124,7 @@ begin
 end;
 
 procedure TForm1.OpenDS(Sender: TObject; filename:string);
+var i,k,m:integer;
 begin
 assignfile(f,filename); FileMode:=0; reset(f,1); FileMode:=2;
 blockread(f,Header,33);
