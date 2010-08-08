@@ -1,7 +1,7 @@
 unit KromUtils;
 {$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
-uses sysutils,windows,Controls,forms,typinfo,ExtCtrls,Math, Dialogs, Registry, ShellApi;
+uses sysutils,windows,Controls,forms,typinfo,ExtCtrls,Math, Dialogs, Registry, ShellApi, shlobj;
 
 type
   PSingleArray = ^TSingleArray;
@@ -106,6 +106,8 @@ procedure DoClientAreaResize(aForm:TForm);
 function BrowseURL(const URL: string) : boolean;
 procedure MailTo(Address,Subject,Body:string);
 procedure OpenMySite(ToolName:string; Address:string='http://krom.reveur.de');
+
+procedure RegisterFileType(ExtName:string; AppName:string);
 
 const
   eol:string=#13+#10; //EndOfLine
@@ -1096,6 +1098,29 @@ end;
 procedure OpenMySite(ToolName:string; Address:string='http://krom.reveur.de');
 begin
   BrowseURL(Address+'/index_r.php?t='+ToolName); //Maybe add tool version later..
+end;
+
+
+procedure RegisterFileType(ExtName:string; AppName:string);
+var reg:TRegistry;
+begin
+  reg := TRegistry.Create;
+  try
+    reg.RootKey := HKEY_CLASSES_ROOT;
+    reg.OpenKey('.'+ExtName, true);
+    reg.WriteString('', ExtName+'file');
+    reg.CloseKey;
+    reg.CreateKey(ExtName+'file');
+    reg.OpenKey(ExtName+'file\DefaultIcon', true);
+    reg.WriteString('', '"'+AppName+'"'+',0');
+    reg.CloseKey;
+    reg.OpenKey(ExtName+'file\shell\open\command', true);
+    reg.WriteString('', '"'+AppName+'"'+' "%1"');
+    reg.CloseKey;
+  finally
+    reg.Free;
+  end;
+  SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, nil, nil) ;
 end;
 
 
