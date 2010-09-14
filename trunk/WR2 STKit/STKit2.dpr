@@ -19,7 +19,8 @@ uses
   Unit_Tracing in 'Unit_Tracing.pas',
   WR_AboutBox in '..\_Common_\WR_AboutBox.pas' {AboutForm},
   SK_Options in 'SK_Options.pas',
-  SK_ImportLWO in 'SK_ImportLWO.pas';
+  SK_ImportLWO in 'SK_ImportLWO.pas',
+  Unit_Grass in 'Unit_Grass.pas';
 
 {$R *.RES}
 

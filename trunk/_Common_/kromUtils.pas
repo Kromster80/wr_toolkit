@@ -9,6 +9,7 @@ type
   PStringArray = ^TStringArray;
   TStringArray = array[1..256] of String;
   Vector4f = record X,Y,Z,W:single; end;
+  Vector3i = record X,Y,Z:integer; end;
   Vector3f = record X,Y,Z:single; end;
   Vector2f = record U,V:single; end;
   PVector3f = ^Vector3f;
@@ -37,6 +38,7 @@ procedure Color2RGB(Col:integer; out R,G,B:byte);
 
 function Vectorize(A,B:single):Vector2f; overload;
 function Vectorize(A,B,C:single):Vector3f; overload;
+function Vectorize(A,B,C:integer):Vector3i; overload;
 
 function Min(const A,B,C: integer):integer; overload;
 function Min(const A,B,C: single):single; overload;
@@ -116,16 +118,26 @@ implementation
 
 function Vectorize(A,B:single):Vector2f; overload;
 begin
-Result.U:=A;
-Result.V:=B;
+  Result.U:=A;
+  Result.V:=B;
 end;
+
 
 function Vectorize(A,B,C:single):Vector3f; overload;
 begin
-Result.X:=A;
-Result.Y:=B;
-Result.Z:=C;
-end;       
+  Result.X:=A;
+  Result.Y:=B;
+  Result.Z:=C;
+end;
+
+
+function Vectorize(A,B,C:integer):Vector3i; overload;
+begin
+  Result.X := A;
+  Result.Y := B;
+  Result.Z := C;
+end;
+
 
 function Min(const A,B,C: integer): integer; overload;
 begin if A < B then if A < C then Result := A else Result := C
