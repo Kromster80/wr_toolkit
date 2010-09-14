@@ -401,10 +401,9 @@ begin
   if Changes.SNI then s:=s+'SNI'+eol;
   if Changes.LVL then s:=s+'LVL'+eol;
   if Changes.SKY then s:=s+'SKY'+eol;
-  for i:=1 to 4 do
-    if Changes.RO[i] then s:=s+'RO'+int2fix(i,2)+eol;
+  if fGrass.Changed then s:=s+'RO#'+eol;
   if Changes.STR then s:=s+'STR'+eol;
-  if Changes.TRL then s:=s+'TRL'+eol;
+  if fTriggers.Changed then s:=s+'TRL'+eol;
   if Changes.SC2 then s:=s+'SC2'+eol;
   Result:=s;
 end;

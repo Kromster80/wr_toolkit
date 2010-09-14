@@ -5,7 +5,7 @@ uses
   Windows, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, kromUtils, KromOGLUtils, Defaults, Math, Menus,
   LoadObjects, Grids,  ImgList, OpenAL, WR_AboutBox, SK_Options, FileCtrl,
-  Buttons, Spin, ComCtrls, Unit_Triggers;
+  Buttons, Spin, ComCtrls, Unit_Grass, Unit_Triggers;
 
 type TCarDrivingMode = (cdm_Sim, cdm_Arcade);
 const CarDrivingMode: array[TCarDrivingMode] of string = ('Sim', 'Arcade');
@@ -662,7 +662,7 @@ type
     procedure ComputeTurnClick(Sender: TObject);
     procedure E_Node1Change(Sender: TObject);
     procedure RemTurnClick(Sender: TObject);
-    procedure ComputeTriggerClick(Sender: TObject);
+    procedure TriggerChange(Sender: TObject);
     procedure AddTriggerClick(Sender: TObject);
     procedure ListObjectsClick(Sender: TObject);
     procedure ListObjects2Click(Sender: TObject);
@@ -770,7 +770,6 @@ type
     procedure ShowQADInfo(Sender: TObject);
     procedure RemLightClick(Sender: TObject);
     procedure GrassPlainColorClick(Sender: TObject);
-    procedure RG_GrassLODClick(Sender: TObject);
     procedure LoadLWOLights(Sender: TObject);
     procedure CopyLightClick(Sender: TObject);
     procedure PasteLightClick(Sender: TObject);
@@ -884,6 +883,7 @@ type
     procedure Done(Sender:Tobject);
     procedure OptimizeVerticesClick(Sender: TObject);
     procedure OptimizeCullingSpheresClick(Sender: TObject);
+    procedure RG_GrassLODClick(Sender: TObject);
 
   private     { Private declarations }
     procedure OnIdle(Sender: TObject; var Done: Boolean);
@@ -931,7 +931,6 @@ var
   CarH:single=180;
   Key1,Key2,Key3,Key4:boolean;
 
-  PointSize,LineWidth:single;
   Zoom: single=0.256;    // Zoom
   ZoomLo: single=0.11;    // Zoom
   ZoomHi: single=1.6;    // Zoom
@@ -954,11 +953,6 @@ var
   ClickedID:integer;
 
   TracePt:integer;
-  coArrow,coSquare,coBox,coBoxW,coSkyDome,coSkyPlane,coMover,coCircleXZ,coCircleYZ,coRoundXZ:glUint; //common objects
-  coCar:glUint;
-  coGrass:array[1..4]of glUint;
-  coGrassTex:array[1..4]of glUint;
-  EnvMap,FlareTex,BlackTex,WhiteTex:glUint;
 
   ScnCall,ScnCall2:array[1..65000]of glUint;
   Texture:array[1..512]of glUint;
@@ -1095,6 +1089,7 @@ var
     d:array[1..32]of single;    //128
     end;
 
+  fGrass:TSGrass;
   fTriggers:TSTriggers;
 
   SKYQty:integer;
@@ -1298,7 +1293,7 @@ var
     poly,vert:integer;
   end;
 
-  RO:array[1..4]of record
+  {RO:array[1..4]of record
     Head:record x1,x2,x3,sizeX,sizeZ,XZ,Qty,Density:integer; end;
     Tex:string[32];
     UV:array[1..4]of record X:array[1..8]of single; end;
@@ -1308,7 +1303,7 @@ var
       ID,Size:byte;
       Color:word;
     end;
-  end;
+  end;}
   GrassColorW:record R,G,B,A:byte; end;
 
   SizeX,SizeZ:integer;       //map dimensions
@@ -1324,11 +1319,10 @@ var
   DoubleClick:boolean=false;
 
   Changes:record
-    TRL,SMP:boolean;
+    SMP:boolean;
     TOB,TRK:array[1..MAX_TRACKS]of boolean;
     WTR:array[1..MAX_WP_TRACKS]of boolean;
     IDX,VTX,QAD,SKY,SNI,LVL:boolean;
-    RO:array[1..4]of boolean;
     STR:boolean;
     SC2,WRK:boolean;
   end;
@@ -1428,6 +1422,7 @@ end else begin
   SE_GripR.MaxValue:=120;
 end;
 
+  fGrass := TSGrass.Create;
   fTriggers := TSTriggers.Create;
 
 
@@ -1896,7 +1891,7 @@ if not CBSelectionBuffer.Checked then begin
   if ActivePage=apStreets                         then RenderStreets(1,STRPointID.Value,STRSplineID1.Value);
   if ActivePage=apAnimated                        then RenderAnimated(1,'Paths',ListSNIObjects.ItemIndex+1,ListSNINodes.ItemIndex+1)
   else if (fOptions.RenderMode>=rmFull)                    then RenderAnimated(1,'Objects',0,0);
-  if ActivePage=apTriggers                        then fTriggers.Render(1,ListTrig.ItemIndex+1);
+  if ActivePage=apTriggers                        then fTriggers.Render(1,ListTrig.ItemIndex+1, EditMode);
 
   //Render scenery in shaders
   if(fOptions.RenderMode<>rmSchem)and(fOptions.RenderMode<>rmOpenGL)then RenderShaders(
@@ -1917,7 +1912,7 @@ if not CBSelectionBuffer.Checked then begin
   if (ActivePage=apTOB)or(fOptions.RenderMode>=rmFull)     then RenderTOB_Objects(TrackID,ListTOB2.ItemIndex+1,1);
   gldisable(gl_Lighting);
 
-  if (ActivePage=apGrass)or(fOptions.RenderMode>=rmFull)   then RenderGrass(RG_GrassLOD.ItemIndex+1,RG_GrassMode.ItemIndex+1);
+  if (ActivePage=apGrass)or(fOptions.RenderMode>=rmFull)   then fGrass.Render(RG_GrassLOD.ItemIndex+1,RG_GrassMode.ItemIndex+1, fOptions.RenderMode);
 
   if CBWire.Checked                               then RenderWire();
 
@@ -1931,7 +1926,7 @@ if not CBSelectionBuffer.Checked then begin
 
   if ActivePage=apStreets         then RenderStreets(0.2,STRPointID.Value,STRSplineID1.Value);
   if ActivePage=apStreets         then RenderRoadNet();
-  if ActivePage=apTriggers        then fTriggers.Render(0.2,ListTrig.ItemIndex+1);
+  if ActivePage=apTriggers        then fTriggers.Render(0.2,ListTrig.ItemIndex+1, EditMode);
   if ActivePage=apAnimated        then RenderAnimated(0.2,'Paths',ListSNIObjects.ItemIndex+1,ListSNINodes.ItemIndex+1);
   if ActivePage=apLights          then RenderLights(0.5,'',ListLights.ItemIndex+1);
   if ActivePage=apTracksMT        then RenderMakeTrack(0.5,ListMakeTrack.ItemIndex+1);
@@ -1969,7 +1964,7 @@ MPos.Z:=V.z;
   glEnable(GL_DEPTH_TEST);
   if ActivePage=apAnimated              then RenderAnimated(0,'Paths',0,0);
 //  if ActivePage='Geometry'        then RenderVTX('Points');
-  if ActivePage=apTriggers              then fTriggers.Render(0,ListTrig.ItemIndex+1);
+  if ActivePage=apTriggers              then fTriggers.Render(0,ListTrig.ItemIndex+1, EditMode);
   if ActivePage=apLights                then RenderLights(0,'',0);
   if ActivePage=apTracksMT              then RenderMakeTrack(0,0);
   if ActivePage=apSounds                then RenderSounds(0,0);
@@ -2050,8 +2045,8 @@ begin
 
   for i:=1 to MAX_TRACKS do begin Changes.TRK[i]:=false; Changes.TOB[i]:=false; end;
   for i:=1 to MAX_WP_TRACKS do Changes.WTR[i]:=false;
-  for i:=1 to 4 do Changes.RO[i]:=false;
-  Changes.TRL:=false; Changes.SMP:=false;
+  fGrass.Changed:=false;
+  fTriggers.Changed:=false; Changes.SMP:=false;
   Changes.IDX:=false; Changes.VTX:=false; Changes.QAD:=false; Changes.SKY:=false;
   Changes.SNI:=false; Changes.LVL:=false; Changes.STR:=false;
   Changes.WRK:=false; Changes.SC2:=false;
@@ -2101,31 +2096,13 @@ if fTriggers.LoadFromFile(fOptions.WorkDir+'RaceDat\'+Scenery+'.trl') then MemoL
 if LoadSC2(fOptions.WorkDir+'AddOns\Sceneries\'
                   +Scenery+'\EditScenery.sc2') then MemoLoad.Lines.Add('Load SC2 in'+ElapsedTime(@OldTime));
 //if LoadRO_(SceneryPath+Scenery)                then MemoLoad.Lines.Add('Load RO# in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('RO# missing');
-RG_GrassLODClick(nil); //Reload current selected Grass LOD
+fGrass.LoadFromFile(SceneryPath+Scenery);
+//RG_GrassLODClick(nil); //Reload current selected Grass LOD
 
 SendQADtoUI('All');
 ShowQADInfo(nil);
 CBTrackChange(nil);
 MouseMoveScale:=(Qty.BlocksX+Qty.BlocksZ)div 5;
-end;
-
-procedure TForm1.RG_GrassLODClick(Sender: TObject);
-var LOD:integer; ROLoaded:boolean;
-begin
-  LOD := RG_GrassLOD.ItemIndex+1;
-  if LOD = 0 then exit;
-
-  //Load new grass LOD or just refresh texture
-  if Changes.RO[LOD] = false then begin
-    ROLoaded := LoadRO_(SceneryPath+Scenery,LOD);
-    if ROLoaded then
-      LoadTexturePTX(SceneryPath+'Textures\'+RO[lod].Tex+'.ptx',coGrassTex[lod])
-    else
-      MessageBox(HWND(nil), 'Grass level now yet exists', 'Info', MB_OK);
-  end else
-    LoadTexturePTX(SceneryPath+'Textures\'+RO[lod].Tex+'.ptx',coGrassTex[lod]);
-
-  ShowGrassInfo(nil);
 end;
 
 
@@ -2415,12 +2392,113 @@ ComputeTurnClick(nil);
 Changes.TRK[TrackID]:=true;
 end;
 
-procedure TForm1.ListTrigClick(Sender: TObject); begin fTriggers.ListTrigClick_(); end;
-procedure TForm1.ListTrigDblClick(Sender: TObject); begin fTriggers.ListTrigDblClick_(); end;
 
-procedure TForm1.AddTriggerClick(Sender: TObject); begin fTriggers.AddTriggerClick_(); end;
-procedure TForm1.RemTriggerClick(Sender: TObject); begin fTriggers.RemTriggerClick_(); end;
-procedure TForm1.ComputeTriggerClick(Sender: TObject); begin fTriggers.ComputeTriggerClick_(Sender); end;
+procedure TForm1.ListTrigClick(Sender: TObject);
+var ID:integer;
+begin
+  TriggersRefresh := true;
+  ID := ListTrig.ItemIndex+1;
+  if ID=0 then exit;
+
+    CBTriggerType.ItemIndex := fTriggers.TriggerType[ID] - 1;
+    TRL_X.Value := fTriggers.Position[ID].X;
+    TRL_Y.Value := fTriggers.Position[ID].Y;
+    TRL_Z.Value := fTriggers.Position[ID].Z;
+    TRL_S1.Value := fTriggers.Scale[ID].X;
+    TRL_S2.Value := fTriggers.Scale[ID].Y;
+    TRL_S3.Value := fTriggers.Scale[ID].Z;
+    TRL_R1.Value := fTriggers.Rotation[ID].X;
+    TRL_R2.Value := fTriggers.Rotation[ID].Y;
+    TRL_R3.Value := fTriggers.Rotation[ID].Z;
+    TRL_P1.Value := fTriggers.Target[ID].X;
+    TRL_P2.Value := fTriggers.Target[ID].Y;
+    TRL_P3.Value := fTriggers.Target[ID].Z;
+    TRL_Flags.Text := fTriggers.GetFlags(ID);
+
+    if fTriggers.TriggerType[ID] in [4,8] then Label17.Caption:='Value' else Label17.Caption:='Target X';
+    Label17.Enabled := fTriggers.TriggerType[ID] in [4,5,8,11];
+    Label16.Enabled := fTriggers.TriggerType[ID] in [5,11];
+    Label15.Enabled := fTriggers.TriggerType[ID] in [5,11];
+    TRL_P1.Enabled := fTriggers.TriggerType[ID] in [4,5,8,11];
+    TRL_P2.Enabled := fTriggers.TriggerType[ID] in [5,11];
+    TRL_P3.Enabled := fTriggers.TriggerType[ID] in [5,11];
+
+  xPos := fTriggers.Position[ID].X;
+  yPos := fTriggers.Position[ID].Y;
+  zPos := fTriggers.Position[ID].Z;
+
+  TriggersRefresh := false;
+end;
+
+
+procedure TForm1.ListTrigDblClick(Sender: TObject);
+var ID:integer;
+begin
+  ID := ListTrig.ItemIndex+1;
+  if ID=0 then exit;
+  xPos := fTriggers.Position[ID].X;
+  yPos := fTriggers.Position[ID].Y;
+  zPos := fTriggers.Position[ID].Z;
+end;
+
+
+procedure TForm1.AddTriggerClick(Sender: TObject);
+begin
+  if not fTriggers.CanAddTrigger then exit;
+  ListTrig.Items.Add('<<<LEER>>>');
+  ListTrig.ItemIndex := ListTrig.Items.Count-1; //The last one
+  fTriggers.AddTrigger(); //Fill in defaults
+  TriggersRefresh := true;
+  TRL_X.Value := xPos;
+  TRL_Y.Value := yPos;
+  TRL_Z.Value := zPos;
+  TriggersRefresh := false;
+  TriggerChange(Sender); //Will copy existing values
+end;
+
+
+procedure TForm1.RemTriggerClick(Sender: TObject);
+var ID:integer;
+begin
+  ID := ListTrig.ItemIndex+1;
+  if ID=0 then exit;
+
+  fTriggers.RemTrigger(ID);
+  ListTrig.Items.Delete(ListTrig.ItemIndex);
+  ListTrig.ItemIndex := EnsureRange(ID, 1, ListTrig.Items.Count) - 1;
+  ListTrigClick(nil);
+end;
+
+
+procedure TForm1.TriggerChange(Sender: TObject);
+var ID:integer;
+begin
+  if TriggersRefresh then exit;
+
+  ID := ListTrig.ItemIndex+1;
+  if ID=0 then exit;
+
+    fTriggers.TriggerType[ID] := CBTriggerType.ItemIndex + 1;
+    ListTrig.Items[ID-1] := fTriggers.GetName(ID);
+    fTriggers.Position[ID] := Vectorize(TRL_X.Value, TRL_Y.Value, TRL_Z.Value);
+    fTriggers.Scale[ID] := Vectorize(TRL_S1.Value, TRL_S2.Value, TRL_S3.Value);
+    fTriggers.Rotation[ID] := Vectorize(TRL_R1.Value, TRL_R2.Value, TRL_R3.Value);
+    fTriggers.Target[ID] := Vectorize(TRL_P1.Value, TRL_P2.Value, TRL_P3.Value);
+
+    if fTriggers.TriggerType[ID] in [4,8] then Label17.Caption:='Value' else Label17.Caption:='Target X';
+    Label17.Enabled := fTriggers.TriggerType[ID] in [4,5,8,11];
+    Label16.Enabled := fTriggers.TriggerType[ID] in [5,11];
+    Label15.Enabled := fTriggers.TriggerType[ID] in [5,11];
+    TRL_P1.Enabled := fTriggers.TriggerType[ID] in [4,5,8,11];
+    TRL_P2.Enabled := fTriggers.TriggerType[ID] in [5,11];
+    TRL_P3.Enabled := fTriggers.TriggerType[ID] in [5,11];
+
+    if (Sender=TRL_X)or(Sender=TRL_Y)or(Sender=TRL_Z) then begin
+      xPos := fTriggers.Position[ID].X;
+      yPos := fTriggers.Position[ID].Y;
+      zPos := fTriggers.Position[ID].Z;
+    end;
+end;
 
 
 procedure TForm1.BrowseLWO(Sender: TObject);
@@ -2771,7 +2849,7 @@ if Changes.SNI then SaveSNI(WSS+SceneryVersion+'\'+Scenery+'.sni');
 if Changes.LVL then SaveLVL(WSS+SceneryVersion+'\'+Scenery+'.lvl');
 if Changes.SMP then SaveSMP(WSS+SceneryVersion+'\Extra\ShdwMap.smp');
 if Changes.SKY then SaveSKY(WSS+SceneryVersion+'\'+Scenery+'.sky');
-for i:=1 to 4 do if Changes.RO[i] then SaveRO_(WSS+SceneryVersion+'\'+Scenery,i,CBOptimizeGrass.Checked);
+if fGrass.Changed then fGrass.SaveToFile(WSS+SceneryVersion+'\'+Scenery,CBOptimizeGrass.Checked);
 for i:=1 to MAX_TRACKS do if Changes.TOB[i] then SaveTOB(WSS+SceneryVersion+'\Tracks\'+Scenery+'_'+int2fix(i,2)+'.tob',i);
 
 //Files below are same for all Versions
@@ -2790,7 +2868,7 @@ if DirectoryExists(WSS+'V2\') then SaveTRK_DAT(WSS+'V2\Tracks\tracks.dat');
 if DirectoryExists(WSS+'V3\') then SaveTRK_DAT(WSS+'V3\Tracks\tracks.dat');
 
 if Changes.SC2 then SaveSC2(fOptions.WorkDir+'AddOns\Sceneries\'+Scenery+'\EditScenery.sc2');
-if Changes.TRL then fTriggers.SaveToFile(fOptions.WorkDir+'RaceDat\'+Scenery+'.trl');
+if fTriggers.Changed then fTriggers.SaveToFile(fOptions.WorkDir+'RaceDat\'+Scenery+'.trl');
 if Changes.STR then SaveSTR(fOptions.WorkDir+'Traffic\Streets\'+Scenery+'.str');
 
 ShowChangesInfoClick(nil);
@@ -5151,20 +5229,10 @@ end;
 
 
 procedure TForm1.GrassPlainColorClick(Sender: TObject);
-var i,r,g,b:integer;
 begin
-if RG_GrassLOD.ItemIndex+1=0 then exit;
-r:=EnsureRange(GrassColorW.R div 15,0,15);
-g:=EnsureRange(GrassColorW.G div 15,0,15);
-b:=EnsureRange(GrassColorW.B div 15,0,15);
-for i:=1 to RO[RG_GrassLOD.ItemIndex+1].Head.Qty do begin
-RO[RG_GrassLOD.ItemIndex+1].Grass[i].Color:=
-    EnsureRange(b+Random(0),0,15)+
-    EnsureRange(g+RandomS(1),0,15)*16+
-    EnsureRange(r+Random(0),0,15)*256; //it's times faster to access local numbers
+  fGrass.SetPlainColor(GrassColorW.r,GrassColorW.g,GrassColorW.b);
 end;
-Changes.RO[RG_GrassLOD.ItemIndex+1]:=true;
-end;
+
 
 procedure TForm1.LoadLWOLights(Sender: TObject);
 var
@@ -5585,169 +5653,41 @@ end;
 
 
 procedure TForm1.GenerateGrassClick(Sender: TObject);
-  const Num=16;
-  var
-    i,k,ii,kk,x,z,ci,ck,cb,Dens,tmp,lod:integer; ps:array of word;
-    inx,ResultY,inz:single; //XYZ for height finding
-    PolyQty:integer;
-    x1,z1,x2,z2,x3,z3,ytemp,nx,ny,nz,D:single;
-    v1,v2,v3:array[1..3] of single;
-    tp:array[1..Num]of integer;
-    s:string;
+var Tick1:cardinal;
 begin
-  ElapsedTime(@OldTime);
-  for lod:=1 to 4 do begin //lod:=RG_GrassLOD.ItemIndex+1;
-    case lod of
-      1: begin RO[lod].Head.Density:=2560; Dens:=11; end; //Dens^2 ~= 128,256,512,1024
-      2: begin RO[lod].Head.Density:=5120; Dens:=16; end;
-      3: begin RO[lod].Head.Density:=10240; Dens:=22; end;
-      4: begin RO[lod].Head.Density:=20480; Dens:=32; end;
-      else exit;
-    end;
-
-    RO[lod].Head.x1     := 65536;
-    RO[lod].Head.x2     := 1;
-    RO[lod].Head.x3     := 4;
-    RO[lod].Head.sizeX  := Qty.BlocksX*4;
-    RO[lod].Head.sizeZ  := Qty.BlocksZ*4;
-    RO[lod].Head.XZ     := RO[lod].Head.sizeX*RO[lod].Head.sizeZ;
-    RO[lod].Head.Qty    := 0;
-    if RO[lod].Tex='' then RO[lod].Tex:='RandObj';
-
-    setlength(RO[lod].Chunks,RO[lod].Head.sizeZ+1);
-    for i:=1 to RO[lod].Head.sizeZ do
-    setlength(RO[lod].Chunks[i],RO[lod].Head.sizeX+1);
-
-    setlength(RO[lod].Grass,Dens*Dens*RO[lod].Head.sizeZ*RO[lod].Head.sizeX+1);
-
-    setlength(ps,Qty.Polys+1); k:=1;
-    for i:=1 to Qty.Polys do begin
-      if i=v07[k+1].FirstPoly+1 then inc(k);
-      ps[i]:=v07[k].SurfaceID+1;
-    end;
-
-    ci:=0; tmp:=0;
-    for i:=1 to RO[lod].Head.sizeZ do begin
-      Label92.Caption:=inttostr(LOD)+'.'+int2fix(round(i/RO[lod].Head.sizeZ*100),2)+' %';
-      Label92.Refresh;
-      //RenderFrame(nil); useless slowdown
-      for k:=1 to RO[lod].Head.sizeX do begin
-        RO[lod].Chunks[i,k].First:=ci;
-
-        for z:=1 to Dens do for x:=1 to Dens do begin
-          RO[lod].Grass[ci+1].X:=((x-0.5)/Dens+(k-1)-Qty.BlocksX*2+RandomS(0.33/Dens))*256; // +/-0.33
-          RO[lod].Grass[ci+1].Z:=((z-0.5)/Dens+(i-1)-Qty.BlocksZ*2+RandomS(0.33/Dens))*256; // +/-0.33
-
-          inx:=RO[lod].Grass[ci+1].X;
-          inz:=RO[lod].Grass[ci+1].Z;
-
-          //Next piece of code
-          // - Check polys under given X/Z
-          // whenever they meet following requirements:
-          // - Has GrowGrass material property
-          // - Are faced up
-          // - Are highest from all found meeting previous conditions
-          PolyQty:=1; ck:=1; tp[1]:=0; ResultY:=DONT_TRACE_TAG;
-          cb:=                                                                    //CollisionBlock:=
-              (EnsureRange(round(inz/256+0.5+Qty.BlocksZ*2),1,Qty.BlocksZ*4)-1)*  //(Z-1)*
-               Qty.BlocksX*4+                                                     //Qty.BlocksX*4+
-               EnsureRange(round(inx/256+0.5+Qty.BlocksX*2),1,Qty.BlocksX*4);     //(X-1)+1
-
-          repeat
-            for ii:=1 to v06[cb][ck] do begin // Polycount; BlockID; ..polys..; Polycount; BlockID; ..polys..; 0-terminator.
-              kk:=Block[((v06[cb,ck+1])div Qty.BlocksX+1),
-                        ((v06[cb,ck+1])mod Qty.BlocksX+1)].FirstPoly+1+v06[cb,ck+1+ii];
-
-              if MaterialW[ps[kk]].GrowGrass=1 then begin
-                x1:=inx-VTX[v[kk,1]].X; z1:=inz-VTX[v[kk,1]].Z;
-                x2:=inx-VTX[v[kk,2]].X; z2:=inz-VTX[v[kk,2]].Z;
-                x3:=inx-VTX[v[kk,3]].X; z3:=inz-VTX[v[kk,3]].Z;
-
-                if (-x1*z2+z1*x2>=0) //point within triangle makes 3 triangles whose normals face up (nY > 0)
-                and(-x2*z3+z2*x3>=0) //simply check if any of these normals Y>=0
-                and(-x3*z1+z3*x1>=0) then begin
-                  tp[PolyQty]:=kk;
-                  if PolyQty<Num then inc(PolyQty); //avoid overflows
-                end;
-              end;
-            end;
-            inc(ck,v06[cb,ck]+2); //qty+2
-          until(v06[cb,ck]=0); //end of list
-
-          dec(PolyQty);
-
-          for ii:=1 to PolyQty do begin
-            v1[1]:=VTX[v[tp[ii],1]].X; v1[2]:=VTX[v[tp[ii],1]].Y; v1[3]:=VTX[v[tp[ii],1]].Z;
-            v2[1]:=VTX[v[tp[ii],2]].X; v2[2]:=VTX[v[tp[ii],2]].Y; v2[3]:=VTX[v[tp[ii],2]].Z;
-            v3[1]:=VTX[v[tp[ii],3]].X; v3[2]:=VTX[v[tp[ii],3]].Y; v3[3]:=VTX[v[tp[ii],3]].Z;
-            Normal2Poly(v1,v2,v3,@nx,@ny,@nz);
-            Normalize(nx,ny,nz);
-            D:=-(nx*VTX[v[tp[ii],1]].X+ny*VTX[v[tp[ii],1]].Y+nz*VTX[v[tp[ii],1]].Z);
-            ytemp:=-(inx*nx+inz*nz+D)/ny; //true height respecting poly surface
-            if ((ytemp > ResultY)and(ny > 0))or(ii=1) then ResultY:=ytemp; //choose highest one
-          end;
-
-          if ResultY<>DONT_TRACE_TAG then begin
-            RO[lod].Grass[ci+1].Y:=ResultY;
-            inc(ci);
-            RO[lod].Grass[ci].Size:=Random(16);
-            RO[lod].Grass[ci].ID:=Random(4); //4 is reserved for fields
-            RO[lod].Grass[ci].Color:=(Random(65536)) mod 65535; //temp colors
-          end;
-        end;
-
-        RO[lod].Chunks[i,k].Num:=ci-RO[lod].Chunks[i,k].First;
-      end; //i
-    end; //k
-    RO[lod].Head.Qty:=ci;
-    ShowGrassInfo(nil);
-    s:=ElapsedTime(@OldTime); decs(s,5); // XX***ms
-    Label92.Caption:=s+'s';
-
-    for i:=1 to 4 do begin
-      RO[lod].UV[i].X[1]:=0;
-      RO[lod].UV[i].X[2]:=(i-1)*0.25;
-      RO[lod].UV[i].X[3]:=0;
-      RO[lod].UV[i].X[4]:=i*0.25;
-      RO[lod].UV[i].X[5]:=1;
-      RO[lod].UV[i].X[6]:=10;
-      RO[lod].UV[i].X[7]:=10;
-      RO[lod].UV[i].X[8]:=0;
-    end;
-    Changes.RO[lod]:=true;
-  end;// for LOD:=1 to 4 do begin
+  Tick1 := GetTickCount;
+  fGrass.Generate(Label92);
+  Label92.Caption := inttostr(GetTickCount-Tick1)+'ms';
+  ShowGrassInfo(nil);
 end;
 
+
 procedure TForm1.ShowGrassInfo(Sender: TObject);
-var LOD:integer;
+var i,LOD:integer;
 begin
   LOD := RG_GrassLOD.ItemIndex+1;
   if LOD = 0 then exit;
 
+  for i:=1 to 8 do
+    VLBGrass.Cells[1,i] := fGrass.GetStats(LOD, i);
+
   GrassRefresh := true;
-  VLBGrass.Cells[1,1] := inttostr(RO[lod].Head.x1);
-  VLBGrass.Cells[1,2] := inttostr(RO[lod].Head.x2);
-  VLBGrass.Cells[1,3] := inttostr(RO[lod].Head.x3);
-  VLBGrass.Cells[1,4] := inttostr(RO[lod].Head.sizeX);
-  VLBGrass.Cells[1,5] := inttostr(RO[lod].Head.sizeZ);
-  VLBGrass.Cells[1,6] := inttostr(RO[lod].Head.XZ);
-  VLBGrass.Cells[1,7] := inttostr(RO[lod].Head.Qty);
-  VLBGrass.Cells[1,8] := inttostr(RO[lod].Head.Density);
-  GrassTexture.Text := RO[lod].Tex;
+  GrassTexture.Text := fGrass.TexName[LOD];
   GrassRefresh := false;
 end;
 
 
+procedure TForm1.RG_GrassLODClick(Sender: TObject);
+begin
+  fGrass.ReloadTexture;
+  ShowGrassInfo(nil);
+end;
+
+
 procedure TForm1.GrassTextureChange(Sender: TObject);
-var s:string;
 begin
   if GrassRefresh then exit;
-  s := GrassTexture.Text;
-
-  decs(s,length(ExtractFileExt(s)));
-  GrassTexture.Text := s; //remove .ptx ending
-  RO[RG_GrassLOD.ItemIndex+1].Tex := GrassTexture.Text;
-  Changes.RO[RG_GrassLOD.ItemIndex+1] := true;
+  fGrass.TexName := TruncateExt(GrassTexture.Text);
 end;
 
 
@@ -6039,72 +5979,13 @@ if Obj[i].ID+1=ListObjects.ItemIndex+1 then
 Obj[i].Size:=1+RandomS(2)/10;
 end;
 
+
 procedure TForm1.GrassTGAColorClick(Sender: TObject);
-var
-  f:file;
-  ci,i,k:integer;
-  sx,sz:word;
-  HasAlpha:boolean;
-  tga:array of array of array[1..4] of byte;
-  ix,iz:integer;
-  rx,rz:single;
-  r1,g1,b1:integer;
-  LOD:integer;
 begin
-if not RunOpenDialog(OpenDialog,'',SceneryPath,'TGA image (*.tga)|*.tga') then exit;
-assignfile(f,OpenDialog.FileName); reset(f,1);
-blockread(f,c,12);
-blockread(f,sx,2);
-blockread(f,sz,2);
-blockread(f,c,2); HasAlpha:=c[1]=#32;
-
-if (sx>2048)or(sz>2048) then begin
-MessageBox(Form1.Handle,'Image exceeds 2048px limit', 'Error', MB_OK or MB_ICONWARNING);
-closefile(f); exit; end;
-
-if HasAlpha then ci:=sx*sz*4 else ci:=sx*sz*3;
-blockread(f,c,ci);
-ci:=1;
-setlength(tga,sz+1);
-  for i:=1 to sz do begin
-  setlength(tga[i],sx+1);
-    for k:=1 to sx do begin  //BGRA
-    tga[i,k,1]:=ord(c[ci]);
-    tga[i,k,2]:=ord(c[ci+1]);
-    tga[i,k,3]:=ord(c[ci+2]);
-    if HasAlpha then tga[i,k,4]:=ord(c[ci+3]) else tga[i,k,4]:=255;
-    if HasAlpha then inc(ci,4) else inc(ci,3);
-    end;
-  end;
-closefile(f);
-
-for LOD:=1 to 4 do begin //LOD:=RG_GrassLOD.ItemIndex+1;
-
-for i:=1 to RO[LOD].Head.Qty do begin
-//interpolating positions into pixels, 0.5 is proven to be just right value
-rx:=sx*(RO[LOD].Grass[i].X+Qty.BlocksX*512)/(Qty.BlocksX*1024)+0.5;
-rz:=sz*(RO[LOD].Grass[i].Z+Qty.BlocksZ*512)/(Qty.BlocksZ*1024)+0.5;
-rx:=EnsureRange(rx,1,sx-1); ix:=trunc(rx); rx:=frac(rx);
-rz:=EnsureRange(rz,1,sz-1); iz:=trunc(rz); rz:=frac(rz);
-//in range 1..2047
-
-r1:=round((tga[iz  ,ix,3]*(1-rx)+tga[iz  ,ix+1,3]*(rx))*(1-rz)+
-          (tga[iz+1,ix,3]*(1-rx)+tga[iz+1,ix+1,3]*(rx))*rz   );
-
-g1:=round((tga[iz  ,ix,2]*(1-rx)+tga[iz  ,ix+1,2]*(rx))*(1-rz)+
-          (tga[iz+1,ix,2]*(1-rx)+tga[iz+1,ix+1,2]*(rx))*rz   );
-
-b1:=round((tga[iz  ,ix,1]*(1-rx)+tga[iz  ,ix+1,1]*(rx))*(1-rz)+
-          (tga[iz+1,ix,1]*(1-rx)+tga[iz+1,ix+1,1]*(rx))*rz   );
-
-RO[LOD].Grass[i].Color:=
-    EnsureRange(round(b1/17),0,15)+
-    EnsureRange(round(g1/17),0,15)*16+
-    EnsureRange(round(r1/17),0,15)*256;
+  if not RunOpenDialog(OpenDialog,'',SceneryPath,'TGA image (*.tga)|*.tga') then exit;
+  fGrass.LoadColorFromTGA(OpenDialog.FileName);
 end;
-Changes.RO[LOD]:=true;
-end;// for LOD:=1 to 4 do begin
-end;
+
 
 procedure TForm1.TraceShadowsClick(Sender: TObject);
 begin
@@ -6457,86 +6338,14 @@ PlayTrack:=false;
 end;
 end;
 
+
 procedure TForm1.GrassTGAMask(Sender: TObject);
-const Num=16; //how many polys to check
-var
-  f:file;
-  i,k,x,ci,ck,tmp:integer;
-  TGAx,TGAz:word;
-  HasAlpha:boolean;
-  tga:array of array of array[1..4] of byte;
-  ix,iz:integer;
-  rx,rz:single;
-  LOD:integer;
 begin
-if not RunOpenDialog(OpenDialog,'',SceneryPath,'TGA image (*.tga)|*.tga') then exit;
-
-ElapsedTime(@OldTime);
-//LOD:=RG_GrassLOD.ItemIndex+1;
-
-assignfile(f,OpenDialog.FileName); reset(f,1);
-blockread(f,c,12);
-blockread(f,TGAx,2);
-blockread(f,TGAz,2);
-blockread(f,c,2); HasAlpha:=c[1]=#32;
-
-if (TGAx>2048)or(TGAz>2048) then begin closefile(f); exit; end;
-
-if HasAlpha then ci:=TGAx*TGAz*4 else ci:=TGAx*TGAz*3;
-blockread(f,c,ci);
-ci:=1;
-setlength(tga,TGAz+1);
-  for i:=1 to TGAz do begin
-  setlength(tga[i],TGAx+1);
-    for k:=1 to TGAx do begin  //BGRA
-    tga[i,k,1]:=ord(c[ci]);
-    tga[i,k,2]:=ord(c[ci+1]);
-    tga[i,k,3]:=ord(c[ci+2]);
-    if HasAlpha then tga[i,k,4]:=ord(c[ci+3]) else tga[i,k,4]:=255;
-    if HasAlpha then inc(ci,4) else inc(ci,3);
-    end;
-  end;
-closefile(f);
-
-for LOD:=1 to 4 do begin
-
-ci:=0; ck:=0;
-for i:=1 to RO[lod].Head.sizeZ do begin
-Label92.Caption:=inttostr(round(i/RO[lod].Head.sizeZ*100))+' %';
-Label92.Refresh;
-//RenderFrame(nil);
-for k:=1 to RO[lod].Head.sizeX do begin
-RO[lod].Chunks[i,k].First:=ci;
-
-    for x:=1 to RO[lod].Chunks[i,k].Num do begin
-    inc(ck);
-    RO[lod].Grass[ci+1]:=RO[lod].Grass[ck];
-
-      rx:=TGAx*(RO[LOD].Grass[ci+1].X+Qty.BlocksX*512)/(Qty.BlocksX*1024)+1;
-      rz:=TGAz*(RO[LOD].Grass[ci+1].Z+Qty.BlocksZ*512)/(Qty.BlocksZ*1024)+1;
-      rx:=EnsureRange(rx,1,TGAx);
-      rz:=EnsureRange(rz,1,TGAz);
-      ix:=EnsureRange(trunc(rx),1,TGAx-1); rx:=frac(rx);
-      iz:=EnsureRange(trunc(rz),1,TGAz-1); rz:=frac(rz);
-
-      tmp:=round((tga[iz  ,ix,2]*(1-rx)+tga[iz  ,ix+1,2]*(rx))*(1-rz)+
-                 (tga[iz+1,ix,2]*(1-rx)+tga[iz+1,ix+1,2]*(rx))*rz   );
-
-      if (tmp=255)or((tmp>25)and(Random*((tmp/255))>=0.3)) then begin //0.5*0.5 ~ 0.25
-      RO[lod].Grass[ci+1].Size:=Random(round(16*tmp/255));
-      inc(ci);
-      end;
-    end;
-
-RO[lod].Chunks[i,k].Num:=ci-RO[lod].Chunks[i,k].First;
-end; //i
-end; //k
-RO[lod].Head.Qty:=ci;
-Changes.RO[lod]:=true;
-end;// for LOD:=1 to 4 do begin
-ShowGrassInfo(nil);
-Label92.Caption:=ElapsedTime(@OldTime);
+  if not RunOpenDialog(OpenDialog,'',SceneryPath,'TGA image (*.tga)|*.tga') then exit;
+  fGrass.LoadMaskFromTGA(OpenDialog.FileName);
+  ShowGrassInfo(nil);
 end;
+
 
 procedure TForm1.PrintScreenJPGClick(Sender: TObject);
 var sh,sw,i,k,h:integer; t:byte; jpg: TJpegImage; mkbmp:TBitmap; s:string;
@@ -7636,5 +7445,6 @@ procedure TForm1.OptimizeCullingSpheresClick(Sender: TObject);
 begin
   OptimizeCullingSpheresClick_();
 end;
+
 
 end.

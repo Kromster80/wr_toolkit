@@ -3,6 +3,15 @@ interface
 uses
   OpenGL, Windows,KromOGLUtils,sysutils,math,dglOpenGL,KromUtils;
 
+var
+  PointSize,LineWidth:single;
+
+  coArrow,coSquare,coBox,coBoxW,coSkyDome,coSkyPlane,coMover,coCircleXZ,coCircleYZ,coRoundXZ:glUint; //common objects
+  coCar:glUint;
+  coGrass:array[1..4]of glUint;
+  coGrassTex:glUint;
+  EnvMap,FlareTex,BlackTex,WhiteTex:glUint;
+
 procedure RenderShaders(Func:string; ShowTex:integer; CBReduceView,CBShowFog,CBCheckers,CBGrass:boolean);
 procedure RenderOpenGL(CBCheckers:boolean);
 procedure RenderStreets(A:single; NodeID,SplineID:integer);
@@ -16,7 +25,6 @@ procedure RenderMakeTrack(A:single; ID:integer);
 procedure RenderSounds(A:single; Input:integer);
 procedure RenderObjects(A,In1,In2:integer);
 procedure RenderObjectsShaders(A,In1,In2:integer);
-procedure RenderGrass(In1,GMode:integer);
 procedure RenderTOB_Objects(TrackID,ObjID,A:integer);
 procedure RenderCar();
 procedure RenderGrid(Mode:integer);
@@ -1118,57 +1126,6 @@ begin
   end;
 end;
 
-procedure RenderGrass(In1,GMode:integer);
-var ii,kk,h,m:integer;
-begin
-  if In1=0 then exit;
-  if RO[In1].Head.Qty=0 then exit;
-
-  if fOptions.RenderMode<rmFull then
-    glBegin(GL_POINTS)
-  else begin
-    glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_GREATER,0.5);
-    glBlendFunc(GL_ONE, GL_ZERO);
-    case GMode of
-      1,2: glBindTexture(GL_TEXTURE_2D,0);
-      3:   glBindTexture(GL_TEXTURE_2D,coGrassTex[in1]);
-    end;
-  end;
-
-
-  for m:=1 to 4 do
-  for kk:=1 to RO[In1].Head.sizeZ do for ii:=1 to RO[In1].Head.sizeX do
-  if GetLength(((ii-RO[In1].Head.sizeX/2)*256-xPos),((kk-RO[In1].Head.sizeZ/2)*256-zPos))<fOptions.ViewDistance/6 then
-  for h:=RO[In1].Chunks[kk,ii].First+1 to RO[In1].Chunks[kk,ii].First+RO[In1].Chunks[kk,ii].Num do
-  if RO[In1].Grass[h].ID+1=m then begin
-    EnsureRange(h,1,RO[In1].Head.Qty);
-
-    case GMode of  //R=0..3, G=0..15, B=BG, A=R0
-      1: SetPresetColorGL(RO[In1].Grass[h].ID+1,1); //Type
-      2: glcolor4f(RO[In1].Grass[h].Size/15,RO[In1].Grass[h].Size/15,RO[In1].Grass[h].Size/15,1);
-      3: glColor3ub((RO[In1].Grass[h].Color and 3840)div 16+15,(RO[In1].Grass[h].Color and 240+15),(RO[In1].Grass[h].Color and 15)*16+15); //Convert 16bit to RGB
-    end;
-
-    if fOptions.RenderMode >= rmFull then begin
-      glPushMatrix;
-        glTranslatef(RO[In1].Grass[h].X,RO[In1].Grass[h].Y,RO[In1].Grass[h].Z);
-        glRotatef(xRot,0,1,0);
-        if GMode<3 then glRotatef(180+yRot,1,0,0);
-        glScalef(0.8+RO[In1].Grass[h].Size/20,0.8+RO[In1].Grass[h].Size/20,0.8+RO[In1].Grass[h].Size/20); //80cm..150cm
-        glCallList(coGrass[m]);
-      glPopMatrix;
-    end else
-      glVertex3f(RO[In1].Grass[h].X,RO[In1].Grass[h].Y+5,RO[In1].Grass[h].Z); //+5 to raise above the ground
-  end;
-
-  if fOptions.RenderMode<rmFull then
-    glEnd;
-
-  glBindTexture(GL_TEXTURE_2D,0);
-  glDisable(GL_ALPHA_TEST);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-end;
 
 procedure RenderVTX(Mode:string);
 var ii:integer;

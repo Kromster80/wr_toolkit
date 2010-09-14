@@ -118,7 +118,7 @@ object Form1: TForm1
     Top = 40
     Width = 296
     Height = 623
-    ActivePage = TabSheet9
+    ActivePage = TabSheet18
     Anchors = [akLeft, akTop, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -6039,7 +6039,7 @@ object Form1: TForm1
         DropDownCount = 24
         ItemHeight = 13
         TabOrder = 2
-        OnChange = ComputeTriggerClick
+        OnChange = TriggerChange
         Items.Strings = (
           #39' (1)'#39','
           #39' (2)'#39','
@@ -6066,7 +6066,7 @@ object Form1: TForm1
         Accuracy = 1
         Increment = 10.000000000000000000
         TabOrder = 3
-        OnChange = ComputeTriggerClick
+        OnChange = TriggerChange
       end
       object TRL_Y: TFloatSpinEdit
         Left = 140
@@ -6076,7 +6076,7 @@ object Form1: TForm1
         Accuracy = 1
         Increment = 10.000000000000000000
         TabOrder = 4
-        OnChange = ComputeTriggerClick
+        OnChange = TriggerChange
       end
       object TRL_Z: TFloatSpinEdit
         Left = 140
@@ -6086,7 +6086,7 @@ object Form1: TForm1
         Accuracy = 1
         Increment = 10.000000000000000000
         TabOrder = 5
-        OnChange = ComputeTriggerClick
+        OnChange = TriggerChange
       end
       object TRL_S1: TFloatSpinEdit
         Left = 140
@@ -6099,7 +6099,7 @@ object Form1: TForm1
         MinValue = 1.000000000000000000
         TabOrder = 6
         Value = 1.000000000000000000
-        OnChange = ComputeTriggerClick
+        OnChange = TriggerChange
       end
       object TRL_S2: TFloatSpinEdit
         Left = 140
@@ -6112,7 +6112,7 @@ object Form1: TForm1
         MinValue = 1.000000000000000000
         TabOrder = 7
         Value = 1.000000000000000000
-        OnChange = ComputeTriggerClick
+        OnChange = TriggerChange
       end
       object TRL_S3: TFloatSpinEdit
         Left = 140
@@ -6125,7 +6125,7 @@ object Form1: TForm1
         MinValue = 1.000000000000000000
         TabOrder = 8
         Value = 1.000000000000000000
-        OnChange = ComputeTriggerClick
+        OnChange = TriggerChange
       end
       object TRL_R1: TSpinEdit
         Left = 140
@@ -6136,7 +6136,7 @@ object Form1: TForm1
         MinValue = 0
         TabOrder = 9
         Value = 0
-        OnChange = ComputeTriggerClick
+        OnChange = TriggerChange
       end
       object TRL_R2: TSpinEdit
         Left = 140
@@ -6147,7 +6147,7 @@ object Form1: TForm1
         MinValue = 0
         TabOrder = 10
         Value = 0
-        OnChange = ComputeTriggerClick
+        OnChange = TriggerChange
       end
       object TRL_R3: TSpinEdit
         Left = 140
@@ -6158,7 +6158,7 @@ object Form1: TForm1
         MinValue = 0
         TabOrder = 11
         Value = 0
-        OnChange = ComputeTriggerClick
+        OnChange = TriggerChange
       end
       object TRL_Flags: TEdit
         Left = 140
@@ -6177,7 +6177,7 @@ object Form1: TForm1
         Accuracy = 1
         Increment = 1.000000000000000000
         TabOrder = 13
-        OnChange = ComputeTriggerClick
+        OnChange = TriggerChange
       end
       object TRL_P2: TFloatSpinEdit
         Left = 140
@@ -6187,7 +6187,7 @@ object Form1: TForm1
         Accuracy = 1
         Increment = 1.000000000000000000
         TabOrder = 14
-        OnChange = ComputeTriggerClick
+        OnChange = TriggerChange
       end
       object TRL_P3: TFloatSpinEdit
         Left = 140
@@ -6197,7 +6197,7 @@ object Form1: TForm1
         Accuracy = 1
         Increment = 1.000000000000000000
         TabOrder = 15
-        OnChange = ComputeTriggerClick
+        OnChange = TriggerChange
       end
       object RemTrigger: TButton
         Left = 266

@@ -16,7 +16,6 @@ uses unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_Ro
     procedure LoadTRK(Input,Input2:string);
     procedure LoadTOB(Input,Input2:string);
     procedure LoadWTR(Input,Input2:string);
-    function  LoadRO_(Input:string; LOD:integer):boolean;
     procedure LoadWRK(Input:string);
 
     procedure SaveQAD(Input:string);
@@ -32,7 +31,6 @@ uses unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_Ro
     procedure SaveLVL(Input:string);
     procedure SaveSMP(Input:string);
     procedure SaveSKY(Input:string);
-    procedure SaveRO_(Input:string;V:integer;Optimize:boolean);
     procedure SaveWRK(Input:string);
 
 implementation
@@ -710,38 +708,6 @@ inc(TracksQtyWP);
 end else WTR[i].NodeQty:=0;
 end;
 
-function LoadRO_(Input:string; LOD:integer):boolean;
-var i,k:integer;
-f:file;
-s:string; c:array[1..1024]of char;
-begin
-  Result := false;
-  k := LOD;
-  s := Input+'.RO'+inttostr(k);
-  if not fileexists(s) then begin
-    RO[k].Head.Qty:=0;
-    RO[k].Head.sizeX:=0;
-    RO[k].Head.sizeZ:=0;
-    Changes.RO[k]:=false;
-    exit;
-  end else begin
-    assignfile(f,s); FileMode:=0; reset(f,1); FileMode:=2;
-    blockread(f,RO[k].Head,32);
-    setlength(RO[k].Chunks,RO[k].Head.sizeZ+1);
-    for i:=1 to RO[k].Head.sizeZ do
-      setlength(RO[k].Chunks[i],RO[k].Head.sizeX+1);
-    blockread(f,c,32);
-    RO[k].Tex:=StrPas(@c); //Name
-    blockread(f,RO[k].UV,128);
-    for i:=1 to RO[k].Head.sizeZ do
-      blockread(f,RO[k].Chunks[i,1],RO[k].Head.sizeX*8);
-    setlength(RO[k].Grass,RO[k].Head.Qty+1);
-    blockread(f,RO[k].Grass[1],RO[k].Head.Qty*16); //R=0..3, G=0..15, B=0..15 16..255, A=0..15
-    closefile(f);
-    Changes.RO[k] := false;
-  end;
-  Result := true;
-end;
 
 procedure LoadWRK(Input:string);
 var
@@ -1093,29 +1059,6 @@ closefile(ft);
 Changes.SKY:=false;
 end;
 
-procedure SaveRO_(Input:string;V:integer;Optimize:boolean);
-var
-  f:file;
-  i:integer;
-begin
-if Optimize=true then
-  for i:=1 to RO[V].Head.Qty do begin
-    RO[V].Grass[i].X:=round(RO[V].Grass[i].X/2)*2;
-    RO[V].Grass[i].Y:=round(RO[V].Grass[i].Y-0.2);
-    RO[V].Grass[i].Z:=round(RO[V].Grass[i].Z/2)*2;
-    RO[V].Grass[i].Size:=EnsureRange(round(RO[V].Grass[i].Size/2)*2,0,15);
-  end;
-
-assignfile(f,Input+'.ro'+inttostr(V)); rewrite(f,1);
-blockwrite(f,RO[V].Head,32);
-blockwrite(f,chr2(RO[V].Tex,32)[1],32);
-blockwrite(f,RO[V].UV,128);
-for i:=1 to RO[V].Head.sizeZ do
-blockwrite(f,RO[V].Chunks[i,1],RO[V].Head.sizeX*8);
-blockwrite(f,RO[V].Grass[1],RO[V].Head.Qty*16);
-closefile(f);
-Changes.RO[V]:=false;
-end;
 
 procedure SaveWRK(Input:string);
 var
