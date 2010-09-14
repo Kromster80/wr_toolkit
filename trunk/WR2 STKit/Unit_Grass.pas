@@ -33,7 +33,6 @@ type
       procedure Generate(aProgressLabel:Pointer);
       procedure SetPlainColor(R,G,B:byte);
       procedure LoadColorFromTGA(aTGAFile:string);
-      procedure LoadMaskFromTGA(aTGAFile:string);
 
       function  LoadFromFile(aFile:string):boolean;
       procedure SaveToFile(aFile:string; Optimize:boolean);
@@ -234,148 +233,102 @@ begin
 end;
 
 
-{ Will load TGA image and apply it's color to grass underneath }
+{ Will load TGA image and apply it's color to grass underneath
+  Mask will be used to determine where grass grows }
 procedure TSGrass.LoadColorFromTGA(aTGAFile:string);
+const Num=16; //how many polys to check
 var
   f:file;
-  ci,i,k:integer;
+  i,k,x,ci,ck:integer;
   sx,sz:word;
   HasAlpha:boolean;
   tga:array of array of array[1..4] of byte;
   ix,iz:integer;
   rx,rz:single;
-  r1,g1,b1:integer;
+  r1,g1,b1,a1:integer;
   LOD:integer;
 begin
-assignfile(f,aTGAFile); reset(f,1);
-blockread(f,c,12);
-blockread(f,sx,2);
-blockread(f,sz,2);
-blockread(f,c,2); HasAlpha:=c[1]=#32;
+  assignfile(f,aTGAFile); reset(f,1);
+  blockread(f,c,12);
+  blockread(f,sx,2);
+  blockread(f,sz,2);
+  blockread(f,c,2); HasAlpha:=c[1]=#32;
 
-if (sx>2048)or(sz>2048) then begin
-MessageBox(Form1.Handle,'Image exceeds 2048px limit', 'Error', MB_OK or MB_ICONWARNING);
-closefile(f); exit; end;
+  if (sx>2048)or(sz>2048) then begin
+    MessageBox(Form1.Handle,'Image exceeds 2048px limit', 'Error', MB_OK or MB_ICONWARNING);
+    closefile(f);
+    exit;
+  end;
 
-if HasAlpha then ci:=sx*sz*4 else ci:=sx*sz*3;
-blockread(f,c,ci);
-ci:=1;
-setlength(tga,sz+1);
+  if HasAlpha then ci:=sx*sz*4 else ci:=sx*sz*3;
+
+  blockread(f,c,ci);
+  ci:=1;
+  setlength(tga,sz+1);
   for i:=1 to sz do begin
-  setlength(tga[i],sx+1);
+    setlength(tga[i],sx+1);
     for k:=1 to sx do begin  //BGRA
-    tga[i,k,1]:=ord(c[ci]);
-    tga[i,k,2]:=ord(c[ci+1]);
-    tga[i,k,3]:=ord(c[ci+2]);
-    if HasAlpha then tga[i,k,4]:=ord(c[ci+3]) else tga[i,k,4]:=255;
-    if HasAlpha then inc(ci,4) else inc(ci,3);
+      tga[i,k,1]:=ord(c[ci]);
+      tga[i,k,2]:=ord(c[ci+1]);
+      tga[i,k,3]:=ord(c[ci+2]);
+      if HasAlpha then tga[i,k,4]:=ord(c[ci+3]) else tga[i,k,4]:=255;
+      if HasAlpha then inc(ci,4) else inc(ci,3);
     end;
   end;
-closefile(f);
+  closefile(f);
 
-for LOD:=1 to MAX_RO_FILES do begin
+  for LOD:=1 to MAX_RO_FILES do begin
 
-for i:=1 to RO[LOD].Head.Qty do begin
-//interpolating positions into pixels, 0.5 is proven to be just right value
-rx:=sx*(RO[LOD].Grass[i].X+Qty.BlocksX*512)/(Qty.BlocksX*1024)+0.5;
-rz:=sz*(RO[LOD].Grass[i].Z+Qty.BlocksZ*512)/(Qty.BlocksZ*1024)+0.5;
-rx:=EnsureRange(rx,1,sx-1); ix:=trunc(rx); rx:=frac(rx);
-rz:=EnsureRange(rz,1,sz-1); iz:=trunc(rz); rz:=frac(rz);
-//in range 1..2047
+    ci:=0; ck:=0;
+    for i:=1 to RO[lod].Head.sizeZ do begin
+    //Label92.Caption:=inttostr(round(i/RO[lod].Head.sizeZ*100))+' %';
+    //Label92.Refresh;
+    //RenderFrame(nil);
+    for k:=1 to RO[lod].Head.sizeX do begin
+    RO[lod].Chunks[i,k].First:=ci;
 
-r1:=round((tga[iz  ,ix,3]*(1-rx)+tga[iz  ,ix+1,3]*(rx))*(1-rz)+
-          (tga[iz+1,ix,3]*(1-rx)+tga[iz+1,ix+1,3]*(rx))*rz   );
+        for x:=1 to RO[lod].Chunks[i,k].Num do begin
+        inc(ck);
+        RO[lod].Grass[ci+1]:=RO[lod].Grass[ck];
 
-g1:=round((tga[iz  ,ix,2]*(1-rx)+tga[iz  ,ix+1,2]*(rx))*(1-rz)+
-          (tga[iz+1,ix,2]*(1-rx)+tga[iz+1,ix+1,2]*(rx))*rz   );
+          rx:=sx*(RO[LOD].Grass[ci+1].X+Qty.BlocksX*512)/(Qty.BlocksX*1024)+1;
+          rz:=sz*(RO[LOD].Grass[ci+1].Z+Qty.BlocksZ*512)/(Qty.BlocksZ*1024)+1;
+          rx:=EnsureRange(rx,1,sx);
+          rz:=EnsureRange(rz,1,sz);
+          ix:=EnsureRange(trunc(rx),1,sx-1); rx:=frac(rx);
+          iz:=EnsureRange(trunc(rz),1,sz-1); rz:=frac(rz);
 
-b1:=round((tga[iz  ,ix,1]*(1-rx)+tga[iz  ,ix+1,1]*(rx))*(1-rz)+
-          (tga[iz+1,ix,1]*(1-rx)+tga[iz+1,ix+1,1]*(rx))*rz   );
+          r1:=round((tga[iz  ,ix,3]*(1-rx)+tga[iz  ,ix+1,3]*(rx))*(1-rz)+
+                    (tga[iz+1,ix,3]*(1-rx)+tga[iz+1,ix+1,3]*(rx))*rz   );
 
-RO[LOD].Grass[i].Color:=
-    EnsureRange(round(b1/17),0,15)+
-    EnsureRange(round(g1/17),0,15)*16+
-    EnsureRange(round(r1/17),0,15)*256;
-end;
-end;// for LOD:=1 to 4 do begin
-Changed := true;
-end;
+          g1:=round((tga[iz  ,ix,2]*(1-rx)+tga[iz  ,ix+1,2]*(rx))*(1-rz)+
+                    (tga[iz+1,ix,2]*(1-rx)+tga[iz+1,ix+1,2]*(rx))*rz   );
 
+          b1:=round((tga[iz  ,ix,1]*(1-rx)+tga[iz  ,ix+1,1]*(rx))*(1-rz)+
+                    (tga[iz+1,ix,1]*(1-rx)+tga[iz+1,ix+1,1]*(rx))*rz   );
 
-procedure TSGrass.LoadMaskFromTGA(aTGAFile:string);
-const Num=16; //how many polys to check
-var
-  f:file;
-  i,k,x,ci,ck,tmp:integer;
-  TGAx,TGAz:word;
-  HasAlpha:boolean;
-  tga:array of array of array[1..4] of byte;
-  ix,iz:integer;
-  rx,rz:single;
-  LOD:integer;
-begin
-assignfile(f,aTGAFile); reset(f,1);
-blockread(f,c,12);
-blockread(f,TGAx,2);
-blockread(f,TGAz,2);
-blockread(f,c,2); HasAlpha:=c[1]=#32;
+          a1:=round((tga[iz  ,ix,2]*(1-rx)+tga[iz  ,ix+1,2]*(rx))*(1-rz)+
+                     (tga[iz+1,ix,2]*(1-rx)+tga[iz+1,ix+1,2]*(rx))*rz   );
 
-if (TGAx>2048)or(TGAz>2048) then begin closefile(f); exit; end;
+          RO[LOD].Grass[i].Color:=
+            EnsureRange(round(b1/17),0,15)+
+            EnsureRange(round(g1/17),0,15)*16+
+            EnsureRange(round(r1/17),0,15)*256;
 
-if HasAlpha then ci:=TGAx*TGAz*4 else ci:=TGAx*TGAz*3;
-blockread(f,c,ci);
-ci:=1;
-setlength(tga,TGAz+1);
-  for i:=1 to TGAz do begin
-  setlength(tga[i],TGAx+1);
-    for k:=1 to TGAx do begin  //BGRA
-    tga[i,k,1]:=ord(c[ci]);
-    tga[i,k,2]:=ord(c[ci+1]);
-    tga[i,k,3]:=ord(c[ci+2]);
-    if HasAlpha then tga[i,k,4]:=ord(c[ci+3]) else tga[i,k,4]:=255;
-    if HasAlpha then inc(ci,4) else inc(ci,3);
-    end;
-  end;
-closefile(f);
+          if (a1=255)or((a1>25)and(Random*((a1/255))>=0.3)) then begin //0.5*0.5 ~ 0.25
+          RO[lod].Grass[ci+1].Size:=Random(round(16*a1/255));
+          inc(ci);
+          end;
+        end;
 
-for LOD:=1 to MAX_RO_FILES do begin
+    RO[lod].Chunks[i,k].Num:=ci-RO[lod].Chunks[i,k].First;
+    end; //i
+    end; //k
+    RO[lod].Head.Qty:=ci;
+  end;// for LOD:=1 to 4 do begin
+  Changed := true;
 
-ci:=0; ck:=0;
-for i:=1 to RO[lod].Head.sizeZ do begin
-//Label92.Caption:=inttostr(round(i/RO[lod].Head.sizeZ*100))+' %';
-//Label92.Refresh;
-//RenderFrame(nil);
-for k:=1 to RO[lod].Head.sizeX do begin
-RO[lod].Chunks[i,k].First:=ci;
-
-    for x:=1 to RO[lod].Chunks[i,k].Num do begin
-    inc(ck);
-    RO[lod].Grass[ci+1]:=RO[lod].Grass[ck];
-
-      rx:=TGAx*(RO[LOD].Grass[ci+1].X+Qty.BlocksX*512)/(Qty.BlocksX*1024)+1;
-      rz:=TGAz*(RO[LOD].Grass[ci+1].Z+Qty.BlocksZ*512)/(Qty.BlocksZ*1024)+1;
-      rx:=EnsureRange(rx,1,TGAx);
-      rz:=EnsureRange(rz,1,TGAz);
-      ix:=EnsureRange(trunc(rx),1,TGAx-1); rx:=frac(rx);
-      iz:=EnsureRange(trunc(rz),1,TGAz-1); rz:=frac(rz);
-
-      tmp:=round((tga[iz  ,ix,2]*(1-rx)+tga[iz  ,ix+1,2]*(rx))*(1-rz)+
-                 (tga[iz+1,ix,2]*(1-rx)+tga[iz+1,ix+1,2]*(rx))*rz   );
-
-      if (tmp=255)or((tmp>25)and(Random*((tmp/255))>=0.3)) then begin //0.5*0.5 ~ 0.25
-      RO[lod].Grass[ci+1].Size:=Random(round(16*tmp/255));
-      inc(ci);
-      end;
-    end;
-
-RO[lod].Chunks[i,k].Num:=ci-RO[lod].Chunks[i,k].First;
-end; //i
-end; //k
-RO[lod].Head.Qty:=ci;
-end;// for LOD:=1 to 4 do begin
-Changed := true;
-
-//Label92.Caption:=ElapsedTime(@OldTime);
+  //Label92.Caption:=ElapsedTime(@OldTime);
 end;
 
 

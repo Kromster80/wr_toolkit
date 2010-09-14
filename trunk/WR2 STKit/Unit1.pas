@@ -523,7 +523,6 @@ type
     SMPPreview: TImage;
     CBTexGrass: TCheckBox;
     CBShowTexGrass: TCheckBox;
-    GenerateGrass3: TButton;
     Panel8: TPanel;
     Panel9: TPanel;
     Label146: TLabel;
@@ -641,6 +640,8 @@ type
     Label178: TLabel;
     LoadobjectinstancesfromLWO1: TMenuItem;
     OptimizeCullingSpheres: TButton;
+    GroupBox4: TGroupBox;
+    Label30: TLabel;
     procedure CBReduceDisplayClick(Sender: TObject);
     procedure CBTraceClick(Sender: TObject);
 //    procedure RenderInit();
@@ -831,7 +832,6 @@ type
     procedure WPNodeChange(Sender: TObject);
     procedure CBCheckersClick(Sender: TObject);
     procedure CBShowCarClick(Sender: TObject);
-    procedure GrassTGAMask(Sender: TObject);
     procedure ShowGrassInfo(Sender: TObject);
     procedure PrintScreenJPGClick(Sender: TObject);
     procedure AddSkyPresetClick(Sender: TObject);
@@ -5672,7 +5672,7 @@ begin
     VLBGrass.Cells[1,i] := fGrass.GetStats(LOD, i);
 
   GrassRefresh := true;
-  GrassTexture.Text := fGrass.TexName[LOD];
+  GrassTexture.Text := fGrass.TexName;
   GrassRefresh := false;
 end;
 
@@ -6336,14 +6336,6 @@ PlayTrack:=true;
 OnIdle(nil,t);
 PlayTrack:=false;
 end;
-end;
-
-
-procedure TForm1.GrassTGAMask(Sender: TObject);
-begin
-  if not RunOpenDialog(OpenDialog,'',SceneryPath,'TGA image (*.tga)|*.tga') then exit;
-  fGrass.LoadMaskFromTGA(OpenDialog.FileName);
-  ShowGrassInfo(nil);
 end;
 
 

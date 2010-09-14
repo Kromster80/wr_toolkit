@@ -5649,7 +5649,7 @@ object Form1: TForm1
       end
       object GrassCol: TShape
         Left = 2
-        Top = 236
+        Top = 260
         Width = 25
         Height = 25
         OnDragDrop = GrassColDragDrop
@@ -5657,14 +5657,14 @@ object Form1: TForm1
       end
       object Label91: TLabel
         Left = 32
-        Top = 242
+        Top = 266
         Width = 53
         Height = 13
         Caption = 'Grass color'
       end
       object Label92: TLabel
-        Left = 120
-        Top = 200
+        Left = 112
+        Top = 208
         Width = 20
         Height = 13
         Caption = '00%'
@@ -5698,7 +5698,7 @@ object Form1: TForm1
       end
       object GrassPlainColor: TButton
         Left = 2
-        Top = 264
+        Top = 288
         Width = 147
         Height = 25
         Caption = 'Use plain color'
@@ -5707,7 +5707,7 @@ object Form1: TForm1
       end
       object GenerateGrass: TButton
         Left = 2
-        Top = 194
+        Top = 202
         Width = 105
         Height = 25
         Caption = 'Generate Grass'
@@ -5755,7 +5755,7 @@ object Form1: TForm1
       end
       object CBOptimizeGrass: TCheckBox
         Left = 2
-        Top = 340
+        Top = 228
         Width = 153
         Height = 17
         Caption = 'Optimize grass for archiving'
@@ -5765,37 +5765,48 @@ object Form1: TForm1
       end
       object GrassTGAColor: TButton
         Left = 2
-        Top = 288
+        Top = 312
         Width = 147
         Height = 25
-        Caption = 'Use color from TGA image ...'
+        Caption = 'Load colors from TGA ...'
         TabOrder = 7
         OnClick = GrassTGAColorClick
       end
       object GroupBox2: TGroupBox
-        Left = 152
-        Top = 192
+        Left = 2
+        Top = 344
         Width = 129
-        Height = 65
+        Height = 73
         Caption = '  Hint  '
         TabOrder = 8
         object Label126: TLabel
           Left = 8
           Top = 16
-          Width = 110
-          Height = 39
-          Caption = 'Define materials where grass should grow in Materials tab'
+          Width = 108
+          Height = 52
+          Caption = 
+            'You can define materials where grass should be generated in Mate' +
+            'rials tab'
           WordWrap = True
         end
       end
-      object GenerateGrass3: TButton
-        Left = 2
-        Top = 312
-        Width = 147
-        Height = 25
-        Caption = 'Apply TGA mask ...'
+      object GroupBox4: TGroupBox
+        Left = 146
+        Top = 344
+        Width = 129
+        Height = 73
+        Caption = '  Hint  '
         TabOrder = 9
-        OnClick = GrassTGAMask
+        object Label30: TLabel
+          Left = 8
+          Top = 16
+          Width = 108
+          Height = 52
+          Caption = 
+            'Loading TGA image will apply color to grass and remove the grass' +
+            ' where Alpha=0'
+          WordWrap = True
+        end
       end
     end
     object TabSheet3: TTabSheet
