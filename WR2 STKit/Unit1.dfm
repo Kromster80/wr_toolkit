@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 292
-  Top = 42
+  Left = 273
+  Top = 100
   Width = 956
   Height = 730
   Color = clBtnFace
@@ -15,6 +15,8 @@ object Form1: TForm1
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnKeyDown = Memo1KeyDown
+  OnKeyUp = Memo1KeyUp
   OnResize = RenderResize
   DesignSize = (
     948
@@ -84,6 +86,13 @@ object Form1: TForm1
     Height = 13
     Caption = 'Render mode:'
   end
+  object Label179: TLabel
+    Left = 688
+    Top = -2
+    Width = 47
+    Height = 13
+    Caption = 'Test-drive'
+  end
   object Panel1: TPanel
     Left = 300
     Top = 40
@@ -118,7 +127,7 @@ object Form1: TForm1
     Top = 40
     Width = 296
     Height = 623
-    ActivePage = TabSheet18
+    ActivePage = TabSheet9
     Anchors = [akLeft, akTop, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -6850,27 +6859,6 @@ object Form1: TForm1
     TabOrder = 23
     OnClick = CBReduceDisplayClick
   end
-  object CBShowCar: TCheckBox
-    Left = 710
-    Top = -2
-    Width = 65
-    Height = 17
-    Caption = 'Show car'
-    TabOrder = 24
-    OnClick = CBShowCarClick
-  end
-  object Memo1: TMemo
-    Left = 504
-    Top = 4
-    Width = 121
-    Height = 33
-    Lines.Strings = (
-      'Speed'
-      'Mode')
-    TabOrder = 25
-    OnKeyDown = Memo1KeyDown
-    OnKeyUp = Memo1KeyUp
-  end
   object PlayTrackControl: TProgressBar
     Left = 632
     Top = 14
@@ -6893,7 +6881,7 @@ object Form1: TForm1
     BevelOuter = bvNone
     Caption = 'Panel11'
     Color = clMaroon
-    TabOrder = 26
+    TabOrder = 24
     Visible = False
   end
   object QADtoUI: TButton
@@ -6906,6 +6894,37 @@ object Form1: TForm1
     TabOrder = 16
     Visible = False
     OnClick = QADtoUIClick
+  end
+  object CBDriveMode: TCheckBox
+    Left = 528
+    Top = 4
+    Width = 81
+    Height = 17
+    Caption = 'Driving mode'
+    TabOrder = 25
+    OnClick = CBDriveModeClick
+  end
+  object RBCarSim: TRadioButton
+    Left = 528
+    Top = 20
+    Width = 41
+    Height = 17
+    Caption = 'Sim'
+    Checked = True
+    Enabled = False
+    TabOrder = 26
+    TabStop = True
+    OnClick = RBCarSimClick
+  end
+  object RBCarArc: TRadioButton
+    Left = 568
+    Top = 20
+    Width = 57
+    Height = 17
+    Caption = 'Arcade'
+    Enabled = False
+    TabOrder = 27
+    OnClick = RBCarSimClick
   end
   object OpenDialog: TOpenDialog
     InitialDir = '.'
