@@ -168,9 +168,8 @@ end;
 
 Car.Stopped:=(Car.Speed=0)and(TurnAngle=0)and(not Key1)and(not Key2)and(not Key3)and(not Key4);
 
-Form1.Memo1.Lines[0]:='Speed '+inttostr(round(Car.Speed*3.6))+'km/h ('+
+Form1.Label179.Caption := 'Speed '+inttostr(round(Car.Speed*3.6))+'km/h ('+
                       inttostr(round(SpeedIncrease-SpeedDecrease))+')';
-Form1.Memo1.Lines[1]:='M -'+CarDrivingMode[Car.Mode];
 
 CarX:=CarX+(-0*cos(xRot/180*pi)+(Car.Speed*FrameTime*10/1000)*sin(xRot/180*pi));
 CarZ:=CarZ+( 0*sin(xRot/180*pi)+(Car.Speed*FrameTime*10/1000)*cos(xRot/180*pi));

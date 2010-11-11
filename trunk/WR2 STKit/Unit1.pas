@@ -481,7 +481,6 @@ type
     ShowInfo: TMenuItem;
     CBTrace: TCheckBox;
     CBReduceDisplay: TCheckBox;
-    CBShowCar: TCheckBox;
     ReloadLWO: TBitBtn;
     CBMatEnlite: TCheckBox;
     ReloadAllObjects1: TMenuItem;
@@ -557,7 +556,6 @@ type
     RotateInstances: TMenuItem;
     Label57: TLabel;
     Label118: TLabel;
-    Memo1: TMemo;
     CBLoadTexList: TCheckBox;
     CBLoadMatList: TCheckBox;
     Label128: TLabel;
@@ -642,6 +640,10 @@ type
     OptimizeCullingSpheres: TButton;
     GroupBox4: TGroupBox;
     Label30: TLabel;
+    CBDriveMode: TCheckBox;
+    RBCarSim: TRadioButton;
+    RBCarArc: TRadioButton;
+    Label179: TLabel;
     procedure CBReduceDisplayClick(Sender: TObject);
     procedure CBTraceClick(Sender: TObject);
 //    procedure RenderInit();
@@ -831,7 +833,6 @@ type
     procedure ListWPNodesClick(Sender: TObject);
     procedure WPNodeChange(Sender: TObject);
     procedure CBCheckersClick(Sender: TObject);
-    procedure CBShowCarClick(Sender: TObject);
     procedure ShowGrassInfo(Sender: TObject);
     procedure PrintScreenJPGClick(Sender: TObject);
     procedure AddSkyPresetClick(Sender: TObject);
@@ -884,6 +885,8 @@ type
     procedure OptimizeVerticesClick(Sender: TObject);
     procedure OptimizeCullingSpheresClick(Sender: TObject);
     procedure RG_GrassLODClick(Sender: TObject);
+    procedure RBCarSimClick(Sender: TObject);
+    procedure CBDriveModeClick(Sender: TObject);
 
   private     { Private declarations }
     procedure OnIdle(Sender: TObject; var Done: Boolean);
@@ -1427,7 +1430,7 @@ end;
 
 
 PageControl1Change(nil);        //get ActivePage name
-CBRenderModeClick(nil);             //get RenderMode state    
+CBRenderModeClick(nil);             //get RenderMode state
 Application.OnIdle:=OnIdle;
 MemoLWO.Lines.Add('Misc init done in '+ElapsedTime(@OldTime));
 Randomize;
@@ -1436,7 +1439,6 @@ Form1.WindowState:=wsMaximized;
   FillSceneryList();
   RG2.ItemIndex := EnsureRange(RG2.ItemIndex,0,RG2.Items.Count-1);
   if RG2.ItemIndex<>-1 then SceneryReload(nil);
-
 
   ResetViewClick(nil);
   ResetViewClick(nil);
@@ -1808,13 +1810,9 @@ begin
   done:=false;
   KnowFPS();
 
-  if (CBShowCar.Checked)and(not Car.Stopped) then MoveCarSimple();
-
-  if (PlayTrack)and(TrackID<>0) then begin
-    MoveCarAlongTrack(TrackID);
-    RenderFrame(CBShowCar);
-    exit;
-  end;
+  //Process car positioning
+  if CBDriveMode.Checked and not Car.Stopped then MoveCarSimple();
+  if PlayTrack and (TrackID<>0) then MoveCarAlongTrack(TrackID);
 
   RenderFrame(Sender);
 end;
@@ -1924,22 +1922,21 @@ if not CBSelectionBuffer.Checked then begin
     (ActivePage=apAddonInfo) then if TrackID<>0  then RenderTracks(TrackID,ListTurns.ItemIndex+1,1,TRKQty[TrackID].Nodes)
                               else if TrackWP<>0  then RenderTracksWP(1,TrackWP,ListWPNodes.ItemIndex+1);
 
-  if ActivePage=apStreets         then RenderStreets(0.2,STRPointID.Value,STRSplineID1.Value);
-  if ActivePage=apStreets         then RenderRoadNet();
-  if ActivePage=apTriggers        then fTriggers.Render(0.2,ListTrig.ItemIndex+1, EditMode);
-  if ActivePage=apAnimated        then RenderAnimated(0.2,'Paths',ListSNIObjects.ItemIndex+1,ListSNINodes.ItemIndex+1);
-  if ActivePage=apLights          then RenderLights(0.5,'',ListLights.ItemIndex+1);
-  if ActivePage=apTracksMT        then RenderMakeTrack(0.5,ListMakeTrack.ItemIndex+1);
-  if ActivePage=apSounds          then RenderSounds(0.2,ListSounds.ItemIndex);
-  if ActivePage=apStructure       then RenderGrid(StructMode.ItemIndex);
-  if ActivePage=apSky             then RenderSunVector();
-  if fOptions.TraceSurface        then RenderTarget();
-  if (Sender=CBShowCar)
-  or(CBShowCar.Checked)           then RenderCar();
+  if ActivePage=apStreets           then RenderStreets(0.2,STRPointID.Value,STRSplineID1.Value);
+  if ActivePage=apStreets           then RenderRoadNet();
+  if ActivePage=apTriggers          then fTriggers.Render(0.2,ListTrig.ItemIndex+1, EditMode);
+  if ActivePage=apAnimated          then RenderAnimated(0.2,'Paths',ListSNIObjects.ItemIndex+1,ListSNINodes.ItemIndex+1);
+  if ActivePage=apLights            then RenderLights(0.5,'',ListLights.ItemIndex+1);
+  if ActivePage=apTracksMT          then RenderMakeTrack(0.5,ListMakeTrack.ItemIndex+1);
+  if ActivePage=apSounds            then RenderSounds(0.2,ListSounds.ItemIndex);
+  if ActivePage=apStructure         then RenderGrid(StructMode.ItemIndex);
+  if ActivePage=apSky               then RenderSunVector();
+  if fOptions.TraceSurface          then RenderTarget();
+  if CBDriveMode.Checked or PlayTrack then RenderCar();
 
   swapBuffers(h_DC);
 
-  if (Sender=ScreenRender)or(Sender=MakeSMP)or(Sender=PrintScreenJPG)or(Sender=CBShowCar) then exit;
+  if (Sender=ScreenRender)or(Sender=MakeSMP)or(Sender=PrintScreenJPG)or(CBDriveMode.Checked or PlayTrack) then exit;
 
 end;
 
@@ -5110,7 +5107,6 @@ begin
 end;
 
 
-
 //Addon Info //Creation and saving of scenery descriptor file EditScenery.sc2
 procedure TForm1.SC2_ScnChange(Sender: TObject);begin EditSC2Click(Sender); end;
 procedure TForm1.SC2_TrackListClick(Sender: TObject);begin CBTrackChange(SC2_TrackList); SC2TrackListClick(Sender); end;
@@ -6032,25 +6028,25 @@ end;
 
 procedure TForm1.PlayTrackControlMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-PlayTrack:=true;
-//fOptions.TraceSurface:=false;
-PlayTrackPrevX:=X;
+  PlayTrack:=true;
+  //fOptions.TraceSurface:=false;
+  PlayTrackPrevX:=X;
 end;
 
 procedure TForm1.PlayTrackControlMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
 begin
-if not PlayTrack then exit;
-PlayTrackSpeed:=EnsureRange((X-PlayTrackPrevX)/15,PlayTrackControl.Min/10,PlayTrackControl.Max/10);
-//Label21.Caption:='Play speed '+floattostr(round(PlayTrackSpeed*10)/10)+'x';
-PlayTrackControl.Position:=round(PlayTrackSpeed*10);
+  if not PlayTrack then exit;
+  PlayTrackSpeed:=EnsureRange((X-PlayTrackPrevX)/15,PlayTrackControl.Min/10,PlayTrackControl.Max/10);
+  //Label21.Caption:='Play speed '+floattostr(round(PlayTrackSpeed*10)/10)+'x';
+  PlayTrackControl.Position:=round(PlayTrackSpeed*10);
 end;
 
 procedure TForm1.PlayTrackControlMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-PlayTrack:=false;
-PlayTrackSpeed:=0;
-//Label21.Caption:='Play speed '+floattostr(PlayTrackSpeed);
-PlayTrackControl.Position:=round(PlayTrackSpeed);
+  PlayTrack:=false;
+  PlayTrackSpeed:=0;
+  //Label21.Caption:='Play speed '+floattostr(PlayTrackSpeed);
+  PlayTrackControl.Position:=round(PlayTrackSpeed);
 end;
 
 procedure TForm1.CBRenderModeClick(Sender: TObject);
@@ -6326,18 +6322,6 @@ inc(WTRLength[TrackWP],round(GetLength(WTR[TrackWP].Node[i+1].X-WTR[TrackWP].Nod
 Label57.Caption:='Length '+inttostr(WTRLength[TrackWP])+'m';
 Changes.WTR[TrackWP]:=true;
 end;
-
-procedure TForm1.CBShowCarClick(Sender: TObject);
-var t:boolean;
-begin
-if Sender<>nil then
-if CBShowCar.Checked then begin
-PlayTrack:=true;
-OnIdle(nil,t);
-PlayTrack:=false;
-end;
-end;
-
 
 procedure TForm1.PrintScreenJPGClick(Sender: TObject);
 var sh,sw,i,k,h:integer; t:byte; jpg: TJpegImage; mkbmp:TBitmap; s:string;
@@ -6673,32 +6657,36 @@ begin
   StatusBar1.Panels[5].Text := ReturnListOfChangedFiles(', ');
 end;
 
+
 procedure TForm1.Memo1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  CBShowCar.Checked:=true;
-  if Car.Stopped then begin
-    CarX:=xPos;
-    CarY:=yPos;
-    CarZ:=zPos;
-    CarH:=xRot-180;
-    Car.Stopped:=false;
+  if CBDriveMode.Checked then begin
+    if Car.Stopped then begin
+      CarX:=xPos;
+      CarY:=yPos;
+      CarZ:=zPos;
+      CarH:=xRot-180;
+      Car.Stopped:=false;
+    end;
+    if Key=VK_UP    then Key1:=true;
+    if Key=VK_DOWN  then Key2:=true;
+    if Key=VK_LEFT  then Key3:=true;
+    if Key=VK_RIGHT then Key4:=true;
+    Key := 0; //Don't pass it to other controls
   end;
-  if Key=VK_UP    then Key1:=true;
-  if Key=VK_DOWN  then Key2:=true;
-  if Key=VK_LEFT  then Key3:=true;
-  if Key=VK_RIGHT then Key4:=true;
-  if Key=ord('M') then
-  if Car.Mode=cdm_Sim then Car.Mode:=cdm_Arcade else Car.Mode:=cdm_Sim;
 end;
+
 
 procedure TForm1.Memo1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-if Key=VK_UP    then Key1:=false;
-if Key=VK_DOWN  then Key2:=false;
-if Key=VK_LEFT  then Key3:=false;
-if Key=VK_RIGHT then Key4:=false;
+  if CBDriveMode.Checked then begin
+    if Key=VK_UP    then Key1:=false;
+    if Key=VK_DOWN  then Key2:=false;
+    if Key=VK_LEFT  then Key3:=false;
+    if Key=VK_RIGHT then Key4:=false;
+    Key := 0; //Don't pass it to other controls
+  end;
 end;
-
 
 
 procedure TForm1.LevelStreetsClick(Sender: TObject);
@@ -7438,5 +7426,17 @@ begin
   OptimizeCullingSpheresClick_();
 end;
 
+
+procedure TForm1.RBCarSimClick(Sender: TObject);
+begin
+  if Sender = RBCarSim then Car.Mode := cdm_Sim;
+  if Sender = RBCarArc then Car.Mode := cdm_Arcade;
+end;
+
+procedure TForm1.CBDriveModeClick(Sender: TObject);
+begin
+  RBCarSim.Enabled := CBDriveMode.Checked;
+  RBCarArc.Enabled := CBDriveMode.Checked;
+end;
 
 end.
