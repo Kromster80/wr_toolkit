@@ -139,6 +139,7 @@ end;
 procedure STRPointXChange_();
 var ID:integer; y1,y2:single; ti:integer;
 begin
+if Form1.STRPointID.Value=0 then exit;
 if STRPointRefresh then exit;
 ID:=Form1.STRPointID.Value;
 STR_Point[ID].x:=Form1.STRPointX.Value;
