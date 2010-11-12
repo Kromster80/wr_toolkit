@@ -26,6 +26,8 @@ Policy:
 Use on your own risk.
 
 Version History:
+			Changed driving preview selector
+			Fixed crash when changing STR node info without node selected
 			Fixed bug in changing active track between racetrack and waypoint 
 2.3.6	05.08.2010	Improved culling spheres generation algorithm for terrain
 2.3.5	16.07.2010	Fixed loading of Blender LWO files
