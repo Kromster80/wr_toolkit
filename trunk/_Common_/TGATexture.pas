@@ -76,8 +76,8 @@ asm
   pop ebx
 end;
 
-procedure FlipImageVertical(W,H,bpp:integer; Image:pointer);
-var ii,kk:integer;
+procedure FlipImageVertical(W,H,bpp:word; Image:pointer);
+var ii,kk:word;
   Front: ^Byte;
   Back: ^Byte;
   Temp: Byte;
@@ -85,7 +85,7 @@ begin
 for kk:=0 to (H div 2)-1 do
 for ii:=0 to W*bpp-1 do begin
           Front := Pointer(cardinal(Image)+kk*W*bpp+ii);
-          Back := Pointer(cardinal(Image)+(H-kk-1)*W*bpp+ii);
+          Back := Pointer(cardinal(Image)+cardinal(H-kk-1)*W*bpp+ii);
           Temp := Front^;
           Front^ := Back^;
           Back^ := Temp;

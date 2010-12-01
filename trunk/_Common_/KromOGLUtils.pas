@@ -17,7 +17,7 @@ procedure SetRenderFrame(const RenderFrame:HWND; out h_DC: HDC; out h_RC: HGLRC)
 procedure SetRenderDefaults();
 function SetDCPixelFormat(h_DC:HDC):boolean;
 procedure CheckGLSLError(FormHandle:hWND; Handle: GLhandleARB; Param: GLenum; ShowWarnings:boolean; Text:string);
-procedure BuildFont(h_DC:HDC;FontSize:integer);
+procedure BuildFont(h_DC:HDC; FontSize:integer; FontWeight:word=FW_NORMAL);
 procedure glPrint(text: string);
 function ReadClick(X, Y: word): Vector;
 procedure glkScale(x:single);
@@ -156,11 +156,11 @@ begin
   StrDispose(s); //Free-up space
 end;
 
-procedure BuildFont(h_DC:HDC;FontSize:integer);
+procedure BuildFont(h_DC:HDC; FontSize:integer; FontWeight:word=FW_NORMAL);
 var Font: HFONT;
 begin
 //New parameter FontSize=16
-  font:=CreateFont(-abs(FontSize),0,0,0,FW_NORMAL,0,0,0,ANSI_CHARSET,
+  font:=CreateFont(-abs(FontSize),0,0,0,FontWeight,0,0,0,ANSI_CHARSET,
   OUT_TT_PRECIS,CLIP_DEFAULT_PRECIS,
   ANTIALIASED_QUALITY,FF_DONTCARE or DEFAULT_PITCH,
   'Terminal');
