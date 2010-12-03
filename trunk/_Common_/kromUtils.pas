@@ -91,6 +91,10 @@ procedure SwapInt(var A,B:cardinal); overload;
 procedure SwapFloat(var A,B:single);
 function Equals(A,B:single; const Epsilon:single=0.001):boolean;
 
+function Abs2X(AbsoluteValue,SizeX:integer):integer;
+function Abs2Z(AbsoluteValue,SizeX:integer):integer;
+
+
 procedure ConvertSetToArray(iSet:integer; Ar:pointer);
 function MakePOT(num:integer):integer;
 function Adler32CRC(TextPointer:Pointer; TextLength:integer):integer;
@@ -210,19 +214,15 @@ end else out_s:='';
 Result:=out_s;
 end;
 
+
 //Returns file extension without dot
 function GetFileExt(const FileName: string): string;
-var k:integer; s:string;
 begin
-  s:=''; k:=0;
-  repeat
-    s:=FileName[length(FileName)-k]+s;
-    inc(k);
-  until((length(FileName)-k=0)or(FileName[length(FileName)-k]='.'));
-  if length(FileName)-k=0 then
-    Result:=''
+  Result := ExtractFileExt(FileName);
+  if length(Result)>0 then
+    Result := UpperCase(Copy(Result, 2, length(Result)-1))
   else
-    Result:=uppercase(s);
+    Result := '';
 end;
 
 
@@ -833,13 +833,27 @@ end;
 procedure SwapFloat(var A,B:single);
 var s:single;
 begin
-s:=A; A:=B; B:=s;
+  s:=A; A:=B; B:=s;
 end;
+
 
 function Equals(A,B:single; const Epsilon:single=0.001):boolean;
 begin
-Result:=abs(A-B)<=Epsilon;
+  Result:=abs(A-B)<=Epsilon;
 end;
+
+
+function Abs2X(AbsoluteValue,SizeX:integer):integer;
+begin
+  Result:=((AbsoluteValue-1) mod SizeX+1); //X
+end;
+
+
+function Abs2Z(AbsoluteValue,SizeX:integer):integer;
+begin
+  Result:=((AbsoluteValue-1) div SizeX+1); //Z
+end;
+
 
 function Adler32CRC(TextPointer:Pointer; TextLength:integer):integer;
 var i,A,B:integer;

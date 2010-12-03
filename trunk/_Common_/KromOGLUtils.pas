@@ -1,50 +1,51 @@
 unit KromOGLUtils;
 interface
-uses dglOpenGL,
+uses KromUtils, dglOpenGL,
   {$IFDEF DELPHI} OpenGL, {$ENDIF}
   {$IFDEF FPC} GL, {$ENDIF}
   sysutils, windows, Forms;
 
 type KCode = (kNil=0,kPoint=1,kSpline=2,kSplineAnchor=3,kSplineAnchorLength=4,
-kPoly=5,kSurface=6,kObject=7,kButton=8);  //1..31 are ok
-type Vector = record x,y,z:single; end;
+              kPoly=5,kSurface=6,kObject=7,kButton=8);  //1..31 are ok
 
-KAlign = (kaLeft, kaCenter, kaRight);
+    KAlign = (kaLeft, kaCenter, kaRight);
 
-TColor4 = cardinal;
+    TColor4 = cardinal;
 
-procedure SetRenderFrame(const RenderFrame:HWND; out h_DC: HDC; out h_RC: HGLRC);
-procedure SetRenderDefaults();
-function SetDCPixelFormat(h_DC:HDC):boolean;
-procedure CheckGLSLError(FormHandle:hWND; Handle: GLhandleARB; Param: GLenum; ShowWarnings:boolean; Text:string);
-procedure BuildFont(h_DC:HDC; FontSize:integer; FontWeight:word=FW_NORMAL);
-procedure glPrint(text: string);
-function ReadClick(X, Y: word): Vector;
-procedure glkScale(x:single);
-procedure glkQuad(Ax,Ay,Bx,By,Cx,Cy,Dx,Dy:single);
-procedure glkRect(Ax,Ay,Bx,By:single);
-procedure glkMoveAALines(DoShift:boolean);
-procedure kSetColorCode(TypeOfValue:KCode;IndexNum:integer);
-procedure kGetColorCode(RGBColor:Pointer;var TypeOfValue:KCode;var IndexNum:integer);
+    procedure SetRenderFrame(const RenderFrame:HWND; out h_DC: HDC; out h_RC: HGLRC);
+    procedure SetRenderDefaults();
+    function SetDCPixelFormat(h_DC:HDC):boolean;
+    procedure CheckGLSLError(FormHandle:hWND; Handle: GLhandleARB; Param: GLenum; ShowWarnings:boolean; Text:string);
+    procedure BuildFont(h_DC:HDC; FontSize:integer; FontWeight:word=FW_NORMAL);
+    procedure glPrint(text: string);
+    function ReadClick(X, Y: word): Vector3f;
+    procedure glkScale(x:single);
+    procedure glkQuad(Ax,Ay,Bx,By,Cx,Cy,Dx,Dy:single);
+    procedure glkRect(Ax,Ay,Bx,By:single);
+    procedure glkMoveAALines(DoShift:boolean);
+    procedure kSetColorCode(TypeOfValue:KCode;IndexNum:integer);
+    procedure kGetColorCode(RGBColor:Pointer;var TypeOfValue:KCode;var IndexNum:integer);
 
 const
-MatModeDefaultV:string=
-'varying vec3 kBlend;'+#10+#13+
-'void main(void)'+#10+#13+
-'{ '+#10+#13+
-'kBlend = gl_SecondaryColor.rgb;'+#10+#13+
-'gl_Position = ftransform();'+#10+#13+
-'}';
+    MatModeDefaultV:string=
+    'varying vec3 kBlend;'+#10+#13+
+    'void main(void)'+#10+#13+
+    '{ '+#10+#13+
+    'kBlend = gl_SecondaryColor.rgb;'+#10+#13+
+    'gl_Position = ftransform();'+#10+#13+
+    '}';
 
-MatModeDefaultF:string=
-'varying vec3 kBlend;'+#10+#13+
-'void main(void)'+#10+#13+
-'{ '+#10+#13+
-'vec3 kColor = smoothstep(0.4375,.5625,kBlend.rgb);'+#10+#13+
-'gl_FragColor = vec4(kColor.rgb,1);'+#10+#13+
-'}';
+    MatModeDefaultF:string=
+    'varying vec3 kBlend;'+#10+#13+
+    'void main(void)'+#10+#13+
+    '{ '+#10+#13+
+    'vec3 kColor = smoothstep(0.4375,.5625,kBlend.rgb);'+#10+#13+
+    'gl_FragColor = vec4(kColor.rgb,1);'+#10+#13+
+    '}';
+
 
 implementation
+
 
 procedure SetRenderFrame(const RenderFrame:HWND; out h_DC: HDC; out h_RC: HGLRC);
 begin
@@ -177,7 +178,7 @@ begin
   glPopAttrib;
 end;
 
-function ReadClick(X, Y: word): Vector;
+function ReadClick(X, Y: word): Vector3f;
 var viewport:TVector4i;
     projection:TMatrix4d;
     modelview:TMatrix4d;
