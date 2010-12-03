@@ -1,9 +1,11 @@
 unit KromOGLUtils;
+{$IFDEF VER140} {$DEFINE WDC} {$ENDIF}  // Delphi 6
+{$IFDEF VER150} {$DEFINE WDC} {$ENDIF}  // Delphi 7
 interface
-uses KromUtils, dglOpenGL,
-  {$IFDEF DELPHI} OpenGL, {$ENDIF}
+uses
+  {$IFDEF WDC} OpenGL, {$ENDIF}  dglOpenGL,
   {$IFDEF FPC} GL, {$ENDIF}
-  sysutils, windows, Forms;
+  sysutils, windows, Forms, KromUtils;
 
 type KCode = (kNil=0,kPoint=1,kSpline=2,kSplineAnchor=3,kSplineAnchorLength=4,
               kPoly=5,kSurface=6,kObject=7,kButton=8);  //1..31 are ok
@@ -23,6 +25,7 @@ type KCode = (kNil=0,kPoint=1,kSpline=2,kSplineAnchor=3,kSplineAnchorLength=4,
     procedure glkQuad(Ax,Ay,Bx,By,Cx,Cy,Dx,Dy:single);
     procedure glkRect(Ax,Ay,Bx,By:single);
     procedure glkMoveAALines(DoShift:boolean);
+procedure SetupVSync(aVSync:boolean);
     procedure kSetColorCode(TypeOfValue:KCode;IndexNum:integer);
     procedure kGetColorCode(RGBColor:Pointer;var TypeOfValue:KCode;var IndexNum:integer);
 
@@ -253,6 +256,13 @@ const Value=0.5;
 begin
 if DoShift then glTranslatef(Value,Value,0)
            else glTranslatef(-Value,-Value,0);
+end;
+
+
+procedure SetupVSync(aVSync:boolean);
+begin
+  if WGL_EXT_swap_control then
+    wglSwapIntervalEXT(byte(aVSync));
 end;
 
 

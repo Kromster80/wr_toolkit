@@ -1,5 +1,7 @@
 unit KromUtils;
-{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
+{$IFDEF VER140} {$DEFINE WDC} {$ENDIF}  // Delphi 6
+{$IFDEF VER150} {$DEFINE WDC} {$ENDIF}  // Delphi 7
+{$IFDEF FPC} {$Mode Delphi} {$ENDIF}
 interface
 uses sysutils,windows,Controls,forms,typinfo,ExtCtrls,Math, Dialogs, Registry, ShellApi, shlobj;
 
@@ -22,6 +24,7 @@ function TruncateExt(FileName:string): string;
 function GetFileSize(const FileName: string): LongInt;
 function CheckFileExists(const FileName: string; const IsSilent:boolean = false):boolean;
 
+procedure FreeThenNil(var Obj);
 procedure krintersect(x1,y1,x2,y2,x3,y3:single; SizeX,SizeY:integer; var ot:array of integer);
 function ReverseString(s1:string):string;
 
@@ -50,7 +53,7 @@ function ArcSin(const X: Extended): Extended;
 function ArcTan2(const Y, X: Extended): Extended;
 function Pow(const Base, Exponent: integer): integer;
 
-  function GetLengthSQR(ix,iy,iz:integer): integer;
+  function GetLengthSQR(ix,iy,iz:integer): integer; //Length without SQRT
   function GetLength(ix,iy,iz:single): single; overload;
   function GetLength(ix:Vector3f): single; overload;
   function GetLength(ix,iy:single): single; overload;
@@ -83,6 +86,7 @@ procedure decs(var AText:widestring; const Len:integer=1); overload;
 function  decs(AText:string; Len,RunAsFunction:integer):string; overload;
 function GetNumberFromString(AText:string; Position:integer):single;
 function RemoveQuotes(Input:string):string;
+function GetCharFromVirtualKey(Key:word):string;
 procedure SwapStr(var A,B:string);
 procedure SwapInt(var A,B:byte); overload;
 procedure SwapInt(var A,B:word); overload;
@@ -93,7 +97,6 @@ function Equals(A,B:single; const Epsilon:single=0.001):boolean;
 
 function Abs2X(AbsoluteValue,SizeX:integer):integer;
 function Abs2Z(AbsoluteValue,SizeX:integer):integer;
-
 
 procedure ConvertSetToArray(iSet:integer; Ar:pointer);
 function MakePOT(num:integer):integer;
@@ -249,7 +252,6 @@ begin
 end;
 
 
-
 function GetFileSize(const FileName: string): LongInt;
 var
   SearchRec: TSearchRec;
@@ -263,6 +265,7 @@ begin
   end;
 end;
 
+
 function CheckFileExists(const FileName: string; const IsSilent:boolean = false):boolean;
 begin
 if fileexists(FileName) then
@@ -272,6 +275,14 @@ else begin
   Result:=false;
 end;
 end;
+
+
+procedure FreeThenNil(var Obj);
+begin
+  TObject(Obj).Free;
+  Pointer(Obj) := nil;
+end;
+
 
 function ReverseString(s1:string):string;
 var s2:string; i:integer;
@@ -422,9 +433,10 @@ setlength(ss,Len);
   Result := ss;
 end;
 
+
 function float2fix(Number:single; Digits:integer):string;
 begin
-  Result := FloatToStrF(Number,ffGeneral,3,2);
+  Result := FloatToStrF(Number, ffGeneral, Digits+1, Digits);
 end;
 
 function int2(c1,c2:char):integer; overload;
@@ -460,6 +472,7 @@ R:=Col AND $FF;
 G:=Col AND $FF00 SHR 8;
 B:=Col AND $FF0000 SHR 16;
 end;
+
 
 function Ceil(const X: Extended): Integer;
 begin
@@ -592,10 +605,12 @@ num := num OR (num SHR 16); //32bit needs no more
 Result := num+1;
 end;
 
+
 function GetLengthSQR(ix,iy,iz:integer): integer;
 begin
   Result:=sqr(ix)+sqr(iy)+sqr(iz);
 end;
+
 
 function GetLength(ix,iy,iz:single): single; overload;
 begin
@@ -800,6 +815,23 @@ begin
 end;
 
 
+function GetCharFromVirtualKey(Key:word):string;
+var
+  KeyboardState: TKeyboardState;
+  AsciiResult: Integer;
+begin
+  GetKeyboardState(KeyboardState);
+  SetLength(Result, 2);
+  AsciiResult := ToAscii(Key, MapVirtualKey(Key,0), KeyboardState, @Result[1], 0);
+  case AsciiResult of
+    0:    Result := '';
+    1:    SetLength(Result, 1);
+    2:    ;
+    else  Result := '';
+  end;
+end;
+
+
 procedure SwapStr(var A,B:string);
 var s:string;
 begin
@@ -811,6 +843,7 @@ var s:byte;
 begin
 s:=A; A:=B; B:=s;
 end;
+
 
 procedure SwapInt(var A,B:word);
 var s:word;
@@ -982,6 +1015,7 @@ Sender.FileName:=FileName;
 Sender.InitialDir:=FilePath;
 Sender.Filter:=Filter;
 Result:=Sender.Execute; //Returns "false" if user pressed "Cancel"
+  if not Result then exit;
 Sender.FileName:=AssureFileExt(Sender.FileName,FileExt);
 end;
 
