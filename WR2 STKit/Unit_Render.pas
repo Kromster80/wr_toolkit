@@ -214,7 +214,7 @@ var ii,kk,j,h,PA,PB,Col,ShapeID:integer; Speed,LA,LB,T,Offset:single;// A,B,C:in
     ax,bx,cx,x0,x1,x2,x3,xt:single;
     ay,by,cy,y0,y1,y2,y3,yt:single;
     az,bz,cz,z0,z1,z2,z3,zt:single;
-    v:vector;
+    v:vector3f;
     Spline:array of array of record x,y,z,tx,ty,tz:single; end;
     TA1,TA2,TB1,TB2:record x,y,z:single; end;
     Tang:record x,y,z,n:single; end;
