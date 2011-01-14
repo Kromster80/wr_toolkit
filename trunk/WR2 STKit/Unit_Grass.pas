@@ -68,10 +68,10 @@ end;
 procedure TSGrass.SetTexName(aTexName:string);
 var i:integer;
 begin
-  for i:=1 to MAX_RO_FILES do RO[i].Tex := aTexName;
+  for i:=1 to MAX_RO_FILES do
+    RO[i].Tex := aTexName;
   Changed := true;
 end;
-
 
 
 procedure TSGrass.Generate(aProgressLabel:Pointer);
@@ -104,7 +104,7 @@ begin
     RO[LOD].Head.sizeZ  := Qty.BlocksZ*4;
     RO[LOD].Head.XZ     := RO[LOD].Head.sizeX*RO[LOD].Head.sizeZ;
     RO[LOD].Head.Qty    := 0;
-    if RO[LOD].Tex='' then RO[LOD].Tex:='RandObj';
+    if RO[LOD].Tex = '' then RO[LOD].Tex := 'RandObj';
 
     setlength(RO[LOD].Chunks,RO[LOD].Head.sizeZ+1);
     for i:=1 to RO[LOD].Head.sizeZ do setlength(RO[LOD].Chunks[i],RO[LOD].Head.sizeX+1);
@@ -194,17 +194,19 @@ begin
     //s:=ElapsedTime(@OldTime); decs(s,5); // XX***ms
     //Label92.Caption:=s+'s';
 
+    //4 items in a strip
     for i:=1 to 4 do begin
-      RO[lod].UV[i].X[1]:=0;
-      RO[lod].UV[i].X[2]:=(i-1)*0.25;
-      RO[lod].UV[i].X[3]:=0;
-      RO[lod].UV[i].X[4]:=i*0.25;
-      RO[lod].UV[i].X[5]:=1;
-      RO[lod].UV[i].X[6]:=10;
-      RO[lod].UV[i].X[7]:=10;
-      RO[lod].UV[i].X[8]:=0;
+      RO[lod].UV[i].X[1] := 0;
+      RO[lod].UV[i].X[2] := (i-1)*0.25;
+      RO[lod].UV[i].X[3] := 0;
+      RO[lod].UV[i].X[4] := i*0.25;
+      RO[lod].UV[i].X[5] := 1;
+      RO[lod].UV[i].X[6] := 10;
+      RO[lod].UV[i].X[7] := 10;
+      RO[lod].UV[i].X[8] := 0;
     end;
-  end;// for LOD:=1 to 4 do begin
+
+  end;
   Changed := true;
 end;
 
@@ -224,10 +226,10 @@ begin
 
   for LOD := 1 to MAX_RO_FILES do
     for i:=1 to RO[LOD].Head.Qty do begin
-    RO[LOD].Grass[i].Color:=
+      RO[LOD].Grass[i].Color :=
         EnsureRange(b+Random(0),0,15)+
-        EnsureRange(g+RandomS(1),0,15)*16+
-        EnsureRange(r+Random(0),0,15)*256; //it's times faster to access local numbers
+        EnsureRange(g+RandomS(1),0,15) shl 4+
+        EnsureRange(r+Random(0),0,15) shl 8; //it's times faster to access local numbers
     end;
   Changed := true;
 end;
@@ -255,7 +257,7 @@ begin
   blockread(f,c,2); HasAlpha:=c[1]=#32;
 
   if (sx>2048)or(sz>2048) then begin
-    MessageBox(Form1.Handle,'Image exceeds 2048px limit', 'Error', MB_OK or MB_ICONWARNING);
+    MessageBox(Form1.Handle,'Image size exceeds 2048px limit', 'Error', MB_OK or MB_ICONWARNING);
     closefile(f);
     exit;
   end;
@@ -336,35 +338,35 @@ function TSGrass.LoadFromFile(aFile:string):boolean;
 var
   i,LOD:integer;
   f:file;
-  FileName:string; c:array[1..1024]of char;
+  FileName:string; c:array[1..33]of char;
 begin
   Result := false;
 
   for LOD:=1 to MAX_RO_FILES do begin
     FileName := aFile+'.RO'+inttostr(LOD);
     if not FileExists(FileName) then begin
-      RO[LOD].Head.Qty:=0;
-      RO[LOD].Head.sizeX:=0;
-      RO[LOD].Head.sizeZ:=0;
+      RO[LOD].Head.Qty   := 0;
+      RO[LOD].Head.sizeX := 0;
+      RO[LOD].Head.sizeZ := 0;
     end else begin
       AssignFile(f,FileName); FileMode:=0; reset(f,1); FileMode:=2;
       blockread(f,RO[LOD].Head,32);
       setlength(RO[LOD].Chunks,RO[LOD].Head.sizeZ+1);
       for i:=1 to RO[LOD].Head.sizeZ do
         setlength(RO[LOD].Chunks[i],RO[LOD].Head.sizeX+1);
-      blockread(f,c,32);
-      RO[LOD].Tex:=StrPas(@c); //Name
+      blockread(f,c,32); c[33]:=#0; //Make sure it's 0-terminated
+      RO[LOD].Tex := StrPas(@c); //Name
       blockread(f,RO[LOD].UV,128);
       for i:=1 to RO[LOD].Head.sizeZ do
         blockread(f,RO[LOD].Chunks[i,1],RO[LOD].Head.sizeX*8);
       setlength(RO[LOD].Grass,RO[LOD].Head.Qty+1);
       blockread(f,RO[LOD].Grass[1],RO[LOD].Head.Qty*16); //R=0..3, G=0..15, B=0..15 16..255, A=0..15
       closefile(f);
+      Result := true;
     end;
   end;
 
   Changed := false;
-  Result := true;
 end;
 
 

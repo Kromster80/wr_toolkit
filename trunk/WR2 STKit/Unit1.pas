@@ -2092,13 +2092,13 @@ if LoadSKY(SceneryPath+Scenery)                then MemoLoad.Lines.Add('Load SKY
 if LoadSTR(fOptions.WorkDir+'Traffic\Streets\'+Scenery) then MemoLoad.Lines.Add('Load STR in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('STR missing');
 if LoadNET(SceneryPath+'Tracks\roads.net')     then MemoLoad.Lines.Add('Load NET in'+ElapsedTime(@OldTime));
 if fTriggers.LoadFromFile(fOptions.WorkDir+'RaceDat\'+Scenery+'.trl') then MemoLoad.Lines.Add('Load TRL in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('TRL missing');
-//if LoadTRL(fOptions.WorkDir+'RaceDat\'+Scenery)         then MemoLoad.Lines.Add('Load TRL in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('TRL missing');
+
    LoadWRK(SceneryPath+Scenery+' WorkFile.wrk');    MemoLoad.Lines.Add('Load WRK in'+ElapsedTime(@OldTime));
 if LoadSC2(fOptions.WorkDir+'AddOns\Sceneries\'
                   +Scenery+'\EditScenery.sc2') then MemoLoad.Lines.Add('Load SC2 in'+ElapsedTime(@OldTime));
-//if LoadRO_(SceneryPath+Scenery)                then MemoLoad.Lines.Add('Load RO# in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('RO# missing');
-fGrass.LoadFromFile(SceneryPath+Scenery);
-//RG_GrassLODClick(nil); //Reload current selected Grass LOD
+
+if fGrass.LoadFromFile(SceneryPath+Scenery)      then MemoLoad.Lines.Add('Load RO# in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('RO# missing');
+
 
 SendQADtoUI('All');
 ShowQADInfo(nil);
