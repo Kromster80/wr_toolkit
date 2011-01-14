@@ -5,7 +5,7 @@ uses
   Windows, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, kromUtils, KromOGLUtils, Defaults, Math, Menus,
   LoadObjects, Grids,  ImgList, OpenAL, WR_AboutBox, SK_Options, FileCtrl,
-  Buttons, Spin, ComCtrls, Unit_Grass, Unit_Triggers;
+  Buttons, Spin, ComCtrls, Unit_Grass, Unit_Streets, Unit_Triggers;
 
 type TCarDrivingMode = (cdm_Sim, cdm_Arcade);
 const CarDrivingMode: array[TCarDrivingMode] of string = ('Sim', 'Arcade');
@@ -1094,6 +1094,7 @@ var
     end;
 
   fGrass:TSGrass;
+  fStreets:TSStreets;
   fTriggers:TSTriggersCollection;
 
   SKYQty:integer;
@@ -1376,7 +1377,7 @@ var
 implementation
   {$R *.dfm}
 
-uses LoadSave, Unit_Render, PTXTexture, Load_TRK, Unit_sc2, Unit_Streets,
+uses LoadSave, Unit_Render, PTXTexture, Load_TRK, Unit_sc2, 
 Unit_Options, Unit_RoutineFunctions, Unit_RenderInit, Unit_Tracing,
   ColorPicker, SK_ImportLWO;
 
@@ -1427,6 +1428,7 @@ end else begin
 end;
 
   fGrass := TSGrass.Create;
+  fStreets := TSStreets.Create;
   fTriggers := TSTriggersCollection.Create;
 
 
@@ -2089,9 +2091,13 @@ if LoadSNI(SceneryPath+Scenery)                then MemoLoad.Lines.Add('Load SNI
    LoadTOB(SceneryPath+'Tracks\',Scenery);          MemoLoad.Lines.Add('Load TOB in'+ElapsedTime(@OldTime));
    LoadWTR(SceneryPath+'Tracks\',Scenery);          MemoLoad.Lines.Add('Load WTR in'+ElapsedTime(@OldTime));
 if LoadSKY(SceneryPath+Scenery)                then MemoLoad.Lines.Add('Load SKY in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('SKY missing');
+
 if LoadSTR(fOptions.WorkDir+'Traffic\Streets\'+Scenery) then MemoLoad.Lines.Add('Load STR in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('STR missing');
 if LoadNET(SceneryPath+'Tracks\roads.net')     then MemoLoad.Lines.Add('Load NET in'+ElapsedTime(@OldTime));
+
+//if fStreets.LoadFromFile(fOptions.WorkDir+'Traffic\Streets\'+Scenery+'.str') then MemoLoad.Lines.Add('Load STR in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('STR missing');
 if fTriggers.LoadFromFile(fOptions.WorkDir+'RaceDat\'+Scenery+'.trl') then MemoLoad.Lines.Add('Load TRL in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('TRL missing');
+
 
    LoadWRK(SceneryPath+Scenery+' WorkFile.wrk');    MemoLoad.Lines.Add('Load WRK in'+ElapsedTime(@OldTime));
 if LoadSC2(fOptions.WorkDir+'AddOns\Sceneries\'
