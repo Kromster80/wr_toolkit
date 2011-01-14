@@ -644,6 +644,7 @@ type
     RBCarSim: TRadioButton;
     RBCarArc: TRadioButton;
     Label179: TLabel;
+    SpeedButton1: TSpeedButton;
     procedure CBReduceDisplayClick(Sender: TObject);
     procedure CBTraceClick(Sender: TObject);
 //    procedure RenderInit();
@@ -1093,7 +1094,7 @@ var
     end;
 
   fGrass:TSGrass;
-  fTriggers:TSTriggers;
+  fTriggers:TSTriggersCollection;
 
   SKYQty:integer;
   SKY:array[1..32]of record
@@ -1426,7 +1427,7 @@ end else begin
 end;
 
   fGrass := TSGrass.Create;
-  fTriggers := TSTriggers.Create;
+  fTriggers := TSTriggersCollection.Create;
 
 
 PageControl1Change(nil);        //get ActivePage name
@@ -1652,10 +1653,10 @@ begin
   vx:=nil; vy:=nil; vz:=nil; vxi:=nil; vyi:=nil; //Init to calm down Compiler
   px:=0; py:=0; pz:=0; //Init to calm down Compiler
 
-try
-if MouseButton=0 then exit;
-if DoubleClick then exit;
-MoveMode:=mmNone;
+  try
+    if MouseButton = 0 then exit;
+    if DoubleClick then exit;
+    MoveMode := mmNone;
 
 if ActivePage=apAnimated then begin vx:=SNI_Node_X; vy:=SNI_Node_Y; vz:=SNI_Node_Z; MoveMode:=mmFloat; end;
 if ActivePage=apSounds   then begin vx:=SoundPosX; vy:=SoundPosY; vz:=SoundPosZ; MoveMode:=mmFloat; end;
@@ -1819,7 +1820,7 @@ end;
 
 
 procedure TForm1.RenderFrame(Sender: TObject);
-var Num:byte; v:vector; ZoomX:single; ii:integer;
+var Num:byte; v:vector3f; ZoomX:single; ii:integer;
 begin
 if Show2ndFrame.Checked then begin
   wglMakeCurrent(h_DC, h_RC);
@@ -2043,7 +2044,10 @@ begin
   for i:=1 to MAX_TRACKS do begin Changes.TRK[i]:=false; Changes.TOB[i]:=false; end;
   for i:=1 to MAX_WP_TRACKS do Changes.WTR[i]:=false;
   fGrass.Changed:=false;
-  fTriggers.Changed:=false; Changes.SMP:=false;
+
+  //fTrigger.Changed=false;//Performed on LoadFromFile
+
+  Changes.SMP:=false;
   Changes.IDX:=false; Changes.VTX:=false; Changes.QAD:=false; Changes.SKY:=false;
   Changes.SNI:=false; Changes.LVL:=false; Changes.STR:=false;
   Changes.WRK:=false; Changes.SC2:=false;
@@ -2391,38 +2395,40 @@ end;
 
 
 procedure TForm1.ListTrigClick(Sender: TObject);
-var ID:integer;
+var ID:integer; T:TSTrigger;
 begin
   TriggersRefresh := true;
   ID := ListTrig.ItemIndex+1;
   if ID=0 then exit;
 
-    CBTriggerType.ItemIndex := fTriggers.TriggerType[ID] - 1;
-    TRL_X.Value := fTriggers.Position[ID].X;
-    TRL_Y.Value := fTriggers.Position[ID].Y;
-    TRL_Z.Value := fTriggers.Position[ID].Z;
-    TRL_S1.Value := fTriggers.Scale[ID].X;
-    TRL_S2.Value := fTriggers.Scale[ID].Y;
-    TRL_S3.Value := fTriggers.Scale[ID].Z;
-    TRL_R1.Value := fTriggers.Rotation[ID].X;
-    TRL_R2.Value := fTriggers.Rotation[ID].Y;
-    TRL_R3.Value := fTriggers.Rotation[ID].Z;
-    TRL_P1.Value := fTriggers.Target[ID].X;
-    TRL_P2.Value := fTriggers.Target[ID].Y;
-    TRL_P3.Value := fTriggers.Target[ID].Z;
-    TRL_Flags.Text := fTriggers.GetFlags(ID);
+  T := fTriggers.Trigger(ID);
 
-    if fTriggers.TriggerType[ID] in [4,8] then Label17.Caption:='Value' else Label17.Caption:='Target X';
-    Label17.Enabled := fTriggers.TriggerType[ID] in [4,5,8,11];
-    Label16.Enabled := fTriggers.TriggerType[ID] in [5,11];
-    Label15.Enabled := fTriggers.TriggerType[ID] in [5,11];
-    TRL_P1.Enabled := fTriggers.TriggerType[ID] in [4,5,8,11];
-    TRL_P2.Enabled := fTriggers.TriggerType[ID] in [5,11];
-    TRL_P3.Enabled := fTriggers.TriggerType[ID] in [5,11];
+  CBTriggerType.ItemIndex := T.TriggerType - 1;
+  TRL_X.Value := T.Position.X;
+  TRL_Y.Value := T.Position.Y;
+  TRL_Z.Value := T.Position.Z;
+  TRL_S1.Value := T.Scale.X;
+  TRL_S2.Value := T.Scale.Y;
+  TRL_S3.Value := T.Scale.Z;
+  TRL_R1.Value := T.Rotation.X;
+  TRL_R2.Value := T.Rotation.Y;
+  TRL_R3.Value := T.Rotation.Z;
+  TRL_P1.Value := T.Target.X;
+  TRL_P2.Value := T.Target.Y;
+  TRL_P3.Value := T.Target.Z;
+  TRL_Flags.Text := T.Flags;
 
-  xPos := fTriggers.Position[ID].X;
-  yPos := fTriggers.Position[ID].Y;
-  zPos := fTriggers.Position[ID].Z;
+  if T.TriggerType in [4,8] then Label17.Caption:='Value' else Label17.Caption:='Target X';
+  Label17.Enabled := T.TriggerType in [4,5,8,11];
+  Label16.Enabled := T.TriggerType in [5,11];
+  Label15.Enabled := T.TriggerType in [5,11];
+  TRL_P1.Enabled := T.TriggerType in [4,5,8,11];
+  TRL_P2.Enabled := T.TriggerType in [5,11];
+  TRL_P3.Enabled := T.TriggerType in [5,11];
+
+  xPos := T.Position.X;
+  yPos := T.Position.Y;
+  zPos := T.Position.Z;
 
   TriggersRefresh := false;
 end;
@@ -2433,24 +2439,21 @@ var ID:integer;
 begin
   ID := ListTrig.ItemIndex+1;
   if ID=0 then exit;
-  xPos := fTriggers.Position[ID].X;
-  yPos := fTriggers.Position[ID].Y;
-  zPos := fTriggers.Position[ID].Z;
+  xPos := fTriggers.Trigger(ID).Position.X;
+  yPos := fTriggers.Trigger(ID).Position.Y;
+  zPos := fTriggers.Trigger(ID).Position.Z;
 end;
 
 
 procedure TForm1.AddTriggerClick(Sender: TObject);
+var ID:integer;
 begin
-  if not fTriggers.CanAddTrigger then exit;
-  ListTrig.Items.Add('<<<LEER>>>');
-  ListTrig.ItemIndex := ListTrig.Items.Count-1; //The last one
-  fTriggers.AddTrigger(); //Fill in defaults
-  TriggersRefresh := true;
-  TRL_X.Value := xPos;
-  TRL_Y.Value := yPos;
-  TRL_Z.Value := zPos;
-  TriggersRefresh := false;
-  TriggerChange(Sender); //Will copy existing values
+  if not fTriggers.AddTrigger(Vectorize(xPos, yPos, zPos)) then exit; //Fill in defaults, error if hit the limit
+
+  ID := fTriggers.Count;
+  ListTrig.Items.Add(fTriggers.Trigger(ID).GetName);
+  ListTrig.ItemIndex := ID-1; //The last one
+  ListTrig.OnClick(ListTrig);
 end;
 
 
@@ -2468,33 +2471,38 @@ end;
 
 
 procedure TForm1.TriggerChange(Sender: TObject);
-var ID:integer;
+var ID:integer; T:TSTrigger;
 begin
   if TriggersRefresh then exit;
 
   ID := ListTrig.ItemIndex+1;
   if ID=0 then exit;
 
-    fTriggers.TriggerType[ID] := CBTriggerType.ItemIndex + 1;
-    ListTrig.Items[ID-1] := fTriggers.GetName(ID);
-    fTriggers.Position[ID] := Vectorize(TRL_X.Value, TRL_Y.Value, TRL_Z.Value);
-    fTriggers.Scale[ID] := Vectorize(TRL_S1.Value, TRL_S2.Value, TRL_S3.Value);
-    fTriggers.Rotation[ID] := Vectorize(TRL_R1.Value, TRL_R2.Value, TRL_R3.Value);
-    fTriggers.Target[ID] := Vectorize(TRL_P1.Value, TRL_P2.Value, TRL_P3.Value);
+  T := fTriggers.Trigger(ID);
 
-    if fTriggers.TriggerType[ID] in [4,8] then Label17.Caption:='Value' else Label17.Caption:='Target X';
-    Label17.Enabled := fTriggers.TriggerType[ID] in [4,5,8,11];
-    Label16.Enabled := fTriggers.TriggerType[ID] in [5,11];
-    Label15.Enabled := fTriggers.TriggerType[ID] in [5,11];
-    TRL_P1.Enabled := fTriggers.TriggerType[ID] in [4,5,8,11];
-    TRL_P2.Enabled := fTriggers.TriggerType[ID] in [5,11];
-    TRL_P3.Enabled := fTriggers.TriggerType[ID] in [5,11];
+  T.TriggerType := CBTriggerType.ItemIndex + 1;
+  ListTrig.Items[ID-1] := fTriggers.TriggerName(ID);
+  T.Position := Vectorize(TRL_X.Value, TRL_Y.Value, TRL_Z.Value);
+  T.Scale := Vectorize(TRL_S1.Value, TRL_S2.Value, TRL_S3.Value);
+  T.Rotation := Vectorize(TRL_R1.Value, TRL_R2.Value, TRL_R3.Value);
+  T.Target := Vectorize(TRL_P1.Value, TRL_P2.Value, TRL_P3.Value);
 
-    if (Sender=TRL_X)or(Sender=TRL_Y)or(Sender=TRL_Z) then begin
-      xPos := fTriggers.Position[ID].X;
-      yPos := fTriggers.Position[ID].Y;
-      zPos := fTriggers.Position[ID].Z;
-    end;
+  fTriggers.ApplyRestrictions;
+
+  if T.TriggerType in [4,8] then Label17.Caption:='Value' else Label17.Caption:='Target X';
+  Label17.Enabled := T.TriggerType in [4,5,8,11];
+  Label16.Enabled := T.TriggerType in [5,11];
+  Label15.Enabled := T.TriggerType in [5,11];
+  TRL_P1.Enabled := T.TriggerType in [4,5,8,11];
+  TRL_P2.Enabled := T.TriggerType in [5,11];
+  TRL_P3.Enabled := T.TriggerType in [5,11];
+
+  if (Sender=TRL_X)or(Sender=TRL_Y)or(Sender=TRL_Z) then
+  begin
+    xPos := T.Position.X;
+    yPos := T.Position.Y;
+    zPos := T.Position.Z;
+  end;
 end;
 
 
@@ -3046,7 +3054,7 @@ if (Sender='All')or(Sender='Triggers') then begin
   for i:=1 to 16 do CBTriggerType.AddItem(TRLnames[i],nil);
   ListTrig.Clear;
   for i:=1 to fTriggers.Count do
-  ListTrig.Items.Add(fTriggers.GetName(i));
+    ListTrig.Items.Add(fTriggers.TriggerName(i));
   ListTrig.ItemIndex:=-1;
 end;
 
@@ -3197,18 +3205,21 @@ Label52.Caption:='Nodes list: ('+floattostr(round(SNILen[ID])/10)+'m)';
 SNIRefresh:=false;
 end;
 
+
 procedure TForm1.PageControl1DrawTab(Control: TCustomTabControl; TabIndex: Integer; const Rect: TRect; Active: Boolean);
-var  NewRect:TRect; bm:Tbitmap;
+var NewRect:TRect; bm:Tbitmap;
 begin
-  NewRect:=Rect;
-  bm:=TBitmap.Create;
-  ImageList1.GetBitmap(TabIndex,bm);
+  NewRect := Rect;
+  bm := TBitmap.Create;
+  ImageList1.GetBitmap(TabIndex, bm);
   Control.Canvas.Draw(NewRect.Left-1,NewRect.Top-1,bm);
-  NewRect.Top:=NewRect.Top+31;
-  Control.Canvas.Brush.Style:=bsClear;
-  Control.Canvas.TextOut(NewRect.Left,NewRect.Top-1,PageShortcut[TabIndex+1]);
+  inc(NewRect.Top, 30);
+  Control.Canvas.Brush.Style := bsClear;
+  Control.Canvas.Font.Color := clBlack;
+  Control.Canvas.TextOut(NewRect.Left, NewRect.Top, PageShortcut[TabIndex+1]);
   bm.Free;
 end;
+
 
 procedure TForm1.TexScaleChange(Sender: TObject);
 var ID,k:integer;
@@ -3613,29 +3624,29 @@ end;
 procedure TForm1.PageControl1Change(Sender: TObject);
 begin
   case PageControl1.ActivePageIndex of
-    0: ActivePage:=apLWO;
-    1: ActivePage:=apGrounds;
-    2: ActivePage:=apTextures;
-    3: ActivePage:=apMaterials;
-    4: ActivePage:=apObjects;
-    5: ActivePage:=apSounds;
-    6: ActivePage:=apLights;
-    7: ActivePage:=apStructure;
-    8: if TRKProperty.ActivePage.Caption='Make track' then ActivePage:=apTracksMT else
-       if TRKProperty.ActivePage.Caption='Direction arrows' then ActivePage:=apTracksAR else
-       if TRKProperty.ActivePage.Caption='Waypoint nodes' then ActivePage:=apTracksWP else
-       Assert(false,'TRK Property page control captions are wrong!');
-    9: ActivePage:=apTOB;
-    10:ActivePage:=apStreets;
-    11:ActivePage:=apAnimated;
-    12:ActivePage:=apSky;
-    13:ActivePage:=apGrass;
-    14:ActivePage:=apTriggers;
-    15:ActivePage:=apAddonInfo;
+    0: ActivePage := apLWO;
+    1: ActivePage := apGrounds;
+    2: ActivePage := apTextures;
+    3: ActivePage := apMaterials;
+    4: ActivePage := apObjects;
+    5: ActivePage := apSounds;
+    6: ActivePage := apLights;
+    7: ActivePage := apStructure;
+    8: if TRKProperty.ActivePage.Caption = 'Make track' then        ActivePage := apTracksMT else
+       if TRKProperty.ActivePage.Caption = 'Direction arrows' then  ActivePage := apTracksAR else
+       if TRKProperty.ActivePage.Caption = 'Waypoint nodes' then    ActivePage := apTracksWP else
+       Assert(false, 'TRK Property page control captions are wrong!');
+    9: ActivePage := apTOB;
+    10:ActivePage := apStreets;
+    11:ActivePage := apAnimated;
+    12:ActivePage := apSky;
+    13:ActivePage := apGrass;
+    14:ActivePage := apTriggers;
+    15:ActivePage := apAddonInfo;
   end;
   SendQADtoUI('All'); //?
-  StatusBar1.Panels[4].Text:=PageCaption[ActivePage];
-  StatusBar1.Panels[5].Text:=ReturnListOfChangedFiles(', ');
+  StatusBar1.Panels[4].Text := PageCaption[ActivePage];
+  StatusBar1.Panels[5].Text := ReturnListOfChangedFiles(', ');
 end;
 
 
@@ -4663,7 +4674,9 @@ begin
 
   PlayTrackPos:=0;
   if TrackWP <> 0 then begin
-    TRKProperty.ActivePageIndex:=2; ActivePage := apTracksWP; //Tied
+    TRKProperty.ActivePageIndex:=2;
+    if ActivePage in [apTracksMT,apTracksAR,apTracksWP] then
+      ActivePage := apTracksWP; //Tied
     SetWP(false);
     ListWPNodes.Clear;
     for i:=1 to WTR[TrackWP].NodeQty do
@@ -4671,7 +4684,9 @@ begin
   end else
   if TrackID <> 0 then begin
     TrackWP:=0;
-    TRKProperty.ActivePageIndex:=1; ActivePage := apTracksAR; //Tied
+    TRKProperty.ActivePageIndex:=1;
+    if ActivePage in [apTracksMT,apTracksAR,apTracksWP] then
+      ActivePage := apTracksAR; //Tied
     SetWP(true);
     TRKRefresh:=true;
     TRK_Loop.Checked:=TRKQty[TrackID].LoopFlag=1;
