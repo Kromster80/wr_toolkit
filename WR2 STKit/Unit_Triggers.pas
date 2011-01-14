@@ -55,7 +55,7 @@ type
 
 
 type
-  TSTriggersColleaction = class
+  TSTriggersCollection = class
   private
     fChanged:boolean;
     fCount:integer;
@@ -136,6 +136,7 @@ begin
                                      Stream.Write(u2, 6);
                                    end;
   end;
+  Changed := false;
 end;
 
 
@@ -203,7 +204,7 @@ end;
 
 
 { TSTriggersColleaction }
-procedure TSTriggersColleaction.Clear;
+procedure TSTriggersCollection.Clear;
 var i:integer;
 begin
   for i:=1 to fCount do
@@ -212,7 +213,7 @@ begin
 end;
 
 
-function TSTriggersColleaction.GetChanged:boolean;
+function TSTriggersCollection.GetChanged:boolean;
 var i:integer;
 begin
   Result := fChanged;
@@ -221,19 +222,19 @@ begin
 end;
 
 
-function TSTriggersColleaction.Trigger(aIndex:integer):TSTrigger;
+function TSTriggersCollection.Trigger(aIndex:integer):TSTrigger;
 begin
   Result := TRL[aIndex];
 end;
 
 
-function TSTriggersColleaction.TriggerName(aIndex:integer):string;
+function TSTriggersCollection.TriggerName(aIndex:integer):string;
 begin
   Result := inttostr(aIndex) + '. ' + TRL[aIndex].GetName;
 end;
 
 
-function TSTriggersColleaction.AddTrigger(aPos:vector3f):boolean;
+function TSTriggersCollection.AddTrigger(aPos:vector3f):boolean;
 begin
   if fCount>255 then begin
     MessageBox(0, 'Can''t add more than 256 objects to a scenery', 'Warning', MB_ICONEXCLAMATION or MB_OK);
@@ -251,7 +252,7 @@ begin
 end;
 
 
-procedure TSTriggersColleaction.RemTrigger(aIndex:integer);
+procedure TSTriggersCollection.RemTrigger(aIndex:integer);
 var i:integer;
 begin
   dec(fCount);
@@ -262,7 +263,7 @@ begin
 end;
 
 
-procedure TSTriggersColleaction.ApplyRestrictions();
+procedure TSTriggersCollection.ApplyRestrictions();
 const MAX_TRIG=8;
 var ii,Nqty,Fqty,Rqty:integer;
 begin
@@ -283,7 +284,7 @@ begin
 end;
 
 
-function TSTriggersColleaction.LoadFromFile(aFile:string):boolean;
+function TSTriggersCollection.LoadFromFile(aFile:string):boolean;
 var i:integer; S:TMemoryStream;
 begin
   Result := false;
@@ -314,7 +315,7 @@ begin
 end;
 
 
-procedure TSTriggersColleaction.SaveToFile(aFile:string);
+procedure TSTriggersCollection.SaveToFile(aFile:string);
 var i:integer; S:TMemoryStream;
 begin
   S := TMemoryStream.Create;
@@ -328,7 +329,7 @@ begin
 end;
 
 
-procedure TSTriggersColleaction.Render(A:single; ID:integer; aEditMode:string);
+procedure TSTriggersCollection.Render(A:single; ID:integer; aEditMode:string);
 var ii:integer; h,p,b:integer;
 begin
   glLineWidth(2);
