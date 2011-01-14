@@ -1,6 +1,67 @@
 unit Unit_Streets;
 interface
-uses Unit1,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_RoutineFunctions, Unit_Tracing;
+uses Classes, sysutils, Windows, KromUtils, Math, dglOpenGL;
+
+
+type
+  TSStreetShape = packed record
+    Offset:array[1..2]of single;
+    Options:word; //unused (Options=0)
+    NumLanes:word;
+  end;
+
+  TSStreetNode = packed record
+    Position:vector3f;
+    Tangent:vector3f;
+  end;
+
+  TSStreetSpline = packed record
+    PtA,PtB:word;
+    FirstShRef,NumShRefs:word;
+    LenA,LenB,Length:single;
+    Density,Options:word;
+    OppSpline,PrevSpline:word;
+    FirstWay,NumWays:word;
+    FirstRoW,NumRoW:word;
+  end;
+
+  TSStreetShRef = packed record //Is same count as Num_Shapes
+    Shape,Speed:word;         //extending each shape with speed limit
+    StartU:single;            //unused (always 0)
+  end;
+
+  TSStreetRoW = packed record //is same count as NumSplines
+    Spline:word;
+    Tracks:cardinal;
+  end;
+
+
+type
+  TSStreets = class
+    private
+      Header:array[1..4]of char;
+      Version,Options:word;
+
+      fShapeCount:integer;
+      fNodeCount:integer;
+      fSplineCount:integer;
+      fShRefCount:integer;
+      fRoWCount:integer;
+      fShapes:array of TSStreetShape;
+      fNodes:array of TSStreetNode;
+      fSplines:array of TSStreetSpline;
+      fShRefs:array of TSStreetShRef;
+      fRoWs:array of TSStreetRoW;
+    public
+      //constructor Create;
+      procedure Clear;
+      //procedure AddShape;
+      //procedure RemShape;
+
+      function LoadFromFile(aFile:string):boolean;
+      //procedure SaveToFile;
+    end;
+
 
 procedure AddShapeClick_();
 procedure RemShapeClick_();
@@ -23,6 +84,63 @@ var
     STRPointRefresh:boolean=false;
 
 implementation
+uses Unit1, Unit_RoutineFunctions, Unit_Tracing, PTXTexture;
+
+
+procedure TSStreets.Clear;
+begin
+  fShapeCount := 0;
+  fNodeCount  := 0;
+  fSplineCount:= 0;
+  fShRefCount := 0;
+  fRoWCount   := 0;
+  setlength(fShapes, 0);
+  setlength(fNodes, 0);
+  setlength(fSplines, 0);
+  setlength(fShRefs, 0);
+  setlength(fRoWs, 0);
+end;
+
+
+function TSStreets.LoadFromFile(aFile:string):boolean;
+var S:TMemoryStream;
+begin
+  Result := false;
+
+  Clear;
+  if not FileExists(aFile) then exit;
+
+  S := TMemoryStream.Create;
+  try
+    S.LoadFromFile(aFile);
+    S.Read(Header[1],4);
+    if Header[1]+Header[2]+Header[3]+Header[4] <> 'NRTS' then exit;
+    S.Read(Version,2);
+    S.Read(Options,2);
+    S.Read(fShapeCount,4);
+    S.Read(fNodeCount,4);
+    S.Read(fSplineCount,4);
+    S.Read(fShRefCount,4);
+    S.Read(fRoWCount,4);
+    Assert(Version = 258, 'Only WR2 streets format is supported yet');
+
+    setlength(fShapes,fShapeCount+2);  //+2 is necessay to handle 0 length case:
+    setlength(fNodes,fNodeCount+2);  // blockread reads from [1] element which
+    setlength(fSplines,fSplineCount+2);// needs to be existent 0..1 => 0+2
+    setlength(fShRefs,fShRefCount+2);
+    setlength(fRoWs,fRoWCount+2);
+
+    S.Read(fShapes[1], fShapeCount*12);
+    S.Read(fNodes[1], fNodeCount*24);
+    S.Read(fSplines[1], fSplineCount*36);
+    S.Read(fShRefs[1], fShRefCount*8);
+    S.Read(fRoWs[1], fRoWCount*6);
+
+  finally
+    S.Free;
+  end;
+end;
+
 
 procedure AddShapeClick_();
 var ID:integer;
