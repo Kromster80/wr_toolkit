@@ -32,7 +32,6 @@ type
     TabSheet10: TTabSheet;
     TabSheet11: TTabSheet;
     TabSheet12: TTabSheet;
-    ValueListEditor1: TValueListEditor;
     GroupDisplayModes: TGroupBox;
     Image7: TImage;
     Label103: TLabel;
@@ -337,6 +336,7 @@ type
     Memo5: TMemo;
     Memo3: TMemo;
     Memo4: TMemo;
+    ListView1: TListView;
     procedure FormCreate(Sender: TObject);
     procedure InitChart();
     procedure OpenClick(Sender: TObject);
@@ -356,8 +356,9 @@ type
     procedure Button1Click(Sender: TObject);
     procedure BitBtn2Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
-    procedure UpdateControls();
-    procedure UpdateDataSet();
+    procedure UpdateControls;
+    procedure UpdateValueList;
+    procedure UpdateDataSet;
     procedure ImportDSCarClick(Sender: TObject);
   end;
 
@@ -468,6 +469,7 @@ begin
 
   UpdateControls;
   UpdateCaption;
+  UpdateValueList;
 end;
 
 
@@ -708,16 +710,15 @@ begin
 
   case ImportDS.Version of
     dsvMBWR:    for i:=2 to ImportDS.COCount(23,3) do
-                LBModel.AddItem(ImportDS.WRTextEn(ImportDS.GetValueAsString(23,3,i)),TObject(i-1));
-
+                  LBModel.AddItem(ImportDS.WRTextEn(ImportDS.GetValueAsString(23,3,i)),TObject(i-1));
     dsvWR2:     for i:=2 to ImportDS.COCount(23,3) do
-                LBModel.AddItem(ImportDS.GetValueAsString(23,49,i)+' '+ImportDS.GetValueAsString(23,3,i),TObject(i-1));
+                  LBModel.AddItem(ImportDS.GetValueAsString(23,49,i)+' '+ImportDS.GetValueAsString(23,3,i),TObject(i-1));
     dsvAFC11N,
     dsvAFC11CT,
     dsvAFC11BW,
     dsvFVR,
     dsvAFC11HN: for i:=2 to ImportDS.COCount(23,3) do
-                LBModel.AddItem(ImportDS.WRTextEn(ImportDS.GetValueAsString(23,52,i))+' '+ImportDS.WRTextEn(ImportDS.GetValueAsString(23,3,i)),TObject(i-1));
+                  LBModel.AddItem(ImportDS.WRTextEn(ImportDS.GetValueAsString(23,52,i))+' '+ImportDS.WRTextEn(ImportDS.GetValueAsString(23,3,i)),TObject(i-1));
     else exit;
   end;
 
@@ -738,6 +739,9 @@ begin
 
   //Let's sketch it for MBWR first, then we'll see how it goes
   if ImportDS.Version = dsvMBWR then begin
+
+    for i:=0 to fDataSet.TBCount(105) do
+      fDataSet.SetValue(105,i,2, 777888999);
 
     fDataSet.SetValue(105,0,2, ImportDS.GetValue(23,0,CarID)); //Kommentar
     fDataSet.SetValue(105,1,2, 0); //Index
@@ -894,7 +898,27 @@ begin
 end;
 
 
-procedure TForm1.UpdateControls();
+
+procedure TForm1.UpdateValueList;
+var i:integer;
+begin
+  ListView1.Clear;
+  for i:=0 to fDataSet.TBCount(105)-1 do
+    with ListView1.Items.Add do
+    begin
+      Caption := fDataSet.GetCOLib(105,i);
+      SubItems.Add(fDataSet.GetValueAsString(105,i,2));
+    end;
+  for i:=0 to fDataSet.TBCount(103)-1 do
+    with ListView1.Items.Add do
+    begin
+      Caption := fDataSet.GetCOLib(103,i);
+      SubItems.Add(fDataSet.GetValueAsString(103,i,2));
+    end;
+end;
+
+
+procedure TForm1.UpdateControls;
 var
   k:integer;
 begin
