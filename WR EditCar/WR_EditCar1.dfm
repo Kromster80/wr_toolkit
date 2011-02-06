@@ -552,7 +552,7 @@ object Form1: TForm1
     Top = 8
     Width = 503
     Height = 489
-    ActivePage = TabSheet13
+    ActivePage = TabSheet12
     TabOrder = 4
     OnChange = PageChange
     object TabSheet13: TTabSheet
@@ -17637,15 +17637,22 @@ object Form1: TForm1
     object TabSheet12: TTabSheet
       Caption = 'Expert'
       ImageIndex = 7
-      object ValueListEditor1: TValueListEditor
-        Left = 2
-        Top = 2
-        Width = 491
-        Height = 409
+      object ListView1: TListView
+        Left = 0
+        Top = 0
+        Width = 494
+        Height = 441
+        Columns = <
+          item
+            Caption = 'Key'
+            Width = 300
+          end
+          item
+            Caption = 'Value'
+            Width = 150
+          end>
         TabOrder = 0
-        ColWidths = (
-          275
-          210)
+        ViewStyle = vsReport
       end
     end
   end
