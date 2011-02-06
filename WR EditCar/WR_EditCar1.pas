@@ -1,7 +1,7 @@
 unit WR_EditCar1;
 interface
 uses
-  SysUtils, Classes, Forms, StdCtrls, Dialogs, ExtCtrls, Controls, ComCtrls, Spin,
+  SysUtils, Classes, Forms, StdCtrls, Dialogs, ExtCtrls, Controls, ComCtrls, Spin, StrUtils,
   WR_EditCar_Lang, WR_DataSet,
   Chart, FloatSpinEdit,
   WR_AboutBox, KromUtils,
@@ -341,6 +341,7 @@ type
     procedure InitChart();
     procedure OpenClick(Sender: TObject);
     procedure OpenCAR(aCarFile: string);
+    procedure UpdateCaption;
     procedure SaveClick(Sender: TObject);
     procedure AboutClick(Sender: TObject);
     procedure FSChange(Sender: TObject);
@@ -466,6 +467,18 @@ begin
   RGFormatClick(nil);
 
   UpdateControls;
+  UpdateCaption;
+end;
+
+
+//Change application title according to opened file path and car name
+procedure TForm1.UpdateCaption;
+var s:string;
+begin
+  s := CarName;
+  if length(s) > 32 then s := '...' + RightStr(s, 32);
+  Form1.Caption := s+'  -  ' + Edit1.Text; //path - carname
+  Application.Title := Edit1.Text;
 end;
 
 
@@ -487,23 +500,20 @@ end;
 procedure TForm1.AboutClick(Sender: TObject);
 begin
   AboutForm.Show(VersionInfo,'Edit cars perfomance in "EditCar.car" files.'+eol+eol+
-                          'German translation by Jonas Wolf'+eol+
-                          'Hungarian translation by Nagyidai Andor'+eol+
-                          'Russian translation by Krom (incomplete)','EDITCAR');
+                             'German translation by Jonas Wolf'+eol+
+                             'Hungarian translation by Nagyidai Andor'+eol+
+                             'Russian translation by Krom (incomplete)','EDITCAR');
 end;
 
 
 procedure TForm1.FSChange(Sender: TObject);
-var s1:string; z:real;
+var z:real;
 begin
   if LockControls then exit;
   UpdateDataSet();
 
-  //Change application title according to opened file path and car name
-  s1 := carname;
-  if length(s1)>30 then s1 := '...'+decs(s1,-(length(s1)-32),1);
-  Form1.Caption := s1+'  -  '+Edit1.Text; //path - carname
-  Application.Title := Edit1.Text;
+  if Sender = Edit1 then
+    UpdateCaption;
 
   //Fill in max speeds for gears
   if (SrpmMax.Value<>0)and(STireFR.Value<>0)and(FSGearF.Value<>0) then begin

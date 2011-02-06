@@ -60,12 +60,10 @@ type
 
     Value:array of array of array of TDSValue;
 
-  private
     function ConvertDSToIndex(iDS:integer):integer;
     function ConvertTBToIndex(iDS,iTB:integer):integer;
-
   public
-    DoProperIndexing:boolean; //This means that indixes will be accessed by Index value, rather than absolute position in table
+    DoProperIndexing:boolean; //This means that indexes will be accessed by Index value, rather than absolute position in table
     constructor Create;
     function LoadDS(FileName:string):boolean;
     procedure SaveDS(FileName:string);
