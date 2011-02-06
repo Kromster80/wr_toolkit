@@ -506,6 +506,12 @@ begin
 end;
 
 
+procedure TForm1.FSChangeLink(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  FSChange(Form1);
+end;
+
+
 procedure TForm1.FSChange(Sender: TObject);
 var z:real;
 begin
@@ -516,24 +522,25 @@ begin
     UpdateCaption;
 
   //Fill in max speeds for gears
-  if (SrpmMax.Value<>0)and(STireFR.Value<>0)and(FSGearF.Value<>0) then begin
+  if (SrpmMax.Value<>0)and(STireFR.Value<>0)and(FSGearF.Value<>0) then
+  begin
     z := STireFR.Value/25.4/168*SrpmMax.Value/FSGearF.Value*1.625;
-    if FSGear1.Value<>0 then Label143.Caption:='('+float2fix(z/FSGear1.Value,3)+' km/h)' else Label143.Caption:='';
-    if FSGear2.Value<>0 then Label144.Caption:='('+float2fix(z/FSGear2.Value,3)+' km/h)' else Label144.Caption:='';
-    if FSGear3.Value<>0 then Label145.Caption:='('+float2fix(z/FSGear3.Value,3)+' km/h)' else Label145.Caption:='';
-    if FSGear4.Value<>0 then Label146.Caption:='('+float2fix(z/FSGear4.Value,3)+' km/h)' else Label146.Caption:='';
-    if FSGear5.Value<>0 then Label147.Caption:='('+float2fix(z/FSGear5.Value,3)+' km/h)' else Label147.Caption:='';
-    if FSGear6.Value<>0 then Label148.Caption:='('+float2fix(z/FSGear6.Value,3)+' km/h)' else Label148.Caption:='';
-    if FSGear7.Value<>0 then Label149.Caption:='('+float2fix(z/FSGear7.Value,3)+' km/h)' else Label149.Caption:='';
-    if FSGearR.Value<>0 then Label150.Caption:='('+float2fix(z/FSGearR.Value,3)+' km/h)' else Label150.Caption:='';
+    if FSGear1.Value<>0 then Label143.Caption := Format('(%.1f) km/h', [z/FSGear1.Value]) else Label143.Caption:='';
+    if FSGear2.Value<>0 then Label144.Caption := Format('(%.1f) km/h', [z/FSGear2.Value]) else Label144.Caption:='';
+    if FSGear3.Value<>0 then Label145.Caption := Format('(%.1f) km/h', [z/FSGear3.Value]) else Label145.Caption:='';
+    if FSGear4.Value<>0 then Label146.Caption := Format('(%.1f) km/h', [z/FSGear4.Value]) else Label146.Caption:='';
+    if FSGear5.Value<>0 then Label147.Caption := Format('(%.1f) km/h', [z/FSGear5.Value]) else Label147.Caption:='';
+    if FSGear6.Value<>0 then Label148.Caption := Format('(%.1f) km/h', [z/FSGear6.Value]) else Label148.Caption:='';
+    if FSGear7.Value<>0 then Label149.Caption := Format('(%.1f) km/h', [z/FSGear7.Value]) else Label149.Caption:='';
+    if FSGearR.Value<>0 then Label150.Caption := Format('(%.1f) km/h', [z/FSGearR.Value]) else Label150.Caption:='';
   end;
 
   //Fill in standard Tire sizes
   if (STireFW.Text<>'')and(STireRW.Text<>'')and(STireFW.Value<>0)and(STireRW.Value<>0) then begin
-    TireFrontSize.Caption:=STireFW.Text+'/'+
-    inttostr(round((STireFR.Value-STireFD.Value*12.7)/STireFW.Value*100))+' R'+STireFD.Text;
-    TireRearSize.Caption:=STireRW.Text+'/'+
-    inttostr(round((STireRR.Value-STireRD.Value*12.7)/STireRW.Value*100))+' R'+STireRD.Text;
+    TireFrontSize.Caption := STireFW.Text+'/'+
+      inttostr(round((STireFR.Value-STireFD.Value*12.7)/STireFW.Value*100))+' R'+STireFD.Text;
+    TireRearSize.Caption := STireRW.Text+'/'+
+      inttostr(round((STireRR.Value-STireRD.Value*12.7)/STireRW.Value*100))+' R'+STireRD.Text;
   end;
 
   Label142.Caption := inttostr(STireFZ.Value-STireRZ.Value)+' mm';
@@ -542,11 +549,13 @@ begin
   LtachoID.Caption := WRtachoID[StachoID.Value];
 end;
 
+
 procedure TForm1.PageChange(Sender: TObject);
 begin
-  if PageControl2.ActivePageIndex = PageControl2.PageCount-1 then {} else UpdateControls;
+  if PageControl2.ActivePageIndex <> PageControl2.PageCount-1 then UpdateControls;
   if PageControl2.ActivePage.Caption = 'Engine' then TorqueMouseMove(nil,[ssShift],0,0);
 end;
+
 
 procedure TForm1.TorqueMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var i,u,v:integer;
@@ -557,8 +566,9 @@ begin
   u := EnsureRange(round(LineSerieHP.XScreenToValue(X)/SNMStep.Value),0,20);
   v := max(round(LineSerieHP.YScreenToValue(Y)),0);
 
-  Chart1.Title.Text.Strings[0] := 'Torque/RPM (HP) - '+inttostr(v)+'/'+inttostr(u*SNMStep.Value)+' ('+inttostr(round(v*u*SNMStep.Value/7023.5))+')';
-   if (ssLeft in Shift) then begin
+  Chart1.Title.Text.Strings[0] := Format('Torque/RPM (HP) - %d/%d (%.0f)',
+                                  [v, u*SNMStep.Value, v*u*SNMStep.Value/7023.5]);
+  if (ssLeft in Shift) then begin
     fDataSet.SetValue(2,51+u,2,v+0.0);
     LineSerieHP.YValue[u] := v;
     //LineSerieHP.SetYValue(u,v);
@@ -573,12 +583,6 @@ begin
   Chart1.LeftAxis.Maximum := round(LineSerieHP.MaxYValue*1.2);
   if Chart1.LeftAxis.Maximum = 0 then Chart1.LeftAxis.Maximum := 500;
   UpdateDataSet;
-end;
-
-
-procedure TForm1.FSChangeLink(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-  FSChange(Form1);
 end;
 
 
