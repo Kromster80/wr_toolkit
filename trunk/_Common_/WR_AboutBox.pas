@@ -7,7 +7,6 @@ uses
   Math;
 
 type
-  { TAboutForm }
   TAboutForm = class(TForm)
     About_Link: TLabel;
     Label_VersionInfo: TLabel;
