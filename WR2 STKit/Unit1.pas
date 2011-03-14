@@ -7458,6 +7458,7 @@ procedure TForm1.CBDriveModeClick(Sender: TObject);
 begin
   RBCarSim.Enabled := CBDriveMode.Checked;
   RBCarArc.Enabled := CBDriveMode.Checked;
+  Form1.ActiveControl := nil;//.FocusControl(Panel1);
 end;
 
 end.
