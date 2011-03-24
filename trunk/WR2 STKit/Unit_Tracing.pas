@@ -1,6 +1,6 @@
 unit Unit_Tracing;
 interface
-uses Unit1, Sysutils, Math, KromUtils, Defaults;
+uses Unit1, Sysutils, Math, KromUtils, Unit_Defaults;
 
 type TPickDirection = (pd_Top, pd_Bottom, pd_Near);
 

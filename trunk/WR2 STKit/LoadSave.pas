@@ -1,6 +1,6 @@
 unit LoadSave;
 interface
-uses unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_RoutineFunctions,Defaults;
+uses unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_RoutineFunctions,Unit_Defaults;
 
     procedure LoadQAD(Input:string);
     procedure LoadQAD_BW(Input:string);

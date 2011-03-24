@@ -1,6 +1,6 @@
 unit Unit_sc2;
 interface
-uses Unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture, Defaults;
+uses Unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture, Unit_Defaults;
 
   procedure AutoFill_SC2(Sender: TObject);
   procedure EditSC2Click(Sender: TObject);

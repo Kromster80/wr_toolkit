@@ -38,7 +38,7 @@ procedure RenderVTX(Mode:string);
 procedure RenderObject(ObjectID:integer);
 
 implementation
-uses Unit1,Defaults,Unit_RoutineFunctions,LoadObjects,Unit_RenderInit;
+uses Unit1,Unit_Defaults,Unit_RoutineFunctions,LoadObjects,Unit_RenderInit;
 
 
 procedure RenderShaders(Func:string; ShowTex:integer; CBReduceView,CBShowFog,CBCheckers,CBGrass:boolean);

@@ -1,6 +1,6 @@
 unit Unit_Triggers;
 interface
-uses Classes, SysUtils, FileCtrl, Windows, KromUtils ,Math, dglOpenGL, Defaults, Unit_Render, KromOGLUtils;
+uses Classes, SysUtils, FileCtrl, Windows, KromUtils ,Math, dglOpenGL, Unit_Defaults, Unit_Render, KromOGLUtils;
 
 const
   RESTRICT_TRIGGERS = true;

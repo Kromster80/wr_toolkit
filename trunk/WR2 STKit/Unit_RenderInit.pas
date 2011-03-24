@@ -2,7 +2,7 @@ unit Unit_RenderInit;
 interface
 uses
   OpenGL,
-  Unit1, KromOGLUtils, dglOpenGL, Defaults, PTXTexture, KromUtils, Unit_Render, Windows, sysutils;
+  Unit1, KromOGLUtils, dglOpenGL, Unit_Defaults, PTXTexture, KromUtils, Unit_Render, Windows, sysutils;
 
 procedure RenderInit();
 procedure KnowFPS();

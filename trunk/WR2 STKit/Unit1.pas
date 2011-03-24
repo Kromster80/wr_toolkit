@@ -3,7 +3,7 @@ interface
 uses
   dglOpenGL, OpenGL, JPEG, FloatSpinEdit, ValEdit,
   Windows, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, kromUtils, KromOGLUtils, Defaults, Math, Menus,
+  StdCtrls, ExtCtrls, kromUtils, KromOGLUtils, Unit_Defaults, Math, Menus,
   LoadObjects, Grids,  ImgList, OpenAL, WR_AboutBox, SK_Options, FileCtrl,
   Buttons, Spin, ComCtrls, Unit_Grass, Unit_Streets, Unit_Triggers;
 
@@ -4954,7 +4954,7 @@ s:=OpenDialog.FileName;
 //AddTrackClick(nil);
 CBTrackChange(LBTrack); //set TrackID in a right way
 if fileexists(s) then
-  if LoadLWO_TRK(s) then
+  if ImportLWO(s) then
     TRK_MakeIdeal(nil);
 end;
 

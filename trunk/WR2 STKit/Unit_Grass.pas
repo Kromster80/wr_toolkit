@@ -1,6 +1,6 @@
 unit Unit_Grass;
 interface
-uses StdCtrls, Windows, Defaults, KromUtils, Math, SysUtils, OpenGL, dglOpenGL, Unit_Render, PTXTexture;
+uses StdCtrls, Windows, Unit_Defaults, KromUtils, Math, SysUtils, OpenGL, dglOpenGL, Unit_Render, PTXTexture;
 
 { Although there are 4 distinct LOD files we will treat them as one Grass setup
   There's no need to treat them separately for any reasons, that brings only confusion. }
