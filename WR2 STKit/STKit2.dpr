@@ -3,7 +3,7 @@ program STKit2;
 uses
   Forms,
   Unit1 in 'Unit1.pas' {Form1},
-  Defaults in 'Defaults.pas',
+  Unit_Defaults in 'Unit_Defaults.pas',
   Unit_Render in 'Unit_Render.pas',
   PTXTexture in '..\_Common_\PTXTexture.pas',
   LoadObjects in 'LoadObjects.pas',

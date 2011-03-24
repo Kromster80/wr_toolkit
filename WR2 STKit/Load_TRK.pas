@@ -1,11 +1,11 @@
 unit Load_TRK;
 interface
-uses unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_RoutineFunctions,Defaults;
+uses unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_RoutineFunctions,Unit_Defaults;
 
-function LoadLWO_TRK(Input:string):boolean;
+function ImportLWO(Input:string):boolean;
 implementation
 
-function LoadLWO_TRK(Input:string):boolean;
+function ImportLWO(Input:string):boolean;
 var
   f:file;
   ii,m,chsize:integer; chname:string[4];

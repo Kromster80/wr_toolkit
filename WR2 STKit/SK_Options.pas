@@ -1,7 +1,7 @@
 unit SK_Options;
 interface
 uses
-  Windows, Classes, Forms, SysUtils, INIFiles, Defaults, Dialogs, KromUtils, FileCtrl;
+  Windows, Classes, Forms, SysUtils, INIFiles, Unit_Defaults, Dialogs, KromUtils, FileCtrl;
 
 {STKit2 global options}
 type

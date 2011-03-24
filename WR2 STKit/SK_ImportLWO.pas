@@ -1,6 +1,6 @@
 unit SK_ImportLWO;
 interface
-uses Unit1,sysutils,Windows,KromUtils,Math,dglOpenGL,Defaults;
+uses Unit1,sysutils,Windows,KromUtils,Math,dglOpenGL,Unit_Defaults;
 
   procedure LoadLWO(Input:string);
   procedure PrepareLWOData();
