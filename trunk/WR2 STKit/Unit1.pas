@@ -2407,7 +2407,7 @@ begin
   ID := ListTrig.ItemIndex+1;
   if ID=0 then exit;
 
-  T := fTriggers.Trigger(ID);
+  T := fTriggers[ID];
 
   CBTriggerType.ItemIndex := T.TriggerType - 1;
   TRL_X.Value := T.Position.X;
@@ -2445,9 +2445,9 @@ var ID:integer;
 begin
   ID := ListTrig.ItemIndex+1;
   if ID=0 then exit;
-  xPos := fTriggers.Trigger(ID).Position.X;
-  yPos := fTriggers.Trigger(ID).Position.Y;
-  zPos := fTriggers.Trigger(ID).Position.Z;
+  xPos := fTriggers[ID].Position.X;
+  yPos := fTriggers[ID].Position.Y;
+  zPos := fTriggers[ID].Position.Z;
 end;
 
 
@@ -2457,7 +2457,7 @@ begin
   if not fTriggers.AddTrigger(Vectorize(xPos, yPos, zPos)) then exit; //Fill in defaults, error if hit the limit
 
   ID := fTriggers.Count;
-  ListTrig.Items.Add(fTriggers.Trigger(ID).GetName);
+  ListTrig.Items.Add(fTriggers[ID].GetName);
   ListTrig.ItemIndex := ID-1; //The last one
   ListTrig.OnClick(ListTrig);
 end;
@@ -2484,7 +2484,7 @@ begin
   ID := ListTrig.ItemIndex+1;
   if ID=0 then exit;
 
-  T := fTriggers.Trigger(ID);
+  T := fTriggers[ID];
 
   T.TriggerType := CBTriggerType.ItemIndex + 1;
   ListTrig.Items[ID-1] := fTriggers.TriggerName(ID);
