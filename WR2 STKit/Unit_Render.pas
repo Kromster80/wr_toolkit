@@ -15,8 +15,8 @@ var
 procedure RenderShaders(Func:string; ShowTex:integer; CBReduceView,CBShowFog,CBCheckers,CBGrass:boolean);
 procedure RenderOpenGL(CBCheckers:boolean);
 procedure RenderStreets(A:single; NodeID,SplineID:integer);
-procedure RenderRoadNet();
-procedure RenderBounds();
+procedure RenderRoadNet;
+procedure RenderBounds;
 procedure RenderTracks(ID,Turn,Na,Nz:integer);
 procedure RenderTracksWP(A:single; TrackWP,Node:integer);
 procedure RenderAnimated(A:single; Mode:string; ObjID,NodeID:integer);
@@ -26,13 +26,13 @@ procedure RenderSounds(A:single; Input:integer);
 procedure RenderObjects(A,In1,In2:integer);
 procedure RenderObjectsShaders(A,In1,In2:integer);
 procedure RenderTOB_Objects(TrackID,ObjID,A:integer);
-procedure RenderCar();
+procedure RenderCar;
 procedure RenderGrid(Mode:integer);
-procedure RenderTarget();
-procedure RenderWire();
+procedure RenderTarget;
+procedure RenderWire;
 procedure RenderSky(ID:integer);
-procedure RenderSunVector();
-procedure CompileCommonObjects();
+procedure RenderSunVector;
+procedure CompileCommonObjects;
 procedure RenderMover(x,y,z:single);
 procedure RenderVTX(Mode:string);
 procedure RenderObject(ObjectID:integer);
@@ -184,7 +184,7 @@ glActiveTexture(GL_TEXTURE0); //
 glBindTexture(GL_TEXTURE_2D,0);
 end;
 
-procedure RenderSunVector();
+procedure RenderSunVector;
 begin
   glLineWidth(1);
   glColor4f(1,1,1,1);
@@ -195,7 +195,7 @@ begin
   glLineWidth(LineWidth);
 end;
 
-procedure RenderBounds();
+procedure RenderBounds;
 begin
 if Qty.Polys=0 then exit;
 glLineWidth(1);
@@ -422,7 +422,7 @@ end;
 glLineWidth(LineWidth);
 end;
 
-procedure RenderRoadNet();
+procedure RenderRoadNet;
 var ii:integer;
 begin
 glbegin(GL_POINTS);
@@ -1089,7 +1089,7 @@ end;
 //  glEnable(GL_LIGHTING);
 end;
 
-procedure RenderCar();
+procedure RenderCar;
 var kk:integer;
 begin
   glEnable(GL_DEPTH_TEST);
@@ -1278,7 +1278,7 @@ end;
 end;
 end;
 
-procedure RenderTarget();
+procedure RenderTarget;
 begin
 if Qty.Polys=0 then exit;
 if PlayTrack then exit;
@@ -1292,7 +1292,7 @@ glLineWidth(2);
 glLineWidth(LineWidth);
 end;
 
-procedure RenderWire();
+procedure RenderWire;
 var ii,i:integer;
 v1,v2,v3:array[1..3]of single;
 A,B,C:single;
@@ -1389,7 +1389,7 @@ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 glBindTexture(GL_TEXTURE_2D,0);
 end;
 
-procedure CompileCommonObjects();
+procedure CompileCommonObjects;
 var ii,h,step:integer;
 begin
 
@@ -1403,7 +1403,7 @@ glBegin (GL_QUADS);
 for ii:=1 to 8 do glvertex3fv(@BArrow[ii,1]);
 for ii:=8 downto 1 do glvertex3fv(@BArrow[ii,1]);
 glEnd;
-glEndList();
+glEndList;
 
 //Grass
 for ii:=1 to 4 do begin
@@ -1416,7 +1416,7 @@ for ii:=1 to 4 do begin
   glTexCoord2f(ii/4,    0); glvertex2f( 5,10);
   glTexCoord2f((ii-1)/4,0); glvertex2f(-5,10);
   glEnd;
-  glEndList();
+  glEndList;
 end;
 
 //Square
@@ -1428,7 +1428,7 @@ glTexCoord2f(1,0); glvertex2f( 0.5,-0.5);
 glTexCoord2f(1,1); glvertex2f( 0.5, 0.5);
 glTexCoord2f(0,1); glvertex2f(-0.5, 0.5);
 glEnd;
-glEndList();
+glEndList;
 
 //Bounding Box
 coBox:=glGenLists(1);
@@ -1438,7 +1438,7 @@ for ii:=1 to 6 do
 for h:=4 downto 1 do
 glvertex3fv(@BBox[BBoxI[ii,h],1]);
 glEnd;
-glEndList();
+glEndList;
 
 //Box Wire
 coBoxW:=glGenLists(1);
@@ -1455,7 +1455,7 @@ glvertex3fv(@BBox[ii,1]);
 glvertex3fv(@BBox[ii+4,1]);
 end;
 glEnd;
-glEndList();
+glEndList;
 
 //SkyDome
 coSkyDome:=glGenLists(1);
@@ -1468,7 +1468,7 @@ glnormal3fv(@OSphereN[OSphereP[ii,h],1]);
 glvertex3f(OSphere[OSphereP[ii,h],1]*100000,OSphere[OSphereP[ii,h],2]*2500,OSphere[OSphereP[ii,h],3]*100000);
 end;
 glEnd;
-glEndList();
+glEndList;
 
 //SkyPlane
 coSkyPlane:=glGenLists(1);
@@ -1481,7 +1481,7 @@ glTexCoord2f(-4, 4); glvertex3f(-100000,5000, 100000);
 glTexCoord2f( 4, 4); glvertex3f( 100000,5000, 100000);
 glTexCoord2f( 4,-4); glvertex3f( 100000,5000,-100000);
 glEnd;
-glEndList();
+glEndList;
 
 //3arrowsXYZ
 coMover:=glGenLists(1);
@@ -1501,7 +1501,7 @@ glNewList (coMover, GL_COMPILE);
   for ii:=1 to length(ObjMover) do
   glvertex3f(ObjMover[ii,3],ObjMover[ii,1],ObjMover[ii,2]);
   glEnd;
-glEndList();
+glEndList;
 
 //CircleXZ
 coCircleXZ:=glGenLists(1);
@@ -1511,7 +1511,7 @@ glNewList (coCircleXZ, GL_COMPILE);
   for ii:=-step to step do
   glvertex3f(cos(ii/step*pi),0,sin(ii/step*pi));//-1..1
   glEnd;
-glEndList();
+glEndList;
 
 //CircleYZ
 coCircleYZ:=glGenLists(1);
@@ -1528,7 +1528,7 @@ glNewList (coCircleYZ, GL_COMPILE);
   glvertex3f(-0.2,cos(ii/step*pi),sin(ii/step*pi));//-1..1
   end;
   glEnd;
-glEndList();
+glEndList;
 
 //RoundXZ
 coRoundXZ:=glGenLists(1);
@@ -1541,7 +1541,7 @@ glNewList (coRoundXZ, GL_COMPILE);
   glvertex3f(cos(ii/step*pi),0,sin(ii/step*pi));//-1..1
   end;
   glEnd;
-glEndList();
+glEndList;
 end;
 
 

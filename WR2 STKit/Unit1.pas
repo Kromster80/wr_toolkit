@@ -647,13 +647,13 @@ type
     SpeedButton1: TSpeedButton;
     procedure CBReduceDisplayClick(Sender: TObject);
     procedure CBTraceClick(Sender: TObject);
-//    procedure RenderInit();
+//    procedure RenderInit;
     procedure RenderResize(Sender: TObject);
     procedure RenderResize2(Sender: TObject);
     procedure RenderFrame(Sender: TObject);
     procedure CompileLoaded(Sender:string; ID,Num:integer);
     procedure FormCreate(Sender: TObject);
-    procedure FillSceneryList();
+    procedure FillSceneryList;
     procedure Panel1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure Panel1MouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
     procedure Panel1MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -759,7 +759,7 @@ type
     procedure ImportNFSPUSoundsClick(Sender: TObject);
     procedure CopySoundClick(Sender: TObject);
     procedure PasteSoundClick(Sender: TObject);
-    procedure CopyHolderHintUpdate();
+    procedure CopyHolderHintUpdate;
     procedure ListSoundsDblClick(Sender: TObject);
     procedure SC2_ScnChange(Sender: TObject);
     procedure SC2_TrackListClick(Sender: TObject);
@@ -863,8 +863,8 @@ type
     procedure RecalculatematerialCRC1Click(Sender: TObject);
     procedure AddMTNodeClick(Sender: TObject);
     procedure InitMTClick(Sender: TObject);
-    procedure RebuildMTSplines();
-    procedure ReverseMTSplines();
+    procedure RebuildMTSplines;
+    procedure ReverseMTSplines;
     procedure RemMTNodeClick(Sender: TObject);
     procedure ScaleInstancesClick(Sender: TObject);
     procedure CopyLightXYZClick(Sender: TObject);
@@ -1412,8 +1412,8 @@ begin
 
   SetRenderFrame(Panel1.Handle, h_DC, h_RC);
 
-  RenderInit();
-  CompileCommonObjects();
+  RenderInit;
+  CompileCommonObjects;
 
   h_DC2 := GetDC(Panel11.Handle);
   if h_DC2=0 then begin MessageBox(h_DC2, 'Unable to get a device context', 'Error', MB_OK or MB_ICONERROR); exit; end;
@@ -1439,7 +1439,7 @@ MemoLWO.Lines.Add('Misc init done in '+ElapsedTime(@OldTime));
 Randomize;
 Form1.WindowState:=wsMaximized;
 
-  FillSceneryList();
+  FillSceneryList;
   RG2.ItemIndex := EnsureRange(RG2.ItemIndex,0,RG2.Items.Count-1);
   if RG2.ItemIndex<>-1 then SceneryReload(nil);
 
@@ -1448,7 +1448,7 @@ Form1.WindowState:=wsMaximized;
 end;
 
 
-procedure TForm1.FillSceneryList();
+procedure TForm1.FillSceneryList;
 var i:integer; SearchRec:TSearchRec;
 begin
   RG2.Clear;
@@ -1490,7 +1490,7 @@ if Form1.Height<744 then Form1.Height:=744;
   if (Panel1.Width = 0) then Panel1.Width := 1;
   glViewport(0, 0, Panel1.Width, Panel1.Height);    // Set the viewport for the OpenGL window
   glMatrixMode(GL_PROJECTION);        // Change Matrix Mode to Projection
-  glLoadIdentity();                   // Reset View
+  glLoadIdentity;                   // Reset View
   if CB2D.Checked then begin
   glOrtho(-512*Min(Qty.BlocksX,Qty.BlocksZ)*(Panel1.Width/Panel1.Height),
            512*Min(Qty.BlocksX,Qty.BlocksZ)*(Panel1.Width/Panel1.Height),
@@ -1498,8 +1498,8 @@ if Form1.Height<744 then Form1.Height:=744;
           -512*Min(Qty.BlocksX,Qty.BlocksZ)*(1),-24000,24000);  // Do the perspective calculations. Last value = max clipping depth
   end else
   gluPerspective(80, -Panel1.Width/Panel1.Height, 0.1, 50000.0);  // Do the perspective calculations. Last value = max clipping depth
-  glMatrixMode(GL_MODELVIEW);         // Return to the modelview matrix
-  glLoadIdentity();                   // Reset View
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity;
 end;
 
 
@@ -1509,7 +1509,7 @@ begin
   if (Panel11.Width = 0) then Panel11.Width := 1;
   glViewport(0, 0, Panel11.Width, Panel11.Height);    // Set the viewport for the OpenGL window
   glMatrixMode(GL_PROJECTION);        // Change Matrix Mode to Projection
-  glLoadIdentity();                   // Reset View
+  glLoadIdentity;                   // Reset View
   if CB2D.Checked then begin
   glOrtho(-512*Min(Qty.BlocksX,Qty.BlocksZ)*(Panel1.Width/Panel1.Height),
            512*Min(Qty.BlocksX,Qty.BlocksZ)*(Panel1.Width/Panel1.Height),
@@ -1517,8 +1517,8 @@ begin
           -512*Min(Qty.BlocksX,Qty.BlocksZ)*(1),-24000,24000);  // Do the perspective calculations. Last value = max clipping depth
   end else
   gluPerspective(80, -Panel1.Width/Panel1.Height, 0.1, 50000.0);  // Do the perspective calculations. Last value = max clipping depth
-  glMatrixMode(GL_MODELVIEW);         // Return to the modelview matrix
-  glLoadIdentity();                   // Reset View
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity;
 end;
 
 
@@ -1811,10 +1811,10 @@ begin
   if (Form1=nil)or(Form_ColorPicker=nil)or((not Form1.Active)and(not Form_ColorPicker.Active)) then exit;
   if ScnRefresh then exit;
   done:=false;
-  KnowFPS();
+  KnowFPS;
 
   //Process car positioning
-  if CBDriveMode.Checked and not Car.Stopped then MoveCarSimple();
+  if CBDriveMode.Checked and not Car.Stopped then MoveCarSimple;
   if PlayTrack and (TrackID<>0) then MoveCarAlongTrack(TrackID);
 
   RenderFrame(Sender);
@@ -1838,7 +1838,7 @@ glClearColor(SKY[SKYIndex].FogCol.R/255,SKY[SKYIndex].FogCol.G/255,SKY[SKYIndex]
   glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D,0);
-  glLoadIdentity();
+  glLoadIdentity;
 
   if Sender=ScreenRender then begin //make top-down view
     glRotatef(yRot,-1, 0,0);
@@ -1880,7 +1880,7 @@ if not CBSelectionBuffer.Checked then begin
   glDisable(GL_DEPTH_TEST);
   if (Sender<>MakeSMP)and(Sender<>ScreenRender)   then
   if (ActivePage=apSky)or(fOptions.RenderMode>=rmFull)     then RenderSky(SKYIndex);
-  if (Sender<>MakeSMP)and(Sender<>ScreenRender)   then RenderBounds();
+  if (Sender<>MakeSMP)and(Sender<>ScreenRender)   then RenderBounds;
 
   gldisable(gl_Lighting);
   glEnable(GL_DEPTH_TEST);
@@ -1915,7 +1915,7 @@ if not CBSelectionBuffer.Checked then begin
 
   if (ActivePage=apGrass)or(fOptions.RenderMode>=rmFull)   then fGrass.Render(RG_GrassLOD.ItemIndex+1,RG_GrassMode.ItemIndex+1, fOptions.RenderMode);
 
-  if CBWire.Checked                               then RenderWire();
+  if CBWire.Checked                               then RenderWire;
 
   gldisable(GL_DEPTH_TEST);
 
@@ -1926,16 +1926,16 @@ if not CBSelectionBuffer.Checked then begin
                               else if TrackWP<>0  then RenderTracksWP(1,TrackWP,ListWPNodes.ItemIndex+1);
 
   if ActivePage=apStreets           then RenderStreets(0.2,STRPointID.Value,STRSplineID1.Value);
-  if ActivePage=apStreets           then RenderRoadNet();
+  if ActivePage=apStreets           then RenderRoadNet;
   if ActivePage=apTriggers          then fTriggers.Render(0.2,ListTrig.ItemIndex+1, EditMode);
   if ActivePage=apAnimated          then RenderAnimated(0.2,'Paths',ListSNIObjects.ItemIndex+1,ListSNINodes.ItemIndex+1);
   if ActivePage=apLights            then RenderLights(0.5,'',ListLights.ItemIndex+1);
   if ActivePage=apTracksMT          then RenderMakeTrack(0.5,ListMakeTrack.ItemIndex+1);
   if ActivePage=apSounds            then RenderSounds(0.2,ListSounds.ItemIndex);
   if ActivePage=apStructure         then RenderGrid(StructMode.ItemIndex);
-  if ActivePage=apSky               then RenderSunVector();
-  if fOptions.TraceSurface          then RenderTarget();
-  if CBDriveMode.Checked or PlayTrack then RenderCar();
+  if ActivePage=apSky               then RenderSunVector;
+  if fOptions.TraceSurface          then RenderTarget;
+  if CBDriveMode.Checked or PlayTrack then RenderCar;
 
   swapBuffers(h_DC);
 
@@ -1998,7 +1998,7 @@ if Show2ndFrame.Checked then begin
   glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D,0);
-  glLoadIdentity();
+  glLoadIdentity;
 
     glTranslatef(0,0,-7); //move away 7m
     glRotatef(180 , 0, 0,1);
@@ -2010,7 +2010,7 @@ if Show2ndFrame.Checked then begin
 
   gldisable(gl_Lighting);
 
-  RenderBounds();
+  RenderBounds;
 
     RenderOpenGL(false);
 
@@ -2141,7 +2141,7 @@ if ID+Num>Qty.BlocksTotal then Num:=Qty.BlocksTotal-ID;
             glvertex3fv   (@VTX[v[k,h]].X);
             end;
             glEnd;
-            glEndList();
+            glEndList;
         end;
     end;
 inc(list_id,Num);
@@ -2176,7 +2176,7 @@ if Sender='OpenGLScenery' then begin
           end;
         end;
       glEnd;
-      glEndList();
+      glEndList;
     end;
 inc(list_ogl,Num);
 end;
@@ -2782,11 +2782,11 @@ glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
       if Sender=ScreenRender then begin
         glViewport(0,0,SizeH, SizeV);
         glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
+        glLoadIdentity;
         glOrtho(-512*Qty.BlocksX,512*Qty.BlocksX,
                 512*Qty.BlocksZ,-512*Qty.BlocksZ,-4000,2000);
         glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
+        glLoadIdentity;
       end;
 
 RenderFrame(Sender);
@@ -3099,8 +3099,8 @@ ShowGrassInfo(nil);
 end;
 
 if (Sender='All')or(Sender='Addon Info') then begin
-WriteCommonDataToSC2();
-SendDataToSC2();
+WriteCommonDataToSC2;
+SendDataToSC2;
 end;
 
 end;
@@ -4259,7 +4259,7 @@ SNIObj[ID].Tempo :=SNIx2.Value;
 SNIObj[ID].Radius:=round(SNIx3.Value/10);
 SNIObj[ID].x4    :=SNIx4.Value;
 
-CalculateSNIRoutes();
+CalculateSNIRoutes;
 
 Changes.SNI:=true;
 Changes.WRK:=true;
@@ -4526,8 +4526,8 @@ SKY_WlkSun.Brush.Color:=SKY[SKYIndex].WlkSun.R+SKY[SKYIndex].WlkSun.G*256+SKY[SK
 SkyRefresh:=false;
 end;
 
-procedure TForm1.STRPointIDChange(Sender: TObject); begin STRPointIDChange_(); end;
-procedure TForm1.STRPointXChange(Sender: TObject); begin STRPointXChange_(); end;
+procedure TForm1.STRPointIDChange(Sender: TObject); begin STRPointIDChange_; end;
+procedure TForm1.STRPointXChange(Sender: TObject); begin STRPointXChange_; end;
 
 procedure TForm1.STRSplineID1Change(Sender: TObject);
 begin
@@ -4638,12 +4638,12 @@ if Sender=EditSplines then EditMode:='StreetSplines' else
 exit;
 end;
 
-procedure TForm1.AddShapeClick(Sender: TObject); begin AddShapeClick_(); end;
-procedure TForm1.RemShapeClick(Sender: TObject); begin RemShapeClick_(); end;
-procedure TForm1.ListStreetShapeClick(Sender: TObject); begin ListStreetShapeClick_(); end;
-procedure TForm1.StreetShapeChange(Sender: TObject); begin StreetShapeChange_() end;
-procedure TForm1.RemPointClick(Sender: TObject); begin RemPointClick_(); end;
-procedure TForm1.RemSplineClick(Sender: TObject); begin RemSplineClick_(); end;
+procedure TForm1.AddShapeClick(Sender: TObject); begin AddShapeClick_; end;
+procedure TForm1.RemShapeClick(Sender: TObject); begin RemShapeClick_; end;
+procedure TForm1.ListStreetShapeClick(Sender: TObject); begin ListStreetShapeClick_; end;
+procedure TForm1.StreetShapeChange(Sender: TObject); begin StreetShapeChange_ end;
+procedure TForm1.RemPointClick(Sender: TObject); begin RemPointClick_; end;
+procedure TForm1.RemSplineClick(Sender: TObject); begin RemSplineClick_; end;
           
 procedure TForm1.CBTrackChange(Sender: TObject);
 var i:integer;
@@ -4939,7 +4939,7 @@ begin
   if OpenALInitDone then begin
     AlDeleteBuffers(1, @ALBuffer);
     AlDeleteSources(1, @ALSource);
-    AlutExit();
+    AlutExit;
   end;
 end;
 
@@ -5101,11 +5101,11 @@ CopyHolder.i2:=SoundPlaySpeed.Value;
 CopyHolder.i3:=SoundRadius.Value;
 CopyHolder.i4:=SoundX4.ItemIndex;
 CopyHolder.r1:=SoundX6.Value;
-CopyHolderHintUpdate();
+CopyHolderHintUpdate;
 CopySound.Hint:=CopyHolder.Hint;
 end;
 
-procedure TForm1.CopyHolderHintUpdate();
+procedure TForm1.CopyHolderHintUpdate;
 begin
 CopyHolder.Hint:='Position:'+#13+
 floattostr(CopyHolder.X)+#13+
@@ -5438,7 +5438,7 @@ begin
   Angles2Matrix(0,0,0,@WTR[TracksQtyWP].Node[i].M[1],9);
   end;
   AddonScenery.Track[TracksQty+TracksQtyWP].Name:=''; //Gets auto corrected
-  WriteCommonDataToSC2(); //Auto correct wrong data if any
+  WriteCommonDataToSC2; //Auto correct wrong data if any
   Changes.WTR[TracksQtyWP] := true;
 end;
 
@@ -5453,7 +5453,7 @@ begin
   for i:=TracksQty to TracksQty+TracksQtyWP-1 do
     AddonScenery.Track[i+1]:=AddonScenery.Track[i];
   AddonScenery.Track[TracksQty].Name:=''; //Gets auto corrected
-  WriteCommonDataToSC2(); //Auto correct wrong data if any
+  WriteCommonDataToSC2; //Auto correct wrong data if any
   SendQADtoUI('Tracks');
   Changes.SC2 := true;
   Changes.WRK := true;
@@ -5731,7 +5731,7 @@ SNINode[SNIObj[ID].firstNode+ID2].Y:=SNI_Node_Y.Value;
 SNINode[SNIObj[ID].firstNode+ID2].Z:=SNI_Node_Z.Value;
 SNINode[SNIObj[ID].firstNode+ID2].Speed:=SNI_Node_Speed.Value;
 SNINode[SNIObj[ID].firstNode+ID2].B:=SNI_Node_B.Value;
-CalculateSNIRoutes();
+CalculateSNIRoutes;
 Changes.SNI:=true;
 end;
 
@@ -5768,7 +5768,7 @@ SNINode[SNIObj[ID].firstNode+ID2].Y:=SNISubNode[ID,k].Y;
 SNINode[SNIObj[ID].firstNode+ID2].Z:=SNISubNode[ID,k].Z;
 
 inc(SNIHead.Node);
-CalculateSNIRoutes();
+CalculateSNIRoutes;
 SendQADToUI('Animated');
 ListSNIObjects.ItemIndex:=ID-1; ListSNIObjectsClick(nil);
 ListSNINodes.ItemIndex:=ID2-1;  ListSNINodesClick(nil);
@@ -6149,7 +6149,7 @@ SNINode[SNIObj[ID].firstNode+3].B:=0;
 
 inc(SNIHead.Obj);
 inc(SNIHead.Node,3); //add 3 nodes
-CalculateSNIRoutes();
+CalculateSNIRoutes;
 SendQADtoUI('Animated');
 ListSNIObjects.ItemIndex:=SNIHead.Obj-1;
 ListSNIObjectsClick(nil);
@@ -6241,11 +6241,11 @@ begin
 
       glViewport(0,0,SMPHead.A,SMPHead.B);
       glMatrixMode(GL_PROJECTION);
-      glLoadIdentity();
+      glLoadIdentity;
       glOrtho(SMPHead.Left,-SMPHead.Left,
       SMPHead.Bottom,e,-SMPHead.NearClip,-SMPHead.FullClip-SMPHead.NearClip);
       glMatrixMode(GL_MODELVIEW);
-      glLoadIdentity();
+      glLoadIdentity;
 
 xRot:=180+(arctan2(LVL.SunX,LVL.SunZ)*180/pi);
 yRot:=arcsin(LVL.SunY)*180/pi;
@@ -6526,7 +6526,7 @@ dec(SNIObj[i].firstNode);
 
 dec(SNIObj[ID].NumNodes);
 dec(SNIHead.Node);
-CalculateSNIRoutes();
+CalculateSNIRoutes;
 SendQADToUI('Animated');
 ListSNIObjects.ItemIndex:=ID-1; ListSNIObjectsClick(nil);
 ListSNINodes.ItemIndex:=ID2-1;  ListSNINodesClick(nil);
@@ -6559,7 +6559,7 @@ dec(SNIHead.Obj);
 dec(SNIHead.Node,NodeQty);
 end;
 
-CalculateSNIRoutes();
+CalculateSNIRoutes;
 SendQADToUI('Animated');
 ListSNIObjects.ItemIndex:=EnsureRange(K-1,0,SNIHead.Obj-1); ListSNIObjectsClick(nil);
 SNINodesRefresh:=false;
@@ -6659,7 +6659,7 @@ if SnowCount<>0 then Interval:=RouteLen/SnowCount else Interval:=0;
   end;
 end;
 
-CalculateSNIRoutes();
+CalculateSNIRoutes;
 SendQADtoUI('Animated');
 ListSNIObjects.ItemIndex:=SNIHead.Obj-1;
 ListSNIObjectsClick(nil);
@@ -6976,7 +6976,7 @@ MakeTrack[TrackID].Node[MTNode].Y:=MTY.Value;
 MakeTrack[TrackID].Node[MTNode].Z:=MTZ.Value;
 MakeTrack[TrackID].Node[MTNode].RoadWidth:=round(MTW.Value*10);
 
-RebuildMTSplines();
+RebuildMTSplines;
 Changes.WRK:=true; //Need to store all that data in WRK file
 end;
 
@@ -7066,7 +7066,7 @@ begin
     end;
   end;
 
-  RebuildMTSplines();
+  RebuildMTSplines;
 
   ListMakeTrack.Clear;
   for i:=1 to MakeTrack[TrackID].NodeQty do
@@ -7075,7 +7075,7 @@ begin
   Changes.WRK := true;
 end;
 
-procedure TForm1.ReverseMTSplines();
+procedure TForm1.ReverseMTSplines;
 //var ii,kk,h,n0,n1,n2:integer; t:single;
 begin
 {  if TrackID=0 then exit;
@@ -7085,7 +7085,7 @@ begin
   }
 end;
 
-procedure TForm1.RebuildMTSplines();
+procedure TForm1.RebuildMTSplines;
 var kk,h,n0,n1,n2:integer; t:single;
     TangA,TangB:array of vector3f;
     MTTang:array of array[1..2]of vector3f;
@@ -7172,7 +7172,7 @@ begin
     exit;
   end;
 
-  RebuildMTSplines();
+  RebuildMTSplines;
 
 if TRK_Loop.Checked then
   NodeCount:=MakeTrack[TrackID].NodeQty
@@ -7281,7 +7281,7 @@ ChDir(Sender);
 for ii:=1 to LWQty.Poly[0] do for h:=1 to 3 do
 LW.DUV[ii,h,2]:=1-LW.DUV[ii,h,2];
 
-PrepareLWOData();
+PrepareLWOData;
 end;
 
 procedure TForm1.LoadSCGTFile(Sender: string);
@@ -7439,12 +7439,12 @@ end;
 
 procedure TForm1.OptimizeVerticesClick(Sender: TObject);
 begin
-  OptimizeVerticesClick_();
+  OptimizeVerticesClick_;
 end;
 
 procedure TForm1.OptimizeCullingSpheresClick(Sender: TObject);
 begin
-  OptimizeCullingSpheresClick_();
+  OptimizeCullingSpheresClick_;
 end;
 
 
