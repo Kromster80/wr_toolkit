@@ -59,16 +59,16 @@ type
   private
     fChanged:boolean;
     fCount:integer;
-    TRL:array of TSTrigger;
+    fTriggers:array of TSTrigger;
     procedure Clear;
     function GetChanged:boolean;
+    function GetTrigger(aIndex:integer):TSTrigger; //Returns Trigger
   public
     property Changed:boolean read GetChanged;
     property Count:integer read fCount;
-    function Trigger(aIndex:integer):TSTrigger; //Returns Trigger
-    function TriggerName(aIndex:integer):string;
+    property Trigger[aIndex:integer]:TSTrigger read GetTrigger; default;
+    function TriggerName(aIndex:integer):string; //Includes ID
     procedure ApplyRestrictions;
-
 
     function  AddTrigger(aPos:vector3f):boolean;
     procedure RemTrigger(aIndex:integer);
@@ -208,7 +208,7 @@ procedure TSTriggersCollection.Clear;
 var i:integer;
 begin
   for i:=1 to fCount do
-    TRL[i].Free;
+    fTriggers[i].Free;
   fCount := 0;
 end;
 
@@ -218,19 +218,19 @@ var i:integer;
 begin
   Result := fChanged;
   for i:=1 to fCount do
-    Result := Result and TRL[i].Changed;
+    Result := Result and fTriggers[i].Changed;
 end;
 
 
-function TSTriggersCollection.Trigger(aIndex:integer):TSTrigger;
+function TSTriggersCollection.GetTrigger(aIndex:integer):TSTrigger;
 begin
-  Result := TRL[aIndex];
+  Result := fTriggers[aIndex];
 end;
 
 
 function TSTriggersCollection.TriggerName(aIndex:integer):string;
 begin
-  Result := inttostr(aIndex) + '. ' + TRL[aIndex].GetName;
+  Result := inttostr(aIndex) + '. ' + fTriggers[aIndex].GetName;
 end;
 
 
@@ -243,9 +243,9 @@ begin
   end;
 
   inc(fCount);
-  setlength(TRL, fCount+1);
-  TRL[fCount] := TSTrigger.Create;
-  TRL[fCount].Position := aPos;
+  setlength(fTriggers, fCount+1);
+  fTriggers[fCount] := TSTrigger.Create;
+  fTriggers[fCount].Position := aPos;
   
   fChanged := true;
   Result := true;
@@ -257,8 +257,8 @@ var i:integer;
 begin
   dec(fCount);
   for i:=aIndex to fCount do
-    TRL[i] := TRL[i+1]; //Shift everything up
-  TRL[fCount+1].Free; //Delete last one
+    fTriggers[i] := fTriggers[i+1]; //Shift everything up
+  fTriggers[fCount+1].Free; //Delete last one
   fChanged := true;
 end;
 
@@ -269,10 +269,10 @@ var ii,Nqty,Fqty,Rqty:integer;
 begin
   Nqty:=0; Fqty:=0; Rqty:=0;
   for ii:=1 to fCount do
-  case TRL[ii].TriggerType of
-    8:  begin inc(Nqty); if NQty>MAX_TRIG then TRL[ii].TriggerType := 16; end; //Nitro
-    15: begin inc(Fqty); if FQty>MAX_TRIG then TRL[ii].TriggerType := 16; end; //Refuel
-    7:  begin inc(Rqty); if RQty>MAX_TRIG then TRL[ii].TriggerType := 16; end; //Repair
+  case fTriggers[ii].TriggerType of
+    8:  begin inc(Nqty); if NQty>MAX_TRIG then fTriggers[ii].TriggerType := 16; end; //Nitro
+    15: begin inc(Fqty); if FQty>MAX_TRIG then fTriggers[ii].TriggerType := 16; end; //Refuel
+    7:  begin inc(Rqty); if RQty>MAX_TRIG then fTriggers[ii].TriggerType := 16; end; //Repair
   end;
 
   if NQty>8 then MessageBox(HWND(nil),'Nitro triggers count is limited to 8 max','Warning',MB_OK or MB_ICONWARNING or MB_TASKMODAL);
@@ -295,18 +295,18 @@ begin
   S.LoadFromFile(aFile);
 
   fCount := 255;
-  setlength(TRL, fCount+1);
+  setlength(fTriggers, fCount+1);
 
   for i:=1 to fCount do
   begin
     if S.Position = S.Size then
     begin
       fCount := i-1;
-      setlength(TRL, fCount+1);
+      setlength(fTriggers, fCount+1);
       break;
     end;
-    TRL[i] := TSTrigger.Create;
-    TRL[i].LoadFromStream(S);
+    fTriggers[i] := TSTrigger.Create;
+    fTriggers[i].LoadFromStream(S);
   end;
 
   S.Free;
@@ -321,7 +321,7 @@ begin
   S := TMemoryStream.Create;
 
   for i:=1 to fCount do
-    TRL[i].SaveToStream(S);
+    fTriggers[i].SaveToStream(S);
 
   S.SaveToFile(aFile);
   S.Free;
@@ -339,36 +339,36 @@ begin
     glPushMatrix;
     if A<>0 then glColor4f(0,0.5,1,A) else kSetColorCode(kObject,ii);
     glBegin(GL_POINTS);
-      glVertex3fv(@TRL[ii].fPosition);
+      glVertex3fv(@fTriggers[ii].fPosition);
     glEnd;
-    Matrix2Angles(TRL[ii].fMatrix,9,@h,@p,@b);
-    glTranslatef(TRL[ii].fPosition.X,TRL[ii].fPosition.Y,TRL[ii].fPosition.Z);
+    Matrix2Angles(fTriggers[ii].fMatrix,9,@h,@p,@b);
+    glTranslatef(fTriggers[ii].fPosition.X,fTriggers[ii].fPosition.Y,fTriggers[ii].fPosition.Z);
     glRotatef(h,1,0,0); glRotatef(p,0,1,0); glRotatef(b,0,0,1);
-    glTranslatef(TRL[ii].fScale.X*5,TRL[ii].fScale.Y*5,TRL[ii].fScale.Z*5); //corner point
-    glScalef(TRL[ii].fScale.X*10,TRL[ii].fScale.Y*10,TRL[ii].fScale.Z*10);  //trigger size
+    glTranslatef(fTriggers[ii].fScale.X*5,fTriggers[ii].fScale.Y*5,fTriggers[ii].fScale.Z*5); //corner point
+    glScalef(fTriggers[ii].fScale.X*10,fTriggers[ii].fScale.Y*10,fTriggers[ii].fScale.Z*10);  //trigger size
     if A<>1 then glCallList(coBox);
     glCallList(coBoxW);
 
     glPushMatrix;
       glRotatef(90,0,0,1);
-      if TRL[ii].TriggerType in [9,11,14] then glCallList(coArrow);
+      if fTriggers[ii].TriggerType in [9,11,14] then glCallList(coArrow);
     glPopMatrix;
 
     if A<>0 then begin
       glRasterPos3f(0,0,0);
-      glPrint(inttostr(TRL[ii].TriggerType));
+      glPrint(inttostr(fTriggers[ii].TriggerType));
     end;
     glPopMatrix;
 
     //Render line for teleport and other thing
-    if TRL[ii].TriggerType in [5,11] then begin
+    if fTriggers[ii].TriggerType in [5,11] then begin
       if A<>0 then glColor4f(1,1,1,A) else kSetColorCode(kPoint,ii);
       glBegin(GL_LINES);
-        glVertex3fv(@TRL[ii].fPosition);
-        glVertex3fv(@TRL[ii].fTarget);
+        glVertex3fv(@fTriggers[ii].fPosition);
+        glVertex3fv(@fTriggers[ii].fTarget);
       glEnd;
       glBegin(GL_POINTS);
-        glVertex3fv(@TRL[ii].fTarget);
+        glVertex3fv(@fTriggers[ii].fTarget);
       glEnd;
     end;
 
@@ -382,9 +382,9 @@ begin
     glColor4f(1,0,0,1); //highlight either trigger or destination with red
     glBegin(GL_POINTS);
     if aEditMode='Pointer' then
-      glvertex3fv(@TRL[ID].fTarget)
+      glvertex3fv(@fTriggers[ID].fTarget)
     else
-      glvertex3fv(@TRL[ID].fPosition);
+      glvertex3fv(@fTriggers[ID].fPosition);
     glEnd;
   end;  
 end;
