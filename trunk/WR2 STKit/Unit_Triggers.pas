@@ -292,26 +292,28 @@ begin
   if not FileExists(aFile) then exit;
 
   S := TMemoryStream.Create;
-  S.LoadFromFile(aFile);
+  try
+    S.LoadFromFile(aFile);
 
-  fCount := 255;
-  setlength(fTriggers, fCount+1);
+    fCount := 255;
+    setlength(fTriggers, fCount+1);
 
-  for i:=1 to fCount do
-  begin
-    if S.Position = S.Size then
+    for i:=1 to fCount do
     begin
-      fCount := i-1;
-      setlength(fTriggers, fCount+1);
-      break;
+      if S.Position = S.Size then
+      begin
+        fCount := i-1;
+        setlength(fTriggers, fCount+1);
+        break;
+      end;
+      fTriggers[i] := TSTrigger.Create;
+      fTriggers[i].LoadFromStream(S);
     end;
-    fTriggers[i] := TSTrigger.Create;
-    fTriggers[i].LoadFromStream(S);
+    fChanged := false;
+    Result := true;
+  finally
+    S.Free;
   end;
-
-  S.Free;
-  fChanged := false;
-  Result := true;
 end;
 
 
@@ -319,13 +321,15 @@ procedure TSTriggersCollection.SaveToFile(aFile:string);
 var i:integer; S:TMemoryStream;
 begin
   S := TMemoryStream.Create;
+  try
+    for i:=1 to fCount do
+      fTriggers[i].SaveToStream(S);
 
-  for i:=1 to fCount do
-    fTriggers[i].SaveToStream(S);
-
-  S.SaveToFile(aFile);
-  S.Free;
-  fChanged := false;
+    S.SaveToFile(aFile);
+    fChanged := false;
+  finally
+    S.Free;
+  end;
 end;
 
 

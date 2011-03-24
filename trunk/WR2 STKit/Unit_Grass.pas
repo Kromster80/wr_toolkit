@@ -21,14 +21,14 @@ type
         end;
       end;
 
-      function GetTexName():string;
+      function GetTexName:string;
       procedure SetTexName(aTexName:string);
     public
       Changed:boolean;
 
       property TexName:string read GetTexName write SetTexName;
       function GetStats(LOD, aIndex:integer):string;
-      procedure ReloadTexture();
+      procedure ReloadTexture;
 
       procedure Generate(aProgressLabel:Pointer);
       procedure SetPlainColor(R,G,B:byte);
@@ -59,7 +59,7 @@ begin
 end;
 
 
-function TSGrass.GetTexName():string;
+function TSGrass.GetTexName:string;
 begin
   Result := RO[1].Tex;
 end;
@@ -211,7 +211,7 @@ begin
 end;
 
 
-procedure TSGrass.ReloadTexture();
+procedure TSGrass.ReloadTexture;
 begin
   LoadTexturePTX(SceneryPath+'Textures\'+RO[1].Tex+'.ptx',coGrassTex);
 end;
