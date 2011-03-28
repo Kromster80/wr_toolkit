@@ -115,7 +115,7 @@ begin
       blockread(f,c,sz*LWQty.RGBA[lay]);
         for ii:=0 to LWQty.RGBA[lay]-1 do begin
         if c[ii*sz+1]=#255 then begin
-        MyMessageBox(Form1.Handle,'More than 65k points in one layer.'+#13+'Split model into several layers.','Error',MB_OK or MB_ICONERROR);
+        MyMessageBox(Form1.Handle,'More than 65k points in one layer.'+eol+'Split model into several layers.','Error',MB_OK or MB_ICONERROR);
         closefile(f); exit;
         end;
         kk:=ord(c[ii*sz+1])*256+ord(c[ii*sz+2])+1;

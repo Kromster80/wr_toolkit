@@ -1,7 +1,7 @@
 unit Unit_Defaults;
 interface
 uses
-  OpenGL, Windows, OpenAL, SysUtils, Graphics;
+  OpenGL, Windows, OpenAL, SysUtils, Graphics, KromUtils;
 
 function GetPresetColor(ID:integer):TColor;
 procedure SetPresetColorGL(ID:integer; A:single);
@@ -94,16 +94,16 @@ MatModeF:array[1..ShadQty]of string = (
 'Mat_Blend','Mat_Smoothshade','Mat_Materials'); //corresponding filename & index FRAG
 
 MatModeDefaultV:string=
-'varying vec3 kBlend;'+#10+#13+
-'void main(void)'+#10+#13+
-'{ kBlend = gl_SecondaryColor.rgb;'+#10+#13+
-'gl_Position = ftransform();}';
+  'varying vec3 kBlend; '+
+  'void main(void) '+
+  '{ kBlend = gl_SecondaryColor.rgb; '+
+  'gl_Position = ftransform();}';
 
 MatModeDefaultF:string=
-'varying vec3 kBlend;'+#10+#13+
-'void main(void)'+#10+#13+
-'{ vec3 kColor = smoothstep(0.4375,.5625,kBlend.rgb);'+#10+#13+
-'gl_FragColor = vec4(kColor.rgb,1);}';
+  'varying vec3 kBlend; '+
+  'void main(void) '+
+  '{ vec3 kColor = smoothstep(0.4375,.5625,kBlend.rgb); '+
+  'gl_FragColor = vec4(kColor.rgb,1);}';
 
 ObjMover:array[1..6,1..3]of single=
 ((-5,0,0),(5,0,0),(4,0,-0.5),(5,0,0),(4,0,0.5),(5,0,0));
