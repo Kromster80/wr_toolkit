@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 209
-  Top = 188
+  Left = 239
+  Top = 265
   Width = 956
   Height = 730
   Color = clBtnFace
@@ -238,7 +238,7 @@ object Form1: TForm1
     Top = 40
     Width = 296
     Height = 623
-    ActivePage = TabSheet3
+    ActivePage = TabSheet20
     Anchors = [akLeft, akTop, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -989,7 +989,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 2
         OnChange = CBTexChange
       end
@@ -1000,7 +1000,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 3
         OnChange = CBTexChange
       end
@@ -1011,7 +1011,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 4
         OnChange = CBTexChange
       end
@@ -1690,7 +1690,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 16
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 22
         OnChange = ObjChangeInstance
       end
@@ -3057,14 +3057,14 @@ object Form1: TForm1
         Height = 13
         Caption = 'Progress'
       end
-      object OpenLWO_TRK: TButton
+      object ImportLWOTrack: TButton
         Left = 144
         Top = 128
         Width = 137
         Height = 25
         Caption = 'Load LWO ...'
         TabOrder = 0
-        OnClick = OpenLWO_TRKClick
+        OnClick = ImportLWOTrackClick
       end
       object LBTrack: TListBox
         Left = 2
@@ -4229,7 +4229,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 16
-        ItemHeight = 0
+        ItemHeight = 13
         TabOrder = 11
         OnChange = TOB_Change
       end
@@ -5656,7 +5656,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 12
-        ItemHeight = 0
+        ItemHeight = 13
         Sorted = True
         TabOrder = 11
         OnChange = EditSkyChange
@@ -5669,7 +5669,7 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 12
-        ItemHeight = 0
+        ItemHeight = 13
         Sorted = True
         TabOrder = 12
         OnChange = EditSkyChange
@@ -6393,7 +6393,7 @@ object Form1: TForm1
       end
       object Label140: TLabel
         Left = 126
-        Top = 335
+        Top = 317
         Width = 47
         Height = 13
         Caption = 'Length, m'
@@ -6426,16 +6426,9 @@ object Form1: TForm1
         Height = 13
         Caption = 'Contact info'
       end
-      object Label19: TLabel
-        Left = 254
-        Top = 199
-        Width = 29
-        Height = 13
-        Caption = 'Image'
-      end
       object Label118: TLabel
         Left = 126
-        Top = 351
+        Top = 333
         Width = 48
         Height = 13
         Caption = 'Waypoint,'
@@ -6481,7 +6474,7 @@ object Form1: TForm1
       end
       object SC2T_Direction: TRadioGroup
         Left = 122
-        Top = 218
+        Top = 200
         Width = 127
         Height = 45
         Caption = ' Direction  '
@@ -6659,7 +6652,7 @@ object Form1: TForm1
       end
       object SC2T_Type: TRadioGroup
         Left = 122
-        Top = 264
+        Top = 246
         Width = 127
         Height = 69
         Caption = ' Car filter  '
@@ -6690,16 +6683,6 @@ object Form1: TForm1
         ReadOnly = True
         TabOrder = 17
         Text = '..\..\..\Flag_TEST_MAP.tga'
-      end
-      object SC2T_Image: TEdit
-        Left = 122
-        Top = 196
-        Width = 127
-        Height = 21
-        TabStop = False
-        ReadOnly = True
-        TabOrder = 18
-        OnChange = SC2T_TrackChange
       end
     end
   end

@@ -1049,7 +1049,7 @@ Form1.RecalculatematerialCRC1Click(nil);
 list_id:=0;
 list_ogl:=0;
 list_tx:=0;
-Form1.SendQADtoUI('All');
+Form1.SendQADtoUI(apLWO);
 ScnRefresh:=false;
 Form1.SaveScenery.Enabled:=true;
 SaveButton:=true;

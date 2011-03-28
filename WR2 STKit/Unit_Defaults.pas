@@ -41,9 +41,26 @@ type RenderModeTypes=(rmSchem=0,
                       rmFull=5,
                       rmPrev=6);
 
-type ActivePageTypes=(
-apLWO,   apGrounds,apTextures,apMaterials,apObjects,apSounds,apLights,  apStructure,
-apTracksMT,apTracksAR,apTracksWP, apTOB,    apStreets, apAnimated, apSky,    apGrass, apTriggers,apAddonInfo);
+type TActivePage=(
+    apLWO,
+    apGrounds,
+    apTextures,
+    apMaterials,
+    apObjects,
+    apSounds,
+    apLights,
+    apStructure,
+
+    apTracksMT,
+    apTracksAR,
+    apTracksWP,
+    apTOB,
+    apStreets,
+    apAnimated,
+    apSky,
+    apGrass,
+    apTriggers,
+    apAddonInfo);
 
 TTexSend=(ts_AddTex,ts_RenTex);
 
@@ -107,7 +124,7 @@ PresetColor:Array[1..30,1..3] of byte = (
 ObjTypes1:array[0..8]of byte = (0,3,4,5,6,7,8,16,17);
 ObjTypes1inv:array[0..17]of byte = (0,0,0,1,2,3,4,5,6,0,0,0,0,0,0,0,7,8);
 
-PageCaption:Array[ActivePageTypes] of string = (
+PageCaption:array[TActivePage] of string = (
 '[LW] Convert LWO to Scenery',
 '[GR] Grounds setup',
 '[TX] Textures',
