@@ -75,7 +75,7 @@ type
 
     function  LoadFromFile(aFile:string):boolean;
     procedure SaveToFile(aFile:string);
-    procedure Render(A:single; ID:integer; aEditMode:string);
+    procedure Render(A:single; ID:integer; aEditMode:TEditingMode);
   end;
 
 
@@ -333,7 +333,7 @@ begin
 end;
 
 
-procedure TSTriggersCollection.Render(A:single; ID:integer; aEditMode:string);
+procedure TSTriggersCollection.Render(A:single; ID:integer; aEditMode:TEditingMode);
 var ii:integer; h,p,b:integer;
 begin
   glLineWidth(2);
@@ -385,7 +385,7 @@ begin
   if A<>0 then begin
     glColor4f(1,0,0,1); //highlight either trigger or destination with red
     glBegin(GL_POINTS);
-    if aEditMode='Pointer' then
+    if aEditMode=emTriggerDest then
       glvertex3fv(@fTriggers[ID].fTarget)
     else
       glvertex3fv(@fTriggers[ID].fPosition);

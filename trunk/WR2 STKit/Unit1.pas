@@ -941,10 +941,9 @@ var
   xPos,zPos:single;
   yPos: single=-1000;     // Height
   MPos:record X,Y,Z:single; end;
-  MouseButton:byte=0;
   MouseMoveScale:integer=8;
-  MouseAction:byte=0;
-  MouseX,MouseY:integer;
+  MouseAction:TMouseAction;
+  MousePos:TPoint;
   ObjectMoveScale:single=1;
   ObjectX,ObjectY:integer;
   SelectionQueue1:array[0..1024]of integer;
@@ -1338,7 +1337,7 @@ var
     r1:single;
   end;
 
-  EditMode:string;
+  EditMode:TEditingMode;
 
   AutoImportTexturesList:string='';
   AutoImportMaterialsList:string='';
@@ -1524,8 +1523,6 @@ procedure TForm1.Panel1MouseDown(Sender: TObject; Button: TMouseButton; Shift: T
 var Code:KCode; ID,i,tmp:integer; ss:string; tmpY:single;
 begin
 ObjectX:=X; ObjectY:=Y;
-if Button=mbLeft  then MouseButton:=1; //Move
-if Button=mbRight then MouseButton:=2; //MoveY
 
 glReadPixels(X,Panel1.Height-Y-1,1,1,GL_RGB,GL_UNSIGNED_BYTE,@pix);
 //Shape1.Brush.Color:=(pix[1]+pix[2]*256+pix[3]*65536);
@@ -1562,8 +1559,8 @@ if ActivePage=apLights then if Code=kPoint then begin
 end;
 
 if ActivePage=apTriggers then if (Code=kObject)or(Code=kPoint) then begin
-  if Code=kObject then EditMode:='Object';
-  if Code=kPoint  then EditMode:='Pointer';
+  if Code=kObject then EditMode:=emTrigger;
+  if Code=kPoint  then EditMode:=emTriggerDest;
   ListTrig.ItemIndex:=ID-1;
   ListTrigClick(nil);
 end;
@@ -1603,7 +1600,7 @@ if ActivePage=apStreets then begin
 if Code=kPoint then SetStreetMode('Nodes') else
 if Code=kSpline then SetStreetMode('Splines') else
 
-  if ((EditMode='StreetNodes')or(EditMode='StreetSplines'))and(MouseButton=1) then
+  if (EditMode in [emStreetNode, emStreetSpline]) and (ssLeft in Shift) then
     if (Code=kNil)and(ID=0)and(MPos.x<>0)and(MPos.y<>0)and(MPos.z<>0) then begin //Add new node
     inc(STRHead.NumPoints);
     setlength(STR_Point,STRHead.NumPoints+1);
@@ -1631,13 +1628,13 @@ if (ActivePage=apTOB)and(TOBMagicDelete.Checked) then
     RemTOBClick(nil);
   end;
 if ActivePage=apStreets then begin
-  if (EditMode='StreetNodes')and(MouseButton=1) then
+  if (EditMode=emStreetNode)and(ssLeft in Shift) then
     if Code=kPoint then STRPointID.Value:=ID; //Pick node
-  if (EditMode='StreetSplines')and(MouseButton=1) then begin
+  if (EditMode=emStreetSpline)and(ssLeft in Shift) then begin
     if Code=kPoint then SelectionQueue1[1]:=ID;
     if Code=kSpline then STRSplineID1.Value:=ID;
-    if Code=kSplineAnchor then EditMode:='StreetAnchors'; //Pick anchor
-    if Code=kSplineAnchorLength then EditMode:='StreetAnchorsLength'; //Pick anchor
+    if Code=kSplineAnchor then EditMode:=emStreetAnchor; //Pick anchor
+    if Code=kSplineAnchorLength then EditMode:=emStreetAnchorLength; //Pick anchor
     end;
 end;
 end;
@@ -1654,38 +1651,39 @@ begin
   px:=0; py:=0; pz:=0; //Init to calm down Compiler
 
   try
-    if MouseButton = 0 then exit;
+    if not (ssLeft in Shift) and not (ssRight in Shift) then exit;
     if DoubleClick then exit;
     MoveMode := mmNone;
 
-if ActivePage=apAnimated then begin vx:=SNI_Node_X; vy:=SNI_Node_Y; vz:=SNI_Node_Z; MoveMode:=mmFloat; end;
-if ActivePage=apSounds   then begin vx:=SoundPosX; vy:=SoundPosY; vz:=SoundPosZ; MoveMode:=mmFloat; end;
-if ActivePage=apTOB      then begin vx:=TOB_X; vy:=TOB_Y; vz:=TOB_Z; MoveMode:=mmFloat; end;
-if ActivePage=apObjects  then begin vx:=ObjX; vy:=ObjY; vz:=ObjZ; MoveMode:=mmFloat; end;
-if ActivePage=apLights   then begin vx:=LightX; vy:=LightY; vz:=LightZ; MoveMode:=mmFloat; end;
-if(ActivePage=apTracksWP)and(TrackWP<>0) then begin vx:=WPNodeX; vy:=WPNodeY; vz:=WPNodeZ; MoveMode:=mmFloat; end;
-if(ActivePage=apTracksAR)and(TrackID<>0) then begin vxi:=E_Node2; vyi:=E_Node1; MoveMode:=mmInteger; end;
-if(ActivePage=apTracksMT)and(TrackID<>0) then begin vx:=MTX; vy:=MTY; vz:=MTZ; MoveMode:=mmFloat; end;
-if ActivePage=apTriggers then
-                          if EditMode='Pointer' then begin
-                          vx:=TRL_P1; vy:=TRL_P2; vz:=TRL_P3; MoveMode:=mmFloat;
-                          end else begin
-                          vx:=TRL_X; vy:=TRL_Y; vz:=TRL_Z; MoveMode:=mmFloat;
-                          end;
-if ActivePage=apStreets  then begin
-                          if EditMode='' then exit;
-
-                          if EditMode='StreetNodes' then begin
+    case ActivePage of
+      apAnimated: begin vx:=SNI_Node_X; vy:=SNI_Node_Y; vz:=SNI_Node_Z; MoveMode:=mmFloat; end;
+      apSounds:   begin vx:=SoundPosX; vy:=SoundPosY; vz:=SoundPosZ; MoveMode:=mmFloat; end;
+      apTOB:      begin vx:=TOB_X; vy:=TOB_Y; vz:=TOB_Z; MoveMode:=mmFloat; end;
+      apObjects:  begin vx:=ObjX; vy:=ObjY; vz:=ObjZ; MoveMode:=mmFloat; end;
+      apLights:   begin vx:=LightX; vy:=LightY; vz:=LightZ; MoveMode:=mmFloat; end;
+      apTracksWP: if TrackWP<>0 then begin vx:=WPNodeX; vy:=WPNodeY; vz:=WPNodeZ; MoveMode:=mmFloat; end;
+      apTracksAR: if TrackID<>0 then begin vxi:=E_Node2; vyi:=E_Node1; MoveMode:=mmInteger; end;
+      apTracksMT: if TrackID<>0 then begin vx:=MTX; vy:=MTY; vz:=MTZ; MoveMode:=mmFloat; end;
+      apTriggers: if EditMode=emTriggerDest then begin
+                    vx:=TRL_P1; vy:=TRL_P2; vz:=TRL_P3; MoveMode:=mmFloat;
+                  end else begin
+                    vx:=TRL_X; vy:=TRL_Y; vz:=TRL_Z; MoveMode:=mmFloat;
+                  end;
+      apStreets:
+                  case EditMode of
+                    emStreetNode:
+                        begin
                           vx:=STRPointX; vy:=STRPointY; vz:=STRPointZ; MoveMode:=mmFloat;
-                          end;
+                        end;
 
-                          if (EditMode='StreetAnchors')and(MouseButton=1) then
-                          MoveMode:=mmAnchors; //Special mode for anchors
+                    emStreetAnchor:
+                        if (ssLeft in Shift) then MoveMode:=mmAnchors; //Special mode for anchors
 
-                          if (EditMode='StreetAnchorsLength')and(MouseButton=1) then
-                          MoveMode:=mmAnchors; //Special mode for anchors
+                    emStreetAnchorLength:
+                        if (ssLeft in Shift) then MoveMode:=mmAnchors; //Special mode for anchors
 
-                          if (EditMode='StreetSplines')and(MouseButton=1) then begin
+                    emStreetSpline:
+                        if (ssLeft in Shift) then begin
                           glReadPixels(X,Panel1.Height-Y-1,1,1,GL_RGB,GL_UNSIGNED_BYTE,@pix);
                           kGetColorCode(@pix[1],Code,ID);
                           if (Code<>kPoint) then exit; //ID=0 gets excluded too cos kNil
@@ -1698,39 +1696,40 @@ if ActivePage=apStreets  then begin
                             end;
                           STR_PrepareToSaveClick(nil);
                           end;
+                  end;
+    end;
 
-                          end;
-if MoveMode=mmNone then exit;
+    if MoveMode=mmNone then exit;
 
-if (MouseButton=1)and(MoveMode=mmFloat) then begin
-vx.Value:=vx.Value+(-(ObjectX-X)*ObjectMoveScale*cos(xRot/180*pi)
-                    +(ObjectY-Y)*ObjectMoveScale*sin(xRot/180*pi))/power(zoom,3)/4;
-vz.Value:=vz.Value+( (ObjectX-X)*ObjectMoveScale*sin(xRot/180*pi)
-                    +(ObjectY-Y)*ObjectMoveScale*cos(xRot/180*pi))/power(zoom,3)/4*sign(yRot-180);
-if (fOptions.TraceSurface)and(not ScnRefresh)and(Qty.Polys>0) then begin
-  //if sign(yRot-180)>0 then ss:=pd_Top else ss:=pd_Bottom;
-  TraceHeight(vx.Value,vy.Value,vz.Value,pd_Near,@ty,@tmp);
-  vy.Value:=ty;
-end;
-end;
+    if (ssLeft in Shift)and(MoveMode=mmFloat) then begin
+      vx.Value:=vx.Value+(-(ObjectX-X)*ObjectMoveScale*cos(xRot/180*pi)
+                          +(ObjectY-Y)*ObjectMoveScale*sin(xRot/180*pi))/power(zoom,3)/4;
+      vz.Value:=vz.Value+( (ObjectX-X)*ObjectMoveScale*sin(xRot/180*pi)
+                          +(ObjectY-Y)*ObjectMoveScale*cos(xRot/180*pi))/power(zoom,3)/4*sign(yRot-180);
+      if (fOptions.TraceSurface)and(not ScnRefresh)and(Qty.Polys>0) then begin
+        //if sign(yRot-180)>0 then ss:=pd_Top else ss:=pd_Bottom;
+        TraceHeight(vx.Value,vy.Value,vz.Value,pd_Near,@ty,@tmp);
+        vy.Value:=ty;
+      end;
+    end;
 
-if (MouseButton=2)and(MoveMode=mmFloat) then
+if (ssRight in Shift)and(MoveMode=mmFloat) then
 vy.Value:=vy.Value+(ObjectY-Y)*ObjectMoveScale/power(zoom,3);
 
-if (MouseButton=1)and(MoveMode=mmInteger) then
+if (ssLeft in Shift)and(MoveMode=mmInteger) then
 vxi.Value:=vxi.Value+round(ObjectY-Y);
 
-if (MouseButton=2)and(MoveMode=mmInteger) then
+if (ssRight in Shift)and(MoveMode=mmInteger) then
 vyi.Value:=vyi.Value+round(ObjectY-Y);
 
-if (MouseButton=1)and(MoveMode=mmAnchors) then begin //Special move without "Value"s
+if (ssLeft in Shift)and(MoveMode=mmAnchors) then begin //Special move without "Value"s
 ID:=STRSplineID1.Value;
 PA:=STR_Spline[ID].PtA+1;
 PB:=STR_Spline[ID].PtB+1;
 LA:=STR_Spline[ID].LenA/3;
 LB:=-STR_Spline[ID].LenB/3;
 
-if EditMode='StreetAnchorsLength' then begin
+if EditMode=emStreetAnchorLength then begin
 if ClickedID=PA then begin
 STR_Spline[ID].LenA:=STR_Spline[ID].LenA-((ObjectX-X-(ObjectY-Y))*ObjectMoveScale/power(zoom,3)/4)*3*sign(STR_Spline[ID].LenA);
 if STR_Spline[ID].OppSpline<>65535 then
@@ -1785,22 +1784,22 @@ tz:=tz+( (ObjectX-X)*ObjectMoveScale*sin(xRot/180*pi)
 end;
 end;
 
-finally ObjectX:=X; ObjectY:=Y; end;
+finally
+  ObjectX:=X;
+  ObjectY:=Y;
+end;
 end;
 
 
 procedure TForm1.Panel1MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin MouseButton:=0;
-SelectionQueue1[1]:=0; //Clear array after use
-SelectionQueue1[2]:=0;
+begin
+  SelectionQueue1[1]:=0; //Clear array after use
+  SelectionQueue1[2]:=0;
 
-if EditMode='MakeTrack' then EditMode:='';
-if EditMode='Waypoint' then EditMode:='';
+  if EditMode in [emStreetAnchor, emStreetAnchorLength] then EditMode := emStreetSpline;
+  if EditMode = emStreetSpline then STRSplineID1Change(nil);
 
-if EditMode='StreetAnchors' then EditMode:='StreetSplines';
-if EditMode='StreetAnchorsLength' then EditMode:='StreetSplines';
-if EditMode='StreetSplines' then STRSplineID1Change(nil);
-if DoubleClick then DoubleClick:=false;
+  if DoubleClick then DoubleClick:=false;
 end;
 
 
@@ -3123,15 +3122,17 @@ begin
 if Button<>mbLeft then exit; //dunno why, but RMB works wrong, better to forbid it at all
 (Sender as TImage).Left:=1;
 (Sender as TImage).Top :=1;
-if Sender=ImageMove   then begin MouseAction:=1; PanelMove.BevelOuter  :=bvLowered; end;
-if Sender=ImageRotate then begin MouseAction:=2; PanelRotate.BevelOuter:=bvLowered; end;
-if Sender=ImageZoom   then begin MouseAction:=3; PanelZoom.BevelOuter  :=bvLowered; end;
-MouseX:=X; MouseY:=Y;
+if Sender=ImageMove   then begin MouseAction:=tmaMove; PanelMove.BevelOuter  :=bvLowered; end;
+if Sender=ImageRotate then begin MouseAction:=tmaRotate; PanelRotate.BevelOuter:=bvLowered; end;
+if Sender=ImageZoom   then begin MouseAction:=tmaZoom; PanelZoom.BevelOuter  :=bvLowered; end;
+MousePos.X := X;
+MousePos.Y := Y;
 ShowCursor(false);
 end;
 
 procedure TForm1.PanelMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin MouseAction:=0; ShowCursor(true);
+begin
+  MouseAction:=tmaNone; ShowCursor(true);
 PanelMove.BevelOuter   :=bvRaised;
 PanelRotate.BevelOuter :=bvRaised;
 PanelZoom.BevelOuter   :=bvRaised;
@@ -3142,28 +3143,33 @@ end;
 procedure TForm1.PanelMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var dx,dy:integer; b:Boolean;
 begin
-  if MouseAction=0 then exit;
+  if MouseAction=tmaNone then exit;
   dx:=0; dy:=0;
   case MouseAction of
-    1:begin xPos:=xPos+(-(MouseX-X)*MouseMoveScale*cos(xRot/180*pi)
-                        +(MouseY-Y)*sign(yRot-180)*MouseMoveScale*sin(xRot/180*pi))/zoom/2;
-            zPos:=zPos+( (MouseX-X)*MouseMoveScale*sin(xRot/180*pi)
-                        +(MouseY-Y)*sign(yRot-180)*MouseMoveScale*cos(xRot/180*pi))/zoom/2;
+    tmaMove:
+        begin
+            xPos:=xPos+(-(MousePos.X-X)*MouseMoveScale*cos(xRot/180*pi)
+                        +(MousePos.Y-Y)*sign(yRot-180)*MouseMoveScale*sin(xRot/180*pi))/zoom/2;
+            zPos:=zPos+( (MousePos.X-X)*MouseMoveScale*sin(xRot/180*pi)
+                        +(MousePos.Y-Y)*sign(yRot-180)*MouseMoveScale*cos(xRot/180*pi))/zoom/2;
             xPos:=EnsureRange(xPos,-Qty.BlocksX*512,Qty.BlocksX*512);
             zPos:=EnsureRange(zPos,-Qty.BlocksZ*512,Qty.BlocksZ*512);
-            dx:=Form1.ClientOrigin.X+PanelMove.Left+ImageMove.Left+MouseX;
-            dy:=Form1.ClientOrigin.Y+PanelMove.Top +ImageMove.Top+MouseY;
-            end;
-    2:begin xRot:=xRot+(MouseX-X)/2.4; //a bit slower rotation feels better
-            yRot:=yRot+(MouseY-Y)/2.4;
-            dx:=Form1.ClientOrigin.X+PanelRotate.Left+ImageRotate.Left+MouseX;
-            dy:=Form1.ClientOrigin.Y+PanelRotate.Top +ImageRotate.Top+MouseY;
-            end;
-    3:begin Zoom:=Zoom-(MouseX-X)/300;
-            Zoom:=EnsureRange(Zoom,ZoomLo,ZoomHi);
-            dx:=Form1.ClientOrigin.X+PanelZoom.Left+ImageZoom.Left+MouseX;
-            dy:=Form1.ClientOrigin.Y+PanelZoom.Top +ImageZoom.Top+MouseY;
-            end;
+            dx:=Form1.ClientOrigin.X+PanelMove.Left+ImageMove.Left+MousePos.X;
+            dy:=Form1.ClientOrigin.Y+PanelMove.Top +ImageMove.Top+MousePos.Y;
+        end;
+    tmaRotate:
+        begin
+          xRot:=xRot+(MousePos.X-X)/2.4; //a bit slower rotation feels better
+          yRot:=yRot+(MousePos.Y-Y)/2.4;
+            dx:=Form1.ClientOrigin.X+PanelRotate.Left+ImageRotate.Left+MousePos.X;
+            dy:=Form1.ClientOrigin.Y+PanelRotate.Top +ImageRotate.Top+MousePos.Y;
+        end;
+    tmaZoom:
+        begin
+            Zoom := EnsureRange(Zoom-(MousePos.X-X)/300, ZoomLo, ZoomHi);
+            dx:=Form1.ClientOrigin.X+PanelZoom.Left+ImageZoom.Left+MousePos.X;
+            dy:=Form1.ClientOrigin.Y+PanelZoom.Top +ImageZoom.Top+MousePos.Y;
+        end;
   end;
 
   if fOptions.TraceSurface then if (not ScnRefresh)and(Qty.Polys>0) then
@@ -4645,9 +4651,9 @@ procedure TForm1.SpeedButton(Sender: TObject);
 begin
 STRSplineID1.Value:=0;
 STRPointID.Value:=0;
-if (Sender as TSpeedButton).Down=false then EditMode:='' else
-if Sender=EditNodes then EditMode:='StreetNodes' else
-if Sender=EditSplines then EditMode:='StreetSplines' else
+if (Sender as TSpeedButton).Down=false then EditMode:=emNone else
+if Sender=EditNodes then EditMode:=emStreetNode else
+if Sender=EditSplines then EditMode:=emStreetSpline else
 exit;
 end;
 
@@ -5831,14 +5837,16 @@ end;
 procedure TForm1.EraseSMPClick(Sender: TObject);
 var x,y:single; i:integer;
 begin
-x:=xRot; y:=yRot;
-PrepareSMP(nil); //sets viewport
-for i:=1 to SMPHead.A*SMPHead.B do
-SMPData[i]:=0;
-RenderResize(nil);
-xRot:=x; yRot:=y;
-SMPPreviewRedraw(nil);
-Changes.SMP:=true;
+  x := xRot;
+  y := yRot;
+  PrepareSMP(nil); //sets viewport
+  for i:=1 to SMPHead.A*SMPHead.B do
+    SMPData[i]:=0;
+  RenderResize(nil);
+  xRot := x;
+  yRot := y;
+  SMPPreviewRedraw(nil);
+  Changes.SMP:=true;
 end;
 
 procedure TForm1.LoadInstancesFromLWOClick(Sender: TObject);

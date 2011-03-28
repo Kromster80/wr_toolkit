@@ -64,6 +64,9 @@ type TActivePage=(
 
 TTexSend=(ts_AddTex,ts_RenTex);
 
+TMouseAction = (tmaNone, tmaMove, tmaRotate, tmaZoom);
+TEditingMode = (emNone, emTrigger, emTriggerDest, emStreetNode, emStreetAnchor, emStreetAnchorLength, emStreetSpline);
+
 const
 BArrow:array[1..8,1..3]of single =(
 (0,-0.50,-0.25),(0,-0.29,-0.25),(0, 0, 0.05),(0, 0, 0.25), //
