@@ -14,18 +14,18 @@ uses Unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture, Unit_D
 
 var
     AddonScenery:record
-    EngineName,BGround,Name,SceneryFlag:string;
-    FreeRideID,TrackQty:integer;
+      EngineName,BGround,Name,SceneryFlag:string;
+      FreeRideID,TrackQty:integer;
       Track:array[1..MAX_TRACKS+MAX_WP_TRACKS]of record
-      TrackNo:byte;
-      Name:string;
-      CheckPoint:byte;
-      mDistance:integer;
-      Direction,WayPoint:byte;
-      Maps:string;
-      TypeID,NumSections,Order:byte;
+        TrackNo:byte;
+        Name:string;
+        CheckPoint:byte;
+        mDistance:integer;
+        Direction,WayPoint:byte;
+        Maps:string;
+        TypeID,NumSections,Order:byte;
       end;
-    Author,Converter,Contact,Comment:string;
+      Author,Converter,Contact,Comment:string;
     end;
 
     SC2TRefresh:boolean=false;
@@ -104,7 +104,6 @@ Form1.SC2T_Direction.ItemIndex:=0;
 Form1.SC2T_Type.ItemIndex:=0;
 Form1.Label140.Caption:='Length, 0m';
 Form1.Label118.Caption:='Waypoint, 0';
-Form1.SC2T_Image.Text:='';
 exit;
 end;
 SC2TRefresh:=true;
@@ -114,7 +113,6 @@ Form1.SC2T_Direction.ItemIndex:=Direction-1;
 Form1.SC2T_Type.ItemIndex:=TypeID-1;
 Form1.Label140.Caption:='Length, '+inttostr(mDistance)+'m';
 Form1.Label118.Caption:='Waypoint, '+inttostr(integer(Waypoint));
-Form1.SC2T_Image.Text:=Maps;
 end;
 SC2TRefresh:=false;
 end;
@@ -267,7 +265,6 @@ if TRKQty[i].Nodes<>0 then
 mDistance:=round(TRK[i].Route[EnsureRange(TRKQty[i].Nodes,1,16384)].Delta/10)
 else mDistance:=0;
 WayPoint:=0;
-Maps:='Track'+AddonScenery.EngineName+int2fix(i,2)+'.tga';
 NumSections:=0;
 Order:=i;
 end;
@@ -287,7 +284,6 @@ Order:=i+TracksQty;
 end;
 
 end;
-
 
 
 end.

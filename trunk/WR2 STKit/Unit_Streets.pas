@@ -1,6 +1,6 @@
 unit Unit_Streets;
 interface
-uses Classes, sysutils, Windows, KromUtils, Math, dglOpenGL;
+uses Classes, sysutils, Windows, KromUtils, Math, dglOpenGL, Unit_Defaults;
 
 
 type
@@ -187,7 +187,7 @@ dec(STRHead.NumShapes);
 if STRHead.NumShapes=1 then Form1.RemShape.Enabled:=false;
 Form1.STRSplineShape1.MaxValue:=STRHead.NumShapes;
 Form1.STRSplineShape2.MaxValue:=STRHead.NumShapes;
-Form1.SendQADtoUI('Streets');
+Form1.SendQADtoUI(apStreets);
 Form1.ListStreetShape.ItemIndex:=ID-1;
 Changes.STR:=true;
 end;

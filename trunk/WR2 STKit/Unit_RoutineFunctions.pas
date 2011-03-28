@@ -12,7 +12,10 @@ procedure PlaceCarOnTerrain(var CrX,CrY,CrZ,CrH,CrP,CrB:single; aPickDir:TPickDi
 procedure MoveCarSimple();
 procedure MoveCarAlongTrack(TrackID:integer);
 
+
 implementation
+uses Unit_Tracks;
+
 
 procedure MoveCarAlongTrack(TrackID:integer);
 var p0,p1,p2,k:integer; dt,ay,by,t:single;

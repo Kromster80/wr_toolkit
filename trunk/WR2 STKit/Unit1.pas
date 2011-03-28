@@ -300,7 +300,7 @@ type
     LE_RGB: TButton;
     LE_Shadow: TButton;
     Label130: TLabel;
-    OpenLWO_TRK: TButton;
+    ImportLWOTrack: TButton;
     TabSheet20: TTabSheet;
     ImportMatList: TButton;
     ExportMatList: TButton;
@@ -457,7 +457,6 @@ type
     SC2T_Type: TRadioGroup;
     CBShowTrace: TCheckBox;
     MemoLog: TMemo;
-    Label19: TLabel;
     SC2_BGImage: TEdit;
     SC2_ScnFlag: TEdit;
     Panel7: TPanel;
@@ -563,7 +562,6 @@ type
     WP_P: TFloatSpinEdit;
     Label160: TLabel;
     SwitchVerticeColors2: TMenuItem;
-    SC2T_Image: TEdit;
     LevelStreets: TMenuItem;
     TOBMagicDelete: TCheckBox;
     AFC11LightningfixBluelakes1: TMenuItem;
@@ -676,7 +674,7 @@ type
     procedure SaveSceneryClick(Sender: TObject);
     procedure ListMaterialsClick(Sender: TObject);
     procedure RGMatModeClick(Sender: TObject);
-    procedure SendQADtoUI(Sender: string);
+    procedure SendQADtoUI(aActivePage:TActivePage);
     procedure PanelMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure PanelMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure PanelMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
@@ -750,7 +748,7 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormDestroy(Sender: TObject);
     procedure ComputeChunkMode(Sender: TObject);
-    procedure OpenLWO_TRKClick(Sender: TObject);
+    procedure ImportLWOTrackClick(Sender: TObject);
     procedure ImportMaterialsClick(Sender: TObject);
     procedure ExportMaterialsClick(Sender: TObject);
 //    procedure SunTextRMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -985,7 +983,7 @@ var
   Scenery,SceneryPath,SceneryVersion:string;
   SaveButton:boolean=true;
 
-  ActivePage:ActivePageTypes;
+  ActivePage:TActivePage;
 
   IDXQty:integer;
   v:array of array[1..3]of integer;
@@ -2106,7 +2104,7 @@ if LoadSC2(fOptions.WorkDir+'AddOns\Sceneries\'
 if fGrass.LoadFromFile(SceneryPath+Scenery)      then MemoLoad.Lines.Add('Load RO# in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('RO# missing');
 
 
-SendQADtoUI('All');
+SendQADtoUI(ActivePage);
 ShowQADInfo(nil);
 CBTrackChange(nil);
 MouseMoveScale:=(Qty.BlocksX+Qty.BlocksZ)div 5;
@@ -2949,160 +2947,175 @@ procedure TForm1.QADtoUIClick(Sender: TObject);
 begin //Placeholder, do not remove
 end;
 
-procedure TForm1.SendQADtoUI(Sender:string);
+procedure TForm1.SendQADtoUI(aActivePage:TActivePage);
 var i:integer; s:string;
 begin
-Label128.Caption:='Path '+LWOSceneryFile;
-if (Sender='All')or(Sender='Textures') then begin
-ListTextures.Clear;
-for i:=1 to Qty.TexturesFiles do
-ListTextures.Items.Add(TexName[i]);
-ListTextures.ItemIndex:=-1;
-CBTex1.Clear; CBTex2.Clear; CBTex3.Clear;
-for i:=1 to Qty.TexturesFiles do begin
-CBTex1.Items.Add(TexName[i]);
-CBTex2.Items.Add(TexName[i]);
-CBTex3.Items.Add(TexName[i]);
-end;
-Label58.Caption:='Texture files: '+inttostr(Qty.TexturesFiles);
-end;
 
-if (Sender='All')or(Sender='Grounds') then begin
-ListGrounds.Clear;
-for i:=1 to Qty.GroundTypes do begin
-ListGrounds.Items.Add(Ground[i].Name);
-RGTexMat.Items[i-1]:=Ground[i].Name;
-RGTexMat.Controls[i-1].Enabled:=true;
-end;
-ListGrounds.ItemIndex:=-1;
-for i:=Qty.GroundTypes+1 to RGTexMat.Items.Count do begin
-RGTexMat.Items[i-1]:='none';
-RGTexMat.Controls[i-1].Enabled:=false;
-end;
-end;
+  case aActivePage of
+    apLWO:
+        Label128.Caption:='Path '+LWOSceneryFile;
 
-if (Sender='All')or(Sender='Materials') then begin
-ListMaterials.Clear;
-//ListMaterials.AddItem(' - All - ',nil);
-for i:=1 to Qty.Materials do ListMaterials.Items.Add(
-{inttostr(i)+'. '+}MaterialW[i].Name+' ('+TexName[Material[i].Tex1+1]+')'{+['+inttostr(Material[i].Mode)+']'});
-ListMaterials.ItemIndex:=-1;
-end;
+    apTextures:
+        begin
+          ListTextures.Clear;
+          for i:=1 to Qty.TexturesFiles do
+            ListTextures.Items.Add(TexName[i]);
+          ListTextures.ItemIndex:=-1;
+          CBTex1.Clear; CBTex2.Clear; CBTex3.Clear;
+          for i:=1 to Qty.TexturesFiles do begin
+            CBTex1.Items.Add(TexName[i]);
+            CBTex2.Items.Add(TexName[i]);
+            CBTex3.Items.Add(TexName[i]);
+          end;
+          Label58.Caption:='Texture files: '+inttostr(Qty.TexturesFiles);
+        end;
 
-if (Sender='All')or(Sender='Objects') then begin
-TOBRefresh:=true;
-SNIRefresh:=true;
-ObjInstanceRefresh:=true;
-ListObjects.Clear;
-ListObjectsTOB.Clear;
-ListObjectsSNI.Clear;
-ListObjectsInstances.Clear;
-for i:=1 to Qty.ObjectFiles do begin
-ListObjects.Items.Add(ObjName[i]+' '+inttostr(ObjProp[i].Mode)+' '+inttostr(ObjProp[i].Shape));
-ListObjectsTOB.Items.Add(inttostr(i)+'. '+ObjName[i]);
-ListObjectsSNI.Items.Add(inttostr(i)+'. '+ObjName[i]);
-ListObjectsInstances.Items.Add(inttostr(i)+'. '+ObjName[i]);
-end;
-ListObjects.ItemIndex:=0;    ListObjectsClick(nil);
-ListObjectsTOB.ItemIndex:=0;
-ListObjectsSNI.ItemIndex:=0;
-ListObjectsInstances.ItemIndex:=0;
-TOBRefresh:=false;
-SNIRefresh:=false;
-ObjInstanceRefresh:=false;
-Label28.Caption:=inttostr(Qty.ObjectFiles)+' Object files:';
-end;
+    apGrounds:
+        begin
+          ListGrounds.Clear;
+          for i:=1 to Qty.GroundTypes do begin
+            ListGrounds.Items.Add(Ground[i].Name);
+            RGTexMat.Items[i-1]:=Ground[i].Name;
+            RGTexMat.Controls[i-1].Enabled:=true;
+          end;
+          ListGrounds.ItemIndex := -1;
+          for i:=Qty.GroundTypes+1 to RGTexMat.Items.Count do begin
+            RGTexMat.Items[i-1]:='none';
+            RGTexMat.Controls[i-1].Enabled:=false;
+          end;
+        end;
 
-if (Sender='All')or(Sender='Sounds') then begin
-ListSounds.Clear;
-ListSounds.Items.Add(' - All - ');
-for i:=1 to Qty.Sounds do ListSounds.Items.Add(inttostr(i)+'. '+Sound[i].Name);
-ListSounds.ItemIndex:=0;
-end;
+    apMaterials:
+        begin
+          ListMaterials.Clear;
+          for i:=1 to Qty.Materials do ListMaterials.Items.Add(MaterialW[i].Name+' ('+TexName[Material[i].Tex1+1]+')');
+          ListMaterials.ItemIndex := -1;
+        end;
 
-if (Sender='All')or(Sender='Lights') then begin
-ListLights.Clear;
-for i:=1 to Qty.Lights do ListLights.Items.Add(inttostr(i)+'. M'+inttostr(Light[i].Mode)+' X'+
-floattostr(round(Light[i].Size*10)/10)+' F'+floattostr(round(Light[i].Freq*100)/100));
-ListLights.ItemIndex:=0;
-Light_Amb.Brush.Color:=AmbLightW.R+AmbLightW.G*256+AmbLightW.B*65536;
-end;
+    apObjects:
+        begin
+          TOBRefresh:=true;
+          SNIRefresh:=true;
+          ObjInstanceRefresh:=true;
+          ListObjects.Clear;
+          ListObjectsTOB.Clear;
+          ListObjectsSNI.Clear;
+          ListObjectsInstances.Clear;
+          for i:=1 to Qty.ObjectFiles do begin
+            ListObjects.Items.Add(ObjName[i]+' '+inttostr(ObjProp[i].Mode)+' '+inttostr(ObjProp[i].Shape));
+            ListObjectsTOB.Items.Add(inttostr(i)+'. '+ObjName[i]);
+            ListObjectsSNI.Items.Add(inttostr(i)+'. '+ObjName[i]);
+            ListObjectsInstances.Items.Add(inttostr(i)+'. '+ObjName[i]);
+          end;
+          ListObjects.ItemIndex:=0;    ListObjectsClick(nil);
+          ListObjectsTOB.ItemIndex:=0;
+          ListObjectsSNI.ItemIndex:=0;
+          ListObjectsInstances.ItemIndex:=0;
+          TOBRefresh:=false;
+          SNIRefresh:=false;
+          ObjInstanceRefresh:=false;
+          Label28.Caption:=inttostr(Qty.ObjectFiles)+' Object files:';
+        end;
 
-if (Sender='All')or(Sender='Sky') then begin
-ListSKY.Clear;
-for i:=1 to SKYQty do ListSKY.Items.Add(inttostr(i)+'. '+SKY[i].SkyTex);
-if SKYQty>0 then ListSKY.ItemIndex:=0 else ListSKY.ItemIndex:=-1;
-ListSKYClick(nil);
-SKYIndex:=ListSKY.ItemIndex+1;
-RGShadEdge.ItemIndex:=ShadowEdgeW;
-end;
+    apSounds:
+        begin
+          ListSounds.Clear;
+          ListSounds.Items.Add(' - All - ');
+          for i:=1 to Qty.Sounds do
+            ListSounds.Items.Add(inttostr(i)+'. '+Sound[i].Name);
+          ListSounds.ItemIndex:=0;
+        end;
 
-if (Sender='All')or(Sender='LVL') then begin
-LVLRefresh:=true;
-LVL_SunY.Value:=arcsin(LVL.SunY)*180/pi;
-LVL_SunXZ.Value:=(arctan2(LVL.SunZ,LVL.SunX)*180/pi);
-//LVL_A.Value:=LVL.a; LVL_B.Value:=LVL.b; LVL_C.Value:=LVL.c;
-//LVL1.Value:=LVL.App1; LVL2.Value:=LVL.App2; LVL3.Value:=LVL.App3;
-LVLRefresh:=false;
-end;
+    apLights:
+        begin
+          ListLights.Clear;
+          for i:=1 to Qty.Lights do
+            ListLights.Items.Add(inttostr(i)+'. M'+inttostr(Light[i].Mode)+' X'+
+          floattostr(round(Light[i].Size*10)/10)+' F'+floattostr(round(Light[i].Freq*100)/100));
+          ListLights.ItemIndex:=0;
+          Light_Amb.Brush.Color:=AmbLightW.R+AmbLightW.G*256+AmbLightW.B*65536;
+        end;
 
-if (Sender='All')or(Sender='Animated') then begin
-ListSNIObjects.Clear;
-for i:=1 to SNIHead.Obj do
-ListSNIObjects.Items.Add(ObjName[SNIObj[i].objID+1]+' ('+StrPas(@SNIObj[i].Sound)+') '
-+inttostr(SNIObj[i].Mode));
-ListSNIObjects.ItemIndex:=0;
-Label46.Caption:='Routes list: '+inttostr(SNIHead.Obj);
-end;
+    apSky:
+        begin
+          ListSKY.Clear;
+          for i:=1 to SKYQty do ListSKY.Items.Add(inttostr(i)+'. '+SKY[i].SkyTex);
+          if SKYQty>0 then ListSKY.ItemIndex:=0 else ListSKY.ItemIndex:=-1;
+          ListSKYClick(nil);
+          SKYIndex:=ListSKY.ItemIndex+1;
+          RGShadEdge.ItemIndex:=ShadowEdgeW;
 
-if (Sender='All')or(Sender='Triggers') then begin
-  CBTriggerType.Clear;
-  for i:=1 to 16 do CBTriggerType.AddItem(TRLnames[i],nil);
-  ListTrig.Clear;
-  for i:=1 to fTriggers.Count do
-    ListTrig.Items.Add(fTriggers.TriggerName(i));
-  ListTrig.ItemIndex:=-1;
-end;
+          LVLRefresh:=true;
+          LVL_SunY.Value:=arcsin(LVL.SunY)*180/pi;
+          LVL_SunXZ.Value:=(arctan2(LVL.SunZ,LVL.SunX)*180/pi);
+          //LVL_A.Value:=LVL.a; LVL_B.Value:=LVL.b; LVL_C.Value:=LVL.c;
+          //LVL1.Value:=LVL.App1; LVL2.Value:=LVL.App2; LVL3.Value:=LVL.App3;
+          LVLRefresh:=false;
+        end;
 
-if (Sender='All')or(Sender='Tracks') then begin
-  CBTrack.Clear;
-  LBTrack.Clear;
-  for i:=1 to TracksQty do begin
-    CBTrack.Items.Add(Scenery+' '+inttostr(i));
-    LBTrack.Items.Add(Scenery+' '+inttostr(i)+'  '+inttostr(TRKQty[i].a1)+inttostr(TRKQty[i].a2)+inttostr(TRKQty[i].a4)+inttostr(TRKQty[i].a6)+inttostr(TRKQty[i].a7)+inttostr(TRKQty[i].a8));
+    apAnimated:
+        begin
+          ListSNIObjects.Clear;
+          for i:=1 to SNIHead.Obj do
+          ListSNIObjects.Items.Add(ObjName[SNIObj[i].objID+1]+' ('+StrPas(@SNIObj[i].Sound)+') '
+          +inttostr(SNIObj[i].Mode));
+          ListSNIObjects.ItemIndex:=0;
+          Label46.Caption:='Routes list: '+inttostr(SNIHead.Obj);
+        end;
+
+    apTriggers:
+        begin
+          CBTriggerType.Clear;
+          for i:=1 to 16 do CBTriggerType.AddItem(TRLnames[i],nil);
+          ListTrig.Clear;
+          for i:=1 to fTriggers.Count do
+            ListTrig.Items.Add(fTriggers.TriggerName(i));
+          ListTrig.ItemIndex:=-1;
+        end;
+
+    apTracksMT,apTracksAR,apTracksWP:
+        begin
+          CBTrack.Clear;
+          LBTrack.Clear;
+          for i:=1 to TracksQty do begin
+            CBTrack.Items.Add(Scenery+' '+inttostr(i));
+            LBTrack.Items.Add(Scenery+' '+inttostr(i)+'  '+inttostr(TRKQty[i].a1)+inttostr(TRKQty[i].a2)+inttostr(TRKQty[i].a4)+inttostr(TRKQty[i].a6)+inttostr(TRKQty[i].a7)+inttostr(TRKQty[i].a8));
+          end;
+          for i:=1 to TracksQtyWP do begin
+            CBTrack.Items.Add(Scenery+' WP'+inttostr(i));
+            LBTrack.Items.Add(Scenery+' WP'+inttostr(i));
+          end;
+          TrackID:=EnsureRange(TrackID,1,TracksQty);
+          CBTrack.ItemIndex := TrackID-1;
+          LBTrack.ItemIndex := TrackID-1;
+        end;
+
+    apStreets:
+        begin
+          ListStreetShape.Clear;
+          for i:=1 to STRHead.NumShapes do begin
+          s:=inttostr(round(STR_ShRef[i].Speed*0.0036))+'kmh ';
+          s:=s+inttostr(round(STR_Shape[i].Offset[1]))+'m ';
+          if STR_Shape[i].NumLanes=2 then s:=s+inttostr(round(STR_Shape[i].Offset[2]))+'m ';
+          if (STR_Shape[i].Options and 4096 = 4096) then s:=s+'1' else s:=s+'0';
+          if (STR_Shape[i].Options and 8192 = 8192) then s:=s+'1' else s:=s+'0';
+          ListStreetShape.Items.Add(s);
+          end;
+          ListStreetShape.ItemIndex:=-1;
+        end;
+
+    apGrass:
+        begin
+          GrassCol.Brush.Color:=GrassColorW.R+GrassColorW.G*256+GrassColorW.B*65536;
+          ShowGrassInfo(nil);
+        end;
+
+    apAddonInfo:
+        begin
+          WriteCommonDataToSC2;
+          SendDataToSC2;
+        end;
   end;
-  for i:=1 to TracksQtyWP do begin
-    CBTrack.Items.Add(Scenery+' WP'+inttostr(i));
-    LBTrack.Items.Add(Scenery+' WP'+inttostr(i));
-  end;
-  TrackID:=EnsureRange(TrackID,1,TracksQty);
-  CBTrack.ItemIndex := TrackID-1;
-  LBTrack.ItemIndex := TrackID-1;
-end;
-
-if (Sender='All')or(Sender='Streets') then begin
-ListStreetShape.Clear;
-for i:=1 to STRHead.NumShapes do begin
-s:=inttostr(round(STR_ShRef[i].Speed*0.0036))+'kmh ';
-s:=s+inttostr(round(STR_Shape[i].Offset[1]))+'m ';
-if STR_Shape[i].NumLanes=2 then s:=s+inttostr(round(STR_Shape[i].Offset[2]))+'m ';
-if (STR_Shape[i].Options and 4096 = 4096) then s:=s+'1' else s:=s+'0';
-if (STR_Shape[i].Options and 8192 = 8192) then s:=s+'1' else s:=s+'0';
-ListStreetShape.Items.Add(s);
-end;
-ListStreetShape.ItemIndex:=-1;
-end;
-
-if (Sender='All')or(Sender='Grass') then begin
-GrassCol.Brush.Color:=GrassColorW.R+GrassColorW.G*256+GrassColorW.B*65536;
-ShowGrassInfo(nil);
-end;
-
-if (Sender='All')or(Sender='Addon Info') then begin
-WriteCommonDataToSC2;
-SendDataToSC2;
-end;
-
 end;
 
 procedure TForm1.PanelMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -3396,7 +3409,7 @@ if TexName[i]=st[k] then Tex2Ground[i]:=gr[k];
 
 list_tx:=0;
 
-if aText='' then SendQADtoUI('Textures');
+if aText='' then SendQADtoUI(apTextures);
 for i:=1 to Qty.TexturesFiles do if TexString=ListTextures.Items[i-1] then
 ListTextures.ItemIndex:=i-1;
 ListTexturesClick(nil);
@@ -3427,7 +3440,7 @@ for i:=1 to Qty.TexturesFiles do TexName[i]:=ListTextures.Items[i-1];
 for i:=ID to Qty.TexturesFiles do Tex2Ground[i]:=Tex2Ground[i+1];
 
 list_tx:=ID;
-if Sender<>nil then SendQADtoUI('Textures'); //Internal senders should not repaint whole list
+if Sender<>nil then SendQADtoUI(apTextures); //Internal senders should not repaint whole list
 ListTextures.ItemIndex:=EnsureRange(ID-1,0,Qty.TexturesFiles-1);
 Changes.QAD:=true;
 end;
@@ -3455,7 +3468,7 @@ for kk:=1 to Qty.TexturesFiles do if TexName[kk]=s then Tex2Ground[kk]:=ID;
 until((ii=256)or(eof(ft)));
 closefile(ft);
 //Qty.TexturesFiles:=ii;
-SendQADtoUI('Textures');
+SendQADtoUI(apTextures);
 //CompileLoaded('Textures',1,Qty.TexturesFiles);
 Changes.QAD:=true;
 end;
@@ -3650,7 +3663,7 @@ begin
     14:ActivePage := apTriggers;
     15:ActivePage := apAddonInfo;
   end;
-  SendQADtoUI('All'); //?
+  SendQADtoUI(ActivePage); //?
   StatusBar1.Panels[4].Text := PageCaption[ActivePage];
   StatusBar1.Panels[5].Text := ReturnListOfChangedFiles(', ');
 end;
@@ -3773,7 +3786,7 @@ blockread(f,Sound[ii].X,12);           //XYZ
 blockread(f,Sound[ii].Volume,24);      //etc..
 end;
 closefile(f);
-SendQADtoUI('Sounds');
+SendQADtoUI(apSounds);
 Changes.QAD:=true;
 end;
 
@@ -3857,7 +3870,7 @@ begin
   end;
   dec(Qty.GroundTypes);
   for i:=ID to Qty.GroundTypes do Ground[i]:=Ground[i+1];
-  SendQADtoUI('Grounds');
+  SendQADtoUI(apGrounds);
   ListGrounds.ItemIndex:=EnsureRange(ID,1,Qty.GroundTypes)-1;
   ListGroundsClick(nil);
   for i:=1 to Qty.TexturesFiles do
@@ -4111,7 +4124,7 @@ Changes.SNI:=true;
 Changes.WRK:=true;
 
 inc(Qty.ObjectFiles);
-SendQADtoUI('Objects');
+SendQADtoUI(apObjects);
 ListObjects.ItemIndex:=newID-1;
 ListObjectsClick(nil);
 Changes.QAD:=true;
@@ -4341,7 +4354,7 @@ Obj[ii].ID:=kk-1;
 Obj[ii].Name:=ss; //assign Name only after adding new object, since it alerts Names
 end;
 closefile(f);
-SendQADtoUI('Objects');
+SendQADtoUI(apObjects);
 CompileLoaded('Objects',1,Qty.ObjectFiles);
 Changes.QAD:=true;
 end;
@@ -4390,7 +4403,7 @@ blockread(f,c,64); Ground[ii].Name:=StrPas(@c);//Name
 blockread(f,Ground[ii].Dirt,92);
 end;
 closefile(f);
-SendQADtoUI('Grounds');
+SendQADtoUI(apGrounds);
 Changes.QAD:=true;
 end;
 
@@ -4506,7 +4519,7 @@ blockread(f,c,48); ObjProp[ii].HitSound:=StrPas(@c);//Name
 blockread(f,c,48); ObjProp[ii].FallSound:=StrPas(@c);//Name
 end;
 closefile(f);
-SendQADtoUI('Objects');
+SendQADtoUI(apObjects);
 CompileLoaded('Objects',1,Qty.ObjectFiles);
 Changes.QAD:=true;
 end;
@@ -4649,7 +4662,7 @@ procedure TForm1.CBTrackChange(Sender: TObject);
 var i:integer;
   procedure SetWP(A:boolean);
   begin
-    OpenLWO_TRK.Enabled:=A;
+    ImportLWOTrack.Enabled:=A;
     TRK_Loop.Enabled:=A;
     Button11.Enabled:=A;
     Button16.Enabled:=A;
@@ -4671,7 +4684,8 @@ begin
     LBTrack.ItemIndex:=SC2_TrackList.ItemIndex;
   end;
 
-  TrackID:=CBTrack.ItemIndex+1;
+  TrackID := CBTrack.ItemIndex+1;
+
   if TrackID>TracksQty then begin
     TrackWP:=TrackID-TracksQty;
     TrackID:=0;
@@ -4689,7 +4703,7 @@ begin
     ListWPNodes.Items.Add(int2fix(i,2)+'. '+int2fix(WTR[TrackWP].Node[i].CheckPointID,2));
   end else
   if TrackID <> 0 then begin
-    TrackWP:=0;
+    TrackWP := 0;
     TRKProperty.ActivePageIndex:=1;
     if ActivePage in [apTracksMT,apTracksAR,apTracksWP] then
       ActivePage := apTracksAR; //Tied
@@ -4703,8 +4717,10 @@ begin
       ListMakeTrack.Clear;
       for i:=1 to MakeTrack[TrackID].NodeQty do
       ListMakeTrack.Items.Add(int2fix(i,2)+'. ');
+    TurnsRefresh := true;
     Form1.E_Node1.Value:=0;
     Form1.E_Node2.Value:=0;
+    TurnsRefresh := false;
     MakeTrackRefresh:=false;
   end;
 end;
@@ -4779,7 +4795,7 @@ begin
     LightW[i-1]:=LightW[i];
   end;
   dec(Qty.Lights);
-  SendQADtoUI('Lights');
+  SendQADtoUI(apLights);
   ListLights.ItemIndex:=EnsureRange(ID-1,0,Qty.Lights-1);
   Changes.QAD:=true;
 end;
@@ -4944,19 +4960,30 @@ begin
 end;
 
 
-procedure TForm1.OpenLWO_TRKClick(Sender: TObject);
+procedure TForm1.ImportLWOTrackClick(Sender: TObject);
 var s:string;
 begin
-if not RunOpenDialog(OpenDialog,'',SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
-s:=OpenDialog.FileName;
-//s:='E:\World Racing 2\Scenarios\Industrial\V1\route.lwo';
-//s:='E:\World Racing 2\Scenarios\Test\V1\Test_trk.lwo';
-//AddTrackClick(nil);
-CBTrackChange(LBTrack); //set TrackID in a right way
-if fileexists(s) then
+  if not RunOpenDialog(OpenDialog,'',SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
+  s := OpenDialog.FileName;
+  //s:='E:\World Racing 2\Scenarios\Industrial\V1\route.lwo';
+  //s:='E:\World Racing 2\Scenarios\Test\V1\Test_trk.lwo';
+
+  CBTrackChange(LBTrack); //set TrackID in a right way
+
+  if TrackID = 0 then begin
+    MessageBox(0, 'Please select track first', 'No track selected', MB_ICONEXCLAMATION or MB_OK);
+    exit;
+  end;
+
+  if not FileExists(s) then begin
+    MessageBox(0, 'LWO file could not be found', 'No file selected', MB_ICONEXCLAMATION or MB_OK);
+    exit;
+  end;
+
   if ImportLWO(s) then
     TRK_MakeIdeal(nil);
 end;
+
 
 procedure TForm1.ImportMaterialsClick(Sender: TObject);
 var
@@ -5018,7 +5045,7 @@ blockread(f,MaterialW[remap[k]].Enlite,1);
 until(NumRead=0);
 closefile(f);
 RecalculatematerialCRC1Click(nil);
-SendQADtoUI('Materials');
+SendQADtoUI(apMaterials);
 Changes.QAD:=true;
 end;
 
@@ -5087,7 +5114,7 @@ begin
     inc(Qty.Sounds);
   until(eof(ft));
   closefile(ft);
-  SendQADtoUI('Sounds');
+  SendQADtoUI(apSounds);
 end;
 
 procedure TForm1.CopySoundClick(Sender: TObject);
@@ -5299,7 +5326,7 @@ begin
     blockread(f,c,chsize);
   until(m<=0);
 
-  SendQADtoUI('Lights');
+  SendQADtoUI(apLights);
   Changes.QAD:=true;
 end;
 
@@ -5400,7 +5427,7 @@ blockread(f,Qty.Lights,4);    //Name
 blockread(f,Light[1].Mode,Qty.Lights*88);
 blockread(f,LightW[1].Radius,Qty.Lights*4);
 closefile(f);
-SendQADtoUI('Lights');
+SendQADtoUI(apLights);
 Changes.QAD:=true;  
 end;
 
@@ -5424,7 +5451,7 @@ begin
     exit;
   end;
   inc(TracksQtyWP);
-  SendQADtoUI('Tracks');
+  SendQADtoUI(ActivePage);
   WTR[TracksQtyWP].NodeQty:=2;
   WTR[TracksQtyWP].Empty[1]:=0;
   WTR[TracksQtyWP].Empty[2]:=0;
@@ -5442,11 +5469,12 @@ begin
   Changes.WTR[TracksQtyWP] := true;
 end;
 
+
 procedure TForm1.AddTrackClick(Sender: TObject);
 var i:integer;
 begin
   if TracksQty >= MAX_TRACKS then begin
-    MessageBox(HWND(nil), PChar(Format('World racing 2 can not handle more than %d racing tracks.',[MAX_TRACKS])), 'Info', MB_OK);
+    MessageBox(0, PChar(Format('World racing 2 can not handle more than %d racing tracks.',[MAX_TRACKS])), 'Info', MB_OK);
     exit;
   end;
   inc(TracksQty);
@@ -5454,14 +5482,16 @@ begin
     AddonScenery.Track[i+1]:=AddonScenery.Track[i];
   AddonScenery.Track[TracksQty].Name:=''; //Gets auto corrected
   WriteCommonDataToSC2; //Auto correct wrong data if any
-  SendQADtoUI('Tracks');
+  SendQADtoUI(ActivePage);
   Changes.SC2 := true;
   Changes.WRK := true;
 end;
 
+
 procedure TForm1.RemTrackClick(Sender: TObject);
 var i:integer;
 begin
+
   if TrackID<>0 then begin
     for i:=TrackID to TracksQty-1 do begin
       TRKQty[i]      := TRKQty[i+1];
@@ -5489,7 +5519,7 @@ begin
 
   AddonScenery.TrackQty := TracksQty+TracksQtyWP;
 
-  SendQADtoUI('Tracks');
+  SendQADtoUI(ActivePage);
   Changes.SC2 := true;
   Changes.WRK := true;
 end;
@@ -5769,7 +5799,7 @@ SNINode[SNIObj[ID].firstNode+ID2].Z:=SNISubNode[ID,k].Z;
 
 inc(SNIHead.Node);
 CalculateSNIRoutes;
-SendQADToUI('Animated');
+SendQADToUI(apAnimated);
 ListSNIObjects.ItemIndex:=ID-1; ListSNIObjectsClick(nil);
 ListSNINodes.ItemIndex:=ID2-1;  ListSNINodesClick(nil);
 SNINodesRefresh:=false;
@@ -5849,7 +5879,7 @@ end else
 
 blockread(f,c,chsize);
 until(m<=0);
-SendQADtoUI('Objects');
+SendQADtoUI(apObjects);
 Changes.QAD:=true;
 
 end;
@@ -5873,7 +5903,7 @@ STR_Shape[i].Options:=0;
 //STR_Shape[i].NumLanes:=1;
 end;
 
-SendQADToUI('Streets');
+SendQADToUI(apStreets);
 
 for i:=1 to STRHead.NumSplines do begin
   STR_Spline[i].FirstShRef:=0;
@@ -5951,7 +5981,7 @@ STRHead.NumPoints:=STRHead.NumPoints*2;
 STRHead.NumSplines:=STRHead.NumSplines*2;
 STRHead.NumShRefs:=STRHead.NumShRefs*2;
 STRHead.NumRoWs:=STRHead.NumRoWs*2;
-SendQADtoUI('Streets');
+SendQADtoUI(apStreets);
 end;
 
 procedure TForm1.CBShowModeClick(Sender: TObject);
@@ -6036,7 +6066,7 @@ for i:=1 to Qty.Materials do for k:=i to Qty.Materials do
     if v07[h].SurfaceID=i-1 then v07[h].SurfaceID:=k-1;
     end;
 
-SendQadToUI('Materials');
+SendQadToUI(apMaterials);
 ComputeChunkMode(nil);
 Changes.QAD:=true;
 Changes.WRK:=true;
@@ -6150,7 +6180,7 @@ SNINode[SNIObj[ID].firstNode+3].B:=0;
 inc(SNIHead.Obj);
 inc(SNIHead.Node,3); //add 3 nodes
 CalculateSNIRoutes;
-SendQADtoUI('Animated');
+SendQADtoUI(apAnimated);
 ListSNIObjects.ItemIndex:=SNIHead.Obj-1;
 ListSNIObjectsClick(nil);
 Changes.SNI:=true;
@@ -6397,7 +6427,7 @@ SKY[SKYIndex].WlkAmb.B:=$66;
 SKY[SKYIndex].WlkSun.R:=$4C;//4C4C4C
 SKY[SKYIndex].WlkSun.G:=$4C;
 SKY[SKYIndex].WlkSun.B:=$4C;
-SendQADtoUI('Sky'); //resets SKYIndex
+SendQADtoUI(apSky); //resets SKYIndex
 ListSKY.ItemIndex:=SKYQty-1;
 ListSKYClick(nil);
 EditSkyChange(nil); //update current sky textures
@@ -6444,6 +6474,7 @@ ListSKY.ItemIndex:=SKYIndex-1;
 Changes.SKY:=true;
 end;
 
+
 procedure TForm1.Button16Click(Sender: TObject);
   var ii:integer;
 begin
@@ -6457,6 +6488,7 @@ begin
   end;
   Changes.TRK[TrackID]:=true;
 end;
+
 
 procedure TForm1.AutoObjectsClick(Sender: TObject);
 var SearchRec:TSearchRec; s:string;
@@ -6527,7 +6559,7 @@ dec(SNIObj[i].firstNode);
 dec(SNIObj[ID].NumNodes);
 dec(SNIHead.Node);
 CalculateSNIRoutes;
-SendQADToUI('Animated');
+SendQADToUI(apAnimated);
 ListSNIObjects.ItemIndex:=ID-1; ListSNIObjectsClick(nil);
 ListSNINodes.ItemIndex:=ID2-1;  ListSNINodesClick(nil);
 SNINodesRefresh:=false;
@@ -6560,7 +6592,7 @@ dec(SNIHead.Node,NodeQty);
 end;
 
 CalculateSNIRoutes;
-SendQADToUI('Animated');
+SendQADToUI(apAnimated);
 ListSNIObjects.ItemIndex:=EnsureRange(K-1,0,SNIHead.Obj-1); ListSNIObjectsClick(nil);
 SNINodesRefresh:=false;
 SNIRefresh:=false;
@@ -6660,7 +6692,7 @@ if SnowCount<>0 then Interval:=RouteLen/SnowCount else Interval:=0;
 end;
 
 CalculateSNIRoutes;
-SendQADtoUI('Animated');
+SendQADtoUI(apAnimated);
 ListSNIObjects.ItemIndex:=SNIHead.Obj-1;
 ListSNIObjectsClick(nil);
 Changes.SNI:=true;
@@ -6934,7 +6966,7 @@ begin
       RemTextureClick(nil);
     end;
 
-SendQADtoUI('Textures');
+SendQADtoUI(apTextures);
 list_tx:=0;
 Changes.QAD:=true;
 end;
@@ -7454,11 +7486,13 @@ begin
   if Sender = RBCarArc then Car.Mode := cdm_Arcade;
 end;
 
+
 procedure TForm1.CBDriveModeClick(Sender: TObject);
 begin
   RBCarSim.Enabled := CBDriveMode.Checked;
   RBCarArc.Enabled := CBDriveMode.Checked;
   Form1.ActiveControl := nil;//.FocusControl(Panel1);
 end;
+
 
 end.
