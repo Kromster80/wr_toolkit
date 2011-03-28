@@ -1344,7 +1344,6 @@ var
 
   UseShaders:boolean;
   OpenALInitDone:boolean=false;
-  RenderFrameDone:boolean=true;
 
   ScnRefresh:boolean=true;
   VerticeRefresh:boolean=false;
@@ -1987,44 +1986,42 @@ if(fOptions.RenderMode>=rmFull)
 or(ActivePage=apSky)or(list_sky=0)then
                if list_sky<SKYQty then CompileLoaded('Sky',list_sky,1);
 
-if Show2ndFrame.Checked then begin
-  wglMakeCurrent(h_DC2, h_RC);
-  RenderResize2(nil);
+  if Show2ndFrame.Checked then begin
+    wglMakeCurrent(h_DC2, h_RC);
+    RenderResize2(nil);
 
-  glClearColor(0,0,0, 0);
-  glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT);
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D,0);
-  glLoadIdentity;
+    glClearColor(0,0,0, 0);
+    glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D,0);
+    glLoadIdentity;
 
-    glTranslatef(0,0,-7); //move away 7m
-    glRotatef(180 , 0, 0,1);
-    glRotatef(yRot,-1, 0,0); //Rotate in
-    glRotatef(xRot, 0,-1,0);
-    ZoomX:=0.04*power(zoom,3);                       //0,00005324 .. 0,16384  447px x3077
-    glkscale(ZoomX);
-    glTranslatef(-xPos,-yPos,-zPos);
+      glTranslatef(0,0,-7); //move away 7m
+      glRotatef(180 , 0, 0,1);
+      glRotatef(yRot,-1, 0,0); //Rotate in
+      glRotatef(xRot, 0,-1,0);
+      ZoomX:=0.04*power(zoom,3);                       //0,00005324 .. 0,16384  447px x3077
+      glkscale(ZoomX);
+      glTranslatef(-xPos,-yPos,-zPos);
 
-  gldisable(gl_Lighting);
+    gldisable(gl_Lighting);
 
-  RenderBounds;
+    RenderBounds;
 
     RenderOpenGL(false);
 
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
 
-    glLineWidth(1);
-    glPolygonMode(GL_FRONT,GL_LINE);
-    glBindTexture(GL_TEXTURE_2D,0);
-    for ii:=1 to Qty.Materials do glCallList(ScnCall2[ii]);
-    glLineWidth(LineWidth);
-    glPolygonMode(GL_FRONT,GL_FILL);
+      glLineWidth(1);
+      glPolygonMode(GL_FRONT,GL_LINE);
+      glBindTexture(GL_TEXTURE_2D,0);
+      for ii:=1 to Qty.Materials do glCallList(ScnCall2[ii]);
+      glLineWidth(LineWidth);
+      glPolygonMode(GL_FRONT,GL_FILL);
 
-  swapBuffers(h_DC2);
-end;
-
-RenderFrameDone:=true;
+    swapBuffers(h_DC2);
+  end;
 end;
 
 
@@ -2255,18 +2252,19 @@ else //show progress without Shaders
   (list_ogl+list_tx+list_obj)/(Qty.TexturesFiles+Qty.Materials+Qty.ObjectFiles)*100))+'%';
 end;
 
+
 ////////////////////////////////////////////////////////////////////////////////
 // Tracks arcade direction arrows setup
 ////////////////////////////////////////////////////////////////////////////////
 procedure TForm1.ListTracksClick(Sender: TObject);
 var i:integer;
 begin
-ListTurns.Clear;
-if TrackID=0 then exit; 
-for i:=1 to TRKQty[TrackID].Turns do
-ListTurns.Items.Add(inttostr(i)+'. '+inttostr(TRK[TrackID].Turns[i].Node1)+'>>'+inttostr(TRK[TrackID].Turns[i].Node2));
-ListTurns.ItemIndex:=0;
-ListTurnsClick(nil);
+  ListTurns.Clear;
+  if TrackID=0 then exit;
+  for i:=1 to TRKQty[TrackID].Turns do
+    ListTurns.Items.Add(inttostr(i)+'. '+inttostr(TRK[TrackID].Turns[i].Node1)+'>>'+inttostr(TRK[TrackID].Turns[i].Node2));
+  ListTurns.ItemIndex := 0;
+  ListTurnsClick(nil);
 end;
 
 procedure TForm1.ListTurnsClick(Sender: TObject);
@@ -3799,61 +3797,66 @@ end;
 procedure TForm1.ListGroundsClick(Sender: TObject);
 var ID:integer;
 begin
-GroundsRefresh:=true;
-ID:=ListGrounds.ItemIndex+1;
-if ID=0 then exit;
-SpinEdit1.Value:=Ground[ID].Dirt;
-SE_GripF.Value:=Ground[ID].GripF;
-SE_GripR.Value:=Ground[ID].GripR;
-SpinEdit4.Value:=Ground[ID].Stick;
-Gr_Noise.ItemIndex:=EnsureRange(Ground[ID].NoiseID,0,3);
-GR_Skid.ItemIndex:=EnsureRange(Ground[ID].SkidID,0,3);
-Gr_NoColli.Checked:=Ground[ID].NoColliFlag=1;
-Gr_Unknown.ItemIndex:=EnsureRange(Ground[ID].x8,0,3);
-GroundsRefresh:=false;
+  GroundsRefresh := true;
+
+  ID := ListGrounds.ItemIndex + 1;
+  if ID=0 then exit;
+
+  SpinEdit1.Value   :=Ground[ID].Dirt;
+  SE_GripF.Value    :=Ground[ID].GripF;
+  SE_GripR.Value    :=Ground[ID].GripR;
+  SpinEdit4.Value   :=Ground[ID].Stick;
+  Gr_Noise.ItemIndex  :=EnsureRange(Ground[ID].NoiseID,0,3);
+  GR_Skid.ItemIndex   :=EnsureRange(Ground[ID].SkidID,0,3);
+  Gr_NoColli.Checked  :=Ground[ID].NoColliFlag=1;
+  Gr_Unknown.ItemIndex:=EnsureRange(Ground[ID].x8,0,3);
+
+  GroundsRefresh := false;
 end;
 
 procedure TForm1.GroundsChange(Sender: TObject);
 var ID:integer;
 begin
-if GroundsRefresh then exit;
-if ListGrounds.ItemIndex<0 then exit;
-ID:=ListGrounds.ItemIndex+1;
-ListGrounds.Items[ID-1]:=Ground[ID].Name; //renaming on-the-fly
-Ground[ID].Dirt:=SpinEdit1.Value;
-Ground[ID].GripF:=SE_GripF.Value;
-Ground[ID].GripR:=SE_GripR.Value;
-Ground[ID].Stick:=SpinEdit4.Value;
-Ground[ID].NoiseID:=EnsureRange(Gr_Noise.ItemIndex,0,Gr_Noise.Items.Count-1);
-Ground[ID].SkidID:=EnsureRange(GR_Skid.ItemIndex,0,GR_Skid.Items.Count-1);
-Ground[ID].NoColliFlag:=ord(Gr_NoColli.Checked);
-Ground[ID].x8:=EnsureRange(Gr_Unknown.ItemIndex,0,Gr_Unknown.Items.Count-1);
-Changes.QAD:=true;
+  if GroundsRefresh then exit;
+
+  ID := ListGrounds.ItemIndex + 1;
+  if ID=0 then exit;
+
+  ListGrounds.Items[ID-1]:=Ground[ID].Name; //renaming on-the-fly
+  Ground[ID].Dirt   := SpinEdit1.Value;
+  Ground[ID].GripF  := SE_GripF.Value;
+  Ground[ID].GripR  := SE_GripR.Value;
+  Ground[ID].Stick  := SpinEdit4.Value;
+  Ground[ID].NoiseID  := EnsureRange(Gr_Noise.ItemIndex,0,Gr_Noise.Items.Count-1);
+  Ground[ID].SkidID   := EnsureRange(GR_Skid.ItemIndex,0,GR_Skid.Items.Count-1);
+  Ground[ID].NoColliFlag  := ord(Gr_NoColli.Checked);
+  Ground[ID].x8 := EnsureRange(Gr_Unknown.ItemIndex,0,Gr_Unknown.Items.Count-1);
+
+  Changes.QAD := true;
 end;
 
 
 procedure TForm1.AddGroundClick(Sender: TObject);
 var ss:string;
 begin
-  GroundsRefresh := true;
+  if Qty.GroundTypes=MaxGrounds then begin
+    MessageBox(Form1.Handle, PChar('Number of grounds limited to - '+inttostr(MaxGrounds)), 'Info', MB_OK or MB_ICONINFORMATION);
+    exit;
+  end;
+
   ss := InputBox('New Ground','Ground name','');
   if ss='' then begin
     MessageBox(Form1.Handle, 'Please input new ground name.', 'Info', MB_OK or MB_ICONINFORMATION);
-    GroundsRefresh := false;
-    exit;
-  end;
-  if Qty.GroundTypes=MaxGrounds then begin
-    MessageBox(Form1.Handle, PChar('Number of grounds limited to - '+inttostr(MaxGrounds)), 'Info', MB_OK or MB_ICONINFORMATION);
-    GroundsRefresh := false;
     exit;
   end;
 
   inc(Qty.GroundTypes);
-  Ground[Qty.GroundTypes].Name  :=ss;
-  Ground[Qty.GroundTypes].GripF :=100;
-  Ground[Qty.GroundTypes].GripR :=100;
-  Ground[Qty.GroundTypes].NoColliFlag:=0;
-  Ground[Qty.GroundTypes].x8    :=0;
+  GroundsRefresh := true;
+  Ground[Qty.GroundTypes].Name  := ss;
+  Ground[Qty.GroundTypes].GripF := 100;
+  Ground[Qty.GroundTypes].GripR := 100;
+  Ground[Qty.GroundTypes].NoColliFlag := 0;
+  Ground[Qty.GroundTypes].x8    := 0;
   ListGrounds.Items.Add(ss);
   ListGrounds.ItemIndex := Qty.GroundTypes-1;
   ListGroundsClick(nil);
@@ -3866,25 +3869,32 @@ procedure TForm1.RemGroundClick(Sender: TObject);
 var i,ID:integer;
 begin
   ID := ListGrounds.ItemIndex+1;
+
   if ID=0 then begin
     MessageBox(Form1.Handle, 'Please select item to remove.', 'Info', MB_OK or MB_ICONINFORMATION);
     exit;
   end;
+
   if Qty.GroundTypes=1 then begin
     MessageBox(Form1.Handle, 'At least one ground should remain.', 'Info', MB_OK or MB_ICONINFORMATION);
     exit;
   end;
+
   dec(Qty.GroundTypes);
-  for i:=ID to Qty.GroundTypes do Ground[i]:=Ground[i+1];
+  for i:=ID to Qty.GroundTypes do
+    Ground[i]:=Ground[i+1];
+
   SendQADtoUI(apGrounds);
-  ListGrounds.ItemIndex:=EnsureRange(ID,1,Qty.GroundTypes)-1;
+  ListGrounds.ItemIndex := EnsureRange(ID,1,Qty.GroundTypes)-1;
   ListGroundsClick(nil);
+
   for i:=1 to Qty.TexturesFiles do
     if Tex2Ground[i]=ID-1 then
       dec(Tex2Ground[i]) //could assign any ground assignment here
     else
       if Tex2Ground[i]>ID-1 then
         dec(Tex2Ground[i]);
+
   Changes.QAD := true;
 end;
 
@@ -3893,10 +3903,12 @@ procedure TForm1.RenGroundClick(Sender: TObject);
 var ID:integer;
 begin
   ID := ListGrounds.ItemIndex+1;
+
   if ID = 0 then begin
     MessageBox(Form1.Handle, 'Please select item to rename.', 'Info', MB_OK or MB_ICONINFORMATION);
     exit;
   end;
+
   Ground[ID].Name := InputBox('Rename ground','Set new name',Ground[ID].Name);
   ListGrounds.Items[ID-1] := Ground[ID].Name;
   Changes.QAD := true;
@@ -3906,11 +3918,12 @@ end;
 procedure TForm1.ListTOBChange(Sender: TObject);
 var i:integer;
 begin
-if TrackID=0 then exit;
-ListTOB2.Clear;
-for i:=1 to TOBHead[TrackID].Qty do
-ListTOB2.Items.Add(inttostr(i)+'. '+ObjName[TOB[TrackID,i].ID+1]);
+  if TrackID=0 then exit;
+  ListTOB2.Clear;
+  for i:=1 to TOBHead[TrackID].Qty do
+    ListTOB2.Items.Add(inttostr(i)+'. '+ObjName[TOB[TrackID,i].ID+1]);
 end;
+
 
 procedure TForm1.ListTOB2Click(Sender: TObject);
 var ID,ID2:integer; a,b,c:integer;
@@ -5091,8 +5104,9 @@ begin
   LVL.SunX:=round(LVL.SunX*1000)/1000;
   LVL.SunZ:=round(LVL.SunZ*1000)/1000;
   LVL.SunY:=round(LVL.SunY*1000)/1000;
-  Changes.LVL:=true;
+  Changes.LVL := true;
 end;
+
 
 procedure TForm1.ImportNFSPUSoundsClick(Sender: TObject);
 var
@@ -5101,11 +5115,15 @@ var
   i3,i4:single;
 begin
   if not RunOpenDialog(OpenDialog,'',SceneryPath,'NFS-PU sounds list (*_aud.scn)|*.scn') then exit;
-  assignfile(ft,OpenDialog.FileName); reset(ft);
-  Qty.Sounds:=0; ii:=1;
+
+  AssignFile(ft,OpenDialog.FileName);
+  Reset(ft);
+
+  ii:=1;
+  Qty.Sounds:=0;
   repeat
     readln(ft);     //AUDIO_ELEMENT 4
-    readln(ft,Sound[ii].X,Sound[ii].Y,Sound[ii].Z);
+    readln(ft,Sound[ii].X, Sound[ii].Y, Sound[ii].Z);
     readln(ft,i1,i2,i3,i4);
 
     Sound[ii].Name   := inttostr(i2);
@@ -5119,31 +5137,33 @@ begin
     inc(ii);
     inc(Qty.Sounds);
   until(eof(ft));
-  closefile(ft);
+  CloseFile(ft);
+  
   SendQADtoUI(apSounds);
 end;
 
+
 procedure TForm1.CopySoundClick(Sender: TObject);
 begin
-PasteSound.Enabled:=true;
-CopyHolder.Name:=EditSoundName.Text;
-CopyHolder.Angl:=0;
-CopyHolder.Size:=1;
-CopyHolder.i1:=SoundVolume.Value;
-CopyHolder.i2:=SoundPlaySpeed.Value;
-CopyHolder.i3:=SoundRadius.Value;
-CopyHolder.i4:=SoundX4.ItemIndex;
-CopyHolder.r1:=SoundX6.Value;
-CopyHolderHintUpdate;
-CopySound.Hint:=CopyHolder.Hint;
+  PasteSound.Enabled:=true;
+  CopyHolder.Name:=EditSoundName.Text;
+  CopyHolder.Angl:=0;
+  CopyHolder.Size:=1;
+  CopyHolder.i1:=SoundVolume.Value;
+  CopyHolder.i2:=SoundPlaySpeed.Value;
+  CopyHolder.i3:=SoundRadius.Value;
+  CopyHolder.i4:=SoundX4.ItemIndex;
+  CopyHolder.r1:=SoundX6.Value;
+  CopyHolderHintUpdate;
+  CopySound.Hint := CopyHolder.Hint;
 end;
 
 procedure TForm1.CopyHolderHintUpdate;
 begin
-CopyHolder.Hint:='Position:'+#13+
-floattostr(CopyHolder.X)+#13+
-floattostr(CopyHolder.Y)+#13+
-floattostr(CopyHolder.Z);
+  CopyHolder.Hint:='Position:'+eol+
+  floattostr(CopyHolder.X)+eol+
+  floattostr(CopyHolder.Y)+eol+
+  floattostr(CopyHolder.Z);
 end;
 
 procedure TForm1.PasteSoundClick(Sender: TObject);
@@ -5170,33 +5190,32 @@ procedure TForm1.FillSC2Click(Sender: TObject);begin AutoFill_SC2(nil); end;
 procedure TForm1.ShowChangesInfoClick(Sender: TObject);
 var i:integer;
 begin
-if Sender=ShowInfo then
-if MemoLoad.Showing then begin
-MemoLoad.Hide;
-MemoSave.Hide;
-ShowInfo.Checked:=false;
-end else begin
-MemoLoad.Show;
-MemoSave.Show;
-ShowInfo.Checked:=true;
-end;
+  if Sender=ShowInfo then
+    if MemoLoad.Showing then begin
+      MemoLoad.Hide;
+      MemoSave.Hide;
+      ShowInfo.Checked:=false;
+      exit;
+    end else begin
+      MemoLoad.Show;
+      MemoSave.Show;
+      ShowInfo.Checked:=true;
+    end;
 
-MemoSave.Lines.Clear;
-MemoSave.Lines.Add('Work folder: '+fOptions.WorkDir+#13+#10+'Scenery name: '+Scenery+#13+#10);
-MemoSave.Lines.Add('ERRORS');
-//for i:=1 to Warnings[0].Level do
-//MemoSave.Lines.Add(Warnings[i].Text);
+  MemoSave.Lines.Clear;
+  MemoSave.Lines.Add('Work folder: '+fOptions.WorkDir+eol+'Scenery name: '+Scenery+eol);
+  MemoSave.Lines.Add('ERRORS');
 
-for i:=1 to STRHead.NumSplines do begin
-if STR_Spline[i].FirstWay+1<>EnsureRange(STR_Spline[i].FirstWay+1,1,STRHead.NumSplines) then
-MemoSave.Lines.Add('STR: No way from spline '+inttostr(i));
-if ((STR_Spline[i].Options and 1)=1)and((STR_Spline[STR_Spline[i].FirstWay+1].Options and 1)=1) then
-MemoSave.Lines.Add('STR:Two intersections next to each other at spline '+inttostr(i));
-end;
+  for i:=1 to STRHead.NumSplines do begin
+    if STR_Spline[i].FirstWay+1<>EnsureRange(STR_Spline[i].FirstWay+1,1,STRHead.NumSplines) then
+      MemoSave.Lines.Add('STR: No way from spline '+inttostr(i));
+    if ((STR_Spline[i].Options and 1)=1)and((STR_Spline[STR_Spline[i].FirstWay+1].Options and 1)=1) then
+      MemoSave.Lines.Add('STR:Two intersections next to each other at spline '+inttostr(i));
+  end;
 
-MemoSave.Lines.Add(#13+#10+'CHANGES');
-MemoSave.Lines.Add(ReturnListOfChangedFiles(#13+#10));
-StatusBar1.Panels[5].Text:=ReturnListOfChangedFiles(', ');
+  MemoSave.Lines.Add(eol+'CHANGES');
+  MemoSave.Lines.Add(ReturnListOfChangedFiles(eol));
+  StatusBar1.Panels[5].Text:=ReturnListOfChangedFiles(', ');
 end;
 
 procedure TForm1.OptionsClick(Sender: TObject); begin FormOptions.Show; end;
@@ -5391,7 +5410,7 @@ var ver,vfl:integer; s:string;
 begin
   glGetIntegerv(GL_SHADING_LANGUAGE_VERSION_ARB,@ver);
   glGetIntegerv(GL_MAX_VARYING_FLOATS_ARB,@vfl);
-  s:='OpenGL '+glGetString(GL_VERSION)+' by '+glGetString(GL_RENDERER)+#13+
+  s:='OpenGL '+glGetString(GL_VERSION)+' by '+glGetString(GL_RENDERER)+eol+
      'GLSL version '+inttostr(ver)+' with max floats '+inttostr(vfl);
   AboutForm.Show(VersionInfo,s,'STKit2');
 end;
@@ -6415,31 +6434,31 @@ end;
 
 procedure TForm1.AddSkyPresetClick(Sender: TObject);
 begin
-if SKYQty>=32 then exit; //limit to 32
-inc(SKYQty);
-SKYIndex:=SKYQty;
-SKY[SKYIndex].SkyTex:='Clouds'+SceneryVersion+'_'+int2fix(SKYIndex,2);
-SKY[SKYIndex].FogTab:='rangefogtable_'+int2fix(SKYIndex,2);
-SKY[SKYIndex].FogCol.R:=$B8;//B8BDCB
-SKY[SKYIndex].FogCol.G:=$BD;
-SKY[SKYIndex].FogCol.B:=$CB;
-SKY[SKYIndex].SunCol.R:=$B0;//b0a090
-SKY[SKYIndex].SunCol.G:=$A0;
-SKY[SKYIndex].SunCol.B:=$90;
-SKY[SKYIndex].AmbCol.R:=$27;//272E34
-SKY[SKYIndex].AmbCol.G:=$2E;
-SKY[SKYIndex].AmbCol.B:=$34;
-SKY[SKYIndex].WlkAmb.R:=$66;//666666
-SKY[SKYIndex].WlkAmb.G:=$66;
-SKY[SKYIndex].WlkAmb.B:=$66;
-SKY[SKYIndex].WlkSun.R:=$4C;//4C4C4C
-SKY[SKYIndex].WlkSun.G:=$4C;
-SKY[SKYIndex].WlkSun.B:=$4C;
-SendQADtoUI(apSky); //resets SKYIndex
-ListSKY.ItemIndex:=SKYQty-1;
-ListSKYClick(nil);
-EditSkyChange(nil); //update current sky textures
-Changes.SKY:=true;
+  if SKYQty>=32 then exit; //limit to 32
+  inc(SKYQty);
+  SKYIndex:=SKYQty;
+  SKY[SKYIndex].SkyTex:='Clouds'+SceneryVersion+'_'+int2fix(SKYIndex,2);
+  SKY[SKYIndex].FogTab:='rangefogtable_'+int2fix(SKYIndex,2);
+  SKY[SKYIndex].FogCol.R:=$B8;//B8BDCB
+  SKY[SKYIndex].FogCol.G:=$BD;
+  SKY[SKYIndex].FogCol.B:=$CB;
+  SKY[SKYIndex].SunCol.R:=$B0;//b0a090
+  SKY[SKYIndex].SunCol.G:=$A0;
+  SKY[SKYIndex].SunCol.B:=$90;
+  SKY[SKYIndex].AmbCol.R:=$27;//272E34
+  SKY[SKYIndex].AmbCol.G:=$2E;
+  SKY[SKYIndex].AmbCol.B:=$34;
+  SKY[SKYIndex].WlkAmb.R:=$66;//666666
+  SKY[SKYIndex].WlkAmb.G:=$66;
+  SKY[SKYIndex].WlkAmb.B:=$66;
+  SKY[SKYIndex].WlkSun.R:=$4C;//4C4C4C
+  SKY[SKYIndex].WlkSun.G:=$4C;
+  SKY[SKYIndex].WlkSun.B:=$4C;
+  SendQADtoUI(apSky); //resets SKYIndex
+  ListSKY.ItemIndex:=SKYQty-1;
+  ListSKYClick(nil);
+  EditSkyChange(nil); //update current sky textures
+  Changes.SKY:=true;
 end;
 
 procedure TForm1.CBCloudsClick(Sender: TObject);
@@ -6464,8 +6483,6 @@ for ii:=0 to (Sender as TComboBox).Items.Count-1 do
 if (tmp=(Sender as TComboBox).Items[ii]) or
 ((Sender=CBFogTable)and((Sender as TComboBox).Items[ii][1]='r')and((Sender as TComboBox).ItemIndex=-1))
 then (Sender as TComboBox).ItemIndex:=ii;
-
-
 if (Sender as TComboBox).ItemIndex=-1 then (Sender as TComboBox).ItemIndex:=0;
 end;
 
@@ -6484,17 +6501,21 @@ end;
 
 
 procedure TForm1.Button16Click(Sender: TObject);
-  var ii:integer;
+var ii:integer;
 begin
-  for ii:=1 to TRKQTY[TrackID].Nodes do begin
-    TRK[TrackID].Route[ii].Tunnel:=0;
-    TRK[TrackID].Route[ii].Column:=0;
-    TRK[TrackID].Route[ii].v1:=0;
-    TRK[TrackID].Route[ii].v2:=0;
-    TRK[TrackID].Route[ii].v3:=0;
-    TRK[TrackID].Route[ii].v4:=0;
+  if TrackID=0 then exit;
+
+  for ii:=1 to TRKQTY[TrackID].Nodes do
+  begin
+    TRK[TrackID].Route[ii].Tunnel := 0;
+    TRK[TrackID].Route[ii].Column := 0;
+    TRK[TrackID].Route[ii].v1 := 0;
+    TRK[TrackID].Route[ii].v2 := 0;
+    TRK[TrackID].Route[ii].v3 := 0;
+    TRK[TrackID].Route[ii].v4 := 0;
   end;
-  Changes.TRK[TrackID]:=true;
+
+  Changes.TRK[TrackID] := true;
 end;
 
 
@@ -6505,7 +6526,8 @@ begin
   FindFirst('*.mox', faAnyFile, SearchRec);
   repeat
     if (SearchRec.Name<>'')and(SearchRec.Name<>'.')and(SearchRec.Name<>'..') then begin
-      s:=SearchRec.Name; decs(s,4); //.mox
+      s := SearchRec.Name;
+      decs(s,4); //.mox
       AddNewObject(s,false);
     end;
   until (FindNext(SearchRec)<>0);
@@ -6513,7 +6535,8 @@ begin
   FindFirst('*.tree', faAnyFile, SearchRec);
   repeat
     if (SearchRec.Name<>'')and(SearchRec.Name<>'.')and(SearchRec.Name<>'..') then begin
-      s:='T\'+SearchRec.Name; decs(s,5); //.tree
+      s := 'T\'+SearchRec.Name;
+      decs(s,5); //.tree
       AddNewObject(s,false);
     end;
   until (FindNext(SearchRec)<>0);
@@ -6525,54 +6548,56 @@ end;
 procedure TForm1.Button20Click(Sender: TObject);
 var ii:integer;
 begin
-STRHead.NumPoints:=NETHead.Num1;
-setlength(STR_Point,NETHead.Num1+1);
-for ii:=1 to NETHead.Num1 do begin
-  STR_Point[ii].x:=NET1[ii].X;
-  STR_Point[ii].y:=NET1[ii].Y;
-  STR_Point[ii].z:=NET1[ii].Z;
-  STR_Point[ii].tx:=1;
-  STR_Point[ii].ty:=0;
-  STR_Point[ii].tz:=0;
-end;
-NETHead.Num1:=0;
+  STRHead.NumPoints := NETHead.Num1;
+  setlength(STR_Point,NETHead.Num1+1);
+
+  for ii:=1 to NETHead.Num1 do begin
+    STR_Point[ii].x:=NET1[ii].X;
+    STR_Point[ii].y:=NET1[ii].Y;
+    STR_Point[ii].z:=NET1[ii].Z;
+    STR_Point[ii].tx:=1;
+    STR_Point[ii].ty:=0;
+    STR_Point[ii].tz:=0;
+  end;
+
+  NETHead.Num1:=0;
 end;
 
 procedure TForm1.RemAniNodeClick(Sender: TObject);
 var ID,ID2,i,k:integer;
 begin
-SNINodesRefresh:=true;
-ID:=ListSNIObjects.ItemIndex+1; if ID=0 then exit;
-ID2:=ListSNINodes.ItemIndex+1;  if ID2=0 then exit;
-if SNIObj[ID].NumNodes<=3 then begin
-MessageBox(Form1.Handle, 'At least 3 nodes should remain in route.', 'Info', MB_OK or MB_ICONINFORMATION);
-exit;
-end;
+  SNINodesRefresh:=true;
+  ID:=ListSNIObjects.ItemIndex+1; if ID=0 then exit;
+  ID2:=ListSNINodes.ItemIndex+1;  if ID2=0 then exit;
+  if SNIObj[ID].NumNodes<=3 then begin
+    MessageBox(Form1.Handle, 'At least 3 nodes should remain in route.', 'Info', MB_OK or MB_ICONINFORMATION);
+    exit;
+  end;
 
-//For current object, remove node and shift following nodes up
-for k:=ID2 to SNIObj[ID].NumNodes do
-SNINode[SNIObj[ID].firstNode+k]:=SNINode[SNIObj[ID].firstNode+k+1];
+  //For current object, remove node and shift following nodes up
+  for k:=ID2 to SNIObj[ID].NumNodes do
+    SNINode[SNIObj[ID].firstNode+k]:=SNINode[SNIObj[ID].firstNode+k+1];
 
-//Shift all following objects nodes 1 up
-for i:=1 to SNIHead.Obj do
-if SNIObj[i].firstNode+1>SNIObj[ID].firstNode+ID2 then
-for k:=1 to SNIObj[i].NumNodes do
-SNINode[SNIObj[i].firstNode+k]:=SNINode[SNIObj[i].firstNode+k+1];
+  //Shift all following objects nodes 1 up
+  for i:=1 to SNIHead.Obj do
+    if SNIObj[i].firstNode+1>SNIObj[ID].firstNode+ID2 then
+      for k:=1 to SNIObj[i].NumNodes do
+        SNINode[SNIObj[i].firstNode+k]:=SNINode[SNIObj[i].firstNode+k+1];
 
-//Shift all following objects FirstNode value
-for i:=1 to SNIHead.Obj do
-if SNIObj[i].firstNode+1>SNIObj[ID].firstNode+ID2 then
-dec(SNIObj[i].firstNode);
+  //Shift all following objects FirstNode value
+  for i:=1 to SNIHead.Obj do
+    if SNIObj[i].firstNode+1>SNIObj[ID].firstNode+ID2 then
+      dec(SNIObj[i].firstNode);
 
-dec(SNIObj[ID].NumNodes);
-dec(SNIHead.Node);
-CalculateSNIRoutes;
-SendQADToUI(apAnimated);
-ListSNIObjects.ItemIndex:=ID-1; ListSNIObjectsClick(nil);
-ListSNINodes.ItemIndex:=ID2-1;  ListSNINodesClick(nil);
-SNINodesRefresh:=false;
-Changes.SNI:=true;
-Changes.WRK:=true;
+  dec(SNIObj[ID].NumNodes);
+  dec(SNIHead.Node);
+  CalculateSNIRoutes;
+  SendQADToUI(apAnimated);
+  ListSNIObjects.ItemIndex:=ID-1; ListSNIObjectsClick(nil);
+  ListSNINodes.ItemIndex:=ID2-1;  ListSNINodesClick(nil);
+  SNINodesRefresh:=false;
+  Changes.SNI:=true;
+  Changes.WRK:=true;
 end;
 
 procedure TForm1.RemAniClick(Sender: TObject);
@@ -6753,22 +6778,23 @@ end;
 procedure TForm1.LevelStreetsClick(Sender: TObject);
 var ID:integer; y1,y2:single; ti:integer;
 begin
-for ID:=1 to STRHead.NumPoints do begin
-TraceHeight(STR_Point[ID].x+STR_Point[ID].tx*100,
-            STR_Point[ID].y+STR_Point[ID].ty*100,
-            STR_Point[ID].z+STR_Point[ID].tz*100,
-            pd_Near, @y1, @ti);
-TraceHeight(STR_Point[ID].x-STR_Point[ID].tx*100,
-            STR_Point[ID].y-STR_Point[ID].ty*100,
-            STR_Point[ID].z-STR_Point[ID].tz*100,
-            pd_Near, @y2, @ti);
+  for ID:=1 to STRHead.NumPoints do begin
+    TraceHeight(STR_Point[ID].x+STR_Point[ID].tx*100,
+                STR_Point[ID].y+STR_Point[ID].ty*100,
+                STR_Point[ID].z+STR_Point[ID].tz*100,
+                pd_Near, @y1, @ti);
+    TraceHeight(STR_Point[ID].x-STR_Point[ID].tx*100,
+                STR_Point[ID].y-STR_Point[ID].ty*100,
+                STR_Point[ID].z-STR_Point[ID].tz*100,
+                pd_Near, @y2, @ti);
 
-Normalize(STR_Point[ID].tx,
-          (y1-y2)/150,
-          STR_Point[ID].tz,
-          @STR_Point[ID].tx,@STR_Point[ID].ty,@STR_Point[ID].tz);
-end;
-Changes.STR:=true;
+    Normalize(STR_Point[ID].tx,
+              (y1-y2)/150,
+              STR_Point[ID].tz,
+              @STR_Point[ID].tx,@STR_Point[ID].ty,@STR_Point[ID].tz);
+  end;
+
+  Changes.STR:=true;
 end;
 
 procedure TForm1.LoadSounds(Sender: TObject);
@@ -6922,22 +6948,21 @@ begin
   FindFirst('*.ptx', faAnyFile, SearchRec);
     count:=0;
     repeat
-    if (SearchRec.Name<>'')and(SearchRec.Name<>'.')and(SearchRec.Name<>'..') then begin
+      if (SearchRec.Name<>'')and(SearchRec.Name<>'.')and(SearchRec.Name<>'..') then
+      begin
+        s:=SearchRec.Name;
+        decs(s,4); {.ptx}
+        TexAlreadyExists:=false;
 
-      s:=SearchRec.Name;
-      decs(s,4); {.ptx}
-      TexAlreadyExists:=false;
+        for i:=1 to Qty.TexturesFiles do
+          if uppercase(TexName[i])=uppercase(s) then
+            TexAlreadyExists:=true;
 
-      for i:=1 to Qty.TexturesFiles do
-        if uppercase(TexName[i])=uppercase(s) then
-          TexAlreadyExists:=true;
-
-      if not TexAlreadyExists then begin
-        inc(count);
-        ArrS[count]:=s;
+        if not TexAlreadyExists then begin
+          inc(count);
+          ArrS[count]:=s;
+        end;
       end;
-
-    end;
     until (FindNext(SearchRec)<>0);
   FindClose(SearchRec);
 
@@ -6974,22 +6999,22 @@ begin
       RemTextureClick(nil);
     end;
 
-SendQADtoUI(apTextures);
-list_tx:=0;
-Changes.QAD:=true;
+  SendQADtoUI(apTextures);
+  list_tx:=0;
+  Changes.QAD:=true;
 end;
 
 procedure TForm1.ListMakeTrackClick(Sender: TObject);
 var MTNode:integer;
 begin
-MTNode:=ListMakeTrack.ItemIndex+1;
-if MTNode=0 then exit;
-MakeTrackRefresh:=true;
-MTX.Value:=MakeTrack[TrackID].Node[MTNode].X;
-MTY.Value:=MakeTrack[TrackID].Node[MTNode].Y;
-MTZ.Value:=MakeTrack[TrackID].Node[MTNode].Z;
-MTW.Value:=MakeTrack[TrackID].Node[MTNode].RoadWidth/10;
-MakeTrackRefresh:=false;
+  MTNode:=ListMakeTrack.ItemIndex+1;
+  if MTNode=0 then exit;
+  MakeTrackRefresh:=true;
+  MTX.Value:=MakeTrack[TrackID].Node[MTNode].X;
+  MTY.Value:=MakeTrack[TrackID].Node[MTNode].Y;
+  MTZ.Value:=MakeTrack[TrackID].Node[MTNode].Z;
+  MTW.Value:=MakeTrack[TrackID].Node[MTNode].RoadWidth/10;
+  MakeTrackRefresh:=false;
 end;
 
 
@@ -7008,16 +7033,18 @@ end;
 procedure TForm1.MTXChange(Sender: TObject);
 var MTNode:integer;
 begin
-MTNode:=ListMakeTrack.ItemIndex+1;
-if MTNode=0 then exit;
-if MakeTrackRefresh then exit;
-MakeTrack[TrackID].Node[MTNode].X:=MTX.Value;
-MakeTrack[TrackID].Node[MTNode].Y:=MTY.Value;
-MakeTrack[TrackID].Node[MTNode].Z:=MTZ.Value;
-MakeTrack[TrackID].Node[MTNode].RoadWidth:=round(MTW.Value*10);
+  if MakeTrackRefresh then exit;
 
-RebuildMTSplines;
-Changes.WRK:=true; //Need to store all that data in WRK file
+  MTNode:=ListMakeTrack.ItemIndex+1;
+  if MTNode=0 then exit;
+  
+  MakeTrack[TrackID].Node[MTNode].X:=MTX.Value;
+  MakeTrack[TrackID].Node[MTNode].Y:=MTY.Value;
+  MakeTrack[TrackID].Node[MTNode].Z:=MTZ.Value;
+  MakeTrack[TrackID].Node[MTNode].RoadWidth:=round(MTW.Value*10);
+
+  RebuildMTSplines;
+  Changes.WRK := true;
 end;
 
 
