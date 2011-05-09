@@ -1,13 +1,18 @@
 unit KromIOUtils;
+{$IFDEF VER140} {$DEFINE WDC} {$ENDIF}  // Delphi 6
+{$IFDEF VER150} {$DEFINE WDC} {$ENDIF}  // Delphi 7
+{$IFDEF VER220} {$DEFINE WDC} {$ENDIF}  // Delphi XE
 interface
 uses ShellAPI, SysUtils;
 
+
 function CopyDir(const fromDir, toDir: string): Boolean;
 function DelDir(dir: string): Boolean;
-
 function ReturnSize(i: int64): string;
 
+
 implementation
+
 
 function CopyDir(const fromDir, toDir: string): Boolean;
 var fos: TSHFileOpStruct;
@@ -20,6 +25,7 @@ begin
   Result := ShFileOperation(fos) = 0;
 end;
 
+
 function DelDir(dir: string): Boolean;
 var fos: TSHFileOpStruct;
 begin
@@ -29,6 +35,7 @@ begin
   fos.pFrom  := PChar(dir + #0);
   Result := ShFileOperation(fos) = 0;
 end;
+
 
 function ReturnSize(i: int64): string;
 begin
@@ -40,6 +47,7 @@ begin
   else
   Result:=inttostr(i shr 30)+'Gb';
 end;
+
 
 end.
  
