@@ -4,9 +4,9 @@ unit KromOGLUtils;
 {$IFDEF VER220} {$DEFINE WDC} {$ENDIF}  // Delphi XE
 interface
 uses
-  {$IFDEF WDC} OpenGL, {$ENDIF}  dglOpenGL,
+  dglOpenGL,
   {$IFDEF FPC} GL, {$ENDIF}
-  sysutils, windows, Forms, KromUtils;
+  SysUtils, Windows, Forms, KromUtils;
 
 type KCode = (kNil=0,kPoint=1,kSpline=2,kSplineAnchor=3,kSplineAnchorLength=4,
               kPoly=5,kSurface=6,kObject=7,kButton=8);  //1..31 are ok
@@ -15,9 +15,10 @@ type KCode = (kNil=0,kPoint=1,kSpline=2,kSplineAnchor=3,kSplineAnchorLength=4,
 
     TColor4 = cardinal;
 
-    procedure SetRenderFrame(const RenderFrame:HWND; out h_DC: HDC; out h_RC: HGLRC);
-    procedure SetRenderDefaults();
-    function SetDCPixelFormat(h_DC:HDC):boolean;
+    procedure SetRenderFrameAA(DummyFrame,RenderFrame:HWND; AntiAliasing:byte; out h_DC: HDC; out h_RC: HGLRC);
+    procedure SetRenderFrame(RenderFrame:HWND; out h_DC: HDC; out h_RC: HGLRC);
+
+    procedure SetRenderDefaults;
     procedure CheckGLSLError(FormHandle:hWND; Handle: GLhandleARB; Param: GLenum; ShowWarnings:boolean; Text:string);
     procedure BuildFont(h_DC:HDC; FontSize:integer; FontWeight:word=FW_NORMAL);
     procedure glPrint(text: string);
@@ -26,7 +27,7 @@ type KCode = (kNil=0,kPoint=1,kSpline=2,kSplineAnchor=3,kSplineAnchorLength=4,
     procedure glkQuad(Ax,Ay,Bx,By,Cx,Cy,Dx,Dy:single);
     procedure glkRect(Ax,Ay,Bx,By:single);
     procedure glkMoveAALines(DoShift:boolean);
-procedure SetupVSync(aVSync:boolean);
+    procedure SetupVSync(aVSync:boolean);
     procedure kSetColorCode(TypeOfValue:KCode;IndexNum:integer);
     procedure kGetColorCode(RGBColor:Pointer;var TypeOfValue:KCode;var IndexNum:integer);
 
@@ -51,55 +52,14 @@ const
 implementation
 
 
-procedure SetRenderFrame(const RenderFrame:HWND; out h_DC: HDC; out h_RC: HGLRC);
-begin
-  InitOpenGL;
-  h_DC := GetDC(RenderFrame);
-  if h_DC=0 then
-  begin
-    MessageBox(HWND(nil), 'Unable to get a device context', 'Error', MB_OK or MB_ICONERROR);
-    exit;
-  end;
-  if not SetDCPixelFormat(h_DC) then
-    exit;
-  h_RC := wglCreateContext(h_DC);
-  if h_RC=0 then
-  begin
-    MessageBox(HWND(nil), 'Unable to create an OpenGL rendering context', 'Error', MB_OK or MB_ICONERROR);
-    exit;
-  end;
-  if not wglMakeCurrent(h_DC, h_RC) then
-  begin
-    MessageBox(HWND(nil), 'Unable to activate OpenGL rendering context', 'Error', MB_OK or MB_ICONERROR);
-    exit;
-  end;
-  ReadExtensions;
-  ReadImplementationProperties;
-end;
-
-
-procedure SetRenderDefaults();
-begin
-  glClearColor(0, 0, 0, 0); 	   //Background
-  glClear (GL_COLOR_BUFFER_BIT);
-  glShadeModel(GL_SMOOTH);                 //Enables Smooth Color Shading
-  glPolygonMode(GL_FRONT,GL_FILL);
-  glEnable(GL_NORMALIZE);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA); //Set alpha mode
-  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-  glEnable(GL_COLOR_MATERIAL);                 //Enable Materials
-  glEnable(GL_TEXTURE_2D);                     // Enable Texture Mapping
-end;
-
-
-function SetDCPixelFormat(h_DC:HDC):boolean;
+function SetDCPixelFormat(h_DC:HDC; PixelFormat:Integer):boolean;
 var
   nPixelFormat: Integer;
   PixelDepth:integer;
   pfd: TPixelFormatDescriptor;
 begin
-PixelDepth:=32;
+  PixelDepth := 32; //32bpp is common
+
   with pfd do begin
     nSize           := SizeOf(TPIXELFORMATDESCRIPTOR); // Size Of This Pixel Format Descriptor
     nVersion        := 1;                    // The version of this data structure
@@ -128,20 +88,156 @@ PixelDepth:=32;
     bReserved       := 0;                    // Number of overlay and underlay planes
     dwLayerMask     := 0;                    // Ignored
     dwVisibleMask   := 0;                    // Transparent color of underlay plane
-    dwDamageMask    := 0;                     // Ignored
+    dwDamageMask    := 0;                    // Ignored
   end;
-  nPixelFormat:=ChoosePixelFormat(h_DC, @pfd);
-  if nPixelFormat=0 then begin
+
+  if PixelFormat = 0 then
+    nPixelFormat := ChoosePixelFormat(h_DC, @pfd)
+  else
+    nPixelFormat := PixelFormat;
+
+  if nPixelFormat = 0 then begin
     MessageBox(0, 'Unable to find a suitable pixel format', 'Error', MB_OK or MB_ICONERROR);
-    Result:=false;
+    Result := false;
     exit;
   end;
+
+  //Even with known pixel format we still need to supply some PFD structure
   if not SetPixelFormat(h_DC, nPixelFormat, @pfd) then begin
     MessageBox(0, 'Unable to set the pixel format', 'Error', MB_OK or MB_ICONERROR);
-    Result:=false;
+    Result := false;
     exit;
   end;
-Result:=true;
+
+  Result := true;
+end;
+
+
+function GetMultisamplePixelFormat(h_dc: HDC; AntiAliasing:byte): integer;
+var
+  pixelFormat: integer;
+  ValidFormat: boolean;
+  NumFormats: GLUint;
+  iAttributes: array of GLint;
+begin
+  Result := 0;
+
+  if not WGL_ARB_multisample or not Assigned(wglChoosePixelFormatARB) then
+    Exit;
+
+  SetLength(iAttributes,21);
+  iAttributes[0] := WGL_DRAW_TO_WINDOW_ARB;
+  iAttributes[1] := 1;
+  iAttributes[2] := WGL_SUPPORT_OPENGL_ARB;
+  iAttributes[3] := 1;
+  iAttributes[4] := WGL_ACCELERATION_ARB;
+  iAttributes[5] := WGL_FULL_ACCELERATION_ARB;
+  iAttributes[6] := WGL_COLOR_BITS_ARB;
+  iAttributes[7] := 24;
+  iAttributes[8] := WGL_ALPHA_BITS_ARB;
+  iAttributes[9] := 8;
+  iAttributes[10] := WGL_DEPTH_BITS_ARB;
+  iAttributes[11] := 16;
+  iAttributes[12] := WGL_STENCIL_BITS_ARB;
+  iAttributes[13] := 0;
+  iAttributes[14] := WGL_DOUBLE_BUFFER_ARB;
+  iAttributes[15] := 1;
+  iAttributes[16] := WGL_SAMPLE_BUFFERS_ARB;
+  iAttributes[17] := 1;
+  iAttributes[18] := WGL_SAMPLES_ARB;
+  iAttributes[19] := AntiAliasing;
+  iAttributes[20] := 0;
+
+  //Try to find mode with slightly worse AA before giving up
+  repeat
+    iAttributes[19] := AntiAliasing;
+    ValidFormat := wglChoosePixelFormatARB(h_dc, @iattributes[0], nil, 1, @pixelFormat, @NumFormats);
+    if ValidFormat and (NumFormats >= 1) then
+    begin
+      Result := pixelFormat;
+      exit;
+    end;
+    AntiAliasing := AntiAliasing div 2;
+  until(AntiAliasing < 2);
+end;
+
+
+procedure SetContexts(RenderFrame:HWND; PixelFormat:integer; out h_DC: HDC; out h_RC: HGLRC);
+begin
+  h_DC := GetDC(RenderFrame);
+
+  if h_DC = 0 then
+  begin
+    MessageBox(HWND(nil), 'Unable to get a device context', 'Error', MB_OK or MB_ICONERROR);
+    exit;
+  end;
+
+  if not SetDCPixelFormat(h_DC, PixelFormat) then
+    exit;
+
+  h_RC := wglCreateContext(h_DC);
+
+  if h_RC = 0 then
+  begin
+    MessageBox(HWND(nil), 'Unable to create an OpenGL rendering context', 'Error', MB_OK or MB_ICONERROR);
+    exit;
+  end;
+
+  if not wglMakeCurrent(h_DC, h_RC) then
+  begin
+    MessageBox(HWND(nil), 'Unable to activate OpenGL rendering context', 'Error', MB_OK or MB_ICONERROR);
+    exit;
+  end;
+end;
+
+
+procedure SetRenderFrame(RenderFrame:HWND; out h_DC: HDC; out h_RC: HGLRC);
+begin
+  InitOpenGL;
+  SetContexts(RenderFrame, 0, h_DC, h_RC);
+  ReadExtensions;
+  ReadImplementationProperties;
+end;
+
+
+{The key problem is this: the function we use to get WGL extensions is, itself, an OpenGL extension.
+Thus like any OpenGL function, it requires an OpenGL context to call it. So in order to get the
+functions we need to create a context, we have to... create a context.
+
+Fortunately, this context does not need to be our final context. All we need to do is create a dummy
+context to get function pointers, then use those functions directly. Unfortunately, Windows does not
+allow recreation of a rendering context within a single HWND. We must destroy previous HWND context
+and create final HWND context after we are finished with the dummy context.}
+procedure SetRenderFrameAA(DummyFrame,RenderFrame:HWND; AntiAliasing:byte; out h_DC: HDC; out h_RC: HGLRC);
+var PixelFormat:integer;
+begin
+  InitOpenGL;
+  SetContexts(DummyFrame, 0, h_DC, h_RC);
+  ReadExtensions;
+  ReadImplementationProperties;
+
+  PixelFormat := GetMultisamplePixelFormat(h_DC, AntiAliasing);
+  wglMakeCurrent(h_DC, 0);
+  wglDeleteContext(h_RC);
+
+  SetContexts(RenderFrame, PixelFormat, h_DC, h_RC);
+  ReadExtensions;
+  ReadImplementationProperties;
+end;
+
+
+procedure SetRenderDefaults;
+begin
+  glClearColor(0, 0, 0, 0); 	   //Background
+  glClear (GL_COLOR_BUFFER_BIT);
+  glShadeModel(GL_SMOOTH);                 //Enables Smooth Color Shading
+  glPolygonMode(GL_FRONT,GL_FILL);
+  glEnable(GL_NORMALIZE);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA); //Set alpha mode
+  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+  glEnable(GL_COLOR_MATERIAL);                 //Enable Materials
+  glEnable(GL_TEXTURE_2D);                     // Enable Texture Mapping
 end;
 
 
@@ -187,6 +283,7 @@ begin
   glPopAttrib;
 end;
 
+
 function ReadClick(X, Y: word): Vector3f;
 var viewport:TVector4i;
     projection:TMatrix4d;
@@ -205,17 +302,18 @@ begin
   glReadPixels(vx, vy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, @vz);
 
   if vz=1 then begin
-  Result.x:=0;
-  Result.y:=0;
-  Result.z:=0;
+    Result.x:=1000000; //Something out of working range
+    Result.y:=0;
+    Result.z:=0;
   end else begin
-  //This function uses OpenGL parameters, not dglOpenGL
-  gluUnProject(vx, vy, vz, modelview, projection, viewport, @wx, @wy, @wz);
-  Result.x:=wx;
-  Result.y:=wy;
-  Result.z:=wz;
+    //This function uses OpenGL parameters, not dglOpenGL
+    gluUnProject(vx, vy, vz, modelview, projection, viewport, @wx, @wy, @wz);
+    Result.x:=wx;
+    Result.y:=wy;
+    Result.z:=wz;
   end;
 end;
+
 
 procedure kSetColorCode(TypeOfValue:KCode;IndexNum:integer);
 begin
@@ -223,6 +321,7 @@ glColor4ub(IndexNum mod 256,
           (IndexNum mod 65536) div 256,    // 1,2,4(524288) 8,16,32,64,128 //0..31
           (IndexNum mod 524288) div 65536+byte(TypeOfValue)*8,255);
 end;
+
 
 procedure kGetColorCode(RGBColor:Pointer;var TypeOfValue:KCode;var IndexNum:integer);
 begin
