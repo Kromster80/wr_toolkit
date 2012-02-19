@@ -1,0 +1,13 @@
+STKit2:
+	Sounds WR2 replica
+	CT import (fix objects)
+	
+MTKit2:
+	Shaders
+	Suspension automatical making of
+	
+WR2Manager:
+	Cars enable/disable
+	
+WR2MissionMaker:
+	Release
