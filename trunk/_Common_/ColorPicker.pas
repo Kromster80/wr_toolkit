@@ -27,7 +27,7 @@ type
     SpinBr: TSpinEdit;
     Button2: TButton;
     procedure FormShow(Sender: TObject);
-    procedure ApplyHue2RGB(InHue:integer; var R,G,B:integer);
+    procedure ApplyHue2RGB(aHue:integer; var R,G,B:integer);
     procedure ApplySat2RGB(InSat:integer; var R,G,B:integer);
     procedure ApplyBri2RGB(inR,inG,inB,InBri:integer; var R,G,B:integer);
     procedure DrawHueSatQuad();
@@ -81,7 +81,7 @@ BitmapBri:=Tbitmap.Create;
 BitmapBri.PixelFormat:=pf24bit;
 BitmapBri.Width:=1;
 BitmapBri.Height:=BriImage.Height;}
-end;   
+end;
 
 //This is wrap to acquire data in different formats and convert them to internal R,G,B
 //Required since we can't make a call to overloaded procedure itself
@@ -98,16 +98,22 @@ end;
 
 procedure DefineInputColorRGB(R,G,B:byte; Sender:TObject);
 begin
-if Sender<>nil then SenderShape:=(Sender as TShape);
-with Form_ColorPicker do begin
-  if Sender<>nil then Show;
-  InputR:=R; InputG:=G; InputB:=B;//Keep input RGB incase user wants to cancel
-  ConvertRGB2HSB(R,G,B,Hue,Sat,Bri);
-  PositionHSBCursors();
-  DrawHueSatQuad();
-  DrawBriRow();
-  DisplayResultColor('Both');
-end;
+  if Sender <> nil then
+    SenderShape := (Sender as TShape);
+
+  with Form_ColorPicker do
+  begin
+    if Sender <> nil then
+      Show;
+    InputR := R;
+    InputG := G;
+    InputB := B; // Keep input RGB incase user wants to cancel
+    ConvertRGB2HSB(R, G, B, Hue, Sat, Bri);
+    PositionHSBCursors();
+    DrawHueSatQuad();
+    DrawBriRow();
+    DisplayResultColor('Both');
+  end;
 end;
 
 procedure TForm_ColorPicker.DrawHueSatQuad();
@@ -133,76 +139,98 @@ begin //Fill area with Hue and Saturation data respecting Brightness
 end;
 
 procedure TForm_ColorPicker.DrawBriRow();
-var R,G,B,Rt,Gt,Bt:integer; i:integer;
+var
+  R, G, B, Rt, Gt, Bt: integer;
+  i: integer;
 begin
-Hue:=Shape1.Left-HSImage.Left+Shape1.Width div 2; //restore after cycle
-Sat:=Shape1.Top-HSImage.Top+Shape1.Height div 2;
-ApplyHue2RGB(Hue, R,G,B);
-ApplySat2RGB(Sat, R,G,B);
-for i:=0 to 255 do begin
-ApplyBri2RGB(R,G,B,i,Rt,Gt,Bt);
-BitmapBri.Canvas.Pixels[0,i]:=Rt+Gt*256+Bt*65536;
-end;
-Bri:=Ticker.Top-BriImage.Top+(Ticker.Height div 2);
-BriImage.Canvas.StretchDraw(BriImage.Canvas.ClipRect,BitmapBri);
+  Hue := Shape1.Left - HSImage.Left + Shape1.Width div 2; // restore after cycle
+  Sat := Shape1.Top - HSImage.Top + Shape1.Height div 2;
+  ApplyHue2RGB(Hue, R, G, B);
+  ApplySat2RGB(Sat, R, G, B);
+  for i := 0 to 255 do
+  begin
+    ApplyBri2RGB(R, G, B, i, Rt, Gt, Bt);
+    BitmapBri.Canvas.Pixels[0, i] := Rt + Gt * 256 + Bt * 65536;
+  end;
+  Bri := Ticker.Top - BriImage.Top + (Ticker.Height div 2);
+  BriImage.Canvas.StretchDraw(BriImage.Canvas.ClipRect, BitmapBri);
 end;
 
-procedure TForm_ColorPicker.ApplyHue2RGB(InHue:integer; var R,G,B:integer);
-var V:single;
-begin V:=255/(360 div 6);
-EnsureRange(InHue,0,359);
-case InHue of
-0..59   :begin R:=255;                  G:=round(InHue*v);       B:=0;                   end;
-60..119 :begin R:=round((120-InHue)*v); G:=255;                  B:=0;                   end;
-120..179:begin R:=0;                    G:=255;                  B:=round((InHue-120)*v);end;
-180..239:begin R:=0;                    G:=round((240-InHue)*v); B:=255;                 end;
-240..299:begin R:=round((InHue-240)*v); G:=0;                    B:=255;                 end;
-300..359:begin R:=255;                  G:=0;                    B:=round((360-InHue)*v);end;
-end;
+procedure TForm_ColorPicker.ApplyHue2RGB(aHue: Integer; var R,G,B: Integer);
+const V = 255 / (360 div 6);
+begin
+  aHue := EnsureRange(aHue, 0, 359);
+  case aHue of
+    0..59   : begin R:=255;                 G:=round(aHue*v);       B:=0;                   end;
+    60..119 : begin R:=round((120-aHue)*v); G:=255;                 B:=0;                   end;
+    120..179: begin R:=0;                   G:=255;                 B:=round((aHue-120)*v); end;
+    180..239: begin R:=0;                   G:=round((240-aHue)*v); B:=255;                 end;
+    240..299: begin R:=round((aHue-240)*v); G:=0;                   B:=255;                 end;
+    300..359: begin R:=255;                 G:=0;                   B:=round((360-aHue)*v); end;
+  end;
 end;
 
 procedure TForm_ColorPicker.ApplySat2RGB(InSat:integer; var R,G,B:integer);
 begin
-R:=round((R*(255-InSat)+127*(InSat))/255);
-G:=round((G*(255-InSat)+127*(InSat))/255);
-B:=round((B*(255-InSat)+127*(InSat))/255);
+  R := round((R * (255 - InSat) + 127 * (InSat)) / 255);
+  G := round((G * (255 - InSat) + 127 * (InSat)) / 255);
+  B := round((B * (255 - InSat) + 127 * (InSat)) / 255);
 end;
 
-procedure TForm_ColorPicker.ApplyBri2RGB(inR,inG,inB,InBri:integer; var R,G,B:integer);
+procedure TForm_ColorPicker.ApplyBri2RGB(inR, inG, inB, InBri: integer; var R, G, B: integer);
 begin
-if InBri<127 then begin
-R:=round((inR*InBri+255*(127-InBri))/127);
-G:=round((inG*InBri+255*(127-InBri))/127);
-B:=round((inB*InBri+255*(127-InBri))/127);
-end else
-if InBri>127 then begin
-R:=round((inR*(255-InBri)+0*(InBri-127))/127);
-G:=round((inG*(255-InBri)+0*(InBri-127))/127);
-B:=round((inB*(255-InBri)+0*(InBri-127))/127);
-end else
+  if InBri < 127 then
+  begin
+    R := round((inR * InBri + 255 * (127 - InBri)) / 127);
+    G := round((inG * InBri + 255 * (127 - InBri)) / 127);
+    B := round((inB * InBri + 255 * (127 - InBri)) / 127);
+  end
+  else if InBri > 127 then
+  begin
+    R := round((inR * (255 - InBri) + 0 * (InBri - 127)) / 127);
+    G := round((inG * (255 - InBri) + 0 * (InBri - 127)) / 127);
+    B := round((inB * (255 - InBri) + 0 * (InBri - 127)) / 127);
+  end
+  else
 end;
 
-procedure TForm_ColorPicker.ConvertRGB2HSB(Rin,Gin,Bin:integer; var Hout,Sout,Bout:integer);
-var Rdel,Gdel,Bdel,Vmin,Vmax,Vdel,xp:integer;
+procedure TForm_ColorPicker.ConvertRGB2HSB(Rin, Gin, Bin: integer; var Hout, Sout, Bout: integer);
+var
+  Rdel, Gdel, Bdel, Vmin, Vmax, Vdel, xp: integer;
 begin
-Vmin:=min(Rin,Gin,Bin);
-Vmax:=max(Rin,Gin,Bin);
-Vdel:=Vmax-Vmin;
-Bout:=255-round((Vmax+Vmin)/2);
-if Vdel=0 then begin Hout:=180; Sout:=255; end else begin//Middle of HSImage
-if Bout>=127 then Sout:=255-round(Vdel/(Vmax+Vmin)*255) //including 127
-             else Sout:=255-round(Vdel/(511-Vmax-Vmin)*255);
+  Vmin := min(Rin, Gin, Bin);
+  Vmax := max(Rin, Gin, Bin);
+  Vdel := Vmax - Vmin;
+  Bout := 255 - round((Vmax + Vmin) / 2);
+  if Vdel = 0 then
+  begin
+    Hout := 180;
+    Sout := 255;
+  end
+  else
+  begin // Middle of HSImage
+    if Bout >= 127 then
+      Sout := 255 - round(Vdel / (Vmax + Vmin) * 255) // including 127
+    else
+      Sout := 255 - round(Vdel / (511 - Vmax - Vmin) * 255);
 
-Rdel:=round((Rin-Vmin)*255/Vdel);
-Gdel:=round((Gin-Vmin)*255/Vdel);
-Bdel:=round((Bin-Vmin)*255/Vdel);
-if Rin=Vmax then xp:=round((Gdel-Bdel)/255*60) else
-if Gin=Vmax then xp:=round(120-(Rdel-Bdel)/255*60) else
-if Bin=Vmax then xp:=round(240-(Gdel-Rdel)/255*60) else xp:=0;
-if xp<0 then inc(xp,360);
-if xp>360 then dec(xp,360);
-Hout:=xp;
-end;
+    Rdel := round((Rin - Vmin) * 255 / Vdel);
+    Gdel := round((Gin - Vmin) * 255 / Vdel);
+    Bdel := round((Bin - Vmin) * 255 / Vdel);
+    if Rin = Vmax then
+      xp := round((Gdel - Bdel) / 255 * 60)
+    else if Gin = Vmax then
+      xp := round(120 - (Rdel - Bdel) / 255 * 60)
+    else if Bin = Vmax then
+      xp := round(240 - (Gdel - Rdel) / 255 * 60)
+    else
+      xp := 0;
+    if xp < 0 then
+      inc(xp, 360);
+    if xp > 360 then
+      dec(xp, 360);
+    Hout := xp;
+  end;
 end;
 
 procedure TForm_ColorPicker.ConvertHSB2RGB(H_in,S_in,B_in:integer; var R,G,B:integer);
@@ -312,36 +340,38 @@ Ticker.Top:=BriImage.Top+Bri-(Ticker.Height div 2);
 end;
 
 procedure TForm_ColorPicker.SpinHSBChange(Sender: TObject);
-var R,G,B:integer;
+var
+  R, G, B: integer;
 begin
-if HSBRefresh then exit;
-HSBRefresh:=true;
-Hue:=EnsureRange(round(SpinH. Value),0,359);
-Sat:=EnsureRange(255-round(SpinS. Value),0,255);
-Bri:=EnsureRange(255-round(SpinBr.Value),0,255);
-HSBRefresh:=false;
-ConvertHSB2RGB(Hue,Sat,Bri,R,G,B);
-PositionHSBCursors();
-DrawHueSatQuad();
-DrawBriRow();
-DisplayResultColor('HSB');
+  if HSBRefresh then Exit;
+
+  HSBRefresh := true;
+  Hue := EnsureRange(round(SpinH.Value), 0, 359);
+  Sat := EnsureRange(255 - round(SpinS.Value), 0, 255);
+  Bri := EnsureRange(255 - round(SpinBr.Value), 0, 255);
+  HSBRefresh := false;
+  ConvertHSB2RGB(Hue, Sat, Bri, R, G, B);
+  PositionHSBCursors();
+  DrawHueSatQuad();
+  DrawBriRow();
+  DisplayResultColor('HSB');
 end;
 
 procedure TForm_ColorPicker.Button2Click(Sender: TObject);
 begin
-Form_ColorPicker.Close;
+  Form_ColorPicker.Close;
 end;
 
 procedure TForm_ColorPicker.FormCreate(Sender: TObject);
 begin
-BitmapHueSat:=Tbitmap.Create;
-BitmapHueSat.PixelFormat:=pf24bit;
-BitmapHueSat.Width:=HSImage.Width;;
-BitmapHueSat.Height:=HSImage.Height;
-BitmapBri:=Tbitmap.Create;
-BitmapBri.PixelFormat:=pf24bit;
-BitmapBri.Width:=1;
-BitmapBri.Height:=BriImage.Height;
+  BitmapHueSat := Tbitmap.Create;
+  BitmapHueSat.PixelFormat := pf24bit;
+  BitmapHueSat.Width := HSImage.Width;;
+  BitmapHueSat.Height := HSImage.Height;
+  BitmapBri := Tbitmap.Create;
+  BitmapBri.PixelFormat := pf24bit;
+  BitmapBri.Width := 1;
+  BitmapBri.Height := BriImage.Height;
 end;
 
 procedure TForm_ColorPicker.FormDestroy(Sender: TObject);
