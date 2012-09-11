@@ -70,17 +70,19 @@ begin
 end;
 
 function LoadShader():boolean;
-var src: PChar; // PGLcharARB = PChar;
+var src: PAnsiChar; // PGLcharARB = PAnsiChar;
     ff: file;
-    c:array[1..16384] of char;
+    c:array[1..16384] of AnsiChar;
     i,NumRead:integer;
     ShowGLSLWarning:boolean;
-    s:string;
+    s: AnsiString;
 begin
-ShowGLSLWarning:=false;
-Result:=false;
+  ShowGLSLWarning:=false;
+  Result:=false;
 
-  if glGetString(GL_VERSION) < '2.0' then begin //return format is "Major.Minor.Minor - Misc", we check first two  numbers as version
+  s := PAnsiChar(glGetString(GL_VERSION));
+
+  if s < '2.0' then begin //return format is "Major.Minor.Minor - Misc", we check first two  numbers as version
     if not fileexists('krom.dev') then
       MessageBox(Form1.Handle,
         PChar('You need at least OpenGL 2.0 to run STKit2'+eol+
@@ -91,6 +93,8 @@ Result:=false;
     exit;
   end;
 
+  Assert(Assigned(glCreateShaderObjectARB));
+
     vs := glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
     s := fOptions.ExeDir+STKit2_Data_Path+'\Shaders\Mat_GLSL.vert';
     if fileexists(s) then begin
@@ -99,7 +103,7 @@ Result:=false;
       blockread(ff,c,16384,NumRead);
       closefile(ff);
       c[NumRead+1]:=#0;
-      src:=PChar(StrPas(@c));
+      src := PAnsiChar(@c[1]);
     end else
       src:=@MatModeDefaultV;
     glShaderSourceARB(vs, 1, @src, @NumRead);
@@ -114,7 +118,7 @@ Result:=false;
         blockread(ff,c,16384,NumRead);
         closefile(ff);
         c[NumRead+1]:=#0;
-        src:=PChar(StrPas(@c));
+        src:=PAnsiChar(@c[1]);
       end else
         src:=@MatModeDefaultF;
       glShaderSourceARB(fs[i], 1, @src, @NumRead);
@@ -139,7 +143,7 @@ Result:=false;
     s:=fOptions.ExeDir+STKit2_Data_Path+'\Shaders\Obj_GLSL.vert';
     assignfile(ff,s); reset(ff,1);
     blockread(ff,c,16384,NumRead); closefile(ff);
-    c[NumRead+1]:=#0; src:=PChar(StrPas(@c));
+    c[NumRead+1]:=#0; src:=PAnsiChar(@c[1]);
     glShaderSourceARB(ovs, 1, @src, @NumRead);
 
     for i:=0 to ObjShadQty do begin
@@ -149,7 +153,7 @@ Result:=false;
     if not fileexists(s) then s:=fOptions.ExeDir+STKit2_Data_Path+'\Shaders\Obj_GLSL.frag';
         assignfile(ff,s); reset(ff,1);
         blockread(ff,c,16384,NumRead); closefile(ff);
-        c[NumRead+1]:=#0; src:=PChar(StrPas(@c));
+        c[NumRead+1]:=#0; src:=PAnsiChar(@c[1]);
         glShaderSourceARB(ofs[i], 1, @src, @NumRead);
     end;
 Form1.MemoLWO.Lines.Add('Loaded Object GLSL files');

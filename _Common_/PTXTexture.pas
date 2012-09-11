@@ -220,7 +220,7 @@ var
   Line : ^cardinal;
 begin       //todo: scanline
   if not FileExists(Filename) then begin
-    //MyMessageBox(0, PChar('File not found  - ' + Filename), PChar('JPG Texture'), MB_OK);
+    //MyMessageBox(0, PAnsiChar('File not found  - ' + Filename), PAnsiChar('JPG Texture'), MB_OK);
     setlength(MipData, 32*16); //size in bytes
     for i:=0 to length(MipData)-1 do
       MipData[i]:=random($FFFFFF);
@@ -266,7 +266,7 @@ begin
   JPGi:=TJPEGImage.Create;
 
   if not FileExists(Filename) then begin
-  //MyMessageBox(0, PChar('File not found  - ' + Filename), PChar('JPG Texture'), MB_OK);
+  //MyMessageBox(0, PAnsiChar('File not found  - ' + Filename), PAnsiChar('JPG Texture'), MB_OK);
 
   setlength(MipData, 32*16); //size in bytes
   for i:=0 to length(MipData)-1 do

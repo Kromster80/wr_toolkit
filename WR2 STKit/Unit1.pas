@@ -1,14 +1,16 @@
 unit Unit1;
 interface
 uses
-  dglOpenGL, OpenGL, JPEG, FloatSpinEdit, ValEdit,
+  dglOpenGL, JPEG, FloatSpinEdit, ValEdit,
   Windows, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, kromUtils, KromOGLUtils, Unit_Defaults, Math, Menus,
   LoadObjects, Grids,  ImgList, OpenAL, WR_AboutBox, SK_Options, FileCtrl,
   Buttons, Spin, ComCtrls, Unit_Grass, Unit_Streets, Unit_Triggers;
 
-type TCarDrivingMode = (cdm_Sim, cdm_Arcade);
-const CarDrivingMode: array[TCarDrivingMode] of string = ('Sim', 'Arcade');
+type
+  TCarDrivingMode = (cdm_Sim, cdm_Arcade);
+const
+  CarDrivingMode: array [TCarDrivingMode] of string = ('Sim', 'Arcade');
 
 
 type
@@ -910,7 +912,7 @@ var
   h_DC2: HDC;
   h_RC2: HGLRC;
   OldTickCount,FrameCount,OldFrameTimes,FrameTime:cardinal;
-  OldTime:integer;//time from last call
+  OldTime: Cardinal;//time from last call
   PlayTrack:boolean=false;
   PlayTrackPos:single=0;
   PlayTrackPrevX:integer;
@@ -977,7 +979,7 @@ var
   pix:array[1..4]of byte;
 
   Form1: TForm1;
-  c:array[1..16777216] of char;
+  c:array[1..16777216] of AnsiChar;
   list_id,list_ogl,list_tx,list_obj,list_sky:integer;
   Scenery,SceneryPath,SceneryVersion:string;
   SaveButton:boolean=true;
@@ -998,7 +1000,7 @@ var
   SNIHead:record Obj,Node,x1,x2:integer; end; //x1=0 x2=0
   SNIObj:array[1..MaxSNI]of record
     NumNodes,objID,firstNode,Mode:word;
-    Sound:array[1..32]of char;
+    Sound:array[1..32]of AnsiChar;
     Volume,Tempo,Radius,x4:word;
   end;
   SNINode:array[1..MaxSNINodes]of record
@@ -1373,7 +1375,7 @@ var
 implementation
   {$R *.dfm}
 
-uses LoadSave, Unit_Render, PTXTexture, Load_TRK, Unit_sc2, 
+uses LoadSave, Unit_Render, PTXTexture, Load_TRK, Unit_sc2,
 Unit_Options, Unit_RoutineFunctions, Unit_RenderInit, Unit_Tracing,
   ColorPicker, SK_ImportLWO;
 
@@ -1392,7 +1394,7 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  DoClientAreaResize(Self);
+  //DoClientAreaResize(Self);
   ElapsedTime(@OldTime);
 
   fOptions := TSKOptions.Create;
@@ -1412,16 +1414,21 @@ begin
   CompileCommonObjects;
 
   h_DC2 := GetDC(Panel11.Handle);
-  if h_DC2=0 then begin MessageBox(h_DC2, 'Unable to get a device context', 'Error', MB_OK or MB_ICONERROR); exit; end;
-  if not SetDCPixelFormat(h_DC2) then exit;
-  
-if not fileexists(fOptions.ExeDir+'unlimiter.'+inttostr(846)) then begin
-  CBRenderMode.ItemIndex:=4; //set view to Textured by default
-  PageControl1.ActivePageIndex:=0; //always set LWO as start tab
-end else begin
-  SE_GripF.MaxValue:=120;
-  SE_GripR.MaxValue:=120;
-end;
+  if h_DC2 = 0 then
+  begin
+    MessageBox(h_DC2, 'Unable to get a device context', 'Error', MB_OK or MB_ICONERROR);
+    Exit;
+  end;
+
+  //if not SetDCPixelFormat(h_DC2) then Exit;
+
+  if not fileexists(fOptions.ExeDir+'unlimiter.'+inttostr(846)) then begin
+    CBRenderMode.ItemIndex:=4; //set view to Textured by default
+    PageControl1.ActivePageIndex:=0; //always set LWO as start tab
+  end else begin
+    SE_GripF.MaxValue:=120;
+    SE_GripR.MaxValue:=120;
+  end;
 
   fGrass := TSGrass.Create;
   fStreets := TSStreets.Create;
@@ -1519,7 +1526,11 @@ end;
 
 
 procedure TForm1.Panel1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-var Code:KCode; ID,i,tmp:integer; ss:string; tmpY:single;
+var
+  Code: KCode;
+  ID, i, tmp: integer;
+  ss: AnsiString;
+  tmpY: single;
 begin
 ObjectX:=X; ObjectY:=Y;
 
@@ -1824,7 +1835,7 @@ if Show2ndFrame.Checked then begin
   wglMakeCurrent(h_DC, h_RC);
   RenderResize(nil);
 end;
-                                     
+
 if OpenALInitDone then
   UpdateListener(nil); //Update sounds
 
@@ -2114,7 +2125,7 @@ var
   ap:array[1..2]of pointer;
   bm:array of integer;
   t:single;
-  s,s2:string;
+  s,s2:AnsiString;
 begin
 if Sender='Scenery' then begin
 if ID+Num>Qty.BlocksTotal then Num:=Qty.BlocksTotal-ID;
@@ -2592,7 +2603,7 @@ ObjectsRefresh:=false;
 end;
 
 procedure TForm1.ListObjects2Click(Sender: TObject);
-var ID:integer; ss:string; a,b,c:integer;
+var ID:integer; ss:AnsiString; a,b,c:integer;
 begin
 if ListObjects2.ItemIndex<0 then exit;
 ObjInstanceRefresh:=true;
@@ -2615,7 +2626,7 @@ end;
 
 
 procedure TForm1.ListObjects2DblClick(Sender: TObject);
-var ID:integer; ss:string;
+var ID:integer; ss:AnsiString;
 begin
   if ListObjects2.ItemIndex = -1 then exit;
   ss:=ListObjects2.Items[ListObjects2.ItemIndex];
@@ -3054,7 +3065,7 @@ begin
         begin
           ListSNIObjects.Clear;
           for i:=1 to SNIHead.Obj do
-          ListSNIObjects.Items.Add(ObjName[SNIObj[i].objID+1]+' ('+StrPas(@SNIObj[i].Sound)+') '
+          ListSNIObjects.Items.Add(ObjName[SNIObj[i].objID+1]+' ('+StrPas(PAnsiChar(SNIObj[i].Sound[1]))+') '
           +inttostr(SNIObj[i].Mode));
           ListSNIObjects.ItemIndex:=0;
           Label46.Caption:='Routes list: '+inttostr(SNIHead.Obj);
@@ -3230,7 +3241,9 @@ end;
 
 
 procedure TForm1.PageControl1DrawTab(Control: TCustomTabControl; TabIndex: Integer; const Rect: TRect; Active: Boolean);
-var NewRect:TRect; bm:Tbitmap;
+var
+  NewRect: TRect;
+  bm: TBitmap;
 begin
   NewRect := Rect;
   bm := TBitmap.Create;
@@ -3785,7 +3798,7 @@ end;
 
 blockread(f,Qty.Sounds,4);    //Name
 for ii:=1 to Qty.Sounds do begin
-blockread(f,c,32); Sound[ii].Name:=StrPas(@c);//Name
+blockread(f,c,32); Sound[ii].Name:=StrPas(PAnsiChar(@c[1]));//Name
 blockread(f,Sound[ii].X,12);           //XYZ
 blockread(f,Sound[ii].Volume,24);      //etc..
 end;
@@ -4043,7 +4056,7 @@ end;
 
 
 procedure TForm1.ObjChangeInstance(Sender: TObject);
-var ID:integer; ss:string;
+var ID:integer; ss:AnsiString;
 begin
 if ObjInstanceRefresh then exit;
 if ListObjects2.ItemIndex=-1 then exit;
@@ -4213,7 +4226,7 @@ begin
 end;
 
 procedure TForm1.RemObjInstanceClick(Sender: TObject);
-var ss:string; i,ID,ID2:integer;
+var ss:AnsiString; i,ID,ID2:integer;
 begin
 ID2:=ListObjects2.ItemIndex+1;
 if ID2=0 then exit;
@@ -4283,7 +4296,7 @@ SNISpawnW[ID].TrackID:=SNIx4.Value;
 
 StrPCopy(@SNIObj[ID].Sound,EditSNISound.Text);
 
-ListSNIObjects.Items[ID-1]:=(ObjName[SNIObj[ID].objID+1]+' ('+StrPas(@SNIObj[ID].Sound)+') '
+ListSNIObjects.Items[ID-1]:=(ObjName[SNIObj[ID].objID+1]+' ('+StrPas(PAnsiChar(SNIObj[ID].Sound[1]))+') '
 +inttostr(SNIObj[ID].Mode));
 
 SNIObj[ID].Volume:=SNIx1.Value;
@@ -4308,7 +4321,7 @@ CopyHolder.Size:=ObjSize.Value;
 end;
 
 procedure TForm1.PasteInstanceClick(Sender: TObject);
-var ID:integer; ss:string;
+var ID:integer; ss:AnsiString;
 begin
 ss:=ListObjects2.Items[ListObjects2.ItemIndex];
 decs(ss,-length(ss)+4);
@@ -4359,7 +4372,7 @@ Qty.ObjectFiles:=0;
 
 blockread(f,Qty.ObjectsTotal,4);    //Name
 for ii:=1 to Qty.ObjectsTotal do begin
-blockread(f,c,32); ss:=StrPas(@c);//Name
+blockread(f,c,32); ss:=StrPas(PAnsiChar(@c[1]));//Name
 if ss='Bagger' then
 ss:=ss;
 blockread(f,Obj[ii].ID,68);
@@ -4393,7 +4406,7 @@ for ii:=1 to Qty.GroundTypes do begin
 blockwrite(f,chr2(Ground[ii].Name,64)[1],64);
 blockwrite(f,Ground[ii].Dirt,92);
 end;
-closefile(f);                                  
+closefile(f);
 end;
 
 procedure TForm1.ImportGroundsClick(Sender: TObject);
@@ -4418,7 +4431,7 @@ end;
 
 blockread(f,Qty.GroundTypes,4);    //Name
 for ii:=1 to Qty.GroundTypes do begin
-blockread(f,c,64); Ground[ii].Name:=StrPas(@c);//Name
+blockread(f,c,64); Ground[ii].Name:=StrPas(PAnsiChar(@c[1]));//Name
 blockread(f,Ground[ii].Dirt,92);
 end;
 closefile(f);
@@ -4512,7 +4525,7 @@ blockwrite(f,ObjProp[ii],20);
 blockwrite(f,chr2(ObjProp[ii].HitSound,48)[1],48);//Name
 blockwrite(f,chr2(ObjProp[ii].FallSound,48)[1],48);//Name
 end;
-closefile(f);       
+closefile(f);
 end;
 
 procedure TForm1.ImportObjectsClick(Sender: TObject);
@@ -4532,10 +4545,10 @@ end;
 
 blockread(f,Qty.ObjectFiles,4);    //Name
 for ii:=1 to Qty.ObjectFiles do begin
-blockread(f,c,32); ObjName[ii]:=StrPas(@c);//Name
+blockread(f,c,32); ObjName[ii]:=StrPas(PAnsiChar(@c[1]));//Name
 blockread(f,ObjProp[ii],20);
-blockread(f,c,48); ObjProp[ii].HitSound:=StrPas(@c);//Name
-blockread(f,c,48); ObjProp[ii].FallSound:=StrPas(@c);//Name
+blockread(f,c,48); ObjProp[ii].HitSound:=StrPas(PAnsiChar(@c[1]));//Name
+blockread(f,c,48); ObjProp[ii].FallSound:=StrPas(PAnsiChar(@c[1]));//Name
 end;
 closefile(f);
 SendQADtoUI(apObjects);
@@ -4676,7 +4689,7 @@ procedure TForm1.ListStreetShapeClick(Sender: TObject); begin ListStreetShapeCli
 procedure TForm1.StreetShapeChange(Sender: TObject); begin StreetShapeChange_ end;
 procedure TForm1.RemPointClick(Sender: TObject); begin RemPointClick_; end;
 procedure TForm1.RemSplineClick(Sender: TObject); begin RemSplineClick_; end;
-          
+
 procedure TForm1.CBTrackChange(Sender: TObject);
 var i:integer;
   procedure SetWP(A:boolean);
@@ -5035,17 +5048,17 @@ s:=c[1]+c[2]+c[3]+c[4]+c[5]+c[6]+c[7]+c[8]; //can't use strpas cos c[7]=#0
 if s='STKit2'+#0+#1 then begin
 blockread(f,EntryQty,4);
   for k:=1 to EntryQty do begin
-  blockread(f,c,32); c[33]:=#0; s:=uppercase(StrPas(@c));
+  blockread(f,c,32); c[33]:=#0; s:=uppercase(StrPas(PAnsiChar(@c[1])));
 
   for i:=1 to Qty.Materials do
     if (uppercase(MaterialW[i].Name)= s)or
       ((uppercase(MaterialW[i].Name)<>s)and(i=Qty.Materials)) then begin
       remap[k]:=i;
-      blockread(f,c,32); c[33]:=#0; s:=uppercase(StrPas(@c));
+      blockread(f,c,32); c[33]:=#0; s:=uppercase(StrPas(PAnsiChar(@c[1])));
         for h:=1 to Qty.TexturesFiles do if s=uppercase(TexName[h]) then Material[i].Tex1:=h-1;
-      blockread(f,c,32); c[33]:=#0; s:=uppercase(StrPas(@c));
+      blockread(f,c,32); c[33]:=#0; s:=uppercase(StrPas(PAnsiChar(@c[1])));
         for h:=1 to Qty.TexturesFiles do if s=uppercase(TexName[h]) then Material[i].Tex2:=h-1;
-      blockread(f,c,32); c[33]:=#0; s:=uppercase(StrPas(@c));
+      blockread(f,c,32); c[33]:=#0; s:=uppercase(StrPas(PAnsiChar(@c[1])));
         for h:=1 to Qty.TexturesFiles do if s=uppercase(TexName[h]) then Material[i].Tex3:=h-1;
       blockread(f,Material[i].Mode,110);
       break;
@@ -5138,7 +5151,7 @@ begin
     inc(Qty.Sounds);
   until(eof(ft));
   CloseFile(ft);
-  
+
   SendQADtoUI(apSounds);
 end;
 
@@ -5453,7 +5466,7 @@ blockread(f,Light[1].Mode,Qty.Lights*88);
 blockread(f,LightW[1].Radius,Qty.Lights*4);
 closefile(f);
 SendQADtoUI(apLights);
-Changes.QAD:=true;  
+Changes.QAD:=true;
 end;
 
 procedure TForm1.EditSkyChange(Sender: TObject);
@@ -6462,7 +6475,7 @@ begin
 end;
 
 procedure TForm1.CBCloudsClick(Sender: TObject);
-var ii:integer; SearchRec:TSearchRec; tmp,s:string;
+var ii:integer; SearchRec:TSearchRec; tmp,s:AnsiString;
 begin
 if not DirectoryExists(fOptions.WorkDir+'Clouds\') then exit;
 if Sender=CBClouds then tmp:=SKY[SKYIndex].SkyTex;
@@ -6520,7 +6533,7 @@ end;
 
 
 procedure TForm1.AutoObjectsClick(Sender: TObject);
-var SearchRec:TSearchRec; s:string;
+var SearchRec:TSearchRec; s:AnsiString;
 begin
   ChDir(fOptions.WorkDir+'Scenarios\'+Scenery+'\'+SceneryVersion+'\Objects\');
   FindFirst('*.mox', faAnyFile, SearchRec);
@@ -6831,19 +6844,19 @@ for i:=1 to Qty.Sounds do begin
 end;
 
 for i:=1 to SNIHead.Obj do
-if StrPas(@SNIObj[i].Sound)<>'' then begin
+if StrPas(PAnsiChar(SNIObj[i].Sound[1]))<>'' then begin
   NewWave:=true;
   for k:=1 to QtyWave do
-    if StrPas(@SNIObj[i].Sound)=WaveW[k] then begin
+    if StrPas(PAnsiChar(SNIObj[i].Sound[1]))=WaveW[k] then begin
       NewWave:=false;
       SoundW[Qty.Sounds+i].WaveID:=k;
     end;
   if NewWave then begin
     inc(QtyWave);
-    WaveW[QtyWave]:=StrPas(@SNIObj[i].Sound);
+    WaveW[QtyWave]:=StrPas(PAnsiChar(SNIObj[i].Sound[1]));
     SoundW[Qty.Sounds+i].WaveID:=QtyWave;
   end;
-  SoundW[Qty.Sounds+i].Name:=StrPas(@SNIObj[i].Sound);
+  SoundW[Qty.Sounds+i].Name:=StrPas(PAnsiChar(SNIObj[i].Sound[1]));
 end;
 
   Assert(QtyWave<=63,'Wave limit exceeded - 64');
@@ -6881,7 +6894,7 @@ begin
 for i:=1 to Qty.Sounds do
   if SoundW[i].WaveID<>0 then
     AddSoundToPlaylist(i,Sound[i].X,Sound[i].Y,Sound[i].Z,Sound[i].Radius,Sound[i].Volume,0,0,0);
- 
+
 for i:=1 to SNIHead.Obj do
   if SoundW[Qty.Sounds+i].WaveID<>0 then begin
     GetPositionFromSNI(i,SNILoc[i],@Loc[1],@Loc[2],@Loc[3]);
@@ -6938,7 +6951,7 @@ begin
 end;
 
 procedure TForm1.Button4Click(Sender: TObject);
-var SearchRec:TSearchRec; s:string; i,k,count:integer; TexAlreadyExists:boolean;
+var SearchRec:TSearchRec; s:AnsiString; i,k,count:integer; TexAlreadyExists:boolean;
   Arr:array[0..256]of word;
   ArrS:array[0..256]of string;
 begin
@@ -7037,7 +7050,7 @@ begin
 
   MTNode:=ListMakeTrack.ItemIndex+1;
   if MTNode=0 then exit;
-  
+
   MakeTrack[TrackID].Node[MTNode].X:=MTX.Value;
   MakeTrack[TrackID].Node[MTNode].Y:=MTY.Value;
   MakeTrack[TrackID].Node[MTNode].Z:=MTZ.Value;
@@ -7117,7 +7130,7 @@ end;
 
 procedure TForm1.InitMTClick(Sender: TObject);
 var i:integer;
-begin   
+begin
   MakeTrack[TrackID].NodeQty := 3;
   setlength(MakeTrack[TrackID].Node,MakeTrack[TrackID].NodeQty+1);
   with MakeTrack[TrackID] do begin
@@ -7196,13 +7209,13 @@ begin
     MTTang[n1,2].Z:=Node[n1].Z-TangB[kk].Z;
   end;
 
-  
+
   for kk:=1 to MakeTrack[TrackID].NodeQty do
   with MakeTrack[TrackID] do begin
     n1:=kk;  //n1-this, n2-next
     n2:=kk+1; if n2>NodeQty then n2:=1;
     //Treat the track as Looped, this grants smooth transition between last/first Nodes
-    //if it's not Looped it doesn't matter whats inbetween last/first anyway 
+    //if it's not Looped it doesn't matter whats inbetween last/first anyway
 
     for h:=1 to fOptions.SplineDetail do begin
       t:=(h-1)/fOptions.SplineDetail; //0..0.9
@@ -7429,7 +7442,7 @@ begin
   reset(f,1); seek(f,Head.TextureNames);
   for ii:=1 to Head.TextureCount do begin
     blockread(f,c,12);
-    s:=UpperCase(StrPas(@c[1]));
+    s:=UpperCase(StrPas(PAnsiChar(@c[1])));
     for h:=1 to LWQty.Surf[0] do
       if s=LW.ClipTex[h] then SurfRemap[ii]:=h;
 

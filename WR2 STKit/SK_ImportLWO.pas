@@ -312,7 +312,7 @@ begin
       ii:=1;
       setlength(LW.SName,SurfaceID+2);
       setlength(LW.SText,SurfaceID+2);
-      LW.SName[SurfaceID] := strpas(@c); //Surface name from LightWave
+      LW.SName[SurfaceID] := StrPas(PAnsiChar(@c[1])); //Surface name from LightWave
       repeat
         //Keep on looking for Texture usage/assignment
         if c[ii]+c[ii+1]+c[ii+2]+c[ii+3]+c[ii+4]+c[ii+5]='IMAG'+#0+#2 then begin
@@ -540,7 +540,7 @@ split[kk,1]:=SizeX*SizeZ;
 for ii:=1 to 64 do begin
   if split[ii,2]>0 then Form1.MemoLWO.Lines.Add('#'+inttostr(ii)+' - '+inttostr(split[ii,2]));
   if split[ii,2]>=65536 then begin
-    MessageBox(Form1.Handle,PChar('Too big chunk made at block '+inttostr(split[ii,1])),'Fatal Error',MB_OK or MB_ICONERROR);
+    MessageBox(Form1.Handle, PChar('Too big chunk made at block '+inttostr(split[ii,1])),'Fatal Error',MB_OK or MB_ICONERROR);
     exit;
   end;
 end;

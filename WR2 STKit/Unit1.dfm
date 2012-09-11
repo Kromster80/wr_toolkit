@@ -1,8 +1,8 @@
 object Form1: TForm1
   Left = 239
   Top = 265
-  Width = 956
-  Height = 730
+  ClientHeight = 684
+  ClientWidth = 948
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -208,7 +208,7 @@ object Form1: TForm1
     Left = 300
     Top = 40
     Width = 646
-    Height = 622
+    Height = 603
     Cursor = crCross
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
@@ -223,7 +223,7 @@ object Form1: TForm1
   end
   object MemoLog: TMemo
     Left = 304
-    Top = 116
+    Top = 97
     Width = 177
     Height = 301
     Anchors = [akLeft, akBottom]
@@ -237,8 +237,8 @@ object Form1: TForm1
     Left = 2
     Top = 40
     Width = 296
-    Height = 623
-    ActivePage = TabSheet16
+    Height = 604
+    ActivePage = TabSheet9
     Anchors = [akLeft, akTop, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -258,7 +258,7 @@ object Form1: TForm1
       Caption = 'LWO'
       DesignSize = (
         288
-        516)
+        497)
       object Label128: TLabel
         Left = 32
         Top = 64
@@ -270,7 +270,7 @@ object Form1: TForm1
         Left = 2
         Top = 120
         Width = 284
-        Height = 391
+        Height = 372
         Hint = '1'
         Anchors = [akLeft, akTop, akRight, akBottom]
         Font.Charset = DEFAULT_CHARSET
@@ -305,11 +305,6 @@ object Form1: TForm1
         Top = 56
         Width = 25
         Height = 25
-        ModalResult = 4
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 3
-        OnClick = ReloadLWOClick
         Glyph.Data = {
           AA030000424DAA03000000000000360000002800000011000000110000000100
           18000000000074030000C40E0000C40E00000000000000000000C8D0D4C8D0D4
@@ -342,7 +337,12 @@ object Form1: TForm1
           C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0
           D4C8D0D4C8D0D4C8D0D4C8D0D400}
         Layout = blGlyphBottom
+        ModalResult = 4
+        ParentShowHint = False
+        ShowHint = True
         Spacing = 0
+        TabOrder = 3
+        OnClick = ReloadLWOClick
       end
       object CBLoadTexList: TCheckBox
         Left = 4
@@ -615,7 +615,7 @@ object Form1: TForm1
       ImageIndex = 2
       DesignSize = (
         288
-        516)
+        497)
       object Label58: TLabel
         Left = 6
         Top = 0
@@ -627,7 +627,7 @@ object Form1: TForm1
         Left = 2
         Top = 16
         Width = 133
-        Height = 465
+        Height = 446
         Style = lbOwnerDrawFixed
         Anchors = [akLeft, akTop, akBottom]
         ExtendedSelect = False
@@ -668,23 +668,25 @@ object Form1: TForm1
       end
       object ImportTexturesList: TButton
         Left = 2
-        Top = 489
+        Top = 470
         Width = 133
         Height = 25
         Anchors = [akLeft, akBottom]
         Caption = 'Import assignments list ...'
         TabOrder = 3
         OnClick = ImportTexturesClick
+        ExplicitTop = 489
       end
       object ExportTexturesList: TButton
         Left = 140
-        Top = 489
+        Top = 470
         Width = 133
         Height = 25
         Anchors = [akLeft, akBottom]
         Caption = 'Export assignments list ...'
         TabOrder = 4
         OnClick = ExportTexturesListClick
+        ExplicitTop = 489
       end
       object RGTexMat: TRadioGroup
         Left = 140
@@ -769,7 +771,7 @@ object Form1: TForm1
       ImageIndex = 3
       DesignSize = (
         288
-        516)
+        497)
       object Label38: TLabel
         Left = 6
         Top = 0
@@ -808,6 +810,10 @@ object Form1: TForm1
         OnChange = MatTexLayChange
         object TabSheet12: TTabSheet
           Caption = '   Texture 1   '
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object Label43: TLabel
             Left = 3
             Top = 0
@@ -854,6 +860,10 @@ object Form1: TForm1
         object TabSheet13: TTabSheet
           Caption = '   Texture 2   '
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object Label167: TLabel
             Left = 3
             Top = 0
@@ -900,6 +910,10 @@ object Form1: TForm1
         object TabSheet14: TTabSheet
           Caption = '   Texture 3   '
           ImageIndex = 2
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object Label173: TLabel
             Left = 3
             Top = 0
@@ -989,7 +1003,6 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 13
         TabOrder = 2
         OnChange = CBTexChange
       end
@@ -1000,7 +1013,6 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 13
         TabOrder = 3
         OnChange = CBTexChange
       end
@@ -1011,7 +1023,6 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 13
         TabOrder = 4
         OnChange = CBTexChange
       end
@@ -1031,7 +1042,6 @@ object Form1: TForm1
         Style = csDropDownList
         DropDownCount = 32
         Enabled = False
-        ItemHeight = 13
         ItemIndex = 0
         TabOrder = 7
         Text = '0'
@@ -1112,23 +1122,25 @@ object Form1: TForm1
       end
       object ImportMatList: TButton
         Left = 2
-        Top = 489
+        Top = 470
         Width = 133
         Height = 25
         Anchors = [akLeft, akBottom]
         Caption = 'Import materials list ...'
         TabOrder = 13
         OnClick = ImportMaterialsClick
+        ExplicitTop = 489
       end
       object ExportMatList: TButton
         Left = 140
-        Top = 489
+        Top = 470
         Width = 133
         Height = 25
         Anchors = [akLeft, akBottom]
         Caption = 'Export materials list ...'
         TabOrder = 14
         OnClick = ExportMaterialsClick
+        ExplicitTop = 489
       end
       object CBMatGrass: TCheckBox
         Left = 160
@@ -1212,7 +1224,7 @@ object Form1: TForm1
       ImageIndex = 4
       DesignSize = (
         288
-        516)
+        497)
       object Label28: TLabel
         Left = 6
         Top = 0
@@ -1436,7 +1448,7 @@ object Form1: TForm1
         Left = 2
         Top = 304
         Width = 133
-        Height = 177
+        Height = 158
         Anchors = [akLeft, akTop, akBottom]
         ItemHeight = 13
         TabOrder = 1
@@ -1623,23 +1635,25 @@ object Form1: TForm1
       end
       object Button12: TButton
         Left = 2
-        Top = 489
+        Top = 470
         Width = 133
         Height = 25
         Anchors = [akLeft, akBottom]
         Caption = 'Load instances list ...'
         TabOrder = 16
         OnClick = Button12Click
+        ExplicitTop = 489
       end
       object Button15: TButton
         Left = 140
-        Top = 489
+        Top = 470
         Width = 133
         Height = 25
         Anchors = [akLeft, akBottom]
         Caption = 'Save instances list ...'
         TabOrder = 17
         OnClick = Button15Click
+        ExplicitTop = 489
       end
       object Button18: TButton
         Left = 140
@@ -1690,7 +1704,6 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 16
-        ItemHeight = 13
         TabOrder = 22
         OnChange = ObjChangeInstance
       end
@@ -1723,8 +1736,6 @@ object Form1: TForm1
         Top = 304
         Width = 25
         Height = 25
-        TabOrder = 25
-        OnClick = CopyInstanceClick
         Glyph.Data = {
           5A010000424D5A01000000000000760000002800000013000000130000000100
           040000000000E400000000000000000000001000000000000000000000000000
@@ -1739,14 +1750,14 @@ object Form1: TForm1
           F00F00F00000FFFFFFFFFFFFFF000FF00000FFFFFFFFFFFFFFFFFFF00000}
         Margin = 0
         Spacing = 0
+        TabOrder = 25
+        OnClick = CopyInstanceClick
       end
       object PasteInstance: TBitBtn
         Left = 260
         Top = 304
         Width = 25
         Height = 25
-        TabOrder = 26
-        OnClick = PasteInstanceClick
         Glyph.Data = {
           AA040000424DAA04000000000000360000002800000013000000130000000100
           18000000000074040000C40E0000C40E00000000000000000000C8D0D4C8D0D4
@@ -1788,6 +1799,8 @@ object Form1: TForm1
           D0D4C8D0D4C8D0D4C8D0D4000000}
         Margin = 0
         Spacing = 0
+        TabOrder = 26
+        OnClick = PasteInstanceClick
       end
     end
     object TabSheet11: TTabSheet
@@ -1795,7 +1808,7 @@ object Form1: TForm1
       ImageIndex = 5
       DesignSize = (
         288
-        516)
+        497)
       object Label39: TLabel
         Left = 6
         Top = 0
@@ -2023,7 +2036,7 @@ object Form1: TForm1
         Left = 2
         Top = 16
         Width = 133
-        Height = 346
+        Height = 327
         Anchors = [akLeft, akTop, akBottom]
         ItemHeight = 13
         TabOrder = 0
@@ -2155,23 +2168,25 @@ object Form1: TForm1
       end
       object ImportSounds: TButton
         Left = 2
-        Top = 489
+        Top = 470
         Width = 137
         Height = 25
         Anchors = [akLeft, akBottom]
         Caption = 'Import sounds list ...'
         TabOrder = 12
         OnClick = ImportSoundsClick
+        ExplicitTop = 489
       end
       object ExportSounds: TButton
         Left = 144
-        Top = 489
+        Top = 470
         Width = 137
         Height = 25
         Anchors = [akLeft, akBottom]
         Caption = 'Export sounds list ...'
         TabOrder = 13
         OnClick = ExportSoundsClick
+        ExplicitTop = 489
       end
       object SoundX4: TRadioGroup
         Left = 140
@@ -2189,7 +2204,7 @@ object Form1: TForm1
       end
       object ImportNFSPUSounds: TButton
         Left = 2
-        Top = 461
+        Top = 442
         Width = 137
         Height = 25
         Anchors = [akLeft, akBottom]
@@ -2198,14 +2213,13 @@ object Form1: TForm1
         TabOrder = 15
         Visible = False
         OnClick = ImportNFSPUSoundsClick
+        ExplicitTop = 461
       end
       object CopySound: TBitBtn
         Left = 140
         Top = 140
         Width = 25
         Height = 25
-        TabOrder = 16
-        OnClick = CopySoundClick
         Glyph.Data = {
           5A010000424D5A01000000000000760000002800000013000000130000000100
           040000000000E400000000000000000000001000000000000000000000000000
@@ -2220,6 +2234,8 @@ object Form1: TForm1
           F00F00F00000FFFFFFFFFFFFFF000FF00000FFFFFFFFFFFFFFFFFFF00000}
         Margin = 0
         Spacing = 0
+        TabOrder = 16
+        OnClick = CopySoundClick
       end
       object PasteSound: TBitBtn
         Left = 164
@@ -2227,8 +2243,6 @@ object Form1: TForm1
         Width = 25
         Height = 25
         Enabled = False
-        TabOrder = 17
-        OnClick = PasteSoundClick
         Glyph.Data = {
           AA040000424DAA04000000000000360000002800000013000000130000000100
           18000000000074040000C40E0000C40E00000000000000000000C8D0D4C8D0D4
@@ -2270,6 +2284,8 @@ object Form1: TForm1
           D0D4C8D0D4C8D0D4C8D0D4000000}
         Margin = 0
         Spacing = 0
+        TabOrder = 17
+        OnClick = PasteSoundClick
       end
       object Button1: TButton
         Left = 144
@@ -2286,7 +2302,7 @@ object Form1: TForm1
       ImageIndex = 6
       DesignSize = (
         288
-        516)
+        497)
       object Shape1: TShape
         Left = 137
         Top = 121
@@ -2753,41 +2769,42 @@ object Form1: TForm1
       end
       object ExportLights: TButton
         Left = 144
-        Top = 489
+        Top = 470
         Width = 137
         Height = 25
         Anchors = [akLeft, akBottom]
         Caption = 'Export lights list ...'
         TabOrder = 13
         OnClick = ExportLightsClick
+        ExplicitTop = 489
       end
       object ImportLights: TButton
         Left = 2
-        Top = 489
+        Top = 470
         Width = 133
         Height = 25
         Anchors = [akLeft, akBottom]
         Caption = 'Import lights list ...'
         TabOrder = 14
         OnClick = ImportLightsClick
+        ExplicitTop = 489
       end
       object LoadLWOLightsButton: TButton
         Left = 2
-        Top = 463
+        Top = 444
         Width = 133
         Height = 25
         Anchors = [akLeft, akBottom]
         Caption = 'Load LWO ...'
         TabOrder = 15
         OnClick = LoadLWOLights
+        ExplicitTop = 463
       end
       object CopyLight: TBitBtn
         Left = 238
         Top = 124
         Width = 25
         Height = 25
-        TabOrder = 16
-        OnClick = CopyLightClick
         Glyph.Data = {
           5A010000424D5A01000000000000760000002800000013000000130000000100
           040000000000E400000000000000000000001000000000000000000000000000
@@ -2802,6 +2819,8 @@ object Form1: TForm1
           F00F00F00000FFFFFFFFFFFFFF000FF00000FFFFFFFFFFFFFFFFFFF00000}
         Margin = 0
         Spacing = 0
+        TabOrder = 16
+        OnClick = CopyLightClick
       end
       object PasteLight: TBitBtn
         Left = 262
@@ -2809,8 +2828,6 @@ object Form1: TForm1
         Width = 25
         Height = 25
         Enabled = False
-        TabOrder = 17
-        OnClick = PasteLightClick
         Glyph.Data = {
           AA040000424DAA04000000000000360000002800000013000000130000000100
           18000000000074040000C40E0000C40E00000000000000000000C8D0D4C8D0D4
@@ -2852,6 +2869,8 @@ object Form1: TForm1
           D0D4C8D0D4C8D0D4C8D0D4000000}
         Margin = 0
         Spacing = 0
+        TabOrder = 17
+        OnClick = PasteLightClick
       end
       object LightMode: TCheckBox
         Left = 140
@@ -2867,8 +2886,6 @@ object Form1: TForm1
         Top = 16
         Width = 25
         Height = 25
-        TabOrder = 19
-        OnClick = CopyLightXYZClick
         Glyph.Data = {
           5A010000424D5A01000000000000760000002800000013000000130000000100
           040000000000E400000000000000000000001000000000000000000000000000
@@ -2883,14 +2900,14 @@ object Form1: TForm1
           F00F00F00000FFFFFFFFFFFFFF000FF00000FFFFFFFFFFFFFFFFFFF00000}
         Margin = 0
         Spacing = 0
+        TabOrder = 19
+        OnClick = CopyLightXYZClick
       end
       object PasteLightXYZ: TBitBtn
         Left = 260
         Top = 16
         Width = 25
         Height = 25
-        TabOrder = 20
-        OnClick = PasteLightXYZClick
         Glyph.Data = {
           AA040000424DAA04000000000000360000002800000013000000130000000100
           18000000000074040000C40E0000C40E00000000000000000000C8D0D4C8D0D4
@@ -2932,11 +2949,17 @@ object Form1: TForm1
           D0D4C8D0D4C8D0D4C8D0D4000000}
         Margin = 0
         Spacing = 0
+        TabOrder = 20
+        OnClick = PasteLightXYZClick
       end
     end
     object TabSheet8: TTabSheet
       Caption = 'Structure'
       ImageIndex = 13
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object CBGrid: TCheckBox
         Left = 198
         Top = 195
@@ -3042,7 +3065,7 @@ object Form1: TForm1
       ImageIndex = 8
       DesignSize = (
         288
-        516)
+        497)
       object Label59: TLabel
         Left = 6
         Top = 0
@@ -3112,7 +3135,7 @@ object Form1: TForm1
         Left = 2
         Top = 232
         Width = 283
-        Height = 281
+        Height = 262
         ActivePage = TabSheet22
         Anchors = [akLeft, akTop, akBottom]
         TabOrder = 6
@@ -3122,7 +3145,7 @@ object Form1: TForm1
           ImageIndex = 2
           DesignSize = (
             275
-            253)
+            234)
           object Label141: TLabel
             Left = 202
             Top = 97
@@ -3270,7 +3293,7 @@ object Form1: TForm1
             Left = 0
             Top = 16
             Width = 135
-            Height = 233
+            Height = 214
             Anchors = [akLeft, akTop, akBottom]
             ItemHeight = 13
             TabOrder = 0
@@ -3385,7 +3408,7 @@ object Form1: TForm1
           Caption = 'Direction arrows'
           DesignSize = (
             275
-            253)
+            234)
           object Image7: TImage
             Left = 254
             Top = 45
@@ -3497,7 +3520,7 @@ object Form1: TForm1
             Left = 0
             Top = 16
             Width = 135
-            Height = 233
+            Height = 214
             Anchors = [akLeft, akTop, akBottom]
             ItemHeight = 13
             TabOrder = 0
@@ -3612,7 +3635,7 @@ object Form1: TForm1
           ImageIndex = 1
           DesignSize = (
             275
-            253)
+            234)
           object Label119: TLabel
             Left = 202
             Top = 125
@@ -3781,7 +3804,7 @@ object Form1: TForm1
             Left = 0
             Top = 16
             Width = 135
-            Height = 233
+            Height = 214
             Anchors = [akLeft, akTop, akBottom]
             ItemHeight = 13
             TabOrder = 0
@@ -3916,7 +3939,7 @@ object Form1: TForm1
       ImageIndex = 9
       DesignSize = (
         288
-        516)
+        497)
       object Label81: TLabel
         Left = 218
         Top = 87
@@ -4099,7 +4122,7 @@ object Form1: TForm1
         Left = 2
         Top = 16
         Width = 135
-        Height = 436
+        Height = 417
         Anchors = [akLeft, akTop, akBottom]
         ItemHeight = 13
         TabOrder = 0
@@ -4229,7 +4252,6 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 16
-        ItemHeight = 13
         TabOrder = 11
         OnChange = TOB_Change
       end
@@ -4979,7 +5001,7 @@ object Form1: TForm1
       ImageIndex = 11
       DesignSize = (
         288
-        516)
+        497)
       object Label46: TLabel
         Left = 6
         Top = 0
@@ -5194,7 +5216,7 @@ object Form1: TForm1
         Left = 2
         Top = 312
         Width = 133
-        Height = 137
+        Height = 118
         Style = lbOwnerDrawFixed
         Anchors = [akLeft, akTop, akBottom]
         ItemHeight = 13
@@ -5208,7 +5230,6 @@ object Form1: TForm1
         Width = 145
         Height = 21
         Style = csDropDownList
-        ItemHeight = 13
         TabOrder = 2
         OnChange = ObjectsSNIChange
         Items.Strings = (
@@ -5429,7 +5450,7 @@ object Form1: TForm1
       ImageIndex = 12
       DesignSize = (
         288
-        516)
+        497)
       object Label22: TLabel
         Left = 66
         Top = 7
@@ -5588,20 +5609,21 @@ object Form1: TForm1
         Left = 2
         Top = 376
         Width = 284
-        Height = 139
+        Height = 120
         Anchors = [akLeft, akTop, akBottom]
         Caption = '  Click to see shadow map preview  '
         TabOrder = 7
         DesignSize = (
           284
-          139)
+          120)
         object SMPPreview: TImage
           Left = 4
           Top = 14
           Width = 275
-          Height = 120
+          Height = 101
           Anchors = [akLeft, akTop, akRight, akBottom]
           OnClick = SMPPreviewRedraw
+          ExplicitHeight = 120
         end
       end
       object AddSkyPreset: TButton
@@ -5656,7 +5678,6 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 12
-        ItemHeight = 13
         Sorted = True
         TabOrder = 11
         OnChange = EditSkyChange
@@ -5669,7 +5690,6 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 12
-        ItemHeight = 13
         Sorted = True
         TabOrder = 12
         OnChange = EditSkyChange
@@ -5741,8 +5761,6 @@ object Form1: TForm1
         Width = 87
         Height = 25
         Caption = 'Rebuild'
-        TabOrder = 17
-        OnClick = LightApplyClick
         Glyph.Data = {
           5A010000424D5A01000000000000760000002800000013000000130000000100
           040000000000E400000000000000000000001000000000000000000000000000
@@ -5755,11 +5773,17 @@ object Form1: TForm1
           FFF0BBB0FFFFFFF00000FFFFFFFF000FFFFFFFF00000FFFFF0FFFFFFF0FFFFF0
           0000FFFF0FFFF0FFFF0FFFF00000FFF0FFFFF0FFFFF0FFF00000FF0FFFFFF0FF
           FFFF0FF00000FFFFFFFFF0FFFFFFFFF00000FFFFFFFFFFFFFFFFFFF00000}
+        TabOrder = 17
+        OnClick = LightApplyClick
       end
     end
     object TabSheet18: TTabSheet
       Caption = 'Grass'
       ImageIndex = 14
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label148: TLabel
         Left = 118
         Top = 171
@@ -5934,7 +5958,7 @@ object Form1: TForm1
       ImageIndex = 7
       DesignSize = (
         288
-        516)
+        497)
       object Label6: TLabel
         Left = 218
         Top = 47
@@ -6138,7 +6162,7 @@ object Form1: TForm1
         Left = 2
         Top = 16
         Width = 133
-        Height = 353
+        Height = 334
         Anchors = [akLeft, akTop, akBottom]
         ExtendedSelect = False
         ItemHeight = 13
@@ -6168,7 +6192,6 @@ object Form1: TForm1
         Height = 21
         Style = csDropDownList
         DropDownCount = 24
-        ItemHeight = 13
         TabOrder = 2
         OnChange = TriggerChange
         Items.Strings = (
@@ -6544,10 +6567,6 @@ object Form1: TForm1
         Width = 33
         Height = 33
         Hint = 'Auto fill'
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 11
-        OnClick = FillSC2Click
         Glyph.Data = {
           56080000424D560800000000000036000000280000001A0000001A0000000100
           18000000000020080000120B0000120B00000000000000000000FFFFFFFFFFFF
@@ -6618,7 +6637,11 @@ object Form1: TForm1
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000}
         Layout = blGlyphBottom
         Margin = 0
+        ParentShowHint = False
+        ShowHint = True
         Spacing = 0
+        TabOrder = 11
+        OnClick = FillSC2Click
       end
       object Panel3: TPanel
         Left = -2
@@ -6773,7 +6796,7 @@ object Form1: TForm1
   end
   object MemoSave: TMemo
     Left = 482
-    Top = 418
+    Top = 399
     Width = 313
     Height = 239
     Anchors = [akLeft, akBottom]
@@ -6790,7 +6813,6 @@ object Form1: TForm1
     Height = 21
     Style = csDropDownList
     DropDownCount = 16
-    ItemHeight = 13
     TabOrder = 7
     OnChange = CBTrackChange
     OnClick = ListTracksClick
@@ -6805,7 +6827,7 @@ object Form1: TForm1
   end
   object MemoLoad: TMemo
     Left = 304
-    Top = 418
+    Top = 399
     Width = 177
     Height = 239
     Anchors = [akLeft, akBottom]
@@ -6822,7 +6844,6 @@ object Form1: TForm1
     Height = 21
     Style = csDropDownList
     DropDownCount = 32
-    ItemHeight = 13
     TabOrder = 10
     OnChange = SceneryReload
   end
@@ -6832,7 +6853,6 @@ object Form1: TForm1
     Width = 49
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
     ItemIndex = 0
     TabOrder = 11
     Text = 'V1'
@@ -6853,7 +6873,7 @@ object Form1: TForm1
     Left = 2
     Top = 140
     Width = 2
-    Height = 523
+    Height = 504
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 12
   end
@@ -6861,13 +6881,13 @@ object Form1: TForm1
     Left = 295
     Top = 140
     Width = 2
-    Height = 523
+    Height = 504
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 13
   end
   object F_Bottom: TPanel
     Left = 2
-    Top = 661
+    Top = 642
     Width = 295
     Height = 2
     Anchors = [akLeft, akBottom]
@@ -6920,7 +6940,6 @@ object Form1: TForm1
     Height = 21
     Style = csDropDownList
     DropDownCount = 16
-    ItemHeight = 13
     ItemIndex = 4
     TabOrder = 21
     Text = 'Textured'
@@ -7819,7 +7838,7 @@ object Form1: TForm1
     Left = 332
     Top = 60
     Bitmap = {
-      494C010110001300040020002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010110001200040020002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       000000000000360000002800000080000000A000000001002000000000000040
       0100000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
