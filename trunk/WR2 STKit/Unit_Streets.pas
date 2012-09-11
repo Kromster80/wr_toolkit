@@ -35,32 +35,30 @@ type
     Tracks:cardinal;
   end;
 
-
-type
   TSStreets = class
-    private
-      Header:array[1..4]of char;
-      Version,Options:word;
+  private
+    Header:array[1..4]of char;
+    Version,Options:word;
 
-      fShapeCount:integer;
-      fNodeCount:integer;
-      fSplineCount:integer;
-      fShRefCount:integer;
-      fRoWCount:integer;
-      fShapes:array of TSStreetShape;
-      fNodes:array of TSStreetNode;
-      fSplines:array of TSStreetSpline;
-      fShRefs:array of TSStreetShRef;
-      fRoWs:array of TSStreetRoW;
-    public
-      //constructor Create;
-      procedure Clear;
-      //procedure AddShape;
-      //procedure RemShape;
+    fShapeCount:integer;
+    fNodeCount:integer;
+    fSplineCount:integer;
+    fShRefCount:integer;
+    fRoWCount:integer;
+    fShapes:array of TSStreetShape;
+    fNodes:array of TSStreetNode;
+    fSplines:array of TSStreetSpline;
+    fShRefs:array of TSStreetShRef;
+    fRoWs:array of TSStreetRoW;
+  public
+    //constructor Create;
+    procedure Clear;
+    //procedure AddShape;
+    //procedure RemShape;
 
-      function LoadFromFile(aFile:string):boolean;
-      //procedure SaveToFile;
-    end;
+    function LoadFromFile(aFile:string):boolean;
+    //procedure SaveToFile;
+  end;
 
 
 procedure AddShapeClick_();
