@@ -100,20 +100,20 @@ RenderMat:=true;
 
         glUseProgramObjectARB(po[ID]);
 
-        S_MtlCol:= glGetUniformLocationARB(po[ID], PGLcharARB(PChar('MtlCol')));
-        S_SunCol:= glGetUniformLocationARB(po[ID], PGLcharARB(PChar('SunCol')));
-        S_FogCol:= glGetUniformLocationARB(po[ID], PGLcharARB(PChar('FogCol')));
-        S_FogPos:= glGetUniformLocationARB(po[ID], PGLcharARB(PChar('FogPos')));
-        T_TA1 := glGetUniformLocationARB(po[ID], PGLcharARB(PChar('TA1')));
-        T_TA2 := glGetUniformLocationARB(po[ID], PGLcharARB(PChar('TA2')));
-        T_TB1 := glGetUniformLocationARB(po[ID], PGLcharARB(PChar('TB1')));
-        T_TB2 := glGetUniformLocationARB(po[ID], PGLcharARB(PChar('TB2')));
-        T_TC1 := glGetUniformLocationARB(po[ID], PGLcharARB(PChar('TC1')));
-        T_TC2 := glGetUniformLocationARB(po[ID], PGLcharARB(PChar('TC2')));
-        S_Tex1:= glGetUniformLocationARB(po[ID], PGLcharARB(PChar('Tex1')));
-        S_Tex2:= glGetUniformLocationARB(po[ID], PGLcharARB(PChar('Tex2')));
-        S_Tex3:= glGetUniformLocationARB(po[ID], PGLcharARB(PChar('Tex3')));
-        S_Tex4:= glGetUniformLocationARB(po[ID], PGLcharARB(PChar('Tex4')));
+        S_MtlCol:= glGetUniformLocationARB(po[ID], PGLcharARB(PAnsiChar('MtlCol')));
+        S_SunCol:= glGetUniformLocationARB(po[ID], PGLcharARB(PAnsiChar('SunCol')));
+        S_FogCol:= glGetUniformLocationARB(po[ID], PGLcharARB(PAnsiChar('FogCol')));
+        S_FogPos:= glGetUniformLocationARB(po[ID], PGLcharARB(PAnsiChar('FogPos')));
+        T_TA1 := glGetUniformLocationARB(po[ID], PGLcharARB(PAnsiChar('TA1')));
+        T_TA2 := glGetUniformLocationARB(po[ID], PGLcharARB(PAnsiChar('TA2')));
+        T_TB1 := glGetUniformLocationARB(po[ID], PGLcharARB(PAnsiChar('TB1')));
+        T_TB2 := glGetUniformLocationARB(po[ID], PGLcharARB(PAnsiChar('TB2')));
+        T_TC1 := glGetUniformLocationARB(po[ID], PGLcharARB(PAnsiChar('TC1')));
+        T_TC2 := glGetUniformLocationARB(po[ID], PGLcharARB(PAnsiChar('TC2')));
+        S_Tex1:= glGetUniformLocationARB(po[ID], PGLcharARB(PAnsiChar('Tex1')));
+        S_Tex2:= glGetUniformLocationARB(po[ID], PGLcharARB(PAnsiChar('Tex2')));
+        S_Tex3:= glGetUniformLocationARB(po[ID], PGLcharARB(PAnsiChar('Tex3')));
+        S_Tex4:= glGetUniformLocationARB(po[ID], PGLcharARB(PAnsiChar('Tex4')));
 
         glUniform3fARB(S_MtlCol,(K mod 256)/255,
                                ((K mod 65536) div 256)/255,
@@ -939,13 +939,13 @@ GetLength(Obj[ii].PosX-xPos,Obj[ii].PosZ-zPos)<ViewDistance-500) then begin
 
 glUseProgramObjectARB(opo[ObjCall[ID].MTLClass]);
 
-  S_MtlCol:= glGetUniformLocationARB(opo[ObjCall[ID].MTLClass], PGLcharARB(PChar('SCol')));
-  S_SunCol:= glGetUniformLocationARB(opo[ObjCall[ID].MTLClass], PGLcharARB(PChar('SunCol')));
-  S_SunPos:= glGetUniformLocationARB(opo[ObjCall[ID].MTLClass], PGLcharARB(PChar('SunPos')));
-  S_FogCol:= glGetUniformLocationARB(opo[ObjCall[ID].MTLClass], PGLcharARB(PChar('FogCol')));
-  S_FogPos:= glGetUniformLocationARB(opo[ObjCall[ID].MTLClass], PGLcharARB(PChar('FogPos')));
-  S_Tex1:= glGetUniformLocationARB(opo[ObjCall[ID].MTLClass], PGLcharARB(PChar('Tex1')));
-  S_Tex2:= glGetUniformLocationARB(opo[ObjCall[ID].MTLClass], PGLcharARB(PChar('Tex2')));
+  S_MtlCol:= glGetUniformLocationARB(opo[ObjCall[ID].MTLClass], PGLcharARB(PAnsiChar('SCol')));
+  S_SunCol:= glGetUniformLocationARB(opo[ObjCall[ID].MTLClass], PGLcharARB(PAnsiChar('SunCol')));
+  S_SunPos:= glGetUniformLocationARB(opo[ObjCall[ID].MTLClass], PGLcharARB(PAnsiChar('SunPos')));
+  S_FogCol:= glGetUniformLocationARB(opo[ObjCall[ID].MTLClass], PGLcharARB(PAnsiChar('FogCol')));
+  S_FogPos:= glGetUniformLocationARB(opo[ObjCall[ID].MTLClass], PGLcharARB(PAnsiChar('FogPos')));
+  S_Tex1:= glGetUniformLocationARB(opo[ObjCall[ID].MTLClass], PGLcharARB(PAnsiChar('Tex1')));
+  S_Tex2:= glGetUniformLocationARB(opo[ObjCall[ID].MTLClass], PGLcharARB(PAnsiChar('Tex2')));
 
 //skipping unused textures for materials doesn't affect perfomance
 

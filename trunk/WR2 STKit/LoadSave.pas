@@ -47,7 +47,7 @@ end;
 assignfile(f,Input+'.qad'); reset(f,1);
 
 blockread(f,c,8);
-if StrPas(@c)='DAUQ' then begin
+if StrPas(PAnsiChar(@c[1]))='DAUQ' then begin
   closefile(f);
   LoadQAD_BW(Input);
   exit;
@@ -61,22 +61,22 @@ if Qty.BumpTexturesFiles<>0 then
   EditingFormat:=ef_CT;
 
 for i:=1 to Qty.TexturesFiles do begin
-blockread(f,c,32); TexName[i]:=StrPas(@c);
+blockread(f,c,32); TexName[i]:=StrPas(PAnsiChar(@c[1]));
 end;
 
 for i:=1 to Qty.BumpTexturesFiles do begin
-blockread(f,c,32); BumpTexName[i]:=StrPas(@c);
+blockread(f,c,32); BumpTexName[i]:=StrPas(PAnsiChar(@c[1]));
 end;
 Qty.BumpTexturesFiles:=0;
 
 for i:=1 to Qty.ObjectFiles do begin
-blockread(f,c,32); ObjName[i]:=StrPas(@c);
+blockread(f,c,32); ObjName[i]:=StrPas(PAnsiChar(@c[1]));
 end;
 
 for i:=1 to Qty.ObjectFiles do begin
 blockread(f,ObjProp[i],20);
-blockread(f,c,48); ObjProp[i].HitSound:=StrPas(@c);
-blockread(f,c,48); ObjProp[i].FallSound:=StrPas(@c);
+blockread(f,c,48); ObjProp[i].HitSound:=StrPas(PAnsiChar(@c[1]));
+blockread(f,c,48); ObjProp[i].FallSound:=StrPas(PAnsiChar(@c[1]));
 if (ObjProp[i].x1<>0)or(ObjProp[i].x2<>0)or(ObjProp[i].x3<>0)or(ObjProp[i].p4<>0) then
 MessageBox(Form1.Handle, 'Unknown object entry found. Contact kromster80@gmail.com', 'ObjectsTable', MB_OK or MB_ICONWARNING);
 end;
@@ -125,7 +125,7 @@ Form1.ComputeChunkMode(nil);
 
 if EditingFormat=ef_CT then
   for i:=1 to Qty.ObjectsTotal do begin
-    blockread(f,c,32); Obj[i].Name:=StrPas(@c);
+    blockread(f,c,32); Obj[i].Name:=StrPas(PAnsiChar(@c[1]));
     blockread(f,Obj[i].ID,16); //20bytes ahead
 //    blockread(f,c,16);
 //    blockread(f,Obj[i].Angl,4);
@@ -139,7 +139,7 @@ if EditingFormat=ef_CT then
   end
 else
   for i:=1 to Qty.ObjectsTotal do begin
-    blockread(f,c,32); Obj[i].Name:=StrPas(@c);
+    blockread(f,c,32); Obj[i].Name:=StrPas(PAnsiChar(@c[1]));
     blockread(f,Obj[i].ID,68);              //Property of object
     if not Obj[i].InShadow in [0,1] then
     MessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'ObjectInShadow', MB_OK or MB_ICONWARNING);
@@ -148,7 +148,7 @@ else
 blockread(f,Light,Qty.Lights*88);
 
 for i:=1 to Qty.GroundTypes do begin
-blockread(f,c,64); Ground[i].Name:=StrPas(@c);
+blockread(f,c,64); Ground[i].Name:=StrPas(PAnsiChar(@c[1]));
 blockread(f,Ground[i].Dirt,92);
 end;
 
@@ -156,7 +156,7 @@ blockread(f,Tex2Ground,512); //256 words
 
 for i:=1 to Qty.Sounds do begin                   //11th
 blockread(f,Sound[i],12);
-blockread(f,c,32); Sound[i].Name:=StrPas(@c);
+blockread(f,c,32); Sound[i].Name:=StrPas(PAnsiChar(@c[1]));
 blockread(f,Sound[i].Volume,24);
 if (Sound[i].z4<>EnsureRange(Sound[i].z4,0,3)) then
 MessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'Sounds', MB_OK or MB_ICONWARNING);
@@ -198,22 +198,22 @@ blockread(f,Qty,64);
 blockread(f,c,56);
 
 for i:=1 to Qty.TexturesFiles do begin
-blockread(f,c,32); TexName[i]:=StrPas(@c);
+blockread(f,c,32); TexName[i]:=StrPas(PAnsiChar(@c[1]));
 end;
 
 for i:=1 to Qty.BumpTexturesFiles do begin
-blockread(f,c,32); BumpTexName[i]:=StrPas(@c);
+blockread(f,c,32); BumpTexName[i]:=StrPas(PAnsiChar(@c[1]));
 end;
 Qty.BumpTexturesFiles:=0;
 
 for i:=1 to Qty.ObjectFiles do begin
-blockread(f,c,32); ObjName[i]:=StrPas(@c);
+blockread(f,c,32); ObjName[i]:=StrPas(PAnsiChar(@c[1]));
 end;
 
 for i:=1 to Qty.ObjectFiles do begin
 blockread(f,ObjProp[i],20);
-blockread(f,c,48); ObjProp[i].HitSound:=StrPas(@c);
-blockread(f,c,48); ObjProp[i].FallSound:=StrPas(@c);
+blockread(f,c,48); ObjProp[i].HitSound:=StrPas(PAnsiChar(@c[1]));
+blockread(f,c,48); ObjProp[i].FallSound:=StrPas(PAnsiChar(@c[1]));
 if (ObjProp[i].x1<>0)or(ObjProp[i].x2<>0)or(ObjProp[i].x3<>0)or(ObjProp[i].p4<>0) then
 MessageBox(Form1.Handle, 'Unknown object entry found. Contact kromster80@gmail.com', 'ObjectsTable', MB_OK or MB_ICONWARNING);
 end;
@@ -259,7 +259,7 @@ Form1.ComputeChunkMode(nil);
         exit;
 //if FormatAFC11CT then
   for i:=1 to Qty.ObjectsTotal do begin
-    blockread(f,c,32); Obj[i].Name:=StrPas(@c);
+    blockread(f,c,32); Obj[i].Name:=StrPas(PAnsiChar(@c[1]));
     blockread(f,Obj[i].ID,16); //20bytes ahead
 //    blockread(f,c,16);
 //    blockread(f,Obj[i].Angl,4);
@@ -275,7 +275,7 @@ Form1.ComputeChunkMode(nil);
 blockread(f,Light,Qty.Lights*88);
 
 for i:=1 to Qty.GroundTypes do begin
-  blockread(f,c,64); Ground[i].Name:=StrPas(@c);
+  blockread(f,c,64); Ground[i].Name:=StrPas(PAnsiChar(@c[1]));
   blockread(f,Ground[i].Dirt,92);
 end;
 
@@ -283,7 +283,7 @@ blockread(f,Tex2Ground,512); //256 words
 
 for i:=1 to Qty.Sounds do begin                   //11th
   blockread(f,Sound[i],12);
-  blockread(f,c,32); Sound[i].Name:=StrPas(@c);
+  blockread(f,c,32); Sound[i].Name:=StrPas(PAnsiChar(@c[1]));
   blockread(f,Sound[i].Volume,24);
   if (Sound[i].z4<>EnsureRange(Sound[i].z4,0,3)) then
   MessageBox(Form1.Handle, 'Unknown entry found. Contact kromster80@gmail.com', 'Sounds', MB_OK or MB_ICONWARNING);
@@ -554,7 +554,7 @@ function LoadSKY(Input:string):boolean;
 var
   ft:textfile;
   ii,kk:integer;
-  CHname,s:string;
+  CHname,s: AnsiString;
 begin
 result:=false;
 if not fileexists(Input+'.sky') then begin
@@ -672,7 +672,7 @@ if fileexists(Input+Input2+'_'+int2fix(i,2)+'.tob') then begin
   blockread(f,TOBHead[i],16);
   setlength(TOB[i],TOBHead[i].Qty+1);
   for ii:=1 to TOBHead[i].Qty do begin
-    blockread(f,c,32); TOB[i,ii].Name:=StrPas(@c);
+    blockread(f,c,32); TOB[i,ii].Name:=StrPas(PAnsiChar(@c[1]));
     if EditingFormat=ef_BW then begin
       blockread(f,TOB[i,ii].ID,92);
 
@@ -726,61 +726,61 @@ assignfile(f,Input); reset(f,1);
 repeat
 blockread(f,c,6); c[7]:=#0;
 
-if StrPas(@c)='MATNAM' then begin
+if StrPas(PAnsiChar(@c[1]))='MATNAM' then begin
   blockread(f,ii,4);
   for k:=1 to ii do begin
   blockread(f,c,32); c[33]:=#0;
-  MaterialW[k].Name:=StrPas(@c);
+  MaterialW[k].Name:=StrPas(PAnsiChar(@c[1]));
   end;
 end;
-if StrPas(@c)='LIGHTS' then begin
+if StrPas(PAnsiChar(@c[1]))='LIGHTS' then begin
   blockread(f,iw,2);
   for k:=1 to iw do
   blockread(f,LightW[k].Radius,4);
 end;
-if StrPas(@c)='AMBLIT' then begin
+if StrPas(PAnsiChar(@c[1]))='AMBLIT' then begin
   blockread(f,AmbLightW.R,4);
 end;
-if StrPas(@c)='MATENL' then begin
+if StrPas(PAnsiChar(@c[1]))='MATENL' then begin
   blockread(f,ii,4);
   for k:=1 to ii do
   blockread(f,MaterialW[k].Enlite,1);
 end;
-if StrPas(@c)='MATGRS' then begin
+if StrPas(PAnsiChar(@c[1]))='MATGRS' then begin
   blockread(f,ii,4);
   for k:=1 to ii do
   blockread(f,MaterialW[k].GrowGrass,1);
 end;
-if StrPas(@c)='MATNSH' then begin //NoShadow
+if StrPas(PAnsiChar(@c[1]))='MATNSH' then begin //NoShadow
   blockread(f,ii,4);
   for k:=1 to ii do
   blockread(f,MaterialW[k].NoShadow,1);
 end;
-if StrPas(@c)='GRSCOL' then begin
+if StrPas(PAnsiChar(@c[1]))='GRSCOL' then begin
   blockread(f,GrassColorW.R,4);
 end;
-if StrPas(@c)='TEXGRS' then begin
+if StrPas(PAnsiChar(@c[1]))='TEXGRS' then begin
   blockread(f,ii,4);
   for k:=1 to ii do
   blockread(f,TextureW[k].GrowGrass,1);
 end;
-if StrPas(@c)='SNWSNI' then begin
+if StrPas(PAnsiChar(@c[1]))='SNWSNI' then begin
   blockread(f,ii,4);
   for k:=1 to ii do
   blockread(f,SNISpawnW[k].Density,12);
 end;
-if StrPas(@c)='LSTTRK' then begin
+if StrPas(PAnsiChar(@c[1]))='LSTTRK' then begin
   blockread(f,TrackID,4);
 end;
 
-if StrPas(@c)='LWOSRC' then begin
+if StrPas(PAnsiChar(@c[1]))='LWOSRC' then begin
   blockread(f,ii,4);
   if ii<>0 then blockread(f,c,ii);
   c[ii+1]:=#0;
-  LWOSceneryFile:=StrPas(@c);
+  LWOSceneryFile:=StrPas(PAnsiChar(@c[1]));
 end;
 
-if StrPas(@c)='MAKTRK' then begin
+if StrPas(PAnsiChar(@c[1]))='MAKTRK' then begin
   blockread(f,k,4); //integer
   TracksQty:=max(k,TracksQty);
   for ii:=1 to k do begin

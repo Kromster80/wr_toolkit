@@ -1,5 +1,9 @@
-{$IFDEF VER150} {$DEFINE VER140} {$ENDIF}
+{$IFDEF VER140} {$DEFINE WDC} {$ENDIF}  // Delphi 6
+{$IFDEF VER150} {$DEFINE WDC} {$ENDIF}  // Delphi 7
+{$IFDEF VER220} {$DEFINE WDC} {$ENDIF}  // Delphi XE
+{$IFDEF VER230} {$DEFINE WDC} {$ENDIF}  // Delphi XE2
 unit ColorPicker;
+{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
 uses
   {$IFDEF FPC} LResources, {$ENDIF}
@@ -67,7 +71,7 @@ var
   HSBRefresh:boolean;
 
 implementation
-{$IFDEF VER140}
+{$IFDEF WDC}
 {$R *.dfm}
 {$ENDIF}
 
@@ -120,12 +124,12 @@ procedure TForm_ColorPicker.DrawHueSatQuad();
 var P : PByteArray; R,G,B:integer; ii,kk:integer;
 begin //Fill area with Hue and Saturation data respecting Brightness
   for ii := 0 to 255 do begin
-    {$IFDEF VER140} P := BitmapHueSat.ScanLine[ii]; {$ENDIF}
+    {$IFDEF WDC} P := BitmapHueSat.ScanLine[ii]; {$ENDIF}
     for kk := 0 to 359 do begin
       ApplyHue2RGB(kk, R, G, B);
       ApplySat2RGB(ii, R, G, B);
       ApplyBri2RGB(R, G, B, Bri, R, G, B);
-      {$IFDEF VER140}
+      {$IFDEF WDC}
         P[kk*3+0] := B;
         P[kk*3+1] := G;
         P[kk*3+2] := R;

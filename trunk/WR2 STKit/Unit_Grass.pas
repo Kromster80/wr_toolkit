@@ -355,7 +355,7 @@ begin
       for i:=1 to RO[LOD].Head.sizeZ do
         setlength(RO[LOD].Chunks[i],RO[LOD].Head.sizeX+1);
       blockread(f,c,32); c[33]:=#0; //Make sure it's 0-terminated
-      RO[LOD].Tex := StrPas(@c); //Name
+      RO[LOD].Tex := StrPas(PAnsiChar(@c[1])); //Name
       blockread(f,RO[LOD].UV,128);
       for i:=1 to RO[LOD].Head.sizeZ do
         blockread(f,RO[LOD].Chunks[i,1],RO[LOD].Head.sizeX*8);

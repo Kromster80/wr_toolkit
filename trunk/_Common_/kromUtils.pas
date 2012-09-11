@@ -29,13 +29,13 @@ procedure FreeThenNil(var Obj);
 procedure krintersect(x1,y1,x2,y2,x3,y3:single; SizeX,SizeY:integer; var ot:array of integer);
 function ReverseString(s1:string):string;
 
-function real2(c1,c2,c3,c4:char):real;
+function real2(c1,c2,c3,c4:AnsiChar):real;
 function unreal2(x:real):string;
-function hextoint(st: char): integer;
+function hextoint(st: AnsiChar): integer;
 function int2fix(Number,Len:integer):string;
 function float2fix(Number:single; Digits:integer):string;
-function int2(c1,c2:char):integer; overload;
-function int2(c1,c2,c3,c4:char):integer; overload;
+function int2(c1,c2:AnsiChar):integer; overload;
+function int2(c1,c2,c3,c4:AnsiChar):integer; overload;
 function chr2(x,len:integer):string; overload;
 function chr2(t:string; len:integer):string; overload;
 procedure Color2RGB(Col:integer; out R,G,B:byte);
@@ -82,9 +82,9 @@ function Pow(const Base, Exponent: integer): integer;
   procedure Normal2Poly(v1,v2,v3:Vector3f; n:PVector3f); overload;
   procedure Normal2Poly(u1,v1,u2,v2,u3,v3:single; out n:single); overload;
 
-procedure decs(var AText:string; const Len:integer=1); overload;
-procedure decs(var AText:widestring; const Len:integer=1); overload;
-function  decs(AText:string; Len,RunAsFunction:integer):string; overload;
+procedure decs(var AText: AnsiString; const Len:integer=1); overload;
+procedure decs(var AText: WideString; const Len:integer=1); overload;
+function  decs(AText: AnsiString; Len,RunAsFunction:integer): AnsiString; overload;
 function GetNumberFromString(AText:string; Position:integer):single;
 function RemoveQuotes(Input:string):string;
 function GetCharFromVirtualKey(Key:word):string;
@@ -175,11 +175,15 @@ i1^:=GetTickCount;                           //assign new value to source
 end;
 
 
-function hextoint(st: char): integer;
-begin st:=uppercase(st)[1];
-if (ord(st)>=48)and(ord(st)<=57) then hextoint:=ord(st)-48 else
-if (ord(st)>=65)and(ord(st)<=70) then hextoint:=ord(st)-55 else
-hextoint:=0;
+function hextoint(st: AnsiChar): integer;
+begin
+  st := AnsiChar(uppercase(st)[1]);
+  if (ord(st) >= 48) and (ord(st) <= 57) then
+    hextoint := ord(st) - 48
+  else if (ord(st) >= 65) and (ord(st) <= 70) then
+    hextoint := ord(st) - 55
+  else
+    hextoint := 0;
 end;
 
 function ExtractOpenedFileName(in_s: string):string;
@@ -306,7 +310,7 @@ x3:=EnsureRange(x3/256,0,SizeX); y3:=EnsureRange(y3/256,0,SizeY);
 if (trunc(x1)=trunc(x2))and(trunc(x2)=trunc(x3))               //All in one block
 and(trunc(y1)=trunc(y2))and(trunc(y2)=trunc(y3)) then begin
 ot[0]:=trunc(x1)+1+trunc(y1)*SizeX;
-exit; end;          
+exit; end;
 
 if y1>y2 then begin                            //Sorting highest
  if y1>y3 then begin Ax:=x1; Ay:=y1; end
@@ -387,20 +391,20 @@ end;
 end;
 
 
-function real2(c1,c2,c3,c4:char):real;
+function real2(c1,c2,c3,c4: AnsiChar): Real;
 var //i,sign,exponent:integer; t,mantissa:real;
-Tmp:array[1..4] of char;
+  Tmp:array[1..4] of AnsiChar;
 begin
-Tmp[1]:=c1; Tmp[2]:=c2; Tmp[3]:=c3; Tmp[4]:=c4;
-Result:=Single(Tmp);
-{if ord(c4) div 128 = 1 then Sign:=-1 else Sign:=1;
-Exponent:=(ord(c4) mod 128)*2 + (ord(c3) div 128)-127;
-Mantissa:=(ord(c3) mod 128)*65536+ord(c2)*256+ord(c1);
-t:=(1+Mantissa/8388608)*Sign;
-if Exponent=-127 then t:=0 else
-if exponent>0 then for i:=1 to exponent do t:=t*2 else
-if exponent<0 then for i:=-1 downto exponent do t:=t/2;
-real2:=t;}
+  Tmp[1]:=c1; Tmp[2]:=c2; Tmp[3]:=c3; Tmp[4]:=c4;
+  Result := Single(Tmp);
+  {if ord(c4) div 128 = 1 then Sign:=-1 else Sign:=1;
+  Exponent:=(ord(c4) mod 128)*2 + (ord(c3) div 128)-127;
+  Mantissa:=(ord(c3) mod 128)*65536+ord(c2)*256+ord(c1);
+  t:=(1+Mantissa/8388608)*Sign;
+  if Exponent=-127 then t:=0 else
+  if exponent>0 then for i:=1 to exponent do t:=t*2 else
+  if exponent<0 then for i:=-1 downto exponent do t:=t/2;
+  real2:=t;}
 end;
 
 
@@ -440,10 +444,10 @@ begin
   Result := FloatToStrF(Number, ffGeneral, Digits+1, Digits);
 end;
 
-function int2(c1,c2:char):integer; overload;
+function int2(c1,c2: AnsiChar):integer; overload;
 begin int2:=ord(c1)+ord(c2)*256; end;
 
-function int2(c1,c2,c3,c4:char):integer; overload;
+function int2(c1,c2,c3,c4:AnsiChar):integer; overload;
 var x:integer;
 begin if ord(c4)>127 then begin
 x:=-(255-ord(c1)+(255-ord(c2))*256+(255-ord(c3))*65536+(255-ord(c4))*16777216);
@@ -552,10 +556,10 @@ m[7]:=matrix09[6+Num*2]; m[8]:=matrix09[7+Num*2]; m[9]:=matrix09[8+Num*2];
         Az:=arctan2(-m[2],m[1]);               // -CF : CE
         if round(m[9]*1000)<>0 then
           Ay:=arctan2(m[3],m[9]/cos(Ax))       //   D : AC/A
-        else 
+        else
   	    if round(m[2]*1000)<>0 then
             Ay:=arctan2(m[3],-m[6]/sin(Ax))    //   D :-BC/B
-          else 
+          else
             if round(m[1]*1000)<>0 then
               Ay:=arctan2(m[3],m[1]/cos(Az))   //   D : CE/E
             else //if round(m[2]*1000)<>0 then
@@ -680,29 +684,29 @@ ix:=ix/len;
 iy:=iy/len;
 end;
 
-function Mix(x1,x2,MixValue:single):single; overload;
+function Mix(x1,x2,MixValue:single):single;
 begin
 Result:=x1*MixValue+x2*(1-MixValue);
 end;
 
-function Mix(x1,x2:integer; MixValue:single):integer; overload;
+function Mix(x1,x2:integer; MixValue:single):integer;
 begin
 Result:=round(x1*MixValue+x2*(1-MixValue));
 end;
 
-function Mix(x1,x2:Vector3f; MixValue:single):vector3f; overload;
+function Mix(x1,x2:Vector3f; MixValue:single):vector3f;
 begin
 Result.X:=x1.X*MixValue+x2.X*(1-MixValue);
 Result.Y:=x1.Y*MixValue+x2.Y*(1-MixValue);
 Result.Z:=x1.Z*MixValue+x2.Z*(1-MixValue);
 end;
 
-function DotProduct(x1,y1,z1,x2,y2,z2:single):single; overload;
+function DotProduct(x1,y1,z1,x2,y2,z2:single):single;
 begin
 Result:=x1*x2+y1*y2+z1*z2;
 end;
 
-function DotProduct(v1,v2:Vector3f):single; overload;
+function DotProduct(v1,v2:Vector3f):single;
 begin
 Result:=v1.X*v2.X+v1.Y*v2.Y+v1.Z*v2.Z;
 end;
@@ -717,26 +721,26 @@ Result.Y:=v2.Y;
 Result.Z:=v2.Z+Tmp.X*Len;
 end;
 
-procedure Normal2Poly(v1,v2,v3:array of single; nx,ny,nz:psingle); overload;
+procedure Normal2Poly(v1,v2,v3:array of single; nx,ny,nz:psingle);
 begin  //aka Cross product of 2 vectors
 nx^:= ((v1[1]-v2[1])*(v1[2]-v3[2])-(v1[2]-v2[2])*(v1[1]-v3[1]))/256;
 ny^:=-((v1[0]-v2[0])*(v1[2]-v3[2])-(v1[2]-v2[2])*(v1[0]-v3[0]))/256;
 nz^:= ((v1[0]-v2[0])*(v1[1]-v3[1])-(v1[1]-v2[1])*(v1[0]-v3[0]))/256;
 end;
 
-procedure Normal2Poly(v1,v2,v3:Vector3f; n:PVector3f); overload;
+procedure Normal2Poly(v1,v2,v3:Vector3f; n:PVector3f);
 begin  //aka Cross product of 2 vectors
 n^.x:= ((v1.Y-v2.Y)*(v1.Z-v3.Z)-(v1.Z-v2.Z)*(v1.Y-v3.Y))/256;
 n^.y:=-((v1.X-v2.X)*(v1.Z-v3.Z)-(v1.Z-v2.Z)*(v1.X-v3.X))/256;
 n^.z:= ((v1.X-v2.X)*(v1.Y-v3.Y)-(v1.Y-v2.Y)*(v1.X-v3.X))/256;
 end;
 
-procedure Normal2Poly(u1,v1,u2,v2,u3,v3:single; out n:single); overload;
+procedure Normal2Poly(u1,v1,u2,v2,u3,v3:single; out n:single);
 begin  //aka Cross product of 2 vectors
 n:=(u1-u2)*(v1-v3)-(v1-v2)*(u1-u3);
 end;
 
-procedure decs(var AText:string; const Len:integer=1); overload;
+procedure decs(var AText: AnsiString; const Len:integer=1);
 begin
 if length(AText)<=abs(Len) then Atext:=''
 else
@@ -744,7 +748,7 @@ if Len>=0 then AText:=Copy(AText, 1, length(AText)-Len)
           else AText:=Copy(AText, 1+abs(Len), length(AText)-abs(Len));
 end;
 
-procedure decs(var AText:widestring; const Len:integer=1); overload;
+procedure decs(var AText: WideString; const Len:integer=1);
 begin
 if length(AText)<=abs(Len) then Atext:=''
 else
@@ -752,7 +756,7 @@ if Len>=0 then AText:=Copy(AText, 1, length(AText)-Len)
           else AText:=Copy(AText, 1+abs(Len), length(AText)-abs(Len));
 end;
 
-function decs(AText:string; Len,RunAsFunction:integer):string; overload;
+function decs(AText:AnsiString; Len,RunAsFunction:integer): AnsiString;
 begin
 if length(AText)<=abs(Len) then result:=''
 else
@@ -936,7 +940,7 @@ for i:=0 to Sender.ComponentCount-1 do begin
     end;
   writeln(ft,'//EndList');
   end;
-  
+
 end;
 
 closefile(ft);
@@ -944,7 +948,7 @@ end;
 
 procedure ReadLangFile(Sender:TForm; FileName:string; EraseWritten:boolean);
 var ft:textfile; i,k,row:integer; capt,eng,rus,ErrS:string; IsList:boolean;
-begin     
+begin
   if not fileexists(FileName) then begin
     ErrS := 'Can''t find input file '+FileName;
     MessageBox(Sender.Handle,@(ErrS)[1],'Error',MB_OK);

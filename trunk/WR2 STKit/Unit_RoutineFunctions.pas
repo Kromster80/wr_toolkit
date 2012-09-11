@@ -14,7 +14,7 @@ procedure MoveCarAlongTrack(TrackID:integer);
 
 
 implementation
-uses Unit_Tracks;
+//uses Unit_TRK;
 
 
 procedure MoveCarAlongTrack(TrackID:integer);
@@ -305,33 +305,36 @@ begin
   setlength(SNISubNode[ii],SNIObj[ii].NumNodes*SNI_LOD+1);
   setlength(SNISubDist[ii],SNIObj[ii].NumNodes*SNI_LOD+1);
 
-     for kk:=1 to SNIObj[ii].NumNodes do begin
-     n0:=kk-1; n1:=kk; n2:=kk+1; //n0-prev, n1-this, n2-next
-     if n0=0 then n0:=SNIObj[ii].NumNodes;
-     if n2>SNIObj[ii].NumNodes then n2:=1;
-     inc(n0,SNIObj[ii].firstNode);
-     inc(n1,SNIObj[ii].firstNode);
-     inc(n2,SNIObj[ii].firstNode);
+     for kk:=1 to SNIObj[ii].NumNodes do
+     begin
+       n0:=kk-1;
+       n1:=kk;
+       n2:=kk+1; //n0-prev, n1-this, n2-next
+       if n0=0 then n0:=SNIObj[ii].NumNodes;
+       if n2>SNIObj[ii].NumNodes then n2:=1;
+       inc(n0,SNIObj[ii].firstNode);
+       inc(n1,SNIObj[ii].firstNode);
+       inc(n2,SNIObj[ii].firstNode);
 
-     ax:=Getlength((SNINode[n1].X-SNINode[n0].X),(SNINode[n1].Y-SNINode[n0].Y),(SNINode[n1].Z-SNINode[n0].Z));
-     bx:=Getlength((SNINode[n2].X-SNINode[n1].X),(SNINode[n2].Y-SNINode[n1].Y),(SNINode[n2].Z-SNINode[n1].Z));
+       ax:=Getlength((SNINode[n1].X-SNINode[n0].X),(SNINode[n1].Y-SNINode[n0].Y),(SNINode[n1].Z-SNINode[n0].Z));
+       bx:=Getlength((SNINode[n2].X-SNINode[n1].X),(SNINode[n2].Y-SNINode[n1].Y),(SNINode[n2].Z-SNINode[n1].Z));
 
-     TangA[kk,1]:=(SNINode[n2].X-SNINode[n0].X); //Vector X0-X2
-     TangA[kk,2]:=(SNINode[n2].Y-SNINode[n0].Y); //Vector X0-X2
-     TangA[kk,3]:=(SNINode[n2].Z-SNINode[n0].Z); //Vector X0-X2
-     Normalize(TangA[kk,1],TangA[kk,2],TangA[kk,3]);
-     TangB[kk,1]:=TangA[kk,1]*ax/3;
-     TangB[kk,2]:=TangA[kk,2]*ax/3;
-     TangB[kk,3]:=TangA[kk,3]*ax/3;
-     TangA[kk,1]:=TangA[kk,1]*bx/3;
-     TangA[kk,2]:=TangA[kk,2]*bx/3;
-     TangA[kk,3]:=TangA[kk,3]*bx/3;
-     SNITang[n1,1,1]:=SNINode[n1].X+TangA[kk,1];
-     SNITang[n1,1,2]:=SNINode[n1].Y+TangA[kk,2];
-     SNITang[n1,1,3]:=SNINode[n1].Z+TangA[kk,3];
-     SNITang[n1,2,1]:=SNINode[n1].X-TangB[kk,1];
-     SNITang[n1,2,2]:=SNINode[n1].Y-TangB[kk,2];
-     SNITang[n1,2,3]:=SNINode[n1].Z-TangB[kk,3];
+       TangA[kk,1]:=(SNINode[n2].X-SNINode[n0].X); //Vector X0-X2
+       TangA[kk,2]:=(SNINode[n2].Y-SNINode[n0].Y); //Vector X0-X2
+       TangA[kk,3]:=(SNINode[n2].Z-SNINode[n0].Z); //Vector X0-X2
+       Normalize(TangA[kk,1],TangA[kk,2],TangA[kk,3]);
+       TangB[kk,1]:=TangA[kk,1]*ax/3;
+       TangB[kk,2]:=TangA[kk,2]*ax/3;
+       TangB[kk,3]:=TangA[kk,3]*ax/3;
+       TangA[kk,1]:=TangA[kk,1]*bx/3;
+       TangA[kk,2]:=TangA[kk,2]*bx/3;
+       TangA[kk,3]:=TangA[kk,3]*bx/3;
+       SNITang[n1,1,1]:=SNINode[n1].X+TangA[kk,1];
+       SNITang[n1,1,2]:=SNINode[n1].Y+TangA[kk,2];
+       SNITang[n1,1,3]:=SNINode[n1].Z+TangA[kk,3];
+       SNITang[n1,2,1]:=SNINode[n1].X-TangB[kk,1];
+       SNITang[n1,2,2]:=SNINode[n1].Y-TangB[kk,2];
+       SNITang[n1,2,3]:=SNINode[n1].Z-TangB[kk,3];
      end;
 
   ci:=0;

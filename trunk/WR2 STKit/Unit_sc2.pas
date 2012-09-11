@@ -187,28 +187,28 @@ blockread(f,c,2); //Chapters
 with AddonScenery do begin
 blockread(f,h,2);
 if h<>0 then begin blockread(f,c,h+1);
-EngineName:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); BGround:=StrPas(@c); end else BGround:='';
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Name:=StrPas(@c); end else Name:='';
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); SceneryFlag:=StrPas(@c); end else SceneryFlag:='';
+EngineName:=StrPas(PAnsiChar(@c[1])); end;
+blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); BGround:=StrPas(PAnsiChar(@c[1])); end else BGround:='';
+blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Name:=StrPas(PAnsiChar(@c[1])); end else Name:='';
+blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); SceneryFlag:=StrPas(PAnsiChar(@c[1])); end else SceneryFlag:='';
 blockread(f,FreeRideID,2);
 blockread(f,TrackQty,2);
 for k:=1 to TrackQty do with AddonScenery.Track[k] do begin
 blockread(f,TrackNo,2);
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Name:=StrPas(@c); end else Name:='';
+blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Name:=StrPas(PAnsiChar(@c[1])); end else Name:='';
 blockread(f,CheckPoint,2);
 blockread(f,mDistance,2);
 blockread(f,Direction,2);
 blockread(f,WayPoint,2);
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Maps:=StrPas(@c); end else Maps:='';
+blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Maps:=StrPas(PAnsiChar(@c[1])); end else Maps:='';
 blockread(f,TypeID,2);
 blockread(f,NumSections,2);
 blockread(f,Order,2);
 end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Author:=StrPas(@c); end else Author:='';
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Converter:=StrPas(@c); end else Converter:='';
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Contact:=StrPas(@c); end else Contact:='';
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Comment:=StrPas(@c); end else Comment:='';
+blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Author:=StrPas(PAnsiChar(@c[1])); end else Author:='';
+blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Converter:=StrPas(PAnsiChar(@c[1])); end else Converter:='';
+blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Contact:=StrPas(PAnsiChar(@c[1])); end else Contact:='';
+blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Comment:=StrPas(PAnsiChar(@c[1])); end else Comment:='';
 end;
 closefile(f);
 SendDataToSC2();

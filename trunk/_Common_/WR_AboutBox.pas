@@ -1,3 +1,7 @@
+{$IFDEF VER140} {$DEFINE WDC} {$ENDIF}  // Delphi 6
+{$IFDEF VER150} {$DEFINE WDC} {$ENDIF}  // Delphi 7
+{$IFDEF VER220} {$DEFINE WDC} {$ENDIF}  // Delphi XE
+{$IFDEF VER230} {$DEFINE WDC} {$ENDIF}  // Delphi XE2
 unit WR_AboutBox;
 {$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
@@ -55,8 +59,9 @@ begin
   if key=27 then AboutForm.Close;   //ESC
 end;
 
-{$IFDEF VER140} {$R *.dfm} {$ENDIF}
-{$IFDEF VER150} {$R *.dfm} {$ENDIF}
+{$IFDEF WDC}
+  {$R *.dfm}
+{$ENDIF}
 
 initialization
 {$IFDEF FPC}
