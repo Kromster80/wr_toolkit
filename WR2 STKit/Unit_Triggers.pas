@@ -3,8 +3,8 @@ interface
 uses Classes, SysUtils, FileCtrl, Windows, KromUtils ,Math, dglOpenGL, Unit_Defaults, Unit_Render, KromOGLUtils;
 
 const
-  RESTRICT_TRIGGERS = true;
-  TRLnames:array[1..24]of string = (
+  RESTRICT_TRIGGERS = True;
+  TRLnames: array [1..24] of string = (
   '/1/', '/2/',
   'Jump Tunnel /3/',              //3
   'Zero gravity',                 //4
@@ -23,38 +23,36 @@ const
 
 type
   TSTrigger = class
-    private
-      fType1,fType2:word;
-      fPosition:Vector3f;
-      fScale:Vector3f;
-      u1:array[1..6]of shortint;
-      fMatrix:array[1..9]of single; //Rotation
-      fTarget:Vector3f;
-      u2:array[1..3]of smallint;
-      Changed:boolean;
-      function  GetTriggerType():word;
-      procedure SetTriggerType(aValue:word);
-      procedure SetPosition(aValue:Vector3f);
-      procedure SetScale(aValue:Vector3f);
-      function  GetRotation():Vector3i;
-      procedure SetRotation(aValue:Vector3i);
-      procedure SetTarget(aValue:Vector3f);
-      function  GetFlags():string;
-    public
-      constructor Create;
-      procedure LoadFromStream(Stream:TMemoryStream);
-      procedure SaveToStream(Stream:TMemoryStream);
-      property TriggerType:word read GetTriggerType write SetTriggerType;
-      property Position:Vector3f read fPosition write SetPosition;
-      property Scale:Vector3f read fScale write SetScale;
-      property Rotation:Vector3i read GetRotation write SetRotation;
-      property Target:Vector3f read fTarget write SetTarget;
-      property Flags:string read GetFlags;
-      function GetName:string;
+  private
+    fType1,fType2:word;
+    fPosition:Vector3f;
+    fScale:Vector3f;
+    u1:array[1..6]of shortint;
+    fMatrix:array[1..9]of single; //Rotation
+    fTarget:Vector3f;
+    u2:array[1..3]of smallint;
+    Changed:boolean;
+    function  GetTriggerType():word;
+    procedure SetTriggerType(aValue:word);
+    procedure SetPosition(aValue:Vector3f);
+    procedure SetScale(aValue:Vector3f);
+    function  GetRotation():Vector3i;
+    procedure SetRotation(aValue:Vector3i);
+    procedure SetTarget(aValue:Vector3f);
+    function  GetFlags():string;
+  public
+    constructor Create;
+    procedure LoadFromStream(Stream:TMemoryStream);
+    procedure SaveToStream(Stream:TMemoryStream);
+    property TriggerType:word read GetTriggerType write SetTriggerType;
+    property Position:Vector3f read fPosition write SetPosition;
+    property Scale:Vector3f read fScale write SetScale;
+    property Rotation:Vector3i read GetRotation write SetRotation;
+    property Target:Vector3f read fTarget write SetTarget;
+    property Flags:string read GetFlags;
+    function GetName:string;
   end;
 
-
-type
   TSTriggersCollection = class
   private
     fChanged:boolean;
@@ -246,7 +244,7 @@ begin
   setlength(fTriggers, fCount+1);
   fTriggers[fCount] := TSTrigger.Create;
   fTriggers[fCount].Position := aPos;
-  
+
   fChanged := true;
   Result := true;
 end;
@@ -263,24 +261,48 @@ begin
 end;
 
 
-procedure TSTriggersCollection.ApplyRestrictions();
-const MAX_TRIG=8;
-var ii,Nqty,Fqty,Rqty:integer;
+procedure TSTriggersCollection.ApplyRestrictions;
+const
+  MAX_TRIG = 8;
+var
+  I: Integer;
+  RepairCount, NitroCount, FuelCount: Integer;
 begin
-  Nqty:=0; Fqty:=0; Rqty:=0;
-  for ii:=1 to fCount do
-  case fTriggers[ii].TriggerType of
-    8:  begin inc(Nqty); if NQty>MAX_TRIG then fTriggers[ii].TriggerType := 16; end; //Nitro
-    15: begin inc(Fqty); if FQty>MAX_TRIG then fTriggers[ii].TriggerType := 16; end; //Refuel
-    7:  begin inc(Rqty); if RQty>MAX_TRIG then fTriggers[ii].TriggerType := 16; end; //Repair
-  end;
+  RepairCount := 0;
+  NitroCount := 0;
+  FuelCount := 0;
 
-  if NQty>8 then MessageBox(HWND(nil),'Nitro triggers count is limited to 8 max','Warning',MB_OK or MB_ICONWARNING or MB_TASKMODAL);
-  if FQty>8 then MessageBox(HWND(nil),'Refuel triggers count is limited to 8 max','Warning',MB_OK or MB_ICONWARNING or MB_TASKMODAL);
-  if Rqty>8 then MessageBox(HWND(nil),'Repair triggers count is limited to 8 max','Warning',MB_OK or MB_ICONWARNING or MB_TASKMODAL);
+  for I := 1 to fCount do
+  case fTriggers[I].TriggerType of
+    7:  begin // Repair
+          Inc(RepairCount);
+          if RepairCount > MAX_TRIG then
+            fTriggers[I].TriggerType := 16;
+        end;
+    8:  begin // Nitro
+          Inc(NitroCount);
+          if NitroCount > MAX_TRIG then
+            fTriggers[I].TriggerType := 16;
+        end;
+    15: begin // Refuel
+          Inc(FuelCount);
+          if FuelCount > MAX_TRIG then
+            fTriggers[I].TriggerType := 16;
+        end;
+    end;
 
-  if (NQty>8)or(FQty>8)or(RQty>8) then
-    fChanged := true;
+  if RepairCount > MAX_TRIG then
+    MessageBox(HWND(nil), 'Repair triggers count is limited to 8 max', 'Warning',
+      MB_OK or MB_ICONWARNING or MB_TASKMODAL);
+  if NitroCount > MAX_TRIG then
+    MessageBox(HWND(nil), 'Nitro triggers count is limited to 8 max', 'Warning',
+      MB_OK or MB_ICONWARNING or MB_TASKMODAL);
+  if FuelCount > MAX_TRIG then
+    MessageBox(HWND(nil), 'Refuel triggers count is limited to 8 max', 'Warning',
+      MB_OK or MB_ICONWARNING or MB_TASKMODAL);
+
+  if (NitroCount > MAX_TRIG) or (FuelCount > MAX_TRIG) or (RepairCount > MAX_TRIG) then
+    fChanged := True;
 end;
 
 
@@ -390,7 +412,7 @@ begin
     else
       glvertex3fv(@fTriggers[ID].fPosition);
     glEnd;
-  end;  
+  end;
 end;
 
 
