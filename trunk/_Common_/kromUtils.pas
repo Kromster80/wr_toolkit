@@ -458,17 +458,18 @@ int2:=ord(c1)+ord(c2)*256+ord(c3)*65536+ord(c4)*16777216; end;
 function chr2(x,len:integer):string; overload;
 var tmp:integer;
 begin tmp:=x;
-if x<0 then begin inc(tmp);
-chr2:=chr(tmp-1)+char(tmp div 256-1)+char(tmp div 65536-1)+char(tmp div 16777216-1)
-end else
-chr2:=chr(tmp)+char(tmp div 256)+char(tmp div 65536)+char(tmp div 16777216);
+  if x<0 then begin inc(tmp);
+  chr2:=chr(tmp-1)+char(tmp div 256-1)+char(tmp div 65536-1)+char(tmp div 16777216-1)
+  end else
+  chr2:=chr(tmp)+char(tmp div 256)+char(tmp div 65536)+char(tmp div 16777216);
 end;
 
 function chr2(t:string; len:integer):string; overload;
-var i:integer; begin
-for i:=length(t) to len-1 do t:=t+#0;
-setlength(t,len);
-chr2:=t;
+var i:integer;
+begin
+  for i:=length(t) to len-1 do t:=t+#0;
+  setlength(t,len);
+  chr2:=t;
 end;
 
 procedure Color2RGB(Col:integer; out R,G,B:byte);
