@@ -4,34 +4,37 @@ uses StdCtrls, Windows, Unit_Defaults, KromUtils, Math, SysUtils, OpenGL, dglOpe
 
 { Although there are 4 distinct LOD files we will treat them as one Grass setup
   There's no need to treat them separately for any reasons, that brings only confusion. }
-const MAX_RO_FILES = 4;
+const
+  MAX_RO_FILES = 4;
 
 type
   TSGrass = class
     private
-      RO:array[1..MAX_RO_FILES]of record
-        Head:record x1,x2,x3,sizeX,sizeZ,XZ,Qty,Density:integer; end;
+      RO: array[1..MAX_RO_FILES]of record
+        Head: record
+          x1,x2,x3,sizeX,sizeZ,XZ,Qty,Density:integer;
+        end;
         Tex:string[32];
-        UV:array[1..4]of record X:array[1..8]of single; end;
-        Chunks:array of array of record First,Num:integer; end;
-        Grass:array of record
+        UV: array[1..4]of record X:array[1..8]of single; end;
+        Chunks: array of array of record First,Num:integer; end;
+        Grass: array of record
           X,Y,Z:single;
           ID,Size:byte;
           Color:word;
         end;
       end;
 
-      function GetTexName:string;
-      procedure SetTexName(aTexName:string);
+      function GetTexName: string;
+      procedure SetTexName(aTexName: string);
     public
-      Changed:boolean;
+      Changed: Boolean;
 
-      property TexName:string read GetTexName write SetTexName;
-      function GetStats(LOD, aIndex:integer):string;
+      property TexName: string read GetTexName write SetTexName;
+      function GetStats(LOD, aIndex: Integer):string;
       procedure ReloadTexture;
 
-      procedure Generate(aProgressLabel:Pointer);
-      procedure SetPlainColor(R,G,B:byte);
+      procedure Generate(aProgressLabel: Pointer);
+      procedure SetPlainColor(R,G,B: Byte);
       procedure LoadColorFromTGA(aTGAFile:string);
 
       function  LoadFromFile(aFile:string):boolean;
