@@ -27,7 +27,6 @@ uses unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_Ro
     procedure SaveTOB(Input:string;ID:integer);
     procedure SaveWTR(Input:string;ID:integer);
     procedure SaveTRK_DAT(Input:string);
-    procedure SaveSTR(Input:string);
     procedure SaveLVL(Input:string);
     procedure SaveSMP(Input:string);
     procedure SaveSKY(Input:string);
@@ -466,59 +465,11 @@ var
 begin
   Result := False;
 
-  if not FileExists(Input+'.str') then
-  begin
-    STRHead.NumShapes:=0;
-    STRHead.NumPoints:=0;
-    STRHead.NumSplines:=0;
-    STRHead.NumShRefs:=0;
-    STRHead.NumRoWs:=0;
-    exit;
-  end;
+  fStreets.LoadFromFile(Input);
 
-  assignfile(f,Input+'.str'); FileMode:=0; reset(f,1); FileMode:=2;
-  blockread(f,STRHead,18); //NRTS
-
-  if STRHead.Version=258 then
-  begin //WR2
-    setlength(STR_Shape,STRHead.NumShapes+2);  //+2 is necessay to handle 0 length case:
-    setlength(STR_Point,STRHead.NumPoints+2);  // blockread reads from [1] element which
-    setlength(STR_Spline,STRHead.NumSplines+2);// needs to be existent 0..1 => 0+2
-    setlength(STR_ShRef,STRHead.NumShRefs+2);
-    setlength(STR_RoW,STRHead.NumRoWs+2);
-
-    blockread(f,STR_Shape[1],12*STRHead.NumShapes);
-    blockread(f,STR_Point[1],24*STRHead.NumPoints);
-    blockread(f,STR_Spline[1],36*STRHead.NumSplines);
-    blockread(f,STR_ShRef[1],8*STRHead.NumShRefs);
-    blockread(f,STR_RoW[1],6*STRHead.NumRoWs);
-  end;
-
-  if STRHead.Version=260 then
-  begin //AFC11
-    setlength(STR_Shape,STRHead.NumShapes+2);  //+2 is necessay to handle 0 length case:
-    setlength(STR_Point,STRHead.NumPoints+2);  // blockread reads from [1] element which
-    setlength(STR_Spline,STRHead.NumSplines+2);// needs to be existent 0..1 => 0+2
-    setlength(STR_ShRef,STRHead.NumShRefs+2);
-    setlength(STR_RoW,STRHead.NumRoWs+2);
-
-    for i:=1 to STRHead.NumShapes do
-    begin
-      blockread(f,STR_Shape[i].Offset,8);
-      blockread(f,c,8);
-      blockread(f,STR_Shape[i].Options,4);
-    end;
-    blockread(f,STR_Point[1],24*STRHead.NumPoints);
-    blockread(f,STR_Spline[1],36*STRHead.NumSplines);
-    blockread(f,STR_ShRef[1],8*STRHead.NumShRefs);
-    blockread(f,STR_RoW[1],6*STRHead.NumRoWs);
-  end;
-
-  closefile(f);
-
-  if STRHead.NumShapes>1 then Form1.RemShape.Enabled:=true;
-  Form1.STRSplineShape1.MaxValue:=STRHead.NumShapes;
-  Form1.STRSplineShape2.MaxValue:=STRHead.NumShapes;
+  Form1.RemShape.Enabled := fStreets.ShapeCount > 1;
+  Form1.STRSplineShape1.MaxValue := fStreets.ShapeCount;
+  Form1.STRSplineShape2.MaxValue := fStreets.ShapeCount;
   Result:=true;
 end;
 
@@ -1007,23 +958,6 @@ blockwrite(f,TracksQty,4);
 fillchar(c[1],60,#0);
 blockwrite(f,c,60);
 closefile(f);
-end;
-
-procedure SaveSTR(Input:string);
-var
-  f:file;
-begin
-ElapsedTime(@OldTime);
-Form1.STR_PrepareToSaveClick(nil);
-assignfile(f,Input); rewrite(f,1);
-blockwrite(f,STRHead,18); //NRTS
-if STRHead.NumShapes<>0  then blockwrite(f,STR_Shape[1],12*STRHead.NumShapes);
-if STRHead.NumPoints<>0  then blockwrite(f,STR_Point[1],24*STRHead.NumPoints);
-if STRHead.NumSplines<>0 then blockwrite(f,STR_Spline[1],36*STRHead.NumSplines);
-if STRHead.NumShRefs<>0  then blockwrite(f,STR_ShRef[1],8*STRHead.NumShRefs);
-if STRHead.NumRoWs<>0    then blockwrite(f,STR_RoW[1],6*STRHead.NumRoWs);
-closefile(f);
-Changes.STR:=false;
 end;
 
 procedure SaveLVL(Input:string);

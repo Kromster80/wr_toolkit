@@ -407,7 +407,7 @@ begin
   if Changes.LVL then s:=s+'LVL'+eol;
   if Changes.SKY then s:=s+'SKY'+eol;
   if fGrass.Changed then s:=s+'RO#'+eol;
-  if Changes.STR then s:=s+'STR'+eol;
+  if fStreets.Changed then s:=s+'STR'+eol;
   if fTriggers.Changed then s:=s+'TRL'+eol;
   if Changes.SC2 then s:=s+'SC2'+eol;
   Result:=s;
