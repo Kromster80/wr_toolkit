@@ -1,9 +1,9 @@
 object FormOptions: TFormOptions
   Left = 474
   Top = 153
-  Width = 265
-  Height = 287
   Caption = 'STKit2 Options'
+  ClientHeight = 260
+  ClientWidth = 257
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -140,7 +140,6 @@ object FormOptions: TFormOptions
       Top = 20
       Width = 65
       Height = 21
-      ItemHeight = 13
       ItemIndex = 1
       TabOrder = 0
       Text = '2048'
@@ -155,7 +154,6 @@ object FormOptions: TFormOptions
       Top = 44
       Width = 65
       Height = 21
-      ItemHeight = 13
       ItemIndex = 1
       TabOrder = 1
       Text = '2048'

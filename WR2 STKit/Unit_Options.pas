@@ -57,8 +57,8 @@ begin
     else  CB_ResV.ItemIndex := 1;
   end;
 
-  if Form1.RG2.ItemIndex <> -1 then //
-    ActiveScenery   := Form1.RG2.Items[Form1.RG2.ItemIndex];
+  if Form1.cbScenery.ItemIndex <> -1 then //
+    ActiveScenery   := Form1.cbScenery.Items[Form1.cbScenery.ItemIndex];
 end;
 
 
@@ -87,22 +87,24 @@ begin
     else fOptions.TopDownRenderV := 1024;
   end;
 
-  Form1.RG2.Clear;
-  if DirectoryExists(fOptions.WorkDir+'Scenarios\') then begin
+  Form1.cbScenery.Clear;
+  if DirectoryExists(fOptions.WorkDir+'Scenarios\') then
+  begin
   ChDir(fOptions.WorkDir+'Scenarios\');
   FindFirst('*', faDirectory, SearchRec);
       repeat
       if (SearchRec.Attr and faDirectory=faDirectory)
       and(SearchRec.Name<>'.')and(SearchRec.Name<>'..')
       and(directoryexists(fOptions.WorkDir+'Scenarios\'+SearchRec.Name)) then
-      Form1.RG2.Items.Add(SearchRec.Name);
+      Form1.cbScenery.Items.Add(SearchRec.Name);
       until (FindNext(SearchRec)<>0);
   FindClose(SearchRec);
   end;
 
-  Form1.RG2.ItemIndex:=0;
-  for i:=1 to Form1.RG2.Items.Count do
-  if Form1.RG2.Items[i-1]=ActiveScenery then Form1.RG2.ItemIndex:=i-1;
+  Form1.cbScenery.ItemIndex := 0;
+  for i:=0 to Form1.cbScenery.Items.Count - 1 do
+    if Form1.cbScenery.Items[I] = ActiveScenery then
+      Form1.cbScenery.ItemIndex := I;
 
   //Form1.SceneryReload(nil);
   FormOptions.Hide;

@@ -464,57 +464,62 @@ var
   f:file;
   i:integer;
 begin
-//Input:='C:\Documents and Settings\Krom\Desktop\2';
-Result:=false;
-if not fileexists(Input+'.str') then begin
-STRHead.NumShapes:=0;
-STRHead.NumPoints:=0;
-STRHead.NumSplines:=0;
-STRHead.NumShRefs:=0;
-STRHead.NumRoWs:=0;
-exit; end;
-assignfile(f,Input+'.str'); FileMode:=0; reset(f,1); FileMode:=2;
-blockread(f,STRHead,18); //NRTS
+  Result := False;
 
-if STRHead.Version=258 then begin //WR2
-setlength(STR_Shape,STRHead.NumShapes+2);  //+2 is necessay to handle 0 length case:
-setlength(STR_Point,STRHead.NumPoints+2);  // blockread reads from [1] element which
-setlength(STR_Spline,STRHead.NumSplines+2);// needs to be existent 0..1 => 0+2
-setlength(STR_ShRef,STRHead.NumShRefs+2);
-setlength(STR_RoW,STRHead.NumRoWs+2);
+  if not FileExists(Input+'.str') then
+  begin
+    STRHead.NumShapes:=0;
+    STRHead.NumPoints:=0;
+    STRHead.NumSplines:=0;
+    STRHead.NumShRefs:=0;
+    STRHead.NumRoWs:=0;
+    exit;
+  end;
 
-blockread(f,STR_Shape[1],12*STRHead.NumShapes);
-blockread(f,STR_Point[1],24*STRHead.NumPoints);
-blockread(f,STR_Spline[1],36*STRHead.NumSplines);
-blockread(f,STR_ShRef[1],8*STRHead.NumShRefs);
-blockread(f,STR_RoW[1],6*STRHead.NumRoWs);
-end;
+  assignfile(f,Input+'.str'); FileMode:=0; reset(f,1); FileMode:=2;
+  blockread(f,STRHead,18); //NRTS
 
-if STRHead.Version=260 then begin //AFC11
-setlength(STR_Shape,STRHead.NumShapes+2);  //+2 is necessay to handle 0 length case:
-setlength(STR_Point,STRHead.NumPoints+2);  // blockread reads from [1] element which
-setlength(STR_Spline,STRHead.NumSplines+2);// needs to be existent 0..1 => 0+2
-setlength(STR_ShRef,STRHead.NumShRefs+2);
-setlength(STR_RoW,STRHead.NumRoWs+2);
+  if STRHead.Version=258 then
+  begin //WR2
+    setlength(STR_Shape,STRHead.NumShapes+2);  //+2 is necessay to handle 0 length case:
+    setlength(STR_Point,STRHead.NumPoints+2);  // blockread reads from [1] element which
+    setlength(STR_Spline,STRHead.NumSplines+2);// needs to be existent 0..1 => 0+2
+    setlength(STR_ShRef,STRHead.NumShRefs+2);
+    setlength(STR_RoW,STRHead.NumRoWs+2);
 
-for i:=1 to STRHead.NumShapes do begin
-blockread(f,STR_Shape[i].Offset,8);
-blockread(f,c,8);
-blockread(f,STR_Shape[i].Options,4);
-end;
-blockread(f,STR_Point[1],24*STRHead.NumPoints);
-blockread(f,STR_Spline[1],36*STRHead.NumSplines);
-blockread(f,STR_ShRef[1],8*STRHead.NumShRefs);
-blockread(f,STR_RoW[1],6*STRHead.NumRoWs);
-end;
+    blockread(f,STR_Shape[1],12*STRHead.NumShapes);
+    blockread(f,STR_Point[1],24*STRHead.NumPoints);
+    blockread(f,STR_Spline[1],36*STRHead.NumSplines);
+    blockread(f,STR_ShRef[1],8*STRHead.NumShRefs);
+    blockread(f,STR_RoW[1],6*STRHead.NumRoWs);
+  end;
 
+  if STRHead.Version=260 then
+  begin //AFC11
+    setlength(STR_Shape,STRHead.NumShapes+2);  //+2 is necessay to handle 0 length case:
+    setlength(STR_Point,STRHead.NumPoints+2);  // blockread reads from [1] element which
+    setlength(STR_Spline,STRHead.NumSplines+2);// needs to be existent 0..1 => 0+2
+    setlength(STR_ShRef,STRHead.NumShRefs+2);
+    setlength(STR_RoW,STRHead.NumRoWs+2);
 
-closefile(f);
+    for i:=1 to STRHead.NumShapes do
+    begin
+      blockread(f,STR_Shape[i].Offset,8);
+      blockread(f,c,8);
+      blockread(f,STR_Shape[i].Options,4);
+    end;
+    blockread(f,STR_Point[1],24*STRHead.NumPoints);
+    blockread(f,STR_Spline[1],36*STRHead.NumSplines);
+    blockread(f,STR_ShRef[1],8*STRHead.NumShRefs);
+    blockread(f,STR_RoW[1],6*STRHead.NumRoWs);
+  end;
 
-if STRHead.NumShapes>1 then Form1.RemShape.Enabled:=true;
-Form1.STRSplineShape1.MaxValue:=STRHead.NumShapes;
-Form1.STRSplineShape2.MaxValue:=STRHead.NumShapes;
-Result:=true;
+  closefile(f);
+
+  if STRHead.NumShapes>1 then Form1.RemShape.Enabled:=true;
+  Form1.STRSplineShape1.MaxValue:=STRHead.NumShapes;
+  Form1.STRSplineShape2.MaxValue:=STRHead.NumShapes;
+  Result:=true;
 end;
 
 function LoadNET(Input:string):boolean;
@@ -622,43 +627,49 @@ var
   f:file;
   i,ii,kk:integer;
 begin
-TracksQty:=0;
-for i:=1 to MAX_TRACKS do
-if fileexists(Input+Input2+'_'+int2fix(i,2)+'.trk') then begin
-  assignfile(f,Input+Input2+'_'+int2fix(i,2)+'.trk'); reset(f,1);
-  blockread(f,TRKQty[i],16);
-  setlength(TRK[i].Route,TRKQty[i].Nodes+1);
+  TracksQty:=0;
+  for i:=1 to MAX_TRACKS do
+  if fileexists(Input+Input2+'_'+int2fix(i,2)+'.trk') then
+  begin
+    assignfile(f,Input+Input2+'_'+int2fix(i,2)+'.trk'); reset(f,1);
+    blockread(f,TRKQty[i],16);
+    setlength(TRK[i].Route,TRKQty[i].Nodes+1);
 
-  if (TRKQty[i].WR2Flag1=0)and(TRKQty[i].WR2Flag2=0) then //MBWR format gets converted to WR2 right here
-    for ii:=1 to TRKQty[i].Nodes do begin
-      blockread(f,TRK[i].Route[ii],72);
-      TRK[i].Route[ii].v1:=0; TRK[i].Route[ii].v2:=0;
-      TRK[i].Route[ii].v3:=0; TRK[i].Route[ii].v4:=0;
-      TRKQty[i].WR2Flag1:=1;
-      TRKQty[i].WR2Flag2:=1;
-      TRKQty[i].a1:=0;
-      TRKQty[i].a2:=1;
-      TRKQty[i].Turns:=0;
-      TRKQty[i].Arrows:=0;
-    end
+    if (TRKQty[i].WR2Flag1=0)and(TRKQty[i].WR2Flag2=0) then //MBWR format gets converted to WR2 right here
+      for ii:=1 to TRKQty[i].Nodes do
+      begin
+        blockread(f,TRK[i].Route[ii],72);
+        TRK[i].Route[ii].v1:=0; TRK[i].Route[ii].v2:=0;
+        TRK[i].Route[ii].v3:=0; TRK[i].Route[ii].v4:=0;
+        TRKQty[i].WR2Flag1:=1;
+        TRKQty[i].WR2Flag2:=1;
+        TRKQty[i].a1:=0;
+        TRKQty[i].a2:=1;
+        TRKQty[i].Turns:=0;
+        TRKQty[i].Arrows:=0;
+      end
+    else
+    begin
+      blockread(f,TRK[i].Route[1],76*TRKQty[i].Nodes);
+      if (TRKQty[i].WR2Flag1=1)and(TRKQty[i].WR2Flag2=1) then
+      begin
+        blockread(f,TRKQty[i].a1,16); //append second header to first one
+        for kk:=1 to TRKQty[i].Turns do blockread(f,TRK[i].Turns[kk],12);
+        for kk:=1 to TRKQty[i].Turns do blockread(f,TRK[i].Turns[kk].Arrows,56*TRK[i].Turns[kk].ArrowNum);
+      end;
+    end;
+
+    closefile(f);
+    inc(TracksQty);
+  end
   else
   begin
-    blockread(f,TRK[i].Route[1],76*TRKQty[i].Nodes);
-    if (TRKQty[i].WR2Flag1=1)and(TRKQty[i].WR2Flag2=1) then begin
-      blockread(f,TRKQty[i].a1,16); //append second header to first one
-      for kk:=1 to TRKQty[i].Turns do blockread(f,TRK[i].Turns[kk],12);
-      for kk:=1 to TRKQty[i].Turns do blockread(f,TRK[i].Turns[kk].Arrows,56*TRK[i].Turns[kk].ArrowNum);
-    end;
+    FillChar(TRKQty[i],sizeof(TRKQty[i]),#0);
+    FillChar(TRK[i],sizeof(TRK[i]),#0);
   end;
 
-  closefile(f);
-  inc(TracksQty);
-end else begin
-  FillChar(TRKQty[i],sizeof(TRKQty[i]),#0);
-  FillChar(TRK[i],sizeof(TRK[i]),#0);
-end;
-if TracksQty=0 then
-  MessageBox(Form1.Handle,'No tracks found in ..\Tracks\ folder','Loading error',MB_OK or MB_ICONWARNING);
+  if TracksQty=0 then
+    MessageBox(Form1.Handle,'No tracks found in ..\Tracks\ folder','Loading error',MB_OK or MB_ICONWARNING);
 end;
 
 procedure LoadTOB(Input,Input2:string);
