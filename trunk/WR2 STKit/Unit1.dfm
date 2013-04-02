@@ -239,7 +239,7 @@ object Form1: TForm1
     Top = 40
     Width = 296
     Height = 604
-    ActivePage = TabSheet3
+    ActivePage = TabSheet9
     Anchors = [akLeft, akTop, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -6834,7 +6834,7 @@ object Form1: TForm1
     Visible = False
     OnClick = ShowChangesInfoClick
   end
-  object RG2: TComboBox
+  object cbScenery: TComboBox
     Left = 2
     Top = 16
     Width = 121
@@ -6844,7 +6844,7 @@ object Form1: TForm1
     TabOrder = 10
     OnChange = SceneryReload
   end
-  object RG1: TComboBox
+  object cbSceneryVer: TComboBox
     Left = 126
     Top = 16
     Width = 49

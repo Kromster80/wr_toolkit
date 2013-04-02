@@ -409,9 +409,9 @@ type
     RenGround: TButton;
     AddAniNode: TButton;
     RemAniNode: TButton;
-    RG2: TComboBox;
+    cbScenery: TComboBox;
     Label154: TLabel;
-    RG1: TComboBox;
+    cbSceneryVer: TComboBox;
     Label158: TLabel;
     F_Left: TPanel;
     F_Right: TPanel;
@@ -1034,7 +1034,7 @@ var
   SMPData:array of single;
 
     STRHead:record
-    Header:array[1..4]of char;
+    Header:array[1..4]of AnsiChar;
     Version,Options:word;
     NumShapes,NumPoints,NumSplines,NumShRefs,NumRoWs:word;
     end;
@@ -1436,16 +1436,17 @@ begin
   fTriggers := TSTriggersCollection.Create;
 
 
-PageControl1Change(nil);        //get ActivePage name
-CBRenderModeClick(nil);             //get RenderMode state
-Application.OnIdle:=OnIdle;
-MemoLWO.Lines.Add('Misc init done in '+ElapsedTime(@OldTime));
-Randomize;
-Form1.WindowState:=wsMaximized;
+  PageControl1Change(nil);        //get ActivePage name
+  CBRenderModeClick(nil);             //get RenderMode state
+  Application.OnIdle:=OnIdle;
+  MemoLWO.Lines.Add('Misc init done in '+ElapsedTime(@OldTime));
+  Randomize;
+  Form1.WindowState:=wsMaximized;
 
   FillSceneryList;
-  RG2.ItemIndex := EnsureRange(RG2.ItemIndex,0,RG2.Items.Count-1);
-  if RG2.ItemIndex<>-1 then SceneryReload(nil);
+  cbScenery.ItemIndex := EnsureRange(cbScenery.ItemIndex, 0, cbScenery.Items.Count - 1);
+  if cbScenery.ItemIndex <> -1 then
+    SceneryReload(nil);
 
   ResetViewClick(nil);
   ResetViewClick(nil);
@@ -1455,22 +1456,22 @@ end;
 procedure TForm1.FillSceneryList;
 var i:integer; SearchRec:TSearchRec;
 begin
-  RG2.Clear;
+  cbScenery.Clear;
   if not DirectoryExists(fOptions.WorkDir+'Scenarios\') then exit;
 
   ChDir(fOptions.WorkDir+'Scenarios\');
   FindFirst('*', faDirectory, SearchRec);
       repeat
-      if (SearchRec.Attr and faDirectory=faDirectory)
-      and(SearchRec.Name<>'.')and(SearchRec.Name<>'..')
-      and(DirectoryExists(fOptions.WorkDir+'Scenarios\'+SearchRec.Name)) then
-      RG2.Items.Add(SearchRec.Name);
+        if (SearchRec.Attr and faDirectory=faDirectory)
+        and(SearchRec.Name<>'.')and(SearchRec.Name<>'..')
+        and(DirectoryExists(fOptions.WorkDir+'Scenarios\'+SearchRec.Name)) then
+        cbScenery.Items.Add(SearchRec.Name);
       until (FindNext(SearchRec)<>0);
   FindClose(SearchRec);
 
-  for i:=0 to RG2.Items.Count-1 do
-    if UpperCase(RG2.Items[i]) = UpperCase(fOptions.ActiveScenery) then RG2.ItemIndex := i;
-
+  for I := 0 to cbScenery.Items.Count - 1 do
+    if UpperCase(cbScenery.Items[I]) = UpperCase(fOptions.ActiveScenery) then
+      cbScenery.ItemIndex := I;
 end;
 
 
@@ -2050,12 +2051,14 @@ end;
 procedure TForm1.SceneryReload(Sender: TObject);
 var i:integer;
 begin
-  if (Sender<>nil)and(not fileexists(fOptions.ExeDir+'unlimiter.'+inttostr(846))) then
-    if MessageBox(Form1.Handle,'Any unsaved changes will be lost','Warning',MB_OKCANCEL or MB_ICONEXCLAMATION)=IDCANCEL then exit;
+  if (Sender <> nil)
+  and not FileExists(fOptions.ExeDir+'unlimiter.'+inttostr(846))
+  and (MessageBox(Form1.Handle,'Any unsaved changes will be lost','Warning',MB_OKCANCEL or MB_ICONEXCLAMATION) = IDCANCEL) then
+    Exit;
 
-  if RG2.ItemIndex = -1 then exit;
+  if cbScenery.ItemIndex = -1 then exit;
 
-  fOptions.ActiveScenery := RG2.Items.Strings[RG2.ItemIndex];
+  fOptions.ActiveScenery := cbScenery.Items.Strings[cbScenery.ItemIndex];
 
   EditingFormat:=ef_WR2;
 
@@ -2076,8 +2079,8 @@ ScnRefresh:=true;
 list_id:=0; list_ogl:=0; list_tx:=0; list_obj:=0; list_sky:=0; TracePt:=0;
 if UseShaders=false then list_id:=65535; //do not compile lists if Shaders are not supported by GPU
 
-Scenery:=RG2.Items.Strings[RG2.ItemIndex];
-SceneryVersion:='V'+inttostr(RG1.ItemIndex+1);
+  Scenery := cbScenery.Items.Strings[cbScenery.ItemIndex];
+  SceneryVersion := 'V' + inttostr(cbSceneryVer.ItemIndex + 1);
 
 //Disable original maps save
 if ((Scenery='Italien')or(Scenery='HHeimRing')or(Scenery='Miami')or
@@ -2122,10 +2125,10 @@ if LoadSC2(fOptions.WorkDir+'AddOns\Sceneries\'
 if fGrass.LoadFromFile(SceneryPath+Scenery)      then MemoLoad.Lines.Add('Load RO# in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('RO# missing');
 
 
-SendQADtoUI(ActivePage);
-ShowQADInfo(nil);
-CBTrackChange(nil);
-MouseMoveScale:=(Qty.BlocksX+Qty.BlocksZ)div 5;
+  SendQADtoUI(ActivePage);
+  ShowQADInfo(nil);
+  CBTrackChange(nil);
+  MouseMoveScale:=(Qty.BlocksX+Qty.BlocksZ)div 5;
 end;
 
 
@@ -2864,52 +2867,52 @@ end;
 procedure TForm1.SaveSceneryClick(Sender: TObject);
 var i:integer; WSS:string;
 begin
-if not SaveButton then exit;
-case RG1.ItemIndex of
-0: SceneryVersion:='V1';
-1: SceneryVersion:='V2';
-2: SceneryVersion:='V3';
-end;
-WSS:=fOptions.WorkDir+'Scenarios\'+Scenery+'\';
-CreateDir(fOptions.WorkDir+'AddOns\');
-CreateDir(fOptions.WorkDir+'AddOns\Sceneries\');
-CreateDir(fOptions.WorkDir+'AddOns\Sceneries\'+Scenery+'\');
-CreateDir(WSS);
-CreateDir(WSS+SceneryVersion+'\');
-CreateDir(WSS+SceneryVersion+'\Extra\');
-CreateDir(WSS+SceneryVersion+'\Tracks\');
-if Changes.QAD then SaveQAD(WSS+SceneryVersion+'\'+Scenery+'.qad');
-if Changes.WRK then SaveWRK(WSS+SceneryVersion+'\'+Scenery+' WorkFile.wrk'); //save after qad, to get materials sorted
-if Changes.IDX then SaveIDX(WSS+SceneryVersion+'\'+Scenery+'.idx');
-if Changes.VTX then SaveVTX(WSS+SceneryVersion+'\'+Scenery+'.vtx');
-if Changes.SNI then SaveSNI(WSS+SceneryVersion+'\'+Scenery+'.sni');
-if Changes.LVL then SaveLVL(WSS+SceneryVersion+'\'+Scenery+'.lvl');
-if Changes.SMP then SaveSMP(WSS+SceneryVersion+'\Extra\ShdwMap.smp');
-if Changes.SKY then SaveSKY(WSS+SceneryVersion+'\'+Scenery+'.sky');
-if fGrass.Changed then fGrass.SaveToFile(WSS+SceneryVersion+'\'+Scenery,CBOptimizeGrass.Checked);
-for i:=1 to MAX_TRACKS do if Changes.TOB[i] then SaveTOB(WSS+SceneryVersion+'\Tracks\'+Scenery+'_'+int2fix(i,2)+'.tob',i);
+  if not SaveButton then exit;
 
-//Files below are same for all Versions
-for i:=1 to MAX_TRACKS do if Changes.TRK[i] then begin
-  if DirectoryExists(WSS+'V1\') then SaveTRK(WSS+'V1\Tracks\'+Scenery+'_'+int2fix(i,2)+'.trk',i);
-  if DirectoryExists(WSS+'V2\') then SaveTRK(WSS+'V2\Tracks\'+Scenery+'_'+int2fix(i,2)+'.trk',i);
-  if DirectoryExists(WSS+'V3\') then SaveTRK(WSS+'V3\Tracks\'+Scenery+'_'+int2fix(i,2)+'.trk',i);
-end;
-for i:=1 to MAX_WP_TRACKS do if Changes.WTR[i] then begin
-  if DirectoryExists(WSS+'V1\') then SaveWTR(WSS+'V1\Tracks\'+Scenery+'_'+int2fix(i,2)+'.wtr',i);
-  if DirectoryExists(WSS+'V2\') then SaveWTR(WSS+'V2\Tracks\'+Scenery+'_'+int2fix(i,2)+'.wtr',i);
-  if DirectoryExists(WSS+'V3\') then SaveWTR(WSS+'V3\Tracks\'+Scenery+'_'+int2fix(i,2)+'.wtr',i);
-end;
-if DirectoryExists(WSS+'V1\') then SaveTRK_DAT(WSS+'V1\Tracks\tracks.dat');
-if DirectoryExists(WSS+'V2\') then SaveTRK_DAT(WSS+'V2\Tracks\tracks.dat');
-if DirectoryExists(WSS+'V3\') then SaveTRK_DAT(WSS+'V3\Tracks\tracks.dat');
+  case cbSceneryVer.ItemIndex of
+    0:  SceneryVersion:='V1';
+    1:  SceneryVersion:='V2';
+    2:  SceneryVersion:='V3';
+  end;
 
-if Changes.SC2 then SaveSC2(fOptions.WorkDir+'AddOns\Sceneries\'+Scenery+'\EditScenery.sc2');
-if fTriggers.Changed then fTriggers.SaveToFile(fOptions.WorkDir+'RaceDat\'+Scenery+'.trl');
-if Changes.STR then SaveSTR(fOptions.WorkDir+'Traffic\Streets\'+Scenery+'.str');
+  WSS:=fOptions.WorkDir+'Scenarios\'+Scenery+'\';
+  ForceDirectories(fOptions.WorkDir+'AddOns\Sceneries\'+Scenery+'\');
+  ForceDirectories(WSS+SceneryVersion+'\Extra\');
+  ForceDirectories(WSS+SceneryVersion+'\Tracks\');
+  if Changes.QAD then SaveQAD(WSS+SceneryVersion+'\'+Scenery+'.qad');
+  if Changes.WRK then SaveWRK(WSS+SceneryVersion+'\'+Scenery+' WorkFile.wrk'); //save after qad, to get materials sorted
+  if Changes.IDX then SaveIDX(WSS+SceneryVersion+'\'+Scenery+'.idx');
+  if Changes.VTX then SaveVTX(WSS+SceneryVersion+'\'+Scenery+'.vtx');
+  if Changes.SNI then SaveSNI(WSS+SceneryVersion+'\'+Scenery+'.sni');
+  if Changes.LVL then SaveLVL(WSS+SceneryVersion+'\'+Scenery+'.lvl');
+  if Changes.SMP then SaveSMP(WSS+SceneryVersion+'\Extra\ShdwMap.smp');
+  if Changes.SKY then SaveSKY(WSS+SceneryVersion+'\'+Scenery+'.sky');
+  if fGrass.Changed then fGrass.SaveToFile(WSS+SceneryVersion+'\'+Scenery,CBOptimizeGrass.Checked);
+  for i:=1 to MAX_TRACKS do if Changes.TOB[i] then SaveTOB(WSS+SceneryVersion+'\Tracks\'+Scenery+'_'+int2fix(i,2)+'.tob',i);
 
-ShowChangesInfoClick(nil);
-ShowQADInfo(nil);
+  //Files below are same for all Versions
+  for i:=1 to MAX_TRACKS do if Changes.TRK[i] then
+  begin
+    if DirectoryExists(WSS+'V1\') then SaveTRK(WSS+'V1\Tracks\'+Scenery+'_'+int2fix(i,2)+'.trk',i);
+    if DirectoryExists(WSS+'V2\') then SaveTRK(WSS+'V2\Tracks\'+Scenery+'_'+int2fix(i,2)+'.trk',i);
+    if DirectoryExists(WSS+'V3\') then SaveTRK(WSS+'V3\Tracks\'+Scenery+'_'+int2fix(i,2)+'.trk',i);
+  end;
+  for i:=1 to MAX_WP_TRACKS do if Changes.WTR[i] then
+  begin
+    if DirectoryExists(WSS+'V1\') then SaveWTR(WSS+'V1\Tracks\'+Scenery+'_'+int2fix(i,2)+'.wtr',i);
+    if DirectoryExists(WSS+'V2\') then SaveWTR(WSS+'V2\Tracks\'+Scenery+'_'+int2fix(i,2)+'.wtr',i);
+    if DirectoryExists(WSS+'V3\') then SaveWTR(WSS+'V3\Tracks\'+Scenery+'_'+int2fix(i,2)+'.wtr',i);
+  end;
+  if DirectoryExists(WSS+'V1\') then SaveTRK_DAT(WSS+'V1\Tracks\tracks.dat');
+  if DirectoryExists(WSS+'V2\') then SaveTRK_DAT(WSS+'V2\Tracks\tracks.dat');
+  if DirectoryExists(WSS+'V3\') then SaveTRK_DAT(WSS+'V3\Tracks\tracks.dat');
+
+  if Changes.SC2 then SaveSC2(fOptions.WorkDir+'AddOns\Sceneries\'+Scenery+'\EditScenery.sc2');
+  if fTriggers.Changed then fTriggers.SaveToFile(fOptions.WorkDir+'RaceDat\'+Scenery+'.trl');
+  if Changes.STR then SaveSTR(fOptions.WorkDir+'Traffic\Streets\'+Scenery+'.str');
+
+  ShowChangesInfoClick(nil);
+  ShowQADInfo(nil);
 end;
 
 procedure TForm1.ListMaterialsClick(Sender: TObject);
@@ -3107,11 +3110,13 @@ begin
         begin
           CBTrack.Clear;
           LBTrack.Clear;
-          for i:=1 to TracksQty do begin
+          for i:=1 to TracksQty do
+          begin
             CBTrack.Items.Add(Scenery+' '+inttostr(i));
             LBTrack.Items.Add(Scenery+' '+inttostr(i)+'  '+inttostr(TRKQty[i].a1)+inttostr(TRKQty[i].a2)+inttostr(TRKQty[i].a4)+inttostr(TRKQty[i].a6)+inttostr(TRKQty[i].a7)+inttostr(TRKQty[i].a8));
           end;
-          for i:=1 to TracksQtyWP do begin
+          for i:=1 to TracksQtyWP do
+          begin
             CBTrack.Items.Add(Scenery+' WP'+inttostr(i));
             LBTrack.Items.Add(Scenery+' WP'+inttostr(i));
           end;
@@ -4713,7 +4718,7 @@ procedure TForm1.RemPointClick(Sender: TObject); begin RemPointClick_; end;
 procedure TForm1.RemSplineClick(Sender: TObject); begin RemSplineClick_; end;
 
 procedure TForm1.CBTrackChange(Sender: TObject);
-var i:integer;
+var I: Integer;
   procedure SetWP(A:boolean);
   begin
     ImportLWOTrack.Enabled:=A;
@@ -4725,17 +4730,22 @@ var i:integer;
     TRKProperty.Pages[2].Enabled:=not A;
   end;
 begin
-  if Sender=LBTrack then begin
-    CBTrack.ItemIndex:=LBTrack.ItemIndex;
-    SC2_TrackList.ItemIndex:=LBTrack.ItemIndex;
+  if Sender = LBTrack then
+  begin
+    CBTrack.ItemIndex := LBTrack.ItemIndex;
+    SC2_TrackList.ItemIndex := LBTrack.ItemIndex;
   end;
-  if Sender=CBTrack then begin
-    LBTrack.ItemIndex:=CBTrack.ItemIndex;
-    SC2_TrackList.ItemIndex:=CBTrack.ItemIndex;
+
+  if Sender = CBTrack then
+  begin
+    LBTrack.ItemIndex := CBTrack.ItemIndex;
+    SC2_TrackList.ItemIndex := CBTrack.ItemIndex;
   end;
-  if Sender=SC2_TrackList then begin
-    CBTrack.ItemIndex:=SC2_TrackList.ItemIndex;
-    LBTrack.ItemIndex:=SC2_TrackList.ItemIndex;
+
+  if Sender = SC2_TrackList then
+  begin
+    CBTrack.ItemIndex := SC2_TrackList.ItemIndex;
+    LBTrack.ItemIndex := SC2_TrackList.ItemIndex;
   end;
 
   TrackID := CBTrack.ItemIndex+1;
@@ -5223,15 +5233,18 @@ procedure TForm1.SC2T_TrackChange(Sender: TObject);begin EditSC2TrackClick(Sende
 procedure TForm1.FillSC2Click(Sender: TObject);begin AutoFill_SC2(nil); end;
 
 procedure TForm1.ShowChangesInfoClick(Sender: TObject);
-var i:integer;
+var I: Integer;
 begin
-  if Sender=ShowInfo then
-    if MemoLoad.Showing then begin
+  if Sender = ShowInfo then
+    if MemoLoad.Showing then
+    begin
       MemoLoad.Hide;
       MemoSave.Hide;
       ShowInfo.Checked:=false;
       exit;
-    end else begin
+    end
+    else
+    begin
       MemoLoad.Show;
       MemoSave.Show;
       ShowInfo.Checked:=true;
@@ -5241,11 +5254,12 @@ begin
   MemoSave.Lines.Add('Work folder: '+fOptions.WorkDir+eol+'Scenery name: '+Scenery+eol);
   MemoSave.Lines.Add('ERRORS');
 
-  for i:=1 to STRHead.NumSplines do begin
-    if STR_Spline[i].FirstWay+1<>EnsureRange(STR_Spline[i].FirstWay+1,1,STRHead.NumSplines) then
-      MemoSave.Lines.Add('STR: No way from spline '+inttostr(i));
-    if ((STR_Spline[i].Options and 1)=1)and((STR_Spline[STR_Spline[i].FirstWay+1].Options and 1)=1) then
-      MemoSave.Lines.Add('STR:Two intersections next to each other at spline '+inttostr(i));
+  for I := 1 to STRHead.NumSplines do
+  begin
+    if STR_Spline[I].FirstWay+1 <> EnsureRange(STR_Spline[I].FirstWay+1,1,STRHead.NumSplines) then
+      MemoSave.Lines.Add('STR: No way from spline '+inttostr(I));
+    if ((STR_Spline[I].Options and 1)=1)and((STR_Spline[STR_Spline[I].FirstWay+1].Options and 1)=1) then
+      MemoSave.Lines.Add('STR:Two intersections next to each other at spline '+inttostr(I));
   end;
 
   MemoSave.Lines.Add(eol+'CHANGES');
@@ -5295,40 +5309,49 @@ Changes.STR:=true;
 end;
 
 procedure TForm1.ShowQADInfo(Sender: TObject);
-var i,k,x,z,j,t:integer; Dup:boolean;
+var
+  I,K,X,Z,J,DupeCount: Integer;
+  Dup: Boolean;
 begin
-t:=0;
-for i:=0 to Qty.BlocksTotal-1 do begin
-x:=i mod Qty.BlocksX+1;
-z:=i div Qty.BlocksX+1;
-    for j:=Block[z,x].FirstTex+1 to Block[z,x].FirstTex+Block[z,x].NumTex do begin
-    Dup:=false;
-        for k:=Block[z,x].FirstTex+1 to j-1 do
-        if v07[k].SurfaceID=v07[j].SurfaceID then Dup:=true;
-    if Dup then inc(t);
-    end;
-end;
+  //Detect how many duplicate surface chunks we have in Blocks
+  DupeCount := 0;
+  for I := 0 to Qty.BlocksTotal - 1 do
+  begin
+    X := I mod Qty.BlocksX + 1;
+    Z := I div Qty.BlocksX + 1;
+    for J := Block[Z,X].FirstTex + 1 to Block[Z,X].FirstTex + Block[Z,X].NumTex do
+    begin
+      Dup := False;
+      //Check if we had that surface before
+      for K := Block[Z,X].FirstTex + 1 to J - 1 do
+      if v07[K].SurfaceID = v07[J].SurfaceID then
+        Dup := True;
 
-//VLBInfo.RowCount := 20;
-VLBInfo.Cells[1,1]:=inttostr(Qty.WidthX)+'   ('+floattostr(round(Qty.BlocksX*1.024)/10)+' km)';
-VLBInfo.Cells[1,2]:=inttostr(Qty.LengthZ)+'   ('+floattostr(round(Qty.BlocksZ*1.024)/10)+' km)';
-VLBInfo.Cells[1,3]:=inttostr(Qty.BlocksX);
-VLBInfo.Cells[1,4]:=inttostr(Qty.BlocksZ);
-VLBInfo.Cells[1,5]:=inttostr(Qty.BlocksTotal);
-VLBInfo.Cells[1,6]:=inttostr(Qty.TexturesTotal)+' ('+inttostr(round(100*t/Qty.TexturesTotal))+'%)';
-VLBInfo.Cells[1,7]:=inttostr(Qty.TexturesFiles);
-VLBInfo.Cells[1,8]:=inttostr(Qty.BumpTexturesFiles);
-VLBInfo.Cells[1,9]:=inttostr(Qty.ObjectFiles);
-VLBInfo.Cells[1,10]:=inttostr(Qty.Polys);
-VLBInfo.Cells[1,11]:=inttostr(Qty.Materials);
-VLBInfo.Cells[1,12]:=inttostr(Qty.ObjectsTotal);
-VLBInfo.Cells[1,13]:=inttostr(Qty.GroundTypes);
-VLBInfo.Cells[1,14]:=inttostr(Qty.ColliSize);
-VLBInfo.Cells[1,15]:=inttostr(Qty.Lights);
-VLBInfo.Cells[1,16]:=inttostr(Qty.x1);
-VLBInfo.Cells[1,17]:=inttostr(Qty.x2);
-VLBInfo.Cells[1,18]:=inttostr(Qty.x3);
-VLBInfo.Cells[1,19]:=inttostr(Qty.Sounds);
+      if Dup then
+        Inc(DupeCount);
+    end;
+  end;
+
+  //VLBInfo.RowCount := 20;
+  VLBInfo.Cells[1,1]:=inttostr(Qty.WidthX)+'   ('+floattostr(round(Qty.BlocksX*1.024)/10)+' km)';
+  VLBInfo.Cells[1,2]:=inttostr(Qty.LengthZ)+'   ('+floattostr(round(Qty.BlocksZ*1.024)/10)+' km)';
+  VLBInfo.Cells[1,3]:=inttostr(Qty.BlocksX);
+  VLBInfo.Cells[1,4]:=inttostr(Qty.BlocksZ);
+  VLBInfo.Cells[1,5]:=inttostr(Qty.BlocksTotal);
+  VLBInfo.Cells[1,6]:=inttostr(Qty.TexturesTotal)+' ('+IntToStr(round(100 * DupeCount / Qty.TexturesTotal))+'%)';
+  VLBInfo.Cells[1,7]:=inttostr(Qty.TexturesFiles);
+  VLBInfo.Cells[1,8]:=inttostr(Qty.BumpTexturesFiles);
+  VLBInfo.Cells[1,9]:=inttostr(Qty.ObjectFiles);
+  VLBInfo.Cells[1,10]:=inttostr(Qty.Polys);
+  VLBInfo.Cells[1,11]:=inttostr(Qty.Materials);
+  VLBInfo.Cells[1,12]:=inttostr(Qty.ObjectsTotal);
+  VLBInfo.Cells[1,13]:=inttostr(Qty.GroundTypes);
+  VLBInfo.Cells[1,14]:=inttostr(Qty.ColliSize);
+  VLBInfo.Cells[1,15]:=inttostr(Qty.Lights);
+  VLBInfo.Cells[1,16]:=inttostr(Qty.x1);
+  VLBInfo.Cells[1,17]:=inttostr(Qty.x2);
+  VLBInfo.Cells[1,18]:=inttostr(Qty.x3);
+  VLBInfo.Cells[1,19]:=inttostr(Qty.Sounds);
 end;
 
 
@@ -5737,7 +5760,7 @@ end;
 
 
 procedure TForm1.CreateNewScenClick(Sender: TObject);
-var i:integer; s:string;
+var I: Integer; s: string;
 begin
   if not FileExists(fOptions.WorkDir+'WR2_PC.exe') then begin
     MessageBox(Form1.Handle,'Please check if path to WR2 folder specified in Options is correct',
@@ -5748,13 +5771,15 @@ begin
   s := InputBox('Create new scenery','Scenery name:','');
   if s = '' then exit;
 
-  for i:=1 to RG2.Items.Count do if RG2.Items[i-1] = s then begin
-    MessageBox(Form1.Handle,'Scenery with such name already exists','Error', MB_OK or MB_ICONERROR);
-    exit;
+  for I := 0 to cbScenery.Items.Count - 1 do
+  if cbScenery.Items[I] = s then
+  begin
+    MessageBox(Form1.Handle, 'Scenery with such name already exists', 'Error', MB_OK or MB_ICONERROR);
+    Exit;
   end;
 
-  RG2.Items.Add(s);
-  RG2.ItemIndex := RG2.Items.Count-1;
+  cbScenery.Items.Add(s);
+  cbScenery.ItemIndex := cbScenery.Items.Count-1;
   SceneryReload(nil);
 end;
 
