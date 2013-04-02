@@ -10,7 +10,6 @@ uses unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_Ro
     function  LoadSNI(Input:string):boolean;
     procedure LoadLVL(Input:string);
     function  LoadSMP(Input:string):boolean;
-    function  LoadSTR(Input:string):boolean;
     function  LoadNET(Input:string):boolean;
     function  LoadSKY(Input:string):boolean;
     procedure LoadTRK(Input,Input2:string);
@@ -458,20 +457,6 @@ closefile(f);
 Result:=true;
 end;
 
-function LoadSTR(Input:string):boolean;
-var
-  f:file;
-  i:integer;
-begin
-  Result := False;
-
-  fStreets.LoadFromFile(Input);
-
-  Form1.RemShape.Enabled := fStreets.ShapeCount > 1;
-  Form1.STRSplineShape1.MaxValue := fStreets.ShapeCount;
-  Form1.STRSplineShape2.MaxValue := fStreets.ShapeCount;
-  Result:=true;
-end;
 
 function LoadNET(Input:string):boolean;
 var
