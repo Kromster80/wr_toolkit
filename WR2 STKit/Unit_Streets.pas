@@ -139,11 +139,11 @@ begin
       exit;
     S.Read(Version, 2);
     S.Read(Options, 2);
-    S.Read(fShapeCount, 4);
-    S.Read(fNodeCount, 4);
-    S.Read(fSplineCount, 4);
-    S.Read(fShRefCount, 4);
-    S.Read(fRoWCount, 4);
+    S.Read(fShapeCount, 2);
+    S.Read(fNodeCount, 2);
+    S.Read(fSplineCount, 2);
+    S.Read(fShRefCount, 2);
+    S.Read(fRoWCount, 2);
 
     SetLength(Shapes, fShapeCount + 2); // +2 is necessay to handle 0 length case:
     SetLength(Nodes, fNodeCount + 2); // blockread reads from [1] element which
@@ -325,11 +325,11 @@ begin
     S.Write(Header[1], 4);
     S.Write(Version, 2);
     S.Write(Options, 2);
-    S.Write(fShapeCount, 4);
-    S.Write(fNodeCount, 4);
-    S.Write(fSplineCount, 4);
-    S.Write(fShRefCount, 4);
-    S.Write(fRoWCount, 4);
+    S.Write(fShapeCount, 2);
+    S.Write(fNodeCount, 2);
+    S.Write(fSplineCount, 2);
+    S.Write(fShRefCount, 2);
+    S.Write(fRoWCount, 2);
 
     S.Write(Shapes[1], fShapeCount * 12);
     S.Write(Nodes[1], fNodeCount * 24);

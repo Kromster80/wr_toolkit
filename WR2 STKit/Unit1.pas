@@ -2109,7 +2109,15 @@ if LoadSNI(SceneryPath+Scenery)                then MemoLoad.Lines.Add('Load SNI
    LoadWTR(SceneryPath+'Tracks\',Scenery);          MemoLoad.Lines.Add('Load WTR in'+ElapsedTime(@OldTime));
 if LoadSKY(SceneryPath+Scenery)                then MemoLoad.Lines.Add('Load SKY in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('SKY missing');
 
-if LoadSTR(fOptions.WorkDir+'Traffic\Streets\'+Scenery) then MemoLoad.Lines.Add('Load STR in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('STR missing');
+if fStreets.LoadFromFile(fOptions.WorkDir+'Traffic\Streets\'+Scenery + '.str') then
+  MemoLoad.Lines.Add('Load STR in'+ElapsedTime(@OldTime))
+else
+  MemoLoad.Lines.Add('STR missing');
+
+  RemShape.Enabled := fStreets.ShapeCount > 1;
+  STRSplineShape1.MaxValue := fStreets.ShapeCount;
+  STRSplineShape2.MaxValue := fStreets.ShapeCount;
+
 if LoadNET(SceneryPath+'Tracks\roads.net')     then MemoLoad.Lines.Add('Load NET in'+ElapsedTime(@OldTime));
 
 //if fStreets.LoadFromFile(fOptions.WorkDir+'Traffic\Streets\'+Scenery+'.str') then MemoLoad.Lines.Add('Load STR in'+ElapsedTime(@OldTime)) else MemoLoad.Lines.Add('STR missing');
