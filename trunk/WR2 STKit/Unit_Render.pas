@@ -226,25 +226,25 @@ begin
   SNI_LOD := fOptions.SplineDetail;
 
   //Prepare Splines
-  setlength(Spline,STRHEad.NumSplines+1);
-  for ii:=1 to STRHead.NumSplines do begin
+  setlength(Spline,fStreets.SplineCount+1);
+  for ii:=1 to fStreets.SplineCount do begin
     setlength(Spline[ii],SNI_LOD+1);
 
     x0:=0; z0:=0; x1:=0; x3:=0; z1:=0; z3:=0; //Init to calm down compiler
 
-    PA:=STR_Spline[ii].PtA+1;       //point A index
-    PB:=STR_Spline[ii].PtB+1;       //point B index
-    LA:=STR_Spline[ii].LenA/3;      //anchor A length
-    LB:=-STR_Spline[ii].LenB/3;     //anchor B length
+    PA:=fStreets.Splines[ii].PtA+1;       //point A index
+    PB:=fStreets.Splines[ii].PtB+1;       //point B index
+    LA:=fStreets.Splines[ii].LenA/3;      //anchor A length
+    LB:=-fStreets.Splines[ii].LenB/3;     //anchor B length
 
     for kk:=0 to SNI_LOD do begin //Compute basic spline
       T:=kk/SNI_LOD; //0..1 range
-      x0:=STR_Point[PA].x; x1:=x0+STR_Point[PA].tx*LA;
-      x3:=STR_Point[PB].x; x2:=x3+STR_Point[PB].tx*LB;
-      y0:=STR_Point[PA].y; y1:=y0+STR_Point[PA].ty*LA;
-      y3:=STR_Point[PB].y; y2:=y3+STR_Point[PB].ty*LB;
-      z0:=STR_Point[PA].z; z1:=z0+STR_Point[PA].tz*LA;
-      z3:=STR_Point[PB].z; z2:=z3+STR_Point[PB].tz*LB;
+      x0:=fStreets.Nodes[PA].x; x1:=x0+fStreets.Nodes[PA].tx*LA;
+      x3:=fStreets.Nodes[PB].x; x2:=x3+fStreets.Nodes[PB].tx*LB;
+      y0:=fStreets.Nodes[PA].y; y1:=y0+fStreets.Nodes[PA].ty*LA;
+      y3:=fStreets.Nodes[PB].y; y2:=y3+fStreets.Nodes[PB].ty*LB;
+      z0:=fStreets.Nodes[PA].z; z1:=z0+fStreets.Nodes[PA].tz*LA;
+      z3:=fStreets.Nodes[PB].z; z2:=z3+fStreets.Nodes[PB].tz*LB;
       cx:=3*(x1-x0); bx:=3*(x2-x1)-cx; ax:=x3-x0-cx-bx; Spline[ii,kk].x:=ax*t*t*t+bx*t*t+cx*t+x0;
       cy:=3*(y1-y0); by:=3*(y2-y1)-cy; ay:=y3-y0-cy-by; Spline[ii,kk].y:=ay*t*t*t+by*t*t+cy*t+y0;
       cz:=3*(z1-z0); bz:=3*(z2-z1)-cz; az:=z3-z0-cz-bz; Spline[ii,kk].z:=az*t*t*t+bz*t*t+cz*t+z0;
@@ -267,7 +267,7 @@ begin
 
   //Centerlines
   if (A<>0)and(A<>1) then
-  for ii:=1 to STRHead.NumSplines do begin
+  for ii:=1 to fStreets.SplineCount do begin
     glColor4f(0,0,0,1);
     glLineWidth(1);
     glbegin (GL_LINE_STRIP);
@@ -277,26 +277,26 @@ begin
 
 //Splines
 glbegin (gl_quads);
-for ii:=1 to STRHead.NumSplines do begin
+for ii:=1 to fStreets.SplineCount do begin
 
     glLineWidth(LineWidth);
     if ii=SplineID then glLineWidth(2*LineWidth);
 
     Col:=0;
-    ShapeID:=STR_ShRef[STR_Spline[ii].FirstShRef+1].Shape+1;
-    Speed:=STR_ShRef[STR_Spline[ii].FirstShRef+1].Speed/65535;
-    for j:=1 to STR_Shape[ShapeID].NumLanes do begin //Draw 2-lane roads
-    if (j=2)and(STR_Shape[ShapeID].Options<>0) then break;
+    ShapeID:=fStreets.ShRefs[fStreets.Splines[ii].FirstShRef+1].Shape+1;
+    Speed:=fStreets.ShRefs[fStreets.Splines[ii].FirstShRef+1].Speed/65535;
+    for j:=1 to fStreets.Shapes[ShapeID].NumLanes do begin //Draw 2-lane roads
+    if (j=2)and(fStreets.Shapes[ShapeID].Options<>0) then break;
       for kk:=0 to SNI_LOD-1 do begin
 
           T:=kk/SNI_LOD;
           //Set new Shape color from predefined place
-          if (    (Col+1)<STR_Spline[ii].NumShRefs)
-          and(T>STR_ShRef[STR_Spline[ii].FirstShRef+1+Col+1].StartU) //bigger than next
+          if (    (Col+1)<fStreets.Splines[ii].NumShRefs)
+          and(T>fStreets.ShRefs[fStreets.Splines[ii].FirstShRef+1+Col+1].StartU) //bigger than next
           then begin
           inc(Col);
-          ShapeID:=STR_ShRef[STR_Spline[ii].FirstShRef+1+Col].Shape+1;
-          Speed:=STR_ShRef[STR_Spline[ii].FirstShRef+1+Col].Speed/65535;
+          ShapeID:=fStreets.ShRefs[fStreets.Splines[ii].FirstShRef+1+Col].Shape+1;
+          Speed:=fStreets.ShRefs[fStreets.Splines[ii].FirstShRef+1+Col].Speed/65535;
           end;
 
           if A=0 then kSetColorCode(kSpline,ii) else
@@ -304,12 +304,12 @@ for ii:=1 to STRHead.NumSplines do begin
           case Form1.STR_Mode.ItemIndex of
           0: SetPresetColorGL(ShapeID,A);
           1: glColor4f(Speed,1-Speed,0,A);
-          2: SetPresetColorGL(STR_Spline[ii].Options+1,A);
-          3: SetPresetColorGL(STR_Spline[ii].NumWays*2+1,A);
-          4: SetPresetColorGL(STR_Spline[ii].Density+1,A);
+          2: SetPresetColorGL(fStreets.Splines[ii].Options+1,A);
+          3: SetPresetColorGL(fStreets.Splines[ii].NumWays*2+1,A);
+          4: SetPresetColorGL(fStreets.Splines[ii].Density+1,A);
           end;
 
-              Offset:=STR_Shape[ShapeID].Offset[j];
+              Offset:=fStreets.Shapes[ShapeID].Offset[j];
 
               v.x:=Spline[ii,kk].x-Spline[ii,kk].tx*(Offset-CarWidth);
               v.y:=Spline[ii,kk].y+0.1;
@@ -338,15 +338,15 @@ glEnd;
 if (A<>0)and(A<>1) then begin
 glLineWidth(1);
 glbegin (GL_LINES);
-  for ii:=1 to STRHead.NumPoints do begin
+  for ii:=1 to fStreets.NodeCount do begin
   glColor4f(1,1,0,1);
-  glvertex3f(STR_Point[ii].x+STR_Point[ii].tx*100,
-             STR_Point[ii].y+STR_Point[ii].ty*100,
-             STR_Point[ii].z+STR_Point[ii].tz*100);
+  glvertex3f(fStreets.Nodes[ii].x+fStreets.Nodes[ii].tx*100,
+             fStreets.Nodes[ii].y+fStreets.Nodes[ii].ty*100,
+             fStreets.Nodes[ii].z+fStreets.Nodes[ii].tz*100);
 //  glColor4f(0.5,0.5,1,1);
-  glvertex3f(STR_Point[ii].x-STR_Point[ii].tx*100,
-             STR_Point[ii].y-STR_Point[ii].ty*100,
-             STR_Point[ii].z-STR_Point[ii].tz*100);
+  glvertex3f(fStreets.Nodes[ii].x-fStreets.Nodes[ii].tx*100,
+             fStreets.Nodes[ii].y-fStreets.Nodes[ii].ty*100,
+             fStreets.Nodes[ii].z-fStreets.Nodes[ii].tz*100);
   end;
 glEnd;
 end;
@@ -354,25 +354,25 @@ end;
 //Render current selected spline anchors
 if (A<>1) then
 if SplineID<>0 then begin
-PA:=STR_Spline[SplineID].PtA+1;
-PB:=STR_Spline[SplineID].PtB+1;
-LA:=STR_Spline[SplineID].LenA/3;
-LB:=-STR_Spline[SplineID].LenB/3;
-TA1.x:=STR_Point[PA].x+STR_Point[PA].tx*LA;
-TA1.y:=STR_Point[PA].y+STR_Point[PA].ty*LA;
-TA1.z:=STR_Point[PA].z+STR_Point[PA].tz*LA;
-TB1.x:=STR_Point[PB].x+STR_Point[PB].tx*LB;
-TB1.y:=STR_Point[PB].y+STR_Point[PB].ty*LB;
-TB1.z:=STR_Point[PB].z+STR_Point[PB].tz*LB;
+PA:=fStreets.Splines[SplineID].PtA+1;
+PB:=fStreets.Splines[SplineID].PtB+1;
+LA:=fStreets.Splines[SplineID].LenA/3;
+LB:=-fStreets.Splines[SplineID].LenB/3;
+TA1.x:=fStreets.Nodes[PA].x+fStreets.Nodes[PA].tx*LA;
+TA1.y:=fStreets.Nodes[PA].y+fStreets.Nodes[PA].ty*LA;
+TA1.z:=fStreets.Nodes[PA].z+fStreets.Nodes[PA].tz*LA;
+TB1.x:=fStreets.Nodes[PB].x+fStreets.Nodes[PB].tx*LB;
+TB1.y:=fStreets.Nodes[PB].y+fStreets.Nodes[PB].ty*LB;
+TB1.z:=fStreets.Nodes[PB].z+fStreets.Nodes[PB].tz*LB;
   //Render Anchor lines
 //  if A<>0 then begin
   glLineWidth(LineWidth/2);
   glbegin (GL_LINES);
   if A=0 then kSetColorCode(kSplineAnchorLength,PA) else glColor4f(1,1,1,1);
-  glvertex3f(STR_Point[PA].x-STR_Point[PA].tx*LA, STR_Point[PA].y-STR_Point[PA].ty*LA, STR_Point[PA].z-STR_Point[PA].tz*LA);
+  glvertex3f(fStreets.Nodes[PA].x-fStreets.Nodes[PA].tx*LA, fStreets.Nodes[PA].y-fStreets.Nodes[PA].ty*LA, fStreets.Nodes[PA].z-fStreets.Nodes[PA].tz*LA);
   glvertex3fv(@TA1);
   if A=0 then kSetColorCode(kSplineAnchorLength,PB) else glColor4f(1,1,1,1);
-  glvertex3f(STR_Point[PB].x-STR_Point[PB].tx*LB, STR_Point[PB].y-STR_Point[PB].ty*LB, STR_Point[PB].z-STR_Point[PB].tz*LB);
+  glvertex3f(fStreets.Nodes[PB].x-fStreets.Nodes[PB].tx*LB, fStreets.Nodes[PB].y-fStreets.Nodes[PB].ty*LB, fStreets.Nodes[PB].z-fStreets.Nodes[PB].tz*LB);
   glvertex3fv(@TB1);
   glEnd;
 //  end;
@@ -389,7 +389,7 @@ if (A<>0)and(A<>1)and(SelectionQueue1[1]<>0) then begin
 glLineWidth(LineWidth/3);
 glbegin (GL_LINES);
   glColor4f(1,0.5,0,1);
-  glvertex3fv(@STR_Point[SelectionQueue1[1]].x);
+  glvertex3fv(@fStreets.Nodes[SelectionQueue1[1]].x);
   glColor4f(1,0,0,1);
   glvertex3fv(@MPos.X);
 glEnd;
@@ -402,18 +402,18 @@ glPointSize(PointSize);
 if A<>0 then begin
 glColor4f(1,1,0,A);
 glbegin (GL_POINTS);
-for ii:=1 to STRHead.NumPoints do glvertex3fv(@STR_Point[ii].x);
-glColor4f(1,0,0,1); if NodeID<>0 then glvertex3fv(@STR_Point[NodeID].x);
-glColor4f(1,0.5,0,1); if SelectionQueue1[1]<>0 then glvertex3fv(@STR_Point[SelectionQueue1[1]].x);
+for ii:=1 to fStreets.NodeCount do glvertex3fv(@fStreets.Nodes[ii].x);
+glColor4f(1,0,0,1); if NodeID<>0 then glvertex3fv(@fStreets.Nodes[NodeID].x);
+glColor4f(1,0.5,0,1); if SelectionQueue1[1]<>0 then glvertex3fv(@fStreets.Nodes[SelectionQueue1[1]].x);
 glEnd;
 end;
 
 //All nodes for selection buffer
 if A=0 then begin
 glbegin (GL_POINTS);
-for ii:=1 to STRHead.NumPoints do begin
+for ii:=1 to fStreets.NodeCount do begin
 kSetColorCode(kPoint,ii);
-glvertex3fv(@STR_Point[ii].x);
+glvertex3fv(@fStreets.Nodes[ii].x);
 end;
 glEnd;
 end;

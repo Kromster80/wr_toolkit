@@ -770,7 +770,6 @@ type
     procedure RemShapeClick(Sender: TObject);
     procedure RemPointClick(Sender: TObject);
     procedure RemSplineClick(Sender: TObject);
-    procedure STR_PrepareToSaveClick(Sender: TObject);
     procedure ShowQADInfo(Sender: TObject);
     procedure RemLightClick(Sender: TObject);
     procedure GrassPlainColorClick(Sender: TObject);
@@ -1032,37 +1031,6 @@ var
   Matrix:array[1..9]of single;
   end;
   SMPData:array of single;
-
-    STRHead:record
-    Header:array[1..4]of AnsiChar;
-    Version,Options:word;
-    NumShapes,NumPoints,NumSplines,NumShRefs,NumRoWs:word;
-    end;
-    STR_Shape:array of record
-    Offset:array[1..2]of single;
-    Options,NumLanes:word;     //unused (Options=0)
-    end;
-    STR_Point:array of record
-    x,y,z:single;
-    tx,ty,tz:single;
-    end;
-    STR_Spline:array of record
-    PtA,PtB:word;
-    FirstShRef,NumShRefs:word;
-    LenA,LenB,Length:single;
-    Density,Options:word;
-    OppSpline,PrevSpline:word;
-    FirstWay,NumWays:word;
-    FirstRoW,NumRoW:word;
-    end;
-    STR_ShRef:array of record //Is same count as Num_Shapes
-    Shape,Speed:word;         //extending each shape with speed limit
-    StartU:single;            //unused (always 0)
-    end;
-    STR_RoW:array of packed record //is same count as NumSplines
-    Spline:word;
-    Tracks:cardinal;
-    end;
 
 //new AFC11CT streets format
     NETHead:record
@@ -1328,7 +1296,6 @@ var
     TOB,TRK:array[1..MAX_TRACKS]of boolean;
     WTR:array[1..MAX_WP_TRACKS]of boolean;
     IDX,VTX,QAD,SKY,SNI,LVL:boolean;
-    STR:boolean;
     SC2,WRK:boolean;
   end;
 
@@ -1438,10 +1405,10 @@ begin
 
   PageControl1Change(nil);        //get ActivePage name
   CBRenderModeClick(nil);             //get RenderMode state
-  Application.OnIdle:=OnIdle;
+  Application.OnIdle := OnIdle;
   MemoLWO.Lines.Add('Misc init done in '+ElapsedTime(@OldTime));
   Randomize;
-  Form1.WindowState:=wsMaximized;
+  Form1.WindowState := wsMaximized;
 
   FillSceneryList;
   cbScenery.ItemIndex := EnsureRange(cbScenery.ItemIndex, 0, cbScenery.Items.Count - 1);
@@ -1623,20 +1590,18 @@ if Code=kPoint then SetStreetMode('Nodes') else
 if Code=kSpline then SetStreetMode('Splines') else
 
   if (EditMode in [emStreetNode, emStreetSpline]) and (ssLeft in Shift) then
-    if (Code=kNil)and(ID=0)and(MPos.x<>0)and(MPos.y<>0)and(MPos.z<>0) then begin //Add new node
-    inc(STRHead.NumPoints);
-    setlength(STR_Point,STRHead.NumPoints+1);
-    STR_Point[STRHead.NumPoints].x:=MPos.X;
-    if yRot>180 then
-      TraceHeight(MPos.X,0,MPos.Z,pd_Top,@tmpY,@tmp)
-    else
-      TraceHeight(MPos.X,0,MPos.Z,pd_Bottom,@tmpY,@tmp);
-    STR_Point[STRHead.NumPoints].y:=tmpY;
-    STR_Point[STRHead.NumPoints].z:=MPos.Z;
-    STR_Point[STRHead.NumPoints].tx:=0;
-    STR_Point[STRHead.NumPoints].ty:=0;
-    STR_Point[STRHead.NumPoints].tz:=1;
-    STRPointID.Value:=STRHead.NumPoints;
+    if (Code = kNil) and (ID = 0)
+    and (MPos.X <> 0) and (MPos.Y <> 0) and (MPos.Z <> 0) then
+    begin //Add new node
+
+      if yRot>180 then
+        TraceHeight(MPos.X,0,MPos.Z,pd_Top,@tmpY,@tmp)
+      else
+        TraceHeight(MPos.X,0,MPos.Z,pd_Bottom,@tmpY,@tmp);
+
+      fStreets.AddNode(MPos.X, tmpY, MPos.Z);
+
+      STRPointID.Value := fStreets.NodeCount;
     end;
 
 end;
@@ -1710,14 +1675,19 @@ begin
                           kGetColorCode(@pix[1],Code,ID);
                           if (Code<>kPoint) then exit; //ID=0 gets excluded too cos kNil
                           if SelectionQueue1[1]=0 then SelectionQueue1[1]:=ID;
-                            if ID<>SelectionQueue1[1] then begin
-                            MakeSpline(SelectionQueue1[1],ID);
-                            if CBSplineSymmetry.Checked then
-                            MakeSpline(ID,SelectionQueue1[1]);
-                            SelectionQueue1[1]:=0;
+                            if ID<>SelectionQueue1[1] then
+                            begin
+                              fStreets.MakeSpline(SelectionQueue1[1],ID);
+                              if CBSplineSymmetry.Checked then
+                                fStreets.MakeSpline(ID,SelectionQueue1[1]);
+
+                              STRSplineID1.Value := fStreets.SplineCount;
+                              fStreets.Recalculate(CB_AutoCross.Checked);
+
+                              SelectionQueue1[1] := 0;
                             end;
-                          STR_PrepareToSaveClick(nil);
-                          end;
+                          fStreets.Recalculate(CB_AutoCross.Checked);
+                        end;
                   end;
     end;
 
@@ -1735,76 +1705,104 @@ begin
       end;
     end;
 
-if (ssRight in Shift)and(MoveMode=mmFloat) then
-vy.Value:=vy.Value+(ObjectY-Y)*ObjectMoveScale/power(zoom,3);
+    if (ssRight in Shift) and (MoveMode = mmFloat) then
+      vy.Value := vy.Value + (ObjectY - Y) * ObjectMoveScale / power(Zoom, 3);
 
-if (ssLeft in Shift)and(MoveMode=mmInteger) then
-vxi.Value:=vxi.Value+round(ObjectY-Y);
+    if (ssLeft in Shift) and (MoveMode = mmInteger) then
+      vxi.Value := vxi.Value + round(ObjectY - Y);
 
-if (ssRight in Shift)and(MoveMode=mmInteger) then
-vyi.Value:=vyi.Value+round(ObjectY-Y);
+    if (ssRight in Shift) and (MoveMode = mmInteger) then
+      vyi.Value := vyi.Value + round(ObjectY - Y);
 
-if (ssLeft in Shift)and(MoveMode=mmAnchors) then begin //Special move without "Value"s
-ID:=STRSplineID1.Value;
-PA:=STR_Spline[ID].PtA+1;
-PB:=STR_Spline[ID].PtB+1;
-LA:=STR_Spline[ID].LenA/3;
-LB:=-STR_Spline[ID].LenB/3;
 
-if EditMode=emStreetAnchorLength then begin
-if ClickedID=PA then begin
-STR_Spline[ID].LenA:=STR_Spline[ID].LenA-((ObjectX-X-(ObjectY-Y))*ObjectMoveScale/power(zoom,3)/4)*3*sign(STR_Spline[ID].LenA);
-if STR_Spline[ID].OppSpline<>65535 then
-STR_Spline[STR_Spline[ID].OppSpline+1].LenB:=-STR_Spline[ID].LenA;
-end;
-if ClickedID=PB then begin
-STR_Spline[ID].LenB:=STR_Spline[ID].LenB-((ObjectX-X-(ObjectY-Y))*ObjectMoveScale/power(zoom,3)/4)*3*sign(STR_Spline[ID].LenB);
-if STR_Spline[ID].OppSpline<>65535 then
-STR_Spline[STR_Spline[ID].OppSpline+1].LenA:=-STR_Spline[ID].LenB;
-end;
-end
-else begin //if EditMode='StreetAnchors'
+    if (ssLeft in Shift) and (MoveMode = mmAnchors) then
+    begin // Special move without "Value"s
+      ID := STRSplineID1.Value;
+      PA := fStreets.Splines[ID].PtA + 1;
+      PB := fStreets.Splines[ID].PtB + 1;
+      LA := fStreets.Splines[ID].LenA / 3;
+      LB := -fStreets.Splines[ID].LenB / 3;
 
-    if ClickedID=PA then begin
-    px:=STR_Point[PA].x; py:=STR_Point[PA].y; pz:=STR_Point[PA].z;
-    tx:=px+STR_Point[PA].tx*LA; ty:=py+STR_Point[PA].ty*LA; tz:=pz+STR_Point[PA].tz*LA;
+      if EditMode = emStreetAnchorLength then
+      begin
+        if ClickedID = PA then
+        begin
+          fStreets.Splines[ID].LenA := fStreets.Splines[ID].LenA -
+            ((ObjectX - X - (ObjectY - Y)) * ObjectMoveScale / power(Zoom, 3) / 4) * 3 *
+            sign(fStreets.Splines[ID].LenA);
+          if fStreets.Splines[ID].OppSpline <> 65535 then
+            fStreets.Splines[fStreets.Splines[ID].OppSpline + 1].LenB := -fStreets.Splines[ID].LenA;
+        end;
+        if ClickedID = PB then
+        begin
+          fStreets.Splines[ID].LenB := fStreets.Splines[ID].LenB -
+            ((ObjectX - X - (ObjectY - Y)) * ObjectMoveScale / power(Zoom, 3) / 4) * 3 *
+            sign(fStreets.Splines[ID].LenB);
+          if fStreets.Splines[ID].OppSpline <> 65535 then
+            fStreets.Splines[fStreets.Splines[ID].OppSpline + 1].LenA := -fStreets.Splines[ID].LenB;
+        end;
+      end
+      else
+      begin // if EditMode='StreetAnchors'
+        if ClickedID = PA then
+        begin
+          px := fStreets.Nodes[PA].X;
+          py := fStreets.Nodes[PA].Y;
+          pz := fStreets.Nodes[PA].Z;
+          tx := px + fStreets.Nodes[PA].tx * LA;
+          ty := py + fStreets.Nodes[PA].ty * LA;
+          tz := pz + fStreets.Nodes[PA].tz * LA;
+        end;
+
+        if ClickedID = PB then
+        begin
+          px := fStreets.Nodes[PB].X;
+          py := fStreets.Nodes[PB].Y;
+          pz := fStreets.Nodes[PB].Z;
+          tx := px + fStreets.Nodes[PB].tx * LB;
+          ty := py + fStreets.Nodes[PB].ty * LB;
+          tz := pz + fStreets.Nodes[PB].tz * LB;
+        end;
+
+        tx := tx + (-(ObjectX - X) * ObjectMoveScale * cos(XRot / 180 * pi) +
+          (ObjectY - Y) * ObjectMoveScale * sin(XRot / 180 * pi)) / power(Zoom, 3) / 4;
+        tz := tz + ((ObjectX - X) * ObjectMoveScale * sin(XRot / 180 * pi) + (ObjectY - Y)
+          * ObjectMoveScale * cos(XRot / 180 * pi)) / power(Zoom, 3) / 4 *
+          sign(YRot - 180);
+
+        if ClickedID = PA then
+        begin
+          fStreets.Splines[ID].LenA := GetLength(px - tx, py - ty, pz - tz) * 3 *
+            sign(fStreets.Splines[ID].LenA);
+          if fStreets.Splines[ID].OppSpline <> 65535 then
+            fStreets.Splines[fStreets.Splines[ID].OppSpline + 1].LenB := -fStreets.Splines[ID].LenA;
+          tx := (tx - px) / sign(fStreets.Splines[ID].LenA);
+          tz := (tz - pz) / sign(fStreets.Splines[ID].LenA);
+          Normalize(tx, tz);
+          ty := fStreets.Nodes[PA].ty;
+          Normalize(tx, ty, tz);
+          fStreets.Nodes[PA].tx := tx;
+          fStreets.Nodes[PA].ty := ty;
+          fStreets.Nodes[PA].tz := tz;
+        end;
+
+        if ClickedID = PB then
+        begin
+          fStreets.Splines[ID].LenB := GetLength(px - tx, py - ty, pz - tz) * 3 *
+            sign(fStreets.Splines[ID].LenB);
+          if fStreets.Splines[ID].OppSpline <> 65535 then
+            fStreets.Splines[fStreets.Splines[ID].OppSpline + 1].LenA := -fStreets.Splines[ID].LenB;
+          tx := -(tx - px) / sign(fStreets.Splines[ID].LenB); // invert length required for B
+          tz := -(tz - pz) / sign(fStreets.Splines[ID].LenB); // invert length required for B
+          Normalize(tx, tz);
+          ty := fStreets.Nodes[PB].ty;
+          Normalize(tx, ty, tz);
+          fStreets.Nodes[PB].tx := tx;
+          fStreets.Nodes[PB].ty := ty;
+          fStreets.Nodes[PB].tz := tz;
+        end;
+      end;
     end;
-
-    if ClickedID=PB then begin
-    px:=STR_Point[PB].x; py:=STR_Point[PB].y; pz:=STR_Point[PB].z;
-    tx:=px+STR_Point[PB].tx*LB; ty:=py+STR_Point[PB].ty*LB; tz:=pz+STR_Point[PB].tz*LB;
-    end;
-
-tx:=tx+(-(ObjectX-X)*ObjectMoveScale*cos(xRot/180*pi)
-        +(ObjectY-Y)*ObjectMoveScale*sin(xRot/180*pi))/power(zoom,3)/4;
-tz:=tz+( (ObjectX-X)*ObjectMoveScale*sin(xRot/180*pi)
-        +(ObjectY-Y)*ObjectMoveScale*cos(xRot/180*pi))/power(zoom,3)/4*sign(yRot-180);
-
-    if ClickedID=PA then begin
-    STR_Spline[ID].LenA:=GetLength(px-tx,py-ty,pz-tz)*3*sign(STR_Spline[ID].LenA);
-    if STR_Spline[ID].OppSpline<>65535 then
-    STR_Spline[STR_Spline[ID].OppSpline+1].LenB:=-STR_Spline[ID].LenA;
-    tx:=(tx-px)/sign(STR_Spline[ID].LenA);
-    tz:=(tz-pz)/sign(STR_Spline[ID].LenA);
-    Normalize(tx,tz);
-    ty:=STR_Point[PA].ty;
-    Normalize(tx,ty,tz);
-    STR_Point[PA].tx:=tx; STR_Point[PA].ty:=ty; STR_Point[PA].tz:=tz;
-    end;
-
-    if ClickedID=PB then begin
-    STR_Spline[ID].LenB:=GetLength(px-tx,py-ty,pz-tz)*3*sign(STR_Spline[ID].LenB);
-    if STR_Spline[ID].OppSpline<>65535 then
-    STR_Spline[STR_Spline[ID].OppSpline+1].LenA:=-STR_Spline[ID].LenB;
-    tx:=-(tx-px)/sign(STR_Spline[ID].LenB); //invert length required for B
-    tz:=-(tz-pz)/sign(STR_Spline[ID].LenB); //invert length required for B
-    Normalize(tx,tz);
-    ty:=STR_Point[PB].ty;
-    Normalize(tx,ty,tz);
-    STR_Point[PB].tx:=tx; STR_Point[PB].ty:=ty; STR_Point[PB].tz:=tz;
-    end;
-end;
-end;
 
 finally
   ObjectX:=X;
@@ -2070,7 +2068,7 @@ begin
 
   Changes.SMP:=false;
   Changes.IDX:=false; Changes.VTX:=false; Changes.QAD:=false; Changes.SKY:=false;
-  Changes.SNI:=false; Changes.LVL:=false; Changes.STR:=false;
+  Changes.SNI:=false; Changes.LVL:=false;
   Changes.WRK:=false; Changes.SC2:=false;
   MemoLoad.Clear;
   MemoLoad.Lines.Add('LOADING');
@@ -2909,7 +2907,12 @@ begin
 
   if Changes.SC2 then SaveSC2(fOptions.WorkDir+'AddOns\Sceneries\'+Scenery+'\EditScenery.sc2');
   if fTriggers.Changed then fTriggers.SaveToFile(fOptions.WorkDir+'RaceDat\'+Scenery+'.trl');
-  if Changes.STR then SaveSTR(fOptions.WorkDir+'Traffic\Streets\'+Scenery+'.str');
+  if fStreets.Changed then
+  begin
+    ElapsedTime(@OldTime);
+
+    fStreets.SaveToFile(fOptions.WorkDir+'Traffic\Streets\'+Scenery+'.str', CB_AutoCross.Checked);
+  end;
 
   ShowChangesInfoClick(nil);
   ShowQADInfo(nil);
@@ -3128,13 +3131,14 @@ begin
     apStreets:
         begin
           ListStreetShape.Clear;
-          for i:=1 to STRHead.NumShapes do begin
-          s:=inttostr(round(STR_ShRef[i].Speed*0.0036))+'kmh ';
-          s:=s+inttostr(round(STR_Shape[i].Offset[1]))+'m ';
-          if STR_Shape[i].NumLanes=2 then s:=s+inttostr(round(STR_Shape[i].Offset[2]))+'m ';
-          if (STR_Shape[i].Options and 4096 = 4096) then s:=s+'1' else s:=s+'0';
-          if (STR_Shape[i].Options and 8192 = 8192) then s:=s+'1' else s:=s+'0';
-          ListStreetShape.Items.Add(s);
+          for i:=1 to fStreets.ShapeCount do
+          begin
+            s:=inttostr(round(fStreets.ShRefs[i].Speed*0.0036))+'kmh ';
+            s:=s+inttostr(round(fStreets.Shapes[i].Offset[1]))+'m ';
+            if fStreets.Shapes[i].NumLanes=2 then s:=s+inttostr(round(fStreets.Shapes[i].Offset[2]))+'m ';
+            if (fStreets.Shapes[i].Options and 4096 = 4096) then s:=s+'1' else s:=s+'0';
+            if (fStreets.Shapes[i].Options and 8192 = 8192) then s:=s+'1' else s:=s+'0';
+            ListStreetShape.Items.Add(s);
           end;
           ListStreetShape.ItemIndex:=-1;
         end;
@@ -4598,8 +4602,62 @@ SKY_WlkSun.Brush.Color:=SKY[SKYIndex].WlkSun.R+SKY[SKYIndex].WlkSun.G*256+SKY[SK
 SkyRefresh:=false;
 end;
 
-procedure TForm1.STRPointIDChange(Sender: TObject); begin STRPointIDChange_; end;
-procedure TForm1.STRPointXChange(Sender: TObject); begin STRPointXChange_; end;
+procedure TForm1.STRPointIDChange(Sender: TObject);
+var
+  ID: integer;
+begin
+  if STRPointID.Value = 0 then
+    exit;
+  STRPointID.Value := EnsureRange(STRPointID.Value, 1, fStreets.NodeCount);
+  ID := Form1.STRPointID.Value;
+  STRPointRefresh := True;
+  STRPointX.Value := fStreets.Nodes[ID].X;
+  STRPointY.Value := fStreets.Nodes[ID].Y;
+  STRPointZ.Value := fStreets.Nodes[ID].Z;
+
+  if fStreets.Nodes[ID].Tz <> 0 then
+    STRPointT.Value := round(arctan2(fStreets.Nodes[ID].Tx, fStreets.Nodes[ID].Tz) * 180 / pi)
+  else
+    STRPointT.Value := 0;
+  STRPointT2.Value := round(sin(fStreets.Nodes[ID].Ty) * 180 / pi);
+  STRPointRefresh := false;
+  // xPos:=fStreets.Nodes[ID].x;
+  // yPos:=fStreets.Nodes[ID].y;
+  // zPos:=fStreets.Nodes[ID].z;
+end;
+
+
+procedure TForm1.STRPointXChange(Sender: TObject);
+var
+  ID: integer;
+  y1, y2: single;
+  ti: integer;
+begin
+  if Form1.STRPointID.Value = 0 then
+    exit;
+  if STRPointRefresh then
+    exit;
+  ID := Form1.STRPointID.Value;
+  fStreets.Nodes[ID].X := Form1.STRPointX.Value;
+  fStreets.Nodes[ID].Y := Form1.STRPointY.Value;
+  fStreets.Nodes[ID].Z := Form1.STRPointZ.Value;
+  fStreets.Nodes[ID].Tx := sin(Form1.STRPointT.Value * pi / 180);
+  // fStreets.Nodes[ID].ty:=arcsin(Form1.STRPointT2.Value*pi/180);
+  fStreets.Nodes[ID].Tz := cos(Form1.STRPointT.Value * pi / 180);
+
+  TraceHeight(fStreets.Nodes[ID].X + fStreets.Nodes[ID].Tx * 100, fStreets.Nodes[ID].Y + fStreets.Nodes[ID].Ty
+    * 100, fStreets.Nodes[ID].Z + fStreets.Nodes[ID].Tz * 100, pd_Near, @y1, @ti);
+  TraceHeight(fStreets.Nodes[ID].X - fStreets.Nodes[ID].Tx * 100, fStreets.Nodes[ID].Y - fStreets.Nodes[ID].Ty
+    * 100, fStreets.Nodes[ID].Z - fStreets.Nodes[ID].Tz * 100, pd_Near, @y2, @ti);
+
+  Normalize(fStreets.Nodes[ID].Tx, (y1 - y2) / 150, fStreets.Nodes[ID].Tz, @fStreets.Nodes[ID].Tx,
+    @fStreets.Nodes[ID].Ty, @fStreets.Nodes[ID].Tz);
+  // xPos:=fStreets.Nodes[ID].x;
+  // yPos:=fStreets.Nodes[ID].y;
+  // zPos:=fStreets.Nodes[ID].z;
+
+  fStreets.Changed := True;
+end;
 
 procedure TForm1.STRSplineID1Change(Sender: TObject);
 begin
@@ -4609,44 +4667,44 @@ exit; end;
 RefreshSTRSpline:=true;
 
 if Sender=STRSplineID1 then begin {
-xPos:=(STR_Point[STR_Spline[STRSplineID1.Value].PtA+1].x
-      +STR_Point[STR_Spline[STRSplineID1.Value].PtB+1].x)/2;
-yPos:=(STR_Point[STR_Spline[STRSplineID1.Value].PtA+1].y
-      +STR_Point[STR_Spline[STRSplineID1.Value].PtB+1].y)/2;
-zPos:=(STR_Point[STR_Spline[STRSplineID1.Value].PtA+1].z
-      +STR_Point[STR_Spline[STRSplineID1.Value].PtB+1].z)/2; }
+xPos:=(fStreets.Nodes[fStreets.Splines[STRSplineID1.Value].PtA+1].x
+      +fStreets.Nodes[fStreets.Splines[STRSplineID1.Value].PtB+1].x)/2;
+yPos:=(fStreets.Nodes[fStreets.Splines[STRSplineID1.Value].PtA+1].y
+      +fStreets.Nodes[fStreets.Splines[STRSplineID1.Value].PtB+1].y)/2;
+zPos:=(fStreets.Nodes[fStreets.Splines[STRSplineID1.Value].PtA+1].z
+      +fStreets.Nodes[fStreets.Splines[STRSplineID1.Value].PtB+1].z)/2; }
 end;
 
-STRSplineShape1.MaxValue:=STRHead.NumShapes;
-STRSplineShape2.MaxValue:=STRHead.NumShapes;
+STRSplineShape1.MaxValue:=fStreets.ShapeCount;
+STRSplineShape2.MaxValue:=fStreets.ShapeCount;
 
-STRSplineID1.Value      :=EnsureRange(STRSplineID1.Value,1,STRHead.NumSplines);
-STRSplineLenA1.Value    :=STR_Spline[STRSplineID1.Value].LenA;
-STRSplineLenB1.Value    :=STR_Spline[STRSplineID1.Value].LenB;
-STRSplineShape1.Value   :=STR_Spline[STRSplineID1.Value].FirstShRef+1;
-STRSplineOpt11.Checked  :=(STR_Spline[STRSplineID1.Value].Options and 1)=1;
-STRSplineOpt12.Checked  :=(STR_Spline[STRSplineID1.Value].Options and 4)=4;
-STRSplineOpt13.Checked  :=(STR_Spline[STRSplineID1.Value].Options and 8)=8;
+STRSplineID1.Value      :=EnsureRange(STRSplineID1.Value,1,fStreets.SplineCount);
+STRSplineLenA1.Value    :=fStreets.Splines[STRSplineID1.Value].LenA;
+STRSplineLenB1.Value    :=fStreets.Splines[STRSplineID1.Value].LenB;
+STRSplineShape1.Value   :=fStreets.Splines[STRSplineID1.Value].FirstShRef+1;
+STRSplineOpt11.Checked  :=(fStreets.Splines[STRSplineID1.Value].Options and 1)=1;
+STRSplineOpt12.Checked  :=(fStreets.Splines[STRSplineID1.Value].Options and 4)=4;
+STRSplineOpt13.Checked  :=(fStreets.Splines[STRSplineID1.Value].Options and 8)=8;
 
-if STR_Spline[STRSplineID1.Value].OppSpline<>65535 then begin
-STRSplineID2.Value      :=STR_Spline[STRSplineID1.Value].OppSpline+1;
-STRSplineLenA2.Value    :=STR_Spline[STRSplineID2.Value].LenA;
-STRSplineLenB2.Value    :=STR_Spline[STRSplineID2.Value].LenB;
-STRSplineShape2.Value   :=STR_Spline[STRSplineID2.Value].FirstShRef+1;
-STRSplineOpt21.Checked  :=(STR_Spline[STRSplineID2.Value].Options and 1)=1;
-STRSplineOpt22.Checked  :=(STR_Spline[STRSplineID2.Value].Options and 4)=4;
-STRSplineOpt23.Checked  :=(STR_Spline[STRSplineID2.Value].Options and 8)=8;
+if fStreets.Splines[STRSplineID1.Value].OppSpline<>65535 then begin
+STRSplineID2.Value      :=fStreets.Splines[STRSplineID1.Value].OppSpline+1;
+STRSplineLenA2.Value    :=fStreets.Splines[STRSplineID2.Value].LenA;
+STRSplineLenB2.Value    :=fStreets.Splines[STRSplineID2.Value].LenB;
+STRSplineShape2.Value   :=fStreets.Splines[STRSplineID2.Value].FirstShRef+1;
+STRSplineOpt21.Checked  :=(fStreets.Splines[STRSplineID2.Value].Options and 1)=1;
+STRSplineOpt22.Checked  :=(fStreets.Splines[STRSplineID2.Value].Options and 4)=4;
+STRSplineOpt23.Checked  :=(fStreets.Splines[STRSplineID2.Value].Options and 8)=8;
 end else
 STRSplineID2.Value:=0;
 
-Label151.Caption:='Length - '+inttostr(round(STR_Spline[STRSplineID1.Value].Length/10))+'m';
-Label113.Caption:='OppSpline - '+inttostr(STR_Spline[STRSplineID1.Value].OppSpline+1);
-Label149.Caption:='PrevSpline - '+inttostr(STR_Spline[STRSplineID1.Value].PrevSpline+1);
-Label150.Caption:='NextSpline - '+inttostr(STR_Spline[STRSplineID1.Value].FirstWay+1);
-Label71.Caption:='NumWays - '+inttostr(STR_Spline[STRSplineID1.Value].NumWays);
-Label146.Caption:='Options - '+inttostr(STR_Spline[STRSplineID1.Value].Options);
-Label116.Caption:='FirstRoW - '+inttostr(STR_Spline[STRSplineID1.Value].FirstRoW);
-Label152.Caption:='NumRoW - '+inttostr(STR_Spline[STRSplineID1.Value].NumRoW);
+Label151.Caption:='Length - '+inttostr(round(fStreets.Splines[STRSplineID1.Value].Length/10))+'m';
+Label113.Caption:='OppSpline - '+inttostr(fStreets.Splines[STRSplineID1.Value].OppSpline+1);
+Label149.Caption:='PrevSpline - '+inttostr(fStreets.Splines[STRSplineID1.Value].PrevSpline+1);
+Label150.Caption:='NextSpline - '+inttostr(fStreets.Splines[STRSplineID1.Value].FirstWay+1);
+Label71.Caption:='NumWays - '+inttostr(fStreets.Splines[STRSplineID1.Value].NumWays);
+Label146.Caption:='Options - '+inttostr(fStreets.Splines[STRSplineID1.Value].Options);
+Label116.Caption:='FirstRoW - '+inttostr(fStreets.Splines[STRSplineID1.Value].FirstRoW);
+Label152.Caption:='NumRoW - '+inttostr(fStreets.Splines[STRSplineID1.Value].NumRoW);
 
 RefreshSTRSpline:=false;
 end;
@@ -4654,39 +4712,39 @@ end;
 procedure TForm1.STRSplineLenA1Change(Sender: TObject);
 var ID1,ID2:integer;
 begin
-if RefreshSTRSpline then exit;
-if STRSplineID1.Value=0 then exit;
-Changes.STR:=true;
-ID1:=STRSplineID1.Value;
+  if RefreshSTRSpline then exit;
+  if STRSplineID1.Value=0 then exit;
+  fStreets.Changed := True;
+  ID1:=STRSplineID1.Value;
 
-STR_Spline[ID1].LenA:=STRSplineLenA1.Value;
-STR_Spline[ID1].LenB:=STRSplineLenB1.Value;
-STR_Spline[ID1].FirstShRef:=EnsureRange(STRSplineShape1.Value,1,STRHead.NumShapes)-1;
-STR_Spline[ID1].Options:=0;
-if STRSplineOpt11.Checked then inc(STR_Spline[ID1].Options,1);
-if STRSplineOpt12.Checked then inc(STR_Spline[ID1].Options,4);
-if STRSplineOpt13.Checked then inc(STR_Spline[ID1].Options,8);
+  fStreets.Splines[ID1].LenA:=STRSplineLenA1.Value;
+  fStreets.Splines[ID1].LenB:=STRSplineLenB1.Value;
+  fStreets.Splines[ID1].FirstShRef:=EnsureRange(STRSplineShape1.Value,1,fStreets.ShapeCount)-1;
+  fStreets.Splines[ID1].Options:=0;
+  if STRSplineOpt11.Checked then inc(fStreets.Splines[ID1].Options,1);
+  if STRSplineOpt12.Checked then inc(fStreets.Splines[ID1].Options,4);
+  if STRSplineOpt13.Checked then inc(fStreets.Splines[ID1].Options,8);
 
-if CBSplineSymmetry.Checked then begin
-  RefreshSTRSpline:=true;
-  STRSplineLenA2.Value:=-STRSplineLenB1.Value;
-  STRSplineLenB2.Value:=-STRSplineLenA1.Value;
-  STRSplineShape2.Value:=STRSplineShape1.Value;
-  STRSplineOpt21.Checked:=STRSplineOpt11.Checked;
-  STRSplineOpt22.Checked:=STRSplineOpt13.Checked;
-  STRSplineOpt23.Checked:=STRSplineOpt12.Checked;
-  RefreshSTRSpline:=false;
-end;
+  if CBSplineSymmetry.Checked then begin
+    RefreshSTRSpline:=true;
+    STRSplineLenA2.Value:=-STRSplineLenB1.Value;
+    STRSplineLenB2.Value:=-STRSplineLenA1.Value;
+    STRSplineShape2.Value:=STRSplineShape1.Value;
+    STRSplineOpt21.Checked:=STRSplineOpt11.Checked;
+    STRSplineOpt22.Checked:=STRSplineOpt13.Checked;
+    STRSplineOpt23.Checked:=STRSplineOpt12.Checked;
+    RefreshSTRSpline:=false;
+  end;
 
-if STRSplineID2.Value=0 then exit;
-ID2:=STRSplineID2.Value;
-STR_Spline[ID2].LenA:=STRSplineLenA2.Value;
-STR_Spline[ID2].LenB:=STRSplineLenB2.Value;
-STR_Spline[ID2].FirstShRef:=EnsureRange(STRSplineShape2.Value,1,STRHead.NumShapes)-1;
-STR_Spline[ID2].Options:=0;
-if STRSplineOpt21.Checked then inc(STR_Spline[ID2].Options,1);
-if STRSplineOpt22.Checked then inc(STR_Spline[ID2].Options,4);
-if STRSplineOpt23.Checked then inc(STR_Spline[ID2].Options,8);
+  if STRSplineID2.Value=0 then exit;
+  ID2:=STRSplineID2.Value;
+  fStreets.Splines[ID2].LenA:=STRSplineLenA2.Value;
+  fStreets.Splines[ID2].LenB:=STRSplineLenB2.Value;
+  fStreets.Splines[ID2].FirstShRef:=EnsureRange(STRSplineShape2.Value,1,fStreets.ShapeCount)-1;
+  fStreets.Splines[ID2].Options:=0;
+  if STRSplineOpt21.Checked then inc(fStreets.Splines[ID2].Options,1);
+  if STRSplineOpt22.Checked then inc(fStreets.Splines[ID2].Options,4);
+  if STRSplineOpt23.Checked then inc(fStreets.Splines[ID2].Options,8);
 end;
 
 procedure TForm1.CBSplineSymmetryClick(Sender: TObject);
@@ -4710,12 +4768,123 @@ if Sender=EditSplines then EditMode:=emStreetSpline else
 exit;
 end;
 
-procedure TForm1.AddShapeClick(Sender: TObject); begin AddShapeClick_; end;
-procedure TForm1.RemShapeClick(Sender: TObject); begin RemShapeClick_; end;
-procedure TForm1.ListStreetShapeClick(Sender: TObject); begin ListStreetShapeClick_; end;
-procedure TForm1.StreetShapeChange(Sender: TObject); begin StreetShapeChange_ end;
-procedure TForm1.RemPointClick(Sender: TObject); begin RemPointClick_; end;
-procedure TForm1.RemSplineClick(Sender: TObject); begin RemSplineClick_; end;
+procedure TForm1.AddShapeClick(Sender: TObject);
+var
+  I: Integer;
+begin
+  fStreets.AddShape;
+
+  I := fStreets.ShapeCount;
+
+  ListStreetShape.Items.Add(
+    inttostr(fStreets.Shapes[i].Options) + ' ' +
+    inttostr(fStreets.Shapes[i].NumLanes) + ' ' +
+    inttostr(round(fStreets.Shapes[i].Offset[1])) + ' ' +
+    inttostr(round(fStreets.Shapes[i].Offset[2])));
+
+  RemShape.Enabled := fStreets.ShapeCount > 1;
+  STRSplineShape1.MaxValue := fStreets.ShapeCount;
+  STRSplineShape2.MaxValue := fStreets.ShapeCount;
+end;
+
+procedure TForm1.RemShapeClick(Sender: TObject);
+var
+  I: Integer;
+begin
+  I := ListStreetShape.ItemIndex;
+  if I = -1 then Exit;
+
+  fStreets.RemShape(I+1);
+
+  RemShape.Enabled := fStreets.ShapeCount > 1;
+  STRSplineShape1.MaxValue := fStreets.ShapeCount;
+  STRSplineShape2.MaxValue := fStreets.ShapeCount;
+  SendQADtoUI(apStreets);
+  ListStreetShape.ItemIndex := I;
+end;
+
+procedure TForm1.ListStreetShapeClick(Sender: TObject);
+var
+  ID: integer;
+begin
+  ID := Form1.ListStreetShape.ItemIndex + 1;
+  if ID < 1 then
+    exit;
+
+  STRShapeRefresh := True;
+  Form1.STROff1.Value := fStreets.Shapes[ID].Offset[1];
+  Form1.STROff2.Value := fStreets.Shapes[ID].Offset[2];
+  Form1.STRLanes.Value := fStreets.Shapes[ID].NumLanes;
+  // Form1.STRShapeOpt1.Checked:=(fStreets.Shapes[ID].Options and 4096 = 4096);
+  // Form1.STRShapeOpt2.Checked:=(fStreets.Shapes[ID].Options and 8192 = 8192);
+  Form1.STRShSpeed.Value := round(fStreets.ShRefs[ID].Speed * 0.0036);
+  STRShapeRefresh := false;
+end;
+
+
+procedure TForm1.StreetShapeChange(Sender: TObject);
+var
+  ID: integer;
+  S: string;
+begin
+  if STRShapeRefresh then
+    exit;
+
+  ID := Form1.ListStreetShape.ItemIndex + 1;
+  if ID = 0 then
+    exit;
+
+  fStreets.Shapes[ID].Offset[1] := STROff1.Value;
+  fStreets.Shapes[ID].Offset[2] := STROff2.Value;
+  fStreets.Shapes[ID].NumLanes := STRLanes.Value;
+  fStreets.Shapes[ID].Options := 0;
+  fStreets.ShRefs[ID].Speed := EnsureRange(round(STRShSpeed.Value / 0.0036), 0, 65535); //
+  // Disable those, seems to have no effect after all
+  // if Form1.STRShapeOpt1.Checked then inc(Shapes[ID].Options,4096);
+  // if Form1.STRShapeOpt2.Checked then inc(Shapes[ID].Options,8192);
+
+  S := inttostr(round(fStreets.ShRefs[ID].Speed * 0.0036)) + 'kmh ';
+  S := S + inttostr(round(fStreets.Shapes[ID].Offset[1])) + 'm ';
+  if fStreets.Shapes[ID].NumLanes = 2 then
+    S := S + inttostr(round(fStreets.Shapes[ID].Offset[2])) + 'm ';
+  if (fStreets.Shapes[ID].Options and 4096 = 4096) then
+    S := S + '1'
+  else
+    S := S + '0';
+  if (fStreets.Shapes[ID].Options and 8192 = 8192) then
+    S := S + '1'
+  else
+    S := S + '0';
+  ListStreetShape.Items[ID - 1] := S;
+
+  fStreets.Changed := True;
+end;
+
+
+procedure TForm1.RemPointClick(Sender: TObject);
+var
+  I: Integer;
+begin
+  I := Form1.STRPointID.Value;
+
+  fStreets.RemNode(I);
+
+  STRPointID.Value := EnsureRange(I, 1, fStreets.NodeCount) - 1;
+end;
+
+
+procedure TForm1.RemSplineClick(Sender: TObject);
+var
+  I: Integer;
+begin
+  I := Form1.STRSplineID1.Value;
+
+  fStreets.RemSpline(I);
+  fStreets.Recalculate(CB_AutoCross.Checked);
+
+  STRSplineID1.Value := EnsureRange(I, 1, fStreets.SplineCount) - 1;
+end;
+
 
 procedure TForm1.CBTrackChange(Sender: TObject);
 var I: Integer;
@@ -5254,11 +5423,11 @@ begin
   MemoSave.Lines.Add('Work folder: '+fOptions.WorkDir+eol+'Scenery name: '+Scenery+eol);
   MemoSave.Lines.Add('ERRORS');
 
-  for I := 1 to STRHead.NumSplines do
+  for I := 1 to fStreets.SplineCount do
   begin
-    if STR_Spline[I].FirstWay+1 <> EnsureRange(STR_Spline[I].FirstWay+1,1,STRHead.NumSplines) then
+    if fStreets.Splines[I].FirstWay+1 <> EnsureRange(fStreets.Splines[I].FirstWay+1,1,fStreets.SplineCount) then
       MemoSave.Lines.Add('STR: No way from spline '+inttostr(I));
-    if ((STR_Spline[I].Options and 1)=1)and((STR_Spline[STR_Spline[I].FirstWay+1].Options and 1)=1) then
+    if ((fStreets.Splines[I].Options and 1)=1)and((fStreets.Splines[fStreets.Splines[I].FirstWay+1].Options and 1)=1) then
       MemoSave.Lines.Add('STR:Two intersections next to each other at spline '+inttostr(I));
   end;
 
@@ -5268,45 +5437,6 @@ begin
 end;
 
 procedure TForm1.OptionsClick(Sender: TObject); begin FormOptions.Show; end;
-
-procedure TForm1.STR_PrepareToSaveClick(Sender: TObject);
-var i:integer;
-begin
-STRHead.Header:='NRTS';
-STRHead.Version:=258; //WR2
-
-if STRHead.NumShapes=0 then AddShapeClick(nil); //Make a shape if there's none
-
-for i:=1 to STRHead.NumSplines do
-STR_Spline[i].Length:=ComputeSplineLength(i); //must compute before FirstWay
-
-for i:=1 to STRHead.NumSplines do
-STR_Spline[i].FirstWay:=FindFirstWay(i);
-
-for i:=1 to STRHead.NumSplines do begin
-STR_Spline[i].Density:=2;
-STR_Spline[i].OppSpline:=FindOppSpline(i);
-STR_Spline[i].PrevSpline:=FindPrevSpline(i);
-STR_Spline[i].FirstRoW:=65535;//i-1;
-STR_Spline[i].NumRoW:=0;//1;
-end;
-
-//Autoset crosses
-if CB_AutoCross.Checked then
-for i:=1 to STRHead.NumSplines do begin
-STR_Spline[i].Options:=STR_Spline[i].Options AND 13; //1101 (1,4,8)
-if ((STR_Spline[i].PrevSpline<>65535)and(STR_Spline[STR_Spline[i].PrevSpline+1].NumWays>1))or
-   ((STR_Spline[i].FirstWay<>65535)and(STR_Spline[STR_Spline[i].FirstWay+1].PrevSpline=65535)) then
-   STR_Spline[i].Options:=STR_Spline[i].Options OR 1; //
-end;
-
-for i:=1 to STRHead.NumRoWs do begin
-  STR_RoW[i].Spline:=0;
-  STR_RoW[i].Tracks:=4294967295; //all bits "1"
-end;
-
-Changes.STR:=true;
-end;
 
 procedure TForm1.ShowQADInfo(Sender: TObject);
 var
@@ -5972,35 +6102,12 @@ Changes.QAD:=true;
 end;
 
 procedure TForm1.Button25Click(Sender: TObject);
-var i:integer;
 begin
-STRHead.NumShRefs:=STRHead.NumShapes;
-setlength(STR_ShRef,STRHead.NumShRefs+2);
+  fStreets.ResetShapes;
 
-for i:=1 to STRHead.NumShRefs do begin
-  STR_ShRef[i].Shape:=0;
-  STR_ShRef[i].Speed:=round(70/0.0036);
-  STR_ShRef[i].StartU:=0;
+  SendQADtoUI(apStreets);
 end;
 
-STRHead.NumShapes:=1;
-
-for i:=1 to STRHead.NumShapes do begin
-STR_Shape[i].Options:=0;
-//STR_Shape[i].NumLanes:=1;
-end;
-
-SendQADToUI(apStreets);
-
-for i:=1 to STRHead.NumSplines do begin
-  STR_Spline[i].FirstShRef:=0;
-  STR_Spline[i].NumShRefs:=1;
-  if STR_Spline[i].NumRoW=0 then STR_Spline[i].FirstRoW:=65535;
-  STR_Spline[i].Options:=STR_Spline[i].Options AND 1;
-end;
-
-Changes.STR:=true;
-end;
 
 procedure TForm1.SetStreetMode(Sender: string);
 begin
@@ -6026,49 +6133,9 @@ Changes.WRK:=true;
 end;
 
 procedure TForm1.DuplicateTrafficRoutesClick(Sender: TObject);
-var i:integer;
 begin
-setlength(STR_Shape,STRHead.NumShapes*2+1);
-for i:=STRHead.NumShapes+1 to STRHead.NumShapes*2 do
-STR_Shape[i]:=STR_Shape[i-STRHead.NumShapes];
-
-setlength(STR_Point,STRHead.NumPoints*2+1);
-for i:=STRHead.NumPoints+1 to STRHead.NumPoints*2 do begin
-STR_Point[i]:=STR_Point[i-STRHead.NumPoints];
-//STR_Point[i].y:=STR_Point[i].y+15;
-end;
-
-setlength(STR_Spline,STRHead.NumSplines*2+1);
-for i:=STRHead.NumSplines+1 to STRHead.NumSplines*2 do begin
-STR_Spline[i]:=STR_Spline[i-STRHead.NumSplines];
-inc(STR_Spline[i].PtA,STRHead.NumPoints);
-inc(STR_Spline[i].PtB,STRHead.NumPoints);
-inc(STR_Spline[i].FirstShRef,STRHead.NumShapes);
-if STR_Spline[i].OppSpline<>65535 then
-inc(STR_Spline[i].OppSpline,STRHead.NumSplines);
-if STR_Spline[i].PrevSpline<>65535 then
-inc(STR_Spline[i].PrevSpline,STRHead.NumSplines);
-if STR_Spline[i].FirstWay<>65535 then
-inc(STR_Spline[i].FirstWay,STRHead.NumSplines);
-//STR_Spline[i].FirstRoW
-end;
-
-setlength(STR_ShRef,STRHead.NumShRefs*2+1);
- for i:=STRHead.NumShRefs+1 to STRHead.NumShRefs*2 do begin
-STR_ShRef[i]:=STR_ShRef[i-STRHead.NumShRefs];
-inc(STR_ShRef[i].Shape,STRHead.NumShapes);
-end;
-
-setlength(STR_RoW,STRHead.NumRoWs*2+1);
-for i:=STRHead.NumRoWs+1 to STRHead.NumRoWs*2 do
-STR_RoW[i]:=STR_RoW[i-STRHead.NumRoWs];
-
-STRHead.NumShapes:=STRHead.NumShapes*2;
-STRHead.NumPoints:=STRHead.NumPoints*2;
-STRHead.NumSplines:=STRHead.NumSplines*2;
-STRHead.NumShRefs:=STRHead.NumShRefs*2;
-STRHead.NumRoWs:=STRHead.NumRoWs*2;
-SendQADtoUI(apStreets);
+  fStreets.DuplicateTrafficRoutes;
+  SendQADtoUI(apStreets);
 end;
 
 procedure TForm1.CBShowModeClick(Sender: TObject);
@@ -6078,14 +6145,10 @@ end;
 
 
 procedure TForm1.StreetsLengthClick(Sender: TObject);
-var i,len:integer;
 begin
-  len:=0;
-  for i:=1 to STRHead.NumSplines do
-    inc(len,round(Str_Spline[i].Length/10));
   MessageBox(Form1.Handle, PChar(eol+'        '+'Total streets length is - '
-  +inttostr(len div 1000)+'.'
-  +inttostr(len mod 1000)+'km'+'        '+eol), 'Info', MB_OK or MB_ICONINFORMATION);
+  +inttostr(fStreets.TotalLength div 1000)+'.'
+  +inttostr(fStreets.TotalLength mod 1000)+'km'+'        '+eol), 'Info', MB_OK or MB_ICONINFORMATION);
 end;
 
 
@@ -6608,19 +6671,19 @@ end;
 procedure TForm1.Button20Click(Sender: TObject);
 var ii:integer;
 begin
-  STRHead.NumPoints := NETHead.Num1;
-  setlength(STR_Point,NETHead.Num1+1);
+  {STRHead.NumPoints := NETHead.Num1;
+  setlength(fStreets.Nodes,NETHead.Num1+1);
 
   for ii:=1 to NETHead.Num1 do begin
-    STR_Point[ii].x:=NET1[ii].X;
-    STR_Point[ii].y:=NET1[ii].Y;
-    STR_Point[ii].z:=NET1[ii].Z;
-    STR_Point[ii].tx:=1;
-    STR_Point[ii].ty:=0;
-    STR_Point[ii].tz:=0;
+    fStreets.Nodes[ii].x:=NET1[ii].X;
+    fStreets.Nodes[ii].y:=NET1[ii].Y;
+    fStreets.Nodes[ii].z:=NET1[ii].Z;
+    fStreets.Nodes[ii].tx:=1;
+    fStreets.Nodes[ii].ty:=0;
+    fStreets.Nodes[ii].tz:=0;
   end;
 
-  NETHead.Num1:=0;
+  NETHead.Num1:=0;}
 end;
 
 procedure TForm1.RemAniNodeClick(Sender: TObject);
@@ -6836,25 +6899,29 @@ end;
 
 
 procedure TForm1.LevelStreetsClick(Sender: TObject);
-var ID:integer; y1,y2:single; ti:integer;
+var
+  ID: integer;
+  y1, y2: single;
+  ti: integer;
 begin
-  for ID:=1 to STRHead.NumPoints do begin
-    TraceHeight(STR_Point[ID].x+STR_Point[ID].tx*100,
-                STR_Point[ID].y+STR_Point[ID].ty*100,
-                STR_Point[ID].z+STR_Point[ID].tz*100,
+  for ID := 1 to fStreets.NodeCount do
+  begin
+    TraceHeight(fStreets.Nodes[ID].x+fStreets.Nodes[ID].tx*100,
+                fStreets.Nodes[ID].y+fStreets.Nodes[ID].ty*100,
+                fStreets.Nodes[ID].z+fStreets.Nodes[ID].tz*100,
                 pd_Near, @y1, @ti);
-    TraceHeight(STR_Point[ID].x-STR_Point[ID].tx*100,
-                STR_Point[ID].y-STR_Point[ID].ty*100,
-                STR_Point[ID].z-STR_Point[ID].tz*100,
+    TraceHeight(fStreets.Nodes[ID].x-fStreets.Nodes[ID].tx*100,
+                fStreets.Nodes[ID].y-fStreets.Nodes[ID].ty*100,
+                fStreets.Nodes[ID].z-fStreets.Nodes[ID].tz*100,
                 pd_Near, @y2, @ti);
 
-    Normalize(STR_Point[ID].tx,
+    Normalize(fStreets.Nodes[ID].tx,
               (y1-y2)/150,
-              STR_Point[ID].tz,
-              @STR_Point[ID].tx,@STR_Point[ID].ty,@STR_Point[ID].tz);
+              fStreets.Nodes[ID].tz,
+              @fStreets.Nodes[ID].tx, @fStreets.Nodes[ID].ty, @fStreets.Nodes[ID].tz);
   end;
 
-  Changes.STR:=true;
+  fStreets.Changed := True;
 end;
 
 procedure TForm1.LoadSounds(Sender: TObject);

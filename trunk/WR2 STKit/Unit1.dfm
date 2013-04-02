@@ -239,7 +239,7 @@ object Form1: TForm1
     Top = 40
     Width = 296
     Height = 604
-    ActivePage = TabSheet9
+    ActivePage = TabSheet2
     Anchors = [akLeft, akTop, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -257,6 +257,10 @@ object Form1: TForm1
     OnDrawTab = PageControl1DrawTab
     object TabSheet9: TTabSheet
       Caption = 'LWO'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         288
         497)
@@ -396,6 +400,10 @@ object Form1: TForm1
     object TabSheet16: TTabSheet
       Caption = 'Grounds'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label70: TLabel
         Left = 6
         Top = 0
@@ -614,6 +622,10 @@ object Form1: TForm1
     object TabSheet15: TTabSheet
       Caption = 'Textures'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         288
         497)
@@ -770,6 +782,10 @@ object Form1: TForm1
     object TabSheet10: TTabSheet
       Caption = 'Materials'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         288
         497)
@@ -1223,6 +1239,10 @@ object Form1: TForm1
     object TabSheet4: TTabSheet
       Caption = 'Objects'
       ImageIndex = 4
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         288
         497)
@@ -1807,6 +1827,10 @@ object Form1: TForm1
     object TabSheet11: TTabSheet
       Caption = 'Sounds'
       ImageIndex = 5
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         288
         497)
@@ -2301,6 +2325,10 @@ object Form1: TForm1
     object TabSheet6: TTabSheet
       Caption = 'Lights'
       ImageIndex = 6
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         288
         497)
@@ -3064,6 +3092,10 @@ object Form1: TForm1
     object TabSheet7: TTabSheet
       Caption = 'Tracks'
       ImageIndex = 8
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         288
         497)
@@ -3144,6 +3176,10 @@ object Form1: TForm1
         object TabSheet22: TTabSheet
           Caption = 'Make track'
           ImageIndex = 2
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           DesignSize = (
             275
             234)
@@ -3407,6 +3443,10 @@ object Form1: TForm1
         end
         object TabSheet19: TTabSheet
           Caption = 'Direction arrows'
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           DesignSize = (
             275
             234)
@@ -3634,6 +3674,10 @@ object Form1: TForm1
         object TabSheet21: TTabSheet
           Caption = 'Waypoint nodes'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           DesignSize = (
             275
             234)
@@ -3938,6 +3982,10 @@ object Form1: TForm1
     object TabSheet17: TTabSheet
       Caption = 'TOB'
       ImageIndex = 9
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         288
         497)
@@ -5000,6 +5048,10 @@ object Form1: TForm1
     object TabSheet5: TTabSheet
       Caption = 'Animated'
       ImageIndex = 11
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         288
         497)
@@ -5449,6 +5501,10 @@ object Form1: TForm1
     object TabSheet1: TTabSheet
       Caption = 'Sky'
       ImageIndex = 12
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         288
         497)
@@ -5781,6 +5837,10 @@ object Form1: TForm1
     object TabSheet18: TTabSheet
       Caption = 'Grass'
       ImageIndex = 14
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label148: TLabel
         Left = 118
         Top = 171
@@ -5953,6 +6013,10 @@ object Form1: TForm1
     object TabSheet3: TTabSheet
       Caption = 'Triggers'
       ImageIndex = 7
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         288
         497)
@@ -6369,6 +6433,10 @@ object Form1: TForm1
     object TabSheet20: TTabSheet
       Caption = 'Addon Info'
       ImageIndex = 15
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label134: TLabel
         Left = 150
         Top = 51
