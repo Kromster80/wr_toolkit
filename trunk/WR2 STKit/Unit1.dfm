@@ -12,6 +12,7 @@ object Form1: TForm1
   KeyPreview = True
   Menu = MainMenu1
   OldCreateOrder = False
+  OnCanResize = FormCanResize
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -238,7 +239,7 @@ object Form1: TForm1
     Top = 40
     Width = 296
     Height = 604
-    ActivePage = TabSheet9
+    ActivePage = TabSheet3
     Anchors = [akLeft, akTop, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -5780,10 +5781,6 @@ object Form1: TForm1
     object TabSheet18: TTabSheet
       Caption = 'Grass'
       ImageIndex = 14
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label148: TLabel
         Left = 118
         Top = 171

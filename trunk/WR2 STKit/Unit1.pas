@@ -888,6 +888,7 @@ type
     procedure RG_GrassLODClick(Sender: TObject);
     procedure RBCarSimClick(Sender: TObject);
     procedure CBDriveModeClick(Sender: TObject);
+    procedure FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer; var Resize: Boolean);
 
   private     { Private declarations }
     procedure OnIdle(Sender: TObject; var Done: Boolean);
@@ -1485,10 +1486,16 @@ begin
 end;
 
 
+procedure TForm1.FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer; var Resize: Boolean);
+begin
+  NewWidth := Max(NewWidth, 960);
+  NewHeight := Max(NewHeight, 744);
+  Resize := True;
+end;
+
+
 procedure TForm1.RenderResize(Sender: TObject);
 begin
-if Form1.Width<960 then Form1.Width:=960;
-if Form1.Height<744 then Form1.Height:=744;
   if (Panel1.Height = 0) then Panel1.Height := 1;
   if (Panel1.Width = 0) then Panel1.Width := 1;
   glViewport(0, 0, Panel1.Width, Panel1.Height);    // Set the viewport for the OpenGL window
@@ -1568,12 +1575,16 @@ if ActivePage=apLights then if Code=kPoint then begin
   ListLightsClick(nil);
 end;
 
-if ActivePage=apTriggers then if (Code=kObject)or(Code=kPoint) then begin
-  if Code=kObject then EditMode:=emTrigger;
-  if Code=kPoint  then EditMode:=emTriggerDest;
-  ListTrig.ItemIndex:=ID-1;
-  ListTrigClick(nil);
-end;
+  if ActivePage=apTriggers then if (Code=kObject)or(Code=kPoint) then
+  begin
+    case Code of
+      kObject:  EditMode := emTrigger;
+      kPoint:   EditMode := emTriggerDest;
+    end;
+
+    ListTrig.ItemIndex := Id;
+    ListTrigClick(nil);
+  end;
 
 if ActivePage=apMaterials then if Code=kSurface then begin
   ListMaterials.ItemIndex:=ID-1;
@@ -1899,7 +1910,7 @@ if not CBSelectionBuffer.Checked then begin
   if ActivePage=apStreets                         then RenderStreets(1,STRPointID.Value,STRSplineID1.Value);
   if ActivePage=apAnimated                        then RenderAnimated(1,'Paths',ListSNIObjects.ItemIndex+1,ListSNINodes.ItemIndex+1)
   else if (fOptions.RenderMode>=rmFull)                    then RenderAnimated(1,'Objects',0,0);
-  if ActivePage=apTriggers                        then fTriggers.Render(1,ListTrig.ItemIndex+1, EditMode);
+  if ActivePage=apTriggers                        then fTriggers.Render(1,ListTrig.ItemIndex, EditMode);
 
   //Render scenery in shaders
   if(fOptions.RenderMode<>rmSchem)and(fOptions.RenderMode<>rmOpenGL)then RenderShaders(
@@ -1934,7 +1945,7 @@ if not CBSelectionBuffer.Checked then begin
 
   if ActivePage=apStreets           then RenderStreets(0.2,STRPointID.Value,STRSplineID1.Value);
   if ActivePage=apStreets           then RenderRoadNet;
-  if ActivePage=apTriggers          then fTriggers.Render(0.2,ListTrig.ItemIndex+1, EditMode);
+  if ActivePage=apTriggers          then fTriggers.Render(0.2,ListTrig.ItemIndex, EditMode);
   if ActivePage=apAnimated          then RenderAnimated(0.2,'Paths',ListSNIObjects.ItemIndex+1,ListSNINodes.ItemIndex+1);
   if ActivePage=apLights            then RenderLights(0.5,'',ListLights.ItemIndex+1);
   if ActivePage=apTracksMT          then RenderMakeTrack(0.5,ListMakeTrack.ItemIndex+1);
@@ -1971,7 +1982,7 @@ MPos.Z:=V.z;
   glEnable(GL_DEPTH_TEST);
   if ActivePage=apAnimated              then RenderAnimated(0,'Paths',0,0);
 //  if ActivePage='Geometry'        then RenderVTX('Points');
-  if ActivePage=apTriggers              then fTriggers.Render(0,ListTrig.ItemIndex+1, EditMode);
+  if ActivePage=apTriggers              then fTriggers.Render(0,ListTrig.ItemIndex, EditMode);
   if ActivePage=apLights                then RenderLights(0,'',0);
   if ActivePage=apTracksMT              then RenderMakeTrack(0,0);
   if ActivePage=apSounds                then RenderSounds(0,0);
@@ -2407,15 +2418,17 @@ end;
 
 
 procedure TForm1.ListTrigClick(Sender: TObject);
-var ID:integer; T:TSTrigger;
+var
+  I: Integer;
+  T: TSTrigger;
 begin
-  TriggersRefresh := true;
-  ID := ListTrig.ItemIndex+1;
-  if ID=0 then exit;
+  TriggersRefresh := True;
+  I := ListTrig.ItemIndex;
+  if I = -1 then exit;
 
-  T := fTriggers[ID];
+  T := fTriggers[I];
 
-  CBTriggerType.ItemIndex := T.TriggerType - 1;
+  CBTriggerType.ItemIndex := T.TriggerType;
   TRL_X.Value := T.Position.X;
   TRL_Y.Value := T.Position.Y;
   TRL_Z.Value := T.Position.Z;
@@ -2447,53 +2460,60 @@ end;
 
 
 procedure TForm1.ListTrigDblClick(Sender: TObject);
-var ID:integer;
+var
+  I: Integer;
 begin
-  ID := ListTrig.ItemIndex+1;
-  if ID=0 then exit;
-  xPos := fTriggers[ID].Position.X;
-  yPos := fTriggers[ID].Position.Y;
-  zPos := fTriggers[ID].Position.Z;
+  I := ListTrig.ItemIndex;
+  if I = -1 then exit;
+  xPos := fTriggers[I].Position.X;
+  yPos := fTriggers[I].Position.Y;
+  zPos := fTriggers[I].Position.Z;
 end;
 
 
 procedure TForm1.AddTriggerClick(Sender: TObject);
-var ID:integer;
+var
+  I: Integer;
 begin
-  if not fTriggers.AddTrigger(Vectorize(xPos, yPos, zPos)) then exit; //Fill in defaults, error if hit the limit
+  //Fill in defaults, error if hit the limit
+  if not fTriggers.AddTrigger(Vectorize(xPos, yPos, zPos)) then
+    Exit;
 
-  ID := fTriggers.Count;
-  ListTrig.Items.Add(fTriggers[ID].GetName);
-  ListTrig.ItemIndex := ID-1; //The last one
+  I := fTriggers.Count - 1;
+  ListTrig.Items.Add(IntToStr(I) + '. ' + fTriggers[I].Title);
+  ListTrig.ItemIndex := I;
   ListTrig.OnClick(ListTrig);
 end;
 
 
 procedure TForm1.RemTriggerClick(Sender: TObject);
-var ID:integer;
+var
+  I: Integer;
 begin
-  ID := ListTrig.ItemIndex+1;
-  if ID=0 then exit;
+  I := ListTrig.ItemIndex;
+  if I = -1 then Exit;
 
-  fTriggers.RemTrigger(ID);
-  ListTrig.Items.Delete(ListTrig.ItemIndex);
-  ListTrig.ItemIndex := EnsureRange(ID, 1, ListTrig.Items.Count) - 1;
+  fTriggers.Delete(I);
+  ListTrig.Items.Delete(I);
+  ListTrig.ItemIndex := EnsureRange(I, 1, ListTrig.Items.Count) - 1;
   ListTrigClick(nil);
 end;
 
 
 procedure TForm1.TriggerChange(Sender: TObject);
-var ID:integer; T:TSTrigger;
+var
+  I: Integer;
+  T: TSTrigger;
 begin
   if TriggersRefresh then exit;
 
-  ID := ListTrig.ItemIndex+1;
-  if ID=0 then exit;
+  I := ListTrig.ItemIndex;
+  if I = -1 then Exit;
 
-  T := fTriggers[ID];
+  T := fTriggers[I];
 
-  T.TriggerType := CBTriggerType.ItemIndex + 1;
-  ListTrig.Items[ID-1] := fTriggers.TriggerName(ID);
+  T.TriggerType := CBTriggerType.ItemIndex;
+  ListTrig.Items[I] := IntToStr(I) + '. ' + fTriggers[I].Title;
   T.Position := Vectorize(TRL_X.Value, TRL_Y.Value, TRL_Z.Value);
   T.Scale := Vectorize(TRL_S1.Value, TRL_S2.Value, TRL_S3.Value);
   T.Rotation := Vectorize(TRL_R1.Value, TRL_R2.Value, TRL_R3.Value);
@@ -3074,11 +3094,13 @@ begin
     apTriggers:
         begin
           CBTriggerType.Clear;
-          for i:=1 to 16 do CBTriggerType.AddItem(TRLnames[i],nil);
+          for I := Low(TRLnames) to High(TRLnames) do
+            CBTriggerType.AddItem(TRLnames[I], nil);
+
           ListTrig.Clear;
-          for i:=1 to fTriggers.Count do
-            ListTrig.Items.Add(fTriggers.TriggerName(i));
-          ListTrig.ItemIndex:=-1;
+          for I := 0 to fTriggers.Count - 1 do
+            ListTrig.Items.Add(IntToStr(I) + '. ' + fTriggers[I].Title);
+          ListTrig.ItemIndex := -1;
         end;
 
     apTracksMT,apTracksAR,apTracksWP:

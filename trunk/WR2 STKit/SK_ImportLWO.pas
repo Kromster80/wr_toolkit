@@ -1072,4 +1072,6 @@ setlength(LW.SName,0);
 setlength(LW.SText,0);
 Form1.MemoLWO.Lines.Add('LWO data cleared');
 end;
+
+
 end.
