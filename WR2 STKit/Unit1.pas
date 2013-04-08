@@ -888,6 +888,7 @@ type
     procedure RBCarSimClick(Sender: TObject);
     procedure CBDriveModeClick(Sender: TObject);
     procedure FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer; var Resize: Boolean);
+    procedure CB_AutoCrossClick(Sender: TObject);
 
   private     { Private declarations }
     procedure OnIdle(Sender: TObject; var Done: Boolean);
@@ -1682,11 +1683,11 @@ begin
                                 fStreets.MakeSpline(ID,SelectionQueue1[1]);
 
                               STRSplineID1.Value := fStreets.SplineCount;
-                              fStreets.Recalculate(CB_AutoCross.Checked);
+                              fStreets.Recalculate;
 
                               SelectionQueue1[1] := 0;
                             end;
-                          fStreets.Recalculate(CB_AutoCross.Checked);
+                          fStreets.Recalculate;
                         end;
                   end;
     end;
@@ -2919,7 +2920,7 @@ begin
   begin
     ElapsedTime(@OldTime);
 
-    fStreets.SaveToFile(fOptions.WorkDir+'Traffic\Streets\'+Scenery+'.str', CB_AutoCross.Checked);
+    fStreets.SaveToFile(fOptions.WorkDir+'Traffic\Streets\'+Scenery+'.str');
   end;
 
   ShowChangesInfoClick(nil);
@@ -4888,7 +4889,7 @@ begin
   I := Form1.STRSplineID1.Value;
 
   fStreets.RemSpline(I);
-  fStreets.Recalculate(CB_AutoCross.Checked);
+  fStreets.Recalculate;
 
   STRSplineID1.Value := EnsureRange(I, 1, fStreets.SplineCount) - 1;
 end;
@@ -6298,6 +6299,12 @@ begin CBCheckers.Checked:=not CBCheckers.Checked; end;
 
 procedure TForm1.CBWireClick(Sender: TObject);
 begin CBWire.Checked:=not CBWire.Checked; end;
+
+procedure TForm1.CB_AutoCrossClick(Sender: TObject);
+begin
+  fStreets.AutoCrosses := CB_AutoCross.Checked;
+  fStreets.Recalculate;
+end;
 
 procedure TForm1.CBSelectionBufferClick(Sender: TObject);
 begin CBSelectionBuffer.Checked:=not CBSelectionBuffer.Checked; end;

@@ -4,51 +4,53 @@ uses Classes, sysutils, Windows, KromUtils, Math, dglOpenGL, Unit_Defaults;
 
 type
   TSStreetShape = packed record
-    Offset: array [1 .. 2] of single;
-    Options: word; // unused (Options=0)
-    NumLanes: word;
+    Offset: array [1 .. 2] of Single;
+    Options: Word; // unused (Options=0)
+    NumLanes: Word;
   end;
 
   TSStreetNode = packed record
-    X, Y, Z, Tx, Ty, Tz: single;
+    X, Y, Z, Tx, Ty, Tz: Single;
   end;
 
   TSStreetSpline = packed record
-    PtA, PtB: word;
-    FirstShRef, NumShRefs: word;
-    LenA, LenB, Length: single;
-    Density, Options: word;
-    OppSpline, PrevSpline: word;
-    FirstWay, NumWays: word;
-    FirstRoW, NumRoW: word;
+    PtA, PtB: Word;
+    FirstShRef, NumShRefs: Word;
+    LenA, LenB, Length: Single;
+    Density, Options: Word;
+    OppSpline, PrevSpline: Word;
+    FirstWay, NumWays: Word;
+    FirstRoW, NumRoW: Word;
   end;
 
   TSStreetShRef = packed record // Is same count as Num_Shapes
-    Shape, Speed: word; // extending each shape with speed limit
-    StartU: single; // unused (always 0)
+    Shape, Speed: Word; // extending each shape with speed limit
+    StartU: Single; // unused (always 0)
   end;
 
   TSStreetRoW = packed record // is same count as NumSplines
-    Spline: word;
-    Tracks: cardinal;
+    Spline: Word;
+    Tracks: Cardinal;
   end;
 
   TSStreets = class
   private
     Header: array [1 .. 4] of AnsiChar;
-    Version, Options: word;
+    Version, Options: Word;
 
-    fShapeCount: integer;
-    fNodeCount: integer;
-    fSplineCount: integer;
-    fShRefCount: integer;
-    fRoWCount: integer;
+    fShapeCount: Integer;
+    fNodeCount: Integer;
+    fSplineCount: Integer;
+    fShRefCount: Integer;
+    fRoWCount: Integer;
 
+    fAutoCrosses: Boolean;
     fChanged: Boolean;
     function ComputeSplineLength(In1: integer): single;
     function FindOppSpline(In1: integer): integer;
     function FindPrevSpline(In1: integer): integer;
     function FindFirstWay(In1: integer): integer;
+    procedure SetAutoCrosses(aValue: Boolean);
   public
     Shapes: array of TSStreetShape;
     Nodes: array of TSStreetNode;
@@ -59,11 +61,9 @@ type
     // constructor Create;
     procedure Clear;
     procedure DuplicateTrafficRoutes;
-    procedure Recalculate(aAutoCrosses: Boolean);
+    procedure Recalculate;
     procedure ResetShapes;
     function TotalLength: integer;
-    // procedure AddShape;
-    // procedure RemShape;
 
     procedure AddNode(X, Y, Z: single);
     procedure AddShape;
@@ -78,10 +78,12 @@ type
     property ShRefCount: integer read fShRefCount;
     property RoWCount: integer read fRoWCount;
     property Changed: Boolean read fChanged write fChanged;
+    property AutoCrosses: Boolean read fAutoCrosses write SetAutoCrosses;
 
     function LoadFromFile(aFile: string): Boolean;
-    procedure SaveToFile(aFile: string; aAutoCrosses: Boolean);
+    procedure SaveToFile(aFile: string);
   end;
+
 
 var
   STRShapeRefresh: Boolean = false;
@@ -106,6 +108,7 @@ begin
   Inc(fNodeCount);
 end;
 
+
 procedure TSStreets.Clear;
 begin
   fShapeCount := 0;
@@ -120,10 +123,11 @@ begin
   SetLength(RoWs, 0);
 end;
 
+
 function TSStreets.LoadFromFile(aFile: string): Boolean;
 var
   S: TMemoryStream;
-  I: integer;
+  I: Integer;
 begin
   Result := false;
 
@@ -180,9 +184,10 @@ begin
   end;
 end;
 
-procedure TSStreets.Recalculate(aAutoCrosses: Boolean);
+
+procedure TSStreets.Recalculate;
 var
-  I: integer;
+  I: Integer;
 begin
   Header[1] := 'N';
   Header[2] := 'R';
@@ -209,7 +214,7 @@ begin
   end;
 
   // Autoset crosses
-  if aAutoCrosses then
+  if fAutoCrosses then
     for I := 1 to fSplineCount do
     begin
       Splines[I].Options := Splines[I].Options AND 13; // 1101 (1,4,8)
@@ -228,9 +233,10 @@ begin
   fChanged := True;
 end;
 
+
 procedure TSStreets.ResetShapes;
 var
-  I: integer;
+  I: Integer;
 begin
   fShRefCount := fShapeCount;
 
@@ -263,9 +269,10 @@ begin
   fChanged := True;
 end;
 
+
 procedure TSStreets.DuplicateTrafficRoutes;
 var
-  I: integer;
+  I: Integer;
 begin
   SetLength(Shapes, fShapeCount * 2 + 1);
   for I := fShapeCount + 1 to fShapeCount * 2 do
@@ -314,11 +321,11 @@ begin
   fChanged := True;
 end;
 
-procedure TSStreets.SaveToFile(aFile: string; aAutoCrosses: Boolean);
+procedure TSStreets.SaveToFile(aFile: string);
 var
   S: TMemoryStream;
 begin
-  Recalculate(aAutoCrosses);
+  Recalculate;
 
   S := TMemoryStream.Create;
   try
@@ -345,7 +352,16 @@ begin
   end;
 end;
 
-// Lngth in meters
+
+procedure TSStreets.SetAutoCrosses(aValue: Boolean);
+begin
+  fAutoCrosses := aValue;
+  if fAutoCrosses then
+    Recalculate;
+end;
+
+
+// Length in meters
 function TSStreets.TotalLength: integer;
 var
   I: integer;
@@ -374,6 +390,7 @@ begin
 
   fChanged := True;
 end;
+
 
 procedure TSStreets.RemShape(aIndex: Integer);
 var
@@ -485,6 +502,7 @@ begin
   Result := Len;
 end;
 
+
 function TSStreets.FindOppSpline(In1: integer): integer;
 var
   k: integer;
@@ -495,6 +513,7 @@ begin
       (Splines[In1].PtB = Splines[k].PtA) then
       Result := k - 1;
 end;
+
 
 function TSStreets.FindPrevSpline(In1: integer): integer;
 var
@@ -515,6 +534,7 @@ begin
   else
     Result := Prev - 1;
 end;
+
 
 function TSStreets.FindFirstWay(In1: integer): integer;
 var
@@ -565,6 +585,7 @@ begin
     Result := (In1 + 1) - 1; // Next
   end;
 end;
+
 
 procedure TSStreets.RemSpline(In1: integer);
 var
@@ -642,5 +663,6 @@ begin
   end;
   // if Form1.CBSplineSymmetry.Checked then Form1.STRSplineID1Change(nil);
 end;
+
 
 end.
