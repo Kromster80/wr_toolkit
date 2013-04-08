@@ -22,7 +22,7 @@ type KCode = (kNil=0,kPoint=1,kSpline=2,kSplineAnchor=3,kSplineAnchorLength=4,
     procedure SetRenderDefaults;
     procedure CheckGLSLError(FormHandle:hWND; Handle: GLhandleARB; Param: GLenum; ShowWarnings:boolean; Text:string);
     procedure BuildFont(h_DC:HDC; FontSize:integer; FontWeight:word=FW_NORMAL);
-    procedure glPrint(text: string);
+    procedure glPrint(text: AnsiString);
     function ReadClick(X, Y: word): Vector3f;
     procedure glkScale(x:single);
     procedure glkQuad(Ax,Ay,Bx,By,Cx,Cy,Dx,Dy:single);
@@ -275,12 +275,12 @@ begin
 end;
 
 
-procedure glPrint(text: string);
+procedure glPrint(text: AnsiString);
 begin
   if text = '' then exit;
   glPushAttrib(GL_LIST_BIT);
   glListBase(20000);
-  glCallLists(length(text),GL_UNSIGNED_BYTE,Pchar(@text[1]));
+  glCallLists(length(text),GL_UNSIGNED_BYTE,PAnsiChar(@text[1]));
   glPopAttrib;
 end;
 
