@@ -1,4 +1,4 @@
-# wr_toolkit
+# WR Toolkit by Krom
 
 This is a modding toolkit for Synetic racing games:
 
