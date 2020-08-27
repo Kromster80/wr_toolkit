@@ -1048,10 +1048,10 @@ object Form1: TForm1
         object SMotID: TSpinEdit
           Left = 12
           Height = 21
-          Hint = '0 - 999'
+          Hint = 'any value'
           Top = 94
           Width = 57
-          MaxValue = 999
+          MaxValue = 2147483647
           OnChange = FSChange
           OnKeyUp = FSChangeLink
           TabOrder = 3
@@ -1059,10 +1059,10 @@ object Form1: TForm1
         object SAusID: TSpinEdit
           Left = 12
           Height = 21
-          Hint = '0 - 999'
+          Hint = 'any value'
           Top = 118
           Width = 57
-          MaxValue = 999
+          MaxValue = 2147483647
           OnChange = FSChange
           OnKeyUp = FSChangeLink
           TabOrder = 4
@@ -1070,10 +1070,10 @@ object Form1: TForm1
         object SSaug: TSpinEdit
           Left = 12
           Height = 21
-          Hint = '0 - 999'
+          Hint = 'any value'
           Top = 142
           Width = 57
-          MaxValue = 999
+          MaxValue = 2147483647
           OnChange = FSChange
           OnKeyUp = FSChangeLink
           TabOrder = 5
@@ -1081,10 +1081,10 @@ object Form1: TForm1
         object SLastger: TSpinEdit
           Left = 12
           Height = 21
-          Hint = '0 - 999'
+          Hint = 'any value'
           Top = 166
           Width = 57
-          MaxValue = 999
+          MaxValue = 2147483647
           OnChange = FSChange
           OnKeyUp = FSChangeLink
           TabOrder = 6
@@ -5106,7 +5106,7 @@ object Form1: TForm1
           Height = 14
           Top = 122
           Width = 154
-          Caption = '103] R¸ckstellkr‰fte for Wheel ?'
+          Caption = '103] RÅEkstellkr‰fte for Wheel ?'
           ParentColor = False
         end
         object Label73: TLabel
@@ -8413,9 +8413,25 @@ object Form1: TForm1
         object Label150: TLabel
           Left = 99
           Height = 13
-          Top = 241
+          Top = 289
           Width = 23
           Caption = 'Rev.'
+          ParentColor = 217False
+        end
+        object Label201: TLabel
+          Left = 99
+          Height = 13
+          Top = 265
+          Width = 15
+          Caption = '7th'
+          ParentColor = False
+        end
+        object Label200: TLabel
+          Left = 99
+          Height = 13
+          Top = 241
+          Width = 15
+          Caption = '8th'
           ParentColor = False
         end
         object Label149: TLabel
@@ -8682,10 +8698,10 @@ object Form1: TForm1
         object SGearQty: TSpinEdit
           Left = 12
           Height = 22
-          Hint = '1 - 7'
+          Hint = '1 - 9'
           Top = 22
           Width = 57
-          MaxValue = 7
+          MaxValue = 9
           MinValue = 1
           OnChange = FSChange
           OnKeyUp = FSChangeLink

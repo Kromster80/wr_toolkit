@@ -22,23 +22,25 @@ WRtachoID:Array[1..7] of string = (
 '0-6.000 rpm','0-7.000 rpm','0-8.000 rpm','0-10.000 rpm',
 '0-12.000 rpm','0-13.000 rpm','0-9.000 rpm');
 
-dataType:array[1..2,0..327] of integer =(
+dataType:array[1..2,0..329] of integer =(
 (3 //int,real,str                                                                                                                                                    ///////
 ,1,3,3,1,2,2,2,2,1,1,1,1,1,1,2,2,2,2,2,2,1,3,1,3,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1,2,2,1,1,1,1,1
 ,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 ,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 ,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 ,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1),
+,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+,1,1),
 (3
 ,1,1,3,1,1,1,1,1,2,1,1,1,1,1,3,1,1,2,2,2,2,1,2,2,2,2,1,2,1,2,1,1,1,2,2,1,2,2,1,1,1,1,2,2,1,3,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,3,1,1,3,3,1,3,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,3,3,3
 ,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 ,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 ,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 ,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1));
+,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+,1,1));
 
-dataText:array[1..2,0..327,1..5] of string =(
+dataText:array[1..2,0..329,1..5] of string =(
 (('Kommentar','D:\NxNlocal\MBC Entwicklung\FrontEnd\_Database\MBWR-Autos.mdb','_3D_FzeugData','Index','Klassenbezeichnung')
 ,('Index','D:\NxNlocal\MBC Entwicklung\FrontEnd\_Database\MBWR-Autos.mdb','_3D_FZeugData','Index','Index')
 ,('EngineName','D:\NxNlocal\MBC Entwicklung\FrontEnd\_Database\MBWR-Autos.mdb','_3D_FZeugData','Index','BasisModellName')
@@ -149,7 +151,7 @@ dataText:array[1..2,0..327,1..5] of string =(
 ,('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash')
 ,('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash')
 ,('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash')
-)
+,('WR2NoDemo','.\','Encrypted','Index','MDHash'),('WR2NoDemo','.\','Encrypted','Index','MDHash'))
 
 ,//2nd
 (('Kommentar','D:\NxNlocal\MBC Entwicklung\FrontEnd\_Database\MBWR-Autos.mdb','Automodelle','Index','Bezeichnung')
@@ -263,7 +265,9 @@ dataText:array[1..2,0..327,1..5] of string =(
 ,('ClassTextID','','','','')
 ,('BitmapFilename','','','','')
 ,('BitmapPosX','','','','')
-,('BitmapPosY','','','','')//,('mocod','','','','')
+,('BitmapPosY','','','','')
+,('Gang8','D:\NxNlocal\MBC Entwicklung\FrontEnd\_Database\MBWR-Autos.mdb','Getriebe','INDEX','Gang8')
+,('Gang9','D:\NxNlocal\MBC Entwicklung\FrontEnd\_Database\MBWR-Autos.mdb','Getriebe','INDEX','Gang9')//,('mocod','','','','')
 //,('','','','','')
 ,('','','','',''),('','','','',''),('','','','',''),('','','','',''),('','','','',''),('','','','','')
 ,('','','','',''),('','','','',''),('','','','',''),('','','','',''),('','','','',''),('','','','','')
@@ -289,7 +293,7 @@ dataText:array[1..2,0..327,1..5] of string =(
 ,('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash')
 ,('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash')
 ,('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash'),('Hash','.\','MD','Index','MDHash')
-));
+,('Hash','.\','MD','Index','MDHash')));
          
 
 implementation
