@@ -2,6 +2,7 @@
 {$IFDEF VER150} {$DEFINE WDC} {$ENDIF}  // Delphi 7
 {$IFDEF VER220} {$DEFINE WDC} {$ENDIF}  // Delphi XE
 {$IFDEF VER230} {$DEFINE WDC} {$ENDIF}  // Delphi XE2
+{$IFDEF VER290} {$DEFINE WDC} {$ENDIF}  // Delphi XE8
 unit WR_AboutBox;
 {$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
