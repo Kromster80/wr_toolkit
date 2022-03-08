@@ -30,14 +30,14 @@ procedure krintersect(x1,y1,x2,y2,x3,y3:single; SizeX,SizeY:integer; var ot:arra
 function ReverseString(s1:string):string;
 
 function real2(c1,c2,c3,c4:AnsiChar):real;
-function unreal2(x:real):string;
+function unreal2(x:real):AnsiString;
 function hextoint(st: AnsiChar): integer;
 function int2fix(Number,Len:integer):string;
 function float2fix(Number:single; Digits:integer):string;
 function int2(c1,c2:AnsiChar):integer; overload;
 function int2(c1,c2,c3,c4:AnsiChar):integer; overload;
-function chr2(x,len:integer):string; overload;
-function chr2(t:string; len:integer):string; overload;
+function chr2(x,len:integer):AnsiString; overload;
+function chr2(t:AnsiString; len:integer):AnsiString; overload;
 procedure Color2RGB(Col:integer; out R,G,B:byte);
 
 function Vectorize(A,B:single):Vector2f; overload;
@@ -412,7 +412,7 @@ begin
 end;
 
 
-function unreal2(X: real): string;
+function unreal2(X: real): AnsiString;
 var
   sign, mant, expo: integer;
 begin
@@ -438,8 +438,8 @@ begin
       expo := 0; //
     mant := round((X - 1) * 8388608);
     expo := expo + 127;
-    unreal2 := chr(mant) + chr(mant div 256) +
-      chr((mant div 65536) + (expo mod 2) * 128) + chr(expo div 2 + sign * 128);
+    unreal2 := AnsiChar(mant) + AnsiChar(mant div 256) +
+      AnsiChar((mant div 65536) + (expo mod 2) * 128) + AnsiChar(expo div 2 + sign * 128);
   end
   else
     unreal2 := #0 + #0 + #0 + #0;
@@ -484,7 +484,7 @@ begin
     int2 := ord(c1) + ord(c2) * 256 + ord(c3) * 65536 + ord(c4) * 16777216;
 end;
 
-function chr2(X, Len: integer): string; overload;
+function chr2(X, Len: integer): AnsiString; overload;
 var
   Tmp: integer;
 begin
@@ -492,15 +492,15 @@ begin
   if X < 0 then
   begin
     inc(Tmp);
-    chr2 := chr(Tmp - 1) + char(Tmp div 256 - 1) + char(Tmp div 65536 - 1) +
+    chr2 := AnsiChar(Tmp - 1) + char(Tmp div 256 - 1) + char(Tmp div 65536 - 1) +
       char(Tmp div 16777216 - 1)
   end
   else
-    chr2 := chr(Tmp) + char(Tmp div 256) + char(Tmp div 65536) +
+    chr2 := AnsiChar(Tmp) + char(Tmp div 256) + char(Tmp div 65536) +
       char(Tmp div 16777216);
 end;
 
-function chr2(t:string; len:integer):string; overload;
+function chr2(t:AnsiString; len:integer):AnsiString; overload;
 var i:integer;
 begin
   for i:=length(t) to len-1 do t:=t+#0;
