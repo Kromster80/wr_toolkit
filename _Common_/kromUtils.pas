@@ -170,8 +170,8 @@ end;
 
 function ElapsedTime(i1:pcardinal): string;
 begin
-result:=' '+inttostr(GetTickCount-i1^)+'ms'; //get time passed
-i1^:=GetTickCount;                           //assign new value to source
+  result:=' '+inttostr(GetTickCount-i1^)+'ms'; //get time passed
+  i1^:=GetTickCount;                           //assign new value to source
 end;
 
 
@@ -271,14 +271,16 @@ begin
 end;
 
 
-function CheckFileExists(const FileName: string; const IsSilent:boolean = false):boolean;
+function CheckFileExists(const FileName: string; const IsSilent: boolean = false): boolean;
 begin
-if fileexists(FileName) then
-  Result:=true
-else begin
-  if not IsSilent then ShowMessage('Unable to locate '+#13+'"'+FileName+'" file');
-  Result:=false;
-end;
+  if FileExists(FileName) then
+    Result := true
+  else
+  begin
+    if not IsSilent then
+      ShowMessage('Unable to locate ' + #13 + '"' + FileName + '" file');
+    Result := false;
+  end;
 end;
 
 
@@ -289,13 +291,15 @@ begin
 end;
 
 
-function ReverseString(s1:string):string;
-var s2:string; i:integer;
+function ReverseString(s1: string): string;
+var
+  s2: string;
+  i: integer;
 begin
-s2:=s1; //preparing ?
-for i:=1 to length(s1) do
-s2[i]:=s1[length(s1)-i+1];
-ReverseString:=s2;
+  s2 := s1; // preparing ?
+  for i := 1 to length(s1) do
+    s2[i] := s1[length(s1) - i + 1];
+  ReverseString := s2;
 end;
 
 procedure krintersect(x1,y1,x2,y2,x3,y3:single; SizeX,SizeY:integer; var ot:array of integer);
@@ -408,33 +412,50 @@ begin
 end;
 
 
-function unreal2(x:real):string;
-var sign,mant,expo:integer;
+function unreal2(X: real): string;
+var
+  sign, mant, expo: integer;
 begin
-if x<0 then sign:=1 else sign:=0;
-if x<>0 then begin
-x:=abs(x); expo:=0;
-if x>=2 then repeat                  //normalizes X
-x:=x/2; expo:=expo+1;           //so it look like
-until(x<2)              // 1.28758...
-else if x<1 then repeat                  //
-x:=x*2; expo:=expo-1;   //power of 2
-until(x>=1)             //to use
-else expo:=0;           //
-mant:=round((x-1)*8388608); expo:=expo+127;
-unreal2:=chr(mant)+chr(mant div 256)+chr((mant div 65536)+(expo mod 2)*128)+chr(expo div 2 + sign*128);
-end else unreal2:=#0+#0+#0+#0;
+  if X < 0 then
+    sign := 1
+  else
+    sign := 0;
+  if X <> 0 then
+  begin
+    X := abs(X);
+    expo := 0;
+    if X >= 2 then
+      repeat // normalizes X
+        X := X / 2;
+        expo := expo + 1; // so it look like
+      until (X < 2) // 1.28758...
+    else if X < 1 then
+      repeat //
+        X := X * 2;
+        expo := expo - 1; // power of 2
+      until (X >= 1) // to use
+    else
+      expo := 0; //
+    mant := round((X - 1) * 8388608);
+    expo := expo + 127;
+    unreal2 := chr(mant) + chr(mant div 256) +
+      chr((mant div 65536) + (expo mod 2) * 128) + chr(expo div 2 + sign * 128);
+  end
+  else
+    unreal2 := #0 + #0 + #0 + #0;
 end;
 
-function int2fix(Number,Len:integer):string;
-var ss:string; x:byte;
+function int2fix(Number, Len: integer): string;
+var
+  ss: string;
+  X: byte;
 begin
-ss:=inttostr(Number);
-for x:=length(ss) to Len-1 do
-ss:='0'+ss;
-  if length(ss)>Len then
-    ss:='**********';//ss[99999999]:='0'; //generating an error in lame way
-setlength(ss,Len);
+  ss := inttostr(Number);
+  for X := length(ss) to Len - 1 do
+    ss := '0' + ss;
+  if length(ss) > Len then
+    ss := '**********'; // ss[99999999]:='0'; //generating an error in lame way
+  setlength(ss, Len);
   Result := ss;
 end;
 
@@ -444,24 +465,39 @@ begin
   Result := FloatToStrF(Number, ffGeneral, Digits+1, Digits);
 end;
 
-function int2(c1,c2: AnsiChar):integer; overload;
-begin int2:=ord(c1)+ord(c2)*256; end;
+function int2(c1, c2: AnsiChar): integer; overload;
+begin
+  int2 := ord(c1) + ord(c2) * 256;
+end;
 
-function int2(c1,c2,c3,c4:AnsiChar):integer; overload;
-var x:integer;
-begin if ord(c4)>127 then begin
-x:=-(255-ord(c1)+(255-ord(c2))*256+(255-ord(c3))*65536+(255-ord(c4))*16777216);
-int2:=x-1;
-end else
-int2:=ord(c1)+ord(c2)*256+ord(c3)*65536+ord(c4)*16777216; end;
+function int2(c1, c2, c3, c4: AnsiChar): integer; overload;
+var
+  X: integer;
+begin
+  if ord(c4) > 127 then
+  begin
+    X := -(255 - ord(c1) + (255 - ord(c2)) * 256 + (255 - ord(c3)) * 65536 +
+      (255 - ord(c4)) * 16777216);
+    int2 := X - 1;
+  end
+  else
+    int2 := ord(c1) + ord(c2) * 256 + ord(c3) * 65536 + ord(c4) * 16777216;
+end;
 
-function chr2(x,len:integer):string; overload;
-var tmp:integer;
-begin tmp:=x;
-  if x<0 then begin inc(tmp);
-  chr2:=chr(tmp-1)+char(tmp div 256-1)+char(tmp div 65536-1)+char(tmp div 16777216-1)
-  end else
-  chr2:=chr(tmp)+char(tmp div 256)+char(tmp div 65536)+char(tmp div 16777216);
+function chr2(X, Len: integer): string; overload;
+var
+  Tmp: integer;
+begin
+  Tmp := X;
+  if X < 0 then
+  begin
+    inc(Tmp);
+    chr2 := chr(Tmp - 1) + char(Tmp div 256 - 1) + char(Tmp div 65536 - 1) +
+      char(Tmp div 16777216 - 1)
+  end
+  else
+    chr2 := chr(Tmp) + char(Tmp div 256) + char(Tmp div 65536) +
+      char(Tmp div 16777216);
 end;
 
 function chr2(t:string; len:integer):string; overload;
@@ -472,11 +508,11 @@ begin
   chr2:=t;
 end;
 
-procedure Color2RGB(Col:integer; out R,G,B:byte);
+procedure Color2RGB(Col: integer; out R, G, B: byte);
 begin
-R:=Col AND $FF;
-G:=Col AND $FF00 SHR 8;
-B:=Col AND $FF0000 SHR 16;
+  R := Col AND $FF;
+  G := Col AND $FF00 SHR 8;
+  B := Col AND $FF0000 SHR 16;
 end;
 
 
@@ -788,7 +824,7 @@ begin
 
   Pos2:=Pos1+1; //Find last digit of required number
   repeat
-    if (Pos2<=length(AText))and(AText[Pos2] in [',','.']) then AText[Pos2] := DecimalSeparator;
+    if (Pos2<=length(AText))and(AText[Pos2] in [',','.']) then AText[Pos2] := FormatSettings.DecimalSeparator;
     inc(Pos2);
   until((Pos2>length(AText))or(
   ((AText[Pos2]=' ')or(AText[Pos2]=#9)or(AText[Pos2]='/'))and(AText[Pos2-1] in [','..'.','0'..'9'])
@@ -1168,7 +1204,8 @@ end;
 
 
 procedure RegisterFileType(ExtName:string; AppName:string);
-var reg:TRegistry;
+var
+  reg: TRegistry;
 begin
   reg := TRegistry.Create;
   try
