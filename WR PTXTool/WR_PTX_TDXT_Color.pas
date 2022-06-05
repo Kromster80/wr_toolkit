@@ -3,7 +3,7 @@ interface
 uses
   Math, KromUtils;
 
-procedure DXT_RGB_Encode(R1,R2,R3,R4:Pointer; out OutDat: int64; out RMS: array of single);
+procedure DXT_RGB_Encode(aRow1,aRow2,aRow3,aRow4: Pointer; out OutDat: int64; out RMS: array of single);
 procedure DXT_RGB_Decode(InDat: Pointer; out OutDat: array of byte);
 
 implementation
@@ -23,7 +23,7 @@ begin
   aB := aWord mod 32 * 8;
 end;
 
-procedure DXT_RGB_Encode(R1,R2,R3,R4:Pointer; out OutDat:int64; out RMS:array of single);
+procedure DXT_RGB_Encode(aRow1,aRow2,aRow3,aRow4: Pointer; out OutDat:int64; out RMS:array of single);
 var
   i,k,h:integer;
   Col:array[1..16,1..3]of byte; //Input colors
@@ -40,20 +40,23 @@ var
 
   procedure MakeBlock(id,mm1,mm2:word);
     var i:integer;
-    begin with Trial[id] do begin
-      Dat:=mm1+(mm2 shl 16);
-      for i:=1 to 16 do
-        Dat:=Dat+int64( int64(im[i] AND $03) shl ( 32 + (i-1)*2 ));
-    end; end;
+    begin
+      with Trial[id] do
+      begin
+        Dat:=mm1+(mm2 shl 16);
+        for i:=1 to 16 do
+          Dat:=Dat+int64( int64(im[i] AND $03) shl ( 32 + (i-1)*2 ));
+      end;
+    end;
 
 begin
   FillChar(im,SizeOf(im),#0);
   FillChar(Trial,SizeOf(Trial),#0);
   FillChar(tRMS,SizeOf(tRMS),#0);
-  for i:=0 to 3 do for h:=1 to 3 do col[i+1,h]:=byte(Char(Pointer((Integer(R1)+i*4+h-1))^));
-  for i:=0 to 3 do for h:=1 to 3 do col[i+1+4,h]:=byte(Char(Pointer((Integer(R2)+i*4+h-1))^));
-  for i:=0 to 3 do for h:=1 to 3 do col[i+1+8,h]:=byte(Char(Pointer((Integer(R3)+i*4+h-1))^));
-  for i:=0 to 3 do for h:=1 to 3 do col[i+1+12,h]:=byte(Char(Pointer((Integer(R4)+i*4+h-1))^));
+  for i:=0 to 3 do for h:=1 to 3 do col[i+1,h] := PByte(Integer(aRow1) +i*4+h-1)^;
+  for i:=0 to 3 do for h:=1 to 3 do col[i+1+4,h] := PByte(Integer(aRow2) +i*4+h-1)^;
+  for i:=0 to 3 do for h:=1 to 3 do col[i+1+8,h] := PByte(Integer(aRow3) +i*4+h-1)^;
+  for i:=0 to 3 do for h:=1 to 3 do col[i+1+12,h] := PByte(Integer(aRow4) +i*4+h-1)^;
   for i:=1 to 16 do begin
     RMS[1] := 0;
     RMS[2] := 0;
@@ -337,10 +340,10 @@ begin
     c[i] := byte(Char(Pointer((cardinal(InDat)+i-1))^));
 
   //Acquire min/max colors
-  Colors[1,1] := (c[2]div 8)*8;                //R1
+  Colors[1,1] := (c[2]div 8)*8;                //aRow1
   Colors[1,2] := (c[2]mod 8)*32+(c[1]div 32)*4;//G1
   Colors[1,3] := (c[1]mod 32)*8;               //B1
-  Colors[2,1] := (c[4]div 8)*8;                //R2
+  Colors[2,1] := (c[4]div 8)*8;                //aRow2
   Colors[2,2] := (c[4]mod 8)*32+(c[3]div 32)*4;//G2
   Colors[2,3] := (c[3]mod 32)*8;               //B2
 
