@@ -39,15 +39,16 @@ var
   end;
 
   procedure MakeBlock(id,mm1,mm2:word);
-    var i:integer;
+  var
+    i: integer;
+  begin
+    with Trial[id] do
     begin
-      with Trial[id] do
-      begin
-        Dat:=mm1+(mm2 shl 16);
-        for i:=1 to 16 do
-          Dat:=Dat+int64( int64(im[i] AND $03) shl ( 32 + (i-1)*2 ));
-      end;
+      Dat:=mm1+(mm2 shl 16);
+      for i:=1 to 16 do
+        Dat:=Dat+int64( int64(im[i] AND $03) shl ( 32 + (i-1)*2 ));
     end;
+  end;
 
 begin
   FillChar(im,SizeOf(im),#0);

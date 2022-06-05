@@ -1,7 +1,7 @@
 unit WR_PTX_TDisplayImage;
 interface
 uses
-  Windows, ExtCtrls, Graphics, SysUtils,Math, kromUtils, Controls, Forms, WR_PTX_TDXT_Alpha, WR_PTX_TDXT_Color;
+  Windows, ExtCtrls, Graphics, SysUtils, Classes, Math, kromUtils, Controls, Forms, WR_PTX_TDXT_Alpha, WR_PTX_TDXT_Color;
 
 type
   TConversionMode = (cmRGB, cmA, cmRGBA);
@@ -26,6 +26,7 @@ type
     MipMapQtyUse: Integer;
     MipMapQtyMax: Integer;
     IsChanged: boolean;
+    fSavedIn: string;
     procedure GenerateMipMap(MMH,MMV,aLevel:Integer);
     procedure ResetAllData;
     procedure SetAllPropsAtOnce(iFileMask:string; iSizeH,iSizeV,iMipMapQty:Integer;
@@ -57,8 +58,8 @@ type
     procedure OpenTGA(aFileName:string);
     procedure Open2DB(aFileName:string);
     procedure SaveUncompressedPTX(FileName:string);
-    procedure SaveCompressedPTX(FileName:string);
-    procedure SaveTGA(FileName:string);
+    procedure SaveCompressedPTX(aFileName: string);
+    procedure SaveTGA(aFileName: string);
     procedure SaveMipMap(aFileName:string; aLevel:Integer);
     procedure ExportBitmapRGB(FileName:string);
     procedure ExportBitmapA(FileName:string);
@@ -66,6 +67,8 @@ type
     procedure ImportBitmapA(FileName:string);
     procedure CreateAlphaFrom(X,Y:Integer);
     procedure ReplaceColorKeyFrom(X,Y:Integer);
+
+    property SavedIn: string read fSavedIn;
   end;
 
 
@@ -236,19 +239,21 @@ end;
 
 procedure TDisplayImage.GenerateMipMap(MMH,MMV,aLevel:Integer);
 var
-  i,k,h,j:Integer;
-  Area:word;
-  Ratio:single;
-  Tmp1,Tmp2,Tmp3,Tmp4,Acc:single;
+  i,k,h,j: Integer;
+  Area: Word;
+  Ratio: Single;
+  Tmp1,Tmp2,Tmp3,Tmp4,Acc: Single;
 begin
   if aLevel = 1 then
   begin
     for i:=1 to MMV do for k:=1 to MMH do
     begin
-      RGBAmm[i,k,1]:=RGBA[i,k,1]; RGBAmm[i,k,2]:=RGBA[i,k,2];
-      RGBAmm[i,k,3]:=RGBA[i,k,3]; RGBAmm[i,k,4]:=RGBA[i,k,4];
+      RGBAmm[i,k,1] := RGBA[i,k,1];
+      RGBAmm[i,k,2] := RGBA[i,k,2];
+      RGBAmm[i,k,3] := RGBA[i,k,3];
+      RGBAmm[i,k,4] := RGBA[i,k,4];
     end;
-    exit;
+    Exit;
   end;
 
   Area := Pow(2, aLevel-1); //1..1024 (one side only), temp limit to 16
@@ -793,38 +798,46 @@ begin
   IsChanged:=false;
 end;
 
-procedure TDisplayImage.SaveCompressedPTX(FileName:string);
+procedure TDisplayImage.SaveCompressedPTX(aFileName: string);
 var
+  ms: TMemoryStream;
   i,h:Integer;
-  f:file;
   MMH,MMV,Size,xp,yp:Integer;
   DXTOut:int64;
   DXTAOut:int64;
+  t: Cardinal;
 begin
   FillChar(RMS,SizeOf(RMS),#0);
-  AssignFile(f,FileName); ReWrite(f,1);
 
-  if Props.hasAlpha then blockwrite(f,AnsiString(#1#32#0#0),4) else blockwrite(f,AnsiString(#1#24#0#0),4); //compression, bpp
+  t := GetTickCount;
 
-  blockwrite(f,Props.SizeH,4);
-  blockwrite(f,Props.SizeV,4);
-  blockwrite(f,MipMapQtyUse,1);
-  blockwrite(f,Fog2[3],1);
-  blockwrite(f,Fog2[2],1);
-  blockwrite(f,Fog2[1],1);
+  ms := TMemoryStream.Create;
 
-  MMH:=Props.SizeH; MMV:=Props.SizeV;
+  if Props.hasAlpha then
+    ms.Write(AnsiString(#1#32#0#0), 4)  //compression, 32bpp
+  else
+    ms.Write(AnsiString(#1#24#0#0), 4); //compression, 24bpp
+
+  ms.Write(Props.SizeH, 4);
+  ms.Write(Props.SizeV, 4);
+  ms.Write(MipMapQtyUse, 1);
+  ms.Write(Fog2[3], 1);
+  ms.Write(Fog2[2], 1);
+  ms.Write(Fog2[1], 1);
+
+  MMH:=Props.SizeH;
+  MMV:=Props.SizeV;
   for h:=1 to MipMapQtyUse do
   begin
     Size := IfThen(Props.hasAlpha, MMH * MMV, MMH * MMV div 2);
 
-    blockwrite(f,Size,4);
-    blockwrite(f,#0#0#0#0,4);
-    GenerateMipMap(MMH,MMV,h);
+    ms.Write(Size, 4);
+    ms.Write(AnsiString(#0#0#0#0), 4);
+    GenerateMipMap(MMH, MMV, h);
     for i:=1 to (MMH*MMV div 16) do
     begin
-      xp:=((i-1)*4) mod MMH +1; //X pixel
-      yp:=((i-1) div ((MMH-1) div 4 + 1) )*4 + 1;
+      xp := ((i-1) * 4) mod MMH + 1; //X pixel
+      yp := ((i-1) div ((MMH-1) div 4 + 1)) * 4 + 1;
       if Props.hasAlpha then
       begin
         DXT_A_Encode(@RGBAmm[yp+0, xp, 4],
@@ -832,31 +845,39 @@ begin
                      @RGBAmm[yp+2, xp, 4],
                      @RGBAmm[yp+3, xp, 4],
                      DXTAOut, RMS[4]);
-        blockwrite(f, DXTAOut, 8);
+        ms.Write(DXTAOut, 8);
       end;
       DXT_RGB_Encode(@RGBAmm[yp+0, xp, 1],
                      @RGBAmm[yp+1, xp, 1],
                      @RGBAmm[yp+2, xp, 1],
                      @RGBAmm[yp+3, xp, 1],
                      DXTOut, RMS);
-      blockwrite(f,DXTOut,8);
+      ms.Write(DXTOut, 8);
     end;
 
     MMH := Max(MMH div 2, 1);
     MMV := Max(MMV div 2, 1);
   end;
-  closefile(f);
-  RMS[1]:=sqrt(RMS[1]/(Props.SizeH*Props.SizeV));
-  RMS[2]:=sqrt(RMS[2]/(Props.SizeH*Props.SizeV));
-  RMS[3]:=sqrt(RMS[3]/(Props.SizeH*Props.SizeV));
-  RMS[4]:=sqrt(RMS[4]/(Props.SizeH*Props.SizeV));
-  IsChanged:=false;
+
+  ms.SaveToFile(aFileName);
+  ms.Free;
+
+  RMS[1] := Sqrt(RMS[1] / (Props.SizeH * Props.SizeV));
+  RMS[2] := Sqrt(RMS[2] / (Props.SizeH * Props.SizeV));
+  RMS[3] := Sqrt(RMS[3] / (Props.SizeH * Props.SizeV));
+  RMS[4] := Sqrt(RMS[4] / (Props.SizeH * Props.SizeV));
+  IsChanged := False;
+
+  fSavedIn := IntToStr(GetTickCount - t);  // 2137, 2137,  2153  // 1841, 1810, 1856
 end;
 
-procedure TDisplayImage.SaveTGA(FileName:string);
-var f:file; i,k,ci:Integer; c:array of byte;
+procedure TDisplayImage.SaveTGA(aFileName: string);
+var
+  f:file;
+  i,k,ci:Integer;
+  c:array of byte;
 begin
-  AssignFile(f,FileName); ReWrite(f,1);
+  AssignFile(f,aFileName); ReWrite(f,1);
   blockwrite(f,#0#0#2#0#0#0#0#0#0#0#0#0,12);
   blockwrite(f,Props.sizeH,2);
   blockwrite(f,Props.sizeV,2);

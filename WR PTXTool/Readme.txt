@@ -24,6 +24,7 @@ You can use uncompressed PTX images to get better image quality in game.
 Changelog:
 v2.2 (05.06.2022)
   Fixed GUI paddings
+  Sped up PTX saving by 10%
 v2.1b (2009.04.24)
   Fixed bug in fog color generation
 v2.1  (2009.04.21)
