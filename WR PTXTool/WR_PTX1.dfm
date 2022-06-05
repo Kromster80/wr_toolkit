@@ -1,12 +1,12 @@
 object Form1: TForm1
   Left = 56
   Top = 143
-  Width = 707
-  Height = 401
   HorzScrollBar.Smooth = True
   VertScrollBar.Smooth = True
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'PTXTool'
+  ClientHeight = 361
+  ClientWidth = 713
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,29 +15,29 @@ object Form1: TForm1
   Font.Style = []
   Menu = MainMenu1
   OldCreateOrder = False
-  Position = poDesktopCenter
+  Position = poScreenCenter
   OnCanResize = FormCanResize
   OnCreate = Form1Init
   OnResize = FormResize
   DesignSize = (
-    699
-    355)
+    713
+    361)
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel_RGB: TBevel
-    Left = 176
+    Left = 184
     Top = 95
     Width = 258
     Height = 258
   end
   object Bevel_A: TBevel
-    Left = 439
+    Left = 447
     Top = 95
     Width = 258
     Height = 258
   end
   object Image_A: TImage
-    Left = 440
+    Left = 448
     Top = 96
     Width = 256
     Height = 256
@@ -74,21 +74,21 @@ object Form1: TForm1
     ParentFont = False
   end
   object Label6: TLabel
-    Left = 516
+    Left = 524
     Top = 64
     Width = 176
     Height = 13
     Caption = 'Replace color-key with average color'
   end
   object Label8: TLabel
-    Left = 516
+    Left = 524
     Top = 40
     Width = 129
     Height = 13
     Caption = 'Create alpha from color-key'
   end
   object Image_RGB: TImage
-    Left = 177
+    Left = 185
     Top = 96
     Width = 256
     Height = 256
@@ -96,7 +96,7 @@ object Form1: TForm1
     OnMouseUp = Image_RGBMouseUp
   end
   object GroupBox1: TGroupBox
-    Left = 176
+    Left = 184
     Top = 7
     Width = 305
     Height = 81
@@ -172,7 +172,7 @@ object Form1: TForm1
     end
   end
   object DriveComboBox1: TDriveComboBox
-    Left = 3
+    Left = 8
     Top = 9
     Width = 129
     Height = 19
@@ -180,21 +180,20 @@ object Form1: TForm1
     TabOrder = 0
   end
   object DirectoryListBox1: TDirectoryListBox
-    Left = 3
+    Left = 8
     Top = 32
     Width = 169
-    Height = 131
+    Height = 129
     FileList = FileListBox1
-    ItemHeight = 16
     ParentShowHint = False
     ShowHint = False
     TabOrder = 1
   end
   object FileListBox1: TFileListBox
-    Left = 3
-    Top = 166
+    Left = 8
+    Top = 168
     Width = 169
-    Height = 187
+    Height = 185
     Anchors = [akLeft, akTop, akBottom]
     ItemHeight = 13
     Mask = '*.ptx;*.dds;*.tga;*.2db; *.xtx'
@@ -202,7 +201,7 @@ object Form1: TForm1
     OnClick = OpenFile
   end
   object Button1: TButton
-    Left = 448
+    Left = 456
     Top = 104
     Width = 121
     Height = 25
@@ -213,7 +212,7 @@ object Form1: TForm1
     OnClick = Button1Click
   end
   object CBnonPOT: TCheckBox
-    Left = 488
+    Left = 496
     Top = 12
     Width = 209
     Height = 17
@@ -222,12 +221,10 @@ object Form1: TForm1
     OnClick = CBnonPOTClick
   end
   object ButtonA: TBitBtn
-    Left = 488
+    Left = 496
     Top = 32
     Width = 25
     Height = 25
-    TabOrder = 6
-    OnClick = SampleAClick
     Glyph.Data = {
       5A010000424D5A01000000000000760000002800000013000000130000000100
       040000000000E400000000000000000000001000000000000000000000000000
@@ -240,14 +237,14 @@ object Form1: TForm1
       FFFFF0F0000FFFF00000FFFFFFFFFF000000FFF00000FFFFFFFFF00000000FF0
       0000FFFFFFFFFFF0000000F00000FFFFFFFFFFFF00F000F00000FFFFFFFFFFFF
       F00F00F00000FFFFFFFFFFFFFF000FF00000FFFFFFFFFFFFFFFFFFF00000}
+    TabOrder = 6
+    OnClick = SampleAClick
   end
   object ButtonR: TBitBtn
-    Left = 488
+    Left = 496
     Top = 56
     Width = 25
     Height = 25
-    TabOrder = 7
-    OnClick = SampleRClick
     Glyph.Data = {
       5A010000424D5A01000000000000760000002800000013000000130000000100
       040000000000E400000000000000000000001000000000000000000000000000
@@ -260,6 +257,8 @@ object Form1: TForm1
       FFFFF0F0000FFFF00000FFFFFFFFFF000000FFF00000FFFFFFFFF00000000FF0
       0000FFFFFFFFFFF0000000F00000FFFFFFFFFFFF00F000F00000FFFFFFFFFFFF
       F00F00F00000FFFFFFFFFFFFFF000FF00000FFFFFFFFFFFFFFFFFFF00000}
+    TabOrder = 7
+    OnClick = SampleRClick
   end
   object Save1: TSaveDialog
     DefaultExt = 'bmp'

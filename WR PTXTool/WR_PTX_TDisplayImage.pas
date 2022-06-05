@@ -1,11 +1,10 @@
 unit WR_PTX_TDisplayImage;
-{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
-{$IFDEF VER150} {$DEFINE VER140} {$ENDIF}
-
 interface
-uses {LCLIntf,} Windows, ExtCtrls, Graphics, SysUtils,Math, kromUtils, Controls, Forms, WR_PTX_TDXT_Alpha, WR_PTX_TDXT_Color;
+uses
+  Windows, ExtCtrls, Graphics, SysUtils,Math, kromUtils, Controls, Forms, WR_PTX_TDXT_Alpha, WR_PTX_TDXT_Color;
 
-type cMode = (cRGB, cA, cRGBA);
+type
+  cMode = (cRGB, cA, cRGBA);
 
 type
   TDisplayImage = class
@@ -31,7 +30,6 @@ type
     procedure ResetAllData;
     procedure SetAllPropsAtOnce(iFileMask:string; iSizeH,iSizeV,iMipMapQty:integer;
               iIsCompressed,iIsSYNPacked,ihasAlpha:boolean);
-  protected
   public
     AllowNonPOTImages:boolean;
     property GetFileMask:string read Props.FileMask;
@@ -68,10 +66,11 @@ type
     procedure ImportBitmapA(FileName:string);
     procedure CreateAlphaFrom(X,Y:integer);
     procedure ReplaceColorKeyFrom(X,Y:integer);
-  published
   end;
 
+
 implementation
+
 
 constructor TDisplayImage.Create(inBitmapRGB,inBitmapA:TBitmap; inImageRGB,inImageA:TImage);
 begin
@@ -187,7 +186,7 @@ begin
 end;
 
 procedure TDisplayImage.RGB2Bitm(Mode:cMode);
-var {$IFDEF VER140} p:PbyteArray; {$ENDIF}
+var p:PbyteArray;
 Save_Cursor:TCursor;
 i,k:integer;
 begin
@@ -195,30 +194,20 @@ Save_Cursor:=Screen.Cursor;
 Screen.Cursor:=crHourGlass;
 if (Mode=cRGBA)or(Mode=cRGB) then
   for i:=1 to Props.sizeV do begin
-  {$IFDEF VER140} p:=BitmapRGB.ScanLine[i-1]; {$ENDIF}
+    p:=BitmapRGB.ScanLine[i-1];
     for k:=1 to Props.sizeH do begin
-    {$IFDEF VER140}
     p[k*3-3]:=RGBA[i,k,3];
     p[k*3-2]:=RGBA[i,k,2];
     p[k*3-1]:=RGBA[i,k,1];
-    {$ENDIF}
-    {$IFDEF FPC}
-    BitmapRGB.Canvas.Pixels[k-1,i-1] := RGBA[i,k,1] + RGBA[i,k,2] shl 8 + RGBA[i,k,3] shl 16;
-    {$ENDIF}
     end;
   end;
 if (Mode=cRGBA)or(Mode=cA) then
   for i:=1 to Props.sizeV do begin
-  {$IFDEF VER140} p:=BitmapA.ScanLine[i-1]; {$ENDIF}
+  p:=BitmapA.ScanLine[i-1];
     for k:=1 to Props.sizeH do begin
-    {$IFDEF VER140}
     p[k*3-3]:=RGBA[i,k,4];
     p[k*3-2]:=RGBA[i,k,4];
     p[k*3-1]:=RGBA[i,k,4];
-    {$ENDIF}
-    {$IFDEF FPC}
-    BitmapA.Canvas.Pixels[k-1,i-1] := RGBA[i,k,4] + RGBA[i,k,4] shl 8 + RGBA[i,k,4] shl 16;
-    {$ENDIF}
     end;
   end;
 Screen.Cursor:=Save_Cursor;
@@ -281,7 +270,7 @@ end;
 procedure TDisplayImage.OpenPTX(FileName:string);
 var i,k,h:integer; a,b:^byte; tb:integer;
   f:file;
-  c,d:array of char;
+  c,d:array of AnsiChar;
   SYNData,PTXData:integer;
   ci,CurChr,addv,x:integer;
   flag:array[1..8]of byte;
@@ -426,7 +415,7 @@ end;
 procedure TDisplayImage.OpenDDS(FileName:string);
 var i,k,h:integer; ftype:string[4];
   f:file;
-  c:array[1..128]of char;
+  c:array[1..128]of AnsiChar;
   T:byte;
   DXTOut:array[1..48]of byte;
 begin
@@ -562,7 +551,7 @@ end;
 procedure TDisplayImage.OpenTGA(FileName:string);
 var i,k:integer;
   f:file;
-  c:array of char;
+  c:array of AnsiChar;
   tSizeH,tSizeV:integer;
   InBit:byte;
 begin
@@ -876,7 +865,7 @@ procedure TDisplayImage.ImportBitmapRGB(FileName:string);
 var
   i,k:integer;
   Bitmap:TBitmap;
-  {$IFDEF VER140} p:PbyteArray; {$ENDIF}
+  p:PbyteArray;
 begin
 Bitmap:=TBitmap.Create;
 Bitmap.LoadFromFile(FileName);
@@ -902,18 +891,11 @@ begin
 end;
 
 for i:=1 to Props.SizeV do begin
-  {$IFDEF VER140} p:=Bitmap.ScanLine[i-1]; {$ENDIF}
+  p:=Bitmap.ScanLine[i-1];
   for k:=1 to Props.sizeH do begin
-  {$IFDEF VER140}
     RGBA[i,k,1] := p[k*3-1];
     RGBA[i,k,2] := p[k*3-2];
     RGBA[i,k,3] := p[k*3-3];
-  {$ENDIF}
-  {$IFDEF FPC}
-    RGBA[i,k,1] := Bitmap.Canvas.Pixels[k-1,i-1] AND $0000FF;
-    RGBA[i,k,2] := Bitmap.Canvas.Pixels[k-1,i-1] AND $00FF00 shr 8;
-    RGBA[i,k,3] := Bitmap.Canvas.Pixels[k-1,i-1] AND $FF0000 shr 16;
-  {$ENDIF}
   end;
 end;
 
@@ -927,7 +909,7 @@ procedure TDisplayImage.ImportBitmapA(FileName:string);
 var
   i,k:integer;
   Bitmap:TBitmap;
-  {$IFDEF VER140} p:PbyteArray; {$ENDIF}
+  p:PbyteArray;
 begin
 Bitmap:=TBitmap.Create;
 Bitmap.LoadFromFile(FileName);
@@ -938,15 +920,9 @@ if (Bitmap.Width<>Props.SizeH)or(Bitmap.Height<>Props.SizeV) then begin
 end;
 
 for i:=1 to Props.SizeV do begin
-  {$IFDEF VER140} p:=Bitmap.ScanLine[i-1]; {$ENDIF}
+  p:=Bitmap.ScanLine[i-1];
   for k:=1 to Props.sizeH do
-  {$IFDEF VER140}
     RGBA[i,k,4]:=(p[k*3-1]+p[k*3-2]+p[k*3-3])div 3;
-  {$ENDIF}
-  {$IFDEF FPC}
-    RGBA[i,k,4] := Bitmap.Canvas.Pixels[k-1,i-1] AND $FF0000 shr 16; //todo:fix
-  {$ENDIF}
-
 end;
 
 Props.hasAlpha:=true;

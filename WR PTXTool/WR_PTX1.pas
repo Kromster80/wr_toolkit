@@ -1,16 +1,11 @@
 unit WR_PTX1;
-{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
 uses
-{$IFDEF FPC} LCLIntf, LResources, {$ENDIF}
-Forms, StdCtrls, Controls, FileCtrl, SysUtils, Graphics, Classes,
-ExtCtrls, Dialogs, ComCtrls, Menus, Spin, kromUtils, Math,
-WR_PTX_TDisplayImage, Buttons;
+  Forms, StdCtrls, Controls, FileCtrl, SysUtils, Graphics, Classes,
+  ExtCtrls, Dialogs, ComCtrls, Menus, Spin, kromUtils, Math,
+  WR_PTX_TDisplayImage, Buttons;
 
 type
-
-  { TForm1 }
-
   TForm1 = class(TForm)
     Image_A: TImage;
     GroupBox1: TGroupBox;
@@ -20,14 +15,8 @@ type
     Bevel_A: TBevel;
     Bevel_RGB: TBevel;
     Save1: TSaveDialog;
-{$IFDEF VER140}
     DriveComboBox1: TDriveComboBox;
     DirectoryListBox1: TDirectoryListBox;
-{$ENDIF}
-{$IFDEF VER150}
-    DriveComboBox1: TDriveComboBox;
-    DirectoryListBox1: TDirectoryListBox;
-{$ENDIF}
     FileListBox1: TFileListBox;
     Open1: TOpenDialog;
     LabelCom: TLabel;
@@ -93,37 +82,36 @@ type
     procedure SampleRClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer; var Resize: Boolean);
+  private
+    fStartWidth: Integer;
+    fStartHeight: Integer;
   end;
 
 
 const
-  VersionInfo = 'Version 2.1b           (24 Apr 2009)';
+  VersionInfo = 'Version 2.2           (05 Jun 2022)';
 
 
 var
   Form1: TForm1;
-  BitmA, Bitm:Tbitmap;
-  ExeDir, WorkDir:string;
-  StartWidth:integer;
-  StartHeight:integer;
-
-  fDisplayImage:TDisplayImage;
-
-  SampleColorKey:boolean;
-  ReplaceColorKey:boolean;
+  BitmA, Bitm: TBitmap;
+  ExeDir, WorkDir: string;
+  fDisplayImage: TDisplayImage;
+  SampleColorKey: Boolean;
+  ReplaceColorKey: Boolean;
 
 implementation
-{$IFDEF VER140} {$R *.dfm} {$ENDIF}
-{$IFDEF VER150} {$R *.dfm} {$ENDIF}
+uses
+  WR_AboutBox;
 
-uses WR_AboutBox;
+{$R *.dfm}
 
 
 procedure TForm1.Form1Init(Sender: TObject);
 begin
   DoClientAreaResize(Self);
-  StartWidth := Width;
-  StartHeight := Height;
+  fStartWidth := Width;
+  fStartHeight := Height;
 
   Bitm  := Tbitmap.Create;
   BitmA := Tbitmap.Create;
@@ -140,7 +128,6 @@ begin
   //FileListBox1.FileName:='000.ptx';
   //OpenFile(nil);
   Form1.Caption := 'PTXTool ' + VersionInfo;
-  {$IFDEF FPC} FileListBox1.Directory := ExeDir; {$ENDIF}
 end;
 
 procedure TForm1.ImportBMPClick(Sender: TObject);
@@ -342,6 +329,7 @@ begin
   if ReplaceColorKey then SampleRClick(nil); //Release ReplaceColorKey
 end;
 
+
 procedure TForm1.SampleRClick(Sender: TObject);
 begin
   ReplaceColorKey := not ReplaceColorKey;
@@ -353,37 +341,34 @@ end;
 
 
 procedure TForm1.FormResize(Sender: TObject);
-var AddSize:integer;
+var
+  addSize: Integer;
 begin
-  AddSize := Math.min((Form1.Width-StartWidth) div 2, Form1.Height-StartHeight);
+  addSize := Min((Width - fStartWidth) div 2, Height - fStartHeight);
 
-  Bevel_RGB.Width := 258 + AddSize;
-  Image_RGB.Width := 256 + AddSize;
-  Bevel_A.Width := 258 + AddSize;
-  Image_A.Width := 256 + AddSize;
-  Bevel_A.Left := 439 + AddSize;
-  Image_A.Left := 440 + AddSize;
+  Bevel_RGB.Width := 258 + addSize;
+  Image_RGB.Width := 256 + addSize;
+  Bevel_A.Width := 258 + addSize;
+  Image_A.Width := 256 + addSize;
+  Bevel_A.Left := 447 + addSize;
+  Image_A.Left := 448 + addSize;
 
-  Bevel_RGB.Height := 258 + AddSize;
-  Image_RGB.Height := 256 + AddSize;
-  Bevel_A.Height := 258 + AddSize;
-  Image_A.Height := 256 + AddSize;
+  Bevel_RGB.Height := 258 + addSize;
+  Image_RGB.Height := 256 + addSize;
+  Bevel_A.Height := 258 + addSize;
+  Image_A.Height := 256 + addSize;
 
-  if fDisplayImage<>nil then DisplayChange(nil);
+  if fDisplayImage <> nil then
+    DisplayChange(nil);
 end;
 
 
 procedure TForm1.FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer; var Resize: Boolean);
 begin
-  //Set minimum accepted size
-  NewWidth := max(NewWidth,StartWidth);
-  NewHeight := max(NewHeight,StartHeight);
+  // Set minimum accepted size
+  NewWidth := Max(NewWidth, fStartWidth);
+  NewHeight := Max(NewHeight, fStartHeight);
 end;
-
-initialization
-{$IFDEF FPC}
-  {$I WR_PTX1.lrs}
-{$ENDIF}
 
 
 end.
