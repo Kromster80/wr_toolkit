@@ -9,34 +9,34 @@ type
 type
   TDisplayImage = class
   private
-    BitmapRGB,BitmapA:TBitmap;
-    ImageRGB,ImageA:TImage;
-    Rect:TRect;
-    Props:record
+    BitmapRGB,BitmapA: TBitmap;
+    ImageRGB,ImageA: TImage;
+    Rect: TRect;
+    Props: record
       FileMask:string;
-      sizeH,sizeV,MipMapQty:integer;
+      sizeH,sizeV,MipMapQty:Integer;
       IsCompressed:boolean;
       IsSYNPacked:boolean;
       hasAlpha:boolean;
     end;
-    RGBA:array [1..2049,1..2049,1..4]of byte;
-    RGBAmm:array [1..2049,1..2049,1..4]of byte;
-    RMS:array[1..4]of single;
+    RGBA: array [1..2049,1..2049,1..4]of byte;
+    RGBAmm: array [1..2049,1..2049,1..4]of byte;
+    RMS: array[1..4]of single;
     Fog2: array[1..3]of Byte;
-    MipMapQtyUse:integer;
-    MipMapQtyMax:integer;
-    IsChanged:boolean;
-    procedure GenerateMipMap(Width,Height,MMH,MMV,Lev:integer);
+    MipMapQtyUse: Integer;
+    MipMapQtyMax: Integer;
+    IsChanged: boolean;
+    procedure GenerateMipMap(MMH,MMV,aLevel:Integer);
     procedure ResetAllData;
-    procedure SetAllPropsAtOnce(iFileMask:string; iSizeH,iSizeV,iMipMapQty:integer;
+    procedure SetAllPropsAtOnce(iFileMask:string; iSizeH,iSizeV,iMipMapQty:Integer;
               iIsCompressed,iIsSYNPacked,ihasAlpha:boolean);
   public
     AllowNonPOTImages:boolean;
     property GetFileMask:string read Props.FileMask;
-    property GetMipMapQty:integer read Props.MipMapQty;
-    property GetMipMapQtyUse:integer read MipMapQtyUse;
-    property SetMipMapQtyUse:integer write MipMapQtyUse;
-    property GetMaxMipMapQty:integer read MipMapQtyMax;
+    property GetMipMapQty:Integer read Props.MipMapQty;
+    property GetMipMapQtyUse:Integer read MipMapQtyUse;
+    property SetMipMapQtyUse:Integer write MipMapQtyUse;
+    property GetMaxMipMapQty:Integer read MipMapQtyMax;
     property GetCompression:boolean read Props.IsCompressed;
     property GetPacked:boolean read Props.IsSYNPacked;
     property GetAlpha:boolean read Props.hasAlpha;
@@ -59,20 +59,21 @@ type
     procedure SaveUncompressedPTX(FileName:string);
     procedure SaveCompressedPTX(FileName:string);
     procedure SaveTGA(FileName:string);
-    procedure SaveMipMap(FileName:string; Lev:integer);
+    procedure SaveMipMap(aFileName:string; aLevel:Integer);
     procedure ExportBitmapRGB(FileName:string);
     procedure ExportBitmapA(FileName:string);
     procedure ImportBitmapRGB(FileName:string);
     procedure ImportBitmapA(FileName:string);
-    procedure CreateAlphaFrom(X,Y:integer);
-    procedure ReplaceColorKeyFrom(X,Y:integer);
+    procedure CreateAlphaFrom(X,Y:Integer);
+    procedure ReplaceColorKeyFrom(X,Y:Integer);
   end;
 
 
 implementation
 
 
-constructor TDisplayImage.Create(inBitmapRGB,inBitmapA:TBitmap; inImageRGB,inImageA:TImage);
+{TDisplayImage}
+constructor TDisplayImage.Create(inBitmapRGB,inBitmapA: TBitmap; inImageRGB,inImageA: TImage);
 begin
   BitmapRGB     := inBitmapRGB;
   BitmapA       := inBitmapA;
@@ -165,7 +166,7 @@ begin
 end;
 
 procedure TDisplayImage.KnowMaxMipMapQty();
-var x:integer;
+var x:Integer;
 begin
 MipMapQtyMax:=0;
 x:=Math.min(Props.sizeH,Props.sizeV);
@@ -174,7 +175,7 @@ end;
 
 procedure TDisplayImage.InvertAlpha;
 var
-  i,k: integer;
+  i,k: Integer;
 begin
   for i:=1 to Props.sizeV do
   for k:=1 to Props.sizeH do
@@ -184,7 +185,7 @@ begin
 end;
 
 procedure TDisplayImage.ClearAlpha;
-var i,k:integer;
+var i,k:Integer;
 begin
   Props.hasAlpha:=false;
   for i:=1 to Props.sizeV do
@@ -200,7 +201,7 @@ var
   pRGBLine: PByteArray;
   pALine: PByteArray;
   prevCursor:TCursor;
-  i,k:integer;
+  i,k:Integer;
 begin
   prevCursor:=Screen.Cursor;
   Screen.Cursor:=crHourGlass;
@@ -233,21 +234,29 @@ begin
 end;
 
 
-procedure TDisplayImage.GenerateMipMap(Width,Height,MMH,MMV,Lev:integer);
-var i,k,h,j:integer; Area:word; Ratio:single; Tmp1,Tmp2,Tmp3,Tmp4,Acc:single;
+procedure TDisplayImage.GenerateMipMap(MMH,MMV,aLevel:Integer);
+var
+  i,k,h,j:Integer;
+  Area:word;
+  Ratio:single;
+  Tmp1,Tmp2,Tmp3,Tmp4,Acc:single;
 begin
-  if Lev=1 then begin
-    for i:=1 to MMV do for k:=1 to MMH do begin
+  if aLevel = 1 then
+  begin
+    for i:=1 to MMV do for k:=1 to MMH do
+    begin
       RGBAmm[i,k,1]:=RGBA[i,k,1]; RGBAmm[i,k,2]:=RGBA[i,k,2];
       RGBAmm[i,k,3]:=RGBA[i,k,3]; RGBAmm[i,k,4]:=RGBA[i,k,4];
     end;
     exit;
   end;
 
-  Area:=pow(2,Lev-1); //1..1024 (one side only), temp limit to 16
-  for i:=1 to MMV do for k:=1 to MMH do begin
+  Area := Pow(2, aLevel-1); //1..1024 (one side only), temp limit to 16
+  for i:=1 to MMV do for k:=1 to MMH do
+  begin
     Tmp1:=0; Tmp2:=0; Tmp3:=0; Tmp4:=0; Acc:=0;
-    for h:=1 to Area do for j:=1 to Area do begin
+    for h:=1 to Area do for j:=1 to Area do
+    begin
       Ratio:=sqr( Area/2 - (h-0.5) ) + sqr( Area/2 - (j-0.5) );
       Ratio:=Math.max(1-sqrt(Ratio)/Area,0);
       //Ratio:=sqr(Ratio); //Fits rather good but kills thin lines
@@ -258,10 +267,10 @@ begin
       Acc:=Acc+Ratio;
     end;
     Acc:=Math.max(Acc,1);
-    RGBAmm[i,k,1]:=round(EnsureRange(Tmp1/Acc,0,255));
-    RGBAmm[i,k,2]:=round(EnsureRange(Tmp2/Acc,0,255));
-    RGBAmm[i,k,3]:=round(EnsureRange(Tmp3/Acc,0,255));
-    RGBAmm[i,k,4]:=round(EnsureRange(Tmp4/Acc,0,255));
+    RGBAmm[i,k,1]:=Round(EnsureRange(Tmp1/Acc,0,255));
+    RGBAmm[i,k,2]:=Round(EnsureRange(Tmp2/Acc,0,255));
+    RGBAmm[i,k,3]:=Round(EnsureRange(Tmp3/Acc,0,255));
+    RGBAmm[i,k,4]:=Round(EnsureRange(Tmp4/Acc,0,255));
   end;
 end;
 
@@ -276,7 +285,7 @@ end;
 
 
 procedure TDisplayImage.SetAllPropsAtOnce(iFileMask:string;
-iSizeH,iSizeV,iMipMapQty:integer; iIsCompressed,iIsSYNPacked,ihasAlpha:boolean);
+iSizeH,iSizeV,iMipMapQty:Integer; iIsCompressed,iIsSYNPacked,ihasAlpha:boolean);
 begin
   Props.FileMask:=iFileMask;
   Props.sizeH:=iSizeH;
@@ -289,15 +298,15 @@ end;
 
 procedure TDisplayImage.OpenPTX(aFileName:string);
 var
-  i,k,h:integer;
+  i,k,h:Integer;
   a,b:^byte;
-  tb:integer;
+  tb:Integer;
   f:file;
   c,d:array of AnsiChar;
-  SYNData,PTXData:integer;
-  ci,CurChr,addv,x:integer;
+  SYNData,PTXData:Integer;
+  ci,CurChr,addv,x:Integer;
   flag:array[1..8]of byte;
-  Dist,Leng:integer;
+  Dist,Leng:Integer;
   DXTOut:array[1..48]of byte;
 begin
   ResetAllData;
@@ -443,7 +452,7 @@ end;
 
 
 procedure TDisplayImage.OpenDDS(aFileName: string);
-var i,k,h:integer; ftype:string[4];
+var i,k,h:Integer; ftype:string[4];
   f:file;
   c:array[1..128]of AnsiChar;
   T:byte;
@@ -507,7 +516,7 @@ end;
 
 
 procedure TDisplayImage.OpenXTX(aFileName: string);
-var i,k,h:integer; ftype:string[4];
+var i,k,h:Integer; ftype:string[4];
   f:file;
   c:array[1..128]of byte;
   T:byte;
@@ -579,207 +588,216 @@ end;
 
 
 procedure TDisplayImage.OpenTGA(aFileName: string);
-var i,k:integer;
+var i,k:Integer;
   f:file;
   c:array of AnsiChar;
-  tSizeH,tSizeV:integer;
+  tSizeH,tSizeV:Integer;
   InBit:byte;
 begin
-ResetAllData;
+  ResetAllData;
 
-AssignFile(f,aFileName); FileMode:=0; Reset(f,1); FileMode:=2;
-setlength(c,18+1);
-BlockRead(f,c[1],18);
-tSizeH:=int2(c[13],c[14]);
-tSizeV:=int2(c[15],c[16]);
-InBit:=ord(c[17]);
+  AssignFile(f,aFileName); FileMode:=0; Reset(f,1); FileMode:=2;
+  setlength(c,18+1);
+  BlockRead(f,c[1],18);
+  tSizeH:=int2(c[13],c[14]);
+  tSizeV:=int2(c[15],c[16]);
+  InBit:=ord(c[17]);
 
-if ((InBit<>24)and(InBit<>32))or
-   ((MakePOT(tSizeH)<>tSizeH)and(not AllowNonPOTImages))or((MakePOT(tSizeV)<>tSizeV)and(not AllowNonPOTImages))or
-   (tSizeH<4)or(tSizeV<4)or(tSizeH>2048)or(tSizeV>2048) then begin
-  MessageBox(0,'Image size must be 4,8,16,32...2048 x 24/32 bit','Error',mb_ok);
+  if ((InBit<>24)and(InBit<>32))
+  or ((MakePOT(tSizeH)<>tSizeH)and(not AllowNonPOTImages))
+  or ((MakePOT(tSizeV)<>tSizeV)and(not AllowNonPOTImages))
+  or  (tSizeH<4)or(tSizeV<4)or(tSizeH>2048)or(tSizeV>2048) then
+  begin
+    MessageBox(0,'Image size must be 4,8,16,32...2048 x 24/32 bit','Error',mb_ok);
+    closefile(f);
+    exit;
+  end;
+
+  IsChanged:=false;
+  SetAllPropsAtOnce(
+          decs(ExtractFileName(aFileName),4,1),
+          tSizeH,tSizeV,1,
+          false,false,InBit=32);
+
+    KnowMaxMipMapQty;
+    MipMapQtyUse:=MipMapQtyMax;
+
+  setlength(c,Props.SizeH*4+1);
+
+  for i:=Props.sizeV downto 1 do
+  begin
+    if InBit=24 then BlockRead(f,c[1],Props.SizeH*3);
+    if InBit=32 then BlockRead(f,c[1],Props.SizeH*4);
+    for k:=1 to Props.sizeH do
+      if InBit=24 then
+      begin
+        RGBA[i,k,1]:=ord(c[k*3-0]);
+        RGBA[i,k,2]:=ord(c[k*3-1]);
+        RGBA[i,k,3]:=ord(c[k*3-2]);
+      end else
+      if InBit=32 then
+      begin
+        RGBA[i,k,1]:=ord(c[k*4-1]);
+        RGBA[i,k,2]:=ord(c[k*4-2]);
+        RGBA[i,k,3]:=ord(c[k*4-3]);
+        RGBA[i,k,4]:=ord(c[k*4-0]);
+      end;
+  end;
   closefile(f);
-  exit;
-end;
 
-IsChanged:=false;
-SetAllPropsAtOnce(
-        decs(ExtractFileName(aFileName),4,1),
-        tSizeH,tSizeV,1,
-        false,false,InBit=32);
-
-  KnowMaxMipMapQty;
-  MipMapQtyUse:=MipMapQtyMax;
-
-setlength(c,Props.SizeH*4+1);
-
-for i:=Props.sizeV downto 1 do begin
-  if InBit=24 then BlockRead(f,c[1],Props.SizeH*3);
-  if InBit=32 then BlockRead(f,c[1],Props.SizeH*4);
-  for k:=1 to Props.sizeH do
-    if InBit=24 then begin
-      RGBA[i,k,1]:=ord(c[k*3-0]);
-      RGBA[i,k,2]:=ord(c[k*3-1]);
-      RGBA[i,k,3]:=ord(c[k*3-2]);
-    end else
-    if InBit=32 then begin
-      RGBA[i,k,1]:=ord(c[k*4-1]);
-      RGBA[i,k,2]:=ord(c[k*4-2]);
-      RGBA[i,k,3]:=ord(c[k*4-3]);
-      RGBA[i,k,4]:=ord(c[k*4-0]);
-    end;
-end;
-closefile(f);
-
-ComputeFog();
-FillChar(RMS,SizeOf(RMS),#0);
+  ComputeFog();
+  FillChar(RMS,SizeOf(RMS),#0);
 end;
 
 procedure TDisplayImage.Open2DB(aFileName: string);
-var i,k,h:integer;
+var i,k,h:Integer;
   f:file;
   c:array of char;
   BNKHeader:packed record
-  {}Un1,Un2:integer;                    //always 2, 0
-  {}FileSize:integer;
+  {}Un1,Un2:Integer;                    //always 2, 0
+  {}FileSize:Integer;
   {}Fmt1,Fmt2:array[1..4] of char;
-  {}Un3:integer;                        //always 0
-  {}Size1,Size2:integer;
+  {}Un3:Integer;                        //always 0
+  {}Size1,Size2:Integer;
   {}Name:array[1..8] of char;
   {}Width,Height:word;
   {}Un4:word;                           //always 1
   {}MipMapH,MipMapV:byte;
-    Un5:integer;
-  {}Un6:integer;                        //always 0
-  {}Un6b:integer;                       //always 0
-    Un6c:integer;
+    Un5:Integer;
+  {}Un6:Integer;                        //always 0
+  {}Un6b:Integer;                       //always 0
+    Un6c:Integer;
   {}Un7:byte;                           //always 0
   {}InBit:byte;
   {}Un8:word;                           //always 0
-    Un9:integer;
+    Un9:Integer;
     Un10,Un11:word;
-  {}Un12:integer;                       //always 0
+  {}Un12:Integer;                       //always 0
   end;
-  ci:integer;
+  ci:Integer;
   DXTOut:array[1..48]of byte;
 begin
-ResetAllData;
+  ResetAllData;
 
-AssignFile(f,aFileName); FileMode:=0; Reset(f,1); FileMode:=2;
-BlockRead(f,BNKHeader,80);
+  AssignFile(f,aFileName); FileMode:=0; Reset(f,1); FileMode:=2;
+  BlockRead(f,BNKHeader,80);
 
-if ((BNKHeader.InBit<>4)and(BNKHeader.InBit<>8)and(BNKHeader.InBit<>32))or
-   (BNKHeader.Width<4)or(BNKHeader.Height<4)or(BNKHeader.Width>2048)or(BNKHeader.Height>2048) then begin
-  MessageBox(0,'Uknown format','Error',mb_ok);
-  closefile(f);
-  exit;
-end;
+  if ((BNKHeader.InBit<>4)and(BNKHeader.InBit<>8)and(BNKHeader.InBit<>32))or
+     (BNKHeader.Width<4)or(BNKHeader.Height<4)or(BNKHeader.Width>2048)or(BNKHeader.Height>2048) then begin
+    MessageBox(0,'Uknown format','Error',mb_ok);
+    closefile(f);
+    exit;
+  end;
 
-if (BNKHeader.Un1<>2)and(BNKHeader.Un2<>0)and(BNKHeader.Un3<>0)and
-   (BNKHeader.Un4<>1)and(BNKHeader.Un6<>0)and(BNKHeader.Un6b<>0)and
-   (BNKHeader.Un7<>0)and(BNKHeader.Un8<>0)and(BNKHeader.Un12<>0) then begin
-  MessageBox(0,'New format modification encountered','Notice',mb_ok);
-end;
+  if (BNKHeader.Un1<>2)and(BNKHeader.Un2<>0)and(BNKHeader.Un3<>0)and
+     (BNKHeader.Un4<>1)and(BNKHeader.Un6<>0)and(BNKHeader.Un6b<>0)and
+     (BNKHeader.Un7<>0)and(BNKHeader.Un8<>0)and(BNKHeader.Un12<>0) then begin
+    MessageBox(0,'New format modification encountered','Notice',mb_ok);
+  end;
 
-IsChanged:=false;
-SetAllPropsAtOnce(
-        decs(ExtractFileName(aFileName),4,1),
-        BNKHeader.Width,BNKHeader.Height,Math.min(BNKHeader.MipMapH,BNKHeader.MipMapV),
-        BNKHeader.InBit<>32,false,(BNKHeader.InBit=32)or(BNKHeader.InBit=8));
+  IsChanged:=false;
+  SetAllPropsAtOnce(
+          decs(ExtractFileName(aFileName),4,1),
+          BNKHeader.Width,BNKHeader.Height,Math.min(BNKHeader.MipMapH,BNKHeader.MipMapV),
+          BNKHeader.InBit<>32,false,(BNKHeader.InBit=32)or(BNKHeader.InBit=8));
 
-  MipMapQtyUse:=Props.MipMapQty;
+    MipMapQtyUse:=Props.MipMapQty;
 
-if BNKHeader.InBit=32 then begin
-  setlength(c,Props.SizeH*4+1);
-  for i:=1 to Props.sizeV do begin
-    BlockRead(f,c[1],Props.SizeH*4);
-    for k:=1 to Props.sizeH do begin
-      RGBA[i,k,1]:=ord(c[k*4-1]);
-      RGBA[i,k,2]:=ord(c[k*4-2]);
-      RGBA[i,k,3]:=ord(c[k*4-3]);
-      RGBA[i,k,4]:=ord(c[k*4-0]);
+  if BNKHeader.InBit=32 then begin
+    setlength(c,Props.SizeH*4+1);
+    for i:=1 to Props.sizeV do begin
+      BlockRead(f,c[1],Props.SizeH*4);
+      for k:=1 to Props.sizeH do begin
+        RGBA[i,k,1]:=ord(c[k*4-1]);
+        RGBA[i,k,2]:=ord(c[k*4-2]);
+        RGBA[i,k,3]:=ord(c[k*4-3]);
+        RGBA[i,k,4]:=ord(c[k*4-0]);
+      end;
     end;
   end;
-end;
 
-if (BNKHeader.InBit=8)or(BNKHeader.InBit=4) then begin
-  ci:=1;
-  if BNKHeader.InBit=8 then begin
-  setlength(c,Props.sizeV*Props.sizeH +1);
-  blockread(f,c[1],Props.sizeV*Props.sizeH ); //read all needed data
-  end else begin
-  setlength(c,(Props.sizeV*Props.sizeH) div 2 +1);
-  blockread(f,c[1],(Props.sizeV*Props.sizeH) div 2); //read all needed data
-  end;
+  if (BNKHeader.InBit=8)or(BNKHeader.InBit=4) then begin
+    ci:=1;
+    if BNKHeader.InBit=8 then begin
+    setlength(c,Props.sizeV*Props.sizeH +1);
+    blockread(f,c[1],Props.sizeV*Props.sizeH ); //read all needed data
+    end else begin
+    setlength(c,(Props.sizeV*Props.sizeH) div 2 +1);
+    blockread(f,c[1],(Props.sizeV*Props.sizeH) div 2); //read all needed data
+    end;
 
-  for i:=0 to (Props.sizeV div 4)-1 do
-    for k:=0 to (Props.sizeH div 4)-1 do begin
-      ///////////////////////////////////////////////////////
-      //Alpha
-      if Props.hasAlpha then begin
-        DXT_A_Decode(@c[ci],DXTOut);
-        for h:=1 to 16 do
-          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
+    for i:=0 to (Props.sizeV div 4)-1 do
+      for k:=0 to (Props.sizeH div 4)-1 do begin
+        ///////////////////////////////////////////////////////
+        //Alpha
+        if Props.hasAlpha then begin
+          DXT_A_Decode(@c[ci],DXTOut);
+          for h:=1 to 16 do
+            RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
+          inc(ci,8);
+        end;
+        ////////////////////////////////////////////////////////
+        //RGB
+        DXT_RGB_Decode(@c[ci],DXTOut);
+        for h:=1 to 16 do begin
+          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
+          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
+          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
+        end;
         inc(ci,8);
-      end;
-      ////////////////////////////////////////////////////////
-      //RGB
-      DXT_RGB_Decode(@c[ci],DXTOut);
-      for h:=1 to 16 do begin
-        RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
-        RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
-        RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
-      end;
-      inc(ci,8);
-    end;  //for 1..x,1..z
-end;
-closefile(f);
+      end;  //for 1..x,1..z
+  end;
+  closefile(f);
 
-ComputeFog();
-FillChar(RMS,SizeOf(RMS),#0);
+  ComputeFog();
+  FillChar(RMS,SizeOf(RMS),#0);
 end;
 
 procedure TDisplayImage.SaveUncompressedPTX(FileName:string);
-var i,k,h:integer; f:file; MMH,MMV,Size:integer; SpeedUp:array[1..4]of byte;
+var
+  i,k,h:Integer;
+  f:file;
+  MMH,MMV,Size:Integer;
+  SpeedUp:array[1..4]of byte;
 begin
-AssignFile(f,FileName); ReWrite(f,1);
-if Props.hasAlpha then blockwrite(f,AnsiString(#0#32#0#0),4) else blockwrite(f,AnsiString(#0#24#0#0),4);//compression, bpp
-blockwrite(f,Props.SizeH,4);
-blockwrite(f,Props.SizeV,4);
-blockwrite(f,MipMapQtyUse,1);
-blockwrite(f,Fog2[3],1);
-blockwrite(f,Fog2[2],1);
-blockwrite(f,Fog2[1],1);
+  AssignFile(f,FileName); ReWrite(f,1);
+  if Props.hasAlpha then blockwrite(f,AnsiString(#0#32#0#0),4) else blockwrite(f,AnsiString(#0#24#0#0),4);//compression, bpp
+  blockwrite(f,Props.SizeH,4);
+  blockwrite(f,Props.SizeV,4);
+  blockwrite(f,MipMapQtyUse,1);
+  blockwrite(f,Fog2[3],1);
+  blockwrite(f,Fog2[2],1);
+  blockwrite(f,Fog2[1],1);
 
-MMH:=Props.SizeH;
-MMV:=Props.SizeV;
-for h:=1 to MipMapQtyUse do begin
-  Size:=MMH*MMV*4;
-  blockwrite(f,Size,4);
-  blockwrite(f,#0#0#0#0,4);
-  GenerateMipMap(Props.SizeH,Props.SizeV,MMH,MMV,h);
-  for i:=1 to MMV do for k:=1 to MMH do begin
-    SpeedUp[1]:=RGBAmm[i,k,3];
-    SpeedUp[2]:=RGBAmm[i,k,2];
-    SpeedUp[3]:=RGBAmm[i,k,1];
-    SpeedUp[4]:=RGBAmm[i,k,4];
-    blockwrite(f,SpeedUp[1],4);
+  MMH:=Props.SizeH;
+  MMV:=Props.SizeV;
+  for h := 1 to MipMapQtyUse do
+  begin
+    Size := MMH*MMV*4;
+    blockwrite(f,Size,4);
+    blockwrite(f,#0#0#0#0,4);
+    GenerateMipMap(MMH,MMV,h);
+    for i:=1 to MMV do for k:=1 to MMH do
+    begin
+      SpeedUp[1] := RGBAmm[i,k,3];
+      SpeedUp[2] := RGBAmm[i,k,2];
+      SpeedUp[3] := RGBAmm[i,k,1];
+      SpeedUp[4] := RGBAmm[i,k,4];
+      blockwrite(f,SpeedUp[1],4);
+    end;
+    MMH := Max(MMH div 2, 1);
+    MMV := Max(MMV div 2, 1);
   end;
-  MMH:=MMH div 2;
-  MMV:=MMV div 2;
-  if MMH=0 then MMH:=1;
-  if MMV=0 then MMV:=1;
-end;
-closefile(f);
-FillChar(RMS,SizeOf(RMS),#0);
-IsChanged:=false;
+  closefile(f);
+  FillChar(RMS,SizeOf(RMS),#0);
+  IsChanged:=false;
 end;
 
 procedure TDisplayImage.SaveCompressedPTX(FileName:string);
 var
-  i,h:integer;
+  i,h:Integer;
   f:file;
-  MMH,MMV,Size,xp,yp:integer;
+  MMH,MMV,Size,xp,yp:Integer;
   DXTOut:int64;
   DXTAOut:int64;
 begin
@@ -788,53 +806,55 @@ begin
 
   if Props.hasAlpha then blockwrite(f,AnsiString(#1#32#0#0),4) else blockwrite(f,AnsiString(#1#24#0#0),4); //compression, bpp
 
-blockwrite(f,Props.SizeH,4);
-blockwrite(f,Props.SizeV,4);
-blockwrite(f,MipMapQtyUse,1);
-blockwrite(f,Fog2[3],1);
-blockwrite(f,Fog2[2],1);
-blockwrite(f,Fog2[1],1);
+  blockwrite(f,Props.SizeH,4);
+  blockwrite(f,Props.SizeV,4);
+  blockwrite(f,MipMapQtyUse,1);
+  blockwrite(f,Fog2[3],1);
+  blockwrite(f,Fog2[2],1);
+  blockwrite(f,Fog2[1],1);
 
-MMH:=Props.SizeH; MMV:=Props.SizeV;
-for h:=1 to MipMapQtyUse do begin
-  if Props.hasAlpha then Size:=MMH*MMV else Size:=MMH*MMV div 2;
-  blockwrite(f,Size,4);
-  blockwrite(f,#0#0#0#0,4);
-  GenerateMipMap(Props.SizeH,Props.SizeV,MMH,MMV,h);
-  for i:=1 to (MMH*MMV div 16) do begin
-    xp:=((i-1)*4) mod MMH +1; //X pixel
-    yp:=((i-1) div ((MMH-1) div 4 + 1) )*4 + 1;
-    if Props.hasAlpha then begin
-      DXT_A_Encode(@RGBAmm[yp+0,xp,4],
-                   @RGBAmm[yp+1,xp,4],
-                   @RGBAmm[yp+2,xp,4],
-                   @RGBAmm[yp+3,xp,4],
-                   DXTAOut,RMS[4]);
-      blockwrite(f,DXTAOut,8);
+  MMH:=Props.SizeH; MMV:=Props.SizeV;
+  for h:=1 to MipMapQtyUse do
+  begin
+    Size := IfThen(Props.hasAlpha, MMH * MMV, MMH * MMV div 2);
+
+    blockwrite(f,Size,4);
+    blockwrite(f,#0#0#0#0,4);
+    GenerateMipMap(MMH,MMV,h);
+    for i:=1 to (MMH*MMV div 16) do
+    begin
+      xp:=((i-1)*4) mod MMH +1; //X pixel
+      yp:=((i-1) div ((MMH-1) div 4 + 1) )*4 + 1;
+      if Props.hasAlpha then
+      begin
+        DXT_A_Encode(@RGBAmm[yp+0,xp,4],
+                     @RGBAmm[yp+1,xp,4],
+                     @RGBAmm[yp+2,xp,4],
+                     @RGBAmm[yp+3,xp,4],
+                     DXTAOut,RMS[4]);
+        blockwrite(f,DXTAOut,8);
+      end;
+      DXT_RGB_Encode(@RGBAmm[yp+0,xp,1],
+                     @RGBAmm[yp+1,xp,1],
+                     @RGBAmm[yp+2,xp,1],
+                     @RGBAmm[yp+3,xp,1],
+                     DXTOut,RMS);
+      blockwrite(f,DXTOut,8);
     end;
-    DXT_RGB_Encode(@RGBAmm[yp+0,xp,1],
-                   @RGBAmm[yp+1,xp,1],
-                   @RGBAmm[yp+2,xp,1],
-                   @RGBAmm[yp+3,xp,1],
-                   DXTOut,RMS);
-    blockwrite(f,DXTOut,8);
-  end;
 
-  MMH := MMH div 2;
-  MMV := MMV div 2;
-  if MMH = 0 then MMH := 1;
-  if MMV = 0 then MMV := 1;
-end;
-closefile(f);
-RMS[1]:=sqrt(RMS[1]/(Props.SizeH*Props.SizeV));
-RMS[2]:=sqrt(RMS[2]/(Props.SizeH*Props.SizeV));
-RMS[3]:=sqrt(RMS[3]/(Props.SizeH*Props.SizeV));
-RMS[4]:=sqrt(RMS[4]/(Props.SizeH*Props.SizeV));
-IsChanged:=false;
+    MMH := Max(MMH div 2, 1);
+    MMV := Max(MMV div 2, 1);
+  end;
+  closefile(f);
+  RMS[1]:=sqrt(RMS[1]/(Props.SizeH*Props.SizeV));
+  RMS[2]:=sqrt(RMS[2]/(Props.SizeH*Props.SizeV));
+  RMS[3]:=sqrt(RMS[3]/(Props.SizeH*Props.SizeV));
+  RMS[4]:=sqrt(RMS[4]/(Props.SizeH*Props.SizeV));
+  IsChanged:=false;
 end;
 
 procedure TDisplayImage.SaveTGA(FileName:string);
-var f:file; i,k,ci:integer; c:array of byte;
+var f:file; i,k,ci:Integer; c:array of byte;
 begin
   AssignFile(f,FileName); ReWrite(f,1);
   blockwrite(f,#0#0#2#0#0#0#0#0#0#0#0#0,12);
@@ -860,20 +880,24 @@ begin
   IsChanged:=false;
 end;
 
-procedure TDisplayImage.SaveMipMap(FileName:string; Lev:integer);
-var f:file; i,k:integer; SizeHDiv,SizeVDiv:word;
+procedure TDisplayImage.SaveMipMap(aFileName: string; aLevel: Integer);
+var
+  f:file;
+  i,k:Integer;
+  SizeHDiv,SizeVDiv:word;
 begin
-  SizeHDiv:=Props.SizeH div pow(2,Lev-1);
-  SizeVDiv:=Props.SizeV div pow(2,Lev-1);
-  AssignFile(f,FileName); ReWrite(f,1);
+  SizeHDiv:=Props.SizeH div Pow(2,aLevel-1);
+  SizeVDiv:=Props.SizeV div Pow(2,aLevel-1);
+  AssignFile(f,aFileName); ReWrite(f,1);
   blockwrite(f,#0#0#2#0#0#0#0#0#0#0#0#0,12);
   FillChar(RGBAmm,SizeOf(RGBAmm),#0);
-  GenerateMipMap(Props.SizeH, Props.SizeV, SizeHDiv, SizeVDiv, Lev);
+  GenerateMipMap(SizeHDiv, SizeVDiv, aLevel);
   blockwrite(f,SizeHDiv,2);
   blockwrite(f,SizeVDiv,2);
   if Props.hasAlpha then blockwrite(f,#32#0,2) else blockwrite(f,#24#0,2);
   for i:=SizeVDiv downto 1 do
-    for k:=1 to SizeHDiv do begin
+    for k:=1 to SizeHDiv do
+    begin
       blockwrite(f,RGBAmm[i,k,3],1);
       blockwrite(f,RGBAmm[i,k,2],1);
       blockwrite(f,RGBAmm[i,k,1],1);
@@ -895,7 +919,7 @@ end;
 
 procedure TDisplayImage.ImportBitmapRGB(FileName:string);
 var
-  i,k:integer;
+  i,k:Integer;
   Bitmap:TBitmap;
   p:PbyteArray;
 begin
@@ -939,7 +963,7 @@ end;
 
 procedure TDisplayImage.ImportBitmapA(FileName:string);
 var
-  i,k:integer;
+  i,k:Integer;
   Bitmap:TBitmap;
   p:PbyteArray;
 begin
@@ -967,8 +991,8 @@ IsChanged:=true;
 end;
 
 
-procedure TDisplayImage.CreateAlphaFrom(X,Y:integer);
-var R,G,B:byte; i,k:integer;
+procedure TDisplayImage.CreateAlphaFrom(X,Y:Integer);
+var R,G,B:byte; i,k:Integer;
 begin
 Color2RGB(ImageRGB.Canvas.Pixels[X,Y],R,G,B);
 
@@ -983,34 +1007,39 @@ IsChanged:=true;
 end;
 
 
-procedure TDisplayImage.ReplaceColorKeyFrom(X,Y:integer);
-var R,G,B:byte; i,k,ci:integer; t:array[1..3]of real;
+procedure TDisplayImage.ReplaceColorKeyFrom(X,Y:Integer);
+var
+  R,G,B: Byte;
+  i,k,ci: Integer;
+  t: array [1..3] of Real;
 begin
-Color2RGB(ImageRGB.Canvas.Pixels[X,Y],R,G,B);
+  Color2RGB(ImageRGB.Canvas.Pixels[X,Y],R,G,B);
 
-t[1]:=0; t[2]:=0; t[3]:=0; ci:=0;
-for i:=1 to Props.sizeV do for k:=1 to Props.sizeH do
-if (RGBA[i,k,1]<>R)or(RGBA[i,k,2]<>G)or(RGBA[i,k,3]<>B) then begin
-inc(ci);
-t[1]:=t[1]+(RGBA[i,k,1]);
-t[2]:=t[2]+(RGBA[i,k,2]);
-t[3]:=t[3]+(RGBA[i,k,3]);
-end;
-{round(r[1]/ci);
-round(r[2]/ci);
-round(r[3]/ci);}
-
-for i:=1 to Props.SizeV do
-  for k:=1 to Props.sizeH do
-  if (RGBA[i,k,1]=R)and(RGBA[i,k,2]=G)and(RGBA[i,k,3]=B) then begin
-    RGBA[i,k,1]:=round(t[1]/ci);
-    RGBA[i,k,2]:=round(t[2]/ci);
-    RGBA[i,k,3]:=round(t[3]/ci);
+  t[1]:=0; t[2]:=0; t[3]:=0; ci:=0;
+  for i:=1 to Props.sizeV do for k:=1 to Props.sizeH do
+  if (RGBA[i,k,1]<>R)or(RGBA[i,k,2]<>G)or(RGBA[i,k,3]<>B) then
+  begin
+    inc(ci);
+    t[1]:=t[1]+(RGBA[i,k,1]);
+    t[2]:=t[2]+(RGBA[i,k,2]);
+    t[3]:=t[3]+(RGBA[i,k,3]);
   end;
+  {round(r[1]/ci);
+  round(r[2]/ci);
+  round(r[3]/ci);}
 
-Props.IsCompressed:=false;
-Props.IsSYNPacked:=false;
-IsChanged:=true;
+  for i:=1 to Props.SizeV do
+    for k:=1 to Props.sizeH do
+    if (RGBA[i,k,1]=R)and(RGBA[i,k,2]=G)and(RGBA[i,k,3]=B) then
+    begin
+      RGBA[i,k,1]:=round(t[1]/ci);
+      RGBA[i,k,2]:=round(t[2]/ci);
+      RGBA[i,k,3]:=round(t[3]/ci);
+    end;
+
+  Props.IsCompressed:=false;
+  Props.IsSYNPacked:=false;
+  IsChanged:=true;
 end;
 
 end.

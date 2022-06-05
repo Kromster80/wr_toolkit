@@ -1,25 +1,26 @@
 unit WR_PTX_TDXT_Color;
 interface
-uses Math, KromUtils;
+uses
+  Math, KromUtils;
 
 procedure DXT_RGB_Encode(R1,R2,R3,R4:Pointer; out OutDat:int64; out RMS:array of single);
 procedure DXT_RGB_Decode(InDat:Pointer; out OutDat:array of byte);
 
 implementation
 
-function ColTo16(c1,c2,c3:byte):word;
+function RGBToWord(aR,aG,aB: Byte): Word; inline;
 begin
-  if (c3 mod 8)>3 then Result := Math.min((c3 shr 3)+1,31) else Result:=(c3 shr 3);
-  if (c2 mod 4)>1 then Result := Result+Math.min((c2 shr 2)+1,63)shl 5 else Result:=Result+(c2 shr 2)shl 5;
-  if (c1 mod 8)>3 then Result := Result+Math.min((c1 shr 3)+1,31)shl 11 else Result:=Result+(c1 shr 3)shl 11;
+  if (aB mod 8) > 3 then Result := Min((aB shr 3)+1, 31) else Result := (aB shr 3);
+  if (aG mod 4) > 1 then Result := Result + Min((aG shr 2)+1, 63) shl 5 else Result := Result + (aG shr 2) shl 5;
+  if (aR mod 8) > 3 then Result := Result + Min((aR shr 3)+1, 31) shl 11 else Result := Result + (aR shr 3) shl 11;
 end;
 
 
-procedure ColFrom16(m:word; out c1,c2,c3:byte);
+procedure WordToRGB(aWord: Word; out aR,aG,aB: Byte); inline;
 begin
-  c1 := m div 2048 * 8;
-  c2 := m div 32 mod 64 * 4;
-  c3 := m mod 32 * 8;
+  aR := aWord div 2048 * 8;
+  aG := aWord div 32 mod 64 * 4;
+  aB := aWord mod 32 * 8;
 end;
 
 procedure DXT_RGB_Encode(R1,R2,R3,R4:Pointer; out OutDat:int64; out RMS:array of single);
@@ -37,7 +38,6 @@ var
     tRMS:integer;
   end;
 
-
   procedure MakeBlock(id,mm1,mm2:word);
     var i:integer;
     begin with Trial[id] do begin
@@ -47,9 +47,9 @@ var
     end; end;
 
 begin
-FillChar(im,SizeOf(im),#0);
-FillChar(Trial,SizeOf(Trial),#0);
-FillChar(tRMS,SizeOf(tRMS),#0);
+  FillChar(im,SizeOf(im),#0);
+  FillChar(Trial,SizeOf(Trial),#0);
+  FillChar(tRMS,SizeOf(tRMS),#0);
   for i:=0 to 3 do for h:=1 to 3 do col[i+1,h]:=byte(Char(Pointer((Integer(R1)+i*4+h-1))^));
   for i:=0 to 3 do for h:=1 to 3 do col[i+1+4,h]:=byte(Char(Pointer((Integer(R2)+i*4+h-1))^));
   for i:=0 to 3 do for h:=1 to 3 do col[i+1+8,h]:=byte(Char(Pointer((Integer(R3)+i*4+h-1))^));
@@ -68,7 +68,7 @@ FillChar(tRMS,SizeOf(tRMS),#0);
     if tRMS[2] <= GetLengthSQR(col[i,1]-col[h,1], col[i,2]-col[h,2], col[i,3]-col[h,3]) then
     begin
       tRMS[2] := GetLengthSQR(col[i,1]-col[h,1], col[i,2]-col[h,2], col[i,3]-col[h,3]);
-      if ColTo16(col[i,1], col[i,2], col[i,3]) <= ColTo16(col[h,1], col[h,2], col[h,3]) then
+      if RGBToWord(col[i,1], col[i,2], col[i,3]) <= RGBToWord(col[h,1], col[h,2], col[h,3]) then
       begin
         im[1] := i;
         im[2] := h;
@@ -81,8 +81,8 @@ FillChar(tRMS,SizeOf(tRMS),#0);
     end;
   end;
 
-  m1 := ColTo16(col[im[2],1], col[im[2],2], col[im[2],3]);
-  m2 := ColTo16(col[im[1],1], col[im[1],2], col[im[1],3]);
+  m1 := RGBToWord(col[im[2],1], col[im[2],2], col[im[2],3]);
+  m2 := RGBToWord(col[im[1],1], col[im[1],2], col[im[1],3]);
 
   //Find another minmax pair from existing colors;
  { tRMS[1]:=65535; tRMS[2]:=0;
@@ -90,15 +90,15 @@ FillChar(tRMS,SizeOf(tRMS),#0);
     if (im[1]<>i)and(im[2]<>h)and(im[2]<>i)and(im[1]<>h) then begin
     if tRMS[2]<=round(GetLength(col[i,1]-col[h,1],col[i,2]-col[h,2],col[i,3]-col[h,3])) then begin
       tRMS[2]:=round(GetLength(col[i,1]-col[h,1],col[i,2]-col[h,2],col[i,3]-col[h,3]));
-      if ColTo16(col[i,1],col[i,2],col[i,3])<=ColTo16(col[h,1],col[h,2],col[h,3]) then begin
+      if RGBToWord(col[i,1],col[i,2],col[i,3])<=RGBToWord(col[h,1],col[h,2],col[h,3]) then begin
         im[3]:=i; im[4]:=h;
       end else begin
         im[3]:=h; im[4]:=i;
       end;
     end;
   end;
-  m1:=ColTo16((col[im[2],1]+col[im[4],1])div 2,(col[im[2],2]+col[im[4],2])div 2,(col[im[2],3]+col[im[4],3])div 2);
-  m2:=ColTo16((col[im[1],1]+col[im[3],1])div 2,(col[im[1],2]+col[im[3],2])div 2,(col[im[1],3]+col[im[3],3])div 2);
+  m1:=RGBToWord((col[im[2],1]+col[im[4],1])div 2,(col[im[2],2]+col[im[4],2])div 2,(col[im[2],3]+col[im[4],3])div 2);
+  m2:=RGBToWord((col[im[1],1]+col[im[3],1])div 2,(col[im[1],2]+col[im[3],2])div 2,(col[im[1],3]+col[im[3],3])div 2);
 //}
 
   {//Get minmax pair by luminance, produces rather poor results
@@ -142,8 +142,8 @@ FillChar(tRMS,SizeOf(tRMS),#0);
   c0[4,3] := col[im[1],3];
 
 //Case1 Straight case, use 2 interpolated colors 1/3 and 2/3
-  ColFrom16(m1,c2[1,1],c2[1,2],c2[1,3]);
-  ColFrom16(m2,c2[4,1],c2[4,2],c2[4,3]);
+  WordToRGB(m1,c2[1,1],c2[1,2],c2[1,3]);
+  WordToRGB(m2,c2[4,1],c2[4,2],c2[4,3]);
   c2[2,1]:=mix(c2[4,1],c2[1,1],1/3);
   c2[2,2]:=mix(c2[4,2],c2[1,2],1/3);
   c2[2,3]:=mix(c2[4,3],c2[1,3],1/3);
@@ -192,21 +192,21 @@ FillChar(tRMS,SizeOf(tRMS),#0);
       c2[1,1]:=EnsureRange(c0[1,1]+(c0[1,1]-c0[4,1])div 2,0,255);
       c2[1,2]:=EnsureRange(c0[1,2]+(c0[1,2]-c0[4,2])div 2,0,255);
       c2[1,3]:=EnsureRange(c0[1,3]+(c0[1,3]-c0[4,3])div 2,0,255);
-      m1:=ColTo16(c2[1,1],c2[1,2],c2[1,3]);
-      m2:=ColTo16(c0[4,1],c0[4,2],c0[4,3]);
+      m1:=RGBToWord(c2[1,1],c2[1,2],c2[1,3]);
+      m2:=RGBToWord(c0[4,1],c0[4,2],c0[4,3]);
       if m1<m2 then SwapInt(m1,m2);
-      ColFrom16(m1,c2[1,1],c2[1,2],c2[1,3]);
-      ColFrom16(m2,c2[4,1],c2[4,2],c2[4,3]);
+      WordToRGB(m1,c2[1,1],c2[1,2],c2[1,3]);
+      WordToRGB(m2,c2[4,1],c2[4,2],c2[4,3]);
     end;
     if k=1 then begin
       c2[4,1]:=EnsureRange(c0[4,1]-(c0[1,1]-c0[4,1])div 2,0,255);
       c2[4,2]:=EnsureRange(c0[4,2]-(c0[1,2]-c0[4,2])div 2,0,255);
       c2[4,3]:=EnsureRange(c0[4,3]-(c0[1,3]-c0[4,3])div 2,0,255);
-      m1:=ColTo16(c0[1,1],c0[1,2],c0[1,3]);
-      m2:=ColTo16(c2[4,1],c2[4,2],c2[4,3]);
+      m1:=RGBToWord(c0[1,1],c0[1,2],c0[1,3]);
+      m2:=RGBToWord(c2[4,1],c2[4,2],c2[4,3]);
       if m1<m2 then SwapInt(m1,m2);
-      ColFrom16(m1,c2[1,1],c2[1,2],c2[1,3]);
-      ColFrom16(m2,c2[4,1],c2[4,2],c2[4,3]);
+      WordToRGB(m1,c2[1,1],c2[1,2],c2[1,3]);
+      WordToRGB(m2,c2[4,1],c2[4,2],c2[4,3]);
     end;
 
     c2[2,1]:=mix(c2[4,1],c2[1,1],1/3);
@@ -241,16 +241,16 @@ FillChar(tRMS,SizeOf(tRMS),#0);
     inc(tRMS[3],col[i,3]);
   end;
 
-  m1:=ColTo16( //rounded one step up
+  m1:=RGBToWord( //rounded one step up
   EnsureRange((round(tRMS[1]/16)shr 3+1) * 8,0,255),
   EnsureRange((round(tRMS[2]/16)shr 2+1) * 4,0,255),
   EnsureRange((round(tRMS[3]/16)shr 3+1) * 8,0,255));
-  ColFrom16(m1,c2[1,1],c2[1,2],c2[1,3]);
-  m2:=ColTo16( //rounded one step down
+  WordToRGB(m1,c2[1,1],c2[1,2],c2[1,3]);
+  m2:=RGBToWord( //rounded one step down
   EnsureRange((round(tRMS[1]/16)shr 3) * 8,0,255),
   EnsureRange((round(tRMS[2]/16)shr 2) * 4,0,255),
   EnsureRange((round(tRMS[3]/16)shr 3) * 8,0,255));
-  ColFrom16(m2,c2[4,1],c2[4,2],c2[4,3]);
+  WordToRGB(m2,c2[4,1],c2[4,2],c2[4,3]);
 
   c2[2,1]:=(c2[4,1]+c2[1,1])div 2; c2[2,2]:=(c2[4,2]+c2[1,2])div 2; c2[2,3]:=(c2[4,3]+c2[1,3])div 2;
 
@@ -297,34 +297,36 @@ FillChar(tRMS,SizeOf(tRMS),#0);
 //  Trial[4].tRMS:=9999999;
 //  Trial[5].tRMS:=9999999;
 //  Trial[6].tRMS:=9999999;
-{  Trial[1].Dat:=ColTo16(255,0,0);   //Red
-  Trial[2].Dat:=ColTo16(255,255,0); //Yellow
-  Trial[3].Dat:=ColTo16(0,255,0);   //Green
-  Trial[4].Dat:=ColTo16(0,255,255); //Cyan
-  Trial[5].Dat:=ColTo16(0,0,255);   //Blue
-  Trial[6].Dat:=ColTo16(255,0,255); //Magenta}
+{  Trial[1].Dat:=RGBToWord(255,0,0);   //Red
+  Trial[2].Dat:=RGBToWord(255,255,0); //Yellow
+  Trial[3].Dat:=RGBToWord(0,255,0);   //Green
+  Trial[4].Dat:=RGBToWord(0,255,255); //Cyan
+  Trial[5].Dat:=RGBToWord(0,0,255);   //Blue
+  Trial[6].Dat:=RGBToWord(255,0,255); //Magenta}
 
-//Choose the result with least RMS error
-  k := 99999;
-  for i:=1 to 6 do
-    if k>Trial[i].tRMS then begin
-      k := Trial[i].tRMS;
-      h := i;
-    end;
-  OutDat := Trial[h].Dat;
-//  if Trial[h].tRMS>100 then
-//    OutDat:=1023;
+  //Choose the result with least RMS error
+    k := 99999;
+    for i:=1 to 6 do
+      if k>Trial[i].tRMS then begin
+        k := Trial[i].tRMS;
+        h := i;
+      end;
+    OutDat := Trial[h].Dat;
+  //  if Trial[h].tRMS>100 then
+  //    OutDat:=1023;
 
-DXT_RGB_Decode(@OutDat,Crms); //Carry out RMS error value
-    for i:=1 to 16 do RMS[0] := RMS[0] + sqr(col[i,1] - Crms[i*3-2]);
-    for i:=1 to 16 do RMS[1] := RMS[1] + sqr(col[i,2] - Crms[i*3-1]);
-    for i:=1 to 16 do RMS[2] := RMS[2] + sqr(col[i,3] - Crms[i*3]);
+  DXT_RGB_Decode(@OutDat,Crms); //Carry out RMS error value
+      for i:=1 to 16 do RMS[0] := RMS[0] + sqr(col[i,1] - Crms[i*3-2]);
+      for i:=1 to 16 do RMS[1] := RMS[1] + sqr(col[i,2] - Crms[i*3-1]);
+      for i:=1 to 16 do RMS[2] := RMS[2] + sqr(col[i,3] - Crms[i*3]);
 end;
 
 
 procedure DXT_RGB_Decode(InDat:Pointer; out OutDat:array of byte);
-var i,h,x:integer; c:array[1..8]of byte;
-Colors:array[1..4,1..3]of word; //4colors in R,G,B
+var
+  i,h,x:integer;
+  c:array[1..8]of byte;
+  Colors:array[1..4,1..3]of word; //4colors in R,G,B
 begin
   for i := 1 to 8 do //cast into array of byte
     c[i] := byte(Char(Pointer((cardinal(InDat)+i-1))^));
@@ -338,20 +340,23 @@ begin
   Colors[2,3] := (c[3]mod 32)*8;               //B2
 
   //Acquire average colors
-  if (c[1]+c[2]*256) > (c[3]+c[4]*256) then begin
-    Colors[3,1] := round((Colors[2,1] + Colors[1,1]*2)/3);
-    Colors[3,2] := round((Colors[2,2] + Colors[1,2]*2)/3);
-    Colors[3,3] := round((Colors[2,3] + Colors[1,3]*2)/3);
-    Colors[4,1] := round((Colors[2,1]*2 + Colors[1,1])/3);
-    Colors[4,2] := round((Colors[2,2]*2 + Colors[1,2])/3);
-    Colors[4,3] := round((Colors[2,3]*2 + Colors[1,3])/3);
-  end else begin
-    Colors[3,1] := round((Colors[2,1] + Colors[1,1])/2); Colors[4,1] := 255; //This is in fact 1bit transparent
-    Colors[3,2] := round((Colors[2,2] + Colors[1,2])/2); Colors[4,2] := 0;   //but let's show it as purple
-    Colors[3,3] := round((Colors[2,3] + Colors[1,3])/2); Colors[4,3] := 255;
+  if (c[1]+c[2]*256) > (c[3]+c[4]*256) then
+  begin
+    Colors[3,1] := Round((Colors[2,1] + Colors[1,1]*2)/3);
+    Colors[3,2] := Round((Colors[2,2] + Colors[1,2]*2)/3);
+    Colors[3,3] := Round((Colors[2,3] + Colors[1,3]*2)/3);
+    Colors[4,1] := Round((Colors[2,1]*2 + Colors[1,1])/3);
+    Colors[4,2] := Round((Colors[2,2]*2 + Colors[1,2])/3);
+    Colors[4,3] := Round((Colors[2,3]*2 + Colors[1,3])/3);
+  end else
+  begin
+    Colors[3,1] := Round((Colors[2,1] + Colors[1,1])/2); Colors[4,1] := 255; //This is in fact 1bit transparent
+    Colors[3,2] := Round((Colors[2,2] + Colors[1,2])/2); Colors[4,2] := 0;   //but let's show it as purple
+    Colors[3,3] := Round((Colors[2,3] + Colors[1,3])/2); Colors[4,3] := 255;
   end;
 
-  for h:=1 to 16 do begin
+  for h:=1 to 16 do
+  begin
     x:=0;
     if h mod 4=1 then x :=  ord(c[1+(h-1)div 4+4])mod 4;        //1,5, 9,13
     if h mod 4=2 then x := (ord(c[1+(h-1)div 4+4])mod 16)div 4; //2,6,10,14
