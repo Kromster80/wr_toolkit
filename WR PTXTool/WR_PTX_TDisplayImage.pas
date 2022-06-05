@@ -42,12 +42,12 @@ type
     property GetAlpha:boolean read Props.hasAlpha;
     constructor Create(inBitmapRGB,inBitmapA:TBitmap; inImageRGB,inImageA:TImage);
     function DisplayImage:boolean;
-    function GetInfoString():string;
-    function GetFogString():string;
-    function GetRMSString():string;
-    function GetChangedString():string;
-    procedure ComputeFog();
-    procedure KnowMaxMipMapQty();
+    function GetInfoString:string;
+    function GetFogString:string;
+    function GetRMSString:string;
+    function GetChangedString:string;
+    procedure ComputeFog;
+    procedure KnowMaxMipMapQty;
     procedure InvertAlpha;
     procedure ClearAlpha;
     procedure RGB2Bitm(aMode: TConversionMode);
@@ -125,27 +125,27 @@ begin
   Result := true;
 end;
 
-function TDisplayImage.GetInfoString():string;
+function TDisplayImage.GetInfoString:string;
 begin
   Result:='Size - '+IntToStr(Props.SizeH)+'x'+IntToStr(Props.SizeV)+' RGB';
   if Props.hasAlpha then Result := Result + 'A'; //RGB+A
 end;
 
-function TDisplayImage.GetFogString():string;
+function TDisplayImage.GetFogString:string;
 begin
   Result := 'R' + IntToStr(Fog2[1]) + '  G' + IntToStr(Fog2[2]) + '  B' + IntToStr(Fog2[3]);
 end;
 
-function TDisplayImage.GetRMSString():string;
+function TDisplayImage.GetRMSString:string;
 begin
   if RMS[1]+RMS[2]+RMS[3]+RMS[4]>0 then
     Result:='RMS '+floattostr(round((RMS[1]+RMS[2]+RMS[3])*33.3)/100)+'  '+floattostr(round(RMS[4]*100)/100);
 end;
 
-function TDisplayImage.GetChangedString():string;
+function TDisplayImage.GetChangedString:string;
 begin if IsChanged then Result:='*' else Result:=''; end;
 
-procedure TDisplayImage.ComputeFog();
+procedure TDisplayImage.ComputeFog;
 var
   I,K: Integer;
   fr,fg,fb: Int64;
@@ -165,7 +165,7 @@ begin
   Fog2[3] := round(fb / (Props.sizeV * Props.sizeH));
 end;
 
-procedure TDisplayImage.KnowMaxMipMapQty();
+procedure TDisplayImage.KnowMaxMipMapQty;
 var x:Integer;
 begin
 MipMapQtyMax:=0;
@@ -510,7 +510,7 @@ end;
 end;
 closefile(f);
 
-ComputeFog();
+ComputeFog;
 FillChar(RMS,SizeOf(RMS),#0);
 end;
 
@@ -582,7 +582,7 @@ end;
 end;
 closefile(f);
 
-ComputeFog();
+ComputeFog;
 FillChar(RMS,SizeOf(RMS),#0);
 end;
 
@@ -645,7 +645,7 @@ begin
   end;
   closefile(f);
 
-  ComputeFog();
+  ComputeFog;
   FillChar(RMS,SizeOf(RMS),#0);
 end;
 
@@ -749,7 +749,7 @@ begin
   end;
   closefile(f);
 
-  ComputeFog();
+  ComputeFog;
   FillChar(RMS,SizeOf(RMS),#0);
 end;
 
@@ -923,87 +923,96 @@ var
   Bitmap:TBitmap;
   p:PbyteArray;
 begin
-Bitmap:=TBitmap.Create;
-Bitmap.LoadFromFile(FileName);
+  Bitmap := TBitmap.Create;
+  Bitmap.LoadFromFile(FileName);
 
-if ((MakePOT(Bitmap.Width)<>Bitmap.Width)and(not AllowNonPOTImages))or((MakePOT(Bitmap.Height)<>Bitmap.Height)and(not AllowNonPOTImages))or
-   (Bitmap.Width<4)or(Bitmap.Height<4)or(Bitmap.Width>2048)or(Bitmap.Height>2048) then begin
-  Bitmap.Destroy;
-  MessageBox(0,'Image size must be 4,8,16,32...2048 pixels','Error',mb_ok);
-  exit;
-end;
-
-//if (Bitmap.Width<>Props.SizeH)or(Bitmap.Height<>Props.SizeV) then
-//Do reset because source RGB has changed
-begin
-  ResetAllData;
-  SetAllPropsAtOnce(
-        decs(ExtractFileName(FileName),4,1),
-        Bitmap.Width,Bitmap.Height,1,
-        false,false,false);
-
-  KnowMaxMipMapQty;
-  MipMapQtyUse:=MipMapQtyMax;
-end;
-
-for i:=1 to Props.SizeV do begin
-  p:=Bitmap.ScanLine[i-1];
-  for k:=1 to Props.sizeH do begin
-    RGBA[i,k,1] := p[k*3-1];
-    RGBA[i,k,2] := p[k*3-2];
-    RGBA[i,k,3] := p[k*3-3];
+  if ((MakePOT(Bitmap.Width)<>Bitmap.Width)and(not AllowNonPOTImages))
+  or ((MakePOT(Bitmap.Height)<>Bitmap.Height)and(not AllowNonPOTImages))
+  or (Bitmap.Width<4)or(Bitmap.Height<4)or(Bitmap.Width>2048)or(Bitmap.Height>2048) then
+  begin
+    Bitmap.Free;
+    MessageBox(0,'Image size must be 4,8,16,32...2048 pixels','Error',mb_ok);
+    exit;
   end;
-end;
 
-Bitmap.Destroy;
-ComputeFog();
-FillChar(RMS,SizeOf(RMS),#0);
-IsChanged:=true;
+  //if (Bitmap.Width<>Props.SizeH)or(Bitmap.Height<>Props.SizeV) then
+  //Do reset because source RGB has changed
+  begin
+    ResetAllData;
+    SetAllPropsAtOnce(
+          decs(ExtractFileName(FileName),4,1),
+          Bitmap.Width,Bitmap.Height,1,
+          false,false,false);
+
+    KnowMaxMipMapQty;
+    MipMapQtyUse:=MipMapQtyMax;
+  end;
+
+  for i:=1 to Props.SizeV do
+  begin
+    p:=Bitmap.ScanLine[i-1];
+    for k:=1 to Props.sizeH do
+    begin
+      RGBA[i,k,1] := p[k*3-1];
+      RGBA[i,k,2] := p[k*3-2];
+      RGBA[i,k,3] := p[k*3-3];
+    end;
+  end;
+
+  Bitmap.Free;
+  ComputeFog;
+  FillChar(RMS,SizeOf(RMS),#0);
+  IsChanged:=true;
 end;
 
 procedure TDisplayImage.ImportBitmapA(FileName:string);
 var
-  i,k:Integer;
-  Bitmap:TBitmap;
-  p:PbyteArray;
+  i,k: Integer;
+  Bitmap: TBitmap;
+  p: PbyteArray;
 begin
-Bitmap:=TBitmap.Create;
-Bitmap.LoadFromFile(FileName);
+  Bitmap:=TBitmap.Create;
+  Bitmap.LoadFromFile(FileName);
 
-if (Bitmap.Width<>Props.SizeH)or(Bitmap.Height<>Props.SizeV) then begin
-  MessageBox(0,'Mask height and width should be same as for RGB image','Error',mb_ok);
-  exit;
-end;
+  if (Bitmap.Width<>Props.SizeH) or (Bitmap.Height<>Props.SizeV) then
+  begin
+    MessageBox(0,'Mask height and width should be same as for RGB image','Error',mb_ok);
+    Bitmap.Free;
+    exit;
+  end;
 
-for i:=1 to Props.SizeV do begin
-  p:=Bitmap.ScanLine[i-1];
-  for k:=1 to Props.sizeH do
-    RGBA[i,k,4]:=(p[k*3-1]+p[k*3-2]+p[k*3-3])div 3;
-end;
+  for i:=1 to Props.SizeV do
+  begin
+    p:=Bitmap.ScanLine[i-1];
+    for k:=1 to Props.sizeH do
+      RGBA[i,k,4]:=(p[k*3-1]+p[k*3-2]+p[k*3-3])div 3;
+  end;
 
-Props.hasAlpha:=true;
-Props.IsCompressed:=false;
-Props.IsSYNPacked:=false;
+  Props.hasAlpha:=true;
+  Props.IsCompressed:=false;
+  Props.IsSYNPacked:=false;
 
-Bitmap.Destroy;
-FillChar(RMS,SizeOf(RMS),#0);
-IsChanged:=true;
+  Bitmap.Free;
+  FillChar(RMS,SizeOf(RMS),#0);
+  IsChanged:=true;
 end;
 
 
 procedure TDisplayImage.CreateAlphaFrom(X,Y:Integer);
-var R,G,B:byte; i,k:Integer;
+var
+  R,G,B:byte;
+  i,k:Integer;
 begin
-Color2RGB(ImageRGB.Canvas.Pixels[X,Y],R,G,B);
+  Color2RGB(ImageRGB.Canvas.Pixels[X,Y],R,G,B);
 
-for i:=1 to Props.SizeV do
-  for k:=1 to Props.sizeH do
-    RGBA[i,k,4]:=255-byte((RGBA[i,k,1]=R)and(RGBA[i,k,2]=G)and(RGBA[i,k,3]=B))*255;
+  for i:=1 to Props.SizeV do
+    for k:=1 to Props.sizeH do
+      RGBA[i,k,4]:=255-byte((RGBA[i,k,1]=R)and(RGBA[i,k,2]=G)and(RGBA[i,k,3]=B))*255;
 
-Props.hasAlpha:=true;
-Props.IsCompressed:=false;
-Props.IsSYNPacked:=false;
-IsChanged:=true;
+  Props.hasAlpha:=true;
+  Props.IsCompressed:=false;
+  Props.IsSYNPacked:=false;
+  IsChanged:=true;
 end;
 
 

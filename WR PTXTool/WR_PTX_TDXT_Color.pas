@@ -3,8 +3,8 @@ interface
 uses
   Math, KromUtils;
 
-procedure DXT_RGB_Encode(R1,R2,R3,R4:Pointer; out OutDat:int64; out RMS:array of single);
-procedure DXT_RGB_Decode(InDat:Pointer; out OutDat:array of byte);
+procedure DXT_RGB_Encode(R1,R2,R3,R4:Pointer; out OutDat: int64; out RMS: array of single);
+procedure DXT_RGB_Decode(InDat: Pointer; out OutDat: array of byte);
 
 implementation
 
@@ -64,7 +64,8 @@ begin
   tRMS[1] := 65535;
   tRMS[2] := 0;
 
-  for i:=1 to 16 do for h:=i+1 to 16 do begin
+  for i:=1 to 16 do for h:=i+1 to 16 do
+  begin
     if tRMS[2] <= GetLengthSQR(col[i,1]-col[h,1], col[i,2]-col[h,2], col[i,3]-col[h,3]) then
     begin
       tRMS[2] := GetLengthSQR(col[i,1]-col[h,1], col[i,2]-col[h,2], col[i,3]-col[h,3]);
