@@ -1,9 +1,10 @@
 unit WR_PTX_TDXT_Alpha;
 interface
-uses Math, KromUtils;
+uses
+  Math, KromUtils;
 
 procedure DXT_A_Encode(R1,R2,R3,R4:Pointer; out OutDat:int64; out RMS:single);
-procedure DXT_A_Decode(InDat:Pointer; out OutDat:array of byte);
+procedure DXT_A_Decode(aInDat: Pointer; out aOutDat: array of Byte);
 
 implementation
 
@@ -104,31 +105,43 @@ end;
 end;
 
 
-procedure DXT_A_Decode(InDat:Pointer; out OutDat:array of byte);
-var h,x:byte; ColorMin,ColorMax,T:byte; d:int64;
+procedure DXT_A_Decode(aInDat: Pointer; out aOutDat: array of Byte);
+var
+  I, x: Byte;
+  colorMin, colorMax, T: Byte;
+  d: Int64;
 begin
-  d := int64(InDat^); //cast all 8 bytes into one int64 value
-  ColorMin := d AND $FF;
-  ColorMax := (d shr 8) AND $FF;
+  d := Int64(aInDat^); //cast all 8 bytes into one int64 value
+  colorMin := d and $FF;
+  colorMax := (d shr 8) and $FF;
   d := d shr 16;
 
-  for h := 1 to 16 do
+  for I := 0 to 15 do
   begin
     T := 0;
-    x := d shr ((h-1)*3) AND $7; //Consequently pick up 3 adjustment bits
-    if x = 0 then T := ColorMin else
-    if x = 1 then T := ColorMax else
-    if ColorMin<ColorMax then
-      case x of //Linear interpolation + min&max
-        2: T := round((4*ColorMin+1*ColorMax)/5);
-        3: T := round((3*ColorMin+2*ColorMax)/5);
-        4: T := round((2*ColorMin+3*ColorMax)/5);
-        5: T := round((1*ColorMin+4*ColorMax)/5);
+    x := d shr (I * 3) and $7; //Consequently pick up 3 adjustment bits
+    if x = 0 then
+      T := colorMin
+    else
+    if x = 1 then
+      T := colorMax
+    else
+
+    if colorMin < colorMax then
+      // Linear interpolation + min&max
+      case x of
+        2: T := Round((4*colorMin + 1*colorMax) / 5);
+        3: T := Round((3*colorMin + 2*colorMax) / 5);
+        4: T := Round((2*colorMin + 3*colorMax) / 5);
+        5: T := Round((1*colorMin + 4*colorMax) / 5);
         6: T := 0;
         7: T := 255;
-      end else //Linear interpolation x=2..7
-        T := round(((8-x)*ColorMin+(x-1)*ColorMax)/7);
-    OutDat[h-1] := T; //0..15
+      end
+    else
+      // Linear interpolation x=2..7
+      T := round(((8-x)*colorMin+(x-1)*colorMax)/7);
+
+    aOutDat[I] := T; //0..15
   end;
 end;
 

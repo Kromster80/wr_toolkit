@@ -130,6 +130,7 @@ begin
   Form1.Caption := 'PTXTool ' + VersionInfo;
 end;
 
+
 procedure TForm1.ImportBMPClick(Sender: TObject);
 begin
   if not RunOpenDialog(Open1,'',WorkDir,'24bit BMP files (*.bmp)|*.bmp') then exit;
@@ -141,6 +142,7 @@ begin
 
   DisplayChange(nil);
 end;
+
 
 procedure TForm1.ImportTGAClick(Sender: TObject);
 begin
@@ -166,6 +168,7 @@ begin
   end;
 end;
 
+
 procedure TForm1.ClearAlpha(Sender: TObject);
 begin
   fDisplayImage.ClearAlpha;
@@ -173,8 +176,10 @@ begin
   Label1.Caption := fDisplayImage.GetInfoString;
 end;
 
+
 procedure TForm1.SaveCompressedPTX(Sender: TObject);
-var Save_Cursor:TCursor;
+var
+  Save_Cursor: TCursor;
 begin
   SpinMMChange(nil);
   if not RunSaveDialog(Save1, fDisplayImage.GetFileMask+'.ptx', WorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then exit;
@@ -187,6 +192,7 @@ begin
   OpenFile(nil);
   Screen.Cursor := Save_Cursor;
 end;
+
 
 procedure TForm1.SaveUncompressedPTX(Sender: TObject);
 var Save_Cursor:TCursor;
@@ -203,15 +209,18 @@ begin
   Screen.Cursor := Save_Cursor;
 end;
 
+
 procedure TForm1.AboutClick(Sender: TObject);
-var s:string;
+var
+  s: string;
 begin
-s:='Create PTX image files for MBWR/WR2/AFC11'+eol+
-   'Opens: BMP, TGA, DDS, 2DB, PTX'+eol+
-   'Saves: BMP, TGA, PTX'+eol+eol+
-   'Right-click on images to open actions menu';
-AboutForm.Show(VersionInfo, s, 'PTXTool');
+  s:='Create PTX image files for MBWR/WR2/AFC11'+eol+
+     'Opens: BMP, TGA, DDS, 2DB, PTX'+eol+
+     'Saves: BMP, TGA, PTX'+eol+eol+
+     'Right-click on images to open actions menu';
+  AboutForm.Show(VersionInfo, s, 'PTXTool');
 end;
+
 
 procedure TForm1.ShowMenu(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
@@ -240,6 +249,7 @@ begin
   Label4.Visible                := not Value; //Hide
 end;
 
+
 procedure TForm1.SetAlpha(Value:boolean);
 begin
   ClearA.Enabled        := Value;
@@ -250,6 +260,7 @@ begin
   SaveBMPMask1.Enabled  := Value;
   Label3.Visible        := not Value; //Hide
 end;
+
 
 procedure TForm1.OpenFile(Sender: TObject);
 var FileName:string;
@@ -265,11 +276,13 @@ begin
   DisplayChange(nil);
 end;
 
+
 procedure TForm1.SpinMMChange(Sender: TObject);
 begin
   fDisplayImage.SetMipMapQtyUse:=(SpinMM.Value);
   //todo: Add FlipVertical! (by Ast)
 end;
+
 
 procedure TForm1.DisplayChange(Sender: TObject);
 begin
@@ -300,15 +313,18 @@ begin
   LabelR.Caption := 'Fade color  '+fDisplayImage.GetFogString;
 end;
 
+
 procedure TForm1.Button1Click(Sender: TObject);
 begin
   fDisplayImage.SaveMipMap(WorkDir+'000sq.tga', 4);
 end;
 
+
 procedure TForm1.CBnonPOTClick(Sender: TObject);
 begin
   fDisplayImage.AllowNonPOTImages := CBnonPOT.Checked;
 end;
+
 
 procedure TForm1.SampleAClick(Sender: TObject);
 begin
@@ -318,6 +334,7 @@ begin
   else
     Cursor := crDefault;
 end;
+
 
 procedure TForm1.Image_RGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
