@@ -9,7 +9,8 @@ type
 type
   TDisplayImage = class
   private
-    BitmapRGB,BitmapA: TBitmap;
+    fBitmapRGB, fBitmapA: TBitmap;
+
     ImageRGB,ImageA: TImage;
     Rect: TRect;
     Props: record
@@ -19,8 +20,8 @@ type
       IsSYNPacked:boolean;
       hasAlpha:boolean;
     end;
-    RGBA: array [1..2049,1..2049,1..4]of byte;
-    RGBAmm: array [1..2049,1..2049,1..4]of byte;
+    RGBA: array [1..2049,1..2049,1..4] of byte;
+    RGBAmm: array [1..2049,1..2049,1..4] of byte;
     RMS: array[1..4]of single;
     Fog2: array[1..3]of Byte;
     MipMapQtyUse: Integer;
@@ -42,7 +43,7 @@ type
     property GetPacked:boolean read Props.IsSYNPacked;
     property GetAlpha:boolean read Props.hasAlpha;
     constructor Create(inBitmapRGB,inBitmapA:TBitmap; inImageRGB,inImageA:TImage);
-    function DisplayImage:boolean;
+    function DisplayImage: Boolean;
     function GetInfoString:string;
     function GetFogString:string;
     function GetRMSString:string;
@@ -52,21 +53,21 @@ type
     procedure InvertAlpha;
     procedure ClearAlpha;
     procedure RGB2Bitm(aMode: TConversionMode);
-    procedure OpenPTX(aFileName:string);
-    procedure OpenDDS(aFileName:string);
-    procedure OpenXTX(aFileName:string);
-    procedure OpenTGA(aFileName:string);
-    procedure Open2DB(aFileName:string);
+    procedure OpenPTX(const aFilename:string);
+    procedure OpenDDS(const aFilename:string);
+    procedure OpenXTX(const aFilename:string);
+    procedure OpenTGA(const aFilename:string);
+    procedure Open2DB(const aFilename:string);
     procedure SaveUncompressedPTX(FileName:string);
-    procedure SaveCompressedPTX(aFileName: string);
-    procedure SaveTGA(aFileName: string);
-    procedure SaveMipMap(aFileName:string; aLevel:Integer);
-    procedure ExportBitmapRGB(FileName:string);
-    procedure ExportBitmapA(FileName:string);
-    procedure ImportBitmapRGB(FileName:string);
-    procedure ImportBitmapA(FileName:string);
-    procedure CreateAlphaFrom(X,Y:Integer);
-    procedure ReplaceColorKeyFrom(X,Y:Integer);
+    procedure SaveCompressedPTX(const aFilename: string);
+    procedure SaveTGA(const aFilename: string);
+    procedure SaveMipMap(const aFilename:string; aLevel:Integer);
+    procedure ExportBitmapRGB(const aFileName:string);
+    procedure ExportBitmapA(const aFileName:string);
+    procedure ImportBitmapRGB(const aFileName:string);
+    procedure ImportBitmapA(const aFileName: string);
+    procedure CreateAlphaFrom(aX, aY: Integer);
+    procedure ReplaceColorKeyWithAverage(aX, aY: Integer);
 
     property SavedIn: string read fSavedIn;
   end;
@@ -78,23 +79,24 @@ implementation
 {TDisplayImage}
 constructor TDisplayImage.Create(inBitmapRGB,inBitmapA: TBitmap; inImageRGB,inImageA: TImage);
 begin
-  BitmapRGB     := inBitmapRGB;
-  BitmapA       := inBitmapA;
-  BitmapRGB.PixelFormat := pf24bit;
-  BitmapA.PixelFormat   := pf24bit;
+  fBitmapRGB     := inBitmapRGB;
+  fBitmapA       := inBitmapA;
+  fBitmapRGB.PixelFormat := pf24bit;
+  fBitmapA.PixelFormat   := pf24bit;
   ImageRGB      := inImageRGB;
   ImageA        := inImageA;
 end;
 
 
-function TDisplayImage.DisplayImage:boolean;
+// Returns "True" on success
+function TDisplayImage.DisplayImage: Boolean;
 begin
-  Result := false;
+  Result := False;
 
-  BitmapRGB.Width := Props.sizeH;
-  BitmapRGB.Height:= Props.sizeV;
-  BitmapA.Width   := Props.sizeH;
-  BitmapA.Height  := Props.sizeV;
+  fBitmapRGB.Width := Props.sizeH;
+  fBitmapRGB.Height:= Props.sizeV;
+  fBitmapA.Width   := Props.sizeH;
+  fBitmapA.Height  := Props.sizeV;
 
   Rect.Bottom := ImageRGB.Height;
   Rect.Right  := ImageRGB.Width;
@@ -102,12 +104,12 @@ begin
   ImageRGB.Canvas.Brush.Color := 128*65793; ImageRGB.Canvas.FillRect(Rect);
   ImageA.Canvas.Brush.Color   := 128*65793; ImageA.Canvas.FillRect(Rect);
 
-  if Props.sizeH*Props.sizeV=0 then exit; //Image didn't loaded
+  if Props.sizeH * Props.sizeV = 0 then Exit; //Image didn't loaded
 
   if (Props.sizeH / Props.sizeV) > 1 then
-    Rect.Bottom:=round(ImageRGB.Height / (Props.sizeH / Props.sizeV))
+    Rect.Bottom := Round(ImageRGB.Height / (Props.sizeH / Props.sizeV))
   else
-    Rect.Right :=round(ImageRGB.Width  / (Props.sizeV / Props.sizeH));
+    Rect.Right  := Round(ImageRGB.Width  / (Props.sizeV / Props.sizeH));
 
   ImageRGB.Picture.Graphic.Height := ImageRGB.Height;
   ImageRGB.Picture.Graphic.Width := ImageRGB.Width;
@@ -115,12 +117,10 @@ begin
   ImageA.Picture.Graphic.Width := ImageA.Width;
 
   RGB2Bitm(cmRGB);
-  ImageRGB.Canvas.StretchDraw(Rect, BitmapRGB);
 
   if Props.hasAlpha then
   begin
     RGB2Bitm(cmA);
-    ImageA.Canvas.StretchDraw(Rect, BitmapA);
   end;
 
   KnowMaxMipMapQty;
@@ -159,22 +159,28 @@ begin
   for I := 1 to Props.sizeV do
   for K := 1 to Props.sizeH do
   begin
-    fr := fr + (RGBA[I,K,1]);
-    fg := fg + (RGBA[I,K,2]);
-    fb := fb + (RGBA[I,K,3]);
+    fr := fr + RGBA[I,K,1];
+    fg := fg + RGBA[I,K,2];
+    fb := fb + RGBA[I,K,3];
   end;
-  Fog2[1] := round(fr / (Props.sizeV * Props.sizeH));
-  Fog2[2] := round(fg / (Props.sizeV * Props.sizeH));
-  Fog2[3] := round(fb / (Props.sizeV * Props.sizeH));
+  Fog2[1] := Round(fr / (Props.sizeV * Props.sizeH));
+  Fog2[2] := Round(fg / (Props.sizeV * Props.sizeH));
+  Fog2[3] := Round(fb / (Props.sizeV * Props.sizeH));
 end;
 
+
 procedure TDisplayImage.KnowMaxMipMapQty;
-var x:Integer;
+var
+  x: Integer;
 begin
-MipMapQtyMax:=0;
-x:=Math.min(Props.sizeH,Props.sizeV);
-repeat x:=x div 2; inc(MipMapQtyMax); until(x<=2);     //min size 4x1 pixels.
+  MipMapQtyMax := 0;
+  x := Min(Props.sizeH, Props.sizeV);
+  repeat
+    x := x div 2;
+    Inc(MipMapQtyMax);
+  until (x <= 2);     //min size 4x1 pixels.
 end;
+
 
 procedure TDisplayImage.InvertAlpha;
 var
@@ -184,11 +190,12 @@ begin
   for k:=1 to Props.sizeH do
     RGBA[i,k,4]:=255-RGBA[i,k,4];
   RGB2Bitm(cmA);
-  ImageA.Canvas.StretchDraw(Rect,BitmapA);
 end;
 
+
 procedure TDisplayImage.ClearAlpha;
-var i,k:Integer;
+var
+  i,k:Integer;
 begin
   Props.hasAlpha:=false;
   for i:=1 to Props.sizeV do
@@ -203,35 +210,41 @@ procedure TDisplayImage.RGB2Bitm(aMode: TConversionMode);
 var
   pRGBLine: PByteArray;
   pALine: PByteArray;
-  prevCursor:TCursor;
-  i,k:Integer;
+  prevCursor: TCursor;
+  I,K: Integer;
 begin
-  prevCursor:=Screen.Cursor;
-  Screen.Cursor:=crHourGlass;
+  prevCursor := Screen.Cursor;
+  Screen.Cursor := crHourGlass;
 
   if aMode in [cmRGBA, cmRGB] then
-    for i := 1 to Props.sizeV do
+  begin
+    for I := 1 to Props.sizeV do
     begin
-      pRGBLine:=BitmapRGB.ScanLine[i-1];
-      for k := 1 to Props.sizeH do
+      pRGBLine := fBitmapRGB.ScanLine[I-1];
+      for K := 1 to Props.sizeH do
       begin
-        pRGBLine[k*3-3] := RGBA[i,k,3];
-        pRGBLine[k*3-2] := RGBA[i,k,2];
-        pRGBLine[k*3-1] := RGBA[i,k,1];
+        pRGBLine[K*3-3] := RGBA[I,K,3];
+        pRGBLine[K*3-2] := RGBA[I,K,2];
+        pRGBLine[K*3-1] := RGBA[I,K,1];
       end;
     end;
+    ImageRGB.Canvas.StretchDraw(Rect, fBitmapRGB);
+  end;
 
   if aMode in [cmRGBA, cmA] then
-    for i := 1 to Props.sizeV do
+  begin
+    for I := 1 to Props.sizeV do
     begin
-      pALine := BitmapA.ScanLine[i-1];
-      for k := 1 to Props.sizeH do
+      pALine := fBitmapA.ScanLine[I-1];
+      for K := 1 to Props.sizeH do
       begin
-        pALine[k*3-3] := RGBA[i,k,4];
-        pALine[k*3-2] := RGBA[i,k,4];
-        pALine[k*3-1] := RGBA[i,k,4];
+        pALine[K*3-3] := RGBA[I,K,4];
+        pALine[K*3-2] := RGBA[I,K,4];
+        pALine[K*3-1] := RGBA[I,K,4];
       end;
     end;
+    ImageA.Canvas.StretchDraw(Rect, fBitmapA);
+  end;
 
   Screen.Cursor:=prevCursor;
 end;
@@ -301,7 +314,7 @@ begin
   Props.hasAlpha:=ihasAlpha;
 end;
 
-procedure TDisplayImage.OpenPTX(aFileName:string);
+procedure TDisplayImage.OpenPTX(const aFilename:string);
 var
   i,k,h:Integer;
   a,b:^byte;
@@ -456,7 +469,7 @@ begin
 end;
 
 
-procedure TDisplayImage.OpenDDS(aFileName: string);
+procedure TDisplayImage.OpenDDS(const aFilename: string);
 var i,k,h:Integer; ftype:string[4];
   f:file;
   c:array[1..128]of AnsiChar;
@@ -520,80 +533,82 @@ FillChar(RMS,SizeOf(RMS),#0);
 end;
 
 
-procedure TDisplayImage.OpenXTX(aFileName: string);
-var i,k,h:Integer; ftype:string[4];
+procedure TDisplayImage.OpenXTX(const aFilename: string);
+var
+  i,k,h:Integer; ftype:string[4];
   f:file;
   c:array[1..128]of byte;
   T:byte;
   DXTOut:array[1..48]of byte;
 begin
-ResetAllData;
-assignfile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
-blockread(f,c,52);
+  ResetAllData;
+  assignfile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
+  blockread(f,c,52);
 
-{if (int2(c[17],c[18])>2048)or(int2(c[13],c[14])>2048) then begin
-  MessageBox(0,'Big images (2048+) are not supported','Error',mb_ok);
-  closefile(f);
-  exit;
-end;  }
+  {if (int2(c[17],c[18])>2048)or(int2(c[13],c[14])>2048) then begin
+    MessageBox(0,'Big images (2048+) are not supported','Error',mb_ok);
+    closefile(f);
+    exit;
+  end;  }
 
-IsChanged:=false;
-SetAllPropsAtOnce(
-        decs(ExtractFileName(aFileName),4,1),
-        64,64,1,
-        true,false,true);
+  IsChanged:=false;
+  SetAllPropsAtOnce(
+          decs(ExtractFileName(aFileName),4,1),
+          64,64,1,
+          true,false,true);
 
-  fType:='DXT5';//c[85]+c[86]+c[87]+c[88];
-  MipMapQtyUse:=Props.MipMapQty;
+    fType:='DXT5';//c[85]+c[86]+c[87]+c[88];
+    MipMapQtyUse:=Props.MipMapQty;
 
-for i:=0 to (Props.sizeV div 4)-1 do
-  for k:=0 to (Props.sizeH div 4)-1 do begin
-///////////////////////////////////////////////////////
-//Alpha
-if Props.hasAlpha then begin
-blockread(f,c,8);
+  for i:=0 to (Props.sizeV div 4)-1 do
+    for k:=0 to (Props.sizeH div 4)-1 do begin
+  ///////////////////////////////////////////////////////
+  //Alpha
+  if Props.hasAlpha then begin
+  blockread(f,c,8);
+    SwapInt(c[1],c[2]);
+    SwapInt(c[3],c[4]);
+    SwapInt(c[5],c[6]);
+    SwapInt(c[7],c[8]);
+  if ftype='DXT5' then begin
+    DXT_A_Decode(@c[1],DXTOut);
+    for h:=1 to 16 do
+      RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
+  end else
+  if ftype='DXT3' then begin
+    for h:=1 to 16 do begin
+      if h mod 2 = 1 then
+      T:=(ord(c[(h+1)div 2])mod 16)*17 else
+      T:=(ord(c[(h+1)div 2])div 16)*17;
+      RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=T;
+    end;
+  end; //Format type DXT3 or DXT5
+  end; //if alpha
+  ////////////////////////////////////////////////////////
+  //RGB
+  blockread(f,c,8);
   SwapInt(c[1],c[2]);
   SwapInt(c[3],c[4]);
   SwapInt(c[5],c[6]);
   SwapInt(c[7],c[8]);
-if ftype='DXT5' then begin
-  DXT_A_Decode(@c[1],DXTOut);
-  for h:=1 to 16 do
-    RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
-end else
-if ftype='DXT3' then begin
+  DXT_RGB_Decode(@c[1],DXTOut);
   for h:=1 to 16 do begin
-    if h mod 2 = 1 then
-    T:=(ord(c[(h+1)div 2])mod 16)*17 else
-    T:=(ord(c[(h+1)div 2])div 16)*17;
-    RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=T;
+    RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
+    RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
+    RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
   end;
-end; //Format type DXT3 or DXT5
-end; //if alpha
-////////////////////////////////////////////////////////
-//RGB
-blockread(f,c,8);
-SwapInt(c[1],c[2]);
-SwapInt(c[3],c[4]);
-SwapInt(c[5],c[6]);
-SwapInt(c[7],c[8]);
-DXT_RGB_Decode(@c[1],DXTOut);
-for h:=1 to 16 do begin
-  RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
-  RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
-  RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
-end;
 
-end;
-closefile(f);
+  end;
+  closefile(f);
 
-ComputeFog;
-FillChar(RMS,SizeOf(RMS),#0);
+  ComputeFog;
+  FillChar(RMS,SizeOf(RMS),#0);
 end;
 
 
-procedure TDisplayImage.OpenTGA(aFileName: string);
-var i,k:Integer;
+procedure TDisplayImage.OpenTGA(const aFilename: string);
+var
+  i,k:Integer;
   f:file;
   c:array of AnsiChar;
   tSizeH,tSizeV:Integer;
@@ -654,7 +669,7 @@ begin
   FillChar(RMS,SizeOf(RMS),#0);
 end;
 
-procedure TDisplayImage.Open2DB(aFileName: string);
+procedure TDisplayImage.Open2DB(const aFilename: string);
 var i,k,h:Integer;
   f:file;
   c:array of char;
@@ -798,7 +813,7 @@ begin
   IsChanged:=false;
 end;
 
-procedure TDisplayImage.SaveCompressedPTX(aFileName: string);
+procedure TDisplayImage.SaveCompressedPTX(const aFilename: string);
 var
   ms: TMemoryStream;
   i,h:Integer;
@@ -825,9 +840,9 @@ begin
   ms.Write(Fog2[2], 1);
   ms.Write(Fog2[1], 1);
 
-  MMH:=Props.SizeH;
-  MMV:=Props.SizeV;
-  for h:=1 to MipMapQtyUse do
+  MMH := Props.SizeH;
+  MMV := Props.SizeV;
+  for h := 1 to MipMapQtyUse do
   begin
     Size := IfThen(Props.hasAlpha, MMH * MMV, MMH * MMV div 2);
 
@@ -840,18 +855,10 @@ begin
       yp := ((i-1) div ((MMH-1) div 4 + 1)) * 4 + 1;
       if Props.hasAlpha then
       begin
-        DXT_A_Encode(@RGBAmm[yp+0, xp, 4],
-                     @RGBAmm[yp+1, xp, 4],
-                     @RGBAmm[yp+2, xp, 4],
-                     @RGBAmm[yp+3, xp, 4],
-                     DXTAOut, RMS[4]);
+        DXT_A_Encode(@RGBAmm[yp+0, xp, 4], @RGBAmm[yp+1, xp, 4], @RGBAmm[yp+2, xp, 4], @RGBAmm[yp+3, xp, 4], DXTAOut, RMS[4]);
         ms.Write(DXTAOut, 8);
       end;
-      DXT_RGB_Encode(@RGBAmm[yp+0, xp, 1],
-                     @RGBAmm[yp+1, xp, 1],
-                     @RGBAmm[yp+2, xp, 1],
-                     @RGBAmm[yp+3, xp, 1],
-                     DXTOut, RMS);
+      DXT_RGB_Encode(@RGBAmm[yp+0, xp, 1], @RGBAmm[yp+1, xp, 1], @RGBAmm[yp+2, xp, 1], @RGBAmm[yp+3, xp, 1], DXTOut, RMS);
       ms.Write(DXTOut, 8);
     end;
 
@@ -868,40 +875,45 @@ begin
   RMS[4] := Sqrt(RMS[4] / (Props.SizeH * Props.SizeV));
   IsChanged := False;
 
-  fSavedIn := IntToStr(GetTickCount - t);  // 2137, 2137,  2153  // 1841, 1810, 1856
+  fSavedIn := IntToStr(GetTickCount - t);
 end;
 
-procedure TDisplayImage.SaveTGA(aFileName: string);
+procedure TDisplayImage.SaveTGA(const aFilename: string);
 var
-  f:file;
-  i,k,ci:Integer;
-  c:array of byte;
+  ms: TMemoryStream;
+  I,K,L:Integer;
+  buf: array of Byte;
 begin
-  AssignFile(f,aFileName); ReWrite(f,1);
-  blockwrite(f,#0#0#2#0#0#0#0#0#0#0#0#0,12);
-  blockwrite(f,Props.sizeH,2);
-  blockwrite(f,Props.sizeV,2);
-  if Props.hasAlpha then blockwrite(f,#32#0,2) else blockwrite(f,#24#0,2); //BitDepth
-  ci:=0;
-  setlength(c,Props.SizeH*Props.SizeV*4+1);
-  for i:=Props.SizeV downto 1 do
-    for k:=1 to Props.SizeH do begin
-      inc(ci); c[ci]:=RGBA[i,k,3];
-      inc(ci); c[ci]:=RGBA[i,k,2];
-      inc(ci); c[ci]:=RGBA[i,k,1];
-      if Props.hasAlpha then begin inc(ci); c[ci]:=RGBA[i,k,4]; end;
-      {blockwrite(f,RGBA[i,k,3],1);
-      blockwrite(f,RGBA[i,k,2],1);
-      blockwrite(f,RGBA[i,k,1],1);
-      if Props.hasAlpha then blockwrite(f,RGBA[i,k,4],1);}
+  ms := TMemoryStream.Create;
+  ms.Write(AnsiString(#0#0#2#0#0#0#0#0#0#0#0#0), 12);
+  ms.Write(Props.sizeH, 2);
+  ms.Write(Props.sizeV, 2);
+  if Props.hasAlpha then
+    ms.Write(AnsiString(#32#0), 2)
+  else
+    ms.Write(AnsiString(#24#0), 2); // BitDepth
+
+  L := 0;
+  SetLength(buf, Props.SizeH * Props.SizeV * 4);
+  for I := Props.SizeV downto 1 do
+    for K := 1 to Props.SizeH do
+    begin
+      buf[L + 0] := RGBA[I,K,3];
+      buf[L + 1] := RGBA[I,K,2];
+      buf[L + 2] := RGBA[I,K,1];
+      if Props.hasAlpha then
+        buf[L + 3] := RGBA[I,K,4];
+      Inc(L, 3 + Ord(Props.hasAlpha));
     end;
-  Assert(ci=Props.SizeH*Props.SizeV*(3+byte(Props.hasAlpha)));
-  blockwrite(f,c[1],ci);
-  closefile(f);
-  IsChanged:=false;
+
+  ms.Write(buf[0], L);
+  ms.SaveToFile(aFileName);
+  ms.Free;
+
+  IsChanged := False;
 end;
 
-procedure TDisplayImage.SaveMipMap(aFileName: string; aLevel: Integer);
+procedure TDisplayImage.SaveMipMap(const aFilename: string; aLevel: Integer);
 var
   f:file;
   i,k:Integer;
@@ -928,24 +940,27 @@ begin
   IsChanged:=false;
 end;
 
-procedure TDisplayImage.ExportBitmapRGB(FileName:string);
+
+procedure TDisplayImage.ExportBitmapRGB(const aFileName:string);
 begin
-BitmapRGB.SaveToFile(FileName);
+  fBitmapRGB.SaveToFile(aFileName);
 end;
 
-procedure TDisplayImage.ExportBitmapA(FileName:string);
+
+procedure TDisplayImage.ExportBitmapA(const aFileName:string);
 begin
-BitmapA.SaveToFile(FileName);
+  fBitmapA.SaveToFile(aFileName);
 end;
 
-procedure TDisplayImage.ImportBitmapRGB(FileName:string);
+
+procedure TDisplayImage.ImportBitmapRGB(const aFileName:string);
 var
   i,k:Integer;
   Bitmap:TBitmap;
   p:PbyteArray;
 begin
   Bitmap := TBitmap.Create;
-  Bitmap.LoadFromFile(FileName);
+  Bitmap.LoadFromFile(aFileName);
 
   if ((MakePOT(Bitmap.Width)<>Bitmap.Width)and(not AllowNonPOTImages))
   or ((MakePOT(Bitmap.Height)<>Bitmap.Height)and(not AllowNonPOTImages))
@@ -961,7 +976,7 @@ begin
   begin
     ResetAllData;
     SetAllPropsAtOnce(
-          decs(ExtractFileName(FileName),4,1),
+          decs(ExtractFileName(aFileName),4,1),
           Bitmap.Width,Bitmap.Height,1,
           false,false,false);
 
@@ -986,14 +1001,14 @@ begin
   IsChanged:=true;
 end;
 
-procedure TDisplayImage.ImportBitmapA(FileName:string);
+procedure TDisplayImage.ImportBitmapA(const aFileName: string);
 var
   i,k: Integer;
   Bitmap: TBitmap;
   p: PbyteArray;
 begin
   Bitmap:=TBitmap.Create;
-  Bitmap.LoadFromFile(FileName);
+  Bitmap.LoadFromFile(aFileName);
 
   if (Bitmap.Width<>Props.SizeH) or (Bitmap.Height<>Props.SizeV) then
   begin
@@ -1019,12 +1034,12 @@ begin
 end;
 
 
-procedure TDisplayImage.CreateAlphaFrom(X,Y:Integer);
+procedure TDisplayImage.CreateAlphaFrom(aX,aY: Integer);
 var
   R,G,B:byte;
   i,k:Integer;
 begin
-  Color2RGB(ImageRGB.Canvas.Pixels[X,Y],R,G,B);
+  Color2RGB(ImageRGB.Canvas.Pixels[aX,aY],R,G,B);
 
   for i:=1 to Props.SizeV do
     for k:=1 to Props.sizeH do
@@ -1037,39 +1052,45 @@ begin
 end;
 
 
-procedure TDisplayImage.ReplaceColorKeyFrom(X,Y:Integer);
+procedure TDisplayImage.ReplaceColorKeyWithAverage(aX,aY: Integer);
 var
-  R,G,B: Byte;
-  i,k,ci: Integer;
-  t: array [1..3] of Real;
+  keyR,keyG,keyB: Byte;
+  i,k,cnt: Integer;
+  rgbAvg: array [1..3] of Int64;
 begin
-  Color2RGB(ImageRGB.Canvas.Pixels[X,Y],R,G,B);
+  Color2RGB(ImageRGB.Canvas.Pixels[aX, aY], keyR, keyG, keyB);
 
-  t[1]:=0; t[2]:=0; t[3]:=0; ci:=0;
-  for i:=1 to Props.sizeV do for k:=1 to Props.sizeH do
-  if (RGBA[i,k,1]<>R)or(RGBA[i,k,2]<>G)or(RGBA[i,k,3]<>B) then
-  begin
-    inc(ci);
-    t[1]:=t[1]+(RGBA[i,k,1]);
-    t[2]:=t[2]+(RGBA[i,k,2]);
-    t[3]:=t[3]+(RGBA[i,k,3]);
-  end;
-  {round(r[1]/ci);
-  round(r[2]/ci);
-  round(r[3]/ci);}
+  cnt := 0;
+  rgbAvg[1] := 0;
+  rgbAvg[2] := 0;
+  rgbAvg[3] := 0;
+  for i:=1 to Props.sizeV do
+    for k:=1 to Props.sizeH do
+    if (RGBA[I, K, 1] <> keyR) or (RGBA[I, K, 2] <> keyG) or (RGBA[I, K, 3] <> keyB) then
+    begin
+      Inc(cnt);
+      rgbAvg[1] := rgbAvg[1] + RGBA[i,k,1];
+      rgbAvg[2] := rgbAvg[2] + RGBA[i,k,2];
+      rgbAvg[3] := rgbAvg[3] + RGBA[i,k,3];
+    end;
+
+  rgbAvg[1] := Round(rgbAvg[1] / cnt);
+  rgbAvg[2] := Round(rgbAvg[2] / cnt);
+  rgbAvg[3] := Round(rgbAvg[3] / cnt);
 
   for i:=1 to Props.SizeV do
     for k:=1 to Props.sizeH do
-    if (RGBA[i,k,1]=R)and(RGBA[i,k,2]=G)and(RGBA[i,k,3]=B) then
+    if (RGBA[I, K, 1] = keyR) and (RGBA[I, K, 2] = keyG) and (RGBA[I, K, 3] = keyB) then
     begin
-      RGBA[i,k,1]:=round(t[1]/ci);
-      RGBA[i,k,2]:=round(t[2]/ci);
-      RGBA[i,k,3]:=round(t[3]/ci);
+      RGBA[i,k,1] := rgbAvg[1];
+      RGBA[i,k,2] := rgbAvg[2];
+      RGBA[i,k,3] := rgbAvg[3];
     end;
 
-  Props.IsCompressed:=false;
-  Props.IsSYNPacked:=false;
-  IsChanged:=true;
+  Props.IsCompressed := false;
+  Props.IsSYNPacked := false;
+  IsChanged := true;
 end;
+
 
 end.

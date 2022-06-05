@@ -340,7 +340,7 @@ procedure TForm1.Image_RGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: 
 begin
   if (not SampleColorKey)and(not ReplaceColorKey) then exit;
   if SampleColorKey then fDisplayImage.CreateAlphaFrom(X,Y);
-  if ReplaceColorKey then fDisplayImage.ReplaceColorKeyFrom(X,Y);
+  if ReplaceColorKey then fDisplayImage.ReplaceColorKeyWithAverage(X,Y);
   DisplayChange(nil);
   if SampleColorKey then  SampleAClick(nil); //Release SampleColorKey
   if ReplaceColorKey then SampleRClick(nil); //Release ReplaceColorKey

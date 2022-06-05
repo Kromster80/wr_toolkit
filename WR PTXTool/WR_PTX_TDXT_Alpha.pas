@@ -112,11 +112,11 @@ begin
     // Min goes first
     dstData := minAlpha + (maxAlpha shl 8);
     for I := 1 to 16 do
-      dstData := dstData + int64( int64(im[I] AND $07) shl ( 16 + (I-1)*3 ) );
+      dstData := dstData + Int64(Int64(im[I] and $07) shl (16 + (I-1)*3));
     RMSError := 0;
     DXT_A_Decode(@dstData, testAlpha);
     for I := 1 to 16 do
-      RMSError := RMSError + sqr(srcAlpha[I] - testAlpha[I]);
+      RMSError := RMSError + Sqr(srcAlpha[I] - testAlpha[I]);
   end;
 
   // Choose least error-result and take it

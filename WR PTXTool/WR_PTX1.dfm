@@ -3,7 +3,6 @@ object Form1: TForm1
   Top = 143
   HorzScrollBar.Smooth = True
   VertScrollBar.Smooth = True
-  BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'PTXTool'
   ClientHeight = 361
   ClientWidth = 713
