@@ -3,66 +3,67 @@ interface
 uses
   Math, KromUtils;
 
-procedure DXT_A_Encode(R1,R2,R3,R4:Pointer; out OutDat:int64; out RMS:single);
+procedure DXT_A_Encode(aRow1, aRow2, aRow3, aRow4: Pointer; out aOutDat: Int64; out aRMS: Single);
 procedure DXT_A_Decode(aInDat: Pointer; out aOutDat: array of Byte);
 
 implementation
 
-procedure DXT_A_Encode(R1,R2,R3,R4:Pointer; out OutDat:int64; out RMS:single);
+procedure DXT_A_Encode(aRow1, aRow2, aRow3, aRow4: Pointer; out aOutDat: Int64; out aRMS: Single);
 const
-  Tolerate=2; //Which color-value should be treated as non pure black/white, '2' fits just fine
+  Tolerate = 2; //Which color-value should be treated as non pure black/white, '2' fits just fine
 var
-  i: integer; //counter
-  InputColor: array[1..16]of byte; //Input color
-  TestColor: array[1..16]of byte; //Will store reference test color to compute RMS error
-  ColorMin: byte;
-  ColorMax: byte;
-  im:array[1..16]of byte;
-  Trial: array[1..2]of record
-    Dat: int64;
-    tRMS: single;
+  I: Integer;
+  srcAlpha: array [1..16] of Byte;
+  TestColor: array [1..16] of Byte; //Will store reference test color to compute RMS error
+  ColorMin: Byte;
+  ColorMax: Byte;
+  im: array [1..16] of Byte;
+  Trial: array [1..2] of record
+    Dat: Int64;
+    tRMS: Single;
   end;
 begin
   FillChar(im, SizeOf(im), #0);
   FillChar(Trial, SizeOf(Trial), #0);
-  for i:=0 to 3 do InputColor[i+1]:=byte(Char(Pointer((Integer(R1)+i*4))^));
-  for i:=0 to 3 do InputColor[i+1+4]:=byte(Char(Pointer((Integer(R2)+i*4))^));
-  for i:=0 to 3 do InputColor[i+1+8]:=byte(Char(Pointer((Integer(R3)+i*4))^));
-  for i:=0 to 3 do InputColor[i+1+12]:=byte(Char(Pointer((Integer(R4)+i*4))^));
+  for I:=0 to 3 do srcAlpha[I+1] := Byte(Char(Pointer((Integer(aRow1)+I*4))^));
+  for I:=0 to 3 do srcAlpha[I+1+4] := Byte(Char(Pointer((Integer(aRow2)+I*4))^));
+  for I:=0 to 3 do srcAlpha[I+1+8] := Byte(Char(Pointer((Integer(aRow3)+I*4))^));
+  for I:=0 to 3 do srcAlpha[I+1+12] := Byte(Char(Pointer((Integer(aRow4)+I*4))^));
 
-  //Find min-max colors
+  // Find min-max colors
   ColorMin := 255;
   ColorMax := 0;
-  for i:=1 to 8 do ColorMin := min(ColorMin,InputColor[i*2-1],InputColor[i*2]);
-  for i:=1 to 8 do ColorMax := max(ColorMax,InputColor[i*2-1],InputColor[i*2]);
+  for I:=1 to 8 do ColorMin := Min(ColorMin, srcAlpha[I*2-1], srcAlpha[I*2]);
+  for I:=1 to 8 do ColorMax := Max(ColorMax, srcAlpha[I*2-1], srcAlpha[I*2]);
 
-  //If there's same color over the block, then use archive-friendly output
-  //Col for first byte and zero for other
+  // If there's same color over the block, then use archive-friendly output
+  // Col for the first byte and zero for the rest
   if ColorMin = ColorMax then
   begin
-    OutDat := ColorMin; //Rest of In64 is filled with zeroes
+    aOutDat := ColorMin; //Rest of In64 is filled with zeroes
+    aRMS := 0;
   end else
   begin
     with Trial[1] do
     begin
 
-      for i := 1 to 16 do
+      for I := 1 to 16 do
       begin
-        if InputColor[i]-ColorMin<>0 then //Don't divide by zero
-          im[i] := round(7/((ColorMax-ColorMin)/(InputColor[i]-ColorMin)))  //0..7
+        if srcAlpha[I]-ColorMin<>0 then //Don't divide by zero
+          im[I] := Round(7/((ColorMax-ColorMin)/(srcAlpha[I]-ColorMin)))  //0..7
         else
-          im[i] := 0;
-        im[i] := 7-im[i] + 1;
-        if im[i] = 1 then im[i]:=0;
-        if im[i] = 8 then im[i]:=1;
+          im[I] := 0;
+        im[I] := 7-im[I] + 1;
+        if im[I] = 1 then im[I]:=0;
+        if im[I] = 8 then im[I]:=1;
       end;
 
       Dat := ColorMax + (ColorMin shl 8); //Max goes first
-      for i := 1 to 16 do
-        Dat := Dat + int64( int64(im[i] AND $07) shl ( 16 + (i-1)*3 ) );
+      for I := 1 to 16 do
+        Dat := Dat + int64( int64(im[I] AND $07) shl ( 16 + (I-1)*3 ) );
       DXT_A_Decode(@Dat, TestColor);
       tRMS := 0;
-      for i := 1 to 16 do tRMS := tRMS + sqr(InputColor[i]-TestColor[i]);
+      for I := 1 to 16 do tRMS := tRMS + Sqr(srcAlpha[I]-TestColor[I]);
     end;
 
     with Trial[2] do
@@ -70,36 +71,38 @@ begin
       FillChar(im,SizeOf(im),#0); //reset
       ColorMin := 255 - Tolerate;
       ColorMax := Tolerate;
-      for i:=1 to 16 do if InputColor[i] >= Tolerate       then ColorMin := Math.min(ColorMin, InputColor[i]);
-      for i:=1 to 16 do if InputColor[i] <= (255-Tolerate) then ColorMax := Math.max(ColorMax, InputColor[i]);
+      for I:=1 to 16 do if srcAlpha[I] >= Tolerate       then ColorMin := Math.min(ColorMin, srcAlpha[I]);
+      for I:=1 to 16 do if srcAlpha[I] <= (255-Tolerate) then ColorMax := Math.max(ColorMax, srcAlpha[I]);
 
-      for i:=1 to 16 do begin
-        if InputColor[i]<=(ColorMin div 2) then im[i]:=6 else
-        if InputColor[i]>=(ColorMax div 2) then im[i]:=7 else
-        if InputColor[i]<=ColorMin then im[i]:=0 else
-        if InputColor[i]>=ColorMax then im[i]:=1 else
+      for I:=1 to 16 do begin
+        if srcAlpha[I]<=(ColorMin div 2) then im[I]:=6 else
+        if srcAlpha[I]>=(ColorMax div 2) then im[I]:=7 else
+        if srcAlpha[I]<=ColorMin then im[I]:=0 else
+        if srcAlpha[I]>=ColorMax then im[I]:=1 else
           begin
-            im[i] := round(5/((ColorMax-ColorMin)/(InputColor[i]-ColorMin)))+1;  //0..5
-            if im[i]=1 then im[i]:=0;
-            if im[i]=6 then im[i]:=1;
+            im[I] := round(5/((ColorMax-ColorMin)/(srcAlpha[I]-ColorMin)))+1;  //0..5
+            if im[I]=1 then im[I]:=0;
+            if im[I]=6 then im[I]:=1;
           end;
       end;
 
       Dat := ColorMin + (ColorMax shl 8);
-      for i := 1 to 16 do
-      Dat := Dat + int64( int64(im[i] AND $07) shl ( 16 + (i-1)*3 ) );
+      for I := 1 to 16 do
+      Dat := Dat + int64( int64(im[I] AND $07) shl ( 16 + (I-1)*3 ) );
       tRMS := 0;
       DXT_A_Decode(@Dat, TestColor);
-      for i := 1 to 16 do tRMS := tRMS + sqr(InputColor[i]-TestColor[i]);
+      for I := 1 to 16 do tRMS := tRMS + sqr(srcAlpha[I]-TestColor[I]);
     end;
 
     //Choose least error-result and take it
-    if Trial[1].tRMS<Trial[2].tRMS then begin
-      RMS    := RMS + Trial[1].tRMS;
-      OutDat := Trial[1].Dat;
-    end else begin
-      RMS    := RMS + Trial[2].tRMS;
-      OutDat := Trial[2].Dat;
+    if Trial[1].tRMS<Trial[2].tRMS then
+    begin
+      aRMS    := aRMS + Trial[1].tRMS;
+      aOutDat := Trial[1].Dat;
+    end else
+    begin
+      aRMS    := aRMS + Trial[2].tRMS;
+      aOutDat := Trial[2].Dat;
     end;
   end;
 end;

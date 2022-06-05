@@ -152,7 +152,8 @@ begin
   c2[3,2]:=mix(c2[4,2],c2[1,2],2/3);
   c2[3,3]:=mix(c2[4,3],c2[1,3],2/3);
 
-  for i:=1 to 16 do begin
+  for i:=1 to 16 do
+  begin
     for h:=1 to 4 do
       tRMS[h]:=GetLengthSQR(col[i,1]-c2[h,1],col[i,2]-c2[h,2],col[i,3]-c2[h,3]);
     if tRMS[1]<tRMS[2] then h:=1 else h:=2;
@@ -172,7 +173,8 @@ begin
   c2[2,2]:=(c2[1,2]+c2[4,2])div 2;
   c2[2,3]:=(c2[1,3]+c2[4,3])div 2;
 
-  for i:=1 to 16 do begin
+  for i:=1 to 16 do
+  begin
     for h:=1 to 4 do
       tRMS[h]:=GetLengthSQR(col[i,1]-c2[h,1],col[i,2]-c2[h,2],col[i,3]-c2[h,3]);
     if tRMS[1]<tRMS[2] then h:=1 else h:=2;
@@ -188,8 +190,10 @@ begin
 
 //Case3 Enlarge range one direction to get better match for 1/3 or 2/3 interpolation
 
-  for k:=0 to 1 do begin
-    if k=0 then begin
+  for k:=0 to 1 do
+  begin
+    if k=0 then
+    begin
       c2[1,1]:=EnsureRange(c0[1,1]+(c0[1,1]-c0[4,1])div 2,0,255);
       c2[1,2]:=EnsureRange(c0[1,2]+(c0[1,2]-c0[4,2])div 2,0,255);
       c2[1,3]:=EnsureRange(c0[1,3]+(c0[1,3]-c0[4,3])div 2,0,255);

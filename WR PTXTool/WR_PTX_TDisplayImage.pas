@@ -827,18 +827,18 @@ begin
       yp:=((i-1) div ((MMH-1) div 4 + 1) )*4 + 1;
       if Props.hasAlpha then
       begin
-        DXT_A_Encode(@RGBAmm[yp+0,xp,4],
-                     @RGBAmm[yp+1,xp,4],
-                     @RGBAmm[yp+2,xp,4],
-                     @RGBAmm[yp+3,xp,4],
-                     DXTAOut,RMS[4]);
-        blockwrite(f,DXTAOut,8);
+        DXT_A_Encode(@RGBAmm[yp+0, xp, 4],
+                     @RGBAmm[yp+1, xp, 4],
+                     @RGBAmm[yp+2, xp, 4],
+                     @RGBAmm[yp+3, xp, 4],
+                     DXTAOut, RMS[4]);
+        blockwrite(f, DXTAOut, 8);
       end;
-      DXT_RGB_Encode(@RGBAmm[yp+0,xp,1],
-                     @RGBAmm[yp+1,xp,1],
-                     @RGBAmm[yp+2,xp,1],
-                     @RGBAmm[yp+3,xp,1],
-                     DXTOut,RMS);
+      DXT_RGB_Encode(@RGBAmm[yp+0, xp, 1],
+                     @RGBAmm[yp+1, xp, 1],
+                     @RGBAmm[yp+2, xp, 1],
+                     @RGBAmm[yp+3, xp, 1],
+                     DXTOut, RMS);
       blockwrite(f,DXTOut,8);
     end;
 
