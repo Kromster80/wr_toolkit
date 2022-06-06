@@ -42,7 +42,7 @@ object Form1: TForm1
     Height = 256
     OnMouseDown = ShowMenu
   end
-  object Label3: TLabel
+  object lbNoAlpha: TLabel
     Left = 543
     Top = 218
     Width = 50
@@ -57,7 +57,7 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
   end
-  object Label4: TLabel
+  object lbNoRGB: TLabel
     Left = 281
     Top = 218
     Width = 46
@@ -72,20 +72,6 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
   end
-  object Label6: TLabel
-    Left = 524
-    Top = 64
-    Width = 176
-    Height = 13
-    Caption = 'Replace color-key with average color'
-  end
-  object Label8: TLabel
-    Left = 524
-    Top = 40
-    Width = 129
-    Height = 13
-    Caption = 'Create alpha from color-key'
-  end
   object Image_RGB: TImage
     Left = 185
     Top = 96
@@ -94,7 +80,7 @@ object Form1: TForm1
     OnMouseDown = ShowMenu
     OnMouseUp = Image_RGBMouseUp
   end
-  object GroupBox1: TGroupBox
+  object gbInfo: TGroupBox
     Left = 184
     Top = 7
     Width = 305
@@ -104,11 +90,11 @@ object Form1: TForm1
     object Label1: TLabel
       Left = 8
       Top = 18
-      Width = 115
+      Width = 23
       Height = 13
-      Caption = 'Size - ____x____ RGBA'
+      Caption = 'Size:'
     end
-    object LabelCom: TLabel
+    object Label9: TLabel
       Left = 8
       Top = 50
       Width = 60
@@ -118,16 +104,16 @@ object Form1: TForm1
     object Label5: TLabel
       Left = 8
       Top = 34
-      Width = 68
+      Width = 46
       Height = 13
-      Caption = 'MipMap levels'
+      Caption = 'MipMaps:'
     end
-    object LabelR: TLabel
+    object Label10: TLabel
       Left = 144
       Top = 18
-      Width = 145
+      Width = 53
       Height = 13
-      Caption = 'Fade color  R___  G___  B___'
+      Caption = 'Fade color:'
     end
     object Label2: TLabel
       Left = 198
@@ -139,9 +125,44 @@ object Form1: TForm1
     object Label7: TLabel
       Left = 144
       Top = 34
+      Width = 27
+      Height = 13
+      Caption = 'RMS:'
+    end
+    object lbSize: TLabel
+      Left = 32
+      Top = 18
+      Width = 94
+      Height = 13
+      Caption = '<<>> x <<>> x <<>>'
+    end
+    object lbMipMaps: TLabel
+      Left = 56
+      Top = 34
       Width = 24
       Height = 13
-      Caption = 'RMS'
+      Caption = '<<>>'
+    end
+    object lbCompression: TLabel
+      Left = 72
+      Top = 50
+      Width = 24
+      Height = 13
+      Caption = '<<>>'
+    end
+    object lbFadeColor: TLabel
+      Left = 200
+      Top = 18
+      Width = 24
+      Height = 13
+      Caption = '<<>>'
+    end
+    object lbRMS: TLabel
+      Left = 176
+      Top = 34
+      Width = 24
+      Height = 13
+      Caption = '<<>>'
     end
     object SpinMM: TSpinEdit
       Left = 144
@@ -212,52 +233,25 @@ object Form1: TForm1
   end
   object CBnonPOT: TCheckBox
     Left = 496
-    Top = 12
+    Top = 52
     Width = 209
     Height = 17
     Caption = 'Allow non-POT images (no use in-game)'
     TabOrder = 5
     OnClick = CBnonPOTClick
   end
-  object ButtonA: TBitBtn
+  object rgCompressionQuality: TRadioGroup
     Left = 496
-    Top = 32
-    Width = 25
-    Height = 25
-    Glyph.Data = {
-      5A010000424D5A01000000000000760000002800000013000000130000000100
-      040000000000E400000000000000000000001000000000000000000000000000
-      8000008000000080800080000000800080008080000080808000C0C0C0000000
-      FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00FF777777FFFF
-      FFFFFFF00000F7777777777FFF0FF0F00000F700077777FFFF0FF0F00000FF07
-      70777FFFFF0000F00000FF07770FFFFFFF0FF0F00000FFF07770FFFFFF0FF0F0
-      0000FFFF07770FFFFFF00FF00000FFFFF07FF0FFFFFFFFF00000FFFFFF0FFF0F
-      FFFFFFF00000FFFFFFF0FFF0F0FFFFF00000FFFFFFFF0FFF00FFFFF00000FFFF
-      FFFFF0F0000FFFF00000FFFFFFFFFF000000FFF00000FFFFFFFFF00000000FF0
-      0000FFFFFFFFFFF0000000F00000FFFFFFFFFFFF00F000F00000FFFFFFFFFFFF
-      F00F00F00000FFFFFFFFFFFFFF000FF00000FFFFFFFFFFFFFFFFFFF00000}
+    Top = 8
+    Width = 201
+    Height = 41
+    Caption = ' Compression quality '
+    Columns = 2
+    ItemIndex = 0
+    Items.Strings = (
+      'Low (fast)'
+      'High (slow)')
     TabOrder = 6
-    OnClick = SampleAClick
-  end
-  object ButtonR: TBitBtn
-    Left = 496
-    Top = 56
-    Width = 25
-    Height = 25
-    Glyph.Data = {
-      5A010000424D5A01000000000000760000002800000013000000130000000100
-      040000000000E400000000000000000000001000000000000000000000000000
-      8000008000000080800080000000800080008080000080808000C0C0C0000000
-      FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00FF777777FFFF
-      FFFFFFF00000F7777777777FF0FF0FF00000F700077777FFF0FF0FF00000FF07
-      70777FFFF000FFF00000FF07770FFFFFF0FF0FF00000FFF07770FFFFF0FF0FF0
-      0000FFFF07770FFFF000FFF00000FFFFF07FF0FFFFFFFFF00000FFFFFF0FFF0F
-      FFFFFFF00000FFFFFFF0FFF0F0FFFFF00000FFFFFFFF0FFF00FFFFF00000FFFF
-      FFFFF0F0000FFFF00000FFFFFFFFFF000000FFF00000FFFFFFFFF00000000FF0
-      0000FFFFFFFFFFF0000000F00000FFFFFFFFFFFF00F000F00000FFFFFFFFFFFF
-      F00F00F00000FFFFFFFFFFFFFF000FF00000FFFFFFFFFFFFFFFFFFF00000}
-    TabOrder = 7
-    OnClick = SampleRClick
   end
   object Save1: TSaveDialog
     DefaultExt = 'bmp'
@@ -383,6 +377,14 @@ object Form1: TForm1
         Caption = 'Clear Alpha'
         Enabled = False
         OnClick = ClearAlpha
+      end
+      object Createalphafromcolorkey1: TMenuItem
+        Caption = 'Create alpha from color-key'
+        OnClick = Createalphafromcolorkey1Click
+      end
+      object Replacecolorkeywithaveragecolor1: TMenuItem
+        Caption = 'Replace color-key with average color'
+        OnClick = Replacecolorkeywithaveragecolor1Click
       end
     end
     object AboutMenu: TMenuItem

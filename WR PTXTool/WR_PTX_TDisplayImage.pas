@@ -22,7 +22,8 @@ type
     end;
     RGBA: array [1..2049,1..2049,1..4] of byte;
     RGBAmm: array [1..2049,1..2049,1..4] of byte;
-    RMS: array[1..4]of single;
+    fRmsRGB: Single;
+    fRmsA: Single;
     Fog2: array[1..3]of Byte;
     MipMapQtyUse: Integer;
     MipMapQtyMax: Integer;
@@ -59,7 +60,7 @@ type
     procedure OpenTGA(const aFilename:string);
     procedure Open2DB(const aFilename:string);
     procedure SaveUncompressedPTX(FileName:string);
-    procedure SaveCompressedPTX(const aFilename: string);
+    procedure SaveCompressedPTX(const aFilename: string; aHeuristic: TCompressionHeuristics);
     procedure SaveTGA(const aFilename: string);
     procedure SaveMipMap(const aFilename:string; aLevel:Integer);
     procedure ExportBitmapRGB(const aFileName:string);
@@ -130,7 +131,7 @@ end;
 
 function TDisplayImage.GetInfoString:string;
 begin
-  Result:='Size - '+IntToStr(Props.SizeH)+'x'+IntToStr(Props.SizeV)+' RGB';
+  Result := IntToStr(Props.sizeH) + 'x' + IntToStr(Props.sizeV) + ' RGB';
   if Props.hasAlpha then Result := Result + 'A'; //RGB+A
 end;
 
@@ -139,14 +140,18 @@ begin
   Result := 'R' + IntToStr(Fog2[1]) + '  G' + IntToStr(Fog2[2]) + '  B' + IntToStr(Fog2[3]);
 end;
 
-function TDisplayImage.GetRMSString:string;
+function TDisplayImage.GetRMSString: string;
 begin
-  if RMS[1]+RMS[2]+RMS[3]+RMS[4]>0 then
-    Result:='RMS '+floattostr(round((RMS[1]+RMS[2]+RMS[3])*33.3)/100)+'  '+floattostr(round(RMS[4]*100)/100);
+  if fRmsRGB + fRmsA > 0 then
+    Result := Format('rgb%.2f a%.2f', [fRmsRGB, fRmsA]);
 end;
 
 function TDisplayImage.GetChangedString:string;
-begin if IsChanged then Result:='*' else Result:=''; end;
+const
+  IS_CHANGED: array [Boolean] of string = ('', '*');
+begin
+  Result := IS_CHANGED[IsChanged];
+end;
 
 procedure TDisplayImage.ComputeFog;
 var
@@ -528,8 +533,9 @@ end;
 end;
 closefile(f);
 
-ComputeFog;
-FillChar(RMS,SizeOf(RMS),#0);
+  ComputeFog;
+  fRmsRGB := 0;
+  fRmsA := 0;
 end;
 
 
@@ -602,7 +608,8 @@ begin
   closefile(f);
 
   ComputeFog;
-  FillChar(RMS,SizeOf(RMS),#0);
+  fRmsRGB := 0;
+  fRmsA := 0;
 end;
 
 
@@ -666,7 +673,8 @@ begin
   closefile(f);
 
   ComputeFog;
-  FillChar(RMS,SizeOf(RMS),#0);
+  fRmsRGB := 0;
+  fRmsA := 0;
 end;
 
 procedure TDisplayImage.Open2DB(const aFilename: string);
@@ -770,7 +778,8 @@ begin
   closefile(f);
 
   ComputeFog;
-  FillChar(RMS,SizeOf(RMS),#0);
+  fRmsRGB := 0;
+  fRmsA := 0;
 end;
 
 procedure TDisplayImage.SaveUncompressedPTX(FileName:string);
@@ -809,11 +818,12 @@ begin
     MMV := Max(MMV div 2, 1);
   end;
   closefile(f);
-  FillChar(RMS,SizeOf(RMS),#0);
+  fRmsRGB := 0;
+  fRmsA := 0;
   IsChanged:=false;
 end;
 
-procedure TDisplayImage.SaveCompressedPTX(const aFilename: string);
+procedure TDisplayImage.SaveCompressedPTX(const aFilename: string; aHeuristic: TCompressionHeuristics);
 var
   ms: TMemoryStream;
   i,h:Integer;
@@ -821,8 +831,11 @@ var
   DXTOut:int64;
   DXTAOut:int64;
   t: Cardinal;
+  cc: TDXTCompressorColor;
+  newRMS: Single;
 begin
-  FillChar(RMS,SizeOf(RMS),#0);
+  fRmsRGB := 0;
+  fRmsA := 0;
 
   t := GetTickCount;
 
@@ -840,6 +853,8 @@ begin
   ms.Write(Fog2[2], 1);
   ms.Write(Fog2[1], 1);
 
+  cc := TDXTCompressorColor.Create;
+
   MMH := Props.SizeH;
   MMV := Props.SizeV;
   for h := 1 to MipMapQtyUse do
@@ -855,24 +870,32 @@ begin
       yp := ((i-1) div ((MMH-1) div 4 + 1)) * 4 + 1;
       if Props.hasAlpha then
       begin
-        DXT_A_Encode(@RGBAmm[yp+0, xp, 4], @RGBAmm[yp+1, xp, 4], @RGBAmm[yp+2, xp, 4], @RGBAmm[yp+3, xp, 4], DXTAOut, RMS[4]);
+        newRMS := 0;
+        DXT_A_Encode(@RGBAmm[yp+0, xp, 4], @RGBAmm[yp+1, xp, 4], @RGBAmm[yp+2, xp, 4], @RGBAmm[yp+3, xp, 4], DXTAOut, newRMS);
         ms.Write(DXTAOut, 8);
+
+        fRmsA := fRmsA + newRMS;
       end;
-      DXT_RGB_Encode(@RGBAmm[yp+0, xp, 1], @RGBAmm[yp+1, xp, 1], @RGBAmm[yp+2, xp, 1], @RGBAmm[yp+3, xp, 1], DXTOut, RMS);
+      newRMS := 0;
+      //DXT_RGB_Encode(@RGBAmm[yp+0, xp, 1], @RGBAmm[yp+1, xp, 1], @RGBAmm[yp+2, xp, 1], @RGBAmm[yp+3, xp, 1], DXTOut, newRMS);
+      cc.CompressBlock(@RGBAmm[yp+0, xp, 1], @RGBAmm[yp+1, xp, 1], @RGBAmm[yp+2, xp, 1], @RGBAmm[yp+3, xp, 1], aHeuristic, DXTOut, newRMS);
       ms.Write(DXTOut, 8);
+
+      fRmsRGB := fRmsRGB + newRMS;
     end;
 
     MMH := Max(MMH div 2, 1);
     MMV := Max(MMV div 2, 1);
   end;
 
+  cc.Free;
+
   ms.SaveToFile(aFileName);
   ms.Free;
 
-  RMS[1] := Sqrt(RMS[1] / (Props.SizeH * Props.SizeV));
-  RMS[2] := Sqrt(RMS[2] / (Props.SizeH * Props.SizeV));
-  RMS[3] := Sqrt(RMS[3] / (Props.SizeH * Props.SizeV));
-  RMS[4] := Sqrt(RMS[4] / (Props.SizeH * Props.SizeV));
+  fRmsRGB := Sqrt(fRmsRGB / (Props.SizeH * Props.SizeV));
+  fRmsA := Sqrt(fRmsA / (Props.SizeH * Props.SizeV));
+
   IsChanged := False;
 
   fSavedIn := IntToStr(GetTickCount - t);
@@ -997,7 +1020,8 @@ begin
 
   Bitmap.Free;
   ComputeFog;
-  FillChar(RMS,SizeOf(RMS),#0);
+  fRmsRGB := 0;
+  fRmsA := 0;
   IsChanged:=true;
 end;
 
@@ -1029,7 +1053,8 @@ begin
   Props.IsSYNPacked:=false;
 
   Bitmap.Free;
-  FillChar(RMS,SizeOf(RMS),#0);
+  fRmsRGB := 0;
+  fRmsA := 0;
   IsChanged:=true;
 end;
 

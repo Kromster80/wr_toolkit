@@ -1,10 +1,81 @@
 unit WR_PTX_TDXT_Color;
 interface
 uses
-  Math, KromUtils;
+  Math, KromUtils, Windows, SysUtils;
 
-procedure DXT_RGB_Encode(aRow1,aRow2,aRow3,aRow4: Pointer; out OutDat: int64; out RMS: array of single);
-procedure DXT_RGB_Decode(InDat: Pointer; out OutDat: array of byte);
+type
+  TDLLCompressProc = procedure(rgba: PByte; block: Pointer; flags: Integer; metric: PSingle); stdcall;
+  TCompressionHeuristics = (
+    chBest,
+    chStraight1, chStraight2,
+    chExtended11, chExtended12,
+    chExtended21, chExtended22,
+    ch51, ch52,
+    chRygs1, chRygs2,
+    chDLL,
+    chPlain1,
+    chPlain2,
+    chOld
+  );
+
+const
+  HEURISTIC_NAME: array [TCompressionHeuristics] of string = (
+    'best',
+    'Straight1', 'Straight2',
+    'Extended11', 'Extended12',
+    'Extended21', 'Extended22',
+    '51', '52',
+    'Rygs1', 'Rygs2',
+    'DLL',
+    'Plain1',
+    'Plain2',
+    'Old'
+  );
+
+type
+  TRGBColor = record
+    R,G,B: Byte;
+  end;
+  TRGBColor16 = record
+    R,G,B: Word;
+  end;
+
+  TDXTCompressorColor = class
+  private
+    fDllLib: NativeUInt;
+    fDllCompress: TDLLCompressProc;
+    fSrcCol: array [1..16] of TRGBColor;
+
+    fDst: array [TCompressionHeuristics] of record
+      Data: Int64;
+      RMS: Single;
+    end;
+
+    function CalculateRMS(aData: Pointer): Single;
+    procedure GetMinMaxColor(out aColorMin, aColorMax: TRGBColor);
+    procedure GetMinMaxColor16(out aColorMin, aColorMax: Word);
+
+    procedure GetMostColor16(out aColorMin, aColorMax: Word);
+    procedure GetRygsColor16(out aColorMin, aColorMax: Word);
+    function RefineBlock(var aColorMin, aColorMax: Word): Boolean;
+
+    function SaveToBlock(aColor0, aColor1: Word): Int64;
+    function SearchMinMax(aDir: Boolean): Int64;
+    function SearchExtended23(aExt, aDir: Boolean): Int64;
+    function Search5(aDir: Boolean): Int64;
+    function SearchRygs(aDir: Boolean): Int64;
+    function SearchDLL: Int64;
+    function SearchPlain(aDir: Boolean): Int64;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure CompressBlock(aRow1, aRow2, aRow3, aRow4: Pointer; aHeuristic: TCompressionHeuristics;
+      out aBlockData: Int64; out aRMS: Single);
+  end;
+
+
+procedure DXT_RGB_Encode(aRow1,aRow2,aRow3,aRow4: Pointer; out OutDat: Int64; out RMS: Single);
+procedure DXT_RGB_Decode(aInDat: Pointer; out OutDat: array of byte);
 
 implementation
 
@@ -23,7 +94,641 @@ begin
   aB := aWord mod 32 * 8;
 end;
 
-procedure DXT_RGB_Encode(aRow1,aRow2,aRow3,aRow4: Pointer; out OutDat:int64; out RMS:array of single);
+
+{ TDXTCompressorColor }
+constructor TDXTCompressorColor.Create;
+var
+  p: Pointer;
+begin
+  inherited;
+
+  // Load ourselves to be able to show a warning message and work without the DLL
+  if FileExists('squish.dll') then
+  begin
+    fDllLib := LoadLibrary('squish.dll');
+    if fDllLib <> 0 then
+      fDllCompress := GetProcAddress(fDllLib, PAnsiChar('_Compress2@16'));
+  end;
+end;
+
+
+destructor TDXTCompressorColor.Destroy;
+begin
+  if fDllLib <> 0 then
+    FreeLibrary(fDllLib);
+
+  inherited;
+end;
+
+
+procedure TDXTCompressorColor.GetMinMaxColor(out aColorMin, aColorMax: TRGBColor);
+var
+  I, K: Integer;
+  bestRMS, newRMS: Integer;
+  idxColorMin, idxColorMax: Integer;
+begin
+  idxColorMin := -1;
+  idxColorMax := -1;
+
+  // Find minmax pair from existing colors
+  bestRMS := 0;
+
+  // Find two most distant colors
+  for I:=1 to 16 do
+  for K:=I+1 to 16 do
+  begin
+    newRMS := GetLengthSQR(fSrcCol[I].R - fSrcCol[K].R, fSrcCol[I].G - fSrcCol[K].G, fSrcCol[I].B - fSrcCol[K].B);
+    if newRMS >= bestRMS then
+    begin
+      bestRMS := newRMS;
+      if RGBToWord(fSrcCol[I].R, fSrcCol[I].G, fSrcCol[I].B) <= RGBToWord(fSrcCol[K].R, fSrcCol[K].G, fSrcCol[K].B) then
+      begin
+        idxColorMin := I;
+        idxColorMax := K;
+      end
+      else
+      begin
+        idxColorMin := K;
+        idxColorMax := I;
+      end;
+    end;
+  end;
+
+  aColorMin := fSrcCol[idxColorMin];
+  aColorMax := fSrcCol[idxColorMax];
+end;
+
+
+procedure TDXTCompressorColor.GetMinMaxColor16(out aColorMin, aColorMax: Word);
+var
+  a, b: TRGBColor;
+begin
+  GetMinMaxColor(a, b);
+
+  aColorMin := RGBToWord(a.R, a.G, a.B);
+  aColorMax := RGBToWord(b.R, b.G, b.B);
+end;
+
+
+procedure TDXTCompressorColor.GetMostColor16(out aColorMin, aColorMax: Word);
+var
+  I, K: Integer;
+  rms: array [1..16, 1..16] of Integer;
+  leastRMS: Integer;
+  idxColorMin, idxColorMax: Integer;
+  rmsPair1, rmsPair2: Integer;
+  wipColor: array [1..16] of TRGBColor;
+  L: Integer;
+begin
+  for I:=1 to 16 do
+    wipColor[I] := fSrcCol[I];
+
+  // Calculate all RMSs
+  for I:=1 to 16 do
+  begin
+    rms[I,I] := -1;
+    for K:=I+1 to 16 do
+    begin
+      rms[I,K] := GetLengthSQR(wipColor[I].R - wipColor[K].R, wipColor[I].G - wipColor[K].G, wipColor[I].B - wipColor[K].B);
+      rms[K,I] := rms[I,K];
+    end;
+  end;
+
+  for L := 1 to 14 do
+  begin
+    // Find a pair of colors with least RMS
+    leastRMS := MaxInt;
+    for I:=1 to 16 do
+      for K:=I+1 to 16 do
+        if (rms[I,K] <> -1)
+        and (rms[I,K] < leastRMS) then
+        begin
+          leastRMS := rms[I,K];
+          rmsPair1 := I;
+          rmsPair2 := K;
+        end;
+
+    // Merge colors
+    wipColor[rmsPair1].R := (wipColor[rmsPair1].R + wipColor[rmsPair2].R) div 2;
+    wipColor[rmsPair1].G := (wipColor[rmsPair1].G + wipColor[rmsPair2].G) div 2;
+    wipColor[rmsPair1].B := (wipColor[rmsPair1].B + wipColor[rmsPair2].B) div 2;
+
+    // Disuse anything regarding 2nd color
+    for I:=1 to 16 do
+    begin
+      rms[I,rmsPair2] := -1;
+      rms[rmsPair2,I] := -1;
+    end;
+
+    // Calculate new RMSs
+    for K:=1 to 16 do
+    if (rms[rmsPair1,K] <> -1) then
+    begin
+      rms[rmsPair1,K] := GetLengthSQR(wipColor[rmsPair1].R - wipColor[K].R, wipColor[rmsPair1].G - wipColor[K].G, wipColor[rmsPair1].B - wipColor[K].B);
+      rms[K,rmsPair1] := rms[rmsPair1,K];
+    end;
+  end;
+
+  // Only 2 colors will remain
+  for I:=1 to 16 do
+  if rms[I,1] <> -1 then
+  begin
+    aColorMax := aColorMin;
+    aColorMin := RGBToWord(wipColor[I].R, wipColor[I].G, wipColor[I].B);
+  end;
+end;
+
+
+procedure TDXTCompressorColor.GetRygsColor16(out aColorMin, aColorMax: Word);
+const
+  nIterPower = 4;
+var
+  I: Integer;
+  muv, minv, maxv, mu: TRGBColor16;
+  cov: array[0..5]of Integer;
+  r,g,b: Integer;
+  covf: array[0..5]of Single;
+  vfr, vfg, vfb: Single;
+  iter: Integer;
+  rr,gg,bb: Single;
+  magn: Single;
+  v_r, v_g, v_b: Integer;
+  mind, maxd: Integer;
+  dot: Integer;
+begin
+  muv.R := fSrcCol[1].R;
+  muv.G := fSrcCol[1].G;
+  muv.B := fSrcCol[1].B;
+  minv := muv;
+  maxv := muv;
+  for I := 2 to 16 do
+  begin
+    muv.R := muv.R + fSrcCol[I].R;
+    muv.G := muv.G + fSrcCol[I].G;
+    muv.B := muv.B + fSrcCol[I].B;
+
+    if fSrcCol[I].R < minv.R then minv.R := fSrcCol[I].R;
+    if fSrcCol[I].R > maxv.R then maxv.R := fSrcCol[I].R;
+    if fSrcCol[I].G < minv.G then minv.G := fSrcCol[I].G;
+    if fSrcCol[I].G > maxv.G then maxv.G := fSrcCol[I].G;
+    if fSrcCol[I].B < minv.B then minv.B := fSrcCol[I].B;
+    if fSrcCol[I].B > maxv.B then maxv.B := fSrcCol[I].B;
+  end;
+
+  mu.R := (muv.R + 8) shr 4;
+  mu.G := (muv.G + 8) shr 4;
+  mu.B := (muv.B + 8) shr 4;
+
+// determine covariance matrix
+  for i:=0 to 5 do
+    cov[i] := 0;
+
+  for I := 1 to 16 do
+  begin
+    r := fSrcCol[I].R - mu.R;
+    g := fSrcCol[I].G - mu.G;
+    b := fSrcCol[I].B - mu.B;
+
+    Inc(cov[0], r*r);
+    Inc(cov[1], r*g);
+    Inc(cov[2], r*b);
+    Inc(cov[3], g*g);
+    Inc(cov[4], g*b);
+    Inc(cov[5], b*b);
+  end;
+
+  // convert covariance matrix to float, find principal axis via power iter
+  for i:=0 to 5 do
+    covf[i] := cov[i] / 255;
+
+  vfr := maxv.R - minv.R;
+  vfg := maxv.G - minv.G;
+  vfb := maxv.B - minv.B;
+
+  for iter := 0 to nIterPower - 1 do
+  begin
+    rr := vfr*covf[0] + vfg*covf[1] + vfb*covf[2];
+    gg := vfr*covf[1] + vfg*covf[3] + vfb*covf[4];
+    bb := vfr*covf[2] + vfg*covf[4] + vfb*covf[5];
+
+    vfr := rr;
+    vfg := gg;
+    vfb := bb;
+  end;
+
+  magn := Abs(vfr);
+  if Abs(vfg) > magn then magn := Abs(vfg);
+  if Abs(vfb) > magn then magn := Abs(vfb);
+
+  if magn < 4.0 then
+  begin // too small, default to luminance
+    v_r := 299; // JPEG YCbCr luma coefs, scaled by 1000.
+    v_g := 587;
+    v_b := 114;
+  end else
+  begin
+    magn := 512.0 / magn;
+    v_r := Round(vfr * magn);
+    v_g := Round(vfg * magn);
+    v_b := Round(vfb * magn);
+  end;
+
+  mind := MaxInt;
+  maxd := -MaxInt;
+
+  // Pick colors at extreme points
+  for I := 1 to 16 do
+  begin
+    dot := fSrcCol[i].R*v_r + fSrcCol[i].G*v_g + fSrcCol[i].B*v_b;
+
+    if (dot < mind) then
+    begin
+      mind := dot;
+      aColorMin := RGBToWord(fSrcCol[i].R, fSrcCol[i].G, fSrcCol[i].B);
+    end;
+
+    if (dot > maxd) then
+    begin
+      maxd := dot;
+      aColorMax := RGBToWord(fSrcCol[i].R, fSrcCol[i].G, fSrcCol[i].B);
+    end;
+  end;
+end;
+
+
+function TDXTCompressorColor.RefineBlock(var aColorMin, aColorMax: Word): Boolean;
+const
+  w1Tab: array [0..3] of Byte = (3,0,2,1);
+  prods: array [0..3] of Integer = ($090000,$000900,$040102,$010402);
+//                                   589824    2304  262402   66562
+//                                      768      48     512     258
+  // ^some magic to save a lot of multiplies in the accumulating loop...
+  // (precomputed products of weights for least squares system, accumulated inside one 32-bit register)
+var
+  frb,fg: Single;
+  oldMin, oldMax, min16, max16: Word;
+  i, akku, xx,xy,yy: Integer;
+  At1: TRGBColor16;
+  At2: TRGBColor16;
+  r,g,b,step,w1: Integer;
+  L: Integer;
+begin
+  oldMin := aColorMin;
+  oldMax := aColorMax;
+             {
+  At1 := default(TRGBColor16);
+  At2 := default(TRGBColor16);
+
+  for I := 1 to 16 do
+  begin
+    step := 3;//cm&3;
+    w1 := w1Tab[step];
+    r := fSrcCol[i].R;
+    g := fSrcCol[i].G;
+    b := fSrcCol[i].B;
+
+    Inc(akku, prods[step]);
+    Inc(At1.r, w1*r);
+    Inc(At1.g, w1*g);
+    Inc(At1.b, w1*b);
+    Inc(At2.r, r);
+    Inc(At2.g, g);
+    Inc(At2.b, b);
+  end;
+
+  At2.r := 3*At2.r - At1.r;
+  At2.g := 3*At2.g - At1.g;
+  At2.b := 3*At2.b - At1.b;
+
+  // extract solutions and decide solvability
+  xx := akku shr 16;
+  yy := (akku shr 8) and $ff;
+  xy := (akku shr 0) and $ff;
+
+  if (xx*yy - xy*xy) = 0 then
+    Exit;
+
+  frb := 3.0 * 31.0 / 255.0 / (xx*yy - xy*xy);
+  fg := frb * 63.0 / 31.0;
+
+  // solve.
+  max16 := EnsureRange(Round((At1.r*yy - At2.r*xy)*frb+0.5),0,31) shl 11 +
+           EnsureRange(Round((At1.g*yy - At2.g*xy)*fg +0.5),0,63) shl 5 +
+           EnsureRange(Round((At1.b*yy - At2.b*xy)*frb+0.5),0,31) shl 0;
+
+  min16 := EnsureRange(Round((At2.r*xx - At1.r*xy)*frb+0.5),0,31) shl 11 +
+           EnsureRange(Round((At2.g*xx - At1.g*xy)*fg +0.5),0,63) shl 5 +
+           EnsureRange(Round((At2.b*xx - At1.b*xy)*frb+0.5),0,31) shl 0;
+
+  aColorMin := min16;
+  aColorMax := max16;                                          }
+  Result := (oldMin <> aColorMin) or (oldMax <> aColorMax);
+end;
+
+
+function TDXTCompressorColor.SearchMinMax(aDir: Boolean): Int64;
+var
+  colorMin, colorMax: Word;
+begin
+  GetMinMaxColor16(colorMin, colorMax);
+  if aDir then
+    Result := SaveToBlock(colorMin, colorMax)
+  else
+    Result := SaveToBlock(colorMax, colorMin);
+end;
+
+
+function TDXTCompressorColor.SearchPlain(aDir: Boolean): Int64;
+var
+  colorMin, colorMax: TRGBColor;
+  colorMin16, colorMax16: Word;
+begin
+  GetMinMaxColor(colorMin, colorMax);
+
+  colorMin16 := RGBToWord(Max(colorMin.R - 8, 0), Max(colorMin.G - 4, 0), Max(colorMin.B - 8, 0));
+  colorMax16 := RGBToWord(Min(colorMin.R + 8, 255), Min(colorMin.G + 4, 255), Min(colorMin.B + 8, 255));
+
+  if aDir then
+    Result := SaveToBlock(colorMin16, colorMax16)
+  else
+    Result := SaveToBlock(colorMax16, colorMin16);
+end;
+
+
+function TDXTCompressorColor.SearchExtended23(aExt, aDir: Boolean): Int64;
+const
+  EXTENT = 2;
+var
+  I, K: Integer;
+  colorRgbMin, colorRgbMax, c2: TRGBColor;
+  color16Min, color16Max: Word;
+begin
+  GetMinMaxColor(colorRgbMin, colorRgbMax);
+  GetMinMaxColor16(color16Min, color16Max);
+
+  // Min .. 1/3 .. 2/3 .. Max
+  //  10 ..  13 ..  16 .. 19
+  //  10 ..  14 ..  18 .. 22
+
+  if aExt then
+  begin
+    c2.R := Min(colorRgbMax.R + Round(Max(colorRgbMax.R - ColorRgbMin.R, 0) div EXTENT), 255);
+    c2.G := Min(colorRgbMax.G + Round(Max(colorRgbMax.G - ColorRgbMin.G, 0) div EXTENT), 255);
+    c2.B := Min(colorRgbMax.B + Round(Max(colorRgbMax.B - ColorRgbMin.B, 0) div EXTENT), 255);
+    color16Max := RGBToWord(c2.R, c2.G, c2.B);
+  end else
+  begin
+    c2.R := Max(colorRgbMin.R - Round(Max(colorRgbMax.R - ColorRgbMin.R, 0) div EXTENT), 0);
+    c2.G := Max(colorRgbMin.G - Round(Max(colorRgbMax.G - ColorRgbMin.G, 0) div EXTENT), 0);
+    c2.B := Max(colorRgbMin.B - Round(Max(colorRgbMax.B - ColorRgbMin.B, 0) div EXTENT), 0);
+    color16Min := RGBToWord(c2.R, c2.G, c2.B);
+  end;
+
+  if color16Min > color16Max then
+    SwapInt(color16Min, color16Max);
+
+  if aDir then
+    Result := SaveToBlock(color16Min, color16Max)
+  else
+    Result := SaveToBlock(color16Max, color16Min);
+end;
+
+
+function TDXTCompressorColor.Search5(aDir: Boolean): Int64;
+var
+  colorMin, colorMax: Word;
+begin
+  GetMostColor16(colorMin, colorMax);
+
+  if aDir then
+    Result := SaveToBlock(colorMin, colorMax)
+  else
+    Result := SaveToBlock(colorMax, colorMin);
+end;
+
+
+function TDXTCompressorColor.SearchDLL: Int64;
+const
+  FLAG_DXT1 = 1; //! Use DXT1 compression.
+  FLAG_DXT3 = 2; //! Use DXT3 compression.
+  FLAG_DXT5 = 4; //! Use DXT5 compression.
+  FLAG_COLOR_CLUSTER_FIT = 8; //! Use a slow but high quality colour compressor (the default).
+  FLAG_COLOR_RANGE_FIT = 16;  //! Use a fast but low quality colour compressor.
+  //32 Unused
+  //64 Unused
+  FLAG_COLOR_BY_ALPHA = 128;              //! Weight the colour by alpha during cluster fit (disabled by default).
+  FLAG_COLOR_ITERATIVE_CLUSTER_FIT = 256; //! Use a very slow but very high quality colour compressor.
+var
+  col: array [0..64] of Byte;
+  block: array [0..15] of Byte;
+  metrics: array [0..2] of Single;
+  flags: Integer;
+  I: Integer;
+begin
+  for I := 0 to 15 do
+  begin
+    col[I*4+0] := fSrcCol[I+1].R;
+    col[I*4+1] := fSrcCol[I+1].G;
+    col[I*4+2] := fSrcCol[I+1].B;
+    col[I*4+3] := 255;
+  end;
+
+  for I := 0 to 15 do block[I] := 0;
+  flags := FLAG_DXT1 or FLAG_COLOR_ITERATIVE_CLUSTER_FIT;
+  metrics[0] := 1.0;
+  metrics[1] := 1.0;
+  metrics[2] := 1.0;
+
+  Result := 0;
+
+  if Assigned(fDllCompress) then
+  begin
+    fDllCompress(@col, @block[0], flags, @metrics[0]);
+
+    for I := 0 to 7 do
+      Result := Result or (Int64(block[I]) shl (I*8));
+  end;
+end;
+
+
+function TDXTCompressorColor.SearchRygs(aDir: Boolean): Int64;
+var
+  colorMin, colorMax: Word;
+begin
+  GetRygsColor16(colorMin, colorMax);
+
+  RefineBlock(colorMin, colorMax);
+
+  if aDir then
+    Result := SaveToBlock(colorMin, colorMax)
+  else
+    Result := SaveToBlock(colorMax, colorMin);
+end;
+
+
+function TDXTCompressorColor.SaveToBlock(aColor0, aColor1: Word): Int64;
+var
+  I, K: Integer;
+  lookup: array [0..3, 1..3] of Byte;
+  dst, bestDst: Integer;
+  im: array [0..15] of Byte;
+begin
+  if aColor0 > aColor1 then
+  begin
+    // Max, Min, 2/3 max, 1/3 max
+
+    WordToRGB(aColor0, lookup[0,1], lookup[0,2], lookup[0,3]);
+    WordToRGB(aColor1, lookup[1,1], lookup[1,2], lookup[1,3]);
+    lookup[2, 1] := mix(lookup[0, 1], lookup[1, 1], 2 / 3); // 2/3 Max
+    lookup[2, 2] := mix(lookup[0, 2], lookup[1, 2], 2 / 3);
+    lookup[2, 3] := mix(lookup[0, 3], lookup[1, 3], 2 / 3);
+    lookup[3, 1] := mix(lookup[0, 1], lookup[1, 1], 1 / 3); // 1/3 Max
+    lookup[3, 2] := mix(lookup[0, 2], lookup[1, 2], 1 / 3);
+    lookup[3, 3] := mix(lookup[0, 3], lookup[1, 3], 1 / 3);
+
+    for I := 0 to 15 do
+    begin
+      // To which of four colors it's closest
+      bestDst := MaxInt;
+      for K := 0 to 3 do
+      begin
+        dst := GetLengthSQR(fSrcCol[I + 1].R - lookup[K, 1], fSrcCol[I + 1].G - lookup[K, 2], fSrcCol[I + 1].B - lookup[K, 3]);
+        if dst < bestDst then
+        begin
+          bestDst := dst;
+          im[I] := K;
+        end;
+      end;
+    end;
+  end else
+  begin
+    // Min, Max, 1/2
+
+    WordToRGB(aColor0, lookup[0,1], lookup[0,2], lookup[0,3]);
+    WordToRGB(aColor1, lookup[1,1], lookup[1,2], lookup[1,3]);
+    lookup[2, 1] := mix(lookup[0, 1], lookup[1, 1], 1 / 2); // 1/2
+    lookup[2, 2] := mix(lookup[0, 2], lookup[1, 2], 1 / 2);
+    lookup[2, 3] := mix(lookup[0, 3], lookup[1, 3], 1 / 2);
+
+    for I := 0 to 15 do
+    begin
+      // To which of three colors it's closest
+      bestDst := MaxInt;
+      for K := 0 to 2 do
+      begin
+        dst := GetLengthSQR(fSrcCol[I + 1].R - lookup[K, 1], fSrcCol[I + 1].G - lookup[K, 2], fSrcCol[I + 1].B - lookup[K, 3]);
+        if dst < bestDst then
+        begin
+          bestDst := dst;
+          im[I] := K;
+        end;
+      end;
+    end;
+  end;
+
+  Result := aColor0 + (aColor1 shl 16);
+  for I := 0 to 15 do
+    Result := Result + Int64(Int64(im[I] and $03) shl (32 + I * 2));
+end;
+
+
+function TDXTCompressorColor.CalculateRMS(aData: Pointer): Single;
+var
+  resCol: array [0..47] of Byte;
+  I: Integer;
+begin
+  DXT_RGB_Decode(aData, resCol);
+
+  Result := 0;
+  for I := 0 to 15 do Result := Result + Sqr(fSrcCol[I+1].R - resCol[I*3+0]);
+  for I := 0 to 15 do Result := Result + Sqr(fSrcCol[I+1].G - resCol[I*3+1]);
+  for I := 0 to 15 do Result := Result + Sqr(fSrcCol[I+1].B - resCol[I*3+2]);
+
+  Result := Result / 48;
+end;
+
+
+procedure TDXTCompressorColor.CompressBlock(aRow1, aRow2, aRow3, aRow4: Pointer; aHeuristic: TCompressionHeuristics;
+  out aBlockData: Int64; out aRMS: Single);
+var
+  I: Integer;
+  L: TCompressionHeuristics;
+  best: TCompressionHeuristics;
+  s: Single;
+begin
+  // Save into local RGB buffer
+  for I := 1 to 4 do
+  begin
+    fSrcCol[I].R := PByte(Cardinal(aRow1) + I * 4 - 4 + 0)^;
+    fSrcCol[I].G := PByte(Cardinal(aRow1) + I * 4 - 4 + 1)^;
+    fSrcCol[I].B := PByte(Cardinal(aRow1) + I * 4 - 4 + 2)^;
+
+    fSrcCol[I+4].R := PByte(Cardinal(aRow2) + I * 4 - 4 + 0)^;
+    fSrcCol[I+4].G := PByte(Cardinal(aRow2) + I * 4 - 4 + 1)^;
+    fSrcCol[I+4].B := PByte(Cardinal(aRow2) + I * 4 - 4 + 2)^;
+
+    fSrcCol[I+8].R := PByte(Cardinal(aRow3) + I * 4 - 4 + 0)^;
+    fSrcCol[I+8].G := PByte(Cardinal(aRow3) + I * 4 - 4 + 1)^;
+    fSrcCol[I+8].B := PByte(Cardinal(aRow3) + I * 4 - 4 + 2)^;
+
+    fSrcCol[I+12].R := PByte(Cardinal(aRow4) + I * 4 - 4 + 0)^;
+    fSrcCol[I+12].G := PByte(Cardinal(aRow4) + I * 4 - 4 + 1)^;
+    fSrcCol[I+12].B := PByte(Cardinal(aRow4) + I * 4 - 4 + 2)^;
+  end;
+
+  if aHeuristic in [chBest, chStraight1] then   fDst[chStraight1].Data := SearchMinMax(False);
+  if aHeuristic in [chBest, chStraight2] then   fDst[chStraight2].Data := SearchMinMax(True);
+  if aHeuristic in [chBest, chExtended11] then  fDst[chExtended11].Data := SearchExtended23(False, False);
+  if aHeuristic in [chBest, chExtended12] then  fDst[chExtended12].Data := SearchExtended23(False, True);
+  if aHeuristic in [chBest, chExtended21] then  fDst[chExtended21].Data := SearchExtended23(True, False);
+  if aHeuristic in [chBest, chExtended22] then  fDst[chExtended22].Data := SearchExtended23(True, True);
+  if aHeuristic in [chBest, ch51] then          fDst[ch51].Data := Search5(True);
+  if aHeuristic in [chBest, ch52] then          fDst[ch52].Data := Search5(False);
+  if aHeuristic in [chBest, chRygs1] then       fDst[chRygs1].Data := SearchRygs(False);
+  if aHeuristic in [chBest, chRygs2] then       fDst[chRygs2].Data := SearchRygs(True);
+  if aHeuristic in [chBest, chDLL] then         fDst[chDLL].Data := SearchDLL;
+  if aHeuristic in [chBest, chPlain1] then      fDst[chPlain1].Data := SearchPlain(False);
+  if aHeuristic in [chBest, chPlain2] then      fDst[chPlain2].Data := SearchPlain(True);
+  if aHeuristic in [chBest, chOld] then         DXT_RGB_Encode(aRow1, aRow2, aRow3, aRow4, fDst[chOld].Data, s);
+
+  fDst[chBest].Data := $AAAAAAAAFFFF;
+  fDst[chBest].RMS := MaxSingle;
+
+  for L := Low(TCompressionHeuristics) to High(TCompressionHeuristics) do
+  if aHeuristic in [chBest, L] then
+    fDst[L].RMS := CalculateRMS(@fDst[L].Data);
+
+  best := aHeuristic;
+  for L := Low(TCompressionHeuristics) to High(TCompressionHeuristics) do
+  if aHeuristic in [chBest, L] then
+  if fDst[L].RMS < fDst[best].RMS then
+    best := L;
+
+  //best := chStraight1;
+
+  aBlockData := fDst[best].Data;
+  aRMS := fDst[best].RMS;
+        {
+  case best of
+    chStraight1:   aBlockData := RGBToWord(255, 0, 0);
+    chStraight2:   aBlockData := RGBToWord(255, 128, 0);
+    chExtended11:  aBlockData := RGBToWord(255, 255, 0);
+    chExtended12:  aBlockData := RGBToWord(128, 255, 0);
+    chExtended21:  aBlockData := RGBToWord(255, 255, 0);
+    chExtended22:  aBlockData := RGBToWord(128, 255, 0);
+    ch51:          aBlockData := RGBToWord(0, 255, 0);
+    ch52:          aBlockData := RGBToWord(0, 255, 128);
+    chRygs1:       aBlockData := RGBToWord(0, 255, 255);
+    chRygs2:       aBlockData := RGBToWord(0, 128, 255);
+    chDLL:         aBlockData := RGBToWord(0, 0, 255);
+    chPlain1:      aBlockData := RGBToWord(0, 0, 128);
+    chPlain2:      aBlockData := RGBToWord(0, 0, 128);
+    chOld:         aBlockData := RGBToWord(0, 0, 0);
+  end;      //}
+end;
+
+
+procedure DXT_RGB_Encode(aRow1,aRow2,aRow3,aRow4: Pointer; out OutDat: Int64; out RMS: Single);
 var
   i,k,h:integer;
   Col:array[1..16,1..3]of byte; //Input colors
@@ -46,7 +751,16 @@ var
     begin
       Dat:=mm1+(mm2 shl 16);
       for i:=1 to 16 do
-        Dat:=Dat+int64( int64(im[i] AND $03) shl ( 32 + (i-1)*2 ));
+        Dat := Dat + Int64(Int64(im[I] and $03) shl (32 + (I - 1) * 2));
+
+      {case id of
+        1: Dat := RGBToWord(255, 0, 0);
+        2: Dat := RGBToWord(255, 128, 0);
+        3: Dat := RGBToWord(255, 255, 0);
+        4: Dat := RGBToWord(128, 255, 0);
+        5: Dat := RGBToWord(0, 255, 0);
+        6: Dat := RGBToWord(0, 255, 128);
+      end;}
     end;
   end;
 
@@ -58,11 +772,7 @@ begin
   for i:=0 to 3 do for h:=1 to 3 do col[i+1+4,h] := PByte(Integer(aRow2) +i*4+h-1)^;
   for i:=0 to 3 do for h:=1 to 3 do col[i+1+8,h] := PByte(Integer(aRow3) +i*4+h-1)^;
   for i:=0 to 3 do for h:=1 to 3 do col[i+1+12,h] := PByte(Integer(aRow4) +i*4+h-1)^;
-  for i:=1 to 16 do begin
-    RMS[1] := 0;
-    RMS[2] := 0;
-    RMS[3] := 0;
-  end;
+  RMS := 0;
 
   //Find minmax pair from existing colors;
   tRMS[1] := 65535;
@@ -299,14 +1009,14 @@ begin
 
   MakeBlock(6, m1, m2);
 
-
+                        {
 //  Trial[1].tRMS:=9999999;
 //  Trial[2].tRMS:=9999999;
 //  Trial[3].tRMS:=9999999;
 //  Trial[4].tRMS:=9999999;
 //  Trial[5].tRMS:=9999999;
 //  Trial[6].tRMS:=9999999;
-{  Trial[1].Dat:=RGBToWord(255,0,0);   //Red
+  Trial[1].Dat:=RGBToWord(255,0,0);   //Red
   Trial[2].Dat:=RGBToWord(255,255,0); //Yellow
   Trial[3].Dat:=RGBToWord(0,255,0);   //Green
   Trial[4].Dat:=RGBToWord(0,255,255); //Cyan
@@ -314,31 +1024,32 @@ begin
   Trial[6].Dat:=RGBToWord(255,0,255); //Magenta}
 
   //Choose the result with least RMS error
-    k := 99999;
-    for i:=1 to 6 do
-      if k>Trial[i].tRMS then begin
-        k := Trial[i].tRMS;
-        h := i;
-      end;
-    OutDat := Trial[h].Dat;
+  k := MaxInt;
+  for i:=1 to 6 do
+    if Trial[i].tRMS < k then
+    begin
+      k := Trial[i].tRMS;
+      h := i;
+    end;
+  OutDat := Trial[h].Dat;
   //  if Trial[h].tRMS>100 then
   //    OutDat:=1023;
 
-  DXT_RGB_Decode(@OutDat,Crms); //Carry out RMS error value
-      for i:=1 to 16 do RMS[0] := RMS[0] + sqr(col[i,1] - Crms[i*3-2]);
-      for i:=1 to 16 do RMS[1] := RMS[1] + sqr(col[i,2] - Crms[i*3-1]);
-      for i:=1 to 16 do RMS[2] := RMS[2] + sqr(col[i,3] - Crms[i*3]);
+  DXT_RGB_Decode(@OutDat, Crms); //Carry out RMS error value
+  for i:=1 to 16 do RMS := RMS + Sqr(col[i,1] - Crms[i*3-2]) / 48;
+  for i:=1 to 16 do RMS := RMS + Sqr(col[i,2] - Crms[i*3-1]) / 48;
+  for i:=1 to 16 do RMS := RMS + Sqr(col[i,3] - Crms[i*3]) / 48;
 end;
 
 
-procedure DXT_RGB_Decode(InDat:Pointer; out OutDat:array of byte);
+procedure DXT_RGB_Decode(aInDat:Pointer; out OutDat: array of Byte);
 var
   i,h,x:integer;
   c:array[1..8]of byte;
   Colors:array[1..4,1..3]of word; //4colors in R,G,B
 begin
-  for i := 1 to 8 do //cast into array of byte
-    c[i] := byte(Char(Pointer((cardinal(InDat)+i-1))^));
+  for I := 1 to 8 do //cast into array of byte
+    c[i] := PByte(Cardinal(aInDat)+I-1)^;
 
   //Acquire min/max colors
   Colors[1,1] := (c[2]div 8)*8;                //aRow1
@@ -379,4 +1090,3 @@ begin
 end;
 
 end.
-

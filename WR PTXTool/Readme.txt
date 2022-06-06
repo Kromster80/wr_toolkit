@@ -1,5 +1,5 @@
 ------------------------------------------------------
-PTX Tool 2.2
+PTX Tool 2.3
 ------------------------------------------------------
 
 Description:
@@ -22,6 +22,10 @@ You can use fewer MipMap levels to get sharper picture in game.
 You can use uncompressed PTX images to get better image quality in game.
 
 Changelog:
+v2.3 (06.06.2022)
+  Added Squish.dll DDS compressor (by https://github.com/richgel999/libsquish, MIT license)
+  Improved PTX compression quality
+  Added PTX compression quality selector
 v2.2 (05.06.2022)
   Fixed GUI paddings
   Sped up PTX saving by 10%

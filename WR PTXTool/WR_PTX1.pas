@@ -8,10 +8,10 @@ uses
 type
   TForm1 = class(TForm)
     Image_A: TImage;
-    GroupBox1: TGroupBox;
+    gbInfo: TGroupBox;
     Label1: TLabel;
-    Label3: TLabel;
-    Label4: TLabel;
+    lbNoAlpha: TLabel;
+    lbNoRGB: TLabel;
     Bevel_A: TBevel;
     Bevel_RGB: TBevel;
     Save1: TSaveDialog;
@@ -19,7 +19,7 @@ type
     DirectoryListBox1: TDirectoryListBox;
     FileListBox1: TFileListBox;
     Open1: TOpenDialog;
-    LabelCom: TLabel;
+    Label9: TLabel;
     Label5: TLabel;
     PopupMenu1: TPopupMenu;
     ExportBMPRGB: TMenuItem;
@@ -48,18 +48,22 @@ type
     N2: TMenuItem;
     InvertA: TMenuItem;
     ClearA: TMenuItem;
-    LabelR: TLabel;
+    Label10: TLabel;
     SpinMM: TSpinEdit;
     Label2: TLabel;
     Panel1: TPanel;
     Label7: TLabel;
     Button1: TButton;
     CBnonPOT: TCheckBox;
-    ButtonA: TBitBtn;
-    ButtonR: TBitBtn;
-    Label6: TLabel;
-    Label8: TLabel;
     Image_RGB: TImage;
+    lbSize: TLabel;
+    lbMipMaps: TLabel;
+    lbCompression: TLabel;
+    lbFadeColor: TLabel;
+    lbRMS: TLabel;
+    Createalphafromcolorkey1: TMenuItem;
+    Replacecolorkeywithaveragecolor1: TMenuItem;
+    rgCompressionQuality: TRadioGroup;
     procedure ExportClick(Sender: TObject);
     procedure ImportBMPClick(Sender: TObject);
     procedure SaveCompressedPTX(Sender: TObject);
@@ -82,6 +86,8 @@ type
     procedure SampleRClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer; var Resize: Boolean);
+    procedure Createalphafromcolorkey1Click(Sender: TObject);
+    procedure Replacecolorkeywithaveragecolor1Click(Sender: TObject);
   private
     fStartWidth: Integer;
     fStartHeight: Integer;
@@ -89,7 +95,7 @@ type
 
 
 const
-  VersionInfo = 'Version 2.2           (05 Jun 2022)';
+  VersionInfo = 'Version 2.3           (06 Jun 2022)';
 
 
 var
@@ -102,12 +108,14 @@ var
 
 implementation
 uses
-  WR_AboutBox;
+  WR_AboutBox, WR_PTX_TDXT_Color;
 
 {$R *.dfm}
 
 
 procedure TForm1.Form1Init(Sender: TObject);
+var
+  I: TCompressionHeuristics;
 begin
   DoClientAreaResize(Self);
   fStartWidth := Width;
@@ -123,17 +131,30 @@ begin
   WorkDir := ExtractFilePath(FileListBox1.FileName);
   if WorkDir = '' then WorkDir := ExeDir;
   OpenFile(nil);
-  //fDisplayImage.SaveCompressedPTX(ExeDir+'000.ptx');
-  //FileListBox1.Update;
-  //FileListBox1.FileName:='000.ptx';
-  //OpenFile(nil);
+            {
+  if DebugHook <> 0 then
+  begin
+    FileListBox1.FileName := '_clkdtm2000.ptx';
+    OpenFile(nil);
+
+    for I := Low(TCompressionHeuristics) to High(TCompressionHeuristics) do
+    if I in [chNone, chOld] then
+    begin
+      fDisplayImage.SaveCompressedPTX(Format('_clkdtm2000.%d.ptx', [Ord(I)]), I);
+      DeleteFile(Format('_clkdtm2000_ptx(RMS %s %s).ptx', [HEURISTIC_NAME[I], fDisplayImage.GetRMSString]));
+      RenameFile(Format('_clkdtm2000.%d.ptx', [Ord(I)]), Format('_clkdtm2000_ptx(RMS %s %s).ptx', [HEURISTIC_NAME[I], fDisplayImage.GetRMSString]));
+    end;
+
+    FileListBox1.Update;
+  end;   }
+
   Form1.Caption := 'PTXTool ' + VersionInfo;
 end;
 
 
 procedure TForm1.ImportBMPClick(Sender: TObject);
 begin
-  if not RunOpenDialog(Open1,'',WorkDir,'24bit BMP files (*.bmp)|*.bmp') then exit;
+  if not RunOpenDialog(Open1, '', WorkDir, '24bit BMP files (*.bmp)|*.bmp') then Exit;
 
   if (Sender=ImportBMPRGB)or(Sender=LoadBMPImage1) then
     fDisplayImage.ImportBitmapRGB(Open1.FileName);
@@ -173,9 +194,18 @@ procedure TForm1.ClearAlpha(Sender: TObject);
 begin
   fDisplayImage.ClearAlpha;
   SetAlpha(false);
-  Label1.Caption := fDisplayImage.GetInfoString;
+  lbSize.Caption := fDisplayImage.GetInfoString;
 end;
 
+
+procedure TForm1.Createalphafromcolorkey1Click(Sender: TObject);
+begin
+  SampleColorKey := not SampleColorKey;
+  if SampleColorKey then
+    Cursor := crHandPoint
+  else
+    Cursor := crDefault;
+end;
 
 procedure TForm1.SaveCompressedPTX(Sender: TObject);
 var
@@ -186,7 +216,12 @@ begin
   //Save1.FileName:='000.ptx';
   Save_Cursor   := Screen.Cursor;
   Screen.Cursor := crHourGlass;
-  fDisplayImage.SaveCompressedPTX(Save1.FileName);
+
+  case rgCompressionQuality.ItemIndex of
+    0:  fDisplayImage.SaveCompressedPTX(Save1.FileName, chOld);
+    1:  fDisplayImage.SaveCompressedPTX(Save1.FileName, chBest);
+  end;
+
   FileListBox1.Update;
   FileListBox1.FileName := Save1.FileName;
   OpenFile(nil);
@@ -235,7 +270,7 @@ begin
   fDisplayImage.InvertAlpha;
 end;
 
-procedure TForm1.SetRGB(Value:boolean);
+procedure TForm1.SetRGB(Value: Boolean);
 begin
   SaveUnCompressedPTX1.Enabled  := Value;
   SaveCompressedPTX1.Enabled    := Value;
@@ -246,11 +281,11 @@ begin
   ExportTGA.Enabled             := Value;
   SaveTGAImageMask1.Enabled     := Value;
   SpinMM.Enabled                := Value;
-  Label4.Visible                := not Value; //Hide
+  lbNoAlpha.Visible             := not Value; //Hide
 end;
 
 
-procedure TForm1.SetAlpha(Value:boolean);
+procedure TForm1.SetAlpha(Value: Boolean);
 begin
   ClearA.Enabled        := Value;
   ClearAlpha1.Enabled   := Value;
@@ -258,7 +293,7 @@ begin
   InvertAlpha1.Enabled  := Value;
   ExportBMPA.Enabled    := Value;
   SaveBMPMask1.Enabled  := Value;
-  Label3.Visible        := not Value; //Hide
+  lbNoAlpha.Visible     := not Value; //Hide
 end;
 
 
@@ -277,9 +312,18 @@ begin
 end;
 
 
+procedure TForm1.Replacecolorkeywithaveragecolor1Click(Sender: TObject);
+begin
+  ReplaceColorKey := not ReplaceColorKey;
+  if ReplaceColorKey then
+    Cursor := crHandPoint
+  else
+    Cursor := crDefault;
+end;
+
 procedure TForm1.SpinMMChange(Sender: TObject);
 begin
-  fDisplayImage.SetMipMapQtyUse:=(SpinMM.Value);
+  fDisplayImage.SetMipMapQtyUse := (SpinMM.Value);
   //todo: Add FlipVertical! (by Ast)
 end;
 
@@ -300,17 +344,17 @@ begin
   SpinMM.MaxValue := fDisplayImage.GetMaxMipMapQty;
   SpinMM.Value    := fDisplayImage.GetMipMapQtyUse;
 
-  GroupBox1.Caption := ' '+fDisplayImage.GetFileMask+fDisplayImage.GetChangedString+' ';
-  Label1.Caption := fDisplayImage.GetInfoString;
-  Label5.Caption := inttostr(fDisplayImage.GetMipMapQty)+' MipMap levels';
+  gbInfo.Caption := ' ' + fDisplayImage.GetFileMask + fDisplayImage.GetChangedString + ' ';
+  lbSize.Caption := fDisplayImage.GetInfoString;
+  lbMipMaps.Caption := IntToStr(fDisplayImage.GetMipMapQty);
   if fDisplayImage.GetCompression then
-    LabelCom.Caption:='Compressed'
+    lbCompression.Caption := 'Y'
   else
-    LabelCom.Caption:='Uncompressed';
+    lbCompression.Caption := 'Y';
   if fDisplayImage.GetPacked then
-    LabelCom.Caption:=LabelCom.Caption+' Packed';
-  Label7.Caption := fDisplayImage.GetRMSString;
-  LabelR.Caption := 'Fade color  '+fDisplayImage.GetFogString;
+    lbCompression.Caption := lbCompression.Caption + '+Packed';
+  lbRMS.Caption := fDisplayImage.GetRMSString;
+  lbFadeColor.Caption := fDisplayImage.GetFogString;
 end;
 
 
