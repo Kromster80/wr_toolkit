@@ -1,72 +1,71 @@
-{$IFDEF VER140} {$DEFINE WDC} {$ENDIF}  // Delphi 6
-{$IFDEF VER150} {$DEFINE WDC} {$ENDIF}  // Delphi 7
-{$IFDEF VER220} {$DEFINE WDC} {$ENDIF}  // Delphi XE
-{$IFDEF VER230} {$DEFINE WDC} {$ENDIF}  // Delphi XE2
-{$IFDEF VER290} {$DEFINE WDC} {$ENDIF}  // Delphi XE8
 unit WR_AboutBox;
-{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
 uses
-  {$IFDEF FPC} LResources, LCLIntf, {$ENDIF}
-  Forms, Classes, Controls, StdCtrls, ExtCtrls, Graphics, Grids, kromUtils,
+  Forms, Classes, Controls, StdCtrls, ExtCtrls, Graphics, KromUtils,
   Math;
 
 type
   TAboutForm = class(TForm)
-    About_Link: TLabel;
-    Label_VersionInfo: TLabel;
-    Label3: TLabel;
     Image1: TImage;
-    Label_Text: TLabel;
+    lbName: TLabel;
+    lbVersion: TLabel;
+    lbText: TLabel;
     Bevel1: TBevel;
-    Label1: TLabel;
+    Label3: TLabel;
     Label2: TLabel;
+    lbContactEmail: TLabel;
     Label4: TLabel;
+    lbWebsiteLink: TLabel;
     procedure URLClick(Sender: TObject);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure MailToClick(Sender: TObject);
   private
-    ToolVersion:string;
+    fURLReference: string;
   public
-    procedure Show(aVersionInfo,aText,aToolVersion4URL:string); overload;
+    procedure Show(const aName, aVersion, aText, aURLReference: string); overload;
   end;
 
 var
   AboutForm: TAboutForm;
 
 implementation
+{$R *.dfm}
 
-procedure TAboutForm.Show(aVersionInfo,aText,aToolVersion4URL:string);
+procedure TAboutForm.Show(const aName, aVersion, aText, aURLReference: string);
 begin
-  Label_VersionInfo.Caption:=aVersionInfo;
-  Label_Text.Caption:=aText;
-  ToolVersion:=aToolVersion4URL;
-  Width:=max(256,Label_VersionInfo.Width+64); //Fit version info
+  lbName.Caption := aName;
+  lbVersion.Caption := aVersion;
+  lbText.Caption := aText;
+
+  fURLReference := aURLReference;
+
+  ClientWidth := Max(1, Max(lbVersion.Width, lbText.Width) + 32);
+
+  Height := lbText.Top + lbText.Height + 24 + (Height - Bevel1.Top);
+
   Show;
 end;
 
+
 procedure TAboutForm.MailToClick(Sender: TObject);
 begin
-  MailTo('kromster80@gmail.com','','');
+  MailTo('kromster80@gmail.com', '', '');
 end;
+
 
 procedure TAboutForm.URLClick(Sender: TObject);
 begin
-  OpenMySite(ToolVersion);
+  OpenMySite(fURLReference);
 end;
+
 
 procedure TAboutForm.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if key=27 then AboutForm.Close;   //ESC
+  // ESC
+  if Key = 27 then
+    Close;
 end;
 
-{$IFDEF WDC}
-  {$R *.dfm}
-{$ENDIF}
-
 initialization
-{$IFDEF FPC}
-  {$I WR_AboutBox.lrs}
-{$ENDIF}
 
 end.

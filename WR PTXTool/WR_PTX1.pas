@@ -68,7 +68,7 @@ type
     procedure ImportBMPClick(Sender: TObject);
     procedure SaveCompressedPTX(Sender: TObject);
     procedure ClearAlpha(Sender: TObject);
-    procedure Form1Init(Sender: TObject);
+    procedure Form1Create(Sender: TObject);
     procedure AboutClick(Sender: TObject);
     procedure ShowMenu(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure SaveUncompressedPTX(Sender: TObject);
@@ -85,22 +85,24 @@ type
     procedure Image_RGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure SampleRClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
-    procedure FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer; var Resize: Boolean);
     procedure Createalphafromcolorkey1Click(Sender: TObject);
     procedure Replacecolorkeywithaveragecolor1Click(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
+    fVersionInfo: string;
     fStartWidth: Integer;
     fStartHeight: Integer;
+    fBitmapRGB: TBitmap;
+    fBitmapA: TBitmap;
   end;
 
 
 const
-  VersionInfo = 'Version 2.3           (06 Jun 2022)';
+  TOOL_NAME = 'PTXTool';
+  TOOL_VERSION = 'Version 2.3';
 
 
 var
-  Form1: TForm1;
-  BitmA, Bitm: TBitmap;
   ExeDir, WorkDir: string;
   fDisplayImage: TDisplayImage;
   SampleColorKey: Boolean;
@@ -113,17 +115,21 @@ uses
 {$R *.dfm}
 
 
-procedure TForm1.Form1Init(Sender: TObject);
+procedure TForm1.Form1Create(Sender: TObject);
 var
   I: TCompressionHeuristics;
 begin
+  fVersionInfo := TOOL_VERSION + ' (' + FormatDateTime('YYY/MM/DD HH:MM', GetExeBuildTime) + ')';
+
+  Caption := TOOL_NAME + ' ' + fVersionInfo;
+
   DoClientAreaResize(Self);
   fStartWidth := Width;
   fStartHeight := Height;
 
-  Bitm  := Tbitmap.Create;
-  BitmA := Tbitmap.Create;
-  fDisplayImage := TDisplayImage.Create(Bitm, BitmA, Image_RGB, Image_A);
+  fBitmapRGB := TBitmap.Create;
+  fBitmapA := TBitmap.Create;
+  fDisplayImage := TDisplayImage.Create(fBitmapRGB, fBitmapA, Image_RGB, Image_A);
 
   //CMDLine:='" " "C:\Documents and Settings\Krom\Desktop\Delphi\World Racing\00_ws_logo.2db"';
   FileListBox1.FileName := ExtractOpenedFileName(CMDLine);
@@ -131,24 +137,31 @@ begin
   WorkDir := ExtractFilePath(FileListBox1.FileName);
   if WorkDir = '' then WorkDir := ExeDir;
   OpenFile(nil);
-            {
+                {
   if DebugHook <> 0 then
   begin
-    FileListBox1.FileName := '_clkdtm2000.ptx';
+    FileListBox1.FileName := 'EnvMap.tga';
     OpenFile(nil);
 
     for I := Low(TCompressionHeuristics) to High(TCompressionHeuristics) do
-    if I in [chNone, chOld] then
+    //if I in [chBest, chOld] then
+    if I in [chBest, chOld, chDLL] then
     begin
-      fDisplayImage.SaveCompressedPTX(Format('_clkdtm2000.%d.ptx', [Ord(I)]), I);
-      DeleteFile(Format('_clkdtm2000_ptx(RMS %s %s).ptx', [HEURISTIC_NAME[I], fDisplayImage.GetRMSString]));
-      RenameFile(Format('_clkdtm2000.%d.ptx', [Ord(I)]), Format('_clkdtm2000_ptx(RMS %s %s).ptx', [HEURISTIC_NAME[I], fDisplayImage.GetRMSString]));
+      fDisplayImage.SaveCompressedPTX(Format('EnvMap.%d.ptx', [Ord(I)]), I);
+      DeleteFile(Format('EnvMap_ptx(RMS %s %s).ptx', [HEURISTIC_NAME[I], fDisplayImage.GetRMSString]));
+      RenameFile(Format('EnvMap.%d.ptx', [Ord(I)]), Format('EnvMap_ptx(RMS %s %s).ptx', [HEURISTIC_NAME[I], fDisplayImage.GetRMSString]));
     end;
 
     FileListBox1.Update;
-  end;   }
+  end;   //}
+end;
 
-  Form1.Caption := 'PTXTool ' + VersionInfo;
+
+procedure TForm1.FormDestroy(Sender: TObject);
+begin
+  FreeAndNil(fDisplayImage);
+  FreeAndNil(fBitmapRGB);
+  FreeAndNil(fBitmapA);
 end;
 
 
@@ -246,22 +259,22 @@ end;
 
 
 procedure TForm1.AboutClick(Sender: TObject);
-var
-  s: string;
+const
+  DESC = 'Create PTX image files for MBWR/WR2/AFC11' + EOL +
+    'Opens: BMP, TGA, DDS, 2DB, PTX' + EOL +
+    'Saves: BMP, TGA, PTX' + EOL +
+    EOL +
+    'Right-click on images to open actions menu';
 begin
-  s:='Create PTX image files for MBWR/WR2/AFC11'+eol+
-     'Opens: BMP, TGA, DDS, 2DB, PTX'+eol+
-     'Saves: BMP, TGA, PTX'+eol+eol+
-     'Right-click on images to open actions menu';
-  AboutForm.Show(VersionInfo, s, 'PTXTool');
+  AboutForm.Show(TOOL_NAME, fVersionInfo, DESC, TOOL_NAME);
 end;
 
 
 procedure TForm1.ShowMenu(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  if Button <> mbRight then exit;
-  if Sender = Image_RGB then PopupMenu1.Popup(Form1.Left+Image_RGB.Left+2+X,Form1.Top+Image_RGB.Top+40+Y);
-  if Sender = Image_A   then PopupMenu1.Popup(Form1.Left+Image_A.Left+2+X,Form1.Top+Image_A.Top+40+Y);
+  if Button <> mbRight then Exit;
+  if Sender = Image_RGB then PopupMenu1.Popup(Left+Image_RGB.Left+2+X, Top+Image_RGB.Top+40+Y);
+  if Sender = Image_A   then PopupMenu1.Popup(Left+Image_A.Left+2+X, Top+Image_A.Top+40+Y);
 end;
 
 
@@ -402,33 +415,32 @@ end;
 
 
 procedure TForm1.FormResize(Sender: TObject);
+const
+  PAD = 8;
 var
-  addSize: Integer;
+  fullWidth, halfWidth, fullHeight: Integer;
+  imgSize: Integer;
 begin
-  addSize := Min((Width - fStartWidth) div 2, Height - fStartHeight);
+  fullWidth := ClientWidth - Image_RGB.Left - PAD;
+  fullHeight := ClientHeight - Image_RGB.Top - PAD;
+  halfWidth := (fullWidth - Pad) div 2;
+  imgSize := Min(halfWidth, fullHeight);
 
-  Bevel_RGB.Width := 258 + addSize;
-  Image_RGB.Width := 256 + addSize;
-  Bevel_A.Width := 258 + addSize;
-  Image_A.Width := 256 + addSize;
-  Bevel_A.Left := 447 + addSize;
-  Image_A.Left := 448 + addSize;
+  Bevel_RGB.Width := halfWidth + 2;
+  Bevel_A.Width := halfWidth + 2;
+  Image_RGB.Width := imgSize;
+  Image_A.Width := imgSize;
 
-  Bevel_RGB.Height := 258 + addSize;
-  Image_RGB.Height := 256 + addSize;
-  Bevel_A.Height := 258 + addSize;
-  Image_A.Height := 256 + addSize;
+  Bevel_A.Left := Image_RGB.Left + halfWidth + PAD - 1;
+  Image_A.Left := Image_RGB.Left + halfWidth + PAD;
+
+  Bevel_RGB.Height := fullHeight;
+  Bevel_A.Height := fullHeight;
+  Image_RGB.Height := imgSize;
+  Image_A.Height := imgSize;
 
   if fDisplayImage <> nil then
     DisplayChange(nil);
-end;
-
-
-procedure TForm1.FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer; var Resize: Boolean);
-begin
-  // Set minimum accepted size
-  NewWidth := Max(NewWidth, fStartWidth);
-  NewHeight := Max(NewHeight, fStartHeight);
 end;
 
 

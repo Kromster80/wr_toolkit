@@ -77,9 +77,11 @@ type
 procedure DXT_RGB_Encode(aRow1,aRow2,aRow3,aRow4: Pointer; out OutDat: Int64; out RMS: Single);
 procedure DXT_RGB_Decode(aInDat: Pointer; out OutDat: array of byte);
 
+
 implementation
 
-function RGBToWord(aR,aG,aB: Byte): Word; inline;
+
+function RGBToWord(aR, aG, aB: Byte): Word; inline;
 begin
   if (aB mod 8) > 3 then Result := Min((aB shr 3)+1, 31) else Result := (aB shr 3);
   if (aG mod 4) > 1 then Result := Result + Min((aG shr 2)+1, 63) shl 5 else Result := Result + (aG shr 2) shl 5;
@@ -87,11 +89,22 @@ begin
 end;
 
 
-procedure WordToRGB(aWord: Word; out aR,aG,aB: Byte); inline;
+procedure WordToRGB(aWord: Word; out aR, aG, aB: Byte);
+var
+  temp: Word;
 begin
-  aR := aWord div 2048 * 8;
-  aG := aWord div 32 mod 64 * 4;
-  aB := aWord mod 32 * 8;
+  // Tested to be properly correct:
+  // 0 -> 0
+  // 31 -> 255
+
+  temp := (aWord shr 11) * 255 + 16;
+  aR := Trunc((temp/32 + temp)/32);
+
+  temp := ((aWord shr 5) and $3F) * 255 + 32;
+  aG := Trunc((temp/64 + temp)/64);
+
+  temp := (aWord and $1F) * 255 + 16;
+  aB := Trunc((temp/32 + temp)/32);
 end;
 
 
@@ -107,7 +120,7 @@ begin
   begin
     fDllLib := LoadLibrary('squish.dll');
     if fDllLib <> 0 then
-      fDllCompress := GetProcAddress(fDllLib, PAnsiChar('_Compress2@16'));
+      fDllCompress := GetProcAddress(fDllLib, PAnsiChar('Compress2'));
   end;
 end;
 
@@ -518,8 +531,11 @@ const
   //64 Unused
   FLAG_COLOR_BY_ALPHA = 128;              //! Weight the colour by alpha during cluster fit (disabled by default).
   FLAG_COLOR_ITERATIVE_CLUSTER_FIT = 256; //! Use a very slow but very high quality colour compressor.
+
+  //todo: Crash
+  CC: array [0..66] of Byte = (126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 127, 125, 127, 255, 0, 0, 0);
 var
-  col: array [0..64] of Byte;
+  col: array [0..63] of Byte;
   block: array [0..15] of Byte;
   metrics: array [0..2] of Single;
   flags: Integer;
@@ -543,7 +559,11 @@ begin
 
   if Assigned(fDllCompress) then
   begin
-    fDllCompress(@col, @block[0], flags, @metrics[0]);
+    try
+    fDllCompress(@col[0], @block[0], flags, @metrics[0]);
+    except
+
+    end;
 
     for I := 0 to 7 do
       Result := Result or (Int64(block[I]) shl (I*8));
@@ -1046,21 +1066,17 @@ procedure DXT_RGB_Decode(aInDat:Pointer; out OutDat: array of Byte);
 var
   i,h,x:integer;
   c:array[1..8]of byte;
-  Colors:array[1..4,1..3]of word; //4colors in R,G,B
+  Colors:array[1..4,1..3]of Byte; //4colors in R,G,B
 begin
   for I := 1 to 8 do //cast into array of byte
     c[i] := PByte(Cardinal(aInDat)+I-1)^;
 
-  //Acquire min/max colors
-  Colors[1,1] := (c[2]div 8)*8;                //aRow1
-  Colors[1,2] := (c[2]mod 8)*32+(c[1]div 32)*4;//G1
-  Colors[1,3] := (c[1]mod 32)*8;               //B1
-  Colors[2,1] := (c[4]div 8)*8;                //aRow2
-  Colors[2,2] := (c[4]mod 8)*32+(c[3]div 32)*4;//G2
-  Colors[2,3] := (c[3]mod 32)*8;               //B2
+  // Acquire min/max colors
+  WordToRGB(c[1] + c[2] shl 8, Colors[1,1], Colors[1,2], Colors[1,3]);
+  WordToRGB(c[3] + c[4] shl 8, Colors[2,1], Colors[2,2], Colors[2,3]);
 
   //Acquire average colors
-  if (c[1]+c[2]*256) > (c[3]+c[4]*256) then
+  if (c[1] + c[2] shl 8) > (c[3] + c[4] shl 8) then
   begin
     Colors[3,1] := Round((Colors[2,1] + Colors[1,1]*2)/3);
     Colors[3,2] := Round((Colors[2,2] + Colors[1,2]*2)/3);

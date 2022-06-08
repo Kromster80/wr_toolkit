@@ -5,8 +5,10 @@ object Form1: TForm1
   VertScrollBar.Smooth = True
   Caption = 'PTXTool'
   ClientHeight = 361
-  ClientWidth = 713
+  ClientWidth = 721
   Color = clBtnFace
+  Constraints.MinHeight = 419
+  Constraints.MinWidth = 737
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -15,35 +17,35 @@ object Form1: TForm1
   Menu = MainMenu1
   OldCreateOrder = False
   Position = poScreenCenter
-  OnCanResize = FormCanResize
-  OnCreate = Form1Init
+  OnCreate = Form1Create
+  OnDestroy = FormDestroy
   OnResize = FormResize
   DesignSize = (
-    713
+    721
     361)
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel_RGB: TBevel
-    Left = 184
+    Left = 192
     Top = 95
     Width = 258
     Height = 258
   end
   object Bevel_A: TBevel
-    Left = 447
+    Left = 455
     Top = 95
     Width = 258
     Height = 258
   end
   object Image_A: TImage
-    Left = 448
+    Left = 456
     Top = 96
     Width = 256
     Height = 256
     OnMouseDown = ShowMenu
   end
   object lbNoAlpha: TLabel
-    Left = 543
+    Left = 551
     Top = 218
     Width = 50
     Height = 13
@@ -58,7 +60,7 @@ object Form1: TForm1
     ParentFont = False
   end
   object lbNoRGB: TLabel
-    Left = 281
+    Left = 289
     Top = 218
     Width = 46
     Height = 13
@@ -73,7 +75,7 @@ object Form1: TForm1
     ParentFont = False
   end
   object Image_RGB: TImage
-    Left = 185
+    Left = 193
     Top = 96
     Width = 256
     Height = 256
@@ -81,7 +83,7 @@ object Form1: TForm1
     OnMouseUp = Image_RGBMouseUp
   end
   object gbInfo: TGroupBox
-    Left = 184
+    Left = 192
     Top = 7
     Width = 305
     Height = 81
@@ -202,7 +204,7 @@ object Form1: TForm1
   object DirectoryListBox1: TDirectoryListBox
     Left = 8
     Top = 32
-    Width = 169
+    Width = 177
     Height = 129
     FileList = FileListBox1
     ParentShowHint = False
@@ -212,7 +214,7 @@ object Form1: TForm1
   object FileListBox1: TFileListBox
     Left = 8
     Top = 168
-    Width = 169
+    Width = 177
     Height = 185
     Anchors = [akLeft, akTop, akBottom]
     ItemHeight = 13
@@ -221,7 +223,7 @@ object Form1: TForm1
     OnClick = OpenFile
   end
   object Button1: TButton
-    Left = 456
+    Left = 464
     Top = 104
     Width = 121
     Height = 25
@@ -232,7 +234,7 @@ object Form1: TForm1
     OnClick = Button1Click
   end
   object CBnonPOT: TCheckBox
-    Left = 496
+    Left = 504
     Top = 52
     Width = 209
     Height = 17
@@ -241,7 +243,7 @@ object Form1: TForm1
     OnClick = CBnonPOTClick
   end
   object rgCompressionQuality: TRadioGroup
-    Left = 496
+    Left = 504
     Top = 8
     Width = 201
     Height = 41

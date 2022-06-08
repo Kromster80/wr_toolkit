@@ -4,7 +4,9 @@ unit KromUtils;
 {$IFDEF VER220} {$DEFINE WDC} {$ENDIF}  // Delphi XE
 {$IFDEF FPC} {$Mode Delphi} {$ENDIF}
 interface
-uses sysutils,windows,Controls,forms,typinfo,ExtCtrls,Math, Dialogs, Registry, ShellApi, shlobj;
+uses
+  sysutils, windows, Controls, forms, typinfo, ExtCtrls, Math, Dialogs,
+  Registry, ShellApi, shlobj, Winapi.ImageHlp, DateUtils;
 
 type
   PSingleArray = ^TSingleArray;
@@ -118,9 +120,10 @@ procedure MailTo(Address,Subject,Body:string);
 procedure OpenMySite(ToolName:string; Address:string='http://krom.reveur.de');
 
 procedure RegisterFileType(ExtName:string; AppName:string);
+function GetExeBuildTime: TDateTime;
 
 const
-  eol:string=#13+#10; //EndOfLine
+  EOL = sLineBreak;
 
 implementation
 
@@ -1144,22 +1147,23 @@ end;
 
 
 procedure DoClientAreaResize(aForm:TForm);
-const DesignHeight = 18;
+const
+  DESIGN_HEIGHT = 18;
 var
-  HeightDif:integer;
-  i:integer;
+  heightDif: Integer;
+  I: Integer;
 begin
-  HeightDif := GetSystemMetrics(SM_CYCAPTION) - DesignHeight;
+  heightDif := GetSystemMetrics(SM_CYCAPTION) - DESIGN_HEIGHT;
 
-  for i:=0 to aForm.ControlCount-1 do
-    if (akBottom in aForm.Controls[i].Anchors) and
-       (akTop in aForm.Controls[i].Anchors) then
-      aForm.Controls[i].Height := aForm.Controls[i].Height - HeightDif
+  for I := 0 to aForm.ControlCount-1 do
+    if (akBottom in aForm.Controls[I].Anchors)
+    and (akTop in aForm.Controls[I].Anchors) then
+      aForm.Controls[I].Height := aForm.Controls[I].Height - heightDif
     else
-    if (akBottom in aForm.Controls[i].Anchors) then
-      aForm.Controls[i].Top := aForm.Controls[i].Top - HeightDif;
+    if (akBottom in aForm.Controls[I].Anchors) then
+      aForm.Controls[I].Top := aForm.Controls[I].Top - heightDif;
 
-  aForm.ClientHeight := aForm.ClientHeight + HeightDif;
+  aForm.ClientHeight := aForm.ClientHeight + heightDif;
 end;
 
 
@@ -1224,6 +1228,37 @@ begin
     reg.Free;
   end;
   SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, nil, nil) ;
+end;
+
+
+function GetExeBuildTime: TDateTime;
+var
+  {$IFDEF MSWINDOWS}
+    LI: TLoadedImage;
+    {$IF CompilerVersion >= 26.0}
+      m: TMarshaller;
+    {$IFEND}
+    timeStamp: Cardinal;
+    utcTime: TDateTime;
+  {$ENDIF}
+begin
+  {$IFDEF MSWINDOWS}
+    {$IF CompilerVersion >= 26.0}
+      // XE7 requires TMarshaller to convert to PAnsiChar
+      // Function fail if the path has Unicode chars. Hence we trim the path
+      Win32Check(MapAndLoad(PAnsiChar(m.AsAnsi(ExtractFileName(ParamStr(0)))), nil, @LI, False, True));
+    {$ELSE}
+      Win32Check(MapAndLoad(PAnsiChar(AnsiString(ExtractFileName(ParamStr(0)))), nil, @LI, False, True));
+    {$IFEND}
+    timeStamp := LI.FileHeader.FileHeader.TimeDateStamp;
+    UnMapAndLoad(@LI);
+
+    utcTime := UnixToDateTime(timeStamp);
+    Result := TTimeZone.Local.ToLocalTime(utcTime);
+  {$ENDIF}
+  {$IFNDEF MSWINDOWS}
+    Result := EncodeDate(1900, 0, 0);
+  {$ENDIF}
 end;
 
 

@@ -9,6 +9,9 @@ uses
 
 {$R *.RES}
 
+var
+  Form1: TForm1;
+
 begin
   Application.Initialize;
   Application.Title := 'MBWR/WR2 PTX Tool';

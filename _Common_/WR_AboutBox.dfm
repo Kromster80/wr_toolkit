@@ -20,48 +20,9 @@ object AboutForm: TAboutForm
     192)
   PixelsPerInch = 96
   TextHeight = 13
-  object About_Link: TLabel
-    Left = 64
-    Top = 170
-    Width = 107
-    Height = 13
-    Cursor = crHandPoint
-    Anchors = [akLeft, akBottom]
-    Caption = 'http://krom.reveur.de/'
-    Color = clBtnFace
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clNavy
-    Font.Height = -11
-    Font.Name = 'MS Sans Serif'
-    Font.Style = [fsUnderline]
-    ParentColor = False
-    ParentFont = False
-    OnClick = URLClick
-  end
-  object Label_VersionInfo: TLabel
-    Left = 48
-    Top = 24
-    Width = 130
-    Height = 13
-    Caption = 'Tool name and version'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'MS Sans Serif'
-    Font.Style = [fsBold]
-    ParentFont = False
-  end
-  object Label3: TLabel
-    Left = 8
-    Top = 138
-    Width = 75
-    Height = 13
-    Anchors = [akLeft, akBottom]
-    Caption = 'Written by Krom'
-  end
   object Image1: TImage
-    Left = 8
-    Top = 8
+    Left = 16
+    Top = 16
     Width = 32
     Height = 32
     AutoSize = True
@@ -167,14 +128,38 @@ object AboutForm: TAboutForm
       D0D4}
     Transparent = True
   end
-  object Label_Text: TLabel
-    Left = 8
-    Top = 48
-    Width = 240
+  object lbName: TLabel
+    Left = 64
+    Top = 16
+    Width = 60
     Height = 13
-    Anchors = [akLeft, akTop, akRight]
-    Caption = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-    WordWrap = True
+    Caption = 'Tool name'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object lbVersion: TLabel
+    Left = 64
+    Top = 32
+    Width = 58
+    Height = 13
+    Caption = 'Tool version'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentFont = False
+  end
+  object lbText: TLabel
+    Left = 16
+    Top = 64
+    Width = 215
+    Height = 13
+    Caption = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
   end
   object Bevel1: TBevel
     Left = 4
@@ -183,8 +168,24 @@ object AboutForm: TAboutForm
     Height = 2
     Anchors = [akLeft, akRight, akBottom]
   end
-  object Label1: TLabel
-    Left = 64
+  object Label3: TLabel
+    Left = 8
+    Top = 138
+    Width = 75
+    Height = 13
+    Anchors = [akLeft, akBottom]
+    Caption = 'Written by Krom'
+  end
+  object Label2: TLabel
+    Left = 8
+    Top = 154
+    Width = 40
+    Height = 13
+    Anchors = [akLeft, akBottom]
+    Caption = 'Contact:'
+  end
+  object lbContactEmail: TLabel
+    Left = 56
     Top = 154
     Width = 110
     Height = 13
@@ -201,20 +202,30 @@ object AboutForm: TAboutForm
     ParentFont = False
     OnClick = MailToClick
   end
-  object Label2: TLabel
-    Left = 8
-    Top = 154
-    Width = 51
-    Height = 13
-    Anchors = [akLeft, akBottom]
-    Caption = 'Contacts - '
-  end
   object Label4: TLabel
     Left = 8
     Top = 170
-    Width = 48
+    Width = 42
     Height = 13
     Anchors = [akLeft, akBottom]
-    Caption = 'Website - '
+    Caption = 'Website:'
+  end
+  object lbWebsiteLink: TLabel
+    Left = 56
+    Top = 170
+    Width = 107
+    Height = 13
+    Cursor = crHandPoint
+    Anchors = [akLeft, akBottom]
+    Caption = 'http://krom.reveur.de/'
+    Color = clBtnFace
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clNavy
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsUnderline]
+    ParentColor = False
+    ParentFont = False
+    OnClick = URLClick
   end
 end
