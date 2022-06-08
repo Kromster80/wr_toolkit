@@ -137,6 +137,8 @@ begin
   WorkDir := ExtractFilePath(FileListBox1.FileName);
   if WorkDir = '' then WorkDir := ExeDir;
   OpenFile(nil);
+
+  SetFocusedControl(FileListBox1);
                 {
   if DebugHook <> 0 then
   begin

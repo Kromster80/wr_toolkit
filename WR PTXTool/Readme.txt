@@ -24,6 +24,7 @@ You can use uncompressed PTX images to get better image quality in game.
 Changelog:
   Fixed image brightening in PTX compression
   Fixed image darkening in PTX and DDS decompression
+  Set focus on file list on start
 v2.3 (06.06.2022)
   Added Squish.dll DDS compressor (by https://github.com/richgel999/libsquish, MIT license)
   Improved PTX compression quality
