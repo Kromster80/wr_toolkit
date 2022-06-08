@@ -94,6 +94,10 @@ type
     fStartHeight: Integer;
     fExeDir, fWorkDir: string;
     fDisplayImage: TDisplayImage;
+
+  fSampleColorKey: Boolean;
+  fReplaceColorKey: Boolean;
+
     procedure SetRGB(aValue: Boolean);
     procedure SetAlpha(aValue: Boolean);
   end;
@@ -102,11 +106,6 @@ type
 const
   TOOL_NAME = 'PTXTool';
   TOOL_VERSION = 'Version 2.3';
-
-
-var
-  SampleColorKey: Boolean;
-  ReplaceColorKey: Boolean;
 
 
 implementation
@@ -231,8 +230,8 @@ end;
 
 procedure TForm1.mnuEditAlphaFromColorKeyClick(Sender: TObject);
 begin
-  SampleColorKey := not SampleColorKey;
-  if SampleColorKey then
+  fSampleColorKey := not fSampleColorKey;
+  if fSampleColorKey then
     Cursor := crHandPoint
   else
     Cursor := crDefault;
@@ -349,8 +348,8 @@ end;
 
 procedure TForm1.mnuEditReplaceColorKeyWithAverageClick(Sender: TObject);
 begin
-  ReplaceColorKey := not ReplaceColorKey;
-  if ReplaceColorKey then
+  fReplaceColorKey := not fReplaceColorKey;
+  if fReplaceColorKey then
     Cursor := crHandPoint
   else
     Cursor := crDefault;
@@ -409,8 +408,8 @@ end;
 
 procedure TForm1.SampleAClick(Sender: TObject);
 begin
-  SampleColorKey := not SampleColorKey;
-  if SampleColorKey then
+  fSampleColorKey := not fSampleColorKey;
+  if fSampleColorKey then
     Cursor := crHandPoint
   else
     Cursor := crDefault;
@@ -419,19 +418,19 @@ end;
 
 procedure TForm1.imgRGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  if (not SampleColorKey)and(not ReplaceColorKey) then exit;
-  if SampleColorKey then fDisplayImage.AlphaCreateFrom(X,Y);
-  if ReplaceColorKey then fDisplayImage.ColorReplaceWithAverage(X,Y);
+  if (not fSampleColorKey)and(not fReplaceColorKey) then exit;
+  if fSampleColorKey then fDisplayImage.AlphaCreateFrom(X,Y);
+  if fReplaceColorKey then fDisplayImage.ColorReplaceWithAverage(X,Y);
   DisplayChange(nil);
-  if SampleColorKey then  SampleAClick(nil); //Release SampleColorKey
-  if ReplaceColorKey then SampleRClick(nil); //Release ReplaceColorKey
+  if fSampleColorKey then  SampleAClick(nil); //Release fSampleColorKey
+  if fReplaceColorKey then SampleRClick(nil); //Release fReplaceColorKey
 end;
 
 
 procedure TForm1.SampleRClick(Sender: TObject);
 begin
-  ReplaceColorKey := not ReplaceColorKey;
-  if ReplaceColorKey then
+  fReplaceColorKey := not fReplaceColorKey;
+  if fReplaceColorKey then
     Cursor := crHandPoint
   else
     Cursor := crDefault;
