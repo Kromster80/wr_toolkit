@@ -1,4 +1,4 @@
-unit WR_PTX_TDXT_Color;
+unit WR_DXTCompressorColor;
 interface
 uses
   Math, KromUtils, Windows, SysUtils;
@@ -40,7 +40,7 @@ type
     R,G,B: Word;
   end;
 
-  TDXTCompressorColor = class
+  TWRDXTCompressorColor = class
   private
     fDllLib: NativeUInt;
     fDllCompress: TDLLCompressProc;
@@ -108,8 +108,8 @@ begin
 end;
 
 
-{ TDXTCompressorColor }
-constructor TDXTCompressorColor.Create;
+{ TWRDXTCompressorColor }
+constructor TWRDXTCompressorColor.Create;
 var
   p: Pointer;
 begin
@@ -125,7 +125,7 @@ begin
 end;
 
 
-destructor TDXTCompressorColor.Destroy;
+destructor TWRDXTCompressorColor.Destroy;
 begin
   if fDllLib <> 0 then
     FreeLibrary(fDllLib);
@@ -134,7 +134,7 @@ begin
 end;
 
 
-procedure TDXTCompressorColor.GetMinMaxColor(out aColorMin, aColorMax: TRGBColor);
+procedure TWRDXTCompressorColor.GetMinMaxColor(out aColorMin, aColorMax: TRGBColor);
 var
   I, K: Integer;
   bestRMS, newRMS: Integer;
@@ -172,7 +172,7 @@ begin
 end;
 
 
-procedure TDXTCompressorColor.GetMinMaxColor16(out aColorMin, aColorMax: Word);
+procedure TWRDXTCompressorColor.GetMinMaxColor16(out aColorMin, aColorMax: Word);
 var
   a, b: TRGBColor;
 begin
@@ -183,7 +183,7 @@ begin
 end;
 
 
-procedure TDXTCompressorColor.GetMostColor16(out aColorMin, aColorMax: Word);
+procedure TWRDXTCompressorColor.GetMostColor16(out aColorMin, aColorMax: Word);
 var
   I, K: Integer;
   rms: array [1..16, 1..16] of Integer;
@@ -252,7 +252,7 @@ begin
 end;
 
 
-procedure TDXTCompressorColor.GetRygsColor16(out aColorMin, aColorMax: Word);
+procedure TWRDXTCompressorColor.GetRygsColor16(out aColorMin, aColorMax: Word);
 const
   nIterPower = 4;
 var
@@ -369,7 +369,7 @@ begin
 end;
 
 
-function TDXTCompressorColor.RefineBlock(var aColorMin, aColorMax: Word): Boolean;
+function TWRDXTCompressorColor.RefineBlock(var aColorMin, aColorMax: Word): Boolean;
 const
   w1Tab: array [0..3] of Byte = (3,0,2,1);
   prods: array [0..3] of Integer = ($090000,$000900,$040102,$010402);
@@ -439,7 +439,7 @@ begin
 end;
 
 
-function TDXTCompressorColor.SearchMinMax(aDir: Boolean): Int64;
+function TWRDXTCompressorColor.SearchMinMax(aDir: Boolean): Int64;
 var
   colorMin, colorMax: Word;
 begin
@@ -451,7 +451,7 @@ begin
 end;
 
 
-function TDXTCompressorColor.SearchPlain(aDir: Boolean): Int64;
+function TWRDXTCompressorColor.SearchPlain(aDir: Boolean): Int64;
 var
   colorMin, colorMax: TRGBColor;
   colorMin16, colorMax16: Word;
@@ -468,7 +468,7 @@ begin
 end;
 
 
-function TDXTCompressorColor.SearchExtended23(aExt, aDir: Boolean): Int64;
+function TWRDXTCompressorColor.SearchExtended23(aExt, aDir: Boolean): Int64;
 const
   EXTENT = 2;
 var
@@ -507,7 +507,7 @@ begin
 end;
 
 
-function TDXTCompressorColor.Search5(aDir: Boolean): Int64;
+function TWRDXTCompressorColor.Search5(aDir: Boolean): Int64;
 var
   colorMin, colorMax: Word;
 begin
@@ -520,7 +520,7 @@ begin
 end;
 
 
-function TDXTCompressorColor.SearchDLL: Int64;
+function TWRDXTCompressorColor.SearchDLL: Int64;
 const
   FLAG_DXT1 = 1; //! Use DXT1 compression.
   FLAG_DXT3 = 2; //! Use DXT3 compression.
@@ -571,7 +571,7 @@ begin
 end;
 
 
-function TDXTCompressorColor.SearchRygs(aDir: Boolean): Int64;
+function TWRDXTCompressorColor.SearchRygs(aDir: Boolean): Int64;
 var
   colorMin, colorMax: Word;
 begin
@@ -586,7 +586,7 @@ begin
 end;
 
 
-function TDXTCompressorColor.SaveToBlock(aColor0, aColor1: Word): Int64;
+function TWRDXTCompressorColor.SaveToBlock(aColor0, aColor1: Word): Int64;
 var
   I, K: Integer;
   lookup: array [0..3, 1..3] of Byte;
@@ -652,7 +652,7 @@ begin
 end;
 
 
-function TDXTCompressorColor.CalculateRMS(aData: Pointer): Single;
+function TWRDXTCompressorColor.CalculateRMS(aData: Pointer): Single;
 var
   resCol: array [0..47] of Byte;
   I: Integer;
@@ -668,7 +668,7 @@ begin
 end;
 
 
-procedure TDXTCompressorColor.CompressBlock(aRow1, aRow2, aRow3, aRow4: Pointer; aHeuristic: TCompressionHeuristics;
+procedure TWRDXTCompressorColor.CompressBlock(aRow1, aRow2, aRow3, aRow4: Pointer; aHeuristic: TCompressionHeuristics;
   out aBlockData: Int64; out aRMS: Single);
 var
   I: Integer;

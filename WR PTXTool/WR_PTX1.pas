@@ -111,7 +111,7 @@ var
 
 implementation
 uses
-  WR_AboutBox, WR_PTX_TDXT_Color;
+  WR_AboutBox, WR_DXTCompressorColor;
 
 {$R *.dfm}
 

@@ -1,4 +1,4 @@
-unit WR_PTX_TDXT_Alpha;
+unit WR_DXTCompressorAlpha;
 interface
 uses
   Math, KromUtils;

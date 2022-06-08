@@ -1,7 +1,7 @@
 unit WR_PTX_TDisplayImage;
 interface
 uses
-  Windows, ExtCtrls, Graphics, SysUtils, Classes, Math, kromUtils, Controls, Forms, WR_PTX_TDXT_Alpha, WR_PTX_TDXT_Color;
+  Windows, ExtCtrls, Graphics, SysUtils, Classes, Math, kromUtils, Controls, Forms, WR_DXTCompressorAlpha, WR_DXTCompressorColor;
 
 type
   TConversionMode = (cmRGB, cmA, cmRGBA);
@@ -831,7 +831,7 @@ var
   DXTOut:int64;
   DXTAOut:int64;
   t: Cardinal;
-  cc: TDXTCompressorColor;
+  cc: TWRDXTCompressorColor;
   newRMS: Single;
 begin
   fRmsRGB := 0;
@@ -853,7 +853,7 @@ begin
   ms.Write(Fog2[2], 1);
   ms.Write(Fog2[1], 1);
 
-  cc := TDXTCompressorColor.Create;
+  cc := TWRDXTCompressorColor.Create;
 
   MMH := Props.SizeH;
   MMV := Props.SizeV;
