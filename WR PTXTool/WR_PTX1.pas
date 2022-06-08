@@ -94,6 +94,8 @@ type
     fStartHeight: Integer;
     fBitmapRGB: TBitmap;
     fBitmapA: TBitmap;
+    fExeDir, fWorkDir: string;
+    fDisplayImage: TDisplayImage;
   end;
 
 
@@ -103,10 +105,9 @@ const
 
 
 var
-  ExeDir, WorkDir: string;
-  fDisplayImage: TDisplayImage;
   SampleColorKey: Boolean;
   ReplaceColorKey: Boolean;
+
 
 implementation
 uses
@@ -115,6 +116,7 @@ uses
 {$R *.dfm}
 
 
+{ TForm1 }
 procedure TForm1.Form1Create(Sender: TObject);
 var
   I: TCompressionHeuristics;
@@ -133,9 +135,9 @@ begin
 
   //CMDLine:='" " "C:\Documents and Settings\Krom\Desktop\Delphi\World Racing\00_ws_logo.2db"';
   FileListBox1.FileName := ExtractOpenedFileName(CMDLine);
-  ExeDir  := ExtractFilePath(Application.ExeName);
-  WorkDir := ExtractFilePath(FileListBox1.FileName);
-  if WorkDir = '' then WorkDir := ExeDir;
+  fExeDir  := ExtractFilePath(Application.ExeName);
+  fWorkDir := ExtractFilePath(FileListBox1.FileName);
+  if fWorkDir = '' then fWorkDir := fExeDir;
   OpenFile(nil);
 
   SetFocusedControl(FileListBox1);
@@ -169,7 +171,7 @@ end;
 
 procedure TForm1.ImportBMPClick(Sender: TObject);
 begin
-  if not RunOpenDialog(Open1, '', WorkDir, '24bit BMP files (*.bmp)|*.bmp') then Exit;
+  if not RunOpenDialog(Open1, '', fWorkDir, '24bit BMP files (*.bmp)|*.bmp') then Exit;
 
   if (Sender=ImportBMPRGB)or(Sender=LoadBMPImage1) then
     fDisplayImage.ImportBitmapRGB(Open1.FileName);
@@ -182,25 +184,29 @@ end;
 
 procedure TForm1.ImportTGAClick(Sender: TObject);
 begin
-  if not RunOpenDialog(Open1,'',WorkDir,'TGA image files (*.tga)|*.tga') then exit;
+  if not RunOpenDialog(Open1, '', fWorkDir, 'TGA image files (*.tga)|*.tga') then Exit;
+
   fDisplayImage.OpenTGA(Open1.FileName);
   DisplayChange(nil);
 end;
 
 procedure TForm1.ExportClick(Sender: TObject);
 begin
-  if (Sender=ExportBMPA)or(Sender=SaveBMPMask1) then begin
-    if not RunSaveDialog(Save1,fDisplayImage.GetFileMask+'_A.bmp',WorkDir,'24bit BMP files (*.bmp)|*.bmp','bmp') then exit;
-    fDisplayImage.ExportBitmapA(Save1.FileName)
+  if (Sender = ExportBMPA) or (Sender = SaveBMPMask1) then
+  begin
+    if RunSaveDialog(Save1, fDisplayImage.GetFileMask + '_A.bmp', fWorkDir, '24bit BMP files (*.bmp)|*.bmp', 'bmp') then
+      fDisplayImage.ExportBitmapA(Save1.FileName);
   end else
-  if (Sender=ExportBMPRGB)or(Sender=SaveBMPImage1) then begin
-    if not RunSaveDialog(Save1,fDisplayImage.GetFileMask+'.bmp',WorkDir,'24bit BMP files (*.bmp)|*.bmp','bmp') then exit;
-    fDisplayImage.ExportBitmapRGB(Save1.FileName)
+  if (Sender = ExportBMPRGB) or (Sender = SaveBMPImage1) then
+  begin
+    if RunSaveDialog(Save1, fDisplayImage.GetFileMask + '.bmp', fWorkDir, '24bit BMP files (*.bmp)|*.bmp', 'bmp') then
+      fDisplayImage.ExportBitmapRGB(Save1.FileName);
   end else
-  if (Sender=ExportTGA)or(Sender=SaveTGAImageMask1) then begin
-    if not RunSaveDialog(Save1,fDisplayImage.GetFileMask+'.tga',WorkDir,'TGA files (*.tga)|*.tga','tga') then exit;
-    fDisplayImage.SaveTGA(Save1.FileName);
-  //  fDisplayImage.SaveTGA(ExeDir+'000.tga');
+  if (Sender = ExportTGA) or (Sender = SaveTGAImageMask1) then
+  begin
+    if RunSaveDialog(Save1, fDisplayImage.GetFileMask + '.tga', fWorkDir, 'TGA files (*.tga)|*.tga', 'tga') then
+      fDisplayImage.SaveTGA(Save1.FileName);
+  //  fDisplayImage.SaveTGA(fExeDir+'000.tga');
   end;
 end;
 
@@ -227,7 +233,7 @@ var
   Save_Cursor: TCursor;
 begin
   SpinMMChange(nil);
-  if not RunSaveDialog(Save1, fDisplayImage.GetFileMask+'.ptx', WorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then exit;
+  if not RunSaveDialog(Save1, fDisplayImage.GetFileMask+'.ptx', fWorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then Exit;
   //Save1.FileName:='000.ptx';
   Save_Cursor   := Screen.Cursor;
   Screen.Cursor := crHourGlass;
@@ -248,7 +254,7 @@ procedure TForm1.SaveUncompressedPTX(Sender: TObject);
 var Save_Cursor:TCursor;
 begin
   SpinMMChange(nil);
-  if not RunSaveDialog(Save1, fDisplayImage.GetFileMask+'.ptx', WorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then exit;
+  if not RunSaveDialog(Save1, fDisplayImage.GetFileMask+'.ptx', fWorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then Exit;
   Save_Cursor   := Screen.Cursor;
   Screen.Cursor := crHourGlass;
   fDisplayImage.SaveUncompressedPTX(Save1.FileName);
@@ -313,16 +319,19 @@ end;
 
 
 procedure TForm1.OpenFile(Sender: TObject);
-var FileName:string;
+var
+  fileName: string;
 begin
-  FileName := FileListBox1.FileName;
-  if not fileexists(FileName) then exit;
-  WorkDir := ExtractFilePath(FileListBox1.FileName);
-  if GetFileExt(FileName)='PTX' then fDisplayImage.OpenPTX(FileName);
-  if GetFileExt(FileName)='DDS' then fDisplayImage.OpenDDS(FileName);
-  if GetFileExt(FileName)='XTX' then fDisplayImage.OpenXTX(FileName);
-  if GetFileExt(FileName)='TGA' then fDisplayImage.OpenTGA(FileName);
-  if GetFileExt(FileName)='2DB' then fDisplayImage.Open2DB(FileName);
+  fileName := FileListBox1.FileName;
+  if not FileExists(fileName) then Exit;
+  fWorkDir := ExtractFilePath(FileListBox1.FileName);
+
+  if LowerCase(ExtractFileExt(fileName)) = '.ptx' then fDisplayImage.OpenPTX(fileName);
+  if LowerCase(ExtractFileExt(fileName)) = '.dds' then fDisplayImage.OpenDDS(fileName);
+  if LowerCase(ExtractFileExt(fileName)) = '.xtx' then fDisplayImage.OpenXTX(fileName);
+  if LowerCase(ExtractFileExt(fileName)) = '.tga' then fDisplayImage.OpenTGA(fileName);
+  if LowerCase(ExtractFileExt(fileName)) = '.2db' then fDisplayImage.Open2DB(fileName);
+
   DisplayChange(nil);
 end;
 
@@ -375,7 +384,7 @@ end;
 
 procedure TForm1.Button1Click(Sender: TObject);
 begin
-  fDisplayImage.SaveMipMap(WorkDir+'000sq.tga', 4);
+  fDisplayImage.SaveMipMap(fWorkDir + '000sq.tga', 4);
 end;
 
 
