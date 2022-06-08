@@ -94,7 +94,7 @@ begin
 end;
 
 
-procedure WordToRGB(aWord: Word; out aR, aG, aB: Byte);
+procedure WordToRGB(aWord: Word; out aR, aG, aB: Byte); inline;
 var
   temp: Word;
 begin
@@ -115,8 +115,6 @@ end;
 
 { TWRDXTCompressorColor }
 constructor TWRDXTCompressorColor.Create;
-var
-  p: Pointer;
 begin
   inherited;
 
@@ -125,8 +123,11 @@ begin
   begin
     fDllLib := LoadLibrary('squish.dll');
     if fDllLib <> 0 then
-      fDllCompress := GetProcAddress(fDllLib, PAnsiChar('Compress2'));
-  end;
+      fDllCompress := GetProcAddress(fDllLib, PAnsiChar('Compress2'))
+    else
+      MessageBox(0, 'DLL method entry point not found', 'Error', MB_OK);
+  end else
+    MessageBox(0, 'squish.dll not found', 'Error', MB_OK);
 end;
 
 
@@ -565,7 +566,7 @@ begin
   if Assigned(fDllCompress) then
   begin
     try
-    fDllCompress(@col[0], @block[0], flags, @metrics[0]);
+      fDllCompress(@col[0], @block[0], flags, @metrics[0]);
     except
 
     end;

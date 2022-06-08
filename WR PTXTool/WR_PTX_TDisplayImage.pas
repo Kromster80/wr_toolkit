@@ -9,6 +9,7 @@ type
 type
   TDisplayImage = class
   private
+    fDXTCompressorColor: TWRDXTCompressorColor;
     fBitmapRGB, fBitmapA: TBitmap;
 
     ImageRGB,ImageA: TImage;
@@ -35,6 +36,10 @@ type
               iIsCompressed,iIsSYNPacked,ihasAlpha:boolean);
   public
     AllowNonPOTImages:boolean;
+
+    constructor Create(inBitmapRGB, inBitmapA: TBitmap; inImageRGB, inImageA: TImage);
+    destructor Destroy; override;
+
     property GetFileMask:string read Props.FileMask;
     property GetMipMapQty:Integer read Props.MipMapQty;
     property GetMipMapQtyUse:Integer read MipMapQtyUse;
@@ -43,7 +48,6 @@ type
     property GetCompression:boolean read Props.IsCompressed;
     property GetPacked:boolean read Props.IsSYNPacked;
     property GetAlpha:boolean read Props.hasAlpha;
-    constructor Create(inBitmapRGB,inBitmapA:TBitmap; inImageRGB,inImageA:TImage);
     function DisplayImage: Boolean;
     function GetInfoString:string;
     function GetFogString:string;
@@ -78,14 +82,26 @@ implementation
 
 
 {TDisplayImage}
-constructor TDisplayImage.Create(inBitmapRGB,inBitmapA: TBitmap; inImageRGB,inImageA: TImage);
+constructor TDisplayImage.Create(inBitmapRGB, inBitmapA: TBitmap; inImageRGB, inImageA: TImage);
 begin
+  inherited Create;
+
+  fDXTCompressorColor := TWRDXTCompressorColor.Create;
+
   fBitmapRGB     := inBitmapRGB;
   fBitmapA       := inBitmapA;
   fBitmapRGB.PixelFormat := pf24bit;
   fBitmapA.PixelFormat   := pf24bit;
   ImageRGB      := inImageRGB;
   ImageA        := inImageA;
+end;
+
+
+destructor TDisplayImage.Destroy;
+begin
+  FreeAndNil(fDXTCompressorColor);
+
+  inherited;
 end;
 
 
@@ -831,7 +847,6 @@ var
   DXTOut:int64;
   DXTAOut:int64;
   t: Cardinal;
-  cc: TWRDXTCompressorColor;
   newRMS: Single;
 begin
   fRmsRGB := 0;
@@ -852,8 +867,6 @@ begin
   ms.Write(Fog2[3], 1);
   ms.Write(Fog2[2], 1);
   ms.Write(Fog2[1], 1);
-
-  cc := TWRDXTCompressorColor.Create;
 
   MMH := Props.SizeH;
   MMV := Props.SizeV;
@@ -878,7 +891,7 @@ begin
       end;
       newRMS := 0;
       //DXT_RGB_Encode(@RGBAmm[yp+0, xp, 1], @RGBAmm[yp+1, xp, 1], @RGBAmm[yp+2, xp, 1], @RGBAmm[yp+3, xp, 1], DXTOut, newRMS);
-      cc.CompressBlock(@RGBAmm[yp+0, xp, 1], @RGBAmm[yp+1, xp, 1], @RGBAmm[yp+2, xp, 1], @RGBAmm[yp+3, xp, 1], aHeuristic, DXTOut, newRMS);
+      fDXTCompressorColor.CompressBlock(@RGBAmm[yp+0, xp, 1], @RGBAmm[yp+1, xp, 1], @RGBAmm[yp+2, xp, 1], @RGBAmm[yp+3, xp, 1], aHeuristic, DXTOut, newRMS);
       ms.Write(DXTOut, 8);
 
       fRmsRGB := fRmsRGB + newRMS;
@@ -887,8 +900,6 @@ begin
     MMH := Max(MMH div 2, 1);
     MMV := Max(MMV div 2, 1);
   end;
-
-  cc.Free;
 
   ms.SaveToFile(aFileName);
   ms.Free;
