@@ -359,7 +359,7 @@ end;
 
 procedure TForm1.SpinMMChange(Sender: TObject);
 begin
-  fDisplayImage.SetMipMapQtyUse := (SpinMM.Value);
+  fDisplayImage.MipMapCount := SpinMM.Value;
   //todo: Add FlipVertical! (by Ast)
 end;
 
@@ -368,17 +368,18 @@ procedure TForm1.DisplayChange(Sender: TObject);
 begin
   if not fDisplayImage.DisplayImage then
   begin
-    SetRGB(false);
-    SetAlpha(false);
-    exit;
+    SetRGB(False);
+    SetAlpha(False);
+    Exit;
   end;
+
   //Now if DisplayImage didn't failed we assume RGB portion is loaded fine
   //and we can perform all needed tasks upon
   SetRGB(true);
   SetAlpha(fDisplayImage.GetAlpha);
 
-  SpinMM.MaxValue := fDisplayImage.GetMaxMipMapQty;
-  SpinMM.Value    := fDisplayImage.GetMipMapQtyUse;
+  SpinMM.MaxValue := fDisplayImage.MaxMipMapCount;
+  SpinMM.Value    := fDisplayImage.MipMapCount;
 
   gbInfo.Caption := ' ' + fDisplayImage.GetFileMask + fDisplayImage.GetChangedString + ' ';
   lbSize.Caption := fDisplayImage.GetInfoString;

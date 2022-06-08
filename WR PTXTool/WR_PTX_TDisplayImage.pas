@@ -4,7 +4,7 @@ uses
   Windows, ExtCtrls, Graphics, SysUtils, Classes, Math, kromUtils, Controls, Forms, WR_DXTCompressorAlpha, WR_DXTCompressorColor;
 
 type
-  TConversionMode = (cmRGB, cmA, cmRGBA);
+  TRefreshMode = (cmRGB, cmA, cmRGBA);
 
 type
   TDisplayImage = class
@@ -15,54 +15,54 @@ type
     fImageRGB, fImageA: TImage;
     Rect: TRect;
     Props: record
-      FileMask:string;
-      sizeH,sizeV,MipMapQty:Integer;
-      IsCompressed:boolean;
-      IsSYNPacked:boolean;
-      hasAlpha:boolean;
+      FileMask: string;
+      sizeH, sizeV, MipMapQty: Integer;
+      IsCompressed: Boolean;
+      IsSYNPacked: Boolean;
+      hasAlpha: Boolean;
     end;
     RGBA: array [1..2049,1..2049,1..4] of byte;
     RGBAmm: array [1..2049,1..2049,1..4] of byte;
     fRmsRGB: Single;
     fRmsA: Single;
-    Fog2: array[1..3]of Byte;
-    MipMapQtyUse: Integer;
-    MipMapQtyMax: Integer;
-    IsChanged: boolean;
-    fSavedIn: string;
-    procedure GenerateMipMap(MMH, MMV, aLevel: Integer);
+    Fog: array [1..3] of Byte;
+    fMipMapCount: Integer;
+    fMaxMipMapCount: Integer;
+    fIsChanged: Boolean;
+    procedure ComputeFog;
+    procedure GenerateMipMap(aLevel: Integer);
     procedure ResetAllData;
     procedure SetAllPropsAtOnce(iFileMask: string; iSizeH, iSizeV, iMipMapQty: Integer; iIsCompressed, iIsSYNPacked, ihasAlpha: Boolean);
+    procedure RefreshImage(aMode: TRefreshMode);
+    procedure UpdateMaxMipMapCount;
   public
-    AllowNonPOTImages:boolean;
+    AllowNonPOTImages: Boolean;
 
     constructor Create(aImageRGB, aImageA: TImage);
     destructor Destroy; override;
 
     property GetFileMask: string read Props.FileMask;
     property GetMipMapQty: Integer read Props.MipMapQty;
-    property GetMipMapQtyUse: Integer read MipMapQtyUse;
-    property SetMipMapQtyUse: Integer write MipMapQtyUse;
-    property GetMaxMipMapQty: Integer read MipMapQtyMax;
-    property GetCompression: boolean read Props.IsCompressed;
-    property GetPacked: boolean read Props.IsSYNPacked;
-    property GetAlpha: boolean read Props.hasAlpha;
-    function DisplayImage: boolean;
+
+    property MipMapCount: Integer read fMipMapCount write fMipMapCount;
+    property MaxMipMapCount: Integer read fMaxMipMapCount;
+
+    property GetCompression: Boolean read Props.IsCompressed;
+    property GetPacked: Boolean read Props.IsSYNPacked;
+    property GetAlpha: Boolean read Props.hasAlpha;
+    function DisplayImage: Boolean;
     function GetInfoString: string;
     function GetFogString: string;
     function GetRMSString: string;
     function GetChangedString: string;
-    procedure ComputeFog;
-    procedure KnowMaxMipMapQty;
     procedure InvertAlpha;
     procedure ClearAlpha;
-    procedure RGB2Bitm(aMode: TConversionMode);
     procedure OpenPTX(const aFilename: string);
     procedure OpenDDS(const aFilename: string);
     procedure OpenXTX(const aFilename: string);
     procedure OpenTGA(const aFilename: string);
     procedure Open2DB(const aFilename: string);
-    procedure SaveUncompressedPTX(FileName: string);
+    procedure SaveUncompressedPTX(const aFileName: string);
     procedure SaveCompressedPTX(const aFilename: string; aHeuristic: TDXTCompressionHeuristics);
     procedure SaveTGA(const aFilename: string);
     procedure SaveMipMap(const aFilename: string; aLevel: Integer);
@@ -72,12 +72,14 @@ type
     procedure ImportBitmapA(const aFilename: string);
     procedure CreateAlphaFrom(aX, aY: Integer);
     procedure ReplaceColorKeyWithAverage(aX, aY: Integer);
-
-    property SavedIn: string read fSavedIn;
   end;
 
 
 implementation
+
+
+const
+  RGB_GREY = 128*65793;
 
 
 { TDisplayImage }
@@ -119,8 +121,8 @@ begin
   Rect.Bottom := fImageRGB.Height;
   Rect.Right  := fImageRGB.Width;
 
-  fImageRGB.Canvas.Brush.Color := 128*65793; fImageRGB.Canvas.FillRect(Rect);
-  fImageA.Canvas.Brush.Color   := 128*65793; fImageA.Canvas.FillRect(Rect);
+  fImageRGB.Canvas.Brush.Color := RGB_GREY; fImageRGB.Canvas.FillRect(Rect);
+  fImageA.Canvas.Brush.Color   := RGB_GREY; fImageA.Canvas.FillRect(Rect);
 
   if Props.sizeH * Props.sizeV = 0 then Exit; //Image didn't loaded
 
@@ -134,28 +136,27 @@ begin
   fImageA.Picture.Graphic.Height := fImageA.Height;
   fImageA.Picture.Graphic.Width := fImageA.Width;
 
-  RGB2Bitm(cmRGB);
+  RefreshImage(cmRGB);
 
   if Props.hasAlpha then
-  begin
-    RGB2Bitm(cmA);
-  end;
-
-  KnowMaxMipMapQty;
+    RefreshImage(cmA);
 
   Result := true;
 end;
 
-function TDisplayImage.GetInfoString:string;
+
+function TDisplayImage.GetInfoString: string;
 begin
   Result := IntToStr(Props.sizeH) + 'x' + IntToStr(Props.sizeV) + ' RGB';
   if Props.hasAlpha then Result := Result + 'A'; //RGB+A
 end;
 
-function TDisplayImage.GetFogString:string;
+
+function TDisplayImage.GetFogString: string;
 begin
-  Result := 'R' + IntToStr(Fog2[1]) + '  G' + IntToStr(Fog2[2]) + '  B' + IntToStr(Fog2[3]);
+  Result := 'R' + IntToStr(Fog[1]) + '  G' + IntToStr(Fog[2]) + '  B' + IntToStr(Fog[3]);
 end;
+
 
 function TDisplayImage.GetRMSString: string;
 begin
@@ -163,43 +164,47 @@ begin
     Result := Format('rgb%.2f a%.2f', [fRmsRGB, fRmsA]);
 end;
 
-function TDisplayImage.GetChangedString:string;
+
+function TDisplayImage.GetChangedString: string;
 const
   IS_CHANGED: array [Boolean] of string = ('', '*');
 begin
-  Result := IS_CHANGED[IsChanged];
+  Result := IS_CHANGED[fIsChanged];
 end;
+
 
 procedure TDisplayImage.ComputeFog;
 var
-  I,K: Integer;
-  fr,fg,fb: Int64;
+  I, K: Integer;
+  fr, fg, fb: Int64;
 begin
   fr := 0;
   fg := 0;
   fb := 0;
+
   for I := 1 to Props.sizeV do
   for K := 1 to Props.sizeH do
   begin
-    fr := fr + RGBA[I,K,1];
-    fg := fg + RGBA[I,K,2];
-    fb := fb + RGBA[I,K,3];
+    Inc(fr, RGBA[I,K,1]);
+    Inc(fg, RGBA[I,K,2]);
+    Inc(fb, RGBA[I,K,3]);
   end;
-  Fog2[1] := Round(fr / (Props.sizeV * Props.sizeH));
-  Fog2[2] := Round(fg / (Props.sizeV * Props.sizeH));
-  Fog2[3] := Round(fb / (Props.sizeV * Props.sizeH));
+
+  Fog[1] := Round(fr / (Props.sizeV * Props.sizeH));
+  Fog[2] := Round(fg / (Props.sizeV * Props.sizeH));
+  Fog[3] := Round(fb / (Props.sizeV * Props.sizeH));
 end;
 
 
-procedure TDisplayImage.KnowMaxMipMapQty;
+procedure TDisplayImage.UpdateMaxMipMapCount;
 var
   x: Integer;
 begin
-  MipMapQtyMax := 0;
+  fMaxMipMapCount := 0;
   x := Min(Props.sizeH, Props.sizeV);
   repeat
     x := x div 2;
-    Inc(MipMapQtyMax);
+    Inc(fMaxMipMapCount);
   until (x <= 2);     //min size 4x1 pixels.
 end;
 
@@ -210,8 +215,11 @@ var
 begin
   for i:=1 to Props.sizeV do
   for k:=1 to Props.sizeH do
-    RGBA[i,k,4]:=255-RGBA[i,k,4];
-  RGB2Bitm(cmA);
+    RGBA[i,k,4] := 255 - RGBA[i,k,4];
+
+  RefreshImage(cmA);
+
+  fIsChanged := True;
 end;
 
 
@@ -219,16 +227,17 @@ procedure TDisplayImage.ClearAlpha;
 var
   i,k:Integer;
 begin
-  Props.hasAlpha:=false;
+  Props.hasAlpha := False;
   for i:=1 to Props.sizeV do
     for k:=1 to Props.sizeH do
-      RGBA[i,k,4]:=0;
-  fImageA.Canvas.Brush.Color:=128*65793;
+      RGBA[i,k,4] := 0;
+  fImageA.Canvas.Brush.Color := RGB_GREY;
   fImageA.Canvas.FillRect(Rect);
+  fIsChanged := True;
 end;
 
 
-procedure TDisplayImage.RGB2Bitm(aMode: TConversionMode);
+procedure TDisplayImage.RefreshImage(aMode: TRefreshMode);
 var
   pRGBLine: PByteArray;
   pALine: PByteArray;
@@ -268,20 +277,24 @@ begin
     fImageA.Canvas.StretchDraw(Rect, fBitmapA);
   end;
 
-  Screen.Cursor:=prevCursor;
+  Screen.Cursor := prevCursor;
 end;
 
 
-procedure TDisplayImage.GenerateMipMap(MMH,MMV,aLevel:Integer);
+procedure TDisplayImage.GenerateMipMap(aLevel: Integer);
 var
+  newWidth, newHeight: Integer;
   i,k,h,j: Integer;
   Area: Word;
   Ratio: Single;
   Tmp1,Tmp2,Tmp3,Tmp4,Acc: Single;
 begin
+  newWidth := Props.sizeH div Pow(2, aLevel - 1);
+  newHeight := Props.sizeV div Pow(2, aLevel - 1);
+
   if aLevel = 1 then
   begin
-    for i:=1 to MMV do for k:=1 to MMH do
+    for i:=1 to newHeight do for k:=1 to newWidth do
     begin
       RGBAmm[i,k,1] := RGBA[i,k,1];
       RGBAmm[i,k,2] := RGBA[i,k,2];
@@ -292,7 +305,7 @@ begin
   end;
 
   Area := Pow(2, aLevel-1); //1..1024 (one side only), temp limit to 16
-  for i:=1 to MMV do for k:=1 to MMH do
+  for i:=1 to newHeight do for k:=1 to newWidth do
   begin
     Tmp1:=0; Tmp2:=0; Tmp3:=0; Tmp4:=0; Acc:=0;
     for h:=1 to Area do for j:=1 to Area do
@@ -317,10 +330,10 @@ end;
 
 procedure TDisplayImage.ResetAllData;
 begin
-  FillChar(RGBA,SizeOf(RGBA),#0);
-  FillChar(Fog2, SizeOf(Fog2), #0);
-  FillChar(Props,SizeOf(Props),#0);
-  IsChanged:=true;
+  FillChar(RGBA, SizeOf(RGBA), #0);
+  FillChar(Fog, SizeOf(Fog), #0);
+  FillChar(Props, SizeOf(Props), #0);
+  fIsChanged := True;
 end;
 
 
@@ -329,10 +342,15 @@ begin
   Props.FileMask:=iFileMask;
   Props.sizeH:=iSizeH;
   Props.sizeV:=iSizeV;
-  Props.MipMapQty:=iMipMapQty;
+  Props.MipMapQty := iMipMapQty;
   Props.IsCompressed:=iIsCompressed;
   Props.IsSYNPacked:=iIsSYNPacked;
   Props.hasAlpha:=ihasAlpha;
+
+  fIsChanged := False;
+
+  UpdateMaxMipMapCount;
+  fMipMapCount := fMaxMipMapCount;
 end;
 
 
@@ -368,14 +386,10 @@ begin
     exit;
   end;
 
-  IsChanged:=false;
-
   SetAllPropsAtOnce(
     decs(ExtractFileName(aFileName),4,1),
     int2(c[5],c[6]),int2(c[9],c[10]),ord(c[13]),
     c[1]=#1,int2(c[21],c[22],c[23],c[24])<>0,c[2]=#32);
-
-  MipMapQtyUse := Props.MipMapQty;
 
   SYNData:=int2(c[21],c[22],c[23],c[24]);
 
@@ -494,7 +508,7 @@ end;
 
 
 procedure TDisplayImage.OpenDDS(const aFilename: string);
-var i,k,h:Integer; ftype:string[4];
+var i,k,h:Integer; ftype: string[4];
   f:file;
   c:array[1..128]of AnsiChar;
   T:byte;
@@ -510,14 +524,12 @@ if (int2(c[17],c[18])>2048)or(int2(c[13],c[14])>2048) then begin
   exit;
 end;
 
-IsChanged:=false;
 SetAllPropsAtOnce(
         decs(ExtractFileName(aFileName),4,1),
         int2(c[17],c[18]),int2(c[13],c[14]),ord(c[29]),
         true,false,(c[88]='3')or(c[88]='5'));
 
   fType:=c[85]+c[86]+c[87]+c[88];
-  MipMapQtyUse:=Props.MipMapQty;
 
 for i:=0 to (Props.sizeV div 4)-1 do
   for k:=0 to (Props.sizeH div 4)-1 do begin
@@ -560,7 +572,7 @@ end;
 
 procedure TDisplayImage.OpenXTX(const aFilename: string);
 var
-  i,k,h:Integer; ftype:string[4];
+  i,k,h:Integer; ftype: string[4];
   f:file;
   c:array[1..128]of byte;
   T:byte;
@@ -576,14 +588,12 @@ begin
     exit;
   end;  }
 
-  IsChanged:=false;
   SetAllPropsAtOnce(
           decs(ExtractFileName(aFileName),4,1),
           64,64,1,
           true,false,true);
 
     fType:='DXT5';//c[85]+c[86]+c[87]+c[88];
-    MipMapQtyUse:=Props.MipMapQty;
 
   for i:=0 to (Props.sizeV div 4)-1 do
     for k:=0 to (Props.sizeH div 4)-1 do begin
@@ -659,14 +669,10 @@ begin
     exit;
   end;
 
-  IsChanged:=false;
   SetAllPropsAtOnce(
           decs(ExtractFileName(aFileName),4,1),
           tSizeH,tSizeV,1,
           false,false,InBit=32);
-
-    KnowMaxMipMapQty;
-    MipMapQtyUse:=MipMapQtyMax;
 
   setlength(c,Props.SizeH*4+1);
 
@@ -742,13 +748,10 @@ begin
     MessageBox(0,'New format modification encountered','Notice',MB_OK);
   end;
 
-  IsChanged:=false;
   SetAllPropsAtOnce(
           decs(ExtractFileName(aFileName),4,1),
           BNKHeader.Width,BNKHeader.Height,Math.min(BNKHeader.MipMapH,BNKHeader.MipMapV),
           BNKHeader.InBit<>32,false,(BNKHeader.InBit=32)or(BNKHeader.InBit=8));
-
-    MipMapQtyUse:=Props.MipMapQty;
 
   if BNKHeader.InBit=32 then begin
     setlength(c,Props.SizeH*4+1);
@@ -801,61 +804,61 @@ begin
   fRmsA := 0;
 end;
 
-procedure TDisplayImage.SaveUncompressedPTX(FileName:string);
+procedure TDisplayImage.SaveUncompressedPTX(const aFileName: string);
 var
-  i,k,h:Integer;
-  f:file;
-  MMH,MMV,Size:Integer;
-  SpeedUp:array[1..4]of byte;
+  i, k, h: Integer;
+  f: file;
+  thisWidth, thisHeight, thisSize: Integer;
+  rgba: array [1..4] of Byte;
 begin
-  AssignFile(f,FileName); ReWrite(f,1);
+  AssignFile(f,aFileName); ReWrite(f,1);
   if Props.hasAlpha then blockwrite(f,AnsiString(#0#32#0#0),4) else blockwrite(f,AnsiString(#0#24#0#0),4);//compression, bpp
-  blockwrite(f,Props.SizeH,4);
-  blockwrite(f,Props.SizeV,4);
-  blockwrite(f,MipMapQtyUse,1);
-  blockwrite(f,Fog2[3],1);
-  blockwrite(f,Fog2[2],1);
-  blockwrite(f,Fog2[1],1);
+  blockwrite(f, Props.SizeH,4);
+  blockwrite(f, Props.SizeV,4);
+  blockwrite(f, fMipMapCount,1);
+  blockwrite(f, Fog[3], 1);
+  blockwrite(f, Fog[2], 1);
+  blockwrite(f, Fog[1], 1);
 
-  MMH:=Props.SizeH;
-  MMV:=Props.SizeV;
-  for h := 1 to MipMapQtyUse do
+  thisWidth:=Props.SizeH;
+  thisHeight:=Props.SizeV;
+  for h := 1 to fMipMapCount do
   begin
-    Size := MMH*MMV*4;
-    blockwrite(f,Size,4);
-    blockwrite(f,#0#0#0#0,4);
-    GenerateMipMap(MMH,MMV,h);
-    for i:=1 to MMV do for k:=1 to MMH do
+    thisSize := thisWidth * thisHeight * 4;
+    blockwrite(f, thisSize, 4);
+    blockwrite(f, #0#0#0#0, 4);
+
+    GenerateMipMap(h);
+
+    for i:=1 to thisHeight do for k:=1 to thisWidth do
     begin
-      SpeedUp[1] := RGBAmm[i,k,3];
-      SpeedUp[2] := RGBAmm[i,k,2];
-      SpeedUp[3] := RGBAmm[i,k,1];
-      SpeedUp[4] := RGBAmm[i,k,4];
-      blockwrite(f,SpeedUp[1],4);
+      rgba[1] := RGBAmm[i,k,3];
+      rgba[2] := RGBAmm[i,k,2];
+      rgba[3] := RGBAmm[i,k,1];
+      rgba[4] := RGBAmm[i,k,4];
+
+      blockwrite(f, rgba[1], 4);
     end;
-    MMH := Max(MMH div 2, 1);
-    MMV := Max(MMV div 2, 1);
+    thisWidth := Max(thisWidth div 2, 1);
+    thisHeight := Max(thisHeight div 2, 1);
   end;
   closefile(f);
   fRmsRGB := 0;
   fRmsA := 0;
-  IsChanged:=false;
+  fIsChanged := False;
 end;
 
 procedure TDisplayImage.SaveCompressedPTX(const aFilename: string; aHeuristic: TDXTCompressionHeuristics);
 var
   ms: TMemoryStream;
-  i,h:Integer;
-  MMH,MMV,Size,xp,yp:Integer;
-  DXTOut:int64;
-  DXTAOut:int64;
-  t: Cardinal;
+  i,h: Integer;
+  thisWidth, thisHeight, thisSize, xp, yp: Integer;
+  DXTOut: Int64;
+  DXTAOut: Int64;
   newRMS: Single;
 begin
   fRmsRGB := 0;
   fRmsA := 0;
-
-  t := GetTickCount;
 
   ms := TMemoryStream.Create;
 
@@ -866,24 +869,24 @@ begin
 
   ms.Write(Props.SizeH, 4);
   ms.Write(Props.SizeV, 4);
-  ms.Write(MipMapQtyUse, 1);
-  ms.Write(Fog2[3], 1);
-  ms.Write(Fog2[2], 1);
-  ms.Write(Fog2[1], 1);
+  ms.Write(fMipMapCount, 1);
+  ms.Write(Fog[3], 1);
+  ms.Write(Fog[2], 1);
+  ms.Write(Fog[1], 1);
 
-  MMH := Props.SizeH;
-  MMV := Props.SizeV;
-  for h := 1 to MipMapQtyUse do
+  thisWidth := Props.SizeH;
+  thisHeight := Props.SizeV;
+  for h := 1 to fMipMapCount do
   begin
-    Size := IfThen(Props.hasAlpha, MMH * MMV, MMH * MMV div 2);
+    thisSize := IfThen(Props.hasAlpha, thisWidth * thisHeight, thisWidth * thisHeight div 2);
 
-    ms.Write(Size, 4);
+    ms.Write(thisSize, 4);
     ms.Write(AnsiString(#0#0#0#0), 4);
-    GenerateMipMap(MMH, MMV, h);
-    for i:=1 to (MMH*MMV div 16) do
+    GenerateMipMap(h);
+    for i:=1 to (thisWidth*thisHeight div 16) do
     begin
-      xp := ((i-1) * 4) mod MMH + 1; //X pixel
-      yp := ((i-1) div ((MMH-1) div 4 + 1)) * 4 + 1;
+      xp := ((i-1) * 4) mod thisWidth + 1; //X pixel
+      yp := ((i-1) div ((thisWidth-1) div 4 + 1)) * 4 + 1;
       if Props.hasAlpha then
       begin
         newRMS := 0;
@@ -900,8 +903,8 @@ begin
       fRmsRGB := fRmsRGB + newRMS;
     end;
 
-    MMH := Max(MMH div 2, 1);
-    MMV := Max(MMV div 2, 1);
+    thisWidth := Max(thisWidth div 2, 1);
+    thisHeight := Max(thisHeight div 2, 1);
   end;
 
   ms.SaveToFile(aFileName);
@@ -910,15 +913,14 @@ begin
   fRmsRGB := Sqrt(fRmsRGB / (Props.SizeH * Props.SizeV));
   fRmsA := Sqrt(fRmsA / (Props.SizeH * Props.SizeV));
 
-  IsChanged := False;
-
-  fSavedIn := IntToStr(GetTickCount - t);
+  fIsChanged := False;
 end;
+
 
 procedure TDisplayImage.SaveTGA(const aFilename: string);
 var
   ms: TMemoryStream;
-  I,K,L:Integer;
+  I,K,L: Integer;
   buf: array of Byte;
 begin
   ms := TMemoryStream.Create;
@@ -947,26 +949,29 @@ begin
   ms.SaveToFile(aFileName);
   ms.Free;
 
-  IsChanged := False;
+  fIsChanged := False;
 end;
+
 
 procedure TDisplayImage.SaveMipMap(const aFilename: string; aLevel: Integer);
 var
   f:file;
-  i,k:Integer;
-  SizeHDiv,SizeVDiv:word;
+  i, k: Integer;
+  thisWidth, thisHeight: Word;
 begin
-  SizeHDiv:=Props.SizeH div Pow(2,aLevel-1);
-  SizeVDiv:=Props.SizeV div Pow(2,aLevel-1);
+  thisWidth:=Props.SizeH div Pow(2,aLevel-1);
+  thisHeight:=Props.SizeV div Pow(2,aLevel-1);
   AssignFile(f,aFileName); ReWrite(f,1);
-  blockwrite(f,#0#0#2#0#0#0#0#0#0#0#0#0,12);
-  FillChar(RGBAmm,SizeOf(RGBAmm),#0);
-  GenerateMipMap(SizeHDiv, SizeVDiv, aLevel);
-  blockwrite(f,SizeHDiv,2);
-  blockwrite(f,SizeVDiv,2);
+  blockwrite(f,AnsiString(#0#0#2#0#0#0#0#0#0#0#0#0), 12);
+  FillChar(RGBAmm, SizeOf(RGBAmm), #0);
+
+  GenerateMipMap(aLevel);
+
+  blockwrite(f, thisWidth, 2);
+  blockwrite(f, thisHeight, 2);
   if Props.hasAlpha then blockwrite(f,#32#0,2) else blockwrite(f,#24#0,2);
-  for i:=SizeVDiv downto 1 do
-    for k:=1 to SizeHDiv do
+  for i:=thisHeight downto 1 do
+    for k:=1 to thisWidth do
     begin
       blockwrite(f,RGBAmm[i,k,3],1);
       blockwrite(f,RGBAmm[i,k,2],1);
@@ -974,56 +979,49 @@ begin
       if Props.hasAlpha then blockwrite(f,RGBAmm[i,k,4],1);
     end;
   closefile(f);
-  IsChanged:=false;
 end;
 
 
-procedure TDisplayImage.ExportBitmapRGB(const aFileName:string);
+procedure TDisplayImage.ExportBitmapRGB(const aFileName: string);
 begin
   fBitmapRGB.SaveToFile(aFileName);
 end;
 
 
-procedure TDisplayImage.ExportBitmapA(const aFileName:string);
+procedure TDisplayImage.ExportBitmapA(const aFileName: string);
 begin
   fBitmapA.SaveToFile(aFileName);
 end;
 
 
-procedure TDisplayImage.ImportBitmapRGB(const aFileName:string);
+procedure TDisplayImage.ImportBitmapRGB(const aFileName: string);
 var
   i,k:Integer;
-  Bitmap:TBitmap;
-  p:PbyteArray;
+  bmp: TBitmap;
+  p: PByteArray;
 begin
-  Bitmap := TBitmap.Create;
-  Bitmap.LoadFromFile(aFileName);
+  bmp := TBitmap.Create;
+  bmp.LoadFromFile(aFileName);
 
-  if ((MakePOT(Bitmap.Width)<>Bitmap.Width)and(not AllowNonPOTImages))
-  or ((MakePOT(Bitmap.Height)<>Bitmap.Height)and(not AllowNonPOTImages))
-  or (Bitmap.Width<4)or(Bitmap.Height<4)or(Bitmap.Width>2048)or(Bitmap.Height>2048) then
+  if ((MakePOT(bmp.Width)<>bmp.Width)and(not AllowNonPOTImages))
+  or ((MakePOT(bmp.Height)<>bmp.Height)and(not AllowNonPOTImages))
+  or (bmp.Width<4)or(bmp.Height<4)or(bmp.Width>2048)or(bmp.Height>2048) then
   begin
-    Bitmap.Free;
-    MessageBox(0,'Image size must be 4,8,16,32...2048 pixels','Error',MB_OK);
-    exit;
+    bmp.Free;
+    MessageBox(0, 'Image size must be 4,8,16,32...2048 pixels', 'Error', MB_OK);
+    Exit;
   end;
 
-  //if (Bitmap.Width<>Props.SizeH)or(Bitmap.Height<>Props.SizeV) then
-  //Do reset because source RGB has changed
-  begin
-    ResetAllData;
-    SetAllPropsAtOnce(
-      Decs(ExtractFileName(aFileName),4,1),
-      Bitmap.Width, Bitmap.Height, 1,
-      false,false,false);
-
-    KnowMaxMipMapQty;
-    MipMapQtyUse:=MipMapQtyMax;
-  end;
+  // Do reset because source RGB has changed
+  ResetAllData;
+  SetAllPropsAtOnce(
+    Decs(ExtractFileName(aFileName),4,1),
+    bmp.Width, bmp.Height, 1,
+    false,false,false);
 
   for i:=1 to Props.SizeV do
   begin
-    p:=Bitmap.ScanLine[i-1];
+    p:=bmp.ScanLine[i-1];
     for k:=1 to Props.sizeH do
     begin
       RGBA[i,k,1] := p[k*3-1];
@@ -1032,32 +1030,31 @@ begin
     end;
   end;
 
-  Bitmap.Free;
+  bmp.Free;
   ComputeFog;
   fRmsRGB := 0;
   fRmsA := 0;
-  IsChanged:=true;
 end;
 
 procedure TDisplayImage.ImportBitmapA(const aFileName: string);
 var
   i,k: Integer;
-  Bitmap: TBitmap;
-  p: PbyteArray;
+  bmp: TBitmap;
+  p: PByteArray;
 begin
-  Bitmap:=TBitmap.Create;
-  Bitmap.LoadFromFile(aFileName);
+  bmp := TBitmap.Create;
+  bmp.LoadFromFile(aFileName);
 
-  if (Bitmap.Width<>Props.SizeH) or (Bitmap.Height<>Props.SizeV) then
+  if (bmp.Width<>Props.SizeH) or (bmp.Height<>Props.SizeV) then
   begin
     MessageBox(0,'Mask height and width should be same as for RGB image','Error',MB_OK);
-    Bitmap.Free;
+    bmp.Free;
     exit;
   end;
 
   for i:=1 to Props.SizeV do
   begin
-    p:=Bitmap.ScanLine[i-1];
+    p:=bmp.ScanLine[i-1];
     for k:=1 to Props.sizeH do
       RGBA[i,k,4]:=(p[k*3-1]+p[k*3-2]+p[k*3-3])div 3;
   end;
@@ -1066,10 +1063,10 @@ begin
   Props.IsCompressed:=false;
   Props.IsSYNPacked:=false;
 
-  Bitmap.Free;
+  bmp.Free;
   fRmsRGB := 0;
   fRmsA := 0;
-  IsChanged:=true;
+  fIsChanged := True;
 end;
 
 
@@ -1087,7 +1084,7 @@ begin
   Props.hasAlpha:=true;
   Props.IsCompressed:=false;
   Props.IsSYNPacked:=false;
-  IsChanged:=true;
+  fIsChanged := True;
 end;
 
 
@@ -1128,7 +1125,7 @@ begin
 
   Props.IsCompressed := false;
   Props.IsSYNPacked := false;
-  IsChanged := true;
+  fIsChanged := True;
 end;
 
 
