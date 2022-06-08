@@ -37,7 +37,7 @@ object Form1: TForm1
     Width = 258
     Height = 258
   end
-  object Image_A: TImage
+  object imgA: TImage
     Left = 455
     Top = 96
     Width = 256
@@ -74,13 +74,13 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
   end
-  object Image_RGB: TImage
+  object imgRGB: TImage
     Left = 192
     Top = 96
     Width = 256
     Height = 256
     OnMouseDown = ShowMenu
-    OnMouseUp = Image_RGBMouseUp
+    OnMouseUp = imgRGBMouseUp
   end
   object gbInfo: TGroupBox
     Left = 192

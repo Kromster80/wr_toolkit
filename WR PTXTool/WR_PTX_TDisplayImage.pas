@@ -12,7 +12,7 @@ type
     fDXTCompressorColor: TWRDXTCompressorColor;
     fBitmapRGB, fBitmapA: TBitmap;
 
-    ImageRGB,ImageA: TImage;
+    fImageRGB, fImageA: TImage;
     Rect: TRect;
     Props: record
       FileMask:string;
@@ -37,7 +37,7 @@ type
   public
     AllowNonPOTImages:boolean;
 
-    constructor Create(inBitmapRGB, inBitmapA: TBitmap; inImageRGB, inImageA: TImage);
+    constructor Create(inImageRGB, inImageA: TImage);
     destructor Destroy; override;
 
     property GetFileMask:string read Props.FileMask;
@@ -82,24 +82,26 @@ implementation
 
 
 {TDisplayImage}
-constructor TDisplayImage.Create(inBitmapRGB, inBitmapA: TBitmap; inImageRGB, inImageA: TImage);
+constructor TDisplayImage.Create(inImageRGB, inImageA: TImage);
 begin
   inherited Create;
 
   fDXTCompressorColor := TWRDXTCompressorColor.Create;
+  fBitmapRGB := TBitmap.Create;
+  fBitmapA := TBitmap.Create;
 
-  fBitmapRGB     := inBitmapRGB;
-  fBitmapA       := inBitmapA;
   fBitmapRGB.PixelFormat := pf24bit;
   fBitmapA.PixelFormat   := pf24bit;
-  ImageRGB      := inImageRGB;
-  ImageA        := inImageA;
+  fImageRGB      := inImageRGB;
+  fImageA        := inImageA;
 end;
 
 
 destructor TDisplayImage.Destroy;
 begin
   FreeAndNil(fDXTCompressorColor);
+  FreeAndNil(fBitmapRGB);
+  FreeAndNil(fBitmapA);
 
   inherited;
 end;
@@ -115,23 +117,23 @@ begin
   fBitmapA.Width   := Props.sizeH;
   fBitmapA.Height  := Props.sizeV;
 
-  Rect.Bottom := ImageRGB.Height;
-  Rect.Right  := ImageRGB.Width;
+  Rect.Bottom := fImageRGB.Height;
+  Rect.Right  := fImageRGB.Width;
 
-  ImageRGB.Canvas.Brush.Color := 128*65793; ImageRGB.Canvas.FillRect(Rect);
-  ImageA.Canvas.Brush.Color   := 128*65793; ImageA.Canvas.FillRect(Rect);
+  fImageRGB.Canvas.Brush.Color := 128*65793; fImageRGB.Canvas.FillRect(Rect);
+  fImageA.Canvas.Brush.Color   := 128*65793; fImageA.Canvas.FillRect(Rect);
 
   if Props.sizeH * Props.sizeV = 0 then Exit; //Image didn't loaded
 
   if (Props.sizeH / Props.sizeV) > 1 then
-    Rect.Bottom := Round(ImageRGB.Height / (Props.sizeH / Props.sizeV))
+    Rect.Bottom := Round(fImageRGB.Height / (Props.sizeH / Props.sizeV))
   else
-    Rect.Right  := Round(ImageRGB.Width  / (Props.sizeV / Props.sizeH));
+    Rect.Right  := Round(fImageRGB.Width  / (Props.sizeV / Props.sizeH));
 
-  ImageRGB.Picture.Graphic.Height := ImageRGB.Height;
-  ImageRGB.Picture.Graphic.Width := ImageRGB.Width;
-  ImageA.Picture.Graphic.Height := ImageA.Height;
-  ImageA.Picture.Graphic.Width := ImageA.Width;
+  fImageRGB.Picture.Graphic.Height := fImageRGB.Height;
+  fImageRGB.Picture.Graphic.Width := fImageRGB.Width;
+  fImageA.Picture.Graphic.Height := fImageA.Height;
+  fImageA.Picture.Graphic.Width := fImageA.Width;
 
   RGB2Bitm(cmRGB);
 
@@ -222,8 +224,8 @@ begin
   for i:=1 to Props.sizeV do
     for k:=1 to Props.sizeH do
       RGBA[i,k,4]:=0;
-  ImageA.Canvas.Brush.Color:=128*65793;
-  ImageA.Canvas.FillRect(Rect);
+  fImageA.Canvas.Brush.Color:=128*65793;
+  fImageA.Canvas.FillRect(Rect);
 end;
 
 
@@ -249,7 +251,7 @@ begin
         pRGBLine[K*3-1] := RGBA[I,K,1];
       end;
     end;
-    ImageRGB.Canvas.StretchDraw(Rect, fBitmapRGB);
+    fImageRGB.Canvas.StretchDraw(Rect, fBitmapRGB);
   end;
 
   if aMode in [cmRGBA, cmA] then
@@ -264,7 +266,7 @@ begin
         pALine[K*3-1] := RGBA[I,K,4];
       end;
     end;
-    ImageA.Canvas.StretchDraw(Rect, fBitmapA);
+    fImageA.Canvas.StretchDraw(Rect, fBitmapA);
   end;
 
   Screen.Cursor:=prevCursor;
@@ -1075,7 +1077,7 @@ var
   R,G,B:byte;
   i,k:Integer;
 begin
-  Color2RGB(ImageRGB.Canvas.Pixels[aX,aY],R,G,B);
+  Color2RGB(fImageRGB.Canvas.Pixels[aX,aY],R,G,B);
 
   for i:=1 to Props.SizeV do
     for k:=1 to Props.sizeH do
@@ -1094,7 +1096,7 @@ var
   i,k,cnt: Integer;
   rgbAvg: array [1..3] of Int64;
 begin
-  Color2RGB(ImageRGB.Canvas.Pixels[aX, aY], keyR, keyG, keyB);
+  Color2RGB(fImageRGB.Canvas.Pixels[aX, aY], keyR, keyG, keyB);
 
   cnt := 0;
   rgbAvg[1] := 0;

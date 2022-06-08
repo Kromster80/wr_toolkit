@@ -8,7 +8,7 @@ uses
 
 type
   TForm1 = class(TForm)
-    Image_A: TImage;
+    imgA: TImage;
     gbInfo: TGroupBox;
     Label1: TLabel;
     lbNoAlpha: TLabel;
@@ -56,7 +56,7 @@ type
     Label7: TLabel;
     Button1: TButton;
     CBnonPOT: TCheckBox;
-    Image_RGB: TImage;
+    imgRGB: TImage;
     lbSize: TLabel;
     lbMipMaps: TLabel;
     lbCompression: TLabel;
@@ -84,7 +84,7 @@ type
     procedure Button1Click(Sender: TObject);
     procedure CBnonPOTClick(Sender: TObject);
     procedure SampleAClick(Sender: TObject);
-    procedure Image_RGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure imgRGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure SampleRClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure Createalphafromcolorkey1Click(Sender: TObject);
@@ -94,8 +94,6 @@ type
     fVersionInfo: string;
     fStartWidth: Integer;
     fStartHeight: Integer;
-    fBitmapRGB: TBitmap;
-    fBitmapA: TBitmap;
     fExeDir, fWorkDir: string;
     fDisplayImage: TDisplayImage;
   end;
@@ -132,9 +130,7 @@ begin
   fStartWidth := Width;
   fStartHeight := Height;
 
-  fBitmapRGB := TBitmap.Create;
-  fBitmapA := TBitmap.Create;
-  fDisplayImage := TDisplayImage.Create(fBitmapRGB, fBitmapA, Image_RGB, Image_A);
+  fDisplayImage := TDisplayImage.Create(imgRGB, imgA);
 
   //CMDLine:='" " "C:\Documents and Settings\Krom\Desktop\Delphi\World Racing\00_ws_logo.2db"';
   FileListBox1.FileName := ExtractOpenedFileName(CMDLine);
@@ -178,8 +174,6 @@ begin
   timeEndPeriod(0);
 
   FreeAndNil(fDisplayImage);
-  FreeAndNil(fBitmapRGB);
-  FreeAndNil(fBitmapA);
 end;
 
 
@@ -295,8 +289,8 @@ end;
 procedure TForm1.ShowMenu(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if Button <> mbRight then Exit;
-  if Sender = Image_RGB then PopupMenu1.Popup(Left+Image_RGB.Left+2+X, Top+Image_RGB.Top+40+Y);
-  if Sender = Image_A   then PopupMenu1.Popup(Left+Image_A.Left+2+X, Top+Image_A.Top+40+Y);
+  if Sender = imgRGB then PopupMenu1.Popup(Left+imgRGB.Left+2+X, Top+imgRGB.Top+40+Y);
+  if Sender = imgA   then PopupMenu1.Popup(Left+imgA.Left+2+X, Top+imgA.Top+40+Y);
 end;
 
 
@@ -418,7 +412,7 @@ begin
 end;
 
 
-procedure TForm1.Image_RGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TForm1.imgRGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if (not SampleColorKey)and(not ReplaceColorKey) then exit;
   if SampleColorKey then fDisplayImage.CreateAlphaFrom(X,Y);
@@ -446,24 +440,24 @@ var
   fullWidth, halfWidth, fullHeight: Integer;
   imgSize: Integer;
 begin
-  fullWidth := ClientWidth - Image_RGB.Left - PAD;
-  fullHeight := ClientHeight - Image_RGB.Top - PAD;
+  fullWidth := ClientWidth - imgRGB.Left - PAD;
+  fullHeight := ClientHeight - imgRGB.Top - PAD;
   halfWidth := (fullWidth - Pad) div 2;
   imgSize := Min(halfWidth, fullHeight);
 
   Bevel_RGB.Width := halfWidth + 2;
   Bevel_A.Width := halfWidth + 2;
-  Image_RGB.Width := imgSize;
-  Image_A.Width := imgSize;
+  imgRGB.Width := imgSize;
+  imgA.Width := imgSize;
   meLog.Width := fullWidth;
 
-  Bevel_A.Left := Image_RGB.Left + halfWidth + PAD - 1;
-  Image_A.Left := Image_RGB.Left + halfWidth + PAD;
+  Bevel_A.Left := imgRGB.Left + halfWidth + PAD - 1;
+  imgA.Left := imgRGB.Left + halfWidth + PAD;
 
   Bevel_RGB.Height := fullHeight;
   Bevel_A.Height := fullHeight;
-  Image_RGB.Height := imgSize;
-  Image_A.Height := imgSize;
+  imgRGB.Height := imgSize;
+  imgA.Height := imgSize;
   meLog.Height := fullHeight;
 
   if fDisplayImage <> nil then
