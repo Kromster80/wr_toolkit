@@ -44,6 +44,14 @@ object Form1: TForm1
     Height = 256
     OnMouseDown = ShowMenu
   end
+  object imgRGB: TImage
+    Left = 192
+    Top = 96
+    Width = 256
+    Height = 256
+    OnMouseDown = ShowMenu
+    OnMouseUp = imgRGBMouseUp
+  end
   object lbNoAlpha: TLabel
     Left = 551
     Top = 218
@@ -73,14 +81,6 @@ object Form1: TForm1
     Font.Style = []
     ParentColor = False
     ParentFont = False
-  end
-  object imgRGB: TImage
-    Left = 192
-    Top = 96
-    Width = 256
-    Height = 256
-    OnMouseDown = ShowMenu
-    OnMouseUp = imgRGBMouseUp
   end
   object gbInfo: TGroupBox
     Left = 192
@@ -261,6 +261,7 @@ object Form1: TForm1
     Width = 169
     Height = 81
     TabOrder = 7
+    Visible = False
   end
   object Save1: TSaveDialog
     DefaultExt = 'bmp'
@@ -330,33 +331,33 @@ object Form1: TForm1
     Top = 319
     object ImportMenu: TMenuItem
       Caption = 'Import'
-      object LoadBMPImage1: TMenuItem
+      object mnuImportBMPImage: TMenuItem
         Caption = 'BMP Image ...'
         OnClick = ImportBMPClick
       end
-      object LoadBMPMask1: TMenuItem
+      object mnuImportBMPMask: TMenuItem
         Caption = 'BMP Mask ...'
         Enabled = False
         OnClick = ImportBMPClick
       end
-      object LoadTGAImageMask1: TMenuItem
+      object mnuImportTGAImageMask: TMenuItem
         Caption = 'TGA Image/Mask ...'
         OnClick = ImportTGAClick
       end
     end
     object ExportMenu: TMenuItem
       Caption = 'Export'
-      object SaveBMPImage1: TMenuItem
+      object mnuExportBMPImage: TMenuItem
         Caption = 'BMP Image ...'
         Enabled = False
         OnClick = ExportClick
       end
-      object SaveBMPMask1: TMenuItem
+      object mnuExportBMPMask: TMenuItem
         Caption = 'BMP Mask ...'
         Enabled = False
         OnClick = ExportClick
       end
-      object SaveTGAImageMask1: TMenuItem
+      object mnuExportTGAImageMask: TMenuItem
         Caption = 'TGA Image/Mask ...'
         Enabled = False
         OnClick = ExportClick
@@ -364,12 +365,12 @@ object Form1: TForm1
     end
     object SaveMenu: TMenuItem
       Caption = 'Save'
-      object SaveUncompressedPTX1: TMenuItem
+      object mnuSaveUncompressedPTX: TMenuItem
         Caption = 'Uncompressed PTX ...'
         Enabled = False
         OnClick = SaveUncompressedPTX
       end
-      object SaveCompressedPTX1: TMenuItem
+      object mnuSaveCompressedPTX: TMenuItem
         Caption = 'Compressed PTX ...'
         Enabled = False
         OnClick = SaveCompressedPTX
@@ -377,26 +378,26 @@ object Form1: TForm1
     end
     object EditMenu: TMenuItem
       Caption = 'Edit'
-      object InvertAlpha1: TMenuItem
+      object mnuEditInvertAlpha: TMenuItem
         Caption = 'Invert Alpha'
         Enabled = False
         OnClick = InvertAlpha
       end
-      object ClearAlpha1: TMenuItem
+      object mnuEditClearAlpha: TMenuItem
         Caption = 'Clear Alpha'
         Enabled = False
         OnClick = ClearAlpha
       end
-      object Createalphafromcolorkey1: TMenuItem
+      object mnuEditAlphaFromColorKey: TMenuItem
         Caption = 'Create alpha from color-key'
-        OnClick = Createalphafromcolorkey1Click
+        OnClick = mnuEditAlphaFromColorKeyClick
       end
-      object Replacecolorkeywithaveragecolor1: TMenuItem
+      object mnuEditReplaceColorKeyWithAverage: TMenuItem
         Caption = 'Replace color-key with average color'
-        OnClick = Replacecolorkeywithaveragecolor1Click
+        OnClick = mnuEditReplaceColorKeyWithAverageClick
       end
     end
-    object AboutMenu: TMenuItem
+    object mnuAbout: TMenuItem
       Caption = 'About'
       OnClick = AboutClick
     end

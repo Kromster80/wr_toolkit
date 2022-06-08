@@ -30,47 +30,46 @@ type
     MipMapQtyMax: Integer;
     IsChanged: boolean;
     fSavedIn: string;
-    procedure GenerateMipMap(MMH,MMV,aLevel:Integer);
+    procedure GenerateMipMap(MMH, MMV, aLevel: Integer);
     procedure ResetAllData;
-    procedure SetAllPropsAtOnce(iFileMask:string; iSizeH,iSizeV,iMipMapQty:Integer;
-              iIsCompressed,iIsSYNPacked,ihasAlpha:boolean);
+    procedure SetAllPropsAtOnce(iFileMask: string; iSizeH, iSizeV, iMipMapQty: Integer; iIsCompressed, iIsSYNPacked, ihasAlpha: Boolean);
   public
     AllowNonPOTImages:boolean;
 
-    constructor Create(inImageRGB, inImageA: TImage);
+    constructor Create(aImageRGB, aImageA: TImage);
     destructor Destroy; override;
 
-    property GetFileMask:string read Props.FileMask;
-    property GetMipMapQty:Integer read Props.MipMapQty;
-    property GetMipMapQtyUse:Integer read MipMapQtyUse;
-    property SetMipMapQtyUse:Integer write MipMapQtyUse;
-    property GetMaxMipMapQty:Integer read MipMapQtyMax;
-    property GetCompression:boolean read Props.IsCompressed;
-    property GetPacked:boolean read Props.IsSYNPacked;
-    property GetAlpha:boolean read Props.hasAlpha;
-    function DisplayImage: Boolean;
-    function GetInfoString:string;
-    function GetFogString:string;
-    function GetRMSString:string;
-    function GetChangedString:string;
+    property GetFileMask: string read Props.FileMask;
+    property GetMipMapQty: Integer read Props.MipMapQty;
+    property GetMipMapQtyUse: Integer read MipMapQtyUse;
+    property SetMipMapQtyUse: Integer write MipMapQtyUse;
+    property GetMaxMipMapQty: Integer read MipMapQtyMax;
+    property GetCompression: boolean read Props.IsCompressed;
+    property GetPacked: boolean read Props.IsSYNPacked;
+    property GetAlpha: boolean read Props.hasAlpha;
+    function DisplayImage: boolean;
+    function GetInfoString: string;
+    function GetFogString: string;
+    function GetRMSString: string;
+    function GetChangedString: string;
     procedure ComputeFog;
     procedure KnowMaxMipMapQty;
     procedure InvertAlpha;
     procedure ClearAlpha;
     procedure RGB2Bitm(aMode: TConversionMode);
-    procedure OpenPTX(const aFilename:string);
-    procedure OpenDDS(const aFilename:string);
-    procedure OpenXTX(const aFilename:string);
-    procedure OpenTGA(const aFilename:string);
-    procedure Open2DB(const aFilename:string);
-    procedure SaveUncompressedPTX(FileName:string);
+    procedure OpenPTX(const aFilename: string);
+    procedure OpenDDS(const aFilename: string);
+    procedure OpenXTX(const aFilename: string);
+    procedure OpenTGA(const aFilename: string);
+    procedure Open2DB(const aFilename: string);
+    procedure SaveUncompressedPTX(FileName: string);
     procedure SaveCompressedPTX(const aFilename: string; aHeuristic: TDXTCompressionHeuristics);
     procedure SaveTGA(const aFilename: string);
-    procedure SaveMipMap(const aFilename:string; aLevel:Integer);
-    procedure ExportBitmapRGB(const aFileName:string);
-    procedure ExportBitmapA(const aFileName:string);
-    procedure ImportBitmapRGB(const aFileName:string);
-    procedure ImportBitmapA(const aFileName: string);
+    procedure SaveMipMap(const aFilename: string; aLevel: Integer);
+    procedure ExportBitmapRGB(const aFilename: string);
+    procedure ExportBitmapA(const aFilename: string);
+    procedure ImportBitmapRGB(const aFilename: string);
+    procedure ImportBitmapA(const aFilename: string);
     procedure CreateAlphaFrom(aX, aY: Integer);
     procedure ReplaceColorKeyWithAverage(aX, aY: Integer);
 
@@ -81,19 +80,19 @@ type
 implementation
 
 
-{TDisplayImage}
-constructor TDisplayImage.Create(inImageRGB, inImageA: TImage);
+{ TDisplayImage }
+constructor TDisplayImage.Create(aImageRGB, aImageA: TImage);
 begin
   inherited Create;
 
+  fImageRGB := aImageRGB;
+  fImageA := aImageA;
+
   fDXTCompressorColor := TWRDXTCompressorColor.Create;
   fBitmapRGB := TBitmap.Create;
-  fBitmapA := TBitmap.Create;
-
   fBitmapRGB.PixelFormat := pf24bit;
+  fBitmapA := TBitmap.Create;
   fBitmapA.PixelFormat   := pf24bit;
-  fImageRGB      := inImageRGB;
-  fImageA        := inImageA;
 end;
 
 
@@ -325,8 +324,7 @@ begin
 end;
 
 
-procedure TDisplayImage.SetAllPropsAtOnce(iFileMask:string;
-iSizeH,iSizeV,iMipMapQty:Integer; iIsCompressed,iIsSYNPacked,ihasAlpha:boolean);
+procedure TDisplayImage.SetAllPropsAtOnce(iFileMask: string; iSizeH, iSizeV, iMipMapQty: Integer; iIsCompressed, iIsSYNPacked, ihasAlpha: Boolean);
 begin
   Props.FileMask:=iFileMask;
   Props.sizeH:=iSizeH;
@@ -337,7 +335,8 @@ begin
   Props.hasAlpha:=ihasAlpha;
 end;
 
-procedure TDisplayImage.OpenPTX(const aFilename:string);
+
+procedure TDisplayImage.OpenPTX(const aFilename: string);
 var
   i,k,h:Integer;
   a,b:^byte;
@@ -355,14 +354,16 @@ begin
   SetLength(c,24+1);
   blockread(f,c[1],24);
 
-  if ((c[1]<>#0)and(c[1]<>#1))or((c[2]<>#32)and(c[2]<>#24)and(c[2]<>#16)) then begin
+  if ((c[1]<>#0)and(c[1]<>#1))or((c[2]<>#32)and(c[2]<>#24)and(c[2]<>#16)) then
+  begin
     MessageBox(0, 'Unknown PTX format, can''t be opened.', 'Error', MB_OK);
     closefile(f);
     exit;
   end;
 
-  if (int2(c[5],c[6])>2048)or(int2(c[9],c[10])>2048) then begin
-    MessageBox(0,'Big images (2048+ pixels) are not supported','Error',mb_ok);
+  if (int2(c[5],c[6])>2048)or(int2(c[9],c[10])>2048) then
+  begin
+    MessageBox(0,'Big images (2048+ pixels) are not supported','Error',MB_OK);
     closefile(f);
     exit;
   end;
@@ -504,7 +505,7 @@ assignfile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
 blockread(f,c,128);
 
 if (int2(c[17],c[18])>2048)or(int2(c[13],c[14])>2048) then begin
-  MessageBox(0,'Big images (2048+) are not supported','Error',mb_ok);
+  MessageBox(0,'Big images (2048+) are not supported','Error',MB_OK);
   closefile(f);
   exit;
 end;
@@ -570,7 +571,7 @@ begin
   blockread(f,c,52);
 
   {if (int2(c[17],c[18])>2048)or(int2(c[13],c[14])>2048) then begin
-    MessageBox(0,'Big images (2048+) are not supported','Error',mb_ok);
+    MessageBox(0,'Big images (2048+) are not supported','Error',MB_OK);
     closefile(f);
     exit;
   end;  }
@@ -653,7 +654,7 @@ begin
   or ((MakePOT(tSizeV)<>tSizeV)and(not AllowNonPOTImages))
   or  (tSizeH<4)or(tSizeV<4)or(tSizeH>2048)or(tSizeV>2048) then
   begin
-    MessageBox(0,'Image size must be 4,8,16,32...2048 x 24/32 bit','Error',mb_ok);
+    MessageBox(0,'Image size must be 4,8,16,32...2048 x 24/32 bit','Error',MB_OK);
     closefile(f);
     exit;
   end;
@@ -730,7 +731,7 @@ begin
 
   if ((BNKHeader.InBit<>4)and(BNKHeader.InBit<>8)and(BNKHeader.InBit<>32))or
      (BNKHeader.Width<4)or(BNKHeader.Height<4)or(BNKHeader.Width>2048)or(BNKHeader.Height>2048) then begin
-    MessageBox(0,'Uknown format','Error',mb_ok);
+    MessageBox(0,'Uknown format','Error',MB_OK);
     closefile(f);
     exit;
   end;
@@ -738,7 +739,7 @@ begin
   if (BNKHeader.Un1<>2)and(BNKHeader.Un2<>0)and(BNKHeader.Un3<>0)and
      (BNKHeader.Un4<>1)and(BNKHeader.Un6<>0)and(BNKHeader.Un6b<>0)and
      (BNKHeader.Un7<>0)and(BNKHeader.Un8<>0)and(BNKHeader.Un12<>0) then begin
-    MessageBox(0,'New format modification encountered','Notice',mb_ok);
+    MessageBox(0,'New format modification encountered','Notice',MB_OK);
   end;
 
   IsChanged:=false;
@@ -1003,7 +1004,7 @@ begin
   or (Bitmap.Width<4)or(Bitmap.Height<4)or(Bitmap.Width>2048)or(Bitmap.Height>2048) then
   begin
     Bitmap.Free;
-    MessageBox(0,'Image size must be 4,8,16,32...2048 pixels','Error',mb_ok);
+    MessageBox(0,'Image size must be 4,8,16,32...2048 pixels','Error',MB_OK);
     exit;
   end;
 
@@ -1012,9 +1013,9 @@ begin
   begin
     ResetAllData;
     SetAllPropsAtOnce(
-          decs(ExtractFileName(aFileName),4,1),
-          Bitmap.Width,Bitmap.Height,1,
-          false,false,false);
+      Decs(ExtractFileName(aFileName),4,1),
+      Bitmap.Width, Bitmap.Height, 1,
+      false,false,false);
 
     KnowMaxMipMapQty;
     MipMapQtyUse:=MipMapQtyMax;
@@ -1049,7 +1050,7 @@ begin
 
   if (Bitmap.Width<>Props.SizeH) or (Bitmap.Height<>Props.SizeV) then
   begin
-    MessageBox(0,'Mask height and width should be same as for RGB image','Error',mb_ok);
+    MessageBox(0,'Mask height and width should be same as for RGB image','Error',MB_OK);
     Bitmap.Free;
     exit;
   end;

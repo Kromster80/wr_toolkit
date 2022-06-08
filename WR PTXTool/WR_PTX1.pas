@@ -33,18 +33,18 @@ type
     ImportMenu: TMenuItem;
     ExportMenu: TMenuItem;
     EditMenu: TMenuItem;
-    AboutMenu: TMenuItem;
-    InvertAlpha1: TMenuItem;
-    ClearAlpha1: TMenuItem;
-    SaveBMPImage1: TMenuItem;
-    SaveBMPMask1: TMenuItem;
-    SaveTGAImageMask1: TMenuItem;
-    LoadBMPImage1: TMenuItem;
-    LoadBMPMask1: TMenuItem;
-    LoadTGAImageMask1: TMenuItem;
+    mnuAbout: TMenuItem;
+    mnuEditInvertAlpha: TMenuItem;
+    mnuEditClearAlpha: TMenuItem;
+    mnuExportBMPImage: TMenuItem;
+    mnuExportBMPMask: TMenuItem;
+    mnuExportTGAImageMask: TMenuItem;
+    mnuImportBMPImage: TMenuItem;
+    mnuImportBMPMask: TMenuItem;
+    mnuImportTGAImageMask: TMenuItem;
     SaveMenu: TMenuItem;
-    SaveUncompressedPTX1: TMenuItem;
-    SaveCompressedPTX1: TMenuItem;
+    mnuSaveUncompressedPTX: TMenuItem;
+    mnuSaveCompressedPTX: TMenuItem;
     N1: TMenuItem;
     N2: TMenuItem;
     InvertA: TMenuItem;
@@ -62,8 +62,8 @@ type
     lbCompression: TLabel;
     lbFadeColor: TLabel;
     lbRMS: TLabel;
-    Createalphafromcolorkey1: TMenuItem;
-    Replacecolorkeywithaveragecolor1: TMenuItem;
+    mnuEditAlphaFromColorKey: TMenuItem;
+    mnuEditReplaceColorKeyWithAverage: TMenuItem;
     rgCompressionQuality: TRadioGroup;
     meLog: TMemo;
     procedure ExportClick(Sender: TObject);
@@ -76,8 +76,6 @@ type
     procedure SaveUncompressedPTX(Sender: TObject);
     procedure ImportTGAClick(Sender: TObject);
     procedure InvertAlpha(Sender: TObject);
-    procedure SetRGB(Value:boolean);
-    procedure SetAlpha(Value:boolean);
     procedure OpenFile(Sender: TObject);
     procedure SpinMMChange(Sender: TObject);
     procedure DisplayChange(Sender: TObject);
@@ -87,8 +85,8 @@ type
     procedure imgRGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure SampleRClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
-    procedure Createalphafromcolorkey1Click(Sender: TObject);
-    procedure Replacecolorkeywithaveragecolor1Click(Sender: TObject);
+    procedure mnuEditAlphaFromColorKeyClick(Sender: TObject);
+    procedure mnuEditReplaceColorKeyWithAverageClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
     fVersionInfo: string;
@@ -96,6 +94,8 @@ type
     fStartHeight: Integer;
     fExeDir, fWorkDir: string;
     fDisplayImage: TDisplayImage;
+    procedure SetRGB(aValue: Boolean);
+    procedure SetAlpha(aValue: Boolean);
   end;
 
 
@@ -142,7 +142,7 @@ begin
   SetFocusedControl(FileListBox1);
 
   timeBeginPeriod(0);
-
+                {
   meLog.Visible := DebugHook <> 0;
 
   if DebugHook <> 0 then
@@ -181,9 +181,10 @@ procedure TForm1.ImportBMPClick(Sender: TObject);
 begin
   if not RunOpenDialog(Open1, '', fWorkDir, '24bit BMP files (*.bmp)|*.bmp') then Exit;
 
-  if (Sender=ImportBMPRGB)or(Sender=LoadBMPImage1) then
+  if (Sender = ImportBMPRGB) or (Sender = mnuImportBMPImage) then
     fDisplayImage.ImportBitmapRGB(Open1.FileName);
-  if (Sender=ImportBMPA)or(Sender=LoadBMPMask1) then
+
+  if (Sender = ImportBMPA) or (Sender = mnuImportBMPMask) then
     fDisplayImage.ImportBitmapA(Open1.FileName);
 
   DisplayChange(nil);
@@ -198,19 +199,20 @@ begin
   DisplayChange(nil);
 end;
 
+
 procedure TForm1.ExportClick(Sender: TObject);
 begin
-  if (Sender = ExportBMPA) or (Sender = SaveBMPMask1) then
+  if (Sender = ExportBMPA) or (Sender = mnuExportBMPMask) then
   begin
     if RunSaveDialog(Save1, fDisplayImage.GetFileMask + '_A.bmp', fWorkDir, '24bit BMP files (*.bmp)|*.bmp', 'bmp') then
       fDisplayImage.ExportBitmapA(Save1.FileName);
   end else
-  if (Sender = ExportBMPRGB) or (Sender = SaveBMPImage1) then
+  if (Sender = ExportBMPRGB) or (Sender = mnuExportBMPImage) then
   begin
     if RunSaveDialog(Save1, fDisplayImage.GetFileMask + '.bmp', fWorkDir, '24bit BMP files (*.bmp)|*.bmp', 'bmp') then
       fDisplayImage.ExportBitmapRGB(Save1.FileName);
   end else
-  if (Sender = ExportTGA) or (Sender = SaveTGAImageMask1) then
+  if (Sender = ExportTGA) or (Sender = mnuExportTGAImageMask) then
   begin
     if RunSaveDialog(Save1, fDisplayImage.GetFileMask + '.tga', fWorkDir, 'TGA files (*.tga)|*.tga', 'tga') then
       fDisplayImage.SaveTGA(Save1.FileName);
@@ -227,7 +229,7 @@ begin
 end;
 
 
-procedure TForm1.Createalphafromcolorkey1Click(Sender: TObject);
+procedure TForm1.mnuEditAlphaFromColorKeyClick(Sender: TObject);
 begin
   SampleColorKey := not SampleColorKey;
   if SampleColorKey then
@@ -299,30 +301,31 @@ begin
   fDisplayImage.InvertAlpha;
 end;
 
-procedure TForm1.SetRGB(Value: Boolean);
+
+procedure TForm1.SetRGB(aValue: Boolean);
 begin
-  SaveUnCompressedPTX1.Enabled  := Value;
-  SaveCompressedPTX1.Enabled    := Value;
-  ExportBMPRGB.Enabled          := Value;
-  SaveBMPImage1.Enabled         := Value;
-  ImportBMPA.Enabled            := Value;
-  LoadBMPMask1.Enabled          := Value;
-  ExportTGA.Enabled             := Value;
-  SaveTGAImageMask1.Enabled     := Value;
-  SpinMM.Enabled                := Value;
-  lbNoAlpha.Visible             := not Value; //Hide
+  mnuSaveUncompressedPTX.Enabled  := aValue;
+  mnuSaveCompressedPTX.Enabled    := aValue;
+  ExportBMPRGB.Enabled            := aValue;
+  mnuExportBMPImage.Enabled       := aValue;
+  ImportBMPA.Enabled              := aValue;
+  mnuImportBMPMask.Enabled        := aValue;
+  ExportTGA.Enabled               := aValue;
+  mnuExportTGAImageMask.Enabled   := aValue;
+  SpinMM.Enabled                  := aValue;
+  lbNoRGB.Visible                 := not aValue;
 end;
 
 
-procedure TForm1.SetAlpha(Value: Boolean);
+procedure TForm1.SetAlpha(aValue: Boolean);
 begin
-  ClearA.Enabled        := Value;
-  ClearAlpha1.Enabled   := Value;
-  InvertA.Enabled       := Value;
-  InvertAlpha1.Enabled  := Value;
-  ExportBMPA.Enabled    := Value;
-  SaveBMPMask1.Enabled  := Value;
-  lbNoAlpha.Visible     := not Value; //Hide
+  ClearA.Enabled              := aValue;
+  mnuEditClearAlpha.Enabled   := aValue;
+  InvertA.Enabled             := aValue;
+  mnuEditInvertAlpha.Enabled  := aValue;
+  ExportBMPA.Enabled          := aValue;
+  mnuExportBMPMask.Enabled    := aValue;
+  lbNoAlpha.Visible           := not aValue;
 end;
 
 
@@ -344,7 +347,7 @@ begin
 end;
 
 
-procedure TForm1.Replacecolorkeywithaveragecolor1Click(Sender: TObject);
+procedure TForm1.mnuEditReplaceColorKeyWithAverageClick(Sender: TObject);
 begin
   ReplaceColorKey := not ReplaceColorKey;
   if ReplaceColorKey then
@@ -352,6 +355,7 @@ begin
   else
     Cursor := crDefault;
 end;
+
 
 procedure TForm1.SpinMMChange(Sender: TObject);
 begin
@@ -459,6 +463,12 @@ begin
   imgRGB.Height := imgSize;
   imgA.Height := imgSize;
   meLog.Height := fullHeight;
+
+  // Center labels
+  lbNoRGB.Left := imgRGB.Left + (imgSize - lbNoRGB.Width) div 2;
+  lbNoAlpha.Left := imgA.Left + (imgSize - lbNoAlpha.Width) div 2;
+  lbNoRGB.Top := imgRGB.Top + (imgSize - lbNoRGB.Height) div 2;
+  lbNoAlpha.Top := imgA.Top + (imgSize - lbNoAlpha.Height) div 2;
 
   if fDisplayImage <> nil then
     DisplayChange(nil);
