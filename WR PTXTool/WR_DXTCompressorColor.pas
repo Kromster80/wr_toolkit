@@ -5,31 +5,36 @@ uses
 
 type
   TDLLCompressProc = procedure(rgba: PByte; block: Pointer; flags: Integer; metric: PSingle); stdcall;
-  TCompressionHeuristics = (
-    chBest,
-    chStraight1, chStraight2,
-    chExtended11, chExtended12,
-    chExtended21, chExtended22,
-    ch51, ch52,
+  TDXTCompressionHeuristics = (
+    chBestPick,
+    chMinMax1, chMinMax2,
+    chExtHigh1, chExtHigh2,
+    chExtLow1, chExtLow2,
+    chMerged1, chMerged2,
     chRygs1, chRygs2,
-    chDLL,
+    chSquish,
     chPlain1,
     chPlain2,
-    chOld
+    chOriginal
   );
 
 const
-  HEURISTIC_NAME: array [TCompressionHeuristics] of string = (
-    'best',
-    'Straight1', 'Straight2',
-    'Extended11', 'Extended12',
-    'Extended21', 'Extended22',
-    '51', '52',
-    'Rygs1', 'Rygs2',
-    'DLL',
+  HEURISTIC_NAME: array [TDXTCompressionHeuristics] of string = (
+    'BestPick',
+    'MinMax1',
+    'MinMax2',
+    'ExtHigh1',
+    'ExtHigh2',
+    'ExtLow1',
+    'ExtLow2',
+    'Merged1',
+    'Merged2',
+    'Rygs1',
+    'Rygs2',
+    'Squish',
     'Plain1',
     'Plain2',
-    'Old'
+    'Original'
   );
 
 type
@@ -46,30 +51,30 @@ type
     fDllCompress: TDLLCompressProc;
     fSrcCol: array [1..16] of TRGBColor;
 
-    fDst: array [TCompressionHeuristics] of record
+    fDst: array [TDXTCompressionHeuristics] of record
       Data: Int64;
       RMS: Single;
     end;
 
     function CalculateRMS(aData: Pointer): Single;
-    procedure GetMinMaxColor(out aColorMin, aColorMax: TRGBColor);
+    procedure GetMinMaxColor24(out aColorMin, aColorMax: TRGBColor);
     procedure GetMinMaxColor16(out aColorMin, aColorMax: Word);
 
-    procedure GetMostColor16(out aColorMin, aColorMax: Word);
+    procedure GetMergedColors(out aColorMin, aColorMax: Word);
     procedure GetRygsColor16(out aColorMin, aColorMax: Word);
     function RefineBlock(var aColorMin, aColorMax: Word): Boolean;
 
     function SaveToBlock(aColor0, aColor1: Word): Int64;
     function SearchMinMax(aDir: Boolean): Int64;
-    function SearchExtended23(aExt, aDir: Boolean): Int64;
-    function Search5(aDir: Boolean): Int64;
+    function SearchExt(aExt, aDir: Boolean): Int64;
+    function SearchMerged(aDir: Boolean): Int64;
     function SearchRygs(aDir: Boolean): Int64;
     function SearchDLL: Int64;
     function SearchPlain(aDir: Boolean): Int64;
   public
     constructor Create;
     destructor Destroy; override;
-    procedure CompressBlock(aRow1, aRow2, aRow3, aRow4: Pointer; aHeuristic: TCompressionHeuristics;
+    procedure CompressBlock(aRow1, aRow2, aRow3, aRow4: Pointer; aHeuristic: TDXTCompressionHeuristics;
       out aBlockData: Int64; out aRMS: Single);
   end;
 
@@ -134,7 +139,7 @@ begin
 end;
 
 
-procedure TWRDXTCompressorColor.GetMinMaxColor(out aColorMin, aColorMax: TRGBColor);
+procedure TWRDXTCompressorColor.GetMinMaxColor24(out aColorMin, aColorMax: TRGBColor);
 var
   I, K: Integer;
   bestRMS, newRMS: Integer;
@@ -176,14 +181,14 @@ procedure TWRDXTCompressorColor.GetMinMaxColor16(out aColorMin, aColorMax: Word)
 var
   a, b: TRGBColor;
 begin
-  GetMinMaxColor(a, b);
+  GetMinMaxColor24(a, b);
 
   aColorMin := RGBToWord(a.R, a.G, a.B);
   aColorMax := RGBToWord(b.R, b.G, b.B);
 end;
 
 
-procedure TWRDXTCompressorColor.GetMostColor16(out aColorMin, aColorMax: Word);
+procedure TWRDXTCompressorColor.GetMergedColors(out aColorMin, aColorMax: Word);
 var
   I, K: Integer;
   rms: array [1..16, 1..16] of Integer;
@@ -456,7 +461,7 @@ var
   colorMin, colorMax: TRGBColor;
   colorMin16, colorMax16: Word;
 begin
-  GetMinMaxColor(colorMin, colorMax);
+  GetMinMaxColor24(colorMin, colorMax);
 
   colorMin16 := RGBToWord(Max(colorMin.R - 8, 0), Max(colorMin.G - 4, 0), Max(colorMin.B - 8, 0));
   colorMax16 := RGBToWord(Min(colorMin.R + 8, 255), Min(colorMin.G + 4, 255), Min(colorMin.B + 8, 255));
@@ -468,15 +473,15 @@ begin
 end;
 
 
-function TWRDXTCompressorColor.SearchExtended23(aExt, aDir: Boolean): Int64;
+function TWRDXTCompressorColor.SearchExt(aExt, aDir: Boolean): Int64;
 const
-  EXTENT = 2;
+  EXTENT = 0.5;
 var
   I, K: Integer;
-  colorRgbMin, colorRgbMax, c2: TRGBColor;
+  color24Min, color24Max, colorExt: TRGBColor;
   color16Min, color16Max: Word;
 begin
-  GetMinMaxColor(colorRgbMin, colorRgbMax);
+  GetMinMaxColor24(color24Min, color24Max);
   GetMinMaxColor16(color16Min, color16Max);
 
   // Min .. 1/3 .. 2/3 .. Max
@@ -485,16 +490,16 @@ begin
 
   if aExt then
   begin
-    c2.R := Min(colorRgbMax.R + Round(Max(colorRgbMax.R - ColorRgbMin.R, 0) div EXTENT), 255);
-    c2.G := Min(colorRgbMax.G + Round(Max(colorRgbMax.G - ColorRgbMin.G, 0) div EXTENT), 255);
-    c2.B := Min(colorRgbMax.B + Round(Max(colorRgbMax.B - ColorRgbMin.B, 0) div EXTENT), 255);
-    color16Max := RGBToWord(c2.R, c2.G, c2.B);
+    colorExt.R := Min(color24Max.R + Round(Max(color24Max.R - color24Min.R, 0) * EXTENT), 255);
+    colorExt.G := Min(color24Max.G + Round(Max(color24Max.G - color24Min.G, 0) * EXTENT), 255);
+    colorExt.B := Min(color24Max.B + Round(Max(color24Max.B - color24Min.B, 0) * EXTENT), 255);
+    color16Max := RGBToWord(colorExt.R, colorExt.G, colorExt.B);
   end else
   begin
-    c2.R := Max(colorRgbMin.R - Round(Max(colorRgbMax.R - ColorRgbMin.R, 0) div EXTENT), 0);
-    c2.G := Max(colorRgbMin.G - Round(Max(colorRgbMax.G - ColorRgbMin.G, 0) div EXTENT), 0);
-    c2.B := Max(colorRgbMin.B - Round(Max(colorRgbMax.B - ColorRgbMin.B, 0) div EXTENT), 0);
-    color16Min := RGBToWord(c2.R, c2.G, c2.B);
+    colorExt.R := Max(color24Min.R - Round(Max(color24Max.R - color24Min.R, 0) * EXTENT), 0);
+    colorExt.G := Max(color24Min.G - Round(Max(color24Max.G - color24Min.G, 0) * EXTENT), 0);
+    colorExt.B := Max(color24Min.B - Round(Max(color24Max.B - color24Min.B, 0) * EXTENT), 0);
+    color16Min := RGBToWord(colorExt.R, colorExt.G, colorExt.B);
   end;
 
   if color16Min > color16Max then
@@ -507,11 +512,11 @@ begin
 end;
 
 
-function TWRDXTCompressorColor.Search5(aDir: Boolean): Int64;
+function TWRDXTCompressorColor.SearchMerged(aDir: Boolean): Int64;
 var
   colorMin, colorMax: Word;
 begin
-  GetMostColor16(colorMin, colorMax);
+  GetMergedColors(colorMin, colorMax);
 
   if aDir then
     Result := SaveToBlock(colorMin, colorMax)
@@ -668,12 +673,12 @@ begin
 end;
 
 
-procedure TWRDXTCompressorColor.CompressBlock(aRow1, aRow2, aRow3, aRow4: Pointer; aHeuristic: TCompressionHeuristics;
+procedure TWRDXTCompressorColor.CompressBlock(aRow1, aRow2, aRow3, aRow4: Pointer; aHeuristic: TDXTCompressionHeuristics;
   out aBlockData: Int64; out aRMS: Single);
 var
   I: Integer;
-  L: TCompressionHeuristics;
-  best: TCompressionHeuristics;
+  L: TDXTCompressionHeuristics;
+  best: TDXTCompressionHeuristics;
   s: Single;
 begin
   // Save into local RGB buffer
@@ -696,31 +701,30 @@ begin
     fSrcCol[I+12].B := PByte(Cardinal(aRow4) + I * 4 - 4 + 2)^;
   end;
 
-  if aHeuristic in [chBest, chStraight1] then   fDst[chStraight1].Data := SearchMinMax(False);
-  if aHeuristic in [chBest, chStraight2] then   fDst[chStraight2].Data := SearchMinMax(True);
-  if aHeuristic in [chBest, chExtended11] then  fDst[chExtended11].Data := SearchExtended23(False, False);
-  if aHeuristic in [chBest, chExtended12] then  fDst[chExtended12].Data := SearchExtended23(False, True);
-  if aHeuristic in [chBest, chExtended21] then  fDst[chExtended21].Data := SearchExtended23(True, False);
-  if aHeuristic in [chBest, chExtended22] then  fDst[chExtended22].Data := SearchExtended23(True, True);
-  if aHeuristic in [chBest, ch51] then          fDst[ch51].Data := Search5(True);
-  if aHeuristic in [chBest, ch52] then          fDst[ch52].Data := Search5(False);
-  if aHeuristic in [chBest, chRygs1] then       fDst[chRygs1].Data := SearchRygs(False);
-  if aHeuristic in [chBest, chRygs2] then       fDst[chRygs2].Data := SearchRygs(True);
-  if aHeuristic in [chBest, chDLL] then         fDst[chDLL].Data := SearchDLL;
-  if aHeuristic in [chBest, chPlain1] then      fDst[chPlain1].Data := SearchPlain(False);
-  if aHeuristic in [chBest, chPlain2] then      fDst[chPlain2].Data := SearchPlain(True);
-  if aHeuristic in [chBest, chOld] then         DXT_RGB_Encode(aRow1, aRow2, aRow3, aRow4, fDst[chOld].Data, s);
+  if aHeuristic in [chBestPick, chMinMax1] then   fDst[chMinMax1].Data := SearchMinMax(False);
+  if aHeuristic in [chBestPick, chMinMax2] then   fDst[chMinMax2].Data := SearchMinMax(True);
+  if aHeuristic in [chBestPick, chExtHigh1] then  fDst[chExtHigh1].Data := SearchExt(False, False);
+  if aHeuristic in [chBestPick, chExtHigh2] then  fDst[chExtHigh2].Data := SearchExt(False, True);
+  if aHeuristic in [chBestPick, chExtLow1] then   fDst[chExtLow1].Data := SearchExt(True, False);
+  if aHeuristic in [chBestPick, chExtLow2] then   fDst[chExtLow2].Data := SearchExt(True, True);
+  if aHeuristic in [chBestPick, chMerged1] then   fDst[chMerged1].Data := SearchMerged(True);
+  if aHeuristic in [chBestPick, chMerged2] then   fDst[chMerged2].Data := SearchMerged(False);
+  if aHeuristic in [chBestPick, chRygs1] then     fDst[chRygs1].Data := SearchRygs(False);
+  if aHeuristic in [chBestPick, chRygs2] then     fDst[chRygs2].Data := SearchRygs(True);
+  if aHeuristic in [chBestPick, chSquish] then    fDst[chSquish].Data := SearchDLL;
+  if aHeuristic in [chBestPick, chPlain1] then    fDst[chPlain1].Data := SearchPlain(False);
+  if aHeuristic in [chBestPick, chPlain2] then    fDst[chPlain2].Data := SearchPlain(True);
+  if aHeuristic in [chBestPick, chOriginal] then  DXT_RGB_Encode(aRow1, aRow2, aRow3, aRow4, fDst[chOriginal].Data, s);
 
-  fDst[chBest].Data := $AAAAAAAAFFFF;
-  fDst[chBest].RMS := MaxSingle;
+  fDst[chBestPick].Data := $AAAAAAAAFFFF;
+  fDst[chBestPick].RMS := MaxSingle;
 
-  for L := Low(TCompressionHeuristics) to High(TCompressionHeuristics) do
-  if aHeuristic in [chBest, L] then
+  for L := Low(TDXTCompressionHeuristics) to High(TDXTCompressionHeuristics) do
     fDst[L].RMS := CalculateRMS(@fDst[L].Data);
 
   best := aHeuristic;
-  for L := Low(TCompressionHeuristics) to High(TCompressionHeuristics) do
-  if aHeuristic in [chBest, L] then
+  for L := Low(TDXTCompressionHeuristics) to High(TDXTCompressionHeuristics) do
+  if aHeuristic in [chBestPick, L] then
   if fDst[L].RMS < fDst[best].RMS then
     best := L;
 

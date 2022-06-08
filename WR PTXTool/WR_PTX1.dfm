@@ -26,19 +26,19 @@ object Form1: TForm1
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel_RGB: TBevel
-    Left = 192
+    Left = 191
     Top = 95
     Width = 258
     Height = 258
   end
   object Bevel_A: TBevel
-    Left = 455
+    Left = 454
     Top = 95
     Width = 258
     Height = 258
   end
   object Image_A: TImage
-    Left = 456
+    Left = 455
     Top = 96
     Width = 256
     Height = 256
@@ -75,7 +75,7 @@ object Form1: TForm1
     ParentFont = False
   end
   object Image_RGB: TImage
-    Left = 193
+    Left = 192
     Top = 96
     Width = 256
     Height = 256
@@ -254,6 +254,13 @@ object Form1: TForm1
       'Low (fast)'
       'High (slow)')
     TabOrder = 6
+  end
+  object meLog: TMemo
+    Left = 192
+    Top = 96
+    Width = 169
+    Height = 81
+    TabOrder = 7
   end
   object Save1: TSaveDialog
     DefaultExt = 'bmp'

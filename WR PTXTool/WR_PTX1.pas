@@ -1,9 +1,10 @@
 unit WR_PTX1;
 interface
 uses
-  Forms, StdCtrls, Controls, FileCtrl, SysUtils, Graphics, Classes,
-  ExtCtrls, Dialogs, ComCtrls, Menus, Spin, kromUtils, Math,
-  WR_PTX_TDisplayImage, Buttons;
+  Forms, StdCtrls, Controls, FileCtrl, SysUtils, Graphics, Classes, Buttons,
+  ExtCtrls, Dialogs, ComCtrls, Menus, Spin, Math, MMSystem,
+  KromUtils,
+  WR_PTX_TDisplayImage;
 
 type
   TForm1 = class(TForm)
@@ -64,6 +65,7 @@ type
     Createalphafromcolorkey1: TMenuItem;
     Replacecolorkeywithaveragecolor1: TMenuItem;
     rgCompressionQuality: TRadioGroup;
+    meLog: TMemo;
     procedure ExportClick(Sender: TObject);
     procedure ImportBMPClick(Sender: TObject);
     procedure SaveCompressedPTX(Sender: TObject);
@@ -119,7 +121,8 @@ uses
 { TForm1 }
 procedure TForm1.Form1Create(Sender: TObject);
 var
-  I: TCompressionHeuristics;
+  I: TDXTCompressionHeuristics;
+  t: Cardinal;
 begin
   fVersionInfo := TOOL_VERSION + ' (' + FormatDateTime('YYY/MM/DD HH:MM', GetExeBuildTime) + ')';
 
@@ -141,19 +144,28 @@ begin
   OpenFile(nil);
 
   SetFocusedControl(FileListBox1);
-                {
+
+  timeBeginPeriod(0);
+
+  meLog.Visible := DebugHook <> 0;
+
   if DebugHook <> 0 then
   begin
     FileListBox1.FileName := 'EnvMap.tga';
     OpenFile(nil);
 
-    for I := Low(TCompressionHeuristics) to High(TCompressionHeuristics) do
+    for I := Low(TDXTCompressionHeuristics) to High(TDXTCompressionHeuristics) do
     //if I in [chBest, chOld] then
-    if I in [chBest, chOld, chDLL] then
+    //if I in [chBest, chOld, chDLL] then
     begin
-      fDisplayImage.SaveCompressedPTX(Format('EnvMap.%d.ptx', [Ord(I)]), I);
+      t := timeGetTime;
+
+      fDisplayImage.SaveCompressedPTX(Format('tmp%d.ptx', [Ord(I)]), I);
+
+      meLog.Lines.Append(Format('%s - %s in %dms', [HEURISTIC_NAME[I], fDisplayImage.GetRMSString, timeGetTime - t]));
+
       DeleteFile(Format('EnvMap_ptx(RMS %s %s).ptx', [HEURISTIC_NAME[I], fDisplayImage.GetRMSString]));
-      RenameFile(Format('EnvMap.%d.ptx', [Ord(I)]), Format('EnvMap_ptx(RMS %s %s).ptx', [HEURISTIC_NAME[I], fDisplayImage.GetRMSString]));
+      RenameFile(Format('tmp%d.ptx', [Ord(I)]), Format('EnvMap_ptx(RMS %s %s).ptx', [HEURISTIC_NAME[I], fDisplayImage.GetRMSString]));
     end;
 
     FileListBox1.Update;
@@ -163,6 +175,8 @@ end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
+  timeEndPeriod(0);
+
   FreeAndNil(fDisplayImage);
   FreeAndNil(fBitmapRGB);
   FreeAndNil(fBitmapA);
@@ -239,8 +253,8 @@ begin
   Screen.Cursor := crHourGlass;
 
   case rgCompressionQuality.ItemIndex of
-    0:  fDisplayImage.SaveCompressedPTX(Save1.FileName, chOld);
-    1:  fDisplayImage.SaveCompressedPTX(Save1.FileName, chBest);
+    0:  fDisplayImage.SaveCompressedPTX(Save1.FileName, chOriginal);
+    1:  fDisplayImage.SaveCompressedPTX(Save1.FileName, chBestPick);
   end;
 
   FileListBox1.Update;
@@ -441,6 +455,7 @@ begin
   Bevel_A.Width := halfWidth + 2;
   Image_RGB.Width := imgSize;
   Image_A.Width := imgSize;
+  meLog.Width := fullWidth;
 
   Bevel_A.Left := Image_RGB.Left + halfWidth + PAD - 1;
   Image_A.Left := Image_RGB.Left + halfWidth + PAD;
@@ -449,6 +464,7 @@ begin
   Bevel_A.Height := fullHeight;
   Image_RGB.Height := imgSize;
   Image_A.Height := imgSize;
+  meLog.Height := fullHeight;
 
   if fDisplayImage <> nil then
     DisplayChange(nil);
