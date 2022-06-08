@@ -223,7 +223,7 @@ end;
 
 procedure TForm1.ClearAlpha(Sender: TObject);
 begin
-  fDisplayImage.ClearAlpha;
+  fDisplayImage.AlphaClear;
   SetAlpha(false);
   lbSize.Caption := fDisplayImage.GetInfoString;
 end;
@@ -298,7 +298,7 @@ end;
 
 procedure TForm1.InvertAlpha(Sender: TObject);
 begin
-  fDisplayImage.InvertAlpha;
+  fDisplayImage.AlphaInvert;
 end;
 
 
@@ -420,8 +420,8 @@ end;
 procedure TForm1.imgRGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if (not SampleColorKey)and(not ReplaceColorKey) then exit;
-  if SampleColorKey then fDisplayImage.CreateAlphaFrom(X,Y);
-  if ReplaceColorKey then fDisplayImage.ReplaceColorKeyWithAverage(X,Y);
+  if SampleColorKey then fDisplayImage.AlphaCreateFrom(X,Y);
+  if ReplaceColorKey then fDisplayImage.ColorReplaceWithAverage(X,Y);
   DisplayChange(nil);
   if SampleColorKey then  SampleAClick(nil); //Release SampleColorKey
   if ReplaceColorKey then SampleRClick(nil); //Release ReplaceColorKey

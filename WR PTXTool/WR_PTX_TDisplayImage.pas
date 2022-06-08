@@ -55,8 +55,11 @@ type
     function GetFogString: string;
     function GetRMSString: string;
     function GetChangedString: string;
-    procedure InvertAlpha;
-    procedure ClearAlpha;
+
+    procedure AlphaInvert;
+    procedure AlphaClear;
+    procedure AlphaCreateFrom(aX, aY: Integer);
+    procedure ColorReplaceWithAverage(aX, aY: Integer);
     procedure OpenPTX(const aFilename: string);
     procedure OpenDDS(const aFilename: string);
     procedure OpenXTX(const aFilename: string);
@@ -70,8 +73,6 @@ type
     procedure ExportBitmapA(const aFilename: string);
     procedure ImportBitmapRGB(const aFilename: string);
     procedure ImportBitmapA(const aFilename: string);
-    procedure CreateAlphaFrom(aX, aY: Integer);
-    procedure ReplaceColorKeyWithAverage(aX, aY: Integer);
   end;
 
 
@@ -80,6 +81,7 @@ implementation
 
 const
   RGB_GREY = 128*65793;
+  MAX_IMAGE_SIZE = 2048;
 
 
 { TDisplayImage }
@@ -209,7 +211,7 @@ begin
 end;
 
 
-procedure TDisplayImage.InvertAlpha;
+procedure TDisplayImage.AlphaInvert;
 var
   i,k: Integer;
 begin
@@ -223,7 +225,7 @@ begin
 end;
 
 
-procedure TDisplayImage.ClearAlpha;
+procedure TDisplayImage.AlphaClear;
 var
   i,k:Integer;
 begin
@@ -379,15 +381,15 @@ begin
     exit;
   end;
 
-  if (int2(c[5],c[6])>2048)or(int2(c[9],c[10])>2048) then
+  if (int2(c[5],c[6])>MAX_IMAGE_SIZE)or(int2(c[9],c[10])>MAX_IMAGE_SIZE) then
   begin
-    MessageBox(0,'Big images (2048+ pixels) are not supported','Error',MB_OK);
+    MessageBox(0,'Big images (2048+ pixels) are not supported', 'Error', MB_OK);
     closefile(f);
     exit;
   end;
 
   SetAllPropsAtOnce(
-    decs(ExtractFileName(aFileName),4,1),
+    ChangeFileExt(ExtractFileName(aFileName), ''),
     int2(c[5],c[6]),int2(c[9],c[10]),ord(c[13]),
     c[1]=#1,int2(c[21],c[22],c[23],c[24])<>0,c[2]=#32);
 
@@ -514,55 +516,61 @@ var i,k,h:Integer; ftype: string[4];
   T:byte;
   DXTOut:array[1..48]of byte;
 begin
-ResetAllData;
-assignfile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
-blockread(f,c,128);
+  ResetAllData;
+  assignfile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
+  blockread(f,c,128);
 
-if (int2(c[17],c[18])>2048)or(int2(c[13],c[14])>2048) then begin
-  MessageBox(0,'Big images (2048+) are not supported','Error',MB_OK);
-  closefile(f);
-  exit;
-end;
+  //todo: Extract into a common verification method
+  if (int2(c[17],c[18])>MAX_IMAGE_SIZE)or(int2(c[13],c[14])>MAX_IMAGE_SIZE) then
+  begin
+    MessageBox(0,'Big images (2048+) are not supported', 'Error', MB_OK);
+    closefile(f);
+    Exit;
+  end;
 
-SetAllPropsAtOnce(
-        decs(ExtractFileName(aFileName),4,1),
-        int2(c[17],c[18]),int2(c[13],c[14]),ord(c[29]),
-        true,false,(c[88]='3')or(c[88]='5'));
+  SetAllPropsAtOnce(
+          ChangeFileExt(ExtractFileName(aFileName), ''),
+          int2(c[17],c[18]),int2(c[13],c[14]),ord(c[29]),
+          true,false,(c[88]='3')or(c[88]='5'));
 
   fType:=c[85]+c[86]+c[87]+c[88];
 
-for i:=0 to (Props.sizeV div 4)-1 do
-  for k:=0 to (Props.sizeH div 4)-1 do begin
-///////////////////////////////////////////////////////
-//Alpha
-if Props.hasAlpha then begin
-blockread(f,c,8);
-if ftype='DXT5' then begin
-  DXT_A_Decode(@c[1],DXTOut);
-  for h:=1 to 16 do
-    RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
-end else
-if ftype='DXT3' then begin
-  for h:=1 to 16 do begin
-    if h mod 2 = 1 then
-    T:=(ord(c[(h+1)div 2])mod 16)*17 else
-    T:=(ord(c[(h+1)div 2])div 16)*17;
-    RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=T;
+  for i:=0 to (Props.sizeV div 4)-1 do
+  for k:=0 to (Props.sizeH div 4)-1 do
+  begin
+    ///////////////////////////////////////////////////////
+    //Alpha
+    if Props.hasAlpha then
+    begin
+      blockread(f,c,8);
+      if ftype='DXT5' then
+      begin
+        DXT_A_Decode(@c[1],DXTOut);
+        for h:=1 to 16 do
+          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
+      end else
+      if ftype='DXT3' then
+      begin
+        for h:=1 to 16 do
+        begin
+          if h mod 2 = 1 then
+          T:=(ord(c[(h+1)div 2])mod 16)*17 else
+          T:=(ord(c[(h+1)div 2])div 16)*17;
+          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=T;
+        end;
+      end; //Format type DXT3 or DXT5
+    end; //if alpha
+    ////////////////////////////////////////////////////////
+    //RGB
+    blockread(f,c,8);
+    DXT_RGB_Decode(@c[1],DXTOut);
+    for h:=1 to 16 do begin
+      RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
+      RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
+      RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
+    end;
   end;
-end; //Format type DXT3 or DXT5
-end; //if alpha
-////////////////////////////////////////////////////////
-//RGB
-blockread(f,c,8);
-DXT_RGB_Decode(@c[1],DXTOut);
-for h:=1 to 16 do begin
-  RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
-  RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
-  RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
-end;
-
-end;
-closefile(f);
+  closefile(f);
 
   ComputeFog;
   fRmsRGB := 0;
@@ -582,16 +590,13 @@ begin
   assignfile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
   blockread(f,c,52);
 
-  {if (int2(c[17],c[18])>2048)or(int2(c[13],c[14])>2048) then begin
+  {if (int2(c[17],c[18])>MAX_IMAGE_SIZE)or(int2(c[13],c[14])>MAX_IMAGE_SIZE) then begin
     MessageBox(0,'Big images (2048+) are not supported','Error',MB_OK);
     closefile(f);
     exit;
   end;  }
 
-  SetAllPropsAtOnce(
-          decs(ExtractFileName(aFileName),4,1),
-          64,64,1,
-          true,false,true);
+  SetAllPropsAtOnce(ChangeFileExt(ExtractFileName(aFileName), ''), 64,64,1, true,false,true);
 
     fType:='DXT5';//c[85]+c[86]+c[87]+c[88];
 
@@ -662,17 +667,17 @@ begin
   if ((InBit<>24)and(InBit<>32))
   or ((MakePOT(tSizeH)<>tSizeH)and(not AllowNonPOTImages))
   or ((MakePOT(tSizeV)<>tSizeV)and(not AllowNonPOTImages))
-  or  (tSizeH<4)or(tSizeV<4)or(tSizeH>2048)or(tSizeV>2048) then
+  or (tSizeH < 4) or (tSizeV < 4) or (tSizeH > MAX_IMAGE_SIZE) or (tSizeV > MAX_IMAGE_SIZE) then
   begin
-    MessageBox(0,'Image size must be 4,8,16,32...2048 x 24/32 bit','Error',MB_OK);
+    MessageBox(0, 'Image size must be 4,8,16,32...2048 x 24/32 bit', 'Error', MB_OK);
     closefile(f);
-    exit;
+    Exit;
   end;
 
   SetAllPropsAtOnce(
-          decs(ExtractFileName(aFileName),4,1),
+          ChangeFileExt(ExtractFileName(aFileName), ''),
           tSizeH,tSizeV,1,
-          false,false,InBit=32);
+          false,false, InBit = 32);
 
   setlength(c,Props.SizeH*4+1);
 
@@ -701,6 +706,7 @@ begin
   fRmsRGB := 0;
   fRmsA := 0;
 end;
+
 
 procedure TDisplayImage.Open2DB(const aFilename: string);
 var i,k,h:Integer;
@@ -736,20 +742,20 @@ begin
   BlockRead(f,BNKHeader,80);
 
   if ((BNKHeader.InBit<>4)and(BNKHeader.InBit<>8)and(BNKHeader.InBit<>32))or
-     (BNKHeader.Width<4)or(BNKHeader.Height<4)or(BNKHeader.Width>2048)or(BNKHeader.Height>2048) then begin
+     (BNKHeader.Width<4)or(BNKHeader.Height<4)or(BNKHeader.Width>MAX_IMAGE_SIZE)or(BNKHeader.Height>MAX_IMAGE_SIZE) then
+     begin
     MessageBox(0,'Uknown format','Error',MB_OK);
     closefile(f);
     exit;
   end;
 
-  if (BNKHeader.Un1<>2)and(BNKHeader.Un2<>0)and(BNKHeader.Un3<>0)and
-     (BNKHeader.Un4<>1)and(BNKHeader.Un6<>0)and(BNKHeader.Un6b<>0)and
-     (BNKHeader.Un7<>0)and(BNKHeader.Un8<>0)and(BNKHeader.Un12<>0) then begin
+  if (BNKHeader.Un1<>2)and(BNKHeader.Un2<>0)and(BNKHeader.Un3<>0)
+  and (BNKHeader.Un4<>1)and(BNKHeader.Un6<>0)and(BNKHeader.Un6b<>0)
+  and (BNKHeader.Un7<>0)and(BNKHeader.Un8<>0)and(BNKHeader.Un12<>0) then
     MessageBox(0,'New format modification encountered','Notice',MB_OK);
-  end;
 
   SetAllPropsAtOnce(
-          decs(ExtractFileName(aFileName),4,1),
+          ChangeFileExt(ExtractFileName(aFileName), ''),
           BNKHeader.Width,BNKHeader.Height,Math.min(BNKHeader.MipMapH,BNKHeader.MipMapV),
           BNKHeader.InBit<>32,false,(BNKHeader.InBit=32)or(BNKHeader.InBit=8));
 
@@ -766,14 +772,17 @@ begin
     end;
   end;
 
-  if (BNKHeader.InBit=8)or(BNKHeader.InBit=4) then begin
+  if (BNKHeader.InBit=8)or(BNKHeader.InBit=4) then
+  begin
     ci:=1;
-    if BNKHeader.InBit=8 then begin
-    setlength(c,Props.sizeV*Props.sizeH +1);
-    blockread(f,c[1],Props.sizeV*Props.sizeH ); //read all needed data
-    end else begin
-    setlength(c,(Props.sizeV*Props.sizeH) div 2 +1);
-    blockread(f,c[1],(Props.sizeV*Props.sizeH) div 2); //read all needed data
+    if BNKHeader.InBit=8 then
+    begin
+      setlength(c,Props.sizeV*Props.sizeH +1);
+      blockread(f,c[1],Props.sizeV*Props.sizeH ); //read all needed data
+    end else
+    begin
+      setlength(c,(Props.sizeV*Props.sizeH) div 2 +1);
+      blockread(f,c[1],(Props.sizeV*Props.sizeH) div 2); //read all needed data
     end;
 
     for i:=0 to (Props.sizeV div 4)-1 do
@@ -803,6 +812,7 @@ begin
   fRmsRGB := 0;
   fRmsA := 0;
 end;
+
 
 procedure TDisplayImage.SaveUncompressedPTX(const aFileName: string);
 var
@@ -994,47 +1004,51 @@ begin
 end;
 
 
+//todo: Rename to OpenBMP (cos it is not an import)
 procedure TDisplayImage.ImportBitmapRGB(const aFileName: string);
 var
-  i,k:Integer;
+  i,k: Integer;
   bmp: TBitmap;
   p: PByteArray;
 begin
   bmp := TBitmap.Create;
-  bmp.LoadFromFile(aFileName);
+  try
+    bmp.LoadFromFile(aFileName);
 
-  if ((MakePOT(bmp.Width)<>bmp.Width)and(not AllowNonPOTImages))
-  or ((MakePOT(bmp.Height)<>bmp.Height)and(not AllowNonPOTImages))
-  or (bmp.Width<4)or(bmp.Height<4)or(bmp.Width>2048)or(bmp.Height>2048) then
-  begin
-    bmp.Free;
-    MessageBox(0, 'Image size must be 4,8,16,32...2048 pixels', 'Error', MB_OK);
-    Exit;
-  end;
-
-  // Do reset because source RGB has changed
-  ResetAllData;
-  SetAllPropsAtOnce(
-    Decs(ExtractFileName(aFileName),4,1),
-    bmp.Width, bmp.Height, 1,
-    false,false,false);
-
-  for i:=1 to Props.SizeV do
-  begin
-    p:=bmp.ScanLine[i-1];
-    for k:=1 to Props.sizeH do
+    if ((MakePOT(bmp.Width)<>bmp.Width)and(not AllowNonPOTImages))
+    or ((MakePOT(bmp.Height)<>bmp.Height)and(not AllowNonPOTImages))
+    or (bmp.Width<4)or(bmp.Height<4)or(bmp.Width>MAX_IMAGE_SIZE)or(bmp.Height>MAX_IMAGE_SIZE) then
     begin
-      RGBA[i,k,1] := p[k*3-1];
-      RGBA[i,k,2] := p[k*3-2];
-      RGBA[i,k,3] := p[k*3-3];
+      MessageBox(0, 'Image size must be 4,8,16,32...2048 pixels', 'Error', MB_OK);
+      Exit;
     end;
+
+    // Do reset because source RGB has changed
+    ResetAllData;
+    SetAllPropsAtOnce(
+      ChangeFileExt(ExtractFileName(aFileName), ''),
+      bmp.Width, bmp.Height, 1,
+      false,false,false);
+
+    for i:=1 to Props.SizeV do
+    begin
+      p:=bmp.ScanLine[i-1];
+      for k:=1 to Props.sizeH do
+      begin
+        RGBA[i,k,1] := p[k*3-1];
+        RGBA[i,k,2] := p[k*3-2];
+        RGBA[i,k,3] := p[k*3-3];
+      end;
+    end;
+  finally
+    bmp.Free;
   end;
 
-  bmp.Free;
   ComputeFog;
   fRmsRGB := 0;
   fRmsA := 0;
 end;
+
 
 procedure TDisplayImage.ImportBitmapA(const aFileName: string);
 var
@@ -1043,39 +1057,41 @@ var
   p: PByteArray;
 begin
   bmp := TBitmap.Create;
-  bmp.LoadFromFile(aFileName);
+  try
+    bmp.LoadFromFile(aFileName);
 
-  if (bmp.Width<>Props.SizeH) or (bmp.Height<>Props.SizeV) then
-  begin
-    MessageBox(0,'Mask height and width should be same as for RGB image','Error',MB_OK);
+    if (bmp.Width <> Props.SizeH) or (bmp.Height <> Props.SizeV) then
+    begin
+      MessageBox(0, 'Mask height and width should be same as for RGB image', 'Error', MB_OK);
+      Exit;
+    end;
+
+    for i:=1 to Props.SizeV do
+    begin
+      p:=bmp.ScanLine[i-1];
+      for k:=1 to Props.sizeH do
+        RGBA[i,k,4]:=(p[k*3-1]+p[k*3-2]+p[k*3-3])div 3;
+    end;
+  finally
     bmp.Free;
-    exit;
-  end;
-
-  for i:=1 to Props.SizeV do
-  begin
-    p:=bmp.ScanLine[i-1];
-    for k:=1 to Props.sizeH do
-      RGBA[i,k,4]:=(p[k*3-1]+p[k*3-2]+p[k*3-3])div 3;
   end;
 
   Props.hasAlpha:=true;
   Props.IsCompressed:=false;
   Props.IsSYNPacked:=false;
+  fIsChanged := True;
 
-  bmp.Free;
   fRmsRGB := 0;
   fRmsA := 0;
-  fIsChanged := True;
 end;
 
 
-procedure TDisplayImage.CreateAlphaFrom(aX,aY: Integer);
+procedure TDisplayImage.AlphaCreateFrom(aX,aY: Integer);
 var
-  R,G,B:byte;
+  R,G,B: Byte;
   i,k:Integer;
 begin
-  Color2RGB(fImageRGB.Canvas.Pixels[aX,aY],R,G,B);
+  Color2RGB(fImageRGB.Canvas.Pixels[aX, aY], R, G, B);
 
   for i:=1 to Props.SizeV do
     for k:=1 to Props.sizeH do
@@ -1088,9 +1104,9 @@ begin
 end;
 
 
-procedure TDisplayImage.ReplaceColorKeyWithAverage(aX,aY: Integer);
+procedure TDisplayImage.ColorReplaceWithAverage(aX,aY: Integer);
 var
-  keyR,keyG,keyB: Byte;
+  keyR, keyG, keyB: Byte;
   i,k,cnt: Integer;
   rgbAvg: array [1..3] of Int64;
 begin
