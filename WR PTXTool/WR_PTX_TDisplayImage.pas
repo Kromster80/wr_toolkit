@@ -17,9 +17,8 @@ type
     Props: record
       FileMask: string;
       sizeH, sizeV, MipMapQty: Integer;
-      IsCompressed: Boolean;
-      IsSYNPacked: Boolean;
       hasAlpha: Boolean;
+      Format: string;
     end;
     RGBA: array [1..2049,1..2049,1..4] of byte;
     RGBAmm: array [1..2049,1..2049,1..4] of byte;
@@ -32,7 +31,7 @@ type
     procedure ComputeFog;
     procedure GenerateMipMap(aLevel: Integer);
     procedure ResetAllData;
-    procedure SetAllPropsAtOnce(iFileMask: string; iSizeH, iSizeV, iMipMapQty: Integer; iIsCompressed, iIsSYNPacked, ihasAlpha: Boolean);
+    procedure SetAllPropsAtOnce(const aFileMask: string; aWidth, aHeight, aMipMapCount: Integer; aHasAlpha: Boolean; const aFormat: string);
     procedure RefreshImage(aMode: TRefreshMode);
     procedure UpdateMaxMipMapCount;
   public
@@ -46,9 +45,9 @@ type
     property MipMapCount: Integer read fMipMapCount write fMipMapCount;
     property MaxMipMapCount: Integer read fMaxMipMapCount;
     property GetAlpha: Boolean read Props.hasAlpha;
+    property GetFormatString: string read Props.Format;
     function DisplayImage: Boolean;
     function GetInfoString: string;
-    function GetFormatString: string;
     function GetFogString: string;
     function GetRMSString: string;
     function GetChangedString: string;
@@ -74,7 +73,8 @@ type
 
 
 implementation
-
+uses
+  StrUtils;
 
 const
   RGB_GREY = 128*65793;
@@ -157,20 +157,6 @@ begin
 end;
 
 
-function TDisplayImage.GetFormatString: string;
-begin
-  //todo: Replace this whole thing with Props.Format: string
-
-  if Props.IsCompressed then
-    Result := 'Y'
-  else
-    Result := 'Y';
-
-  if Props.IsSYNPacked then
-    Result := Result + '+Packed';
-end;
-
-
 function TDisplayImage.GetRMSString: string;
 begin
   if fRmsRGB + fRmsA > 0 then
@@ -246,6 +232,8 @@ begin
       RGBA[i,k,4] := 0;
   fImageA.Canvas.Brush.Color := RGB_GREY;
   fImageA.Canvas.FillRect(Rect);
+
+  Props.Format := '';
   fIsChanged := True;
 end;
 
@@ -350,15 +338,17 @@ begin
 end;
 
 
-procedure TDisplayImage.SetAllPropsAtOnce(iFileMask: string; iSizeH, iSizeV, iMipMapQty: Integer; iIsCompressed, iIsSYNPacked, ihasAlpha: Boolean);
+procedure TDisplayImage.SetAllPropsAtOnce(const aFileMask: string; aWidth, aHeight, aMipMapCount: Integer;
+  aHasAlpha: Boolean; const aFormat: string);
 begin
-  Props.FileMask:=iFileMask;
-  Props.sizeH:=iSizeH;
-  Props.sizeV:=iSizeV;
-  Props.MipMapQty := iMipMapQty;
-  Props.IsCompressed:=iIsCompressed;
-  Props.IsSYNPacked:=iIsSYNPacked;
-  Props.hasAlpha:=ihasAlpha;
+  Props.FileMask := aFileMask;
+  Props.sizeH := aWidth;
+  Props.sizeV := aHeight;
+  Props.MipMapQty := aMipMapCount;
+
+  Props.hasAlpha := aHasAlpha;
+
+  Props.Format := aFormat;
 
   fIsChanged := False;
 
@@ -374,11 +364,12 @@ var
   tb:Integer;
   f:file;
   c,d:array of AnsiChar;
+  isCompressed: Boolean;
   SYNData,PTXData:Integer;
   ci,CurChr,addv,x:Integer;
-  flag:array[1..8]of byte;
+  flag:array [1..8]of byte;
   Dist,Leng:Integer;
-  DXTOut:array[1..48]of byte;
+  DXTOut:array [1..48]of byte;
 begin
   ResetAllData;
   assignfile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
@@ -399,20 +390,23 @@ begin
     exit;
   end;
 
+  isCompressed := c[1]=#1;
+
   SetAllPropsAtOnce(
     ChangeFileExt(ExtractFileName(aFileName), ''),
-    int2(c[5],c[6]),int2(c[9],c[10]),ord(c[13]),
-    c[1]=#1,int2(c[21],c[22],c[23],c[24])<>0,c[2]=#32);
+    int2(c[5], c[6]), int2(c[9], c[10]), ord(c[13]),
+    c[2] = #32,
+    Trim('PTX ' + IfThen(isCompressed, 'Compressed ') + IfThen(int2(c[21],c[22],c[23],c[24])<>0, 'Packed ')));
 
   SYNData:=int2(c[21],c[22],c[23],c[24]);
 
-  if Props.IsCompressed then
+  if isCompressed then
     if Props.hasAlpha then
-      PTXData:=Props.sizeH*Props.sizeV
+      PTXData := Props.sizeH*Props.sizeV
     else
-      PTXData:=Props.sizeH*Props.sizeV div 2
+      PTXData := Props.sizeH*Props.sizeV div 2
   else
-    PTXData:=Props.sizeH*Props.sizeV*4;
+    PTXData := Props.sizeH*Props.sizeV*4;
 
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -466,22 +460,22 @@ begin
     until(ci>SYNData);
   end;
 
-  if Props.IsCompressed and (SYNData=0) then
+  if isCompressed and (SYNData = 0) then
   begin
     setlength(c,PTXData+1);
     blockread(f,c[1],PTXData); //read all needed data
   end;
 
   ci:=1;
-  if Props.IsCompressed then
+  if isCompressed then
   begin
-
     for i:=0 to (Props.sizeV div 4)-1 do
-      for k:=0 to (Props.sizeH div 4)-1 do begin
+      for k:=0 to (Props.sizeH div 4)-1 do
+      begin
         ///////////////////////////////////////////////////////
         //Alpha
-        if Props.hasAlpha then begin
-
+        if Props.hasAlpha then
+        begin
           DXT_A_Decode(@c[ci],DXTOut);
 
           for h:=1 to 16 do
@@ -491,17 +485,16 @@ begin
         ////////////////////////////////////////////////////////
         //RGB
         DXT_RGB_Decode(@c[ci],DXTOut);
-        for h:=1 to 16 do begin
+        for h:=1 to 16 do
+        begin
           RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
           RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
           RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
         end;
         inc(ci,8);
       end;  //for 1..x,1..z
-
   end else
   begin //Compressed=0
-
     for i:=1 to Props.sizeV do
     begin
       blockread(f,RGBA[i,1,1],Props.sizeH*4);
@@ -512,7 +505,6 @@ begin
         tb:=a^; a^:=b^; b^:=tb;
       end;
     end;
-
   end;
   closefile(f);
 
@@ -521,11 +513,13 @@ end;
 
 
 procedure TDisplayImage.OpenDDS(const aFilename: string);
-var i,k,h:Integer; ftype: string[4];
-  f:file;
-  c:array[1..128]of AnsiChar;
-  T:byte;
-  DXTOut:array[1..48]of byte;
+var
+  i,k,h: Integer;
+  ftype: string[4];
+  f: file;
+  c: array [1..128]of AnsiChar;
+  T: Byte;
+  DXTOut: array [1..48]of byte;
 begin
   ResetAllData;
   assignfile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
@@ -542,7 +536,8 @@ begin
   SetAllPropsAtOnce(
           ChangeFileExt(ExtractFileName(aFileName), ''),
           int2(c[17],c[18]),int2(c[13],c[14]),ord(c[29]),
-          true,false,(c[88]='3')or(c[88]='5'));
+          (c[88]='3')or(c[88]='5'),
+          'DDS Compressed');
 
   fType:=c[85]+c[86]+c[87]+c[88];
 
@@ -593,9 +588,9 @@ procedure TDisplayImage.OpenXTX(const aFilename: string);
 var
   i,k,h:Integer; ftype: string[4];
   f:file;
-  c:array[1..128]of byte;
+  c:array [1..128]of byte;
   T:byte;
-  DXTOut:array[1..48]of byte;
+  DXTOut:array [1..48]of byte;
 begin
   ResetAllData;
   assignfile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
@@ -607,7 +602,7 @@ begin
     exit;
   end;  }
 
-  SetAllPropsAtOnce(ChangeFileExt(ExtractFileName(aFileName), ''), 64,64,1, true,false,true);
+  SetAllPropsAtOnce(ChangeFileExt(ExtractFileName(aFilename), ''), 64, 64, 1, True, 'XTX Compressed');
 
     fType:='DXT5';//c[85]+c[86]+c[87]+c[88];
 
@@ -687,8 +682,9 @@ begin
 
   SetAllPropsAtOnce(
           ChangeFileExt(ExtractFileName(aFileName), ''),
-          tSizeH,tSizeV,1,
-          false,false, InBit = 32);
+          tSizeH, tSizeV, 1,
+          InBit = 32,
+          'TGA');
 
   setlength(c,Props.SizeH*4+1);
 
@@ -726,10 +722,10 @@ var i,k,h:Integer;
   BNKHeader:packed record
   {}Un1,Un2:Integer;                    //always 2, 0
   {}FileSize:Integer;
-  {}Fmt1,Fmt2:array[1..4] of char;
+  {}Fmt1,Fmt2:array [1..4] of char;
   {}Un3:Integer;                        //always 0
   {}Size1,Size2:Integer;
-  {}Name:array[1..8] of char;
+  {}Name:array [1..8] of char;
   {}Width,Height:word;
   {}Un4:word;                           //always 1
   {}MipMapH,MipMapV:byte;
@@ -745,7 +741,7 @@ var i,k,h:Integer;
   {}Un12:Integer;                       //always 0
   end;
   ci:Integer;
-  DXTOut:array[1..48]of byte;
+  DXTOut:array [1..48]of byte;
 begin
   ResetAllData;
 
@@ -768,7 +764,8 @@ begin
   SetAllPropsAtOnce(
           ChangeFileExt(ExtractFileName(aFileName), ''),
           BNKHeader.Width,BNKHeader.Height,Math.min(BNKHeader.MipMapH,BNKHeader.MipMapV),
-          BNKHeader.InBit<>32,false,(BNKHeader.InBit=32)or(BNKHeader.InBit=8));
+          (BNKHeader.InBit = 32) or (BNKHeader.InBit = 8),
+          '2DB ' + IfThen(BNKHeader.InBit <> 32, 'Compressed'));
 
   if BNKHeader.InBit=32 then begin
     setlength(c,Props.SizeH*4+1);
@@ -1035,10 +1032,7 @@ begin
 
     // Do reset because source RGB has changed
     ResetAllData;
-    SetAllPropsAtOnce(
-      ChangeFileExt(ExtractFileName(aFileName), ''),
-      bmp.Width, bmp.Height, 1,
-      false,false,false);
+    SetAllPropsAtOnce(ChangeFileExt(ExtractFileName(aFileName), ''), bmp.Width, bmp.Height, 1, False, 'BMP');
 
     for i:=1 to Props.SizeV do
     begin
@@ -1086,9 +1080,8 @@ begin
     bmp.Free;
   end;
 
-  Props.hasAlpha:=true;
-  Props.IsCompressed:=false;
-  Props.IsSYNPacked:=false;
+  Props.hasAlpha := True;
+  Props.Format := '';
   fIsChanged := True;
 
   fRmsRGB := 0;
@@ -1107,9 +1100,8 @@ begin
     for k:=1 to Props.sizeH do
       RGBA[i,k,4]:=255-byte((RGBA[i,k,1]=R)and(RGBA[i,k,2]=G)and(RGBA[i,k,3]=B))*255;
 
-  Props.hasAlpha:=true;
-  Props.IsCompressed:=false;
-  Props.IsSYNPacked:=false;
+  Props.hasAlpha := True;
+  Props.Format := '';
   fIsChanged := True;
 end;
 
@@ -1149,8 +1141,7 @@ begin
       RGBA[i,k,3] := rgbAvg[3];
     end;
 
-  Props.IsCompressed := false;
-  Props.IsSYNPacked := false;
+  Props.Format := '';
   fIsChanged := True;
 end;
 
