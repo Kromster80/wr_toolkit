@@ -33,6 +33,7 @@ type
     procedure ResetAllData;
     procedure SetAllPropsAtOnce(const aFileMask: string; aWidth, aHeight, aMipMapCount: Integer; aHasAlpha: Boolean; const aFormat: string);
     procedure RefreshImage(aMode: TRefreshMode);
+    function Verify(aWidth, aHeight: Integer): Boolean;
     procedure UpdateMaxMipMapCount;
   public
     AllowNonPOT: Boolean;
@@ -204,6 +205,20 @@ begin
 end;
 
 
+function TDisplayImage.Verify(aWidth, aHeight: Integer): Boolean;
+begin
+  Result := True;
+
+  if ((MakePOT(aWidth) <> aWidth) and (not AllowNonPOT))
+  or ((MakePOT(aHeight) <> aHeight) and (not AllowNonPOT))
+  or (aWidth < 4) or (aHeight < 4) or (aWidth > MAX_IMAGE_SIZE) or (aHeight > MAX_IMAGE_SIZE) then
+  begin
+    MessageBox(0, 'Image size must be 4,8,16,32...2048 pixels', 'Error', MB_OK);
+    Exit(False);
+  end;
+end;
+
+
 procedure TDisplayImage.EditAlphaInvert;
 var
   i,k: Integer;
@@ -355,17 +370,17 @@ end;
 
 procedure TDisplayImage.OpenPTX(const aFilename: string);
 var
-  i,k,h:Integer;
-  a,b:^byte;
-  tb:Integer;
-  f:file;
-  c,d:array of AnsiChar;
+  I, K, h: Integer;
+  a, b: ^Byte;
+  tb: Integer;
+  f: file;
+  c, d: array of AnsiChar;
   isCompressed: Boolean;
-  SYNData,PTXData:Integer;
-  ci,CurChr,addv,x:Integer;
-  flag:array [1..8]of byte;
-  Dist,Leng:Integer;
-  DXTOut:array [1..48]of byte;
+  SYNData, PTXData: Integer;
+  ci, CurChr, addv, x: Integer;
+  flag: array [1 .. 8] of Byte;
+  Dist, Leng: Integer;
+  DXTOut: array [1 .. 48] of Byte;
 begin
   ResetAllData;
   assignfile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
@@ -376,14 +391,13 @@ begin
   begin
     MessageBox(0, 'Unknown PTX format, can''t be opened.', 'Error', MB_OK);
     closefile(f);
-    exit;
+    Exit;
   end;
 
-  if (int2(c[5],c[6])>MAX_IMAGE_SIZE)or(int2(c[9],c[10])>MAX_IMAGE_SIZE) then
+  if not Verify(int2(c[5],c[6]), int2(c[9],c[10])) then
   begin
-    MessageBox(0,'Big images (2048+ pixels) are not supported', 'Error', MB_OK);
-    closefile(f);
-    exit;
+    CloseFile(f);
+    Exit;
   end;
 
   isCompressed := c[1]=#1;
@@ -509,22 +523,20 @@ end;
 
 procedure TDisplayImage.OpenDDS(const aFilename: string);
 var
-  i,k,h: Integer;
+  I, K, h: Integer;
   ftype: string[4];
   f: file;
-  c: array [1..128]of AnsiChar;
+  c: array [1 .. 128] of AnsiChar;
   T: Byte;
-  DXTOut: array [1..48]of byte;
+  DXTOut: array [1 .. 48] of Byte;
 begin
   ResetAllData;
   assignfile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
   blockread(f,c,128);
 
-  //todo: Extract into a common verification method
-  if (int2(c[17],c[18])>MAX_IMAGE_SIZE)or(int2(c[13],c[14])>MAX_IMAGE_SIZE) then
+  if not Verify(int2(c[17],c[18]), int2(c[13],c[14])) then
   begin
-    MessageBox(0,'Big images (2048+) are not supported', 'Error', MB_OK);
-    closefile(f);
+    CloseFile(f);
     Exit;
   end;
 
@@ -581,14 +593,15 @@ end;
 
 procedure TDisplayImage.OpenXTX(const aFilename: string);
 var
-  i,k,h:Integer; ftype: string[4];
-  f:file;
-  c:array [1..128]of byte;
-  T:byte;
-  DXTOut:array [1..48]of byte;
+  i,k,h: Integer;
+  ftype: string[4];
+  f: file;
+  c: array [1..128] of Byte;
+  T: Byte;
+  DXTOut: array [1..48] of Byte;
 begin
   ResetAllData;
-  assignfile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
+  AssignFile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
   blockread(f,c,52);
 
   {if (int2(c[17],c[18])>MAX_IMAGE_SIZE)or(int2(c[13],c[14])>MAX_IMAGE_SIZE) then begin
@@ -599,46 +612,52 @@ begin
 
   SetAllPropsAtOnce(ChangeFileExt(ExtractFileName(aFilename), ''), 64, 64, 1, True, 'XTX Compressed');
 
-    fType:='DXT5';//c[85]+c[86]+c[87]+c[88];
+  fType := 'DXT5';//c[85]+c[86]+c[87]+c[88];
 
   for i:=0 to (Props.Height div 4)-1 do
-    for k:=0 to (Props.Width div 4)-1 do begin
-  ///////////////////////////////////////////////////////
-  //Alpha
-  if Props.HasAlpha then begin
-  blockread(f,c,8);
+  for k:=0 to (Props.Width div 4)-1 do
+  begin
+    ///////////////////////////////////////////////////////
+    //Alpha
+    if Props.HasAlpha then
+    begin
+      blockread(f,c,8);
+      SwapInt(c[1],c[2]);
+      SwapInt(c[3],c[4]);
+      SwapInt(c[5],c[6]);
+      SwapInt(c[7],c[8]);
+
+      if ftype = 'DXT5' then
+      begin
+        DXT_A_Decode(@c[1],DXTOut);
+        for h:=1 to 16 do
+          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
+      end else
+      if ftype = 'DXT3' then
+      begin
+        for h:=1 to 16 do
+        begin
+          if h mod 2 = 1 then
+          T:=(ord(c[(h+1)div 2])mod 16)*17 else
+          T:=(ord(c[(h+1)div 2])div 16)*17;
+          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=T;
+        end;
+      end; //Format type DXT3 or DXT5
+    end; //if alpha
+    ////////////////////////////////////////////////////////
+    //RGB
+    blockread(f,c,8);
     SwapInt(c[1],c[2]);
     SwapInt(c[3],c[4]);
     SwapInt(c[5],c[6]);
     SwapInt(c[7],c[8]);
-  if ftype='DXT5' then begin
-    DXT_A_Decode(@c[1],DXTOut);
+    DXT_RGB_Decode(@c[1],DXTOut);
     for h:=1 to 16 do
-      RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
-  end else
-  if ftype='DXT3' then begin
-    for h:=1 to 16 do begin
-      if h mod 2 = 1 then
-      T:=(ord(c[(h+1)div 2])mod 16)*17 else
-      T:=(ord(c[(h+1)div 2])div 16)*17;
-      RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=T;
+    begin
+      RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
+      RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
+      RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
     end;
-  end; //Format type DXT3 or DXT5
-  end; //if alpha
-  ////////////////////////////////////////////////////////
-  //RGB
-  blockread(f,c,8);
-  SwapInt(c[1],c[2]);
-  SwapInt(c[3],c[4]);
-  SwapInt(c[5],c[6]);
-  SwapInt(c[7],c[8]);
-  DXT_RGB_Decode(@c[1],DXTOut);
-  for h:=1 to 16 do begin
-    RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
-    RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
-    RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
-  end;
-
   end;
   closefile(f);
 
@@ -650,11 +669,11 @@ end;
 
 procedure TDisplayImage.OpenTGA(const aFilename: string);
 var
-  i,k:Integer;
-  f:file;
-  c:array of AnsiChar;
-  tSizeH,tSizeV:Integer;
-  InBit:byte;
+  I, K: Integer;
+  f: file;
+  c: array of AnsiChar;
+  tSizeH, tSizeV: Integer;
+  InBit: Byte;
 begin
   ResetAllData;
 
@@ -665,21 +684,20 @@ begin
   tSizeV:=int2(c[15],c[16]);
   InBit:=ord(c[17]);
 
-  if ((InBit<>24)and(InBit<>32))
-  or ((MakePOT(tSizeH)<>tSizeH)and(not AllowNonPOT))
-  or ((MakePOT(tSizeV)<>tSizeV)and(not AllowNonPOT))
-  or (tSizeH < 4) or (tSizeV < 4) or (tSizeH > MAX_IMAGE_SIZE) or (tSizeV > MAX_IMAGE_SIZE) then
+  if (InBit <> 24) and (InBit <> 32) then
   begin
-    MessageBox(0, 'Image size must be 4,8,16,32...2048 x 24/32 bit', 'Error', MB_OK);
+    MessageBox(0, 'Image size must be 24/32 bit', 'Error', MB_OK);
     closefile(f);
     Exit;
   end;
 
-  SetAllPropsAtOnce(
-          ChangeFileExt(ExtractFileName(aFileName), ''),
-          tSizeH, tSizeV, 1,
-          InBit = 32,
-          'TGA');
+  if not Verify(tSizeH, tSizeV) then
+  begin
+    closefile(f);
+    Exit;
+  end;
+
+  SetAllPropsAtOnce(ChangeFileExt(ExtractFileName(aFileName), ''), tSizeH, tSizeV, 1, InBit = 32, 'TGA');
 
   setlength(c,Props.Width*4+1);
 
@@ -742,14 +760,19 @@ begin
   ResetAllData;
 
   AssignFile(f,aFileName); FileMode:=0; Reset(f,1); FileMode:=2;
-  BlockRead(f,BNKHeader,80);
+  BlockRead(f, BNKHeader, 80);
 
-  if ((BNKHeader.InBit<>4)and(BNKHeader.InBit<>8)and(BNKHeader.InBit<>32))or
-     (BNKHeader.Width<4)or(BNKHeader.Height<4)or(BNKHeader.Width>MAX_IMAGE_SIZE)or(BNKHeader.Height>MAX_IMAGE_SIZE) then
-     begin
-    MessageBox(0,'Uknown format','Error',MB_OK);
-    closefile(f);
-    exit;
+  if not Verify(BNKHeader.Width, BNKHeader.Height) then
+  begin
+    CloseFile(f);
+    Exit;
+  end;
+
+  if not (BNKHeader.InBit in [4, 8, 32]) then
+  begin
+    MessageBox(0, 'Uknown format', 'Error', MB_OK);
+    CloseFile(f);
+    Exit;
   end;
 
   if (BNKHeader.Un1<>2)and(BNKHeader.Un2<>0)and(BNKHeader.Un3<>0)
@@ -1019,13 +1042,8 @@ begin
   try
     bmp.LoadFromFile(aFileName);
 
-    if ((MakePOT(bmp.Width) <> bmp.Width) and (not AllowNonPOT))
-    or ((MakePOT(bmp.Height) <> bmp.Height) and (not AllowNonPOT))
-    or (bmp.Width < 4) or (bmp.Height < 4) or (bmp.Width > MAX_IMAGE_SIZE) or (bmp.Height > MAX_IMAGE_SIZE) then
-    begin
-      MessageBox(0, 'Image size must be 4,8,16,32...2048 pixels', 'Error', MB_OK);
+    if not Verify(bmp.Width, bmp.Height) then
       Exit;
-    end;
 
     // Do reset because source RGB has changed
     ResetAllData;
