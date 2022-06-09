@@ -99,9 +99,9 @@ object fmPTXTool: TfmPTXTool
     object Label9: TLabel
       Left = 8
       Top = 50
-      Width = 60
+      Width = 35
       Height = 13
-      Caption = 'Compression'
+      Caption = 'Format:'
     end
     object Label5: TLabel
       Left = 8
@@ -132,7 +132,7 @@ object fmPTXTool: TfmPTXTool
       Caption = 'RMS:'
     end
     object lbSize: TLabel
-      Left = 32
+      Left = 34
       Top = 18
       Width = 94
       Height = 13
@@ -145,8 +145,8 @@ object fmPTXTool: TfmPTXTool
       Height = 13
       Caption = '<<>>'
     end
-    object lbCompression: TLabel
-      Left = 72
+    object lbFormat: TLabel
+      Left = 46
       Top = 50
       Width = 24
       Height = 13
@@ -160,7 +160,7 @@ object fmPTXTool: TfmPTXTool
       Caption = '<<>>'
     end
     object lbRMS: TLabel
-      Left = 176
+      Left = 174
       Top = 34
       Width = 24
       Height = 13
@@ -222,7 +222,7 @@ object fmPTXTool: TfmPTXTool
     TabOrder = 2
     OnClick = OpenFile
   end
-  object Button1: TButton
+  object btnSaveMipMap: TButton
     Left = 480
     Top = 104
     Width = 121
@@ -231,7 +231,7 @@ object fmPTXTool: TfmPTXTool
     Enabled = False
     TabOrder = 4
     Visible = False
-    OnClick = Button1Click
+    OnClick = btnSaveMipMapClick
   end
   object CBnonPOT: TCheckBox
     Left = 520

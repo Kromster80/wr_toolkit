@@ -14,8 +14,8 @@ type
 
     fImageRGB, fImageA: TImage;
     fDrawRect: TRect;
-    Props: record
-      FileMask: string;
+    fSource: record
+      Filename: string;
       Width, Height, MipMapCount: Integer;
       HasAlpha: Boolean;
       Format: string;
@@ -31,7 +31,7 @@ type
     procedure UpdateFog;
     procedure GenerateMipMap(aLevel: Integer);
     procedure ResetAllData;
-    procedure SetAllPropsAtOnce(const aFileMask: string; aWidth, aHeight, aMipMapCount: Integer; aHasAlpha: Boolean; const aFormat: string);
+    procedure SetAllPropsAtOnce(const aFilename: string; aWidth, aHeight, aMipMapCount: Integer; aHasAlpha: Boolean; const aFormat: string);
     procedure RefreshImage(aMode: TRefreshMode);
     function Verify(aWidth, aHeight: Integer): Boolean;
     procedure UpdateMaxMipMapCount;
@@ -41,11 +41,12 @@ type
     constructor Create(aImageRGB, aImageA: TImage);
     destructor Destroy; override;
 
-    property GetFileMask: string read Props.FileMask;
+    property SourceFilename: string read fSource.Filename;
+    property SourceMipMapCount: Integer read fMipMapCount write fSource.MipMapCount;
     property MipMapCount: Integer read fMipMapCount write fMipMapCount;
     property MaxMipMapCount: Integer read fMaxMipMapCount;
-    property GetAlpha: Boolean read Props.HasAlpha;
-    property GetFormatString: string read Props.Format;
+    property GetAlpha: Boolean read fSource.HasAlpha;
+    property SourceFormatString: string read fSource.Format;
     function DisplayImage: Boolean;
     function GetInfoString: string;
     function GetFogString: string;
@@ -112,10 +113,10 @@ function TDisplayImage.DisplayImage: Boolean;
 begin
   Result := False;
 
-  fBitmapRGB.Width := Props.Width;
-  fBitmapRGB.Height:= Props.Height;
-  fBitmapA.Width   := Props.Width;
-  fBitmapA.Height  := Props.Height;
+  fBitmapRGB.Width := fSource.Width;
+  fBitmapRGB.Height:= fSource.Height;
+  fBitmapA.Width   := fSource.Width;
+  fBitmapA.Height  := fSource.Height;
 
   fDrawRect.Bottom := fImageRGB.Height;
   fDrawRect.Right  := fImageRGB.Width;
@@ -123,12 +124,12 @@ begin
   fImageRGB.Canvas.Brush.Color := RGB_GREY; fImageRGB.Canvas.FillRect(fDrawRect);
   fImageA.Canvas.Brush.Color   := RGB_GREY; fImageA.Canvas.FillRect(fDrawRect);
 
-  if Props.Width * Props.Height = 0 then Exit; // Image didn't load
+  if fSource.Width * fSource.Height = 0 then Exit; // Image didn't load
 
-  if (Props.Width / Props.Height) > 1 then
-    fDrawRect.Bottom := Round(fImageRGB.Height / (Props.Width / Props.Height))
+  if (fSource.Width / fSource.Height) > 1 then
+    fDrawRect.Bottom := Round(fImageRGB.Height / (fSource.Width / fSource.Height))
   else
-    fDrawRect.Right  := Round(fImageRGB.Width  / (Props.Height / Props.Width));
+    fDrawRect.Right  := Round(fImageRGB.Width  / (fSource.Height / fSource.Width));
 
   fImageRGB.Picture.Graphic.Height := fImageRGB.Height;
   fImageRGB.Picture.Graphic.Width := fImageRGB.Width;
@@ -137,7 +138,7 @@ begin
 
   RefreshImage(cmRGB);
 
-  if Props.HasAlpha then
+  if fSource.HasAlpha then
     RefreshImage(cmA);
 
   Result := true;
@@ -146,7 +147,7 @@ end;
 
 function TDisplayImage.GetInfoString: string;
 begin
-  Result := IntToStr(Props.Width) + 'x' + IntToStr(Props.Height) + ' RGB' + IfThen(Props.HasAlpha, 'A');
+  Result := IntToStr(fSource.Width) + 'x' + IntToStr(fSource.Height) + ' RGB' + IfThen(fSource.HasAlpha, 'A');
 end;
 
 
@@ -178,17 +179,17 @@ begin
   g := 0;
   b := 0;
 
-  for I := 1 to Props.Height do
-  for K := 1 to Props.Width do
+  for I := 1 to fSource.Height do
+  for K := 1 to fSource.Width do
   begin
     Inc(r, RGBA[I, K, 1]);
     Inc(g, RGBA[I, K, 2]);
     Inc(b, RGBA[I, K, 3]);
   end;
 
-  fFog[1] := Round(r / (Props.Height * Props.Width));
-  fFog[2] := Round(g / (Props.Height * Props.Width));
-  fFog[3] := Round(b / (Props.Height * Props.Width));
+  fFog[1] := Round(r / (fSource.Height * fSource.Width));
+  fFog[2] := Round(g / (fSource.Height * fSource.Width));
+  fFog[3] := Round(b / (fSource.Height * fSource.Width));
 end;
 
 
@@ -197,7 +198,7 @@ var
   x: Integer;
 begin
   fMaxMipMapCount := 0;
-  x := Min(Props.Width, Props.Height);
+  x := Min(fSource.Width, fSource.Height);
   repeat
     x := x div 2;
     Inc(fMaxMipMapCount);
@@ -223,8 +224,8 @@ procedure TDisplayImage.EditAlphaInvert;
 var
   i,k: Integer;
 begin
-  for i:=1 to Props.Height do
-  for k:=1 to Props.Width do
+  for i:=1 to fSource.Height do
+  for k:=1 to fSource.Width do
     RGBA[i,k,4] := 255 - RGBA[i,k,4];
 
   RefreshImage(cmA);
@@ -237,14 +238,14 @@ procedure TDisplayImage.EditAlphaClear;
 var
   i,k:Integer;
 begin
-  for i:=1 to Props.Height do
-    for k:=1 to Props.Width do
+  for i:=1 to fSource.Height do
+    for k:=1 to fSource.Width do
       RGBA[i,k,4] := 0;
   fImageA.Canvas.Brush.Color := RGB_GREY;
   fImageA.Canvas.FillRect(fDrawRect);
 
-  Props.HasAlpha := False;
-  Props.Format := '';
+  fSource.HasAlpha := False;
+  fSource.Format := '';
   fIsChanged := True;
 end;
 
@@ -261,10 +262,10 @@ begin
 
   if aMode in [cmRGBA, cmRGB] then
   begin
-    for I := 1 to Props.Height do
+    for I := 1 to fSource.Height do
     begin
       pRGBLine := fBitmapRGB.ScanLine[I-1];
-      for K := 1 to Props.Width do
+      for K := 1 to fSource.Width do
       begin
         pRGBLine[K*3-3] := RGBA[I,K,3];
         pRGBLine[K*3-2] := RGBA[I,K,2];
@@ -276,10 +277,10 @@ begin
 
   if aMode in [cmRGBA, cmA] then
   begin
-    for I := 1 to Props.Height do
+    for I := 1 to fSource.Height do
     begin
       pALine := fBitmapA.ScanLine[I-1];
-      for K := 1 to Props.Width do
+      for K := 1 to fSource.Width do
       begin
         pALine[K*3-3] := RGBA[I,K,4];
         pALine[K*3-2] := RGBA[I,K,4];
@@ -301,8 +302,8 @@ var
   Ratio: Single;
   Tmp1,Tmp2,Tmp3,Tmp4,Acc: Single;
 begin
-  newWidth := Props.Width div Pow(2, aLevel - 1);
-  newHeight := Props.Height div Pow(2, aLevel - 1);
+  newWidth := fSource.Width div Pow(2, aLevel - 1);
+  newHeight := fSource.Height div Pow(2, aLevel - 1);
 
   if aLevel = 1 then
   begin
@@ -344,22 +345,22 @@ procedure TDisplayImage.ResetAllData;
 begin
   FillChar(RGBA, SizeOf(RGBA), #0);
   FillChar(fFog, SizeOf(fFog), #0);
-  FillChar(Props, SizeOf(Props), #0);
+  FillChar(fSource, SizeOf(fSource), #0);
   fIsChanged := True;
 end;
 
 
-procedure TDisplayImage.SetAllPropsAtOnce(const aFileMask: string; aWidth, aHeight, aMipMapCount: Integer;
+procedure TDisplayImage.SetAllPropsAtOnce(const aFilename: string; aWidth, aHeight, aMipMapCount: Integer;
   aHasAlpha: Boolean; const aFormat: string);
 begin
-  Props.FileMask := aFileMask;
-  Props.Width := aWidth;
-  Props.Height := aHeight;
-  Props.MipMapCount := aMipMapCount;
+  fSource.Filename := aFilename;
+  fSource.Width := aWidth;
+  fSource.Height := aHeight;
+  fSource.MipMapCount := aMipMapCount;
 
-  Props.HasAlpha := aHasAlpha;
+  fSource.HasAlpha := aHasAlpha;
 
-  Props.Format := aFormat;
+  fSource.Format := aFormat;
 
   fIsChanged := False;
 
@@ -411,12 +412,12 @@ begin
   SYNData:=int2(c[21],c[22],c[23],c[24]);
 
   if isCompressed then
-    if Props.HasAlpha then
-      PTXData := Props.Width*Props.Height
+    if fSource.HasAlpha then
+      PTXData := fSource.Width*fSource.Height
     else
-      PTXData := Props.Width*Props.Height div 2
+      PTXData := fSource.Width*fSource.Height div 2
   else
-    PTXData := Props.Width*Props.Height*4;
+    PTXData := fSource.Width*fSource.Height*4;
 
   ////////////////////////////////////////////////////////////////////////////////
   //read data / decode
@@ -478,12 +479,12 @@ begin
   ci:=1;
   if isCompressed then
   begin
-    for i:=0 to (Props.Height div 4)-1 do
-      for k:=0 to (Props.Width div 4)-1 do
+    for i:=0 to (fSource.Height div 4)-1 do
+      for k:=0 to (fSource.Width div 4)-1 do
       begin
         ///////////////////////////////////////////////////////
         //Alpha
-        if Props.HasAlpha then
+        if fSource.HasAlpha then
         begin
           DXT_A_Decode(@c[ci],DXTOut);
 
@@ -504,10 +505,10 @@ begin
       end;  //for 1..x,1..z
   end else
   begin //Compressed=0
-    for i:=1 to Props.Height do
+    for i:=1 to fSource.Height do
     begin
-      blockread(f,RGBA[i,1,1],Props.Width*4);
-      for k:=1 to Props.Width do
+      blockread(f,RGBA[i,1,1],fSource.Width*4);
+      for k:=1 to fSource.Width do
        begin
         a:=@RGBA[i,k,1]; //fast exchange
         b:=@RGBA[i,k,3];
@@ -548,12 +549,12 @@ begin
 
   fType:=c[85]+c[86]+c[87]+c[88];
 
-  for i:=0 to (Props.Height div 4)-1 do
-  for k:=0 to (Props.Width div 4)-1 do
+  for i:=0 to (fSource.Height div 4)-1 do
+  for k:=0 to (fSource.Width div 4)-1 do
   begin
     ///////////////////////////////////////////////////////
     //Alpha
-    if Props.HasAlpha then
+    if fSource.HasAlpha then
     begin
       blockread(f,c,8);
       if ftype='DXT5' then
@@ -614,12 +615,12 @@ begin
 
   fType := 'DXT5';//c[85]+c[86]+c[87]+c[88];
 
-  for i:=0 to (Props.Height div 4)-1 do
-  for k:=0 to (Props.Width div 4)-1 do
+  for i:=0 to (fSource.Height div 4)-1 do
+  for k:=0 to (fSource.Width div 4)-1 do
   begin
     ///////////////////////////////////////////////////////
     //Alpha
-    if Props.HasAlpha then
+    if fSource.HasAlpha then
     begin
       blockread(f,c,8);
       SwapInt(c[1],c[2]);
@@ -699,13 +700,13 @@ begin
 
   SetAllPropsAtOnce(ChangeFileExt(ExtractFileName(aFileName), ''), tSizeH, tSizeV, 1, InBit = 32, 'TGA');
 
-  setlength(c,Props.Width*4+1);
+  setlength(c,fSource.Width*4+1);
 
-  for i:=Props.Height downto 1 do
+  for i:=fSource.Height downto 1 do
   begin
-    if InBit=24 then BlockRead(f,c[1],Props.Width*3);
-    if InBit=32 then BlockRead(f,c[1],Props.Width*4);
-    for k:=1 to Props.Width do
+    if InBit=24 then BlockRead(f,c[1],fSource.Width*3);
+    if InBit=32 then BlockRead(f,c[1],fSource.Width*4);
+    for k:=1 to fSource.Width do
       if InBit=24 then
       begin
         RGBA[i,k,1]:=ord(c[k*3-0]);
@@ -787,10 +788,10 @@ begin
           '2DB ' + IfThen(BNKHeader.InBit <> 32, 'Compressed'));
 
   if BNKHeader.InBit=32 then begin
-    setlength(c,Props.Width*4+1);
-    for i:=1 to Props.Height do begin
-      BlockRead(f,c[1],Props.Width*4);
-      for k:=1 to Props.Width do begin
+    setlength(c,fSource.Width*4+1);
+    for i:=1 to fSource.Height do begin
+      BlockRead(f,c[1],fSource.Width*4);
+      for k:=1 to fSource.Width do begin
         RGBA[i,k,1]:=ord(c[k*4-1]);
         RGBA[i,k,2]:=ord(c[k*4-2]);
         RGBA[i,k,3]:=ord(c[k*4-3]);
@@ -804,19 +805,19 @@ begin
     ci:=1;
     if BNKHeader.InBit=8 then
     begin
-      setlength(c,Props.Height*Props.Width +1);
-      blockread(f,c[1],Props.Height*Props.Width ); //read all needed data
+      setlength(c,fSource.Height*fSource.Width +1);
+      blockread(f,c[1],fSource.Height*fSource.Width ); //read all needed data
     end else
     begin
-      setlength(c,(Props.Height*Props.Width) div 2 +1);
-      blockread(f,c[1],(Props.Height*Props.Width) div 2); //read all needed data
+      setlength(c,(fSource.Height*fSource.Width) div 2 +1);
+      blockread(f,c[1],(fSource.Height*fSource.Width) div 2); //read all needed data
     end;
 
-    for i:=0 to (Props.Height div 4)-1 do
-      for k:=0 to (Props.Width div 4)-1 do begin
+    for i:=0 to (fSource.Height div 4)-1 do
+      for k:=0 to (fSource.Width div 4)-1 do begin
         ///////////////////////////////////////////////////////
         //Alpha
-        if Props.HasAlpha then begin
+        if fSource.HasAlpha then begin
           DXT_A_Decode(@c[ci],DXTOut);
           for h:=1 to 16 do
             RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
@@ -849,16 +850,16 @@ var
   rgba: array [1..4] of Byte;
 begin
   AssignFile(f,aFileName); ReWrite(f,1);
-  if Props.HasAlpha then blockwrite(f,AnsiString(#0#32#0#0),4) else blockwrite(f,AnsiString(#0#24#0#0),4);//compression, bpp
-  blockwrite(f, Props.Width, 4);
-  blockwrite(f, Props.Height, 4);
+  if fSource.HasAlpha then blockwrite(f,AnsiString(#0#32#0#0),4) else blockwrite(f,AnsiString(#0#24#0#0),4);//compression, bpp
+  blockwrite(f, fSource.Width, 4);
+  blockwrite(f, fSource.Height, 4);
   blockwrite(f, fMipMapCount, 1);
   blockwrite(f, fFog[3], 1);
   blockwrite(f, fFog[2], 1);
   blockwrite(f, fFog[1], 1);
 
-  thisWidth:=Props.Width;
-  thisHeight:=Props.Height;
+  thisWidth:=fSource.Width;
+  thisHeight:=fSource.Height;
   for h := 1 to fMipMapCount do
   begin
     thisSize := thisWidth * thisHeight * 4;
@@ -900,23 +901,23 @@ begin
 
   ms := TMemoryStream.Create;
 
-  if Props.HasAlpha then
+  if fSource.HasAlpha then
     ms.Write(AnsiString(#1#32#0#0), 4)  //compression, 32bpp
   else
     ms.Write(AnsiString(#1#24#0#0), 4); //compression, 24bpp
 
-  ms.Write(Props.Width, 4);
-  ms.Write(Props.Height, 4);
+  ms.Write(fSource.Width, 4);
+  ms.Write(fSource.Height, 4);
   ms.Write(fMipMapCount, 1);
   ms.Write(fFog[3], 1);
   ms.Write(fFog[2], 1);
   ms.Write(fFog[1], 1);
 
-  thisWidth := Props.Width;
-  thisHeight := Props.Height;
+  thisWidth := fSource.Width;
+  thisHeight := fSource.Height;
   for h := 1 to fMipMapCount do
   begin
-    thisSize := IfThen(Props.HasAlpha, thisWidth * thisHeight, thisWidth * thisHeight div 2);
+    thisSize := IfThen(fSource.HasAlpha, thisWidth * thisHeight, thisWidth * thisHeight div 2);
 
     ms.Write(thisSize, 4);
     ms.Write(AnsiString(#0#0#0#0), 4);
@@ -925,7 +926,7 @@ begin
     begin
       xp := ((i-1) * 4) mod thisWidth + 1; //X pixel
       yp := ((i-1) div ((thisWidth-1) div 4 + 1)) * 4 + 1;
-      if Props.HasAlpha then
+      if fSource.HasAlpha then
       begin
         newRMS := 0;
         DXT_A_Encode(@RGBAmm[yp+0, xp, 4], @RGBAmm[yp+1, xp, 4], @RGBAmm[yp+2, xp, 4], @RGBAmm[yp+3, xp, 4], DXTAOut, newRMS);
@@ -948,8 +949,8 @@ begin
   ms.SaveToFile(aFileName);
   ms.Free;
 
-  fRmsRGB := Sqrt(fRmsRGB / (Props.Width * Props.Height));
-  fRmsA := Sqrt(fRmsA / (Props.Width * Props.Height));
+  fRmsRGB := Sqrt(fRmsRGB / (fSource.Width * fSource.Height));
+  fRmsA := Sqrt(fRmsA / (fSource.Width * fSource.Height));
 
   fIsChanged := False;
 end;
@@ -963,24 +964,24 @@ var
 begin
   ms := TMemoryStream.Create;
   ms.Write(AnsiString(#0#0#2#0#0#0#0#0#0#0#0#0), 12);
-  ms.Write(Props.Width, 2);
-  ms.Write(Props.Height, 2);
-  if Props.HasAlpha then
+  ms.Write(fSource.Width, 2);
+  ms.Write(fSource.Height, 2);
+  if fSource.HasAlpha then
     ms.Write(AnsiString(#32#0), 2)
   else
     ms.Write(AnsiString(#24#0), 2); // BitDepth
 
   L := 0;
-  SetLength(buf, Props.Width * Props.Height * 4);
-  for I := Props.Height downto 1 do
-    for K := 1 to Props.Width do
+  SetLength(buf, fSource.Width * fSource.Height * 4);
+  for I := fSource.Height downto 1 do
+    for K := 1 to fSource.Width do
     begin
       buf[L + 0] := RGBA[I,K,3];
       buf[L + 1] := RGBA[I,K,2];
       buf[L + 2] := RGBA[I,K,1];
-      if Props.HasAlpha then
+      if fSource.HasAlpha then
         buf[L + 3] := RGBA[I,K,4];
-      Inc(L, 3 + Ord(Props.HasAlpha));
+      Inc(L, 3 + Ord(fSource.HasAlpha));
     end;
 
   ms.Write(buf[0], L);
@@ -997,8 +998,8 @@ var
   i, k: Integer;
   thisWidth, thisHeight: Word;
 begin
-  thisWidth:=Props.Width div Pow(2,aLevel-1);
-  thisHeight:=Props.Height div Pow(2,aLevel-1);
+  thisWidth:=fSource.Width div Pow(2,aLevel-1);
+  thisHeight:=fSource.Height div Pow(2,aLevel-1);
   AssignFile(f,aFileName); ReWrite(f,1);
   blockwrite(f,AnsiString(#0#0#2#0#0#0#0#0#0#0#0#0), 12);
   FillChar(RGBAmm, SizeOf(RGBAmm), #0);
@@ -1007,14 +1008,14 @@ begin
 
   blockwrite(f, thisWidth, 2);
   blockwrite(f, thisHeight, 2);
-  if Props.HasAlpha then blockwrite(f,#32#0,2) else blockwrite(f,#24#0,2);
+  if fSource.HasAlpha then blockwrite(f,#32#0,2) else blockwrite(f,#24#0,2);
   for i:=thisHeight downto 1 do
     for k:=1 to thisWidth do
     begin
       blockwrite(f,RGBAmm[i,k,3],1);
       blockwrite(f,RGBAmm[i,k,2],1);
       blockwrite(f,RGBAmm[i,k,1],1);
-      if Props.HasAlpha then blockwrite(f,RGBAmm[i,k,4],1);
+      if fSource.HasAlpha then blockwrite(f,RGBAmm[i,k,4],1);
     end;
   closefile(f);
 end;
@@ -1049,10 +1050,10 @@ begin
     ResetAllData;
     SetAllPropsAtOnce(ChangeFileExt(ExtractFileName(aFileName), ''), bmp.Width, bmp.Height, 1, False, 'BMP');
 
-    for i:=1 to Props.Height do
+    for i:=1 to fSource.Height do
     begin
       p:=bmp.ScanLine[i-1];
-      for k:=1 to Props.Width do
+      for k:=1 to fSource.Width do
       begin
         RGBA[i,k,1] := p[k*3-1];
         RGBA[i,k,2] := p[k*3-2];
@@ -1079,24 +1080,24 @@ begin
   try
     bmp.LoadFromFile(aFileName);
 
-    if (bmp.Width <> Props.Width) or (bmp.Height <> Props.Height) then
+    if (bmp.Width <> fSource.Width) or (bmp.Height <> fSource.Height) then
     begin
       MessageBox(0, 'Mask height and width should be same as for RGB image', 'Error', MB_OK);
       Exit;
     end;
 
-    for i:=1 to Props.Height do
+    for i:=1 to fSource.Height do
     begin
       p:=bmp.ScanLine[i-1];
-      for k:=1 to Props.Width do
+      for k:=1 to fSource.Width do
         RGBA[i,k,4]:=(p[k*3-1]+p[k*3-2]+p[k*3-3])div 3;
     end;
   finally
     bmp.Free;
   end;
 
-  Props.HasAlpha := True;
-  Props.Format := '';
+  fSource.HasAlpha := True;
+  fSource.Format := '';
   fIsChanged := True;
 
   fRmsRGB := 0;
@@ -1111,12 +1112,12 @@ var
 begin
   Color2RGB(fImageRGB.Canvas.Pixels[aX, aY], R, G, B);
 
-  for i:=1 to Props.Height do
-    for k:=1 to Props.Width do
+  for i:=1 to fSource.Height do
+    for k:=1 to fSource.Width do
       RGBA[i,k,4]:=255-byte((RGBA[i,k,1]=R)and(RGBA[i,k,2]=G)and(RGBA[i,k,3]=B))*255;
 
-  Props.HasAlpha := True;
-  Props.Format := '';
+  fSource.HasAlpha := True;
+  fSource.Format := '';
   fIsChanged := True;
 end;
 
@@ -1133,8 +1134,8 @@ begin
   rgbAvg[1] := 0;
   rgbAvg[2] := 0;
   rgbAvg[3] := 0;
-  for i:=1 to Props.Height do
-    for k:=1 to Props.Width do
+  for i:=1 to fSource.Height do
+    for k:=1 to fSource.Width do
     if (RGBA[I, K, 1] <> keyR) or (RGBA[I, K, 2] <> keyG) or (RGBA[I, K, 3] <> keyB) then
     begin
       Inc(cnt);
@@ -1147,8 +1148,8 @@ begin
   rgbAvg[2] := Round(rgbAvg[2] / cnt);
   rgbAvg[3] := Round(rgbAvg[3] / cnt);
 
-  for i:=1 to Props.Height do
-    for k:=1 to Props.Width do
+  for i:=1 to fSource.Height do
+    for k:=1 to fSource.Width do
     if (RGBA[I, K, 1] = keyR) and (RGBA[I, K, 2] = keyG) and (RGBA[I, K, 3] = keyB) then
     begin
       RGBA[i,k,1] := rgbAvg[1];
@@ -1156,7 +1157,7 @@ begin
       RGBA[i,k,3] := rgbAvg[3];
     end;
 
-  Props.Format := '';
+  fSource.Format := '';
   UpdateFog;
   fIsChanged := True;
 end;

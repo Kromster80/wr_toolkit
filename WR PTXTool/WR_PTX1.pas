@@ -50,12 +50,12 @@ type
     Label2: TLabel;
     Panel1: TPanel;
     Label7: TLabel;
-    Button1: TButton;
+    btnSaveMipMap: TButton;
     CBnonPOT: TCheckBox;
     imgRGB: TImage;
     lbSize: TLabel;
     lbMipMaps: TLabel;
-    lbCompression: TLabel;
+    lbFormat: TLabel;
     lbFadeColor: TLabel;
     lbRMS: TLabel;
     mnuEditAlphaFromColorKey: TMenuItem;
@@ -74,7 +74,7 @@ type
     procedure OpenFile(Sender: TObject);
     procedure seMipMapCountChange(Sender: TObject);
     procedure DisplayChange(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
+    procedure btnSaveMipMapClick(Sender: TObject);
     procedure CBnonPOTClick(Sender: TObject);
     procedure SampleAClick(Sender: TObject);
     procedure imgRGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -186,17 +186,17 @@ procedure TfmPTXTool.ExportClick(Sender: TObject);
 begin
   if (Sender = ExportBMPA) or (Sender = mnuExportBMPMask) then
   begin
-    if RunSaveDialog(sdSave, fDisplayImage.GetFileMask + '_A.bmp', fWorkDir, '24bit BMP files (*.bmp)|*.bmp', 'bmp') then
+    if RunSaveDialog(sdSave, fDisplayImage.SourceFilename + '_A.bmp', fWorkDir, '24bit BMP files (*.bmp)|*.bmp', 'bmp') then
       fDisplayImage.ExportBitmapA(sdSave.FileName);
   end else
   if (Sender = ExportBMPRGB) or (Sender = mnuExportBMPImage) then
   begin
-    if RunSaveDialog(sdSave, fDisplayImage.GetFileMask + '.bmp', fWorkDir, '24bit BMP files (*.bmp)|*.bmp', 'bmp') then
+    if RunSaveDialog(sdSave, fDisplayImage.SourceFilename + '.bmp', fWorkDir, '24bit BMP files (*.bmp)|*.bmp', 'bmp') then
       fDisplayImage.ExportBitmapRGB(sdSave.FileName);
   end else
   if (Sender = ExportTGA) or (Sender = mnuExportTGAImageMask) then
   begin
-    if RunSaveDialog(sdSave, fDisplayImage.GetFileMask + '.tga', fWorkDir, 'TGA files (*.tga)|*.tga', 'tga') then
+    if RunSaveDialog(sdSave, fDisplayImage.SourceFilename + '.tga', fWorkDir, 'TGA files (*.tga)|*.tga', 'tga') then
       fDisplayImage.SaveTGA(sdSave.FileName);
   //  fDisplayImage.SaveTGA(fExeDir+'000.tga');
   end;
@@ -224,7 +224,7 @@ procedure TfmPTXTool.SaveCompressedPTX(Sender: TObject);
 var
   prevCursor: TCursor;
 begin
-  if not RunSaveDialog(sdSave, fDisplayImage.GetFileMask + '.ptx', fWorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then Exit;
+  if not RunSaveDialog(sdSave, fDisplayImage.SourceFilename + '.ptx', fWorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then Exit;
   //sdSave.FileName:='000.ptx';
   prevCursor   := Screen.Cursor;
   Screen.Cursor := crHourGlass;
@@ -246,7 +246,7 @@ procedure TfmPTXTool.SaveUncompressedPTX(Sender: TObject);
 var
   prevCursor: TCursor;
 begin
-  if not RunSaveDialog(sdSave, fDisplayImage.GetFileMask + '.ptx', fWorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then Exit;
+  if not RunSaveDialog(sdSave, fDisplayImage.SourceFilename + '.ptx', fWorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then Exit;
 
   prevCursor := Screen.Cursor;
   Screen.Cursor := crHourGlass;
@@ -366,18 +366,18 @@ begin
   SetAlpha(fDisplayImage.GetAlpha);
 
   seMipMapCount.MaxValue := fDisplayImage.MaxMipMapCount;
-  seMipMapCount.Value    := fDisplayImage.MipMapCount;
+  seMipMapCount.Value    := fDisplayImage.SourceMipMapCount;
 
-  gbInfo.Caption := ' ' + fDisplayImage.GetFileMask + fDisplayImage.GetChangedString + ' ';
+  gbInfo.Caption := ' ' + fDisplayImage.SourceFilename + fDisplayImage.GetChangedString + ' ';
   lbSize.Caption := fDisplayImage.GetInfoString;
   lbMipMaps.Caption := IntToStr(fDisplayImage.MipMapCount);
-  lbCompression.Caption := fDisplayImage.GetFormatString;
+  lbFormat.Caption := fDisplayImage.SourceFormatString;
   lbRMS.Caption := fDisplayImage.GetRMSString;
   lbFadeColor.Caption := fDisplayImage.GetFogString;
 end;
 
 
-procedure TfmPTXTool.Button1Click(Sender: TObject);
+procedure TfmPTXTool.btnSaveMipMapClick(Sender: TObject);
 begin
   fDisplayImage.SaveMipMap(fWorkDir + '000sq.tga', 4);
 end;
