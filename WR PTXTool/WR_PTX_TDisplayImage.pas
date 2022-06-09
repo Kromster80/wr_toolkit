@@ -11,6 +11,7 @@ type
   TDisplayImage = class
   private
     fDXTCompressorColor: TWRDXTCompressorColor;
+    fDXTCompressorAlpha: TWRDXTCompressorAlpha;
     fBitmapRGB, fBitmapA: TBitmap;
     fImageRGB, fImageA: TImage;
     fDrawRect: TRect;
@@ -93,6 +94,8 @@ begin
   fImageA := aImageA;
 
   fDXTCompressorColor := TWRDXTCompressorColor.Create;
+  fDXTCompressorAlpha := TWRDXTCompressorAlpha.Create;
+
   fBitmapRGB := TBitmap.Create;
   fBitmapRGB.PixelFormat := pf24bit;
   fBitmapA := TBitmap.Create;
@@ -103,6 +106,7 @@ end;
 destructor TDisplayImage.Destroy;
 begin
   FreeAndNil(fDXTCompressorColor);
+  FreeAndNil(fDXTCompressorAlpha);
   FreeAndNil(fBitmapRGB);
   FreeAndNil(fBitmapA);
 
@@ -484,7 +488,7 @@ begin
         //Alpha
         if fSource.HasAlpha then
         begin
-          DXT_A_Decode(@c[ci],DXTOut);
+          fDXTCompressorAlpha.DecompressBlock(@c[ci], DXTOut);
 
           for h:=1 to 16 do
             fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
@@ -557,7 +561,7 @@ begin
       blockread(f,c,8);
       if ftype='DXT5' then
       begin
-        DXT_A_Decode(@c[1],DXTOut);
+        fDXTCompressorAlpha.DecompressBlock(@c[1], DXTOut);
         for h:=1 to 16 do
           fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
       end else
@@ -628,7 +632,7 @@ begin
 
       if ftype = 'DXT5' then
       begin
-        DXT_A_Decode(@c[1],DXTOut);
+        fDXTCompressorAlpha.DecompressBlock(@c[1], DXTOut);
         for h:=1 to 16 do
           fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
       end else
@@ -816,9 +820,9 @@ begin
         ///////////////////////////////////////////////////////
         //Alpha
         if fSource.HasAlpha then begin
-          DXT_A_Decode(@c[ci],DXTOut);
+          fDXTCompressorAlpha.DecompressBlock(@c[ci], DXTOut);
           for h:=1 to 16 do
-            fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
+            fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4] := DXTOut[h];
           inc(ci,8);
         end;
         ////////////////////////////////////////////////////////
@@ -927,7 +931,7 @@ begin
       if fSource.HasAlpha then
       begin
         newRMS := 0;
-        DXT_A_Encode(@fRGBAmm[yp+0, xp, 4], @fRGBAmm[yp+1, xp, 4], @fRGBAmm[yp+2, xp, 4], @fRGBAmm[yp+3, xp, 4], DXTAOut, newRMS);
+        fDXTCompressorAlpha.CompressBlock(@fRGBAmm[yp+0, xp, 4], @fRGBAmm[yp+1, xp, 4], @fRGBAmm[yp+2, xp, 4], @fRGBAmm[yp+3, xp, 4], DXTAOut, newRMS);
         ms.Write(DXTAOut, 8);
 
         fRmsA := fRmsA + newRMS;
