@@ -1,5 +1,5 @@
 ------------------------------------------------------
-PTX Tool 2.3
+PTX Tool 2.4
 ------------------------------------------------------
 
 Description:
@@ -22,6 +22,8 @@ You can use fewer MipMap levels to get sharper picture in game.
 You can use uncompressed PTX images to get better image quality in game.
 
 Changelog:
+v2.4 (09.06.2022)
+  Refactoring
   Fixed image brightening in PTX compression
   Fixed image darkening in PTX and DDS decompression
   Set focus on file list on start
