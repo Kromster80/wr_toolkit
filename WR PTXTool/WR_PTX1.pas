@@ -46,7 +46,7 @@ type
     InvertA: TMenuItem;
     ClearA: TMenuItem;
     Label10: TLabel;
-    SpinMM: TSpinEdit;
+    seMipMapCount: TSpinEdit;
     Label2: TLabel;
     Panel1: TPanel;
     Label7: TLabel;
@@ -72,7 +72,7 @@ type
     procedure SaveUncompressedPTX(Sender: TObject);
     procedure InvertAlpha(Sender: TObject);
     procedure OpenFile(Sender: TObject);
-    procedure SpinMMChange(Sender: TObject);
+    procedure seMipMapCountChange(Sender: TObject);
     procedure DisplayChange(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure CBnonPOTClick(Sender: TObject);
@@ -222,14 +222,14 @@ end;
 
 procedure TfmPTXTool.SaveCompressedPTX(Sender: TObject);
 var
-  Save_Cursor: TCursor;
+  prevCursor: TCursor;
 begin
-  SpinMMChange(nil);
-  if not RunSaveDialog(sdSave, fDisplayImage.GetFileMask+'.ptx', fWorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then Exit;
+  if not RunSaveDialog(sdSave, fDisplayImage.GetFileMask + '.ptx', fWorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then Exit;
   //sdSave.FileName:='000.ptx';
-  Save_Cursor   := Screen.Cursor;
+  prevCursor   := Screen.Cursor;
   Screen.Cursor := crHourGlass;
 
+  seMipMapCountChange(nil);
   case rgCompressionQuality.ItemIndex of
     0:  fDisplayImage.SaveCompressedPTX(sdSave.FileName, chOriginal);
     1:  fDisplayImage.SaveCompressedPTX(sdSave.FileName, chBestPick);
@@ -238,7 +238,7 @@ begin
   FileListBox1.Update;
   FileListBox1.FileName := sdSave.FileName;
   OpenFile(nil);
-  Screen.Cursor := Save_Cursor;
+  Screen.Cursor := prevCursor;
 end;
 
 
@@ -246,15 +246,18 @@ procedure TfmPTXTool.SaveUncompressedPTX(Sender: TObject);
 var
   prevCursor: TCursor;
 begin
-  SpinMMChange(nil);
-  if not RunSaveDialog(sdSave, fDisplayImage.GetFileMask+'.ptx', fWorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then Exit;
+  if not RunSaveDialog(sdSave, fDisplayImage.GetFileMask + '.ptx', fWorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then Exit;
+
   prevCursor := Screen.Cursor;
   Screen.Cursor := crHourGlass;
+
+  seMipMapCountChange(nil);
   fDisplayImage.SaveUncompressedPTX(sdSave.FileName);
   FileListBox1.Update;
   FileListBox1.FileName := sdSave.FileName;
   FileListBox1.TopIndex := FileListBox1.ItemIndex;
   OpenFile(nil);
+
   Screen.Cursor := prevCursor;
 end;
 
@@ -295,7 +298,7 @@ begin
   mnuImportBMPMask.Enabled        := aValue;
   ExportTGA.Enabled               := aValue;
   mnuExportTGAImageMask.Enabled   := aValue;
-  SpinMM.Enabled                  := aValue;
+  seMipMapCount.Enabled                  := aValue;
   lbNoRGB.Visible                 := not aValue;
 end;
 
@@ -341,9 +344,9 @@ begin
 end;
 
 
-procedure TfmPTXTool.SpinMMChange(Sender: TObject);
+procedure TfmPTXTool.seMipMapCountChange(Sender: TObject);
 begin
-  fDisplayImage.MipMapCount := SpinMM.Value;
+  fDisplayImage.MipMapCount := seMipMapCount.Value;
   //todo: Add FlipVertical! (by Ast)
 end;
 
@@ -362,8 +365,8 @@ begin
   SetRGB(true);
   SetAlpha(fDisplayImage.GetAlpha);
 
-  SpinMM.MaxValue := fDisplayImage.MaxMipMapCount;
-  SpinMM.Value    := fDisplayImage.MipMapCount;
+  seMipMapCount.MaxValue := fDisplayImage.MaxMipMapCount;
+  seMipMapCount.Value    := fDisplayImage.MipMapCount;
 
   gbInfo.Caption := ' ' + fDisplayImage.GetFileMask + fDisplayImage.GetChangedString + ' ';
   lbSize.Caption := fDisplayImage.GetInfoString;

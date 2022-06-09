@@ -166,7 +166,7 @@ object fmPTXTool: TfmPTXTool
       Height = 13
       Caption = '<<>>'
     end
-    object SpinMM: TSpinEdit
+    object seMipMapCount: TSpinEdit
       Left = 144
       Top = 50
       Width = 49
@@ -181,7 +181,7 @@ object fmPTXTool: TfmPTXTool
       ParentFont = False
       TabOrder = 0
       Value = 16
-      OnChange = SpinMMChange
+      OnChange = seMipMapCountChange
     end
     object Panel1: TPanel
       Left = 136
