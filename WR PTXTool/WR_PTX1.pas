@@ -2,11 +2,13 @@ unit WR_PTX1;
 interface
 uses
   Forms, StdCtrls, Controls, FileCtrl, SysUtils, Graphics, Classes, Buttons,
-  ExtCtrls, Dialogs, ComCtrls, Menus, Spin, Math, MMSystem,
+  ExtCtrls, Dialogs, ComCtrls, Menus, Spin, Math, MMSystem, Types,
   KromUtils,
   WR_PTX_TDisplayImage;
 
 type
+  TCursorEdit = (ceNone, ceAlphaCreate, ceColorReplaceAvg);
+
   TfmPTXTool = class(TForm)
     imgA: TImage;
     gbInfo: TGroupBox;
@@ -87,14 +89,11 @@ type
     fExeDir, fWorkDir: string;
     fDisplayImage: TDisplayImage;
 
-    fSampleColorKey: Boolean;
-    fReplaceColorKey: Boolean;
+    fCursorEdit: TCursorEdit;
 
     procedure SetRGB(aValue: Boolean);
     procedure SetAlpha(aValue: Boolean);
     procedure DisplayChange;
-    procedure SampleAClick;
-    procedure SampleRClick;
   end;
 
 
@@ -212,12 +211,10 @@ end;
 
 procedure TfmPTXTool.mnuEditAlphaFromColorKeyClick(Sender: TObject);
 begin
-  fSampleColorKey := not fSampleColorKey;
-  if fSampleColorKey then
-    Cursor := crHandPoint
-  else
-    Cursor := crDefault;
+  fCursorEdit := ceAlphaCreate;
+  Cursor := crHandPoint;
 end;
+
 
 procedure TfmPTXTool.SaveCompressedPTX(Sender: TObject);
 var
@@ -336,11 +333,8 @@ end;
 
 procedure TfmPTXTool.mnuEditReplaceColorKeyWithAverageClick(Sender: TObject);
 begin
-  fReplaceColorKey := not fReplaceColorKey;
-  if fReplaceColorKey then
-    Cursor := crHandPoint
-  else
-    Cursor := crDefault;
+  fCursorEdit := ceColorReplaceAvg;
+  Cursor := crHandPoint;
 end;
 
 
@@ -389,36 +383,18 @@ begin
 end;
 
 
-procedure TfmPTXTool.SampleAClick;
-begin
-  fSampleColorKey := not fSampleColorKey;
-  if fSampleColorKey then
-    Cursor := crHandPoint
-  else
-    Cursor := crDefault;
-end;
-
-
 procedure TfmPTXTool.imgMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  if (not fSampleColorKey)and(not fReplaceColorKey) then exit;
-  if fSampleColorKey then fDisplayImage.EditAlphaCreateFrom(X,Y);
-  if fReplaceColorKey then fDisplayImage.EditColorReplaceWithAverage(X,Y);
+  case fCursorEdit of
+    ceAlphaCreate:       fDisplayImage.EditAlphaCreateFrom(X,Y);
+    ceColorReplaceAvg:  fDisplayImage.EditColorReplaceWithAverage(X,Y);
+  end;
 
-  DisplayChange;
+  if fCursorEdit <> ceNone then
+    DisplayChange;
 
-  if fSampleColorKey then  SampleAClick; //Release fSampleColorKey
-  if fReplaceColorKey then SampleRClick; //Release fReplaceColorKey
-end;
-
-
-procedure TfmPTXTool.SampleRClick;
-begin
-  fReplaceColorKey := not fReplaceColorKey;
-  if fReplaceColorKey then
-    Cursor := crHandPoint
-  else
-    Cursor := crDefault;
+  fCursorEdit := ceNone;
+  Cursor := crDefault;
 end;
 
 
