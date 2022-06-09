@@ -231,8 +231,8 @@ begin
 
   seMipMapCountChange(nil);
   case rgCompressionQuality.ItemIndex of
-    0:  fDisplayImage.SaveCompressedPTX(sdSave.FileName, chOriginal);
-    1:  fDisplayImage.SaveCompressedPTX(sdSave.FileName, chBestPick);
+    0:  fDisplayImage.SavePTXCompressed(sdSave.FileName, chOriginal);
+    1:  fDisplayImage.SavePTXCompressed(sdSave.FileName, chBestPick);
   end;
 
   FileListBox1.Update;
@@ -252,7 +252,7 @@ begin
   Screen.Cursor := crHourGlass;
 
   seMipMapCountChange(nil);
-  fDisplayImage.SaveUncompressedPTX(sdSave.FileName);
+  fDisplayImage.SavePTXUncompressed(sdSave.FileName);
   FileListBox1.Update;
   FileListBox1.FileName := sdSave.FileName;
   FileListBox1.TopIndex := FileListBox1.ItemIndex;

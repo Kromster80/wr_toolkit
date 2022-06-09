@@ -66,8 +66,8 @@ type
     procedure OpenXTX(const aFilename: string);
     procedure OpenTGA(const aFilename: string);
     procedure Open2DB(const aFilename: string);
-    procedure SaveUncompressedPTX(const aFileName: string);
-    procedure SaveCompressedPTX(const aFilename: string; aHeuristic: TDXTCompressionHeuristics);
+    procedure SavePTXUncompressed(const aFileName: string);
+    procedure SavePTXCompressed(const aFilename: string; aHeuristic: TDXTCompressionHeuristics);
     procedure SaveTGA(const aFilename: string);
     procedure SaveMipMap(const aFilename: string; aLevel: Integer);
     procedure ExportBitmapRGB(const aFilename: string);
@@ -814,7 +814,7 @@ begin
 end;
 
 
-procedure TDisplayImage.SaveUncompressedPTX(const aFileName: string);
+procedure TDisplayImage.SavePTXUncompressed(const aFileName: string);
 var
   i, k, h: Integer;
   f: file;
@@ -858,7 +858,7 @@ begin
   fIsChanged := False;
 end;
 
-procedure TDisplayImage.SaveCompressedPTX(const aFilename: string; aHeuristic: TDXTCompressionHeuristics);
+procedure TDisplayImage.SavePTXCompressed(const aFilename: string; aHeuristic: TDXTCompressionHeuristics);
 var
   ms: TMemoryStream;
   i,h: Integer;
