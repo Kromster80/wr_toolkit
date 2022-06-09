@@ -6,27 +6,29 @@ uses
 type
   TRefreshMode = (cmRGB, cmA, cmRGBA);
 
-type
+  TRGBABuffer = array [1..2049, 1..2049, 1..4] of Byte;
+
   TDisplayImage = class
   private
     fDXTCompressorColor: TWRDXTCompressorColor;
     fBitmapRGB, fBitmapA: TBitmap;
-
     fImageRGB, fImageA: TImage;
     fDrawRect: TRect;
+
     fSource: record
       Filename: string;
       Width, Height, MipMapCount: Integer;
       HasAlpha: Boolean;
       Format: string;
     end;
-    RGBA: array [1..2049,1..2049,1..4] of Byte;
-    RGBAmm: array [1..2049,1..2049,1..4] of Byte;
+
+    fRGBA: TRGBABuffer;
+    fRGBAmm: TRGBABuffer;
+    fFog: array [1..3] of Byte;
     fRmsRGB: Single;
     fRmsA: Single;
-    fFog: array [1..3] of Byte;
-    fMipMapCount: Integer;
     fMaxMipMapCount: Integer;
+    fMipMapCount: Integer;
     fIsChanged: Boolean;
     procedure UpdateFog;
     procedure GenerateMipMap(aLevel: Integer);
@@ -182,9 +184,9 @@ begin
   for I := 1 to fSource.Height do
   for K := 1 to fSource.Width do
   begin
-    Inc(r, RGBA[I, K, 1]);
-    Inc(g, RGBA[I, K, 2]);
-    Inc(b, RGBA[I, K, 3]);
+    Inc(r, fRGBA[I, K, 1]);
+    Inc(g, fRGBA[I, K, 2]);
+    Inc(b, fRGBA[I, K, 3]);
   end;
 
   fFog[1] := Round(r / (fSource.Height * fSource.Width));
@@ -226,7 +228,7 @@ var
 begin
   for i:=1 to fSource.Height do
   for k:=1 to fSource.Width do
-    RGBA[i,k,4] := 255 - RGBA[i,k,4];
+    fRGBA[i,k,4] := 255 - fRGBA[i,k,4];
 
   RefreshImage(cmA);
 
@@ -240,7 +242,7 @@ var
 begin
   for i:=1 to fSource.Height do
     for k:=1 to fSource.Width do
-      RGBA[i,k,4] := 0;
+      fRGBA[i,k,4] := 0;
   fImageA.Canvas.Brush.Color := RGB_GREY;
   fImageA.Canvas.FillRect(fDrawRect);
 
@@ -267,9 +269,9 @@ begin
       pRGBLine := fBitmapRGB.ScanLine[I-1];
       for K := 1 to fSource.Width do
       begin
-        pRGBLine[K*3-3] := RGBA[I,K,3];
-        pRGBLine[K*3-2] := RGBA[I,K,2];
-        pRGBLine[K*3-1] := RGBA[I,K,1];
+        pRGBLine[K*3-3] := fRGBA[I,K,3];
+        pRGBLine[K*3-2] := fRGBA[I,K,2];
+        pRGBLine[K*3-1] := fRGBA[I,K,1];
       end;
     end;
     fImageRGB.Canvas.StretchDraw(fDrawRect, fBitmapRGB);
@@ -282,9 +284,9 @@ begin
       pALine := fBitmapA.ScanLine[I-1];
       for K := 1 to fSource.Width do
       begin
-        pALine[K*3-3] := RGBA[I,K,4];
-        pALine[K*3-2] := RGBA[I,K,4];
-        pALine[K*3-1] := RGBA[I,K,4];
+        pALine[K*3-3] := fRGBA[I,K,4];
+        pALine[K*3-2] := fRGBA[I,K,4];
+        pALine[K*3-1] := fRGBA[I,K,4];
       end;
     end;
     fImageA.Canvas.StretchDraw(fDrawRect, fBitmapA);
@@ -309,10 +311,10 @@ begin
   begin
     for i:=1 to newHeight do for k:=1 to newWidth do
     begin
-      RGBAmm[i,k,1] := RGBA[i,k,1];
-      RGBAmm[i,k,2] := RGBA[i,k,2];
-      RGBAmm[i,k,3] := RGBA[i,k,3];
-      RGBAmm[i,k,4] := RGBA[i,k,4];
+      fRGBAmm[i,k,1] := fRGBA[i,k,1];
+      fRGBAmm[i,k,2] := fRGBA[i,k,2];
+      fRGBAmm[i,k,3] := fRGBA[i,k,3];
+      fRGBAmm[i,k,4] := fRGBA[i,k,4];
     end;
     Exit;
   end;
@@ -326,24 +328,24 @@ begin
       Ratio := Sqr(Area / 2 - (h - 0.5)) + Sqr(Area / 2 - (j - 0.5));
       Ratio := Max(1-sqrt(Ratio)/Area,0);
       //Ratio:=sqr(Ratio); //Fits rather good but kills thin lines
-      Tmp1 := Tmp1 + RGBA[(I - 1) * Area + h, (K - 1) * Area + j, 1] * Ratio;
-      Tmp2 := Tmp2 + RGBA[(I - 1) * Area + h, (K - 1) * Area + j, 2] * Ratio;
-      Tmp3 := Tmp3 + RGBA[(I - 1) * Area + h, (K - 1) * Area + j, 3] * Ratio;
-      Tmp4 := Tmp4 + RGBA[(I - 1) * Area + h, (K - 1) * Area + j, 4] * Ratio;
+      Tmp1 := Tmp1 + fRGBA[(I - 1) * Area + h, (K - 1) * Area + j, 1] * Ratio;
+      Tmp2 := Tmp2 + fRGBA[(I - 1) * Area + h, (K - 1) * Area + j, 2] * Ratio;
+      Tmp3 := Tmp3 + fRGBA[(I - 1) * Area + h, (K - 1) * Area + j, 3] * Ratio;
+      Tmp4 := Tmp4 + fRGBA[(I - 1) * Area + h, (K - 1) * Area + j, 4] * Ratio;
       Acc := Acc + Ratio;
     end;
     Acc := Max(Acc, 1);
-    RGBAmm[i,k,1] := Round(EnsureRange(Tmp1/Acc, 0, 255));
-    RGBAmm[i,k,2] := Round(EnsureRange(Tmp2/Acc, 0, 255));
-    RGBAmm[i,k,3] := Round(EnsureRange(Tmp3/Acc, 0, 255));
-    RGBAmm[i,k,4] := Round(EnsureRange(Tmp4/Acc, 0, 255));
+    fRGBAmm[i,k,1] := Round(EnsureRange(Tmp1/Acc, 0, 255));
+    fRGBAmm[i,k,2] := Round(EnsureRange(Tmp2/Acc, 0, 255));
+    fRGBAmm[i,k,3] := Round(EnsureRange(Tmp3/Acc, 0, 255));
+    fRGBAmm[i,k,4] := Round(EnsureRange(Tmp4/Acc, 0, 255));
   end;
 end;
 
 
 procedure TDisplayImage.ResetAllData;
 begin
-  FillChar(RGBA, SizeOf(RGBA), #0);
+  FillChar(fRGBA, SizeOf(fRGBA), #0);
   FillChar(fFog, SizeOf(fFog), #0);
   FillChar(fSource, SizeOf(fSource), #0);
   fIsChanged := True;
@@ -357,9 +359,7 @@ begin
   fSource.Width := aWidth;
   fSource.Height := aHeight;
   fSource.MipMapCount := aMipMapCount;
-
   fSource.HasAlpha := aHasAlpha;
-
   fSource.Format := aFormat;
 
   fIsChanged := False;
@@ -489,7 +489,7 @@ begin
           DXT_A_Decode(@c[ci],DXTOut);
 
           for h:=1 to 16 do
-            RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
+            fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
           inc(ci,8);
         end;
         ////////////////////////////////////////////////////////
@@ -497,9 +497,9 @@ begin
         DXT_RGB_Decode(@c[ci],DXTOut);
         for h:=1 to 16 do
         begin
-          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
-          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
-          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
+          fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
+          fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
+          fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
         end;
         inc(ci,8);
       end;  //for 1..x,1..z
@@ -507,11 +507,11 @@ begin
   begin //Compressed=0
     for i:=1 to fSource.Height do
     begin
-      blockread(f,RGBA[i,1,1],fSource.Width*4);
+      blockread(f,fRGBA[i,1,1],fSource.Width*4);
       for k:=1 to fSource.Width do
        begin
-        a:=@RGBA[i,k,1]; //fast exchange
-        b:=@RGBA[i,k,3];
+        a:=@fRGBA[i,k,1]; //fast exchange
+        b:=@fRGBA[i,k,3];
         tb:=a^; a^:=b^; b^:=tb;
       end;
     end;
@@ -561,7 +561,7 @@ begin
       begin
         DXT_A_Decode(@c[1],DXTOut);
         for h:=1 to 16 do
-          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
+          fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
       end else
       if ftype='DXT3' then
       begin
@@ -570,7 +570,7 @@ begin
           if h mod 2 = 1 then
           T:=(ord(c[(h+1)div 2])mod 16)*17 else
           T:=(ord(c[(h+1)div 2])div 16)*17;
-          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=T;
+          fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=T;
         end;
       end; //Format type DXT3 or DXT5
     end; //if alpha
@@ -579,9 +579,9 @@ begin
     blockread(f,c,8);
     DXT_RGB_Decode(@c[1],DXTOut);
     for h:=1 to 16 do begin
-      RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
-      RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
-      RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
+      fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
+      fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
+      fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
     end;
   end;
   closefile(f);
@@ -632,7 +632,7 @@ begin
       begin
         DXT_A_Decode(@c[1],DXTOut);
         for h:=1 to 16 do
-          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
+          fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
       end else
       if ftype = 'DXT3' then
       begin
@@ -641,7 +641,7 @@ begin
           if h mod 2 = 1 then
           T:=(ord(c[(h+1)div 2])mod 16)*17 else
           T:=(ord(c[(h+1)div 2])div 16)*17;
-          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=T;
+          fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=T;
         end;
       end; //Format type DXT3 or DXT5
     end; //if alpha
@@ -655,9 +655,9 @@ begin
     DXT_RGB_Decode(@c[1],DXTOut);
     for h:=1 to 16 do
     begin
-      RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
-      RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
-      RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
+      fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
+      fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
+      fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
     end;
   end;
   closefile(f);
@@ -709,16 +709,16 @@ begin
     for k:=1 to fSource.Width do
       if InBit=24 then
       begin
-        RGBA[i,k,1]:=ord(c[k*3-0]);
-        RGBA[i,k,2]:=ord(c[k*3-1]);
-        RGBA[i,k,3]:=ord(c[k*3-2]);
+        fRGBA[i,k,1]:=ord(c[k*3-0]);
+        fRGBA[i,k,2]:=ord(c[k*3-1]);
+        fRGBA[i,k,3]:=ord(c[k*3-2]);
       end else
       if InBit=32 then
       begin
-        RGBA[i,k,1]:=ord(c[k*4-1]);
-        RGBA[i,k,2]:=ord(c[k*4-2]);
-        RGBA[i,k,3]:=ord(c[k*4-3]);
-        RGBA[i,k,4]:=ord(c[k*4-0]);
+        fRGBA[i,k,1]:=ord(c[k*4-1]);
+        fRGBA[i,k,2]:=ord(c[k*4-2]);
+        fRGBA[i,k,3]:=ord(c[k*4-3]);
+        fRGBA[i,k,4]:=ord(c[k*4-0]);
       end;
   end;
   closefile(f);
@@ -792,10 +792,10 @@ begin
     for i:=1 to fSource.Height do begin
       BlockRead(f,c[1],fSource.Width*4);
       for k:=1 to fSource.Width do begin
-        RGBA[i,k,1]:=ord(c[k*4-1]);
-        RGBA[i,k,2]:=ord(c[k*4-2]);
-        RGBA[i,k,3]:=ord(c[k*4-3]);
-        RGBA[i,k,4]:=ord(c[k*4-0]);
+        fRGBA[i,k,1]:=ord(c[k*4-1]);
+        fRGBA[i,k,2]:=ord(c[k*4-2]);
+        fRGBA[i,k,3]:=ord(c[k*4-3]);
+        fRGBA[i,k,4]:=ord(c[k*4-0]);
       end;
     end;
   end;
@@ -820,16 +820,16 @@ begin
         if fSource.HasAlpha then begin
           DXT_A_Decode(@c[ci],DXTOut);
           for h:=1 to 16 do
-            RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
+            fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,4]:=DXTOut[h];
           inc(ci,8);
         end;
         ////////////////////////////////////////////////////////
         //RGB
         DXT_RGB_Decode(@c[ci],DXTOut);
         for h:=1 to 16 do begin
-          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
-          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
-          RGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
+          fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,1]:=DXTOut[(h-1)*3+1];
+          fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,2]:=DXTOut[(h-1)*3+2];
+          fRGBA[i*4+(h-1)div 4+1,k*4+(h-1)mod 4+1,3]:=DXTOut[(h-1)*3+3];
         end;
         inc(ci,8);
       end;  //for 1..x,1..z
@@ -847,7 +847,7 @@ var
   i, k, h: Integer;
   f: file;
   thisWidth, thisHeight, thisSize: Integer;
-  rgba: array [1..4] of Byte;
+  fRGBA: array [1..4] of Byte;
 begin
   AssignFile(f,aFileName); ReWrite(f,1);
   if fSource.HasAlpha then blockwrite(f,AnsiString(#0#32#0#0),4) else blockwrite(f,AnsiString(#0#24#0#0),4);//compression, bpp
@@ -871,12 +871,12 @@ begin
     for i:=1 to thisHeight do
     for k:=1 to thisWidth do
     begin
-      rgba[1] := RGBAmm[i,k,3];
-      rgba[2] := RGBAmm[i,k,2];
-      rgba[3] := RGBAmm[i,k,1];
-      rgba[4] := RGBAmm[i,k,4];
+      fRGBA[1] := fRGBAmm[i,k,3];
+      fRGBA[2] := fRGBAmm[i,k,2];
+      fRGBA[3] := fRGBAmm[i,k,1];
+      fRGBA[4] := fRGBAmm[i,k,4];
 
-      blockwrite(f, rgba[1], 4);
+      blockwrite(f, fRGBA[1], 4);
     end;
     thisWidth := Max(thisWidth div 2, 1);
     thisHeight := Max(thisHeight div 2, 1);
@@ -929,14 +929,14 @@ begin
       if fSource.HasAlpha then
       begin
         newRMS := 0;
-        DXT_A_Encode(@RGBAmm[yp+0, xp, 4], @RGBAmm[yp+1, xp, 4], @RGBAmm[yp+2, xp, 4], @RGBAmm[yp+3, xp, 4], DXTAOut, newRMS);
+        DXT_A_Encode(@fRGBAmm[yp+0, xp, 4], @fRGBAmm[yp+1, xp, 4], @fRGBAmm[yp+2, xp, 4], @fRGBAmm[yp+3, xp, 4], DXTAOut, newRMS);
         ms.Write(DXTAOut, 8);
 
         fRmsA := fRmsA + newRMS;
       end;
       newRMS := 0;
-      //DXT_RGB_Encode(@RGBAmm[yp+0, xp, 1], @RGBAmm[yp+1, xp, 1], @RGBAmm[yp+2, xp, 1], @RGBAmm[yp+3, xp, 1], DXTOut, newRMS);
-      fDXTCompressorColor.CompressBlock(@RGBAmm[yp+0, xp, 1], @RGBAmm[yp+1, xp, 1], @RGBAmm[yp+2, xp, 1], @RGBAmm[yp+3, xp, 1], aHeuristic, DXTOut, newRMS);
+      //DXT_RGB_Encode(@fRGBAmm[yp+0, xp, 1], @fRGBAmm[yp+1, xp, 1], @fRGBAmm[yp+2, xp, 1], @fRGBAmm[yp+3, xp, 1], DXTOut, newRMS);
+      fDXTCompressorColor.CompressBlock(@fRGBAmm[yp+0, xp, 1], @fRGBAmm[yp+1, xp, 1], @fRGBAmm[yp+2, xp, 1], @fRGBAmm[yp+3, xp, 1], aHeuristic, DXTOut, newRMS);
       ms.Write(DXTOut, 8);
 
       fRmsRGB := fRmsRGB + newRMS;
@@ -976,11 +976,11 @@ begin
   for I := fSource.Height downto 1 do
     for K := 1 to fSource.Width do
     begin
-      buf[L + 0] := RGBA[I,K,3];
-      buf[L + 1] := RGBA[I,K,2];
-      buf[L + 2] := RGBA[I,K,1];
+      buf[L + 0] := fRGBA[I,K,3];
+      buf[L + 1] := fRGBA[I,K,2];
+      buf[L + 2] := fRGBA[I,K,1];
       if fSource.HasAlpha then
-        buf[L + 3] := RGBA[I,K,4];
+        buf[L + 3] := fRGBA[I,K,4];
       Inc(L, 3 + Ord(fSource.HasAlpha));
     end;
 
@@ -1002,7 +1002,7 @@ begin
   thisHeight:=fSource.Height div Pow(2,aLevel-1);
   AssignFile(f,aFileName); ReWrite(f,1);
   blockwrite(f,AnsiString(#0#0#2#0#0#0#0#0#0#0#0#0), 12);
-  FillChar(RGBAmm, SizeOf(RGBAmm), #0);
+  FillChar(fRGBAmm, SizeOf(fRGBAmm), #0);
 
   GenerateMipMap(aLevel);
 
@@ -1012,10 +1012,10 @@ begin
   for i:=thisHeight downto 1 do
     for k:=1 to thisWidth do
     begin
-      blockwrite(f,RGBAmm[i,k,3],1);
-      blockwrite(f,RGBAmm[i,k,2],1);
-      blockwrite(f,RGBAmm[i,k,1],1);
-      if fSource.HasAlpha then blockwrite(f,RGBAmm[i,k,4],1);
+      blockwrite(f,fRGBAmm[i,k,3],1);
+      blockwrite(f,fRGBAmm[i,k,2],1);
+      blockwrite(f,fRGBAmm[i,k,1],1);
+      if fSource.HasAlpha then blockwrite(f,fRGBAmm[i,k,4],1);
     end;
   closefile(f);
 end;
@@ -1055,9 +1055,9 @@ begin
       p:=bmp.ScanLine[i-1];
       for k:=1 to fSource.Width do
       begin
-        RGBA[i,k,1] := p[k*3-1];
-        RGBA[i,k,2] := p[k*3-2];
-        RGBA[i,k,3] := p[k*3-3];
+        fRGBA[i,k,1] := p[k*3-1];
+        fRGBA[i,k,2] := p[k*3-2];
+        fRGBA[i,k,3] := p[k*3-3];
       end;
     end;
   finally
@@ -1090,7 +1090,7 @@ begin
     begin
       p:=bmp.ScanLine[i-1];
       for k:=1 to fSource.Width do
-        RGBA[i,k,4]:=(p[k*3-1]+p[k*3-2]+p[k*3-3])div 3;
+        fRGBA[i,k,4]:=(p[k*3-1]+p[k*3-2]+p[k*3-3])div 3;
     end;
   finally
     bmp.Free;
@@ -1114,7 +1114,7 @@ begin
 
   for i:=1 to fSource.Height do
     for k:=1 to fSource.Width do
-      RGBA[i,k,4]:=255-byte((RGBA[i,k,1]=R)and(RGBA[i,k,2]=G)and(RGBA[i,k,3]=B))*255;
+      fRGBA[i,k,4]:=255-byte((fRGBA[i,k,1]=R)and(fRGBA[i,k,2]=G)and(fRGBA[i,k,3]=B))*255;
 
   fSource.HasAlpha := True;
   fSource.Format := '';
@@ -1136,12 +1136,12 @@ begin
   rgbAvg[3] := 0;
   for i:=1 to fSource.Height do
     for k:=1 to fSource.Width do
-    if (RGBA[I, K, 1] <> keyR) or (RGBA[I, K, 2] <> keyG) or (RGBA[I, K, 3] <> keyB) then
+    if (fRGBA[I, K, 1] <> keyR) or (fRGBA[I, K, 2] <> keyG) or (fRGBA[I, K, 3] <> keyB) then
     begin
       Inc(cnt);
-      rgbAvg[1] := rgbAvg[1] + RGBA[i,k,1];
-      rgbAvg[2] := rgbAvg[2] + RGBA[i,k,2];
-      rgbAvg[3] := rgbAvg[3] + RGBA[i,k,3];
+      rgbAvg[1] := rgbAvg[1] + fRGBA[i,k,1];
+      rgbAvg[2] := rgbAvg[2] + fRGBA[i,k,2];
+      rgbAvg[3] := rgbAvg[3] + fRGBA[i,k,3];
     end;
 
   rgbAvg[1] := Round(rgbAvg[1] / cnt);
@@ -1150,11 +1150,11 @@ begin
 
   for i:=1 to fSource.Height do
     for k:=1 to fSource.Width do
-    if (RGBA[I, K, 1] = keyR) and (RGBA[I, K, 2] = keyG) and (RGBA[I, K, 3] = keyB) then
+    if (fRGBA[I, K, 1] = keyR) and (fRGBA[I, K, 2] = keyG) and (fRGBA[I, K, 3] = keyB) then
     begin
-      RGBA[i,k,1] := rgbAvg[1];
-      RGBA[i,k,2] := rgbAvg[2];
-      RGBA[i,k,3] := rgbAvg[3];
+      fRGBA[i,k,1] := rgbAvg[1];
+      fRGBA[i,k,2] := rgbAvg[2];
+      fRGBA[i,k,3] := rgbAvg[3];
     end;
 
   fSource.Format := '';
