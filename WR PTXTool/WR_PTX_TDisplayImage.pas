@@ -60,6 +60,7 @@ type
     procedure AlphaClear;
     procedure AlphaCreateFrom(aX, aY: Integer);
     procedure ColorReplaceWithAverage(aX, aY: Integer);
+    procedure OpenBMP(const aFilename: string);
     procedure OpenPTX(const aFilename: string);
     procedure OpenDDS(const aFilename: string);
     procedure OpenXTX(const aFilename: string);
@@ -71,7 +72,6 @@ type
     procedure SaveMipMap(const aFilename: string; aLevel: Integer);
     procedure ExportBitmapRGB(const aFilename: string);
     procedure ExportBitmapA(const aFilename: string);
-    procedure ImportBitmapRGB(const aFilename: string);
     procedure ImportBitmapA(const aFilename: string);
   end;
 
@@ -1004,8 +1004,7 @@ begin
 end;
 
 
-//todo: Rename to OpenBMP (cos it is not an import)
-procedure TDisplayImage.ImportBitmapRGB(const aFileName: string);
+procedure TDisplayImage.OpenBMP(const aFileName: string);
 var
   i,k: Integer;
   bmp: TBitmap;

@@ -26,9 +26,7 @@ type
     ExportBMPRGB: TMenuItem;
     ExportBMPA: TMenuItem;
     ExportTGA: TMenuItem;
-    ImportBMPRGB: TMenuItem;
     ImportBMPA: TMenuItem;
-    ImportTGAImageMask1: TMenuItem;
     MainMenu1: TMainMenu;
     ImportMenu: TMenuItem;
     ExportMenu: TMenuItem;
@@ -39,9 +37,7 @@ type
     mnuExportBMPImage: TMenuItem;
     mnuExportBMPMask: TMenuItem;
     mnuExportTGAImageMask: TMenuItem;
-    mnuImportBMPImage: TMenuItem;
     mnuImportBMPMask: TMenuItem;
-    mnuImportTGAImageMask: TMenuItem;
     SaveMenu: TMenuItem;
     mnuSaveUncompressedPTX: TMenuItem;
     mnuSaveCompressedPTX: TMenuItem;
@@ -74,7 +70,6 @@ type
     procedure AboutClick(Sender: TObject);
     procedure ShowMenu(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure SaveUncompressedPTX(Sender: TObject);
-    procedure ImportTGAClick(Sender: TObject);
     procedure InvertAlpha(Sender: TObject);
     procedure OpenFile(Sender: TObject);
     procedure SpinMMChange(Sender: TObject);
@@ -180,21 +175,9 @@ procedure TForm1.ImportBMPClick(Sender: TObject);
 begin
   if not RunOpenDialog(Open1, '', fWorkDir, '24bit BMP files (*.bmp)|*.bmp') then Exit;
 
-  if (Sender = ImportBMPRGB) or (Sender = mnuImportBMPImage) then
-    fDisplayImage.ImportBitmapRGB(Open1.FileName);
-
   if (Sender = ImportBMPA) or (Sender = mnuImportBMPMask) then
     fDisplayImage.ImportBitmapA(Open1.FileName);
 
-  DisplayChange(nil);
-end;
-
-
-procedure TForm1.ImportTGAClick(Sender: TObject);
-begin
-  if not RunOpenDialog(Open1, '', fWorkDir, 'TGA image files (*.tga)|*.tga') then Exit;
-
-  fDisplayImage.OpenTGA(Open1.FileName);
   DisplayChange(nil);
 end;
 
@@ -336,6 +319,7 @@ begin
   if not FileExists(fileName) then Exit;
   fWorkDir := ExtractFilePath(FileListBox1.FileName);
 
+  if LowerCase(ExtractFileExt(fileName)) = '.bmp' then fDisplayImage.OpenBMP(fileName);
   if LowerCase(ExtractFileExt(fileName)) = '.ptx' then fDisplayImage.OpenPTX(fileName);
   if LowerCase(ExtractFileExt(fileName)) = '.dds' then fDisplayImage.OpenDDS(fileName);
   if LowerCase(ExtractFileExt(fileName)) = '.xtx' then fDisplayImage.OpenXTX(fileName);

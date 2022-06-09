@@ -537,9 +537,6 @@ const
   //64 Unused
   FLAG_COLOR_BY_ALPHA = 128;              //! Weight the colour by alpha during cluster fit (disabled by default).
   FLAG_COLOR_ITERATIVE_CLUSTER_FIT = 256; //! Use a very slow but very high quality colour compressor.
-
-  //todo: Crash
-  CC: array [0..66] of Byte = (126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 126, 127, 126, 255, 127, 125, 127, 255, 0, 0, 0);
 var
   col: array [0..63] of Byte;
   block: array [0..15] of Byte;
@@ -568,7 +565,7 @@ begin
     try
       fDllCompress(@col[0], @block[0], flags, @metrics[0]);
     except
-
+      // Tolerate fails (BestPick will manage this)
     end;
 
     for I := 0 to 7 do

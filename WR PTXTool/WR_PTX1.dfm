@@ -218,7 +218,7 @@ object Form1: TForm1
     Height = 185
     Anchors = [akLeft, akTop, akBottom]
     ItemHeight = 13
-    Mask = '*.ptx;*.dds;*.tga;*.2db; *.xtx'
+    Mask = '*.bmp;*.ptx;*.dds;*.tga;*.2db;*.xtx'
     TabOrder = 2
     OnClick = OpenFile
   end
@@ -279,18 +279,10 @@ object Form1: TForm1
   object PopupMenu1: TPopupMenu
     Left = 607
     Top = 319
-    object ImportBMPRGB: TMenuItem
-      Caption = 'Import BMP Image'
-      OnClick = ImportBMPClick
-    end
     object ImportBMPA: TMenuItem
       Caption = 'Import BMP Mask'
       Enabled = False
       OnClick = ImportBMPClick
-    end
-    object ImportTGAImageMask1: TMenuItem
-      Caption = 'Import TGA Image/Mask'
-      OnClick = ImportTGAClick
     end
     object N1: TMenuItem
       Caption = '-'
@@ -331,18 +323,10 @@ object Form1: TForm1
     Top = 319
     object ImportMenu: TMenuItem
       Caption = 'Import'
-      object mnuImportBMPImage: TMenuItem
-        Caption = 'BMP Image ...'
-        OnClick = ImportBMPClick
-      end
       object mnuImportBMPMask: TMenuItem
         Caption = 'BMP Mask ...'
         Enabled = False
         OnClick = ImportBMPClick
-      end
-      object mnuImportTGAImageMask: TMenuItem
-        Caption = 'TGA Image/Mask ...'
-        OnClick = ImportTGAClick
       end
     end
     object ExportMenu: TMenuItem
