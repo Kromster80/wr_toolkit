@@ -7,7 +7,7 @@ uses
   WR_PTX_TDisplayImage;
 
 type
-  TForm1 = class(TForm)
+  TfmPTXTool = class(TForm)
     imgA: TImage;
     gbInfo: TGroupBox;
     Label1: TLabel;
@@ -15,7 +15,7 @@ type
     lbNoRGB: TLabel;
     Bevel_A: TBevel;
     Bevel_RGB: TBevel;
-    Save1: TSaveDialog;
+    sdSave: TSaveDialog;
     DriveComboBox1: TDriveComboBox;
     DirectoryListBox1: TDirectoryListBox;
     FileListBox1: TFileListBox;
@@ -30,7 +30,7 @@ type
     MainMenu1: TMainMenu;
     ImportMenu: TMenuItem;
     ExportMenu: TMenuItem;
-    EditMenu: TMenuItem;
+    mnuEdit: TMenuItem;
     mnuAbout: TMenuItem;
     mnuEditInvertAlpha: TMenuItem;
     mnuEditClearAlpha: TMenuItem;
@@ -110,8 +110,8 @@ uses
 {$R *.dfm}
 
 
-{ TForm1 }
-procedure TForm1.Form1Create(Sender: TObject);
+{ TfmPTXTool }
+procedure TfmPTXTool.Form1Create(Sender: TObject);
 var
   I: TDXTCompressionHeuristics;
   t: Cardinal;
@@ -163,7 +163,7 @@ begin
 end;
 
 
-procedure TForm1.FormDestroy(Sender: TObject);
+procedure TfmPTXTool.FormDestroy(Sender: TObject);
 begin
   timeEndPeriod(0);
 
@@ -171,7 +171,7 @@ begin
 end;
 
 
-procedure TForm1.ImportBMPClick(Sender: TObject);
+procedure TfmPTXTool.ImportBMPClick(Sender: TObject);
 begin
   if not RunOpenDialog(Open1, '', fWorkDir, '24bit BMP files (*.bmp)|*.bmp') then Exit;
 
@@ -182,28 +182,28 @@ begin
 end;
 
 
-procedure TForm1.ExportClick(Sender: TObject);
+procedure TfmPTXTool.ExportClick(Sender: TObject);
 begin
   if (Sender = ExportBMPA) or (Sender = mnuExportBMPMask) then
   begin
-    if RunSaveDialog(Save1, fDisplayImage.GetFileMask + '_A.bmp', fWorkDir, '24bit BMP files (*.bmp)|*.bmp', 'bmp') then
-      fDisplayImage.ExportBitmapA(Save1.FileName);
+    if RunSaveDialog(sdSave, fDisplayImage.GetFileMask + '_A.bmp', fWorkDir, '24bit BMP files (*.bmp)|*.bmp', 'bmp') then
+      fDisplayImage.ExportBitmapA(sdSave.FileName);
   end else
   if (Sender = ExportBMPRGB) or (Sender = mnuExportBMPImage) then
   begin
-    if RunSaveDialog(Save1, fDisplayImage.GetFileMask + '.bmp', fWorkDir, '24bit BMP files (*.bmp)|*.bmp', 'bmp') then
-      fDisplayImage.ExportBitmapRGB(Save1.FileName);
+    if RunSaveDialog(sdSave, fDisplayImage.GetFileMask + '.bmp', fWorkDir, '24bit BMP files (*.bmp)|*.bmp', 'bmp') then
+      fDisplayImage.ExportBitmapRGB(sdSave.FileName);
   end else
   if (Sender = ExportTGA) or (Sender = mnuExportTGAImageMask) then
   begin
-    if RunSaveDialog(Save1, fDisplayImage.GetFileMask + '.tga', fWorkDir, 'TGA files (*.tga)|*.tga', 'tga') then
-      fDisplayImage.SaveTGA(Save1.FileName);
+    if RunSaveDialog(sdSave, fDisplayImage.GetFileMask + '.tga', fWorkDir, 'TGA files (*.tga)|*.tga', 'tga') then
+      fDisplayImage.SaveTGA(sdSave.FileName);
   //  fDisplayImage.SaveTGA(fExeDir+'000.tga');
   end;
 end;
 
 
-procedure TForm1.ClearAlpha(Sender: TObject);
+procedure TfmPTXTool.ClearAlpha(Sender: TObject);
 begin
   fDisplayImage.AlphaClear;
   SetAlpha(false);
@@ -211,7 +211,7 @@ begin
 end;
 
 
-procedure TForm1.mnuEditAlphaFromColorKeyClick(Sender: TObject);
+procedure TfmPTXTool.mnuEditAlphaFromColorKeyClick(Sender: TObject);
 begin
   fSampleColorKey := not fSampleColorKey;
   if fSampleColorKey then
@@ -220,45 +220,46 @@ begin
     Cursor := crDefault;
 end;
 
-procedure TForm1.SaveCompressedPTX(Sender: TObject);
+procedure TfmPTXTool.SaveCompressedPTX(Sender: TObject);
 var
   Save_Cursor: TCursor;
 begin
   SpinMMChange(nil);
-  if not RunSaveDialog(Save1, fDisplayImage.GetFileMask+'.ptx', fWorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then Exit;
-  //Save1.FileName:='000.ptx';
+  if not RunSaveDialog(sdSave, fDisplayImage.GetFileMask+'.ptx', fWorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then Exit;
+  //sdSave.FileName:='000.ptx';
   Save_Cursor   := Screen.Cursor;
   Screen.Cursor := crHourGlass;
 
   case rgCompressionQuality.ItemIndex of
-    0:  fDisplayImage.SaveCompressedPTX(Save1.FileName, chOriginal);
-    1:  fDisplayImage.SaveCompressedPTX(Save1.FileName, chBestPick);
+    0:  fDisplayImage.SaveCompressedPTX(sdSave.FileName, chOriginal);
+    1:  fDisplayImage.SaveCompressedPTX(sdSave.FileName, chBestPick);
   end;
 
   FileListBox1.Update;
-  FileListBox1.FileName := Save1.FileName;
+  FileListBox1.FileName := sdSave.FileName;
   OpenFile(nil);
   Screen.Cursor := Save_Cursor;
 end;
 
 
-procedure TForm1.SaveUncompressedPTX(Sender: TObject);
-var Save_Cursor:TCursor;
+procedure TfmPTXTool.SaveUncompressedPTX(Sender: TObject);
+var
+  prevCursor: TCursor;
 begin
   SpinMMChange(nil);
-  if not RunSaveDialog(Save1, fDisplayImage.GetFileMask+'.ptx', fWorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then Exit;
-  Save_Cursor   := Screen.Cursor;
+  if not RunSaveDialog(sdSave, fDisplayImage.GetFileMask+'.ptx', fWorkDir, 'PTX files (*.ptx)|*.ptx', 'ptx') then Exit;
+  prevCursor := Screen.Cursor;
   Screen.Cursor := crHourGlass;
-  fDisplayImage.SaveUncompressedPTX(Save1.FileName);
+  fDisplayImage.SaveUncompressedPTX(sdSave.FileName);
   FileListBox1.Update;
-  FileListBox1.FileName := Save1.FileName;
+  FileListBox1.FileName := sdSave.FileName;
   FileListBox1.TopIndex := FileListBox1.ItemIndex;
   OpenFile(nil);
-  Screen.Cursor := Save_Cursor;
+  Screen.Cursor := prevCursor;
 end;
 
 
-procedure TForm1.AboutClick(Sender: TObject);
+procedure TfmPTXTool.AboutClick(Sender: TObject);
 const
   DESC = 'Create PTX image files for MBWR/WR2/AFC11' + EOL +
     'Opens: BMP, TGA, DDS, 2DB, PTX' + EOL +
@@ -270,7 +271,7 @@ begin
 end;
 
 
-procedure TForm1.ShowMenu(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TfmPTXTool.ShowMenu(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if Button <> mbRight then Exit;
   if Sender = imgRGB then PopupMenu1.Popup(Left+imgRGB.Left+2+X, Top+imgRGB.Top+40+Y);
@@ -278,13 +279,13 @@ begin
 end;
 
 
-procedure TForm1.InvertAlpha(Sender: TObject);
+procedure TfmPTXTool.InvertAlpha(Sender: TObject);
 begin
   fDisplayImage.AlphaInvert;
 end;
 
 
-procedure TForm1.SetRGB(aValue: Boolean);
+procedure TfmPTXTool.SetRGB(aValue: Boolean);
 begin
   mnuSaveUncompressedPTX.Enabled  := aValue;
   mnuSaveCompressedPTX.Enabled    := aValue;
@@ -299,7 +300,7 @@ begin
 end;
 
 
-procedure TForm1.SetAlpha(aValue: Boolean);
+procedure TfmPTXTool.SetAlpha(aValue: Boolean);
 begin
   ClearA.Enabled              := aValue;
   mnuEditClearAlpha.Enabled   := aValue;
@@ -311,7 +312,7 @@ begin
 end;
 
 
-procedure TForm1.OpenFile(Sender: TObject);
+procedure TfmPTXTool.OpenFile(Sender: TObject);
 var
   fileName: string;
 begin
@@ -330,7 +331,7 @@ begin
 end;
 
 
-procedure TForm1.mnuEditReplaceColorKeyWithAverageClick(Sender: TObject);
+procedure TfmPTXTool.mnuEditReplaceColorKeyWithAverageClick(Sender: TObject);
 begin
   fReplaceColorKey := not fReplaceColorKey;
   if fReplaceColorKey then
@@ -340,14 +341,14 @@ begin
 end;
 
 
-procedure TForm1.SpinMMChange(Sender: TObject);
+procedure TfmPTXTool.SpinMMChange(Sender: TObject);
 begin
   fDisplayImage.MipMapCount := SpinMM.Value;
   //todo: Add FlipVertical! (by Ast)
 end;
 
 
-procedure TForm1.DisplayChange(Sender: TObject);
+procedure TfmPTXTool.DisplayChange(Sender: TObject);
 begin
   if not fDisplayImage.DisplayImage then
   begin
@@ -378,19 +379,19 @@ begin
 end;
 
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TfmPTXTool.Button1Click(Sender: TObject);
 begin
   fDisplayImage.SaveMipMap(fWorkDir + '000sq.tga', 4);
 end;
 
 
-procedure TForm1.CBnonPOTClick(Sender: TObject);
+procedure TfmPTXTool.CBnonPOTClick(Sender: TObject);
 begin
   fDisplayImage.AllowNonPOTImages := CBnonPOT.Checked;
 end;
 
 
-procedure TForm1.SampleAClick(Sender: TObject);
+procedure TfmPTXTool.SampleAClick(Sender: TObject);
 begin
   fSampleColorKey := not fSampleColorKey;
   if fSampleColorKey then
@@ -400,7 +401,7 @@ begin
 end;
 
 
-procedure TForm1.imgRGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TfmPTXTool.imgRGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if (not fSampleColorKey)and(not fReplaceColorKey) then exit;
   if fSampleColorKey then fDisplayImage.AlphaCreateFrom(X,Y);
@@ -411,7 +412,7 @@ begin
 end;
 
 
-procedure TForm1.SampleRClick(Sender: TObject);
+procedure TfmPTXTool.SampleRClick(Sender: TObject);
 begin
   fReplaceColorKey := not fReplaceColorKey;
   if fReplaceColorKey then
@@ -421,7 +422,7 @@ begin
 end;
 
 
-procedure TForm1.FormResize(Sender: TObject);
+procedure TfmPTXTool.FormResize(Sender: TObject);
 const
   PAD = 8;
 var
@@ -432,6 +433,8 @@ begin
   fullHeight := ClientHeight - imgRGB.Top - PAD;
   halfWidth := (fullWidth - Pad) div 2;
   imgSize := Min(halfWidth, fullHeight);
+
+  FileListBox1.Height := ClientHeight - FileListBox1.Top - PAD;
 
   Bevel_RGB.Width := halfWidth + 2;
   Bevel_A.Width := halfWidth + 2;

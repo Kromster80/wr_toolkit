@@ -1,7 +1,7 @@
 program WR_PTXTool;
 uses
   Forms,
-  WR_PTX1 in 'WR_PTX1.pas' {Form1},
+  WR_PTX1 in 'WR_PTX1.pas' {fmPTXTool},
   WR_AboutBox in '..\_Common_\WR_AboutBox.pas' {AboutForm},
   WR_PTX_TDisplayImage in 'WR_PTX_TDisplayImage.pas',
   WR_DXTCompressorAlpha in 'WR_DXTCompressorAlpha.pas',
@@ -10,12 +10,12 @@ uses
 {$R *.RES}
 
 var
-  Form1: TForm1;
+  fmPTXTool: TfmPTXTool;
 
 begin
   Application.Initialize;
   Application.Title := 'MBWR/WR2 PTX Tool';
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TfmPTXTool, fmPTXTool);
   Application.CreateForm(TAboutForm, AboutForm);
   Application.Run;
 end.

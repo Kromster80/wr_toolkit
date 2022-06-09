@@ -1,11 +1,11 @@
-object Form1: TForm1
+object fmPTXTool: TfmPTXTool
   Left = 56
   Top = 143
   HorzScrollBar.Smooth = True
   VertScrollBar.Smooth = True
   Caption = 'PTXTool'
   ClientHeight = 361
-  ClientWidth = 721
+  ClientWidth = 737
   Color = clBtnFace
   Constraints.MinHeight = 419
   Constraints.MinWidth = 737
@@ -21,31 +21,31 @@ object Form1: TForm1
   OnDestroy = FormDestroy
   OnResize = FormResize
   DesignSize = (
-    721
+    737
     361)
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel_RGB: TBevel
-    Left = 191
+    Left = 207
     Top = 95
     Width = 258
     Height = 258
   end
   object Bevel_A: TBevel
-    Left = 454
+    Left = 470
     Top = 95
     Width = 258
     Height = 258
   end
   object imgA: TImage
-    Left = 455
+    Left = 471
     Top = 96
     Width = 256
     Height = 256
     OnMouseDown = ShowMenu
   end
   object imgRGB: TImage
-    Left = 192
+    Left = 208
     Top = 96
     Width = 256
     Height = 256
@@ -53,7 +53,7 @@ object Form1: TForm1
     OnMouseUp = imgRGBMouseUp
   end
   object lbNoAlpha: TLabel
-    Left = 551
+    Left = 567
     Top = 218
     Width = 50
     Height = 13
@@ -68,7 +68,7 @@ object Form1: TForm1
     ParentFont = False
   end
   object lbNoRGB: TLabel
-    Left = 289
+    Left = 305
     Top = 218
     Width = 46
     Height = 13
@@ -83,7 +83,7 @@ object Form1: TForm1
     ParentFont = False
   end
   object gbInfo: TGroupBox
-    Left = 192
+    Left = 208
     Top = 7
     Width = 305
     Height = 81
@@ -204,7 +204,7 @@ object Form1: TForm1
   object DirectoryListBox1: TDirectoryListBox
     Left = 8
     Top = 32
-    Width = 177
+    Width = 193
     Height = 129
     FileList = FileListBox1
     ParentShowHint = False
@@ -214,7 +214,7 @@ object Form1: TForm1
   object FileListBox1: TFileListBox
     Left = 8
     Top = 168
-    Width = 177
+    Width = 193
     Height = 185
     Anchors = [akLeft, akTop, akBottom]
     ItemHeight = 13
@@ -223,7 +223,7 @@ object Form1: TForm1
     OnClick = OpenFile
   end
   object Button1: TButton
-    Left = 464
+    Left = 480
     Top = 104
     Width = 121
     Height = 25
@@ -234,7 +234,7 @@ object Form1: TForm1
     OnClick = Button1Click
   end
   object CBnonPOT: TCheckBox
-    Left = 504
+    Left = 520
     Top = 52
     Width = 209
     Height = 17
@@ -243,7 +243,7 @@ object Form1: TForm1
     OnClick = CBnonPOTClick
   end
   object rgCompressionQuality: TRadioGroup
-    Left = 504
+    Left = 520
     Top = 8
     Width = 201
     Height = 41
@@ -256,28 +256,28 @@ object Form1: TForm1
     TabOrder = 6
   end
   object meLog: TMemo
-    Left = 192
+    Left = 208
     Top = 96
     Width = 169
     Height = 81
     TabOrder = 7
     Visible = False
   end
-  object Save1: TSaveDialog
+  object sdSave: TSaveDialog
     DefaultExt = 'bmp'
     InitialDir = '.'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
-    Left = 663
+    Left = 679
     Top = 319
   end
   object Open1: TOpenDialog
     InitialDir = '.'
     Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
-    Left = 635
+    Left = 651
     Top = 319
   end
   object PopupMenu1: TPopupMenu
-    Left = 607
+    Left = 623
     Top = 319
     object ImportBMPA: TMenuItem
       Caption = 'Import BMP Mask'
@@ -319,7 +319,7 @@ object Form1: TForm1
     end
   end
   object MainMenu1: TMainMenu
-    Left = 579
+    Left = 595
     Top = 319
     object ImportMenu: TMenuItem
       Caption = 'Import'
@@ -360,7 +360,7 @@ object Form1: TForm1
         OnClick = SaveCompressedPTX
       end
     end
-    object EditMenu: TMenuItem
+    object mnuEdit: TMenuItem
       Caption = 'Edit'
       object mnuEditInvertAlpha: TMenuItem
         Caption = 'Invert Alpha'
