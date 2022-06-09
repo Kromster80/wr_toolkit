@@ -360,8 +360,8 @@ begin
     Exit;
   end;
 
-  //Now if DisplayImage didn't failed we assume RGB portion is loaded fine
-  //and we can perform all needed tasks upon
+  // Now if DisplayImage didn't failed we assume RGB portion is loaded fine
+  // and we can perform all needed tasks upon
   SetRGB(true);
   SetAlpha(fDisplayImage.GetAlpha);
 
@@ -370,7 +370,7 @@ begin
 
   gbInfo.Caption := ' ' + fDisplayImage.GetFileMask + fDisplayImage.GetChangedString + ' ';
   lbSize.Caption := fDisplayImage.GetInfoString;
-  lbMipMaps.Caption := IntToStr(fDisplayImage.GetMipMapQty);
+  lbMipMaps.Caption := IntToStr(fDisplayImage.MipMapCount);
   lbCompression.Caption := fDisplayImage.GetFormatString;
   lbRMS.Caption := fDisplayImage.GetRMSString;
   lbFadeColor.Caption := fDisplayImage.GetFogString;
@@ -385,7 +385,7 @@ end;
 
 procedure TfmPTXTool.CBnonPOTClick(Sender: TObject);
 begin
-  fDisplayImage.AllowNonPOTImages := CBnonPOT.Checked;
+  fDisplayImage.AllowNonPOT := CBnonPOT.Checked;
 end;
 
 

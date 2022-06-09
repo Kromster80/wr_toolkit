@@ -13,35 +13,34 @@ type
     fBitmapRGB, fBitmapA: TBitmap;
 
     fImageRGB, fImageA: TImage;
-    Rect: TRect;
+    fDrawRect: TRect;
     Props: record
       FileMask: string;
       Width, Height, MipMapCount: Integer;
       HasAlpha: Boolean;
       Format: string;
     end;
-    RGBA: array [1..2049,1..2049,1..4] of byte;
-    RGBAmm: array [1..2049,1..2049,1..4] of byte;
+    RGBA: array [1..2049,1..2049,1..4] of Byte;
+    RGBAmm: array [1..2049,1..2049,1..4] of Byte;
     fRmsRGB: Single;
     fRmsA: Single;
-    Fog: array [1..3] of Byte;
+    fFog: array [1..3] of Byte;
     fMipMapCount: Integer;
     fMaxMipMapCount: Integer;
     fIsChanged: Boolean;
-    procedure ComputeFog;
+    procedure UpdateFog;
     procedure GenerateMipMap(aLevel: Integer);
     procedure ResetAllData;
     procedure SetAllPropsAtOnce(const aFileMask: string; aWidth, aHeight, aMipMapCount: Integer; aHasAlpha: Boolean; const aFormat: string);
     procedure RefreshImage(aMode: TRefreshMode);
     procedure UpdateMaxMipMapCount;
   public
-    AllowNonPOTImages: Boolean;
+    AllowNonPOT: Boolean;
 
     constructor Create(aImageRGB, aImageA: TImage);
     destructor Destroy; override;
 
     property GetFileMask: string read Props.FileMask;
-    property GetMipMapQty: Integer read Props.MipMapCount;
     property MipMapCount: Integer read fMipMapCount write fMipMapCount;
     property MaxMipMapCount: Integer read fMaxMipMapCount;
     property GetAlpha: Boolean read Props.HasAlpha;
@@ -117,18 +116,18 @@ begin
   fBitmapA.Width   := Props.Width;
   fBitmapA.Height  := Props.Height;
 
-  Rect.Bottom := fImageRGB.Height;
-  Rect.Right  := fImageRGB.Width;
+  fDrawRect.Bottom := fImageRGB.Height;
+  fDrawRect.Right  := fImageRGB.Width;
 
-  fImageRGB.Canvas.Brush.Color := RGB_GREY; fImageRGB.Canvas.FillRect(Rect);
-  fImageA.Canvas.Brush.Color   := RGB_GREY; fImageA.Canvas.FillRect(Rect);
+  fImageRGB.Canvas.Brush.Color := RGB_GREY; fImageRGB.Canvas.FillRect(fDrawRect);
+  fImageA.Canvas.Brush.Color   := RGB_GREY; fImageA.Canvas.FillRect(fDrawRect);
 
   if Props.Width * Props.Height = 0 then Exit; // Image didn't load
 
   if (Props.Width / Props.Height) > 1 then
-    Rect.Bottom := Round(fImageRGB.Height / (Props.Width / Props.Height))
+    fDrawRect.Bottom := Round(fImageRGB.Height / (Props.Width / Props.Height))
   else
-    Rect.Right  := Round(fImageRGB.Width  / (Props.Height / Props.Width));
+    fDrawRect.Right  := Round(fImageRGB.Width  / (Props.Height / Props.Width));
 
   fImageRGB.Picture.Graphic.Height := fImageRGB.Height;
   fImageRGB.Picture.Graphic.Width := fImageRGB.Width;
@@ -152,7 +151,7 @@ end;
 
 function TDisplayImage.GetFogString: string;
 begin
-  Result := 'R' + IntToStr(Fog[1]) + '  G' + IntToStr(Fog[2]) + '  B' + IntToStr(Fog[3]);
+  Result := 'R' + IntToStr(fFog[1]) + '  G' + IntToStr(fFog[2]) + '  B' + IntToStr(fFog[3]);
 end;
 
 
@@ -164,33 +163,31 @@ end;
 
 
 function TDisplayImage.GetChangedString: string;
-const
-  IS_CHANGED: array [Boolean] of string = ('', '*');
 begin
-  Result := IS_CHANGED[fIsChanged];
+  Result := IfThen(fIsChanged, '*');
 end;
 
 
-procedure TDisplayImage.ComputeFog;
+procedure TDisplayImage.UpdateFog;
 var
   I, K: Integer;
-  fr, fg, fb: Int64;
+  r, g, b: Int64;
 begin
-  fr := 0;
-  fg := 0;
-  fb := 0;
+  r := 0;
+  g := 0;
+  b := 0;
 
   for I := 1 to Props.Height do
   for K := 1 to Props.Width do
   begin
-    Inc(fr, RGBA[I,K,1]);
-    Inc(fg, RGBA[I,K,2]);
-    Inc(fb, RGBA[I,K,3]);
+    Inc(r, RGBA[I, K, 1]);
+    Inc(g, RGBA[I, K, 2]);
+    Inc(b, RGBA[I, K, 3]);
   end;
 
-  Fog[1] := Round(fr / (Props.Height * Props.Width));
-  Fog[2] := Round(fg / (Props.Height * Props.Width));
-  Fog[3] := Round(fb / (Props.Height * Props.Width));
+  fFog[1] := Round(r / (Props.Height * Props.Width));
+  fFog[2] := Round(g / (Props.Height * Props.Width));
+  fFog[3] := Round(b / (Props.Height * Props.Width));
 end;
 
 
@@ -229,7 +226,7 @@ begin
     for k:=1 to Props.Width do
       RGBA[i,k,4] := 0;
   fImageA.Canvas.Brush.Color := RGB_GREY;
-  fImageA.Canvas.FillRect(Rect);
+  fImageA.Canvas.FillRect(fDrawRect);
 
   Props.HasAlpha := False;
   Props.Format := '';
@@ -259,7 +256,7 @@ begin
         pRGBLine[K*3-1] := RGBA[I,K,1];
       end;
     end;
-    fImageRGB.Canvas.StretchDraw(Rect, fBitmapRGB);
+    fImageRGB.Canvas.StretchDraw(fDrawRect, fBitmapRGB);
   end;
 
   if aMode in [cmRGBA, cmA] then
@@ -274,7 +271,7 @@ begin
         pALine[K*3-1] := RGBA[I,K,4];
       end;
     end;
-    fImageA.Canvas.StretchDraw(Rect, fBitmapA);
+    fImageA.Canvas.StretchDraw(fDrawRect, fBitmapA);
   end;
 
   Screen.Cursor := prevCursor;
@@ -331,7 +328,7 @@ end;
 procedure TDisplayImage.ResetAllData;
 begin
   FillChar(RGBA, SizeOf(RGBA), #0);
-  FillChar(Fog, SizeOf(Fog), #0);
+  FillChar(fFog, SizeOf(fFog), #0);
   FillChar(Props, SizeOf(Props), #0);
   fIsChanged := True;
 end;
@@ -506,7 +503,7 @@ begin
   end;
   closefile(f);
 
-  ComputeFog;
+  UpdateFog;
 end;
 
 
@@ -576,7 +573,7 @@ begin
   end;
   closefile(f);
 
-  ComputeFog;
+  UpdateFog;
   fRmsRGB := 0;
   fRmsA := 0;
 end;
@@ -645,7 +642,7 @@ begin
   end;
   closefile(f);
 
-  ComputeFog;
+  UpdateFog;
   fRmsRGB := 0;
   fRmsA := 0;
 end;
@@ -669,8 +666,8 @@ begin
   InBit:=ord(c[17]);
 
   if ((InBit<>24)and(InBit<>32))
-  or ((MakePOT(tSizeH)<>tSizeH)and(not AllowNonPOTImages))
-  or ((MakePOT(tSizeV)<>tSizeV)and(not AllowNonPOTImages))
+  or ((MakePOT(tSizeH)<>tSizeH)and(not AllowNonPOT))
+  or ((MakePOT(tSizeV)<>tSizeV)and(not AllowNonPOT))
   or (tSizeH < 4) or (tSizeV < 4) or (tSizeH > MAX_IMAGE_SIZE) or (tSizeV > MAX_IMAGE_SIZE) then
   begin
     MessageBox(0, 'Image size must be 4,8,16,32...2048 x 24/32 bit', 'Error', MB_OK);
@@ -707,7 +704,7 @@ begin
   end;
   closefile(f);
 
-  ComputeFog;
+  UpdateFog;
   fRmsRGB := 0;
   fRmsA := 0;
 end;
@@ -815,7 +812,7 @@ begin
   end;
   closefile(f);
 
-  ComputeFog;
+  UpdateFog;
   fRmsRGB := 0;
   fRmsA := 0;
 end;
@@ -830,12 +827,12 @@ var
 begin
   AssignFile(f,aFileName); ReWrite(f,1);
   if Props.HasAlpha then blockwrite(f,AnsiString(#0#32#0#0),4) else blockwrite(f,AnsiString(#0#24#0#0),4);//compression, bpp
-  blockwrite(f, Props.Width,4);
-  blockwrite(f, Props.Height,4);
-  blockwrite(f, fMipMapCount,1);
-  blockwrite(f, Fog[3], 1);
-  blockwrite(f, Fog[2], 1);
-  blockwrite(f, Fog[1], 1);
+  blockwrite(f, Props.Width, 4);
+  blockwrite(f, Props.Height, 4);
+  blockwrite(f, fMipMapCount, 1);
+  blockwrite(f, fFog[3], 1);
+  blockwrite(f, fFog[2], 1);
+  blockwrite(f, fFog[1], 1);
 
   thisWidth:=Props.Width;
   thisHeight:=Props.Height;
@@ -847,7 +844,8 @@ begin
 
     GenerateMipMap(h);
 
-    for i:=1 to thisHeight do for k:=1 to thisWidth do
+    for i:=1 to thisHeight do
+    for k:=1 to thisWidth do
     begin
       rgba[1] := RGBAmm[i,k,3];
       rgba[2] := RGBAmm[i,k,2];
@@ -887,9 +885,9 @@ begin
   ms.Write(Props.Width, 4);
   ms.Write(Props.Height, 4);
   ms.Write(fMipMapCount, 1);
-  ms.Write(Fog[3], 1);
-  ms.Write(Fog[2], 1);
-  ms.Write(Fog[1], 1);
+  ms.Write(fFog[3], 1);
+  ms.Write(fFog[2], 1);
+  ms.Write(fFog[1], 1);
 
   thisWidth := Props.Width;
   thisHeight := Props.Height;
@@ -1021,9 +1019,9 @@ begin
   try
     bmp.LoadFromFile(aFileName);
 
-    if ((MakePOT(bmp.Width)<>bmp.Width)and(not AllowNonPOTImages))
-    or ((MakePOT(bmp.Height)<>bmp.Height)and(not AllowNonPOTImages))
-    or (bmp.Width<4)or(bmp.Height<4)or(bmp.Width>MAX_IMAGE_SIZE)or(bmp.Height>MAX_IMAGE_SIZE) then
+    if ((MakePOT(bmp.Width) <> bmp.Width) and (not AllowNonPOT))
+    or ((MakePOT(bmp.Height) <> bmp.Height) and (not AllowNonPOT))
+    or (bmp.Width < 4) or (bmp.Height < 4) or (bmp.Width > MAX_IMAGE_SIZE) or (bmp.Height > MAX_IMAGE_SIZE) then
     begin
       MessageBox(0, 'Image size must be 4,8,16,32...2048 pixels', 'Error', MB_OK);
       Exit;
@@ -1047,7 +1045,7 @@ begin
     bmp.Free;
   end;
 
-  ComputeFog;
+  UpdateFog;
   fRmsRGB := 0;
   fRmsA := 0;
 end;
@@ -1141,6 +1139,7 @@ begin
     end;
 
   Props.Format := '';
+  UpdateFog;
   fIsChanged := True;
 end;
 
