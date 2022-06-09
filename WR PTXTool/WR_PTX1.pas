@@ -25,10 +25,10 @@ type
     Label9: TLabel;
     Label5: TLabel;
     pmMenu: TPopupMenu;
-    ExportBMPRGB: TMenuItem;
-    ExportBMPA: TMenuItem;
-    ExportTGA: TMenuItem;
-    ImportBMPA: TMenuItem;
+    pmExportBMPRGB: TMenuItem;
+    pmExportBMPA: TMenuItem;
+    pmExportTGA: TMenuItem;
+    pmImportBMPA: TMenuItem;
     MainMenu1: TMainMenu;
     ImportMenu: TMenuItem;
     ExportMenu: TMenuItem;
@@ -45,8 +45,8 @@ type
     mnuSaveCompressedPTX: TMenuItem;
     N1: TMenuItem;
     N2: TMenuItem;
-    InvertA: TMenuItem;
-    ClearA: TMenuItem;
+    pmInvertAlpha: TMenuItem;
+    pmClearAlpha: TMenuItem;
     Label10: TLabel;
     seMipMapCount: TSpinEdit;
     Label2: TLabel;
@@ -174,7 +174,7 @@ procedure TfmPTXTool.ImportBMPClick(Sender: TObject);
 begin
   if not RunOpenDialog(Open1, '', fWorkDir, '24bit BMP files (*.bmp)|*.bmp') then Exit;
 
-  if (Sender = ImportBMPA) or (Sender = mnuImportBMPMask) then
+  if (Sender = pmImportBMPA) or (Sender = mnuImportBMPMask) then
     fDisplayImage.ImportBitmapA(Open1.FileName);
 
   DisplayChange;
@@ -183,17 +183,17 @@ end;
 
 procedure TfmPTXTool.ExportClick(Sender: TObject);
 begin
-  if (Sender = ExportBMPA) or (Sender = mnuExportBMPMask) then
+  if (Sender = pmExportBMPA) or (Sender = mnuExportBMPMask) then
   begin
     if RunSaveDialog(sdSave, fDisplayImage.SourceFilename + '_A.bmp', fWorkDir, '24bit BMP files (*.bmp)|*.bmp', 'bmp') then
       fDisplayImage.ExportBitmapA(sdSave.FileName);
   end else
-  if (Sender = ExportBMPRGB) or (Sender = mnuExportBMPImage) then
+  if (Sender = pmExportBMPRGB) or (Sender = mnuExportBMPImage) then
   begin
     if RunSaveDialog(sdSave, fDisplayImage.SourceFilename + '.bmp', fWorkDir, '24bit BMP files (*.bmp)|*.bmp', 'bmp') then
       fDisplayImage.ExportBitmapRGB(sdSave.FileName);
   end else
-  if (Sender = ExportTGA) or (Sender = mnuExportTGAImageMask) then
+  if (Sender = pmExportTGA) or (Sender = mnuExportTGAImageMask) then
   begin
     if RunSaveDialog(sdSave, fDisplayImage.SourceFilename + '.tga', fWorkDir, 'TGA files (*.tga)|*.tga', 'tga') then
       fDisplayImage.SaveTGA(sdSave.FileName);
@@ -289,11 +289,11 @@ procedure TfmPTXTool.SetRGB(aValue: Boolean);
 begin
   mnuSaveUncompressedPTX.Enabled  := aValue;
   mnuSaveCompressedPTX.Enabled    := aValue;
-  ExportBMPRGB.Enabled            := aValue;
+  pmExportBMPRGB.Enabled          := aValue;
   mnuExportBMPImage.Enabled       := aValue;
-  ImportBMPA.Enabled              := aValue;
+  pmImportBMPA.Enabled            := aValue;
   mnuImportBMPMask.Enabled        := aValue;
-  ExportTGA.Enabled               := aValue;
+  pmExportTGA.Enabled             := aValue;
   mnuExportTGAImageMask.Enabled   := aValue;
   seMipMapCount.Enabled           := aValue;
   lbNoRGB.Visible                 := not aValue;
@@ -302,11 +302,11 @@ end;
 
 procedure TfmPTXTool.SetAlpha(aValue: Boolean);
 begin
-  ClearA.Enabled              := aValue;
+  pmClearAlpha.Enabled        := aValue;
   mnuEditClearAlpha.Enabled   := aValue;
-  InvertA.Enabled             := aValue;
+  pmInvertAlpha.Enabled       := aValue;
   mnuEditInvertAlpha.Enabled  := aValue;
-  ExportBMPA.Enabled          := aValue;
+  pmExportBMPA.Enabled        := aValue;
   mnuExportBMPMask.Enabled    := aValue;
   lbNoAlpha.Visible           := not aValue;
 end;

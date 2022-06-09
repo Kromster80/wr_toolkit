@@ -279,7 +279,7 @@ object fmPTXTool: TfmPTXTool
   object pmMenu: TPopupMenu
     Left = 623
     Top = 319
-    object ImportBMPA: TMenuItem
+    object pmImportBMPA: TMenuItem
       Caption = 'Import BMP Mask'
       Enabled = False
       OnClick = ImportBMPClick
@@ -288,17 +288,17 @@ object fmPTXTool: TfmPTXTool
       Caption = '-'
       Enabled = False
     end
-    object ExportBMPRGB: TMenuItem
+    object pmExportBMPRGB: TMenuItem
       Caption = 'Export BMP Image'
       Enabled = False
       OnClick = ExportClick
     end
-    object ExportBMPA: TMenuItem
+    object pmExportBMPA: TMenuItem
       Caption = 'Export BMP Mask'
       Enabled = False
       OnClick = ExportClick
     end
-    object ExportTGA: TMenuItem
+    object pmExportTGA: TMenuItem
       Caption = 'Export TGA Image/Mask'
       Enabled = False
       OnClick = ExportClick
@@ -307,12 +307,12 @@ object fmPTXTool: TfmPTXTool
       Caption = '-'
       Enabled = False
     end
-    object InvertA: TMenuItem
+    object pmInvertAlpha: TMenuItem
       Caption = 'Invert Alpha'
       Enabled = False
       OnClick = btnAlphaInvertClick
     end
-    object ClearA: TMenuItem
+    object pmClearAlpha: TMenuItem
       Caption = 'Clear Alpha'
       Enabled = False
       OnClick = btnAlphaClearClick
