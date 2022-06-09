@@ -371,12 +371,7 @@ begin
   gbInfo.Caption := ' ' + fDisplayImage.GetFileMask + fDisplayImage.GetChangedString + ' ';
   lbSize.Caption := fDisplayImage.GetInfoString;
   lbMipMaps.Caption := IntToStr(fDisplayImage.GetMipMapQty);
-  if fDisplayImage.GetCompression then
-    lbCompression.Caption := 'Y'
-  else
-    lbCompression.Caption := 'Y';
-  if fDisplayImage.GetPacked then
-    lbCompression.Caption := lbCompression.Caption + '+Packed';
+  lbCompression.Caption := fDisplayImage.GetFormatString;
   lbRMS.Caption := fDisplayImage.GetRMSString;
   lbFadeColor.Caption := fDisplayImage.GetFogString;
 end;

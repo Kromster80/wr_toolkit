@@ -45,11 +45,10 @@ type
     property GetMipMapQty: Integer read Props.MipMapQty;
     property MipMapCount: Integer read fMipMapCount write fMipMapCount;
     property MaxMipMapCount: Integer read fMaxMipMapCount;
-    property GetCompression: Boolean read Props.IsCompressed;
-    property GetPacked: Boolean read Props.IsSYNPacked;
     property GetAlpha: Boolean read Props.hasAlpha;
     function DisplayImage: Boolean;
     function GetInfoString: string;
+    function GetFormatString: string;
     function GetFogString: string;
     function GetRMSString: string;
     function GetChangedString: string;
@@ -155,6 +154,20 @@ end;
 function TDisplayImage.GetFogString: string;
 begin
   Result := 'R' + IntToStr(Fog[1]) + '  G' + IntToStr(Fog[2]) + '  B' + IntToStr(Fog[3]);
+end;
+
+
+function TDisplayImage.GetFormatString: string;
+begin
+  //todo: Replace this whole thing with Props.Format: string
+
+  if Props.IsCompressed then
+    Result := 'Y'
+  else
+    Result := 'Y';
+
+  if Props.IsSYNPacked then
+    Result := Result + '+Packed';
 end;
 
 
@@ -310,20 +323,20 @@ begin
     Tmp1:=0; Tmp2:=0; Tmp3:=0; Tmp4:=0; Acc:=0;
     for h:=1 to Area do for j:=1 to Area do
     begin
-      Ratio:=sqr( Area/2 - (h-0.5) ) + sqr( Area/2 - (j-0.5) );
-      Ratio:=Math.max(1-sqrt(Ratio)/Area,0);
+      Ratio := Sqr(Area / 2 - (h - 0.5)) + Sqr(Area / 2 - (j - 0.5));
+      Ratio := Max(1-sqrt(Ratio)/Area,0);
       //Ratio:=sqr(Ratio); //Fits rather good but kills thin lines
-      Tmp1:=Tmp1+RGBA[(i-1)*Area+h,(k-1)*Area+j,1]*Ratio;
-      Tmp2:=Tmp2+RGBA[(i-1)*Area+h,(k-1)*Area+j,2]*Ratio;
-      Tmp3:=Tmp3+RGBA[(i-1)*Area+h,(k-1)*Area+j,3]*Ratio;
-      Tmp4:=Tmp4+RGBA[(i-1)*Area+h,(k-1)*Area+j,4]*Ratio;
-      Acc:=Acc+Ratio;
+      Tmp1 := Tmp1 + RGBA[(I - 1) * Area + h, (K - 1) * Area + j, 1] * Ratio;
+      Tmp2 := Tmp2 + RGBA[(I - 1) * Area + h, (K - 1) * Area + j, 2] * Ratio;
+      Tmp3 := Tmp3 + RGBA[(I - 1) * Area + h, (K - 1) * Area + j, 3] * Ratio;
+      Tmp4 := Tmp4 + RGBA[(I - 1) * Area + h, (K - 1) * Area + j, 4] * Ratio;
+      Acc := Acc + Ratio;
     end;
-    Acc:=Math.max(Acc,1);
-    RGBAmm[i,k,1]:=Round(EnsureRange(Tmp1/Acc,0,255));
-    RGBAmm[i,k,2]:=Round(EnsureRange(Tmp2/Acc,0,255));
-    RGBAmm[i,k,3]:=Round(EnsureRange(Tmp3/Acc,0,255));
-    RGBAmm[i,k,4]:=Round(EnsureRange(Tmp4/Acc,0,255));
+    Acc := Max(Acc, 1);
+    RGBAmm[i,k,1] := Round(EnsureRange(Tmp1/Acc, 0, 255));
+    RGBAmm[i,k,2] := Round(EnsureRange(Tmp2/Acc, 0, 255));
+    RGBAmm[i,k,3] := Round(EnsureRange(Tmp3/Acc, 0, 255));
+    RGBAmm[i,k,4] := Round(EnsureRange(Tmp4/Acc, 0, 255));
   end;
 end;
 
