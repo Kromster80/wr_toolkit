@@ -27,8 +27,8 @@ type
     fFog: array [1..3] of Byte;
     fRmsRGB: Single;
     fRmsA: Single;
-    fMaxMipMapCount: Integer;
     fMipMapCount: Integer;
+    fMipMapMax: Integer;
     fIsChanged: Boolean;
     procedure UpdateFog;
     procedure GenerateMipMap(aLevel: Integer);
@@ -46,8 +46,8 @@ type
     property SourceFilename: string read fSource.Filename;
     property SourceMipMapCount: Integer read fMipMapCount write fSource.MipMapCount;
     property MipMapCount: Integer read fMipMapCount write fMipMapCount;
-    property MaxMipMapCount: Integer read fMaxMipMapCount;
-    property GetAlpha: Boolean read fSource.HasAlpha;
+    property MipMapMax: Integer read fMipMapMax;
+    property HasAlpha: Boolean read fSource.HasAlpha;
     property SourceFormatString: string read fSource.Format;
     function DisplayImage: Boolean;
     function GetInfoString: string;
@@ -199,11 +199,11 @@ procedure TDisplayImage.UpdateMaxMipMapCount;
 var
   x: Integer;
 begin
-  fMaxMipMapCount := 0;
+  fMipMapMax := 0;
   x := Min(fSource.Width, fSource.Height);
   repeat
     x := x div 2;
-    Inc(fMaxMipMapCount);
+    Inc(fMipMapMax);
   until (x <= 2);     // min size 4x1 pixels
 end;
 
@@ -229,8 +229,6 @@ begin
   for i:=1 to fSource.Height do
   for k:=1 to fSource.Width do
     fRGBA[i,k,4] := 255 - fRGBA[i,k,4];
-
-  RefreshImage(cmA);
 
   fIsChanged := True;
 end;
@@ -365,7 +363,7 @@ begin
   fIsChanged := False;
 
   UpdateMaxMipMapCount;
-  fMipMapCount := fMaxMipMapCount;
+  fMipMapCount := fMipMapMax;
 end;
 
 

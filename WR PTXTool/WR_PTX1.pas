@@ -22,7 +22,7 @@ type
     Open1: TOpenDialog;
     Label9: TLabel;
     Label5: TLabel;
-    PopupMenu1: TPopupMenu;
+    pmMenu: TPopupMenu;
     ExportBMPRGB: TMenuItem;
     ExportBMPA: TMenuItem;
     ExportTGA: TMenuItem;
@@ -51,7 +51,7 @@ type
     Panel1: TPanel;
     Label7: TLabel;
     btnSaveMipMap: TButton;
-    CBnonPOT: TCheckBox;
+    cbAllowNPOT: TCheckBox;
     imgRGB: TImage;
     lbSize: TLabel;
     lbMipMaps: TLabel;
@@ -62,27 +62,24 @@ type
     mnuEditReplaceColorKeyWithAverage: TMenuItem;
     rgCompressionQuality: TRadioGroup;
     meLog: TMemo;
+    procedure Form1Create(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure FormResize(Sender: TObject);
     procedure ExportClick(Sender: TObject);
     procedure ImportBMPClick(Sender: TObject);
     procedure SaveCompressedPTX(Sender: TObject);
-    procedure ClearAlpha(Sender: TObject);
-    procedure Form1Create(Sender: TObject);
+    procedure btnAlphaClearClick(Sender: TObject);
     procedure AboutClick(Sender: TObject);
-    procedure ShowMenu(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure imgMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure SaveUncompressedPTX(Sender: TObject);
-    procedure InvertAlpha(Sender: TObject);
+    procedure btnAlphaInvertClick(Sender: TObject);
     procedure OpenFile(Sender: TObject);
     procedure seMipMapCountChange(Sender: TObject);
-    procedure DisplayChange(Sender: TObject);
     procedure btnSaveMipMapClick(Sender: TObject);
-    procedure CBnonPOTClick(Sender: TObject);
-    procedure SampleAClick(Sender: TObject);
-    procedure imgRGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure SampleRClick(Sender: TObject);
-    procedure FormResize(Sender: TObject);
+    procedure cbAllowNPOTClick(Sender: TObject);
+    procedure imgMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure mnuEditAlphaFromColorKeyClick(Sender: TObject);
     procedure mnuEditReplaceColorKeyWithAverageClick(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
   private
     fVersionInfo: string;
     fStartWidth: Integer;
@@ -90,11 +87,14 @@ type
     fExeDir, fWorkDir: string;
     fDisplayImage: TDisplayImage;
 
-  fSampleColorKey: Boolean;
-  fReplaceColorKey: Boolean;
+    fSampleColorKey: Boolean;
+    fReplaceColorKey: Boolean;
 
     procedure SetRGB(aValue: Boolean);
     procedure SetAlpha(aValue: Boolean);
+    procedure DisplayChange;
+    procedure SampleAClick;
+    procedure SampleRClick;
   end;
 
 
@@ -178,7 +178,7 @@ begin
   if (Sender = ImportBMPA) or (Sender = mnuImportBMPMask) then
     fDisplayImage.ImportBitmapA(Open1.FileName);
 
-  DisplayChange(nil);
+  DisplayChange;
 end;
 
 
@@ -203,11 +203,10 @@ begin
 end;
 
 
-procedure TfmPTXTool.ClearAlpha(Sender: TObject);
+procedure TfmPTXTool.btnAlphaClearClick(Sender: TObject);
 begin
   fDisplayImage.EditAlphaClear;
-  SetAlpha(false);
-  lbSize.Caption := fDisplayImage.GetInfoString;
+  DisplayChange;
 end;
 
 
@@ -274,17 +273,18 @@ begin
 end;
 
 
-procedure TfmPTXTool.ShowMenu(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TfmPTXTool.imgMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if Button <> mbRight then Exit;
-  if Sender = imgRGB then PopupMenu1.Popup(Left+imgRGB.Left+2+X, Top+imgRGB.Top+40+Y);
-  if Sender = imgA   then PopupMenu1.Popup(Left+imgA.Left+2+X, Top+imgA.Top+40+Y);
+  if Sender = imgRGB then pmMenu.Popup(Left+imgRGB.Left+4+X, Top+imgRGB.Top+50+Y);
+  if Sender = imgA   then pmMenu.Popup(Left+imgA.Left+4+X, Top+imgA.Top+50+Y);
 end;
 
 
-procedure TfmPTXTool.InvertAlpha(Sender: TObject);
+procedure TfmPTXTool.btnAlphaInvertClick(Sender: TObject);
 begin
   fDisplayImage.EditAlphaInvert;
+  DisplayChange;
 end;
 
 
@@ -298,7 +298,7 @@ begin
   mnuImportBMPMask.Enabled        := aValue;
   ExportTGA.Enabled               := aValue;
   mnuExportTGAImageMask.Enabled   := aValue;
-  seMipMapCount.Enabled                  := aValue;
+  seMipMapCount.Enabled           := aValue;
   lbNoRGB.Visible                 := not aValue;
 end;
 
@@ -330,7 +330,7 @@ begin
   if LowerCase(ExtractFileExt(fileName)) = '.tga' then fDisplayImage.OpenTGA(fileName);
   if LowerCase(ExtractFileExt(fileName)) = '.2db' then fDisplayImage.Open2DB(fileName);
 
-  DisplayChange(nil);
+  DisplayChange;
 end;
 
 
@@ -351,7 +351,7 @@ begin
 end;
 
 
-procedure TfmPTXTool.DisplayChange(Sender: TObject);
+procedure TfmPTXTool.DisplayChange;
 begin
   if not fDisplayImage.DisplayImage then
   begin
@@ -362,10 +362,10 @@ begin
 
   // Now if DisplayImage didn't failed we assume RGB portion is loaded fine
   // and we can perform all needed tasks upon
-  SetRGB(true);
-  SetAlpha(fDisplayImage.GetAlpha);
+  SetRGB(True);
+  SetAlpha(fDisplayImage.HasAlpha);
 
-  seMipMapCount.MaxValue := fDisplayImage.MaxMipMapCount;
+  seMipMapCount.MaxValue := fDisplayImage.MipMapMax;
   seMipMapCount.Value    := fDisplayImage.SourceMipMapCount;
 
   gbInfo.Caption := ' ' + fDisplayImage.SourceFilename + fDisplayImage.GetChangedString + ' ';
@@ -383,13 +383,13 @@ begin
 end;
 
 
-procedure TfmPTXTool.CBnonPOTClick(Sender: TObject);
+procedure TfmPTXTool.cbAllowNPOTClick(Sender: TObject);
 begin
-  fDisplayImage.AllowNonPOT := CBnonPOT.Checked;
+  fDisplayImage.AllowNonPOT := cbAllowNPOT.Checked;
 end;
 
 
-procedure TfmPTXTool.SampleAClick(Sender: TObject);
+procedure TfmPTXTool.SampleAClick;
 begin
   fSampleColorKey := not fSampleColorKey;
   if fSampleColorKey then
@@ -399,18 +399,20 @@ begin
 end;
 
 
-procedure TfmPTXTool.imgRGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TfmPTXTool.imgMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if (not fSampleColorKey)and(not fReplaceColorKey) then exit;
   if fSampleColorKey then fDisplayImage.EditAlphaCreateFrom(X,Y);
   if fReplaceColorKey then fDisplayImage.EditColorReplaceWithAverage(X,Y);
-  DisplayChange(nil);
-  if fSampleColorKey then  SampleAClick(nil); //Release fSampleColorKey
-  if fReplaceColorKey then SampleRClick(nil); //Release fReplaceColorKey
+
+  DisplayChange;
+
+  if fSampleColorKey then  SampleAClick; //Release fSampleColorKey
+  if fReplaceColorKey then SampleRClick; //Release fReplaceColorKey
 end;
 
 
-procedure TfmPTXTool.SampleRClick(Sender: TObject);
+procedure TfmPTXTool.SampleRClick;
 begin
   fReplaceColorKey := not fReplaceColorKey;
   if fReplaceColorKey then
@@ -456,7 +458,7 @@ begin
   lbNoAlpha.Top := imgA.Top + (imgSize - lbNoAlpha.Height) div 2;
 
   if fDisplayImage <> nil then
-    DisplayChange(nil);
+    DisplayChange;
 end;
 
 

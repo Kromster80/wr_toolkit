@@ -42,15 +42,15 @@ object fmPTXTool: TfmPTXTool
     Top = 96
     Width = 256
     Height = 256
-    OnMouseDown = ShowMenu
+    OnMouseDown = imgMouseDown
   end
   object imgRGB: TImage
     Left = 208
     Top = 96
     Width = 256
     Height = 256
-    OnMouseDown = ShowMenu
-    OnMouseUp = imgRGBMouseUp
+    OnMouseDown = imgMouseDown
+    OnMouseUp = imgMouseUp
   end
   object lbNoAlpha: TLabel
     Left = 567
@@ -233,14 +233,14 @@ object fmPTXTool: TfmPTXTool
     Visible = False
     OnClick = btnSaveMipMapClick
   end
-  object CBnonPOT: TCheckBox
+  object cbAllowNPOT: TCheckBox
     Left = 520
     Top = 52
     Width = 209
     Height = 17
     Caption = 'Allow non-POT images (no use in-game)'
     TabOrder = 5
-    OnClick = CBnonPOTClick
+    OnClick = cbAllowNPOTClick
   end
   object rgCompressionQuality: TRadioGroup
     Left = 520
@@ -276,7 +276,7 @@ object fmPTXTool: TfmPTXTool
     Left = 651
     Top = 319
   end
-  object PopupMenu1: TPopupMenu
+  object pmMenu: TPopupMenu
     Left = 623
     Top = 319
     object ImportBMPA: TMenuItem
@@ -310,12 +310,12 @@ object fmPTXTool: TfmPTXTool
     object InvertA: TMenuItem
       Caption = 'Invert Alpha'
       Enabled = False
-      OnClick = InvertAlpha
+      OnClick = btnAlphaInvertClick
     end
     object ClearA: TMenuItem
       Caption = 'Clear Alpha'
       Enabled = False
-      OnClick = ClearAlpha
+      OnClick = btnAlphaClearClick
     end
   end
   object MainMenu1: TMainMenu
@@ -365,12 +365,12 @@ object fmPTXTool: TfmPTXTool
       object mnuEditInvertAlpha: TMenuItem
         Caption = 'Invert Alpha'
         Enabled = False
-        OnClick = InvertAlpha
+        OnClick = btnAlphaInvertClick
       end
       object mnuEditClearAlpha: TMenuItem
         Caption = 'Clear Alpha'
         Enabled = False
-        OnClick = ClearAlpha
+        OnClick = btnAlphaClearClick
       end
       object mnuEditAlphaFromColorKey: TMenuItem
         Caption = 'Create alpha from color-key'
