@@ -205,7 +205,7 @@ end;
 
 procedure TfmPTXTool.ClearAlpha(Sender: TObject);
 begin
-  fDisplayImage.AlphaClear;
+  fDisplayImage.EditAlphaClear;
   SetAlpha(false);
   lbSize.Caption := fDisplayImage.GetInfoString;
 end;
@@ -284,7 +284,7 @@ end;
 
 procedure TfmPTXTool.InvertAlpha(Sender: TObject);
 begin
-  fDisplayImage.AlphaInvert;
+  fDisplayImage.EditAlphaInvert;
 end;
 
 
@@ -407,8 +407,8 @@ end;
 procedure TfmPTXTool.imgRGBMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if (not fSampleColorKey)and(not fReplaceColorKey) then exit;
-  if fSampleColorKey then fDisplayImage.AlphaCreateFrom(X,Y);
-  if fReplaceColorKey then fDisplayImage.ColorReplaceWithAverage(X,Y);
+  if fSampleColorKey then fDisplayImage.EditAlphaCreateFrom(X,Y);
+  if fReplaceColorKey then fDisplayImage.EditColorReplaceWithAverage(X,Y);
   DisplayChange(nil);
   if fSampleColorKey then  SampleAClick(nil); //Release fSampleColorKey
   if fReplaceColorKey then SampleRClick(nil); //Release fReplaceColorKey

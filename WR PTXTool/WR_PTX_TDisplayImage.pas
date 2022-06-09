@@ -43,10 +43,8 @@ type
 
     property GetFileMask: string read Props.FileMask;
     property GetMipMapQty: Integer read Props.MipMapQty;
-
     property MipMapCount: Integer read fMipMapCount write fMipMapCount;
     property MaxMipMapCount: Integer read fMaxMipMapCount;
-
     property GetCompression: Boolean read Props.IsCompressed;
     property GetPacked: Boolean read Props.IsSYNPacked;
     property GetAlpha: Boolean read Props.hasAlpha;
@@ -56,10 +54,10 @@ type
     function GetRMSString: string;
     function GetChangedString: string;
 
-    procedure AlphaInvert;
-    procedure AlphaClear;
-    procedure AlphaCreateFrom(aX, aY: Integer);
-    procedure ColorReplaceWithAverage(aX, aY: Integer);
+    procedure EditAlphaInvert;
+    procedure EditAlphaClear;
+    procedure EditAlphaCreateFrom(aX, aY: Integer);
+    procedure EditColorReplaceWithAverage(aX, aY: Integer);
     procedure OpenBMP(const aFilename: string);
     procedure OpenPTX(const aFilename: string);
     procedure OpenDDS(const aFilename: string);
@@ -211,7 +209,7 @@ begin
 end;
 
 
-procedure TDisplayImage.AlphaInvert;
+procedure TDisplayImage.EditAlphaInvert;
 var
   i,k: Integer;
 begin
@@ -225,7 +223,7 @@ begin
 end;
 
 
-procedure TDisplayImage.AlphaClear;
+procedure TDisplayImage.EditAlphaClear;
 var
   i,k:Integer;
 begin
@@ -1085,7 +1083,7 @@ begin
 end;
 
 
-procedure TDisplayImage.AlphaCreateFrom(aX,aY: Integer);
+procedure TDisplayImage.EditAlphaCreateFrom(aX,aY: Integer);
 var
   R,G,B: Byte;
   i,k:Integer;
@@ -1103,7 +1101,7 @@ begin
 end;
 
 
-procedure TDisplayImage.ColorReplaceWithAverage(aX,aY: Integer);
+procedure TDisplayImage.EditColorReplaceWithAverage(aX,aY: Integer);
 var
   keyR, keyG, keyB: Byte;
   i,k,cnt: Integer;
