@@ -23,7 +23,7 @@ You can use uncompressed PTX images to get better image quality in game.
 
 Changelog:
 v2.6 (02.08.2022)
-  Restores Import BMP Image function
+  Restored Import BMP Image function
 v2.5 (11.07.2022)
   Fixed squish.dll (being compiled in debug mode)
 v2.4 (09.06.2022)
