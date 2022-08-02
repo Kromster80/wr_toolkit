@@ -64,6 +64,8 @@ type
     mnuEditReplaceColorKeyWithAverage: TMenuItem;
     rgCompressionQuality: TRadioGroup;
     meLog: TMemo;
+    pmImportBMPRGB: TMenuItem;
+    mnuImportBMPImage: TMenuItem;
     procedure Form1Create(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -99,7 +101,7 @@ type
 
 const
   TOOL_NAME = 'PTXTool';
-  TOOL_VERSION = 'Version 2.5';
+  TOOL_VERSION = 'Version 2.6';
 
 
 implementation
@@ -175,7 +177,10 @@ begin
   if not RunOpenDialog(Open1, '', fWorkDir, '24bit BMP files (*.bmp)|*.bmp') then Exit;
 
   if (Sender = pmImportBMPA) or (Sender = mnuImportBMPMask) then
-    fDisplayImage.ImportBitmapA(Open1.FileName);
+    fDisplayImage.ImportBitmapA(Open1.FileName)
+  else
+  if (Sender = pmImportBMPRGB) or (Sender = mnuImportBMPImage) then
+    fDisplayImage.OpenBMP(Open1.FileName);
 
   DisplayChange;
 end;

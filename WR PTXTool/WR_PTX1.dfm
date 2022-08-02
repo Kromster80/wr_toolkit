@@ -279,6 +279,10 @@ object fmPTXTool: TfmPTXTool
   object pmMenu: TPopupMenu
     Left = 623
     Top = 319
+    object pmImportBMPRGB: TMenuItem
+      Caption = 'Import BMP Image'
+      OnClick = ImportBMPClick
+    end
     object pmImportBMPA: TMenuItem
       Caption = 'Import BMP Mask'
       Enabled = False
@@ -323,6 +327,10 @@ object fmPTXTool: TfmPTXTool
     Top = 319
     object ImportMenu: TMenuItem
       Caption = 'Import'
+      object mnuImportBMPImage: TMenuItem
+        Caption = 'BMP Image ...'
+        OnClick = ImportBMPClick
+      end
       object mnuImportBMPMask: TMenuItem
         Caption = 'BMP Mask ...'
         Enabled = False
