@@ -119,7 +119,7 @@ begin
   inherited;
 
   // Load ourselves to be able to show a warning message and work without the DLL
-  if FileExists('squish.dll') then
+  if FileExists(ExtractFilePath(ParamStr(0)) + 'squish.dll') then
   begin
     fDllLib := LoadLibrary('squish.dll');
     if fDllLib <> 0 then

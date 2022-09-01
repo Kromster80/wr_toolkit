@@ -85,7 +85,7 @@ object fmPTXTool: TfmPTXTool
   object gbInfo: TGroupBox
     Left = 208
     Top = 7
-    Width = 305
+    Width = 329
     Height = 81
     Caption = '  File Name  '
     TabOrder = 3
@@ -111,21 +111,21 @@ object fmPTXTool: TfmPTXTool
       Caption = 'MipMaps:'
     end
     object Label10: TLabel
-      Left = 144
+      Left = 176
       Top = 18
       Width = 53
       Height = 13
       Caption = 'Fade color:'
     end
     object Label2: TLabel
-      Left = 198
+      Left = 230
       Top = 53
       Width = 87
       Height = 13
       Caption = 'Set MipMap levels'
     end
     object Label7: TLabel
-      Left = 144
+      Left = 176
       Top = 34
       Width = 27
       Height = 13
@@ -153,21 +153,21 @@ object fmPTXTool: TfmPTXTool
       Caption = '<<>>'
     end
     object lbFadeColor: TLabel
-      Left = 200
+      Left = 232
       Top = 18
       Width = 24
       Height = 13
       Caption = '<<>>'
     end
     object lbRMS: TLabel
-      Left = 174
+      Left = 206
       Top = 34
       Width = 24
       Height = 13
       Caption = '<<>>'
     end
     object seMipMapCount: TSpinEdit
-      Left = 144
+      Left = 176
       Top = 50
       Width = 49
       Height = 22
@@ -184,7 +184,7 @@ object fmPTXTool: TfmPTXTool
       OnChange = seMipMapCountChange
     end
     object Panel1: TPanel
-      Left = 136
+      Left = 168
       Top = 16
       Width = 2
       Height = 57
@@ -234,18 +234,19 @@ object fmPTXTool: TfmPTXTool
     OnClick = btnSaveMipMapClick
   end
   object cbAllowNPOT: TCheckBox
-    Left = 520
+    Left = 544
     Top = 52
-    Width = 209
-    Height = 17
+    Width = 161
+    Height = 29
     Caption = 'Allow non-POT images (no use in-game)'
     TabOrder = 5
+    WordWrap = True
     OnClick = cbAllowNPOTClick
   end
   object rgCompressionQuality: TRadioGroup
-    Left = 520
+    Left = 544
     Top = 8
-    Width = 201
+    Width = 161
     Height = 41
     Caption = ' Compression quality '
     Columns = 2

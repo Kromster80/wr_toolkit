@@ -1,5 +1,5 @@
 ------------------------------------------------------
-PTX Tool 2.6
+PTX Tool 2.7
 ------------------------------------------------------
 
 Description:
@@ -22,6 +22,8 @@ You can use fewer MipMap levels to get sharper picture in game.
 You can use uncompressed PTX images to get better image quality in game.
 
 Changelog:
+v2.7 (01.09.2022)
+  Fixed missing DLL error on opening PTX files associated with PTXTool in Explorer
 v2.6 (02.08.2022)
   Restored Import BMP Image function
 v2.5 (11.07.2022)

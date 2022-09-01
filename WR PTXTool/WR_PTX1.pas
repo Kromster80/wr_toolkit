@@ -101,7 +101,7 @@ type
 
 const
   TOOL_NAME = 'PTXTool';
-  TOOL_VERSION = 'Version 2.6';
+  TOOL_VERSION = 'Version 2.7';
 
 
 implementation
