@@ -7,7 +7,6 @@ uses
 type
   TBlinkerPreviewMode = (bmNone, bmHeadBreaks, bmBlinkers, bmReverse, bmNitro);
 
-  procedure SetRenderFrame(aHWND: HWND);
   procedure RenderInit;
   function LoadFresnelShader: Boolean;
   function RenderShaders: Boolean;
@@ -31,12 +30,6 @@ var
 implementation
 uses
   MTkit2_Unit1, MTkit2_Defaults;
-
-
-procedure SetRenderFrame(aHWND: HWND);
-begin
-  kromOGLUtils.SetRenderFrame(aHWND, h_DC, h_RC);
-end;
 
 procedure RenderInit;
 begin
@@ -72,7 +65,7 @@ begin
 end;
 
 
-function LoadFresnelShader:Boolean;
+function LoadFresnelShader: Boolean;
 var
   c: array [1..MAX_READ_BUFFER] of AnsiChar;
   src: PAnsiChar; // PGLcharARB = PAnsiChar;
@@ -157,87 +150,98 @@ begin
 end;
 
 function RenderShaders:Boolean;
-var mc2,mc3,mc4:Byte; i,k,h:Integer;
+var
+  mc2,mc3,mc4: Byte;
+  i,k,h:Integer;
 begin
-for i:=1 to MOX.Qty.Parts do begin
-glPushMatrix;
-glMultMatrixf(@MOX.Parts[i].Matrix);
+  for i:=1 to MOX.Qty.Parts do
+  begin
+    glPushMatrix;
+    glMultMatrixf(@MOX.Parts[i].Matrix);
 
-if (RenderOpts.ShowDamage)or(SelectedTreeNode=i) then begin //Flap everything correctly
-glRotatef(Mix(MOX.Parts[i].x1,MOX.Parts[i].x2,RenderOpts.PartsFlapPos)/pi*180,1,0,0);
-glRotatef(Mix(MOX.Parts[i].y1,MOX.Parts[i].y2,RenderOpts.PartsFlapPos)/pi*180,0,1,0);
-glRotatef(Mix(MOX.Parts[i].z1,MOX.Parts[i].z2,RenderOpts.PartsFlapPos)/pi*180,0,0,-1);
-end;
-
-  for k:=MOX.Parts[i].FirstMat+1 to MOX.Parts[i].FirstMat+MOX.Parts[i].NumMat do begin
-
-    //if (RenderOpts.ShowMaterial<>0)and(MatID<>MOX.Sid[k,1]+1) then exit;
-
-    mc2:=Material[MOX.Sid[k,1]+1].MatClass[2];
-    mc3:=Material[MOX.Sid[k,1]+1].MatClass[3];
-    mc4:=Material[MOX.Sid[k,1]+1].MatClass[4];
-
-    glUseProgramObjectARB(po[mc2,mc3]);
-    S_Tex1 := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Tex1')));
-    S_Tex2 := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Tex2')));
-    S_Tex3 := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Tex3')));
-    S_Tex4 := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Tex4')));
-    Mat_Ambi := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_Ambi')));
-    Mat_Diff := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_Diff')));
-    Mat_Spec := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_Spec1')));
-    Mat_Spec2:= glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_Spec2')));
-    Mat_Refl := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_Refl')));
-    Mat_Dirt := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_DirtAm')));
-    Mat_ReflF:= glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_ReflFres')));
-
-    glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, MoxTex[MOX.Sid[k,1]+1]); //
-    if (Form1.CBVinyl.ItemIndex>0) and (mc4 and 1 = 1) then
-      glBindTexture(GL_TEXTURE_2D, VinylsTex);
-      
-    glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, 1); //EnvMap
-    glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, DirtTex);
-    glActiveTexture(GL_TEXTURE3); glBindTexture(GL_TEXTURE_2D, ScratchTex);
-    glUniform1iARB(S_Tex1, 0);
-    glUniform1iARB(S_Tex2, 1);
-    glUniform1iARB(S_Tex3, 2);
-    glUniform1iARB(S_Tex4, 3);
-
-    with Material[MOX.Sid[k,1]+1].Color[ColID] do begin
-      glUniform3fARB(Mat_Diff ,Dif.R/255,Dif.G/255,Dif.B/255);
-      glUniform3fARB(Mat_Ambi ,Amb.R/255,Amb.G/255,Amb.B/255);
-      glUniform3fARB(Mat_Spec ,Sp1.R/255,Sp1.G/255,Sp1.B/255);
-      glUniform3fARB(Mat_Spec2,Sp2.R/255,Sp2.G/255,Sp2.B/255);
-      if mc4 and 8 = 8 then begin
-        glUniform3fARB(Mat_Refl , Ref.R/255,Ref.G/255,Ref.B/255); //ReflectionControl /on
-        glUniform1fARB(Mat_ReflF,1);                              //ReflectionControl /on
-      end else begin
-        glUniform1fARB(Mat_ReflF, 0);                            //ReflectionControl /off
-        glUniform3fARB(Mat_Refl,Byte(Ref.R<>0),Byte(Ref.G<>0),Byte(Ref.B<>0)); //Fresnel /on/off
-      end;
-      glUniform1fARB(Mat_Dirt, (Form1.TBDirt.Position/100) * Byte(mc4 and 4 = 4));
+    // Flap everything correctly
+    if RenderOpts.ShowDamage or (I = SelectedTreeNode) then
+    begin
+      glRotatef(Mix(MOX.Parts[i].x1,MOX.Parts[i].x2,RenderOpts.PartsFlapPos)/pi*180,1,0,0);
+      glRotatef(Mix(MOX.Parts[i].y1,MOX.Parts[i].y2,RenderOpts.PartsFlapPos)/pi*180,0,1,0);
+      glRotatef(Mix(MOX.Parts[i].z1,MOX.Parts[i].z2,RenderOpts.PartsFlapPos)/pi*180,0,0,-1);
     end;
 
-    glCallList(MoxCall[k]);
+    for k:=MOX.Parts[i].FirstMat+1 to MOX.Parts[i].FirstMat+MOX.Parts[i].NumMat do
+    begin
+
+      //if (RenderOpts.ShowMaterial<>0)and(MatID<>MOX.Sid[k,1]+1) then exit;
+
+      mc2:=Material[MOX.Sid[k,1]+1].MatClass[2];
+      mc3:=Material[MOX.Sid[k,1]+1].MatClass[3];
+      mc4:=Material[MOX.Sid[k,1]+1].MatClass[4];
+
+      glUseProgramObjectARB(po[mc2,mc3]);
+      S_Tex1 := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Tex1')));
+      S_Tex2 := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Tex2')));
+      S_Tex3 := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Tex3')));
+      S_Tex4 := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Tex4')));
+      Mat_Ambi := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_Ambi')));
+      Mat_Diff := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_Diff')));
+      Mat_Spec := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_Spec1')));
+      Mat_Spec2:= glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_Spec2')));
+      Mat_Refl := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_Refl')));
+      Mat_Dirt := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_DirtAm')));
+      Mat_ReflF:= glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_ReflFres')));
+
+      glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, MoxTex[MOX.Sid[k,1]+1]); //
+      if (Form1.CBVinyl.ItemIndex>0) and (mc4 and 1 = 1) then
+        glBindTexture(GL_TEXTURE_2D, VinylsTex);
+
+      glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, 1); //EnvMap
+      glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, DirtTex);
+      glActiveTexture(GL_TEXTURE3); glBindTexture(GL_TEXTURE_2D, ScratchTex);
+      glUniform1iARB(S_Tex1, 0);
+      glUniform1iARB(S_Tex2, 1);
+      glUniform1iARB(S_Tex3, 2);
+      glUniform1iARB(S_Tex4, 3);
+
+      with Material[MOX.Sid[k,1]+1].Color[ColID] do
+      begin
+        glUniform3fARB(Mat_Diff ,Dif.R/255,Dif.G/255,Dif.B/255);
+        glUniform3fARB(Mat_Ambi ,Amb.R/255,Amb.G/255,Amb.B/255);
+        glUniform3fARB(Mat_Spec ,Sp1.R/255,Sp1.G/255,Sp1.B/255);
+        glUniform3fARB(Mat_Spec2,Sp2.R/255,Sp2.G/255,Sp2.B/255);
+        if mc4 and 8 = 8 then
+        begin
+          glUniform3fARB(Mat_Refl , Ref.R/255,Ref.G/255,Ref.B/255); //ReflectionControl /on
+          glUniform1fARB(Mat_ReflF,1);                              //ReflectionControl /on
+        end else
+        begin
+          glUniform1fARB(Mat_ReflF, 0);                            //ReflectionControl /off
+          glUniform3fARB(Mat_Refl,Byte(Ref.R<>0),Byte(Ref.G<>0),Byte(Ref.B<>0)); //Fresnel /on/off
+        end;
+        glUniform1fARB(Mat_Dirt, (Form1.TBDirt.Position/100) * Byte(mc4 and 4 = 4));
+      end;
+
+      glCallList(MoxCall[k]);
+    end;
+
+    if MOX.Parts[i].Child=-1 then
+    begin
+      glPopMatrix;
+      h:=i;
+      while(h>1)and(MOX.Parts[h].NextInLevel=-1) do begin
+        glPopMatrix;
+        h:=MOX.Parts[h].Parent+1;
+      end;
+    end;
+
   end;
 
-if MOX.Parts[i].Child=-1 then begin
-  glPopMatrix;
-  h:=i;
-  while(h>1)and(MOX.Parts[h].NextInLevel=-1) do begin
-    glPopMatrix;
-    h:=MOX.Parts[h].Parent+1;
-  end;
-end;
-
-end;
-
-glUseProgramObjectARB(0);
-glActiveTexture(GL_TEXTURE0);
+  glUseProgramObjectARB(0);
+  glActiveTexture(GL_TEXTURE0);
 end;
 
 
-procedure RenderCOB(ID:Integer);
-var i,h:Integer;
+procedure RenderCOB(ID: Integer);
+var
+  i,h:Integer;
 begin
   if COB.Head.PointQty=0 then exit;
   glBindTexture(GL_TEXTURE_2D, 0); //UV map texture
@@ -274,13 +278,15 @@ begin
   glDisable(GL_LIGHTING);
 
   if Form1.CBShowIDs.Checked then
-  for i:=1 to COB.Head.PointQty do begin
+  for i:=1 to COB.Head.PointQty do
+  begin
     glColor4f(0.75,0.75,0.75,1);
     glRasterPos3f(COB.Vertices[i].X,COB.Vertices[i].Y,COB.Vertices[i].Z);
     glPrint(inttostr(i));
   end;
 
-  if ID>0 then begin
+  if ID > 0 then
+  begin
     glColor4f(1,1,1,1);
     glDepthFunc(GL_ALWAYS);
 
@@ -303,60 +309,62 @@ begin
   glDisable(GL_LIGHTING);
   glBindTexture(GL_TEXTURE_2D, 0); //UV map texture
 
-for i:=1 to CPOHead.Qty do
-begin
-  glPushMatrix;
-  Matrix2Angles(CPO[i].Matrix9,9,@a,@b,@c);
-  glTranslate(CPO[i].PosX,CPO[i].PosY,CPO[i].PosZ);
-  glRotate(c,0,0,-1); glRotate(b,0,-1,0); glRotate(a,-1,0,0);
-  glCallList(Pivot); //Pivot
-  if ID=i then glColor4f(1,1,1,1)
-          else glColor4f(1,0.9,0.6,1);
-    //Bounding box
-    if CPO[i].Format=2 then begin
-        glScale(abs(CPO[i].ScaleX),abs(CPO[i].ScaleY),abs(CPO[i].ScaleZ));
-        glCallList(BBoxW);
-        if ID=i then glColor4f(0.8,0.5,0.4,0.3)
-                 else glColor4f(0.7,0.6,0.5,0.3);
-        glCallList(BBox);
-    end;
-    //Shape
-    if CPO[i].Format=3 then begin
-        glBegin(gl_Points);
-          for h:=1 to CPO[i].VerticeCount do
-            glVertex3fv(@CPO[i].Vertices[h]);
-        glEnd;
-
-        ci:=0;
-        for k:=1 to CPO[i].PolyCount do begin
-          inc(ci);
-          qty:=CPO[i].Indices[ci];
-          glBegin(gl_line_strip);
-            for h:=1 to qty do begin
-              inc(ci);
-              glVertex3fv(@CPO[i].Vertices[CPO[i].Indices[ci]+1]);
-            end;
+  for i:=1 to CPOHead.Qty do
+  begin
+    glPushMatrix;
+    Matrix2Angles(CPO[i].Matrix9,9,@a,@b,@c);
+    glTranslate(CPO[i].PosX,CPO[i].PosY,CPO[i].PosZ);
+    glRotate(c,0,0,-1); glRotate(b,0,-1,0); glRotate(a,-1,0,0);
+    glCallList(Pivot); //Pivot
+    if ID=i then glColor4f(1,1,1,1)
+            else glColor4f(1,0.9,0.6,1);
+      //Bounding box
+      if CPO[i].Format=2 then
+      begin
+          glScale(abs(CPO[i].ScaleX),abs(CPO[i].ScaleY),abs(CPO[i].ScaleZ));
+          glCallList(BBoxW);
+          if ID=i then glColor4f(0.8,0.5,0.4,0.3)
+                   else glColor4f(0.7,0.6,0.5,0.3);
+          glCallList(BBox);
+      end;
+      //Shape
+      if CPO[i].Format=3 then
+      begin
+          glBegin(gl_Points);
+            for h:=1 to CPO[i].VerticeCount do
+              glVertex3fv(@CPO[i].Vertices[h]);
           glEnd;
-        end;
 
-        if ID=i then glColor4f(0.8,0.5,0.4,0.3)
-                 else glColor4f(0.7,0.6,0.5,0.3);
+          ci:=0;
+          for k:=1 to CPO[i].PolyCount do begin
+            inc(ci);
+            qty:=CPO[i].Indices[ci];
+            glBegin(gl_line_strip);
+              for h:=1 to qty do begin
+                inc(ci);
+                glVertex3fv(@CPO[i].Vertices[CPO[i].Indices[ci]+1]);
+              end;
+            glEnd;
+          end;
 
-        ci:=0;
-        for k:=1 to CPO[i].PolyCount do begin
-          inc(ci);
-          qty:=CPO[i].Indices[ci];
-          glBegin(gl_Polygon);
-            for h:=qty downto 1 do begin
-              glVertex3fv(@CPO[i].Vertices[CPO[i].Indices[ci+h]+1]);
-            end;
-            inc(ci,qty);
-          glEnd;
-        end;
+          if ID=i then glColor4f(0.8,0.5,0.4,0.3)
+                   else glColor4f(0.7,0.6,0.5,0.3);
 
-    end;
-  glPopMatrix;
-end;
+          ci:=0;
+          for k:=1 to CPO[i].PolyCount do
+          begin
+            inc(ci);
+            qty:=CPO[i].Indices[ci];
+            glBegin(gl_Polygon);
+              for h:=qty downto 1 do
+                glVertex3fv(@CPO[i].Vertices[CPO[i].Indices[ci+h]+1]);
+              inc(ci,qty);
+            glEnd;
+          end;
+
+      end;
+    glPopMatrix;
+  end;
   glEnable(GL_LIGHTING);
 end;
 
@@ -378,7 +386,8 @@ glPushMatrix;
   glAlphaFunc(GL_GREATER,0.5);
   glBindTexture(GL_TEXTURE_2D, TreeTex[2]); //UV map texture
   glColor4f(0.75,0.75,0.75,1);
-  for i:=1 to Tree.NumLeaves do begin
+  for i:=1 to Tree.NumLeaves do
+  begin
     glPushMatrix;
       glTranslate(TreeLeaves[i].X,TreeLeaves[i].Y,TreeLeaves[i].Z);
       glRotatef(xRot, 0, -1, 0); //face camera
@@ -394,7 +403,8 @@ glPushMatrix;
   end;
   glDisable(GL_ALPHA_TEST);
 
-  if RenderOpts.Wire then begin
+  if RenderOpts.Wire then
+  begin
     glBindTexture(GL_TEXTURE_2D,0); //UV map texture
     glDepthFunc(GL_ALWAYS);
     glColor4f(0.6,0.9,0.6,0.1);
@@ -594,20 +604,25 @@ end;
 procedure RenderUVGrid(ShowGrid:Boolean);
 var
   i:Integer;
-begin 
-glBegin(GL_LINES);
-if ShowGrid then begin
-  glColor4f(1,1,1,0.4);
-  for i:=1 to 19 do begin
-    glVertex2f(i/20, 0);
-    glVertex2f(i/20, 1);
-  end;
-  for i:=1 to 19 do begin
-    glVertex2f( 0,i/20);
-    glVertex2f( 1,i/20);
-  end;
-end;
-  glColor4f(0,0,0,0.5);
+begin
+  glBegin(GL_LINES);
+
+    if ShowGrid then
+    begin
+      glColor4f(1,1,1,0.4);
+      for i:=1 to 19 do
+      begin
+        glVertex2f(i/20, 0);
+        glVertex2f(i/20, 1);
+      end;
+      for i:=1 to 19 do
+      begin
+        glVertex2f( 0,i/20);
+        glVertex2f( 1,i/20);
+      end;
+    end;
+
+    glColor4f(0,0,0,0.5);
     glVertex2f(0, 0);
     glVertex2f(0, 1.05);
     glVertex2f(0 ,0);
@@ -626,7 +641,7 @@ end;
     glVertex2f(0, 1.05);
     glVertex2f(0 ,1.05);
     glVertex2f(-0.025 ,1);
-glEnd;
+  glEnd;
 end;
 
 procedure CompileCommonObjects;

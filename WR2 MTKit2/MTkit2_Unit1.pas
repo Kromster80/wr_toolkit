@@ -382,6 +382,9 @@ type
     procedure Button2Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
+    h_DC: HDC;
+    h_RC: HGLRC;
+
     fOpenedFileMask: string;
     fOpenedFolder: string;
     fRenderMode: TRenderMode;
@@ -395,7 +398,8 @@ type
   end;
 
 const
-  VersionInfo = 'Mesh ToolKit 2.3.9 (09 Mar 2022)';
+  APP_TITLE = 'Mesh ToolKit';
+  VER_INFO = '2.3.9 (09 Mar 2022)';
   FPS_INTERVAL: Cardinal = 1000;               // Calculate FPS every ---- ms
   MAX_MATERIALS = 255;
   MAX_COLORS = 15;
@@ -406,14 +410,11 @@ const
 
 var
   Form1: TForm1;
-  s,s2,chname:AnsiString;            //Strings
+  s,s2,chname: AnsiString;            //Strings
 
-  //OpenGL variables
-  h_DC: HDC;
-  h_RC: HGLRC;
-  FPSLag:Word=33;
+  FPSLag: Word = 33;
   OldTimeFPS,OldTimeRC,OldTimeLWO,OldFrameTimes,FrameCount:cardinal;
-  UseShaders:Boolean;
+  UseShaders: Boolean;
   EnvTexture,SpecTexture,Spec2Texture:glUint;
   DirtTex,ScratchTex:glUint;
   FlameTex,LensFlareTex,DummyTex,SelectionTex:glUint;
@@ -617,10 +618,10 @@ begin
   aFilename := ParamStr(1); //Get filename parameter
   ExeDir := ExtractFilePath(Application.ExeName);
   Memo1.Lines.Add(aFilename);
-  Caption := VersionInfo;
+  Caption := APP_TITLE + '    ' + VER_INFO;
 
   LoadSettingsFromIni(ExeDir + 'MTKit2 Data\options.ini');
-  SetRenderFrame(RenderPanel.Handle);
+  SetRenderFrame(RenderPanel.Handle, h_DC, h_RC);
   Memo1.Lines.Add('Basic OpenGL init complete');
 
   BuildFont(h_DC, 20);
@@ -2113,17 +2114,19 @@ end;
 
 procedure TForm1.About1Click(Sender: TObject);
 var
-  ver, vfl: Integer;
+  glslVersion: string;
+  vfl: Integer;
 begin
-  glGetIntegerv(GL_SHADING_LANGUAGE_VERSION_ARB, @ver);
+  // Newer versions return string
+  glslVersion := glGetString(GL_SHADING_LANGUAGE_VERSION);
   glGetIntegerv(GL_MAX_VARYING_FLOATS_ARB, @vfl);
 
   MessageBox(
     Handle,
     PChar(
-      VersionInfo + eol + eol +
+      APP_TITLE + '    ' + VER_INFO + eol + eol +
       'using OpenGL ' + glGetString(GL_VERSION) + ' by ' + glGetString(GL_RENDERER) + eol +
-      'using GLSL version ' + IntToStr(ver) + ' with max floats ' + IntToStr(vfl) + eol + eol +
+      'using GLSL version ' + glslVersion + ' with max floats ' + IntToStr(vfl) + eol + eol +
       'Written by Krom - kromster80@gmail.com' + eol +
       'Site - http://krom.reveur.de'),
     'Info',
