@@ -27,7 +27,6 @@ object Form1: TForm1
     Height = 529
     ActivePage = TabSheet4
     Anchors = [akLeft, akTop, akRight, akBottom]
-    TabIndex = 0
     TabOrder = 0
     object TabSheet2: TTabSheet
       Caption = 'Cars'
@@ -128,7 +127,6 @@ object Form1: TForm1
         Style = csDropDownList
         Anchors = [akTop, akRight]
         DropDownCount = 28
-        ItemHeight = 13
         Sorted = True
         TabOrder = 2
         OnChange = CBCarsChange
@@ -478,16 +476,10 @@ object Form1: TForm1
           Height = 33
           LineSize = 10
           Max = 100
-          Orientation = trHorizontal
           PageSize = 30
           Frequency = 10
-          Position = 0
-          SelEnd = 0
-          SelStart = 0
           TabOrder = 0
           ThumbLength = 15
-          TickMarks = tmBottomRight
-          TickStyle = tsAuto
           OnChange = TBChange
         end
         object TBAI: TTrackBar
@@ -498,16 +490,11 @@ object Form1: TForm1
           LineSize = 5
           Max = 100
           Min = 50
-          Orientation = trHorizontal
           PageSize = 15
           Frequency = 5
           Position = 80
-          SelEnd = 0
-          SelStart = 0
           TabOrder = 1
           ThumbLength = 15
-          TickMarks = tmBottomRight
-          TickStyle = tsAuto
           OnChange = TBChange
         end
         object TBMaxDam: TTrackBar
@@ -517,16 +504,10 @@ object Form1: TForm1
           Height = 33
           LineSize = 10
           Max = 100
-          Orientation = trHorizontal
           PageSize = 10
           Frequency = 10
-          Position = 0
-          SelEnd = 0
-          SelStart = 0
           TabOrder = 2
           ThumbLength = 15
-          TickMarks = tmBottomRight
-          TickStyle = tsAuto
           OnChange = TBChange
         end
         object TBNitro: TTrackBar
@@ -536,16 +517,9 @@ object Form1: TForm1
           Height = 33
           LineSize = 10
           Max = 4
-          Orientation = trHorizontal
           PageSize = 10
-          Frequency = 1
-          Position = 0
-          SelEnd = 0
-          SelStart = 0
           TabOrder = 3
           ThumbLength = 15
-          TickMarks = tmBottomRight
-          TickStyle = tsAuto
           OnChange = TBChange
         end
         object RandAddons: TCheckBox
@@ -563,7 +537,6 @@ object Form1: TForm1
           Top = 56
           Width = 97
           Height = 21
-          ItemHeight = 13
           ItemIndex = 1
           TabOrder = 5
           Text = 'Championship'
@@ -579,7 +552,6 @@ object Form1: TForm1
           Width = 113
           Height = 21
           Enabled = False
-          ItemHeight = 13
           TabOrder = 6
           Text = 'ComboBox1'
         end
@@ -780,13 +752,8 @@ object Form1: TForm1
           Max = 6
           Min = 1
           Orientation = trVertical
-          Frequency = 1
           Position = 6
-          SelEnd = 0
-          SelStart = 0
           TabOrder = 9
-          TickMarks = tmBottomRight
-          TickStyle = tsAuto
           OnChange = RefreshSceneryList
         end
         object Scn1: TComboBox
@@ -800,7 +767,6 @@ object Form1: TForm1
           Style = csDropDownList
           Ctl3D = True
           DropDownCount = 12
-          ItemHeight = 13
           ItemIndex = 0
           ParentCtl3D = False
           TabOrder = 10
@@ -823,7 +789,6 @@ object Form1: TForm1
           BevelInner = bvNone
           BevelKind = bkTile
           Style = csDropDownList
-          ItemHeight = 13
           ItemIndex = 0
           TabOrder = 11
           Text = 'Italy 1'
@@ -843,7 +808,6 @@ object Form1: TForm1
           Ctl3D = True
           DropDownCount = 12
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 0
           ParentCtl3D = False
           TabOrder = 12
@@ -867,7 +831,6 @@ object Form1: TForm1
           BevelKind = bkTile
           Style = csDropDownList
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 0
           TabOrder = 13
           Text = 'Italy 1'
@@ -912,7 +875,6 @@ object Form1: TForm1
           BevelInner = bvNone
           BevelKind = bkTile
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 4
           TabOrder = 16
           Text = 'Rush Hour'
@@ -935,7 +897,6 @@ object Form1: TForm1
           Ctl3D = True
           DropDownCount = 12
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 0
           ParentCtl3D = False
           TabOrder = 17
@@ -959,7 +920,6 @@ object Form1: TForm1
           BevelKind = bkTile
           Style = csDropDownList
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 0
           TabOrder = 18
           Text = 'Italy 1'
@@ -1004,7 +964,6 @@ object Form1: TForm1
           BevelInner = bvNone
           BevelKind = bkTile
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 4
           TabOrder = 21
           Text = 'Rush Hour'
@@ -1027,7 +986,6 @@ object Form1: TForm1
           Ctl3D = True
           DropDownCount = 12
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 0
           ParentCtl3D = False
           TabOrder = 22
@@ -1051,7 +1009,6 @@ object Form1: TForm1
           BevelKind = bkTile
           Style = csDropDownList
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 0
           TabOrder = 23
           Text = 'Italy 1'
@@ -1096,7 +1053,6 @@ object Form1: TForm1
           BevelInner = bvNone
           BevelKind = bkTile
           Enabled = False
-          ItemHeight = 13
           TabOrder = 26
           Text = 'Rush Hour'
           Items.Strings = (
@@ -1118,7 +1074,6 @@ object Form1: TForm1
           Ctl3D = True
           DropDownCount = 12
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 0
           ParentCtl3D = False
           TabOrder = 27
@@ -1142,7 +1097,6 @@ object Form1: TForm1
           BevelKind = bkTile
           Style = csDropDownList
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 0
           TabOrder = 28
           Text = 'Italy 1'
@@ -1187,7 +1141,6 @@ object Form1: TForm1
           BevelInner = bvNone
           BevelKind = bkTile
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 4
           TabOrder = 31
           Text = 'Rush Hour'
@@ -1210,7 +1163,6 @@ object Form1: TForm1
           Ctl3D = True
           DropDownCount = 12
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 0
           ParentCtl3D = False
           TabOrder = 32
@@ -1234,7 +1186,6 @@ object Form1: TForm1
           BevelKind = bkTile
           Style = csDropDownList
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 0
           TabOrder = 33
           Text = 'Italy 1'
@@ -1279,7 +1230,6 @@ object Form1: TForm1
           BevelInner = bvNone
           BevelKind = bkTile
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 4
           TabOrder = 36
           Text = 'Rush Hour'
@@ -1325,7 +1275,6 @@ object Form1: TForm1
           AutoComplete = False
           BevelInner = bvNone
           BevelKind = bkTile
-          ItemHeight = 13
           ItemIndex = 4
           TabOrder = 39
           Text = 'Rush Hour'
@@ -1402,7 +1351,6 @@ object Form1: TForm1
           Ctl3D = True
           DropDownCount = 12
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 0
           ParentCtl3D = False
           TabOrder = 53
@@ -1427,7 +1375,6 @@ object Form1: TForm1
           BevelKind = bkTile
           Style = csDropDownList
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 0
           TabOrder = 54
           Text = 'Italy 1'
@@ -1486,7 +1433,6 @@ object Form1: TForm1
           BevelInner = bvNone
           BevelKind = bkTile
           Enabled = False
-          ItemHeight = 13
           ItemIndex = 4
           TabOrder = 58
           Text = 'Rush Hour'
@@ -1745,7 +1691,6 @@ object Form1: TForm1
           Width = 125
           Height = 21
           Style = csDropDownList
-          ItemHeight = 13
           ItemIndex = 0
           TabOrder = 1
           Text = 'Gold/Silver/Bronze'
@@ -1845,7 +1790,6 @@ object Form1: TForm1
           Height = 21
           Style = csDropDownList
           DropDownCount = 12
-          ItemHeight = 13
           ItemIndex = 0
           TabOrder = 10
           Text = '1. Qualification Test'
@@ -1869,7 +1813,6 @@ object Form1: TForm1
           Height = 21
           Style = csDropDownList
           DropDownCount = 12
-          ItemHeight = 13
           ItemIndex = 0
           TabOrder = 11
           Text = '0. Common value'
@@ -2206,7 +2149,6 @@ object Form1: TForm1
           Top = 295
           Width = 89
           Height = 21
-          ItemHeight = 13
           ItemIndex = 0
           TabOrder = 0
           Text = '0 '
@@ -2234,7 +2176,6 @@ object Form1: TForm1
           AutoComplete = False
           Style = csDropDownList
           DropDownCount = 24
-          ItemHeight = 13
           Sorted = True
           TabOrder = 1
           OnChange = GetDataFromUI
@@ -2248,7 +2189,6 @@ object Form1: TForm1
           AutoComplete = False
           Style = csDropDownList
           DropDownCount = 24
-          ItemHeight = 13
           ItemIndex = 1
           Sorted = True
           TabOrder = 2
@@ -2340,7 +2280,6 @@ object Form1: TForm1
           Height = 21
           AutoComplete = False
           Style = csDropDownList
-          ItemHeight = 13
           ItemIndex = 0
           TabOrder = 9
           Text = 'Default Race'
@@ -2518,7 +2457,6 @@ object Form1: TForm1
           Height = 21
           Style = csDropDownList
           DropDownCount = 24
-          ItemHeight = 13
           ItemIndex = 0
           Sorted = True
           TabOrder = 23
@@ -2535,7 +2473,6 @@ object Form1: TForm1
           Height = 21
           Style = csDropDownList
           DropDownCount = 24
-          ItemHeight = 13
           ItemIndex = 0
           Sorted = True
           TabOrder = 24
@@ -2552,7 +2489,6 @@ object Form1: TForm1
           Height = 21
           Style = csDropDownList
           DropDownCount = 24
-          ItemHeight = 13
           ItemIndex = 0
           Sorted = True
           TabOrder = 25
@@ -2569,7 +2505,6 @@ object Form1: TForm1
           Height = 21
           Style = csDropDownList
           DropDownCount = 24
-          ItemHeight = 13
           ItemIndex = 0
           Sorted = True
           TabOrder = 26
@@ -2586,7 +2521,6 @@ object Form1: TForm1
           Height = 21
           Style = csDropDownList
           DropDownCount = 24
-          ItemHeight = 13
           ItemIndex = 0
           Sorted = True
           TabOrder = 27
@@ -2661,7 +2595,7 @@ object Form1: TForm1
           Width = 65
           Height = 22
           Accuracy = 1
-          Increment = 0.1
+          Increment = 0.100000000000000000
           TabOrder = 33
           OnChange = GetDataFromUI
           OnClick = GetDataFromUI
@@ -2672,7 +2606,7 @@ object Form1: TForm1
           Width = 65
           Height = 22
           Accuracy = 1
-          Increment = 0.1
+          Increment = 0.100000000000000000
           TabOrder = 34
           OnChange = GetDataFromUI
           OnClick = GetDataFromUI
@@ -2683,7 +2617,7 @@ object Form1: TForm1
           Width = 65
           Height = 22
           Accuracy = 1
-          Increment = 0.1
+          Increment = 0.100000000000000000
           TabOrder = 35
           OnChange = GetDataFromUI
           OnClick = GetDataFromUI
@@ -2693,7 +2627,6 @@ object Form1: TForm1
           Top = 271
           Width = 89
           Height = 21
-          ItemHeight = 13
           ItemIndex = 0
           TabOrder = 36
           Text = '0'
@@ -2715,7 +2648,6 @@ object Form1: TForm1
           Top = 79
           Width = 89
           Height = 21
-          ItemHeight = 13
           ItemIndex = 0
           TabOrder = 37
           Text = 'Specified'
@@ -2731,7 +2663,6 @@ object Form1: TForm1
           Top = 55
           Width = 89
           Height = 21
-          ItemHeight = 13
           ItemIndex = 5
           TabOrder = 38
           Text = '5'

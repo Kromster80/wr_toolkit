@@ -1,11 +1,13 @@
 program WR2MissionMaker;
-
 uses
   Forms,
   Unit1 in 'Unit1.pas' {Form1},
   SupprtUnit2 in 'SupprtUnit2.pas';
 
 {$R *.res}
+
+var
+  Form1: TForm1;
 
 begin
   Application.Initialize;

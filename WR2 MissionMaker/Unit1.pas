@@ -1,6 +1,5 @@
 unit Unit1;  
 interface
-
 uses
   Windows, Messages, SysUtils, Classes, Controls, Buttons,
   Graphics, ExtCtrls, Forms, StdCtrls, KromUtils, Math, ComCtrls, CheckLst, Spin,
@@ -275,7 +274,6 @@ type
     M_NumDrivers: TComboBox;
     TC_Race: TTabControl;
     procedure FormCreate(Sender: TObject);
-    procedure OpenDS(Sender: TObject; filename:string);
     procedure SearchSceneries(Sender: TObject);
     procedure SearchAutos(Sender: TObject);
     procedure GetAutoInfo(s1:string;i1:integer);
@@ -308,17 +306,14 @@ type
     procedure SetDataToUI();
     procedure Button1Click(Sender: TObject);
   private
-    { Private declarations }
-  public
-    { Public declarations }
+    procedure OpenDS(filename:string);
   end;
 
 var
-  Form1: TForm1;
   f:file;
   ft:textfile;
-  c:array[1..1024000]of char;
-  i,j,k,m,h:integer;
+  c:array[1..1024000]of AnsiChar;
+  i,j,k,m:integer;
   s:string;
   RootDir:string;
   TimeCode:integer;
@@ -333,7 +328,7 @@ var
   Nit:array[1..8]of TComboBox;
   Tra:array[1..8]of TComboBox;
 ////////////////////////////////////////////////////////////////////////////////
-  Header:array[1..33]of char;
+  Header:array[1..33]of AnsiChar;
   DSqty:integer;
 
   TB:array of record
@@ -453,151 +448,162 @@ implementation
 uses SupprtUnit2;
 
 procedure TForm1.FormCreate(Sender: TObject);
-var wr2ds:string;
+var wr2ds: string;
 begin
-Randomize;
-//ChDir('E:\World Racing 2\');
-//zz:='   ';
-RootDir:=getcurrentdir;//+'\\\';
-wr2ds:=RootDir+'\FrontEnd\wr2.ds';
-CopyFile(@wr2ds[1],@(decs(wr2ds,2,1)+'bak')[1],true);
-//MessageBox(Form1.Handle,'Backup created','Info',MB_OK);
-if fileexists(wr2ds) then OpenDS(nil,wr2ds) else begin
-  MessageBox(Form1.Handle,'"FrontEnd\wr2.ds" not found. Run EXE from WR2 folder!','Warning',MB_OK);
-  Form1.Close;
-  exit;
-end;
-//MessageBox(Form1.Handle,'wr2ds readed and released','Info',MB_OK);
-MRaceOld:=1; //MissionRace
-TC_Race.TabIndex:=0;
-ElapsedTime(@TimeCode);
-SearchAutos(nil);         //Form2.Memo1.Lines.Add('Autos - '+ElapsedTime(@TimeCode));
-SearchSceneries(nil);     //Form2.Memo1.Lines.Add('Sceneries - '+ElapsedTime(@TimeCode));
-//MessageBox(Form1.Handle,'AddOns folder processed or skipped','Info',MB_OK);
-RefreshSceneryList(nil);
-end;
+  Randomize;
+  //ChDir('E:\World Racing 2\');
+  //zz:='   ';
+  RootDir:=getcurrentdir;//+'\\\';
+  wr2ds:=RootDir+'\FrontEnd\wr2.ds';
 
-procedure TForm1.OpenDS(Sender: TObject; filename:string);
-begin
-assignfile(f,filename); FileMode:=0; reset(f,1); FileMode:=2;
-blockread(f,Header,33);
-DSqty:=ord(Header[9]);
-setlength(TB,DSqty+1);
-setlength(CO,DSqty+1);
-setlength(Value,DSqty+1);
-for i:=1 to DSqty do begin
-blockread(f,c,33);
-TB[i].Entries:=ord(c[9])+ord(c[10])*256;
-TB[i].Index:=ord(c[17])+ord(c[18])*256;
-TB[i].iC:=ord(c[25]);
-j:=ord(c[30]);
-if j<>0 then blockread(f,c,j+1); s:='';
-for m:=1 to j do s:=s+c[m];
-TB[i].Lib:=s;
-setlength(CO[i],TB[i].Entries+1);
-setlength(Value[i],TB[i].Entries+1);
+  CopyFile(@wr2ds[1], @(decs(wr2ds,2,1)+'bak')[1], true);
 
-for k:=1 to TB[i].Entries do begin
-blockread(f,c,4);
-if c[1]+c[2]+c[3]+c[4]<>'NDCO' then begin
-blockread(f,c,4);
-TB[i].Cond:=int2(c[1],c[2]);
-setlength(TB[i].CondText,TB[i].Cond+1);
-  for j:=1 to TB[i].Cond do begin
-  blockread(f,c,4);
-  h:=int2(c[1],c[2]); //length of entry
-  blockread(f,c,h+1);
-  for m:=1 to h do TB[i].CondText[j]:=TB[i].CondText[j]+c[m];
+  //MessageBox(Form1.Handle,'Backup created','Info',MB_OK);
+  if fileexists(wr2ds) then
+    OpenDS(wr2ds)
+  else
+  begin
+    MessageBox(Handle,'"FrontEnd\wr2.ds" not found. Run EXE from WR2 folder!','Warning',MB_OK);
+    Close;
+    Exit;
   end;
-blockread(f,c,4); //read upcoming NDCO
+  //MessageBox(Form1.Handle,'wr2ds readed and released','Info',MB_OK);
+  MRaceOld:=1; //MissionRace
+  TC_Race.TabIndex:=0;
+  ElapsedTime(@TimeCode);
+  SearchAutos(nil);         //Form2.Memo1.Lines.Add('Autos - '+ElapsedTime(@TimeCode));
+  SearchSceneries(nil);     //Form2.Memo1.Lines.Add('Sceneries - '+ElapsedTime(@TimeCode));
+  //MessageBox(Form1.Handle,'AddOns folder processed or skipped','Info',MB_OK);
+  RefreshSceneryList(nil);
 end;
 
-blockread(f,c,24);                      //VAEn, VAId, VALb
-CO[i,k].Entries:=ord(c[5])+ord(c[6])*256;
-CO[i,k].Index:=ord(c[13])+ord(c[14])*256;
-j:=ord(c[21]);
-if j<>0 then blockread(f,c,j+1); s:='';
-for m:=1 to j do s:=s+c[m];
-CO[i,k].Lib:=s;
+procedure TForm1.OpenDS(filename:string);
+var
+  w: Word;
+  q: Integer;
+begin
+  assignfile(f,filename); FileMode:=0; reset(f,1); FileMode:=2;
+  blockread(f,Header,33);
+  DSqty:=ord(Header[9]);
+  setlength(TB,DSqty+1);
+  setlength(CO,DSqty+1);
+  setlength(Value,DSqty+1);
+  for i:=1 to DSqty do
+  begin
+    blockread(f,c,33);
+    TB[i].Entries:=ord(c[9])+ord(c[10])*256;
+    TB[i].Index:=ord(c[17])+ord(c[18])*256;
+    TB[i].iC:=ord(c[25]);
+    j:=ord(c[30]);
+    if j<>0 then blockread(f,c,j+1); s:='';
+    for m:=1 to j do s:=s+c[m];
+    TB[i].Lib:=s;
+    setlength(CO[i],TB[i].Entries+1);
+    setlength(Value[i],TB[i].Entries+1);
 
-blockread(f,c,13);                      //VASM
-CO[i,k].iU:=ord(c[5]);
-j:=ord(c[10]);
-if j<>0 then blockread(f,c,j+1); s:='';
-for m:=1 to j do s:=s+c[m];
-CO[i,k].SM:=s;
+    for k:=1 to TB[i].Entries do
+    begin
+      blockread(f,c,4);
+      if c[1]+c[2]+c[3]+c[4]<>'NDCO' then
+      begin
+        blockread(f,c,4);
+        TB[i].Cond:=int2(c[1],c[2]);
+        setlength(TB[i].CondText,TB[i].Cond+1);
+          for j:=1 to TB[i].Cond do begin
+            blockread(f,c,4);
+            w:=int2(c[1],c[2]); //length of entry
+            blockread(f,c,w+1);
+            for m:=1 to w do TB[i].CondText[j]:=TB[i].CondText[j]+c[m];
+          end;
+        blockread(f,c,4); //read upcoming NDCO
+      end;
 
-blockread(f,c,8);                       //VAST
-j:=ord(c[5]);
-if j<>0 then blockread(f,c,j+1); s:='';
-for m:=1 to j do s:=s+c[m];
-CO[i,k].ST:=s;
+      blockread(f,c,24);                      //VAEn, VAId, VALb
+      CO[i,k].Entries:=ord(c[5])+ord(c[6])*256;
+      CO[i,k].Index:=ord(c[13])+ord(c[14])*256;
+      j:=ord(c[21]);
+      if j<>0 then blockread(f,c,j+1); s:='';
+      for m:=1 to j do s:=s+c[m];
+      CO[i,k].Lib:=s;
 
-blockread(f,c,8);                       //VAIC
-j:=ord(c[5]);
-if j<>0 then blockread(f,c,j+1); s:='';
-for m:=1 to j do s:=s+c[m];
-CO[i,k].IC:=s;
+      blockread(f,c,13);                      //VASM
+      CO[i,k].iU:=ord(c[5]);
+      j:=ord(c[10]);
+      if j<>0 then blockread(f,c,j+1); s:='';
+      for m:=1 to j do s:=s+c[m];
+      CO[i,k].SM:=s;
 
-blockread(f,c,8);                       //VASC
-j:=ord(c[5]);
-if j<>0 then blockread(f,c,j+1); s:='';
-for m:=1 to j do s:=s+c[m];
-CO[i,k].SC:=s;
+      blockread(f,c,8);                       //VAST
+      j:=ord(c[5]);
+      if j<>0 then blockread(f,c,j+1); s:='';
+      for m:=1 to j do s:=s+c[m];
+      CO[i,k].ST:=s;
 
-if (i=14)or(i=16)or(i=19)or(i=49) then
-setlength(Value[i,k],CO[i,k].Entries+1024) else
-setlength(Value[i,k],CO[i,k].Entries+10);//stupid way to avoid common length
-for j:=1 to CO[i,k].Entries do begin      //mismatches when adding new stuff
-Value[i,k,j].Typ:=0;
-Value[i,k,j].Int:=0;
-Value[i,k,j].Rel:=0;
-Value[i,k,j].Str:='';
-blockread(f,c,1);
-if c[1]=#1  then begin Value[i,k,j].Typ:=1; blockread(f,Value[i,k,j].Int,4); end;
-if c[1]=#2  then begin Value[i,k,j].Typ:=2; blockread(f,Value[i,k,j].Rel,4); end;
-if c[1]=#16 then begin Value[i,k,j].Typ:=3; Value[i,k,j].Str:=''; blockread(f,h,4);
-                       if h<>0 then begin blockread(f,c,h+1);
-                       Value[i,k,j].Str:=StrPas(@c); end; end;
-if Value[i,k,j].Typ=0 then exit;
+      blockread(f,c,8);                       //VAIC
+      j:=ord(c[5]);
+      if j<>0 then blockread(f,c,j+1); s:='';
+      for m:=1 to j do s:=s+c[m];
+      CO[i,k].IC:=s;
 
-end;//CO.Entries
-end;//TB.Entries
-end; //1..DSqty
-closefile(f);
+      blockread(f,c,8);                       //VASC
+      j:=ord(c[5]);
+      if j<>0 then blockread(f,c,j+1); s:='';
+      for m:=1 to j do s:=s+c[m];
+      CO[i,k].SC:=s;
+
+      if (i=14)or(i=16)or(i=19)or(i=49) then
+      setlength(Value[i,k],CO[i,k].Entries+1024) else
+      setlength(Value[i,k],CO[i,k].Entries+10);//stupid way to avoid common length
+      for j:=1 to CO[i,k].Entries do begin      //mismatches when adding new stuff
+        Value[i,k,j].Typ:=0;
+        Value[i,k,j].Int:=0;
+        Value[i,k,j].Rel:=0;
+        Value[i,k,j].Str:='';
+        blockread(f,c,1);
+        if c[1]=#1  then begin Value[i,k,j].Typ:=1; blockread(f,Value[i,k,j].Int,4); end;
+        if c[1]=#2  then begin Value[i,k,j].Typ:=2; blockread(f,Value[i,k,j].Rel,4); end;
+        if c[1]=#16 then begin Value[i,k,j].Typ:=3; Value[i,k,j].Str:=''; blockread(f,q,4);
+                               if q<>0 then begin blockread(f,c,q+1);
+                               Value[i,k,j].Str:=PAnsiChar(@c); end; end;
+        if Value[i,k,j].Typ=0 then exit;
+
+      end;//CO.Entries
+    end;//TB.Entries
+  end; //1..DSqty
+  closefile(f);
 end;
 
 procedure TForm1.SearchSceneries(Sender: TObject);
-var SearchRec:TSearchRec; ii:integer;
+var SearchRec:TSearchRec; ii:integer; h: Integer;
 begin
-ChDir(RootDir);
-////////////////////////////////////////////////////////////////////////////////
-//Scanning for add-on scenario folders
-////////////////////////////////////////////////////////////////////////////////
-if not DirectoryExists('AddOns\Sceneries') then begin
-//MessageBox(Form1.Handle,'"AddOns\Sceneries\" not found','Warning',MB_OK);
-AddonSceneryQty:=0;
-//exit;
-end else begin
-  ChDir('AddOns\Sceneries');
-  FindFirst('*', faAnyFile or faDirectory, SearchRec);
-  h:=1;
-  repeat
-    if (SearchRec.Attr and faDirectory<>0)and(SearchRec.Name<>'.')and(SearchRec.Name<>'..')and
-    (fileexists(RootDir+'\AddOns\Sceneries\'+SearchRec.Name+'\EditScenery.sc2')) then begin
-      AddonScenery[h].Folder:=SearchRec.Name;
-      inc(h);
-    end;
-  until (FindNext(SearchRec)<>0);
-  FindClose(SearchRec);
-  AddonSceneryQty:=h-1;
-  //resorting add-on sceneries for Multi-Players
-  for i:=1 to h-1 do //all
-    for k:=i+1 to h-1 do  //all following after
-      if UpperCase(AddonScenery[i].Folder)>UpperCase(AddonScenery[k].Folder) then
-        SwapStr(AddonScenery[i].Folder,AddonScenery[k].Folder);
+  ChDir(RootDir);
+  ////////////////////////////////////////////////////////////////////////////////
+  //Scanning for add-on scenario folders
+  ////////////////////////////////////////////////////////////////////////////////
+  if not DirectoryExists('AddOns\Sceneries') then begin
+    //MessageBox(Form1.Handle,'"AddOns\Sceneries\" not found','Warning',MB_OK);
+    AddonSceneryQty:=0;
+    //exit;
+  end else begin
+    ChDir('AddOns\Sceneries');
+    FindFirst('*', faAnyFile or faDirectory, SearchRec);
+    h:=1;
+    repeat
+      if (SearchRec.Attr and faDirectory<>0)and(SearchRec.Name<>'.')and(SearchRec.Name<>'..')and
+      (fileexists(RootDir+'\AddOns\Sceneries\'+SearchRec.Name+'\EditScenery.sc2')) then begin
+        AddonScenery[h].Folder:=SearchRec.Name;
+        inc(h);
+      end;
+    until (FindNext(SearchRec)<>0);
+    FindClose(SearchRec);
+    AddonSceneryQty:=h-1;
+    //resorting add-on sceneries for Multi-Players
+    for i:=1 to h-1 do //all
+      for k:=i+1 to h-1 do  //all following after
+        if UpperCase(AddonScenery[i].Folder)>UpperCase(AddonScenery[k].Folder) then
+          SwapStr(AddonScenery[i].Folder,AddonScenery[k].Folder);
 
-end;
+  end;
 
 for ii:=1 to AddonSceneryQty do
 if fileexists(AddonScenery[ii].Folder+'\EditScenery.sc2') then
@@ -663,155 +669,166 @@ M_TrackID.ItemIndex:=0;
 end;
 
 procedure TForm1.GetSceneryInfo(s1:string; i1:integer);
+var
+  w: Word;
 begin
 assignfile(f,s1+'\EditScenery.sc2'); FileMode:=0; reset(f,1); FileMode:=2; //read-only
 blockread(f,c,4); if c[1]+c[2]+c[3]+c[4]<>'WR2'+#1 then exit;
 blockread(f,c,2); //Chapters
 with AddonScenery[i1] do begin
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); EngineName:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); BGround:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Name:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); SceneryFlag:=StrPas(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); EngineName:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); BGround:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Name:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); SceneryFlag:=PAnsiChar(@c); end;
 blockread(f,FreeRideID,2);
 blockread(f,TrackQty,2);
 for k:=1 to TrackQty do with AddonScenery[i1].Track[k] do begin
 blockread(f,TrackNo,2);
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Name:=StrPas(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Name:=PAnsiChar(@c); end;
 blockread(f,CheckPoint,2);
 blockread(f,mDistance,2);
 blockread(f,Direction,2);
 blockread(f,WayPoint,2);
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Maps:=StrPas(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Maps:=PAnsiChar(@c); end;
 blockread(f,TypeID,2);
 blockread(f,NumSections,2);
 blockread(f,Order,2);
 end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Author:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Converter:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Contact:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Comment:=StrPas(@c); end;
-
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Author:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Converter:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Contact:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Comment:=PAnsiChar(@c); end;
 end;
 
 closefile(f);
 end;
 
 procedure TForm1.SearchAutos(Sender: TObject);
-var SearchRec:TSearchRec; ii,kk,jj,t:integer;
+var
+  SearchRec: TSearchRec;
+  ii,kk,jj,t,h: integer;
 begin
-ChDir(RootDir); AddonCarQty:=0;
-if not DirectoryExists('AddOns\autos') then begin
-//MessageBox(Form1.Handle,'"AddOns\autos\" not found','Warning',MB_OK);
-//exit;
-end else begin
-ChDir('AddOns\autos');
-  FindFirst('*', faAnyFile or faDirectory, SearchRec);
-  h:=1;
-  repeat
-  if (SearchRec.Attr and faDirectory<>0)and(SearchRec.Name<>'.')and(SearchRec.Name<>'..') then
-  if fileexists(RootDir+'\AddOns\autos\'+SearchRec.Name+'\EditCar.car') then begin
-  AddonCar[h].Folder:=SearchRec.Name;
-  inc(h); end;
-  until (FindNext(SearchRec)<>0);
-  FindClose(SearchRec);
-  AddonCarQty:=h-1;
-end;
+  ChDir(RootDir); AddonCarQty:=0;
+  if not DirectoryExists('AddOns\autos') then begin
+    //MessageBox(Form1.Handle,'"AddOns\autos\" not found','Warning',MB_OK);
+    //exit;
+  end else
+  begin
+    ChDir('AddOns\autos');
+    FindFirst('*', faAnyFile or faDirectory, SearchRec);
+    h:=1;
+    repeat
+      if (SearchRec.Attr and faDirectory<>0)and(SearchRec.Name<>'.')and(SearchRec.Name<>'..') then
+      if fileexists(RootDir+'\AddOns\autos\'+SearchRec.Name+'\EditCar.car') then
+      begin
+        AddonCar[h].Folder:=SearchRec.Name;
+        inc(h);
+      end;
+    until (FindNext(SearchRec)<>0);
+    FindClose(SearchRec);
+    AddonCarQty:=h-1;
+  end;
 
 
-for ii:=1 to AddonCarQty do begin //don't use (i) here
-GetAutoInfo(AddonCar[ii].Folder,ii);
-if AddonCar[ii].Factory<>'' then
-AddonCar[ii].Name:=' '+AddonCar[ii].Factory+' '+AddonCar[ii].Model else
-AddonCar[ii].Name:=' '+AddonCar[ii].Model;
-CBCars.AddItem(AddOnCarPrefix+AddonCar[ii].Name+zz+inttostr(ii),nil);
-end;
+  for ii:=1 to AddonCarQty do begin //don't use (i) here
+    GetAutoInfo(AddonCar[ii].Folder,ii);
+    if AddonCar[ii].Factory<>'' then
+    AddonCar[ii].Name:=' '+AddonCar[ii].Factory+' '+AddonCar[ii].Model else
+    AddonCar[ii].Name:=' '+AddonCar[ii].Model;
+    CBCars.AddItem(AddOnCarPrefix+AddonCar[ii].Name+zz+inttostr(ii),nil);
+  end;
 
-for i:=2 to CO[24,3].Entries do
-CBCars.AddItem(#160+Value[24,44,i].Str+' '+Value[24,3,i].Str+zz+inttostr(i-1),nil);
-
-CBCars.ItemIndex:=0;
-
-//IDs:=0;
-ListCars2.AddItem('',nil);
-for k:=1 to 1024 do begin
   for i:=2 to CO[24,3].Entries do
-  if Value[24,7,i].Int=k then begin
-  ListCars2.AddItem(#160+Value[24,44,i].Str+' '+Value[24,3,i].Str+zz+inttostr(i-1)+' '+inttostr(Value[24,4,i].Int),nil);
-  inc(CarsInClass[k]);
-  end;
-  for ii:=1 to AddonCarQty do
-  if AddonCar[ii].MenuClass=k then begin
-  ListCars2.AddItem(AddOnCarPrefix+AddonCar[ii].Name+zz+inttostr(ii)+' '+inttostr(AddonCar[ii].Score),nil);
-  inc(CarsInClass[k]);
-  end;
-  if ListCars2.Items.Strings[ListCars2.Count-1]<>'' then begin
+    CBCars.AddItem(#160+Value[24,44,i].Str+' '+Value[24,3,i].Str+zz+inttostr(i-1),nil);
+
+  CBCars.ItemIndex:=0;
+
+  //IDs:=0;
   ListCars2.AddItem('',nil);
-  //inc(IDs);
+  for k:=1 to 1024 do
+  begin
+    for i:=2 to CO[24,3].Entries do
+    if Value[24,7,i].Int=k then
+    begin
+      ListCars2.AddItem(#160+Value[24,44,i].Str+' '+Value[24,3,i].Str+zz+inttostr(i-1)+' '+inttostr(Value[24,4,i].Int),nil);
+      inc(CarsInClass[k]);
+    end;
+    for ii:=1 to AddonCarQty do
+    if AddonCar[ii].MenuClass=k then
+    begin
+      ListCars2.AddItem(AddOnCarPrefix+AddonCar[ii].Name+zz+inttostr(ii)+' '+inttostr(AddonCar[ii].Score),nil);
+      inc(CarsInClass[k]);
+    end;
+    if ListCars2.Items.Strings[ListCars2.Count-1]<>'' then
+    begin
+      ListCars2.AddItem('',nil);
+      //inc(IDs);
+    end;
   end;
-end;
 
-t:=0;
-for ii:=1 to 1024 do begin
-if CarsInClass[ii]<>0 then inc(t);
-for kk:=1 to CarsInClass[ii] do begin
-  for jj:=1 to kk-1 do
-  if IDfromSTR(ListCars2.Items[kk-1+t],1)<IDfromSTR(ListCars2.Items[jj-1+t],1) then begin //previous is empty row
-  ListCars2.Items.Insert(jj-1+t,ListCars2.Items[kk-1+t]);
-  ListCars2.Items.Delete(kk-1+t+1);          //Delete moved text
+  t:=0;
+  for ii:=1 to 1024 do begin
+    if CarsInClass[ii]<>0 then inc(t);
+    for kk:=1 to CarsInClass[ii] do begin
+      for jj:=1 to kk-1 do
+      if IDfromSTR(ListCars2.Items[kk-1+t],1)<IDfromSTR(ListCars2.Items[jj-1+t],1) then begin //previous is empty row
+        ListCars2.Items.Insert(jj-1+t,ListCars2.Items[kk-1+t]);
+        ListCars2.Items.Delete(kk-1+t+1);          //Delete moved text
+      end;
+    //inc(t);
+    end;
+    inc(t,CarsInClass[ii]);
   end;
-//inc(t);
-end;
-inc(t,CarsInClass[ii]);
-end;                           
 
-for i:=2 to ListCars2.Count-1 do
-for k:=2 to i-1 do begin
-if (ListCars2.Items[i-2]='')and //compare by groups
-   (ListCars2.Items[k-2]='')and
-((IDfromSTR(ListCars2.Items[k-1],1))
->(IDfromSTR(ListCars2.Items[i-1],1)))
-then begin //compare Scores
-t:=0;
-repeat
-ListCars2.Items.Insert(k-1+t,ListCars2.Items[i-1+t]);
-inc(t);
-ListCars2.Items.Delete(i-1+t);          //Delete moved text
-until(ListCars2.Items[i-1+t]='');       //until empty moved
-ListCars2.Items.Insert(k-1+t,'');       //add spacer
-ListCars2.Items.Delete(i-1+t+1);        //delete old spacer
-break;
-end;
-end;
+  for i:=2 to ListCars2.Count-1 do
+  for k:=2 to i-1 do begin
+    if (ListCars2.Items[i-2]='')and //compare by groups
+       (ListCars2.Items[k-2]='')and
+    ((IDfromSTR(ListCars2.Items[k-1],1))
+    >(IDfromSTR(ListCars2.Items[i-1],1)))
+    then begin //compare Scores
+      t:=0;
+      repeat
+        ListCars2.Items.Insert(k-1+t,ListCars2.Items[i-1+t]);
+        inc(t);
+        ListCars2.Items.Delete(i-1+t);          //Delete moved text
+      until(ListCars2.Items[i-1+t]='');       //until empty moved
+      ListCars2.Items.Insert(k-1+t,'');       //add spacer
+      ListCars2.Items.Delete(i-1+t+1);        //delete old spacer
+      break;
+    end;
+  end;
 
-ListCars2.Items.Delete(ListCars2.Count-1); //Delete last empty
+  ListCars2.Items.Delete(ListCars2.Count-1); //Delete last empty
 
-Label86.Caption:=inttostr(CO[24,3].Entries-1)+'+'+inttostr(AddonCarQty)+'='+inttostr(CO[24,3].Entries-1+AddonCarQty)+' Cars';
+  Label86.Caption:=inttostr(CO[24,3].Entries-1)+'+'+inttostr(AddonCarQty)+'='+inttostr(CO[24,3].Entries-1+AddonCarQty)+' Cars';
 
-M_CarID.Clear;
-M_OppCar1.Clear; M_OppCar2.Clear; M_OppCar3.Clear; M_OppCar4.Clear; M_OppCar5.Clear;
-M_OppCar1.Items.Add(' Same car'+zz+'0'); M_OppCar2.Items.Add(' Same car'+zz+'0');
-M_OppCar3.Items.Add(' Same car'+zz+'0'); M_OppCar4.Items.Add(' Same car'+zz+'0');
-M_OppCar5.Items.Add(' Same car'+zz+'0');
-for i:=2 to 94 do begin//94 is base number of WR2 cars
-M_CarID.Items.Add(Value[24,44,i].Str+' '+Value[24,3,i].Str+zz+inttostr(i-1));
-M_OppCar1.Items.Add(Value[24,44,i].Str+' '+Value[24,3,i].Str+zz+inttostr(i-1));
-M_OppCar2.Items.Add(Value[24,44,i].Str+' '+Value[24,3,i].Str+zz+inttostr(i-1));
-M_OppCar3.Items.Add(Value[24,44,i].Str+' '+Value[24,3,i].Str+zz+inttostr(i-1));
-M_OppCar4.Items.Add(Value[24,44,i].Str+' '+Value[24,3,i].Str+zz+inttostr(i-1));
-M_OppCar5.Items.Add(Value[24,44,i].Str+' '+Value[24,3,i].Str+zz+inttostr(i-1));
-end;
-{for i:=1 to AddonCarQty do begin
-s:=AddonCar[i].Model+zz+inttostr(93+i);
-if AddonCar[i].Factory<>'' then s:=AddonCar[i].Factory+' '+s;
-M_CarID.Items.Add(s);
-end;             }
-M_CarID.ItemIndex:=0;
-M_OppCar1.ItemIndex:=0; M_OppCar2.ItemIndex:=0; M_OppCar3.ItemIndex:=0;
-M_OppCar4.ItemIndex:=0; M_OppCar5.ItemIndex:=0;
+  M_CarID.Clear;
+  M_OppCar1.Clear; M_OppCar2.Clear; M_OppCar3.Clear; M_OppCar4.Clear; M_OppCar5.Clear;
+  M_OppCar1.Items.Add(' Same car'+zz+'0'); M_OppCar2.Items.Add(' Same car'+zz+'0');
+  M_OppCar3.Items.Add(' Same car'+zz+'0'); M_OppCar4.Items.Add(' Same car'+zz+'0');
+  M_OppCar5.Items.Add(' Same car'+zz+'0');
+  for i:=2 to 94 do begin//94 is base number of WR2 cars
+    M_CarID.Items.Add(Value[24,44,i].Str+' '+Value[24,3,i].Str+zz+inttostr(i-1));
+    M_OppCar1.Items.Add(Value[24,44,i].Str+' '+Value[24,3,i].Str+zz+inttostr(i-1));
+    M_OppCar2.Items.Add(Value[24,44,i].Str+' '+Value[24,3,i].Str+zz+inttostr(i-1));
+    M_OppCar3.Items.Add(Value[24,44,i].Str+' '+Value[24,3,i].Str+zz+inttostr(i-1));
+    M_OppCar4.Items.Add(Value[24,44,i].Str+' '+Value[24,3,i].Str+zz+inttostr(i-1));
+    M_OppCar5.Items.Add(Value[24,44,i].Str+' '+Value[24,3,i].Str+zz+inttostr(i-1));
+  end;
+  {for i:=1 to AddonCarQty do begin
+  s:=AddonCar[i].Model+zz+inttostr(93+i);
+  if AddonCar[i].Factory<>'' then s:=AddonCar[i].Factory+' '+s;
+  M_CarID.Items.Add(s);
+  end;             }
+  M_CarID.ItemIndex:=0;
+  M_OppCar1.ItemIndex:=0; M_OppCar2.ItemIndex:=0; M_OppCar3.ItemIndex:=0;
+  M_OppCar4.ItemIndex:=0; M_OppCar5.ItemIndex:=0;
 end;
 
 procedure TForm1.GetAutoInfo(s1:string;i1:integer);
-var NumRead,Pos:integer;
+var
+  NumRead,Pos,h:integer;
 begin
 Pos:=0; //reset to 0
 assignfile(f,RootDir+'\AddOns\autos\'+s1+'\EditCar.car'); FileMode:=0; reset(f,128); FileMode:=2;
@@ -857,7 +874,7 @@ if c[Pos+1]=#16 then begin
             EC_Value[i,k,j].Typ:=3; h:=int2(c[Pos+2],c[Pos+3],c[Pos+4],c[Pos+5]); inc(Pos,5);
             for m:=1 to h do EC_Value[i,k,j].Str:=EC_Value[i,k,j].Str+c[Pos+m];
             if h<>0 then inc(Pos,h+1); end;
-if EC_Value[i,k,j].Typ=0 then Form1.Close;
+if EC_Value[i,k,j].Typ=0 then Close;
 end;//CO.Entries
 end;//TB.Entries
 end; //1..DSqty
@@ -944,7 +961,9 @@ end;
 end;
 
 procedure TForm1.GetMissionInfo(s1:string);
-var version:byte;
+var
+  version:byte;
+  w: Word;
 begin
 assignfile(f,s1); FileMode:=0; reset(f,1); FileMode:=2; //read-only
 blockread(f,c,4);
@@ -952,21 +971,21 @@ version:=ord(c[4]);
 if (c[1]+c[2]+c[3]<>'WR2') then exit;
 blockread(f,c,2); //=1
 with AddonMission do begin //mission maker ID
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); MissionName:=StrPas(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); MissionName:=PAnsiChar(@c); end;
 blockread(f,EventCode,2);
 blockread(f,ResultTyp,2);
 blockread(f,NumRaces,2);
 blockread(f,MissionClass,2);
 blockread(f,Score,2);
 blockread(f,DefCash,2);
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); RefText1:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); RefText2:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); RefText3:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); RefTextFail:=StrPas(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); RefText1:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); RefText2:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); RefText3:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); RefTextFail:=PAnsiChar(@c); end;
 blockread(f,InitCShip,2);
 for k:=1 to NumRaces do begin
 blockread(f,c,2); //=ID
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Race[k].HeadLineText:=StrPas(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Race[k].HeadLineText:=PAnsiChar(@c); end;
 blockread(f,Race[k].BonusID,24);
 {blockread(f,Race[k].CarID,2);
 blockread(f,Race[k].TrackID,2);
@@ -979,7 +998,7 @@ blockread(f,Race[k].LeadPositions,2);
 blockread(f,Race[k].Nitro,2);
 blockread(f,Race[k].Traffic,2);
 blockread(f,Race[k].RaceMode,2);}
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Race[k].MissionText:=StrPas(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Race[k].MissionText:=PAnsiChar(@c); end;
 blockread(f,Race[k].MinPlace,22);
 {blockread(f,Race[k].AvgSpeed,2);
 blockread(f,Race[k].Drifts,2);
@@ -1002,18 +1021,18 @@ blockread(f,Race[k].OppCar2,2);
 blockread(f,Race[k].OppCar3,2);
 blockread(f,Race[k].OppCar4,2);
 blockread(f,Race[k].OppCar5,2);
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Race[k].TextSuccess:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Race[k].TextFail:=StrPas(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Race[k].TextSuccess:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Race[k].TextFail:=PAnsiChar(@c); end;
 blockread(f,Race[k].InitCode,2);
 end; //..NumRaces
 if version>=2 then begin
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Author:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Contact:=StrPas(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Author:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Contact:=PAnsiChar(@c); end;
 end;
 if version>=3 then begin
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Comment:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); CarName:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); TrackName:=StrPas(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Comment:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); CarName:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); TrackName:=PAnsiChar(@c); end;
 end;
 
 end; //..with
@@ -1323,6 +1342,8 @@ Tra[1]:=T1; Tra[2]:=T2; Tra[3]:=T3; Tra[4]:=T4; Tra[5]:=T5; Tra[6]:=T6;
 end;
 
 procedure TForm1.Button13Click(Sender: TObject);
+var
+  w: Word;
 begin
 SaveDialog1.Filter:='WR2 Manager Custom Mission file (*.mis)|*.mis';
 SaveDialog1.InitialDir:=RootDir+'\AddOns\Missions\';
@@ -1334,29 +1355,29 @@ blockwrite(f,'WR2'+#2,4);//byte4 means file version
 blockwrite(f,#1+#0,2);//meaning number of missions in file
 
 if M_Name.Text='' then begin M_Name.Text:='NewMission'; closefile(f); exit; end;
-h:=length(M_Name.Text); blockwrite(f,h,2); if h<>0 then blockwrite(f,chr2(M_Name.Text,h+1)[1],h+1);
-h:=M_EventCode.ItemIndex+1; blockwrite(f,h,2);
-h:=M_ResultTyp.ItemIndex+1; blockwrite(f,h,2);
-h:=M_NumRaces.Value;      blockwrite(f,h,2);
-h:=M_Class.Value;         blockwrite(f,h,2); 
-h:=M_Score.Value;         blockwrite(f,h,2); 
-h:=M_Cash.Value;          blockwrite(f,h,2); 
-h:=length(M_Gold.Lines.GetText);
-blockwrite(f,h,2); if h<>0 then blockwrite(f,chr2(M_Gold.Lines.GetText,h+1)[1],h+1);
-h:=length(M_Silver.Lines.GetText);
-blockwrite(f,h,2); if h<>0 then blockwrite(f,chr2(M_Silver.Lines.GetText,h+1)[1],h+1);
-h:=length(M_Bronze.Lines.GetText);
-blockwrite(f,h,2); if h<>0 then blockwrite(f,chr2(M_Bronze.Lines.GetText,h+1)[1],h+1);
-h:=length(M_Fail.Lines.GetText);
-blockwrite(f,h,2); if h<>0 then blockwrite(f,chr2(M_Fail.Lines.GetText,h+1)[1],h+1);
-h:=M_InitCShip.ItemIndex;     blockwrite(f,h,2);
+w:=length(M_Name.Text); blockwrite(f,w,2); if w<>0 then blockwrite(f,chr2(M_Name.Text,w+1)[1],w+1);
+w:=M_EventCode.ItemIndex+1; blockwrite(f,w,2);
+w:=M_ResultTyp.ItemIndex+1; blockwrite(f,w,2);
+w:=M_NumRaces.Value;      blockwrite(f,w,2);
+w:=M_Class.Value;         blockwrite(f,w,2);
+w:=M_Score.Value;         blockwrite(f,w,2);
+w:=M_Cash.Value;          blockwrite(f,w,2);
+w:=length(M_Gold.Lines.GetText);
+blockwrite(f,w,2); if w<>0 then blockwrite(f,chr2(M_Gold.Lines.GetText,w+1)[1],w+1);
+w:=length(M_Silver.Lines.GetText);
+blockwrite(f,w,2); if w<>0 then blockwrite(f,chr2(M_Silver.Lines.GetText,w+1)[1],w+1);
+w:=length(M_Bronze.Lines.GetText);
+blockwrite(f,w,2); if w<>0 then blockwrite(f,chr2(M_Bronze.Lines.GetText,w+1)[1],w+1);
+w:=length(M_Fail.Lines.GetText);
+blockwrite(f,w,2); if w<>0 then blockwrite(f,chr2(M_Fail.Lines.GetText,w+1)[1],w+1);
+w:=M_InitCShip.ItemIndex;     blockwrite(f,w,2);
 
 //TC_RaceClick(nil);
 with AddonMission do //mission maker ID
 for k:=1 to M_NumRaces.Value do begin
 blockwrite(f,k,2);
-h:=length(Race[k].HeadLineText);
-blockwrite(f,h,2); if h<>0 then blockwrite(f,chr2(Race[k].HeadLineText,h+1)[1],h+1);
+w:=length(Race[k].HeadLineText);
+blockwrite(f,w,2); if w<>0 then blockwrite(f,chr2(Race[k].HeadLineText,w+1)[1],w+1);
 blockwrite(f,Race[k].BonusID,24);
 {blockwrite(f,Race[k].BonusID,2);
 blockwrite(f,Race[k].CarID,2);
@@ -1370,8 +1391,8 @@ blockwrite(f,Race[k].LeadPositions,2);
 blockwrite(f,Race[k].Nitro,2);
 blockwrite(f,Race[k].Traffic,2);
 blockwrite(f,Race[k].RaceMode,2); }
-h:=length(Race[k].MissionText);
-blockwrite(f,h,2); if h<>0 then blockwrite(f,chr2(Race[k].MissionText,h+1)[1],h+1);
+w:=length(Race[k].MissionText);
+blockwrite(f,w,2); if w<>0 then blockwrite(f,chr2(Race[k].MissionText,w+1)[1],w+1);
 blockwrite(f,Race[k].MinPlace,22);
 {blockwrite(f,Race[k].MinPlace,2);
 blockwrite(f,Race[k].AvgSpeed,2);
@@ -1384,7 +1405,7 @@ blockwrite(f,Race[k].TopSpeed,2);
 blockwrite(f,Race[k].TopSpeedNum,2);
 blockwrite(f,Race[k].OppStrength,2);
 blockwrite(f,Race[k].DriveModel,2); }
-h:=M_Class.Value; blockwrite(f,h,2); //MissionID
+w:=M_Class.Value; blockwrite(f,w,2); //MissionID
 blockwrite(f,k,2); //MissionRaceOrder
 blockwrite(f,Race[k].TrackFilter,2);
 blockwrite(f,Race[k].CarFilter,2);
@@ -1395,27 +1416,27 @@ blockwrite(f,Race[k].OppCar2,2);
 blockwrite(f,Race[k].OppCar3,2);
 blockwrite(f,Race[k].OppCar4,2);
 blockwrite(f,Race[k].OppCar5,2);
-h:=length(Race[k].TextSuccess);
-blockwrite(f,h,2); if h<>0 then blockwrite(f,chr2(Race[k].TextSuccess,h+1)[1],h+1);
-h:=length(Race[k].TextFail);
-blockwrite(f,h,2); if h<>0 then blockwrite(f,chr2(Race[k].TextFail,h+1)[1],h+1);
+w:=length(Race[k].TextSuccess);
+blockwrite(f,w,2); if w<>0 then blockwrite(f,chr2(Race[k].TextSuccess,w+1)[1],w+1);
+w:=length(Race[k].TextFail);
+blockwrite(f,w,2); if w<>0 then blockwrite(f,chr2(Race[k].TextFail,w+1)[1],w+1);
 blockwrite(f,Race[k].InitCode,2);
 end;
 //Version 2+
-h:=length(M_Author.Text); blockwrite(f,h,2); if h<>0 then blockwrite(f,chr2(M_Author.Text,h+1)[1],h+1);
-h:=length(M_Contact.Text); blockwrite(f,h,2); if h<>0 then blockwrite(f,chr2(M_Contact.Text,h+1)[1],h+1);
+w:=length(M_Author.Text); blockwrite(f,w,2); if w<>0 then blockwrite(f,chr2(M_Author.Text,w+1)[1],w+1);
+w:=length(M_Contact.Text); blockwrite(f,w,2); if w<>0 then blockwrite(f,chr2(M_Contact.Text,w+1)[1],w+1);
 //Version 3+ //Comment, addon CarName and TrackName
-h:=length(M_Author.Text); blockwrite(f,h,2); if h<>0 then blockwrite(f,chr2(M_Author.Text,h+1)[1],h+1);
-h:=length(M_Contact.Text); blockwrite(f,h,2); if h<>0 then blockwrite(f,chr2(M_Contact.Text,h+1)[1],h+1);
-h:=length(M_Contact.Text); blockwrite(f,h,2); if h<>0 then blockwrite(f,chr2(M_Contact.Text,h+1)[1],h+1);
+w:=length(M_Author.Text); blockwrite(f,w,2); if w<>0 then blockwrite(f,chr2(M_Author.Text,w+1)[1],w+1);
+w:=length(M_Contact.Text); blockwrite(f,w,2); if w<>0 then blockwrite(f,chr2(M_Contact.Text,w+1)[1],w+1);
+w:=length(M_Contact.Text); blockwrite(f,w,2); if w<>0 then blockwrite(f,chr2(M_Contact.Text,w+1)[1],w+1);
 
 closefile(f);
 end;
 
 procedure TForm1.TC_RaceChange(Sender: TObject);
 begin
-if TC_Race.TabIndex+1>M_NumRaces.Value then TC_Race.TabIndex:=M_NumRaces.Value-1;
-SetDataToUI();
+  if TC_Race.TabIndex+1>M_NumRaces.Value then TC_Race.TabIndex:=M_NumRaces.Value-1;
+  SetDataToUI();
 end;
 
 procedure TForm1.M_DriversChange(Sender: TObject);
@@ -1590,9 +1611,9 @@ end;
 
 procedure TForm1.Button1Click(Sender: TObject);
 begin
-CollectCustomMissionData(nil);
-SetMissionDataToUI(nil);
-Button13Click(nil);
+  CollectCustomMissionData(nil);
+  SetMissionDataToUI(nil);
+  Button13Click(nil);
 end;
 
 end.
