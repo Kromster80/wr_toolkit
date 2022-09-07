@@ -279,7 +279,7 @@ type
     procedure RenderFrame(Sender:TObject);
     procedure LoadTextures;
     function TryToLoadTexture(const aFilename: string):cardinal;
-    procedure CompileLoaded(Typename:string);
+    procedure CompileLoaded(aTypename: string);
     procedure RenderResize(Sender: TObject);
     procedure LoadMOX(const aFilename: string);
     procedure Panel1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -430,14 +430,12 @@ var
   BGColor: array [1..3]of Byte;
   WFColor: array [1..3]of Byte;
 
-  //Viewport controls
+  // Viewport controls
   xMov,yMov:Single;
   XRot:Single=25;
   YRot:Single=20;
   zoom: Single=0.3125;
-  CursorClick:TPoint;
   MouseX,MouseY:Integer;
-  OldX:Integer;
 
   RenderOpts:record
     ShowPart:Boolean;
@@ -458,8 +456,8 @@ var
 
   COB: record
     Head: record
-      PointQty,PolyQty: Integer;
-      X,Y,Z,Xmin,Xmax,Ymin,Ymax,Zmin,Zmax: Single;
+      PointQty, PolyQty: Integer;
+      X, Y, Z, Xmin, Xmax, Ymin, Ymax, Zmin, ZMax: Single;
     end;
     Vertices: array [1..256] of Vector3f;
     NormalsP: array [1..256] of Vector3f;
@@ -470,6 +468,7 @@ var
     Head: array [1..4] of AnsiChar;
     Qty,x1,x2,x3: Integer;
   end;
+
   CPO: array [1..MAX_CPO_SHAPES]of record
     Format:Integer; //2 possible types 2-box 3-shape
     PosX,PosY,PosZ:Single;
@@ -485,7 +484,7 @@ type
 
 var
   MOX: record
-    Qty: record Vertice,Poly,Chunks,Mat,Parts,Blink: Integer; end;
+    Qty: record Vertice, Poly, Chunks, Mat, Parts, Blink: Integer; end;
     Vertice: array [1..65280] of record X,Y,Z,nX,nY,nZ,U,V,x1,x2: Single; end;
     Face: array [1..65280,1..3] of Word;   //Polygon links
     Chunk: array [1..2048,1..4] of Word; //Surface ranges (points/polys) 40parts*40materials
@@ -497,13 +496,13 @@ var
     Parts: array [1..MAX_PARTS] of record
       Dname: string[64];
       Matrix: TMatrix;
-      Parent,Child,PrevInLevel,NextInLevel: SmallInt;
-      FirstMat,NumMat: Word;
-      xMid,yMid,zMid,fRadius: Single;
-      w1,w2,w3: SmallInt;
+      Parent, Child, PrevInLevel, NextInLevel: SmallInt;
+      FirstMat, NumMat: Word;
+      xMid, yMid, zMid, fRadius: Single;
+      w1, w2, w3: SmallInt;
       TypeID: SmallInt;
-      x1,x2,y1,y2,z1,z2: Single;
-      w4,w5: Integer;
+      x1, x2, y1, y2, z1, z2: Single;
+      w4, w5: Integer;
     end;
 
     Blinkers: array [1..MAX_BLINKERS] of record
@@ -514,8 +513,6 @@ var
       Matrix: TMatrix;  //88
     end;
   end;
-
-  BlinkWrite: array [1..MAX_BLINKERS] of Byte;
 
   // This should be universal exchange format in MTKit2
   Imp: record
@@ -566,12 +563,12 @@ var
   VinylsList: array [1..128]of string;
 
   PartModify: array [1..MAX_PARTS]of record
-   ActualPoint:Integer;
-   AxisSetup: array [1..3]of Byte;
-   Low: array [1..3]of Single;
-   High: array [1..3]of Single;
-   Custom: array [1..3]of Single;
-   Move: array [1..3]of Single;
+    ActualPoint:Integer;
+    AxisSetup: array [1..3]of Byte;
+    Low: array [1..3]of Single;
+    High: array [1..3]of Single;
+    Custom: array [1..3]of Single;
+    Move: array [1..3]of Single;
   end;
 
 
@@ -982,12 +979,12 @@ begin
   end;
 end;
 
-procedure TForm1.CompileLoaded(Typename: string);
+procedure TForm1.CompileLoaded(aTypename: string);
 var
   h,i,k,LOD:Integer;
   t:Single;
 begin
-  if Typename='MOX' then
+  if aTypename = 'MOX' then
   begin
     for i:=1 to MOX.Qty.Chunks do
     begin
@@ -1026,9 +1023,10 @@ begin
       glEnd;
       glEndList;
     end;
-      KnowScale(nil);
+
+    KnowScale(nil);
   end else
-  if Typename='TREE' then
+  if aTypename = 'TREE' then
   begin
     LOD:=1;
     if TreeCall=0 then TreeCall:=glGenLists(1);
@@ -1192,7 +1190,6 @@ begin
   if (Sender=ImageM)or((Sender=RenderPanel)and(Button=mbRight)) then CameraAction:='Move';
   if (Sender=ImageZ) then CameraAction:='Zoom';
   MouseX:=X; MouseY:=Y;
-  GetCursorPos(CursorClick);
   //ShowCursor(False);
 end;
 
@@ -1592,54 +1589,24 @@ begin
 
   BlockWrite(f,MOX.MoxMat,336*MOX.Qty.Mat);   //4+332
 
-  for ii:=1 to MOX.Qty.Parts do begin
+  for ii:=1 to MOX.Qty.Parts do
+  begin
     s:=chr2(MOX.Parts[ii].Dname,64);
     BlockWrite(f,s[1],64);
     BlockWrite(f,MOX.Parts[ii].Matrix,132);
   end;
 
+  //todo: It is worth writing more important blinkers first (deprioritize LED decoys),
+  // since the game has a limit on how many blinkers it can show at once (255 iirc)
   for ii:=1 to MOX.Qty.Blink do //Write blinkers in order
     for kk:=0 to 33 do //todo: Looks like this loop should be on the outside
      if MOX.Blinkers[ii].BlinkerType = kk then
        BlockWrite(f, MOX.Blinkers[ii], 88);
 
-  {
-  for ii:=1 to MOX.Qty.Blink do //Write important "blinkers" first
-    if (MOX.Blinkers[ii].TypeID<2)or(MOX.Blinkers[ii].TypeID>9) then begin
-      BlockWrite(f,MOX.Blinkers[ii],88);
-      BlinkWrite[ii]:=255;           //Written
-    end else
-      BlinkWrite[ii]:=0;  //Not written
-
-  for ii:=1 to MOX.Qty.Blink do if BlinkWrite[ii]=0 then
-      for kk:=ii+1 to MOX.Qty.Blink do
-      if (BlinkWrite[kk]=0)and(MOX.Blinkers[kk].Matrix[4,1]=-MOX.Blinkers[ii].Matrix[4,1]) then
-      if MOX.Blinkers[kk].Matrix[4,1]>0 then begin BlinkWrite[ii]:=4; BlinkWrite[kk]:=2; end //L-R sides
-                                    else begin BlinkWrite[ii]:=2; BlinkWrite[kk]:=4; end;//R-L sides
-
-  for ii:=1 to MOX.Qty.Blink do if BlinkWrite[ii]=0 then begin
-    BlockWrite(f,MOX.Blinkers[ii],88); //Write assymetrical blinkers
-    BlinkWrite[ii]:=255;
-  end;
-
-  for ii:=1 to MOX.Qty.Blink do
-    if BlinkWrite[ii]=2 then
-      if ii mod 2 = 0 then begin
-        BlockWrite(f,MOX.Blinkers[ii],88);
-        BlinkWrite[ii]:=255;
-      end else
-        for kk:=ii to MOX.Qty.Blink do
-          if BlinkWrite[kk]=4 then begin
-            BlockWrite(f,MOX.Blinkers[kk],88);
-            BlinkWrite[kk]:=255;
-          end;
-
-  for ii:=1 to MOX.Qty.Blink do if BlinkWrite[ii]<>255 then
-  BlockWrite(f,MOX.Blinkers[ii],88);  }
-
   closefile(f);
   Memo1.Lines.Add('MOX file closed');
-  for i:=1 to MOX.Qty.Parts do begin
+  for i:=1 to MOX.Qty.Parts do
+  begin
     PartModify[i].Custom[1]:=0;
     PartModify[i].Custom[2]:=0;
     PartModify[i].Custom[3]:=0;
@@ -1647,7 +1614,8 @@ begin
     PartModify[i].Move[2]:=0;
     PartModify[i].Move[3]:=0;
   end;
-  CompileLoaded('MOX'); //To make sure it looks just right
+
+  CompileLoaded('MOX'); // To make sure it looks just right
 end;
 
 
@@ -1660,33 +1628,33 @@ end;
 
 procedure TForm1.PartTypeChange(Sender: TObject);
 begin
-if (TVParts.Selected=nil)or(ForbidPartsChange) then Exit;
-if LX1.Value>LX2.Value then
-if Sender=LX1 then LX2.Value:=LX1.Value else LX1.Value:=LX2.Value;
+  if (TVParts.Selected=nil)or(ForbidPartsChange) then Exit;
+  if LX1.Value>LX2.Value then
+  if Sender=LX1 then LX2.Value:=LX1.Value else LX1.Value:=LX2.Value;
 
-if LY1.Value>LY2.Value then
-if Sender=LY1 then LY2.Value:=LY1.Value else LY1.Value:=LY2.Value;
-if LZ1.Value>LZ2.Value then
-if Sender=LZ1 then LZ2.Value:=LZ1.Value else LZ1.Value:=LZ2.Value;
-SelectedTreeNode:=TVParts.Selected.AbsoluteIndex+1;
-MOX.Parts[SelectedTreeNode].Dname:=EDetailName.Text;
-MOX.Parts[SelectedTreeNode].xMid:=CX.Value;
-MOX.Parts[SelectedTreeNode].yMid:=CY.Value;
-MOX.Parts[SelectedTreeNode].zMid:=CZ.Value;
-MOX.Parts[SelectedTreeNode].fRadius:=CRad.Value;
-MOX.Parts[SelectedTreeNode].w1:=0;//SpinEdit5.Value;
-MOX.Parts[SelectedTreeNode].w2:=0;//SpinEdit6.Value;
-MOX.Parts[SelectedTreeNode].w3:=0;//SpinEdit7.Value;
-MOX.Parts[SelectedTreeNode].w4:=0;//SpinEdit8.Value;
-MOX.Parts[SelectedTreeNode].w5:=0;//SpinEdit9.Value;
-MOX.Parts[SelectedTreeNode].TypeID:=RGDetailType.ItemIndex;
-MOX.Parts[SelectedTreeNode].x1:=LX1.Value/180*pi;//-YZ rotation
-MOX.Parts[SelectedTreeNode].x2:=LX2.Value/180*pi;//-YZ rotation
-MOX.Parts[SelectedTreeNode].y1:=LY1.Value/180*pi;//-YZ rotation
-MOX.Parts[SelectedTreeNode].y2:=LY2.Value/180*pi;//-YZ rotation
-MOX.Parts[SelectedTreeNode].z1:=LZ1.Value/180*pi;//-YZ rotation
-MOX.Parts[SelectedTreeNode].z2:=LZ2.Value/180*pi;//-YZ rotation
-TVParts.Items[SelectedTreeNode-1].Text:=MOX.Parts[SelectedTreeNode].Dname;
+  if LY1.Value>LY2.Value then
+  if Sender=LY1 then LY2.Value:=LY1.Value else LY1.Value:=LY2.Value;
+  if LZ1.Value>LZ2.Value then
+  if Sender=LZ1 then LZ2.Value:=LZ1.Value else LZ1.Value:=LZ2.Value;
+  SelectedTreeNode:=TVParts.Selected.AbsoluteIndex+1;
+  MOX.Parts[SelectedTreeNode].Dname:=EDetailName.Text;
+  MOX.Parts[SelectedTreeNode].xMid:=CX.Value;
+  MOX.Parts[SelectedTreeNode].yMid:=CY.Value;
+  MOX.Parts[SelectedTreeNode].zMid:=CZ.Value;
+  MOX.Parts[SelectedTreeNode].fRadius:=CRad.Value;
+  MOX.Parts[SelectedTreeNode].w1:=0;//SpinEdit5.Value;
+  MOX.Parts[SelectedTreeNode].w2:=0;//SpinEdit6.Value;
+  MOX.Parts[SelectedTreeNode].w3:=0;//SpinEdit7.Value;
+  MOX.Parts[SelectedTreeNode].w4:=0;//SpinEdit8.Value;
+  MOX.Parts[SelectedTreeNode].w5:=0;//SpinEdit9.Value;
+  MOX.Parts[SelectedTreeNode].TypeID:=RGDetailType.ItemIndex;
+  MOX.Parts[SelectedTreeNode].x1:=LX1.Value/180*pi;//-YZ rotation
+  MOX.Parts[SelectedTreeNode].x2:=LX2.Value/180*pi;//-YZ rotation
+  MOX.Parts[SelectedTreeNode].y1:=LY1.Value/180*pi;//-YZ rotation
+  MOX.Parts[SelectedTreeNode].y2:=LY2.Value/180*pi;//-YZ rotation
+  MOX.Parts[SelectedTreeNode].z1:=LZ1.Value/180*pi;//-YZ rotation
+  MOX.Parts[SelectedTreeNode].z2:=LZ2.Value/180*pi;//-YZ rotation
+  TVParts.Items[SelectedTreeNode-1].Text:=MOX.Parts[SelectedTreeNode].Dname;
 end;
 
 
@@ -1798,9 +1766,11 @@ begin
   for m:=1 to MOX.Qty.Parts do
   for i:=1 to Imp.PolyCount do
     if Imp.Part[i]=m then begin//for all polys belong to current part
-    if i mod 1000 = 0 then begin
-    Shape2.Width:=round((i/Imp.PolyCount)*100);
-    Label35.Caption:=IntToStr(round((i/Imp.PolyCount)*100))+' %'; Label35.Repaint;
+    if i mod 1000 = 0 then
+    begin
+      Shape2.Width:=round((i/Imp.PolyCount)*100);
+      Label35.Caption:=IntToStr(round((i/Imp.PolyCount)*100))+' %';
+      Label35.Repaint;
     end;
 
       for h:=1 to 3 do begin //point-by-point
@@ -1844,11 +1814,12 @@ begin
   Shape2.Width:=100;
 
   h:=1;
-  for m:=1 to MOX.Qty.Parts do begin
+  for m:=1 to MOX.Qty.Parts do
+  begin
     t:=1;
     for i:=1 to MOX.Qty.Mat do
-      for k:=1 to VqtyAtSurf[m,i] do begin
-
+      for k:=1 to VqtyAtSurf[m,i] do
+      begin
         MOX.Vertice[h].X:=Imp.XYZ[altpoint[m,i,k,1]].X;
         MOX.Vertice[h].Y:=Imp.XYZ[altpoint[m,i,k,1]].Y;
         MOX.Vertice[h].Z:=Imp.XYZ[altpoint[m,i,k,1]].Z;
@@ -1903,9 +1874,11 @@ begin
     end;
 
   h:=1;
-  for m:=1 to MOX.Qty.Parts do begin
+  for m:=1 to MOX.Qty.Parts do
+  begin
     MOX.Parts[m].NumMat:=0;
-    for i:=1 to MOX.Qty.Mat do begin
+    for i:=1 to MOX.Qty.Mat do
+    begin
       MOX.Chunk[h,2]:=PqtyAtSurf[m,i];
       if h>1 then MOX.Chunk[h,1]:=MOX.Chunk[h-1,1]+MOX.Chunk[h-1,2] else MOX.Chunk[h,1]:=0;
       MOX.Qty.Poly:=MOX.Chunk[h,1]+MOX.Chunk[h,2];
@@ -1914,26 +1887,27 @@ begin
     end;
   end;
 
-  for i:=1 to MOX.Qty.Mat do begin
-  Material[i].Mtag:=inttohex((i-1),4);
-  Material[i].Title:=Imp.Mtl[i].Title;
-  if Imp.Mtl[i].TexName<>'' then Material[i].MatClass[2]:=3; //Make texture visible if there's one
-  Material[i].Color[1].Amb.R:=Imp.Mtl[i].Amb.R;
-  Material[i].Color[1].Amb.G:=Imp.Mtl[i].Amb.G;
-  Material[i].Color[1].Amb.B:=Imp.Mtl[i].Amb.B;
-  Material[i].Color[1].Dif.R:=Imp.Mtl[i].Dif.R;
-  Material[i].Color[1].Dif.G:=Imp.Mtl[i].Dif.G;
-  Material[i].Color[1].Dif.B:=Imp.Mtl[i].Dif.B;
-  Material[i].Color[1].Sp1.R:=Imp.Mtl[i].Spec.R;
-  Material[i].Color[1].Sp1.G:=Imp.Mtl[i].Spec.G;
-  Material[i].Color[1].Sp1.B:=Imp.Mtl[i].Spec.B;
-  Material[i].Color[1].Ref.R:=Imp.Mtl[i].Reflect;
-  Material[i].Color[1].Ref.G:=Imp.Mtl[i].Reflect;
-  Material[i].Color[1].Ref.B:=Imp.Mtl[i].Reflect;
-  Material[i].Transparency:=Imp.Mtl[i].Transparency;
-  Material[i].TexEdge.U:=1;
-  Material[i].TexEdge.V:=1;
-  Material[i].TexName:=Imp.Mtl[i].TexName;
+  for i:=1 to MOX.Qty.Mat do
+  begin
+    Material[i].Mtag:=inttohex((i-1),4);
+    Material[i].Title:=Imp.Mtl[i].Title;
+    if Imp.Mtl[i].TexName<>'' then Material[i].MatClass[2]:=3; //Make texture visible if there's one
+    Material[i].Color[1].Amb.R:=Imp.Mtl[i].Amb.R;
+    Material[i].Color[1].Amb.G:=Imp.Mtl[i].Amb.G;
+    Material[i].Color[1].Amb.B:=Imp.Mtl[i].Amb.B;
+    Material[i].Color[1].Dif.R:=Imp.Mtl[i].Dif.R;
+    Material[i].Color[1].Dif.G:=Imp.Mtl[i].Dif.G;
+    Material[i].Color[1].Dif.B:=Imp.Mtl[i].Dif.B;
+    Material[i].Color[1].Sp1.R:=Imp.Mtl[i].Spec.R;
+    Material[i].Color[1].Sp1.G:=Imp.Mtl[i].Spec.G;
+    Material[i].Color[1].Sp1.B:=Imp.Mtl[i].Spec.B;
+    Material[i].Color[1].Ref.R:=Imp.Mtl[i].Reflect;
+    Material[i].Color[1].Ref.G:=Imp.Mtl[i].Reflect;
+    Material[i].Color[1].Ref.B:=Imp.Mtl[i].Reflect;
+    Material[i].Transparency:=Imp.Mtl[i].Transparency;
+    Material[i].TexEdge.U:=1;
+    Material[i].TexEdge.V:=1;
+    Material[i].TexName:=Imp.Mtl[i].TexName;
   end;
 
   NumColors:=MAX_COLORS;
@@ -3267,15 +3241,15 @@ end;
 
 procedure TForm1.Button1Click(Sender: TObject);
 var
-  log:string;
-  aFilename:string;
+  log: string;
+  filename: string;
 begin
-  aFilename:=ExeDir+'LoadOBJ\clkdtm.obj';
-  //aFilename:=ExeDir+'LoadOBJ\oacwr2.obj';
-  if not LoadOBJ(aFilename,log) then Exit;
+  filename := ExeDir + 'LoadOBJ\clkdtm.obj';
+  //filename:=ExeDir+'LoadOBJ\oacwr2.obj';
+  if not LoadOBJ(filename, log) then Exit;
   Memo1.Lines.Add(log);
   ConverseImp_MOX;
-  UpdateOpenedFileInfo(aFilename);
+  UpdateOpenedFileInfo(filename);
 end;
 
 procedure TForm1.KnowScale(Sender: TObject);
@@ -3293,7 +3267,7 @@ begin
     AbsMax := max(AbsMax, MOX.Vertice[i].Z);
   end;
 
-  zoom := sqrt(5.5 / (AbsMax - AbsMin)); // 5.5 looks about right
+  zoom := Sqrt(5.5 / (AbsMax - AbsMin)); // 5.5 looks about right
 end;
 
 
@@ -3317,25 +3291,25 @@ begin
   inc(CPOHead.Qty);
   IDnew:=CPOHead.Qty;
 
-    CPO[IDnew].Format:=3;
-    CPO[IDnew].PosX:=0;
-    CPO[IDnew].PosY:=0;
-    CPO[IDnew].PosZ:=0;
-    Angles2Matrix(0,0,0, @CPO[IDnew].Matrix9, 9);
+  CPO[IDnew].Format:=3;
+  CPO[IDnew].PosX:=0;
+  CPO[IDnew].PosY:=0;
+  CPO[IDnew].PosZ:=0;
+  Angles2Matrix(0,0,0, @CPO[IDnew].Matrix9, 9);
 
-    CPO[IDnew].VerticeCount:=Imp.VerticeCount;
-    CPO[IDnew].PolyCount:=Imp.PolyCount;
-    CPO[IDnew].IndiceSize:=Imp.PolyCount*6+Imp.PolyCount*2; //indices+indicecountperpoly
-    CPO[IDnew].Clear1:=0;
-    for i:=1 to Imp.VerticeCount do
-      CPO[IDnew].Vertices[i]:=Imp.XYZ[i];
+  CPO[IDnew].VerticeCount:=Imp.VerticeCount;
+  CPO[IDnew].PolyCount:=Imp.PolyCount;
+  CPO[IDnew].IndiceSize:=Imp.PolyCount*6+Imp.PolyCount*2; //indices+indicecountperpoly
+  CPO[IDnew].Clear1:=0;
+  for i:=1 to Imp.VerticeCount do
+    CPO[IDnew].Vertices[i]:=Imp.XYZ[i];
 
-    for i:=1 to Imp.PolyCount do
-    for h:=1 to 4 do
-    case h of
-      1: CPO[IDnew].Indices[(i-1)*4+h]:=3;
-      2..4: CPO[IDnew].Indices[(i-1)*4+h]:=Imp.Faces[i,h-1]-1;
-    end;
+  for i:=1 to Imp.PolyCount do
+  for h:=1 to 4 do
+  case h of
+    1: CPO[IDnew].Indices[(i-1)*4+h]:=3;
+    2..4: CPO[IDnew].Indices[(i-1)*4+h]:=Imp.Faces[i,h-1]-1;
+  end;
 
   SendDataToUI(uiCPO);
 
