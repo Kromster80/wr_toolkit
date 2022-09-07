@@ -28,28 +28,25 @@ type
     fType1, fType2: Word;
     fPosition: Vector3f;
     fScale: Vector3f;
-    u1: array [1 .. 6] of ShortInt;
-    fMatrix:array[1..9]of Single; //Rotation
-    fTarget:Vector3f;
-    u2:array[1..3]of SmallInt;
-    Changed:Boolean;
-    function  GetTriggerType: Word;
+    u1: array [1 .. 6] of ShortInt; // Unknown
+    fMatrix: array[1..9]of Single; //Rotation
+    fTarget: Vector3f;
+    u2: array[1..3]of SmallInt; // Unknown
+    fChanged: Boolean;
     procedure SetTriggerType(aValue:word);
-    procedure SetPosition(aValue:Vector3f);
     procedure SetScale(aValue:Vector3f);
     function  GetRotation:Vector3i;
     procedure SetRotation(aValue:Vector3i);
-    procedure SetTarget(aValue:Vector3f);
     function  GetFlags:string;
   public
     constructor Create;
     procedure LoadFromStream(Stream:TMemoryStream);
     procedure SaveToStream(Stream:TMemoryStream);
-    property TriggerType: Word read GetTriggerType write SetTriggerType;
-    property Position: Vector3f read fPosition write SetPosition;
+    property TriggerType: Word read fType1 write SetTriggerType;
+    property Position: Vector3f read fPosition write fPosition;
     property Scale: Vector3f read fScale write SetScale;
     property Rotation: Vector3i read GetRotation write SetRotation;
-    property Target: Vector3f read fTarget write SetTarget;
+    property Target: Vector3f read fTarget write fTarget;
     property Flags: string read GetFlags;
     function Title: string;
   end;
@@ -82,6 +79,7 @@ type
 implementation
 
 
+{ TSTrigger }
 constructor TSTrigger.Create;
 var
   I: Integer;
@@ -138,13 +136,7 @@ begin
                                      Stream.Write(u2, 6);
                                    end;
   end;
-  Changed := false;
-end;
-
-
-function TSTrigger.GetTriggerType: Word;
-begin
-  Result := fType1;
+  fChanged := False;
 end;
 
 
@@ -152,12 +144,6 @@ procedure TSTrigger.SetTriggerType(aValue: Word);
 begin
   fType1 := aValue;
   fType2 := aValue;
-end;
-
-
-procedure TSTrigger.SetPosition(aValue: Vector3f);
-begin
-  fPosition := aValue;
 end;
 
 
@@ -184,12 +170,6 @@ end;
 procedure TSTrigger.SetRotation(aValue: Vector3i);
 begin
   Angles2Matrix(aValue.X, aValue.Y, aValue.Z, @fMatrix, 9);
-end;
-
-
-procedure TSTrigger.SetTarget(aValue: Vector3f);
-begin
-  fTarget := aValue;
 end;
 
 
@@ -240,7 +220,7 @@ var
 begin
   Result := fChanged;
   for I := 0 to Count - 1 do
-    Result := Result and Triggers[I].Changed;
+    Result := Result and Triggers[I].fChanged;
 end;
 
 
@@ -258,19 +238,18 @@ end;
 
 function TSTriggersCollection.AddTrigger(aPos: vector3f): Boolean;
 var
-  T: TSTrigger;
+  newTrigger: TSTrigger;
 begin
   if Count > 255 then
   begin
-    MessageBox(0, 'Can''t add more than 256 objects to a scenery', 'Warning', MB_ICONEXCLAMATION or MB_OK);
-    Result := False;
-    Exit;
+    MessageBox(0, 'Can''t add more than 256 triggers to a scenery', 'Warning', MB_ICONEXCLAMATION or MB_OK);
+    Exit(False);
   end;
 
-  T := TSTrigger.Create;
-  T.Position := aPos;
+  newTrigger := TSTrigger.Create;
+  newTrigger.Position := aPos;
 
-  fTriggers.Add(T);
+  fTriggers.Add(newTrigger);
 
   fChanged := True;
   Result := True;

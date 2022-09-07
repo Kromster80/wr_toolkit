@@ -31,6 +31,9 @@ const
                                            //(e.g. shadow tracing for backdrop grid of scenery)    
 
 
+const
+  DIALOG_FILTER_LIGHTS = 'Lights list (LightsList.dat)|*.dat';
+
 type TEditingFormat = (ef_WR2, ef_N, ef_CT, ef_BW);
 
 type RenderModeTypes=(rmSchem=0,

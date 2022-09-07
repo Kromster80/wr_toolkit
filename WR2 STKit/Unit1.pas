@@ -9,6 +9,7 @@ uses
 
 type
   TCarDrivingMode = (cdm_Sim, cdm_Arcade);
+
 const
   CarDrivingMode: array [TCarDrivingMode] of string = ('Sim', 'Arcade');
 
@@ -5617,15 +5618,15 @@ procedure TForm1.ExportLightsClick(Sender: TObject);
 var
   f:file;
 begin
-if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_LightsList.dat',
-       SceneryPath,'Lights list (LightsList.dat)|*.dat') then exit;
+  if not RunSaveDialog(SaveDialog, Scenery + '_' + SceneryVersion + '_LightsList.dat', SceneryPath, DIALOG_FILTER_LIGHTS) then
+    Exit;
 
-assignfile(f,SaveDialog.FileName); rewrite(f,1);
-blockwrite(f,'STKit2'+#0+#0,8);    //Name
-blockwrite(f,Qty.Lights,4);    //Name
-blockwrite(f,Light[1].Mode,Qty.Lights*88);
-blockwrite(f,LightW[1].Radius,Qty.Lights*4);
-closefile(f);
+  assignfile(f,SaveDialog.FileName); rewrite(f,1);
+  blockwrite(f,'STKit2'+#0+#0,8);    //Name
+  blockwrite(f,Qty.Lights,4);    //Name
+  blockwrite(f,Light[1].Mode,Qty.Lights*88);
+  blockwrite(f,LightW[1].Radius,Qty.Lights*4);
+  closefile(f);
 end;
 
 procedure TForm1.ImportLightsClick(Sender: TObject);
@@ -5636,7 +5637,7 @@ begin
 //if AutoImportLightsList<>'' then
 //OpenDialog.FileName:=AutoImportLightsList
 //else
-if not RunOpenDialog(OpenDialog,'',SceneryPath,'Lights list (LightsList.dat)|*.dat') then exit;
+if not RunOpenDialog(OpenDialog,'',SceneryPath, DIALOG_FILTER_LIGHTS) then exit;
 //AutoImportLightsList:='';
 
 assignfile(f,OpenDialog.FileName); reset(f,1);
