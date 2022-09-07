@@ -1,11 +1,9 @@
 program AFC11NMan;
-
 uses
   Forms,
   Unit1 in 'Unit1.pas' {Form1},
-  SupprtUnit2 in 'SupprtUnit2.pas',
   Unit2 in 'Unit2.pas' {Form2},
-  WR_AboutBox in 'WR_AboutBox.pas' {AboutForm};
+  WR_AboutBox in '..\_Common_\WR_AboutBox.pas' {AboutForm};
 
 {$R *.res}
 

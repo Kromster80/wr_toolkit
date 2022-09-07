@@ -25,7 +25,6 @@ type
     Shape1: TShape;
     Label1: TLabel;
     procedure FormCreate(Sender: TObject);
-    procedure OpenDS(Sender: TObject; filename:string);
     procedure SaveDS(Sender: TObject);
     procedure SaveProfiles(Sender: TObject);
     procedure AddTracksToDS(Sender: TObject);
@@ -46,10 +45,16 @@ type
     procedure WriteINI;
     procedure GetAutoInfo(s1:string;i1:integer);
     procedure GetProfileInfo(s1:string;i1:integer);
+    procedure OpenDS(afilename:string);
   end;
 
 const
- MaxCars=256;
+  MaxCars=256;
+
+  PresetColor: array[1..15]of TColor = (
+    $000000,$000080,$0000D0,$0060C0,$00B0D0,
+    $0080F0,$D0D0D0,$404040,$405000,$006000,
+    $600000,$A05050,$602060,$909090,$808080);
 
 var
   Form1: TForm1;
@@ -147,16 +152,20 @@ var
   end;
 
 implementation
+uses
+  Unit2, WR_AboutBox;
 
 {$R *.dfm}
-uses SupprtUnit2, Unit2, WR_AboutBox;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   Form2.Show;
   Form2.Repaint;
-  if fileexists('krom.dev') then ChDir('D:\Alarm for Cobra 11 - Nitro');
-  RootDir:=GetCurrentDir;
+
+  if FileExists('krom.dev') then
+    ChDir('D:\Alarm for Cobra 11 - Nitro');
+
+  RootDir := GetCurrentDir;
   if not fileexists('FrontEnd\Cobra11.ds') then
   begin
     Form2.FormStyle:=fsNormal;
@@ -164,19 +173,20 @@ begin
     Form2.Close;
     exit;
   end;
-  if not FileExists('FrontEnd\Cobra11.bak') then CopyFile('FrontEnd\Cobra11.ds','FrontEnd\Cobra11.bak',true);
-  if fileexists('FrontEnd\Cobra11.ds') then OpenDS(nil,'FrontEnd\Cobra11.ds');
+  if not FileExists('FrontEnd\Cobra11.bak') then CopyFile('FrontEnd\Cobra11.ds', 'FrontEnd\Cobra11.bak', True);
+  if fileexists('FrontEnd\Cobra11.ds') then OpenDS('FrontEnd\Cobra11.ds');
   ElapsedTime(@TimeCode);
   Form2.Label2.Caption:='Scanning: Profiles ...'; Form2.Label2.Refresh; SearchProfiles(nil);
-  Form2.Label2.Caption:='Scanning: Cars ...';     Form2.Label2.Refresh; SearchAutos(nil);         //Form2.Memo1.Lines.Add('Autos - '+ElapsedTime(@TimeCode));
+  Form2.Label2.Caption:='Scanning: Cars ...';     Form2.Label2.Refresh; SearchAutos(nil);
+  //Form2.Memo1.Lines.Add('Autos - '+ElapsedTime(@TimeCode));
   if Form2.Showing then Form2.Destroy;
   PopulateCarList(nil);
   ReadINI;
 end;
 
-procedure TForm1.OpenDS(Sender: TObject; filename:string);
+procedure TForm1.OpenDS(afilename:string);
 begin
-assignfile(f,filename); FileMode:=0; reset(f,1); FileMode:=2;
+assignfile(f,afilename); FileMode:=0; reset(f,1); FileMode:=2;
 blockread(f,Header,33);
 DSqty:=ord(Header[9]);
 setlength(TB,DSqty+1);
@@ -842,10 +852,12 @@ begin
     TrackBar1.Position:=AddonCar[CLBCars.ItemIndex+1].ColorID;
 end;
 
+
 procedure TForm1.Info(Sender: TObject);
 begin
   AboutForm.Show('AFC11N Manager', 'Version 0.1c (08 Sep 2007)', 'Manages AFC11 addons.','AFC11NMAN' );
 end;
+
 
 procedure TForm1.WriteINI;
 begin
@@ -878,6 +890,7 @@ begin
 
   closefile(ft);
 end;
+
 
 procedure TForm1.CBSimMissionsClick(Sender: TObject);
 begin
@@ -938,6 +951,7 @@ begin
   CLBClickCheck(nil);
 end;
 
+
 procedure TForm1.PopulateCarList(Sender: TObject);
 var i:integer;
 begin
@@ -948,10 +962,12 @@ begin
   CLBCars.Refresh;
 end;
 
+
 procedure TForm1.CBSortCarsClick(Sender: TObject);
 begin
   CLBCars.Sorted:=CBSortCars.Checked;
 end;
+
 
 procedure TForm1.BitBtn2Click(Sender: TObject);
 begin
