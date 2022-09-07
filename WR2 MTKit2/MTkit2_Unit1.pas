@@ -382,6 +382,10 @@ type
     procedure Button2Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
+    fOpenedFileMask: string;
+    fOpenedFolder: string;
+    fRenderMode: TRenderMode;
+
     procedure LoadSettingsFromIni(const aFilename: string);
     procedure SaveSettingsToIni(const aFilename: string);
     procedure OnIdle(Sender: TObject; var Done: Boolean);
@@ -438,11 +442,8 @@ var
     LightVec,Colli,Wire,UVMap:Boolean;
   end;
 
-  Opened3DMask: string; //Opened3DFileNameMask
-  OpenedFolder: string; //OpenedFolderMask
   ExeDir: string;
   ActivePage: TActivePage;
-  RenderMode: rmRenderMode=rmOpenGL;
   RenderObject: TRenderObjectSet;
   CameraAction: string='';
 
@@ -650,7 +651,7 @@ begin
     FileListBox1.FileName := aFilename;
     FileListBox1Click(nil);
   end else
-    OpenedFolder := ExeDir;
+    fOpenedFolder := ExeDir;
 
   DoClientAreaResize(Form1);
 end;
@@ -1092,8 +1093,8 @@ begin
     glEnable(GL_LIGHTING);
 
     if roMOX in RenderObject then begin
-      if RenderMode=rmShaders then RenderShaders;
-      if RenderMode=rmOpenGL then begin
+      if fRenderMode = rmShaders then RenderShaders;
+      if fRenderMode = rmOpenGL then begin
         RenderOpenGL;
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
         RenderDirt('', TBDirt.Position);
@@ -1263,22 +1264,22 @@ end;
 
 function TForm1.TryToLoadTexture(const aFilename: string):cardinal;
 var
-  TexID: Cardinal;
-  FileName: string;
+  texId: Cardinal;
+  fname: string;
 begin
-  TexID := 0;
+  texId := 0;
   //Try in following order:
   //Textures_PC\TGA > Textures\TGA > Textures_PC\PTX > Textures\PTX
-  FileName := TruncateExt(aFileName) + '.';
-  if FileExists(OpenedFolder + '\Textures_PC\' + FileName + 'TGA') then
-    LoadTexture(OpenedFolder + '\Textures_PC\' + FileName + 'TGA', TexID, 0)
-  else if FileExists(OpenedFolder + '\Textures\' + FileName + 'TGA') then
-    LoadTexture(OpenedFolder + '\Textures\' + FileName + 'TGA', TexID, 0)
-  else if FileExists(OpenedFolder + '\Textures_PC\' + FileName + 'PTX') then
-    LoadTexturePTX(OpenedFolder + '\Textures_PC\' + FileName + 'PTX', TexID)
-  else if FileExists(OpenedFolder + '\Textures\' + FileName + 'PTX') then
-    LoadTexturePTX(OpenedFolder + '\Textures\' + FileName + 'PTX', TexID);
-  Result := TexID;
+  fname := TruncateExt(aFileName) + '.';
+  if FileExists(fOpenedFolder + '\Textures_PC\' + fname + 'TGA') then
+    LoadTexture(fOpenedFolder + '\Textures_PC\' + fname + 'TGA', texId, 0)
+  else if FileExists(fOpenedFolder + '\Textures\' + fname + 'TGA') then
+    LoadTexture(fOpenedFolder + '\Textures\' + fname + 'TGA', texId, 0)
+  else if FileExists(fOpenedFolder + '\Textures_PC\' + fname + 'PTX') then
+    LoadTexturePTX(fOpenedFolder + '\Textures_PC\' + fname + 'PTX', texId)
+  else if FileExists(fOpenedFolder + '\Textures\' + fname + 'PTX') then
+    LoadTexturePTX(fOpenedFolder + '\Textures\' + fname + 'PTX', texId);
+  Result := texId;
 end;
 
 
@@ -1682,11 +1683,13 @@ end;
 
 procedure TForm1.UpdateOpenedFileInfo(const aFilename: string);
 begin
-  Opened3DMask:=decs(aFilename,4,0);
-  OpenedFolder:=ExtractFileDir(Opened3DMask);
-  if OpenedFolder='' then OpenedFolder:=ExeDir;
-  Form1.Caption:='MTKit2 - '+ExtractFileName(Opened3DMask);
-  Application.Title:='MTKit2 - '+ExtractFileName(Opened3DMask);
+  fOpenedFileMask := decs(aFilename, 4, 0);
+  fOpenedFolder := ExtractFileDir(fOpenedFileMask);
+  if fOpenedFolder = '' then
+    fOpenedFolder := ExeDir;
+
+  Form1.Caption := 'MTKit2 - ' + ExtractFileName(fOpenedFileMask);
+  Application.Title := 'MTKit2 - ' + ExtractFileName(fOpenedFileMask);
 end;
 
 
@@ -1984,8 +1987,8 @@ end;
 
 procedure TForm1.MatTexBrowseClick(Sender: TObject);
 begin
-  if MatID=0 then Exit;
-  if not RunOpenDialog(Open1,'',OpenedFolder,'Targa, PTX image files (*.ptx; *.tga)|*.tga;*.ptx') then Exit;
+  if MatID = 0 then Exit;
+  if not RunOpenDialog(Open1,'', fOpenedFolder,'Targa, PTX image files (*.ptx; *.tga)|*.tga;*.ptx') then Exit;
   ETextureName.Text:=ExtractFileName(Open1.FileName);
   MatTexReloadClick(nil);
 end;
@@ -2090,7 +2093,7 @@ end;
 
 procedure TForm1.SaveBlinkClick(Sender: TObject);
 begin
-  if not RunSaveDialog(Save1, Opened3DMask+'.lsf','','MTKit2 Lights Setup Files (*.lsf)|*.lsf','lsf') then Exit;
+  if not RunSaveDialog(Save1, fOpenedFileMask + '.lsf', '', 'MTKit2 Lights Setup Files (*.lsf)|*.lsf', 'lsf') then Exit;
   SaveLights(Save1.FileName);
 end;
 
@@ -2429,7 +2432,7 @@ end;
 
 procedure TForm1.PSFSaveClick(Sender: TObject);
 begin
-  if not RunSaveDialog(Save1,Opened3DMask+'.psf','','MTKit2 Pivot Setup Files (*.psf)|*.psf','psf') then Exit;
+  if not RunSaveDialog(Save1, fOpenedFileMask + '.psf', '', 'MTKit2 Pivot Setup Files (*.psf)|*.psf', 'psf') then Exit;
   Memo1.Lines.Add('Assigning PSF file ...');
   SavePSF(Save1.FileName);
   Memo1.Lines.Add('PSF file closed');
@@ -2449,7 +2452,7 @@ end;
 
 procedure TForm1.PBFSaveClick(Sender: TObject);
 begin
-  if not RunSaveDialog(Save1,Opened3DMask+'_colli.pbf','','MTKit2 Part Behaviour Files (*.pbf)|*.pbf','pbf') then Exit;
+  if not RunSaveDialog(Save1, fOpenedFileMask + '_colli.pbf', '', 'MTKit2 Part Behaviour Files (*.pbf)|*.pbf', 'pbf') then Exit;
   Memo1.Lines.Add('Assigning PBF file ...');
   SavePBF(Save1.FileName);
   Memo1.Lines.Add('PBF file closed');
@@ -2559,7 +2562,7 @@ begin
     ShowUpClick(cuMOX);
       LoadMTL(decs(aFilename,4,0)+'.mtl');
       LoadTextures;
-      ScanVinyls(OpenedFolder);
+      ScanVinyls(fOpenedFolder);
       ShowUpClick(cuMTL);
     SetRenderObject([roMOX]);
     if LoadCOB(decs(aFilename,4,0)+'_colli.cob') then
@@ -2646,11 +2649,10 @@ end;
 
 procedure TForm1.CBRenderModeChange(Sender: TObject);
 begin
-  if not UseShaders then CBRenderMode.ItemIndex:=0;
-  case CBRenderMode.ItemIndex of
-    0: RenderMode:=rmOpenGL;
-    1: RenderMode:=rmShaders;
-  end;
+  if not UseShaders then
+    CBRenderMode.ItemIndex := 0;
+
+  fRenderMode:= TRenderMode(CBRenderMode.ItemIndex);
 end;
 
 
@@ -2934,25 +2936,25 @@ end;
 
 procedure TForm1.LoadMOXClick(Sender: TObject);
 begin
-  if not RunOpenDialog(Open1,'',OpenedFolder,'World Racing 2 object files (*.mox)|*.mox') then Exit;
+  if not RunOpenDialog(Open1,'',fOpenedFolder,'World Racing 2 object files (*.mox)|*.mox') then Exit;
   LoadFile(Open1.FileName,lmLoadAndShow);
 end;
 
 procedure TForm1.LoadCOBClick(Sender: TObject);
 begin
-  if not RunOpenDialog(Open1,'',OpenedFolder,'World Racing 2 collision files (*.cob)|*.cob') then Exit;
+  if not RunOpenDialog(Open1,'',fOpenedFolder,'World Racing 2 collision files (*.cob)|*.cob') then Exit;
   LoadFile(Open1.FileName,lmLoadAndShow);
 end;
 
 procedure TForm1.LoadCPOClick(Sender: TObject);
 begin
-  if not RunOpenDialog(Open1,'',OpenedFolder,'Alarm for Cobra 11 Nitro collision files (*.cpo)|*.cpo') then Exit;
+  if not RunOpenDialog(Open1,'',fOpenedFolder,'Alarm for Cobra 11 Nitro collision files (*.cpo)|*.cpo') then Exit;
   LoadFile(Open1.FileName,lmLoadAndShow);
 end;
 
 procedure TForm1.LoadTREE1Click(Sender: TObject);
 begin
-  if not RunOpenDialog(Open1,'',OpenedFolder,'World Racing 2 tree files (*.tree)|*.tree') then Exit;
+  if not RunOpenDialog(Open1,'',fOpenedFolder,'World Racing 2 tree files (*.tree)|*.tree') then Exit;
   LoadFile(Open1.FileName,lmLoadAndShow);
 end;
 
@@ -2960,7 +2962,7 @@ end;
 
 procedure TForm1.SaveMOXClick(Sender: TObject);
 begin
-  if not RunSaveDialog(Save1, Opened3DMask + '.mox', '', 'World Racing 2 object files (*.mox)|*.mox', 'mox') then Exit;
+  if not RunSaveDialog(Save1, fOpenedFileMask + '.mox', '', 'World Racing 2 object files (*.mox)|*.mox', 'mox') then Exit;
 
   Memo1.Lines.Add('Saving MOX file ...');
   SaveMOX(Save1.FileName);
@@ -2969,7 +2971,7 @@ end;
 
 procedure TForm1.SaveMTL1Click(Sender: TObject);
 begin
-  if not RunSaveDialog(Save1,Opened3DMask+'.mtl','','World Racing Material files (*.mtl)|*.mtl','mtl') then Exit;
+  if not RunSaveDialog(Save1, fOpenedFileMask+'.mtl','','World Racing Material files (*.mtl)|*.mtl','mtl') then Exit;
   //Save1.FileName:=AssureFileExt(Save1.FileName,'mtl');
   Memo1.Lines.Add('Saving MTL file ...');
   SaveMTL(Save1.FileName);
@@ -2978,14 +2980,14 @@ end;
 
 procedure TForm1.SaveCOB1Click(Sender: TObject);
 begin
-  if not RunSaveDialog(Save1,Opened3DMask+'_colli.cob','','World Racing 2 collision files (*.cob)|*.cob','cob') then Exit;
+  if not RunSaveDialog(Save1, fOpenedFileMask+'_colli.cob','','World Racing 2 collision files (*.cob)|*.cob','cob') then Exit;
   RebuildCOBBounds; //Need to recompute BBOX and normals
   SaveCOB(Save1.FileName);
 end;
 
 procedure TForm1.SaveCPO1Click(Sender: TObject);
 begin
-  if not RunSaveDialog(Save1,Opened3DMask+'.cpo','','World Racing 2 collision files (*.cpo)|*.cpo','cpo') then Exit;
+  if not RunSaveDialog(Save1, fOpenedFileMask+'.cpo','','World Racing 2 collision files (*.cpo)|*.cpo','cpo') then Exit;
   SaveCPO(Save1.FileName);
 end;
 
@@ -2995,7 +2997,7 @@ procedure TForm1.Import3DSMOX1Click(Sender: TObject);
 var
   log: string;
 begin
-  if not RunOpenDialog(Open1,'',OpenedFolder,'3DMax object files (*.3ds)|*.3ds') then Exit;
+  if not RunOpenDialog(Open1,'',fOpenedFolder,'3DMax object files (*.3ds)|*.3ds') then Exit;
   if not Load3DS(Open1.FileName,log) then Exit;
   Memo1.Lines.Add(log);
   RebuildImpNormals;
@@ -3007,7 +3009,7 @@ procedure TForm1.ImportOBJMOX1Click(Sender: TObject);
 var
   log: string;
 begin
-  if not RunOpenDialog(Open1,'',OpenedFolder,'OBJ object files (*.obj)|*.obj') then Exit;
+  if not RunOpenDialog(Open1,'',fOpenedFolder,'OBJ object files (*.obj)|*.obj') then Exit;
   if not LoadOBJ(Open1.FileName,log) then Exit;
   Memo1.Lines.Add(log);
   ConverseImp_MOX;
@@ -3018,7 +3020,7 @@ procedure TForm1.ImportLWO1Click(Sender: TObject);
 var
   log: string;
 begin
-  if not RunOpenDialog(Open1,'',OpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
+  if not RunOpenDialog(Open1,'',fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
   if not LoadLWO(Open1.FileName,log) then Exit;
   Memo1.Lines.Add(log);
   RebuildImpNormals;
@@ -3031,14 +3033,15 @@ procedure TForm1.ImportLWO2Click(Sender: TObject);
 begin
   ImportLWO1Click(nil);
 
-  LoadMTL(Opened3DMask+'.mtl');
+  LoadMTL(fOpenedFileMask+'.mtl');
   LoadTextures;
-  ScanVinyls(OpenedFolder);
+  ScanVinyls(fOpenedFolder);
   ShowUpClick(cuMTL);
 
-  LoadPSF(Opened3DMask+'.psf');
-  LoadPBF(Opened3DMask+'.pbf');
-  LoadLights(Opened3DMask+'.lsf');
+  LoadPSF(fOpenedFileMask+'.psf');
+  LoadPBF(fOpenedFileMask+'.pbf');
+  LoadLights(fOpenedFileMask+'.lsf');
+
   SendDataToUI(uiLights);
   BlinkerPaste.Enabled:=False;
 end;
@@ -3047,7 +3050,7 @@ end;
 procedure TForm1.ImportLWOCOB1Click(Sender: TObject);
 var Log: string;
 begin
-  if not RunOpenDialog(Open1,'',OpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
+  if not RunOpenDialog(Open1,'',fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
   LoadLWO(Open1.FileName, Log);
   ConverseImp_COB;
 end;
@@ -3057,7 +3060,7 @@ procedure TForm1.ExportMOX1Click(Sender: TObject);
 var
   doSpread: Boolean;
 begin
-  if not RunSaveDialog(Save1,Opened3DMask+'.lwo','','Lightwave 3D files (*.lwo)|*.lwo','lwo') then Exit;
+  if not RunSaveDialog(Save1, fOpenedFileMask+'.lwo','','Lightwave 3D files (*.lwo)|*.lwo','lwo') then Exit;
 
   Memo1.Lines.Add('Writing MOX>LWO file');
 
@@ -3071,7 +3074,7 @@ end;
 
 procedure TForm1.ExportCOB1Click(Sender: TObject);
 begin
-  if not RunSaveDialog(Save1,Opened3DMask+'_colli.lwo','','Lightwave 3D files (*.lwo)|*.lwo','lwo') then Exit;
+  if not RunSaveDialog(Save1, fOpenedFileMask+'_colli.lwo','','Lightwave 3D files (*.lwo)|*.lwo','lwo') then Exit;
   Memo1.Lines.Add('Writing COB>LWO file');
   SaveCOB2LWO(Save1.FileName);
   Memo1.Lines.Add('COB>LWO Save Complete');
@@ -3213,8 +3216,8 @@ begin
   I := CBVinyl.ItemIndex;
   if I < 1 then Exit;
 
-  if FileExists(OpenedFolder+'\Textures_PC\Vinyls\'+VinylsList[I]) then
-    LoadTexturePTX(OpenedFolder+'\Textures_PC\Vinyls\'+VinylsList[I], VinylsTex);
+  if FileExists(fOpenedFolder+'\Textures_PC\Vinyls\'+VinylsList[I]) then
+    LoadTexturePTX(fOpenedFolder+'\Textures_PC\Vinyls\'+VinylsList[I], VinylsTex);
 end;
 
 
@@ -3268,7 +3271,7 @@ var
   log:string;
   i,h,IDnew:Integer;
 begin
-  if not RunOpenDialog(Open1,'',OpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
+  if not RunOpenDialog(Open1,'',fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
   if not LoadLWO(Open1.FileName,log) then Exit;
   Memo1.Lines.Add(log);
 
@@ -3321,7 +3324,7 @@ begin
     Exit;
   end;
 
-  if not RunSaveDialog(Save1,Opened3DMask+'.lwo','','Lightwave 3D files (*.lwo)|*.lwo','lwo') then
+  if not RunSaveDialog(Save1, fOpenedFileMask+'.lwo','','Lightwave 3D files (*.lwo)|*.lwo','lwo') then
     Exit;
 
   Memo1.Lines.Add('Writing CPO>LWO file');

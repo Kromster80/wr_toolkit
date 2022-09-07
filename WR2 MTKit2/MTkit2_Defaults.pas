@@ -5,7 +5,7 @@ uses
 
 type
   TActivePage = (apMTL, apParts, apLights, apCOB, apCPO, apExtra, apBrowse);
-  rmRenderMode = (rmOpenGL, rmShaders);
+  TRenderMode = (rmOpenGL, rmShaders);
   TUIDataSection = (uiMOX, uiMTL, uiVinyl, uiLights, uiParts, uiCOB, uiCPO);
   TLoadMode = (lmJustLoad, lmLoadAndShow);
   TRenderObjectSet = set of (roMOX, roMOX_COB, roCOB, roCPO, roTREE);
