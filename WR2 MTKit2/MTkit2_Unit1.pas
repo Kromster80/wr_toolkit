@@ -1109,7 +1109,8 @@ begin
         glEnable(GL_LIGHTING);
       end;
       glDisable(GL_DEPTH_TEST);
-      if (ActivePage=apLights)or(RenderOpts.LightVec) then RenderLights(LBBlinkers.ItemIndex+1,RGActBlink.ItemIndex,ActivePage=apLights);
+      if (ActivePage = apLights) or RenderOpts.LightVec then
+        RenderLights(LBBlinkers.ItemIndex+1, TBlinkerPreviewMode(RGActBlink.ItemIndex), ActivePage = apLights, Lightvectors1.Checked);
       glEnable(GL_DEPTH_TEST);
     end;
 

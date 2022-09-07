@@ -4,23 +4,26 @@ uses
   OpenGL, dglOpenGL, kromOGLUtils, kromUtils, sysutils, Math, Windows,
   TGATexture, PTXTexture;
 
+type
+  TBlinkerPreviewMode = (bmNone, bmHeadBreaks, bmBlinkers, bmReverse, bmNitro);
+
   procedure SetRenderFrame(aHWND: HWND);
   procedure RenderInit;
-  function LoadFresnelShader:Boolean;
-  function RenderShaders:Boolean;
-  procedure RenderLights(ID, Mode:Integer; aShowDummy: Boolean);
-  procedure RenderCOB(ID:Integer);
-  procedure RenderCPO(ID:Integer);
+  function LoadFresnelShader: Boolean;
+  function RenderShaders: Boolean;
+  procedure RenderLights(aSelected: Integer; aMode: TBlinkerPreviewMode; aShowDummy, aVectors: Boolean);
+  procedure RenderCOB(ID: Integer);
+  procedure RenderCPO(ID: Integer);
   procedure RenderTREE;
   procedure RenderGrid;
-  procedure RenderUVGrid(ShowGrid:Boolean);
+  procedure RenderUVGrid(ShowGrid: Boolean);
   procedure CompileCommonObjects;
 
 const
   MAX_MAT_CLASS = 4;
 
 var
-  vs:Integer;
+  vs: Integer;
   po,fs: array [0..MAX_MAT_CLASS, 0..MAX_MAT_CLASS] of Integer;
   S_Tex1, S_Tex2, S_Tex3, S_Tex4: Integer;
   Mat_Ambi, Mat_Diff, Mat_Spec, Mat_Spec2, Mat_Refl, Mat_Dirt, Mat_ReflF: Integer;
@@ -401,14 +404,14 @@ glPushMatrix;
     glDepthFunc(GL_LEQUAL);
   end;
 
-glPopMatrix;
+  glPopMatrix;
 end;
 
 
-procedure RenderLights(ID, Mode: Integer; aShowDummy: Boolean);
+procedure RenderLights(aSelected: Integer; aMode: TBlinkerPreviewMode; aShowDummy, aVectors: Boolean);
 var
-  i:Integer;
-  c:Integer;
+  I: Integer;
+  c: Integer;
   cam: array [1..3]of Single;
 begin
   glDisable(GL_LIGHTING);
@@ -420,17 +423,18 @@ begin
   Angles2Vector(-xRot, yRot, 0, cam[1], cam[2], cam[3]);
   Normalize(cam[1],cam[2],cam[3]);
 
-  for i:=1 to MOX.Qty.Blink do begin
-    if Form1.Lightvectors1.Checked = true then
+  for I := 1 to MOX.Qty.Blink do
+  begin
+    if aVectors then
     begin
       glBindTexture(GL_TEXTURE_2D, 0);
       glPushMatrix;
-        glTranslate(MOX.Blinkers[i].Matrix[4,1],MOX.Blinkers[i].Matrix[4,2],MOX.Blinkers[i].Matrix[4,3]);
-        //glMultMatrixf(@MOX.Blinkers[i].Matrix);
+        glTranslate(MOX.Blinkers[I].Matrix[4,1],MOX.Blinkers[I].Matrix[4,2],MOX.Blinkers[I].Matrix[4,3]);
+        //glMultMatrixf(@MOX.Blinkers[I].Matrix);
         glBegin(GL_LINES);
-        glColor4ub(MOX.Blinkers[i].R,MOX.Blinkers[i].G,MOX.Blinkers[i].B,0);
-        glVertex3f(MOX.Blinkers[i].Matrix[3,1]*10,MOX.Blinkers[i].Matrix[3,2]*10,MOX.Blinkers[i].Matrix[3,3]*10);
-        glColor4ub(MOX.Blinkers[i].R,MOX.Blinkers[i].G,MOX.Blinkers[i].B,255);
+        glColor4ub(MOX.Blinkers[I].R,MOX.Blinkers[I].G,MOX.Blinkers[I].B,0);
+        glVertex3f(MOX.Blinkers[I].Matrix[3,1]*10,MOX.Blinkers[I].Matrix[3,2]*10,MOX.Blinkers[I].Matrix[3,3]*10);
+        glColor4ub(MOX.Blinkers[I].R,MOX.Blinkers[I].G,MOX.Blinkers[I].B,255);
         glVertex3f(0,0,0);
         glEnd;
       glPopMatrix;
@@ -439,86 +443,90 @@ begin
     glPushMatrix;
 
     // Prepare texture
-    case MOX.Blinkers[i].BlinkerType of
+    case MOX.Blinkers[I].BlinkerType of
       1:      begin
                 glColor3f(1,1,1);
                 glBindTexture(GL_TEXTURE_2D, FlameTex);
-                glMultMatrixf(@MOX.Blinkers[i].Matrix);
+                glMultMatrixf(@MOX.Blinkers[I].Matrix);
               end;
       2..9:   begin
                 glBindTexture(GL_TEXTURE_2D, LensFlareTex);
-                glTranslate(MOX.Blinkers[i].Matrix[4,1],MOX.Blinkers[i].Matrix[4,2],MOX.Blinkers[i].Matrix[4,3]);
+                glTranslate(MOX.Blinkers[I].Matrix[4,1],MOX.Blinkers[I].Matrix[4,2],MOX.Blinkers[I].Matrix[4,3]);
                 glRotatef(xRot, 0,-1, 0);
                 glRotatef(yRot,-1, 0, 0);
                 //find DOT between view and blinker vector
                 c := Round(
-                (DotProduct(MOX.Blinkers[i].Matrix[3,1],
-                            MOX.Blinkers[i].Matrix[3,2],
-                            MOX.Blinkers[i].Matrix[3,3],
+                (DotProduct(MOX.Blinkers[I].Matrix[3,1],
+                            MOX.Blinkers[I].Matrix[3,2],
+                            MOX.Blinkers[I].Matrix[3,3],
                             cam[1], cam[2], cam[3]
                             )-0.325)*255*(1/(1-0.325))); //use 0.325 .. 1.0 as 0..1
                 c := EnsureRange(c, 0, 255);
-                glColor4ub(MOX.Blinkers[i].R,MOX.Blinkers[i].G,MOX.Blinkers[i].B,c); //set visibility according to DOT
+                glColor4ub(MOX.Blinkers[I].R,MOX.Blinkers[I].G,MOX.Blinkers[I].B,c); //set visibility according to DOT
               end;
 
       16..24: begin
                 glColor3f(1,1,1);
                 glBindTexture(GL_TEXTURE_2D, DummyTex);
-                glMultMatrixf(@MOX.Blinkers[i].Matrix);
+                glMultMatrixf(@MOX.Blinkers[I].Matrix);
               end;
     end;
 
-    case MOX.Blinkers[i].BlinkerType of
-      1:  begin  //Flame
-            glDepthFunc(GL_LEQUAL);
-            if Mode=4 then glScale(MOX.Blinkers[i].sMin,MOX.Blinkers[i].sMin,MOX.Blinkers[i].sMax+RandomS(0.125))
-                      else glkScale(MOX.Blinkers[i].sMin);
-            glCallList(FlameSprite);
-            glDepthFunc(GL_ALWAYS);
-          end;
-      2,3://HeadLights //BrakeLights
-          if Mode=1 then glkScale(MOX.Blinkers[i].sMax)
-                    else glkScale(MOX.Blinkers[i].sMin);
-      4:  //ReverseLights
-          if Mode=3 then glkScale(MOX.Blinkers[i].sMin)
-                    else glkScale(0);
-      5,6: if (Mode=2) and (round(GetTickCount/500)mod 2 = 0) then //Left //Right
-            glkScale(MOX.Blinkers[i].sMin) else glkScale(0);
-
-      7:  //Start gate
-          if (MOX.Blinkers[i].BlinkerType <> 8) and (Round(GetTickCount/500)mod 2 = 0) then
-            glkScale(MOX.Blinkers[i].sMin) else glkScale(0);
-
-      8:  //Strobe
-          if (MOX.Blinkers[i].BlinkerType <> 8) and (Round(GetTickCount/500)mod 2 = 0) then
-            glkScale(MOX.Blinkers[i].sMin) else glkScale(0);
-
-      9: //Flashing
-          begin //Emergency
-            if round(GetTickCount/1000*3) mod 2 = 0 then glscale(1,-1,1);
-            glkScale(MOX.Blinkers[i].sMin);
-          end;
-
-      16: //MotorLocaion
-          begin
-            glColor4f(1,1,1,1);
-            glkScale(0.8/zoom);
-          end;
-
-      20: //AFC11 WheelPosition
-          begin
-            glColor4f(0,0.8,0,1);
-            glkScale(0.8/zoom);
-          end;
-
-      24: //AFC11 TowingPoint
-          begin
-            glColor4f(0,0.8,0.8,1);
-            glkScale(0.8/zoom);
-          end;
+    case MOX.Blinkers[I].BlinkerType of
+      1:    //Nitro Flame
+            begin
+              glDepthFunc(GL_LEQUAL);
+              if aMode = bmNitro then
+                glScale(MOX.Blinkers[I].sMin, MOX.Blinkers[I].sMin, MOX.Blinkers[I].sMax + RandomS(0.125))
+              else
+                glkScale(MOX.Blinkers[I].sMin);
+              glCallList(FlameSprite);
+              glDepthFunc(GL_ALWAYS);
+            end;
+      2,3:  //HeadLights //BrakeLights
+            if aMode = bmHeadBreaks then
+              glkScale(MOX.Blinkers[I].sMax)
+            else
+              glkScale(MOX.Blinkers[I].sMin);
+      4:    //ReverseLights
+            if aMode = bmReverse then
+              glkScale(MOX.Blinkers[I].sMin)
+            else
+              glkScale(0);
+      5,6:  // Left and Right
+            if (aMode = bmBlinkers) and (Round(GetTickCount/500)mod 2 = 0) then
+              glkScale(MOX.Blinkers[I].sMin)
+            else
+              glkScale(0);
+      7:    // Start gate
+            if (MOX.Blinkers[I].BlinkerType <> 8) and (Round(GetTickCount/500)mod 2 = 0) then
+              glkScale(MOX.Blinkers[I].sMin) else glkScale(0);
+      8:    // Strobe
+            if (MOX.Blinkers[I].BlinkerType <> 8) and (Round(GetTickCount/500)mod 2 = 0) then
+              glkScale(MOX.Blinkers[I].sMin) else glkScale(0);
+      9:    // Flashing
+            begin //Emergency
+              if round(GetTickCount/1000*3) mod 2 = 0 then glscale(1,-1,1);
+              glkScale(MOX.Blinkers[I].sMin);
+            end;
+      16:   // MotorLocaion
+            begin
+              glColor4f(1,1,1,1);
+              glkScale(0.8/zoom);
+            end;
+      20:   // AFC11 WheelPosition
+            begin
+              glColor4f(0,0.8,0,1);
+              glkScale(0.8/zoom);
+            end;
+      24:   // AFC11 TowingPoint
+            begin
+              glColor4f(0,0.8,0.8,1);
+              glkScale(0.8/zoom);
+            end;
     end;
 
-    case MOX.Blinkers[i].BlinkerType of
+    case MOX.Blinkers[I].BlinkerType of
       //1:     glCallList(FlameSprite);
       2..9:   glCallList(Sprite1Side);
       16..24: if aShowDummy then glCallList(Sprite2Side);
@@ -526,14 +534,19 @@ begin
 
     glPopMatrix;
 
-    if ID = i then
+    if I = aSelected then
     begin
       glPushMatrix;
-      glMultMatrixf(@MOX.Blinkers[i].Matrix);
-      glrotate((round(GetTickCount/15)mod 90),0,0,1);
-      glColor4f(0,0,1,1); glBindTexture(GL_TEXTURE_2D, SelectionTex);
-      glkScale(0.8/zoom); glCallList(Sprite2Side);
-      glPopMatrix;
+      try
+        glMultMatrixf(@MOX.Blinkers[I].Matrix);
+        glRotate((Round(GetTickCount/15)mod 90),0,0,1);
+        glColor4f(0, 0, 1, 1);
+        glBindTexture(GL_TEXTURE_2D, SelectionTex);
+        glkScale(0.8 / zoom);
+        glCallList(Sprite2Side);
+      finally
+        glPopMatrix;
+      end;
     end;
   end;
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
