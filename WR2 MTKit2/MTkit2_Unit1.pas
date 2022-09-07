@@ -503,8 +503,9 @@ var
       x1,x2,y1,y2,z1,z2: Single;
       w4,w5: Integer;
     end;
-    Blinkers: array [1..MAX_BLINKERS]of record
-      TypeID: Integer;                      //4 Type of object
+
+    Blinkers: array [1..MAX_BLINKERS] of record
+      BlinkerType: Integer;                      //4b Type of object
       sMin,sMax,Freq: Single;               //Min,Max
       B,G,R,A: Byte;                //20
       z1,Parent: smallint;                      //24
@@ -932,7 +933,7 @@ begin
                 oldID1:=LBBlinkers.ItemIndex;
                 LBBlinkers.Clear;
                 for ii:=1 to MOX.Qty.Blink do
-                  LBBlinkers.Items.Add(IntToStr(ii)+'. '+BLINKER_TYPE_SHORTNAME[MOX.Blinkers[ii].TypeID]+'  '+
+                  LBBlinkers.Items.Add(IntToStr(ii)+'. '+BLINKER_TYPE_SHORTNAME[MOX.Blinkers[ii].BlinkerType]+'  '+
                     FloatToStrF(MOX.Blinkers[ii].sMin,ffGeneral,5,7)+'->'+
                     FloatToStrF(MOX.Blinkers[ii].sMax,ffGeneral,5,7)+'  '+
                     IntToStr(MOX.Blinkers[ii].Parent)
@@ -1285,22 +1286,24 @@ end;
 
 procedure TForm1.LBBlinkersClick(Sender: TObject);
 var
-  x: Integer;
+  blinkerType: Integer;
   ax,ay,az: Integer;
   m: array [1..9] of Single;
 begin
 LitID:=LBBlinkers.ItemIndex+1;
 if LitID=0 then Exit;
 
-LightRefresh:=True;
-x:=MOX.Blinkers[LitID].TypeID;
-case x of //Fit 0..24 IDs in RG range of 0..12
-  16: x:=10;
-  20: x:=11;
-  24: x:=12;
-  33: x:=13;
-end;
-RGBlinkType.ItemIndex:=x;
+  LightRefresh:=True;
+  blinkerType := MOX.Blinkers[LitID].BlinkerType;
+  case blinkerType of //Fit 0..24 IDs in RG range of 0..12
+    16: blinkerType := 10;
+    20: blinkerType := 11;
+    24: blinkerType := 12;
+    33: blinkerType := 13;
+  end;
+
+RGBlinkType.ItemIndex := blinkerType;
+
 FS1.Value:=MOX.Blinkers[LitID].sMin;
 FS2.Value:=MOX.Blinkers[LitID].sMax;
 FS3.Value:=MOX.Blinkers[LitID].Freq;
@@ -1329,21 +1332,23 @@ end;
 
 procedure TForm1.BlinkChange(Sender: TObject);
 begin
-if LitID=0 then Exit;
-if LightRefresh then Exit;
-case RGBlinkType.ItemIndex of
-  0..9: MOX.Blinkers[LitID].TypeID:=RGBlinkType.ItemIndex;
-  10:   MOX.Blinkers[LitID].TypeID:=16;
-  11:   MOX.Blinkers[LitID].TypeID:=20;
-  12:   MOX.Blinkers[LitID].TypeID:=24;
-  13:   MOX.Blinkers[LitID].TypeID:=33;
-end;
-MOX.Blinkers[LitID].sMin:=FS1.Value;
-MOX.Blinkers[LitID].sMax:=FS2.Value;
-MOX.Blinkers[LitID].Freq:=FS3.Value;
-MOX.Blinkers[LitID].z1:=0;//S1.Value;
-MOX.Blinkers[LitID].Parent:=S2.Value;
-SendDataToUI(uiLights);
+  if LitID = 0 then Exit;
+  if LightRefresh then Exit;
+
+  case RGBlinkType.ItemIndex of
+    0..9: MOX.Blinkers[LitID].BlinkerType := RGBlinkType.ItemIndex;
+    10:   MOX.Blinkers[LitID].BlinkerType := 16;
+    11:   MOX.Blinkers[LitID].BlinkerType := 20;
+    12:   MOX.Blinkers[LitID].BlinkerType := 24;
+    13:   MOX.Blinkers[LitID].BlinkerType := 33;
+  end;
+
+  MOX.Blinkers[LitID].sMin:=FS1.Value;
+  MOX.Blinkers[LitID].sMax:=FS2.Value;
+  MOX.Blinkers[LitID].Freq:=FS3.Value;
+  MOX.Blinkers[LitID].z1:=0;//S1.Value;
+  MOX.Blinkers[LitID].Parent:=S2.Value;
+  SendDataToUI(uiLights);
 end;
 
 procedure TForm1.CBColorChange(Sender: TObject);
@@ -1590,9 +1595,9 @@ begin
   end;
 
   for ii:=1 to MOX.Qty.Blink do //Write blinkers in order
-    for kk:=0 to 33 do
-     if MOX.Blinkers[ii].TypeID=kk then
-       BlockWrite(f,MOX.Blinkers[ii],88);
+    for kk:=0 to 33 do //todo: Looks like this loop should be on the outside
+     if MOX.Blinkers[ii].BlinkerType = kk then
+       BlockWrite(f, MOX.Blinkers[ii], 88);
 
   {
   for ii:=1 to MOX.Qty.Blink do //Write important "blinkers" first
@@ -1735,12 +1740,14 @@ begin
     inc(MOX.Qty.Parts);
   end;
 
-  MOX.Qty.Blink:=0;
+  MOX.Qty.Blink := 0;
   for i:=1 to Imp.VerticeCount do
-    if (sprite[i])and(MOX.Qty.Blink<MAX_BLINKERS)then begin
-      inc(MOX.Qty.Blink);                                 //63+1=64
-      with MOX.Blinkers[MOX.Qty.Blink] do begin //0..63
-        TypeID:=2;
+    if sprite[i] and (MOX.Qty.Blink < MAX_BLINKERS) then
+    begin
+      Inc(MOX.Qty.Blink);                                 //63+1=64
+      with MOX.Blinkers[MOX.Qty.Blink] do
+      begin //0..63
+        BlinkerType := 2;
         Matrix[1,1]:=1; Matrix[1,2]:=0; Matrix[1,3]:=0; Matrix[1,4]:=0;
         Matrix[2,1]:=0; Matrix[2,2]:=1; Matrix[2,3]:=0; Matrix[2,4]:=0;
         Matrix[3,1]:=0; Matrix[3,2]:=0; Matrix[3,3]:=1; Matrix[3,4]:=0;
@@ -2010,8 +2017,13 @@ begin
   if MOX.Qty.Blink>=MAX_BLINKERS then Exit;
   inc(MOX.Qty.Blink);
 
-  if LBBlinkers.ItemIndex>=0 then MOX.Blinkers[MOX.Qty.Blink]:=MOX.Blinkers[LBBlinkers.ItemIndex+1] else begin
-    MOX.Blinkers[MOX.Qty.Blink].TypeID:=0;
+  if LBBlinkers.ItemIndex >= 0 then
+    // Duplicate existing
+    MOX.Blinkers[MOX.Qty.Blink] := MOX.Blinkers[LBBlinkers.ItemIndex+1]
+  else
+  begin
+    // Create new
+    MOX.Blinkers[MOX.Qty.Blink].BlinkerType:=0;
     MOX.Blinkers[MOX.Qty.Blink].sMin:=0;
     MOX.Blinkers[MOX.Qty.Blink].sMax:=1;
     MOX.Blinkers[MOX.Qty.Blink].Freq:=0;
@@ -2054,9 +2066,9 @@ end;
 
 procedure TForm1.BlinkPasteClick(Sender: TObject);
 var
-  ID:Integer;
+  ID: Integer;
 begin
-  ID:=LBBlinkers.ItemIndex+1;
+  ID := LBBlinkers.ItemIndex+1;
   if ID=0 then Exit;
 
   if LightCopyID<>EnsureRange(LightCopyID,1,MOX.Qty.Blink) then
@@ -2065,7 +2077,7 @@ begin
     Exit;
   end;
 
-  MOX.Blinkers[ID].TypeID:=MOX.Blinkers[LightCopyID].TypeID;
+  MOX.Blinkers[ID].BlinkerType := MOX.Blinkers[LightCopyID].BlinkerType;
   MOX.Blinkers[ID].sMin:=MOX.Blinkers[LightCopyID].sMin;
   MOX.Blinkers[ID].sMax:=MOX.Blinkers[LightCopyID].sMax;
   MOX.Blinkers[ID].Freq:=MOX.Blinkers[LightCopyID].Freq;
