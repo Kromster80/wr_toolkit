@@ -1,0 +1,96 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{13222362-CFF8-43DD-989D-8B539352E64F}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="AFC11N Manager\AFC11NMan.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="WR PTXTool\WR_PTXTool.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="WR2 MTKit2\MTkit2.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="WR2 STKit\STKit2.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="WR2 Manager\WR2Man.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="WR2 MissionMaker\WR2MissionMaker.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="AFC11NMan">
+        <MSBuild Projects="AFC11N Manager\AFC11NMan.dproj"/>
+    </Target>
+    <Target Name="AFC11NMan:Clean">
+        <MSBuild Projects="AFC11N Manager\AFC11NMan.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="AFC11NMan:Make">
+        <MSBuild Projects="AFC11N Manager\AFC11NMan.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="WR_PTXTool">
+        <MSBuild Projects="WR PTXTool\WR_PTXTool.dproj"/>
+    </Target>
+    <Target Name="WR_PTXTool:Clean">
+        <MSBuild Projects="WR PTXTool\WR_PTXTool.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="WR_PTXTool:Make">
+        <MSBuild Projects="WR PTXTool\WR_PTXTool.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="MTkit2">
+        <MSBuild Projects="WR2 MTKit2\MTkit2.dproj"/>
+    </Target>
+    <Target Name="MTkit2:Clean">
+        <MSBuild Projects="WR2 MTKit2\MTkit2.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="MTkit2:Make">
+        <MSBuild Projects="WR2 MTKit2\MTkit2.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="STKit2">
+        <MSBuild Projects="WR2 STKit\STKit2.dproj"/>
+    </Target>
+    <Target Name="STKit2:Clean">
+        <MSBuild Projects="WR2 STKit\STKit2.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="STKit2:Make">
+        <MSBuild Projects="WR2 STKit\STKit2.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="WR2Man">
+        <MSBuild Projects="WR2 Manager\WR2Man.dproj"/>
+    </Target>
+    <Target Name="WR2Man:Clean">
+        <MSBuild Projects="WR2 Manager\WR2Man.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="WR2Man:Make">
+        <MSBuild Projects="WR2 Manager\WR2Man.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="WR2MissionMaker">
+        <MSBuild Projects="WR2 MissionMaker\WR2MissionMaker.dproj"/>
+    </Target>
+    <Target Name="WR2MissionMaker:Clean">
+        <MSBuild Projects="WR2 MissionMaker\WR2MissionMaker.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="WR2MissionMaker:Make">
+        <MSBuild Projects="WR2 MissionMaker\WR2MissionMaker.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="AFC11NMan;WR_PTXTool;MTkit2;STKit2;WR2Man;WR2MissionMaker"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="AFC11NMan:Clean;WR_PTXTool:Clean;MTkit2:Clean;STKit2:Clean;WR2Man:Clean;WR2MissionMaker:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="AFC11NMan:Make;WR_PTXTool:Make;MTkit2:Make;STKit2:Make;WR2Man:Make;WR2MissionMaker:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
