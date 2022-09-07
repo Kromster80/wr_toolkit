@@ -279,7 +279,6 @@ type
     procedure RenderFrame(Sender:TObject);
     procedure LoadTextures;
     function TryToLoadTexture(const aFilename: string):cardinal;
-    procedure SendDataToUI(Sender:uiSendDataToUI);
     procedure CompileLoaded(Typename:string);
     procedure RenderResize(Sender: TObject);
     procedure LoadMOX(const aFilename: string);
@@ -347,8 +346,6 @@ type
     procedure FileListBox1Click(Sender: TObject);
     function  LoadFile(const aFilename: string; lm: TLoadMode):Boolean;
     procedure PageControl1Change(Sender: TObject);
-    procedure SetActivePage(ap:apActivePage);
-    procedure SetRenderObject(ro:roRenderObject);
     procedure ResetView(Sender: TObject);
     procedure CBRenderModeChange(Sender: TObject);
     procedure ShapeAMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -388,6 +385,9 @@ type
     procedure LoadSettingsFromIni(const aFilename: string);
     procedure SaveSettingsToIni(const aFilename: string);
     procedure OnIdle(Sender: TObject; var Done: Boolean);
+    procedure SendDataToUI(aSection: TUIDataSection);
+    procedure SetActivePage(aPage: TActivePage);
+    procedure SetRenderObject(aSet: TRenderObjectSet);
   end;
 
 const
@@ -438,13 +438,13 @@ var
     LightVec,Colli,Wire,UVMap:Boolean;
   end;
 
-  Opened3DMask:string; //Opened3DFileNameMask
-  OpenedFolder:string; //OpenedFolderMask
-  ExeDir:string;
-  ActivePage:apActivePage;
-  RenderMode:rmRenderMode=rmOpenGL;
-  RenderObject:roRenderObject;
-  CameraAction:string='';
+  Opened3DMask: string; //Opened3DFileNameMask
+  OpenedFolder: string; //OpenedFolderMask
+  ExeDir: string;
+  ActivePage: TActivePage;
+  RenderMode: rmRenderMode=rmOpenGL;
+  RenderObject: TRenderObjectSet;
+  CameraAction: string='';
 
   MatID,ColID,LitID:Integer;
   LightCopyID:Integer;
@@ -893,12 +893,12 @@ end;
 
 procedure TForm1.Button4Click(Sender: TObject); begin {Placeholder} end;
 
-procedure TForm1.SendDataToUI(Sender:uiSendDataToUI);
+procedure TForm1.SendDataToUI(aSection: TUIDataSection);
 var
-  ii:Integer;
-  oldID1:Integer;
+  ii: Integer;
+  oldID1: Integer;
 begin
-  case Sender of
+  case aSection of
     uiMOX:    begin
                 Edit3Dqty.Text:=IntToStr(MOX.Qty.Vertice);
                 EditUVqty.Text:=IntToStr(MOX.Qty.Vertice);
@@ -919,7 +919,7 @@ begin
                   CBColor.ItemIndex:=DefColor;
                 LBMaterialsClick(nil);
               end;
-    uiVin:    begin
+    uiVinyl:  begin
                 CBVinyl.Clear;
                 CBVinyl.AddItem('-Default-', nil);
                 for ii:=1 to VinylsCount do
@@ -2616,37 +2616,21 @@ end;
 
 procedure TForm1.PageControl1Change(Sender: TObject);
 begin
-  SelectedTreeNode:=0;
-  case PageControl1.TabIndex of
-    0: ActivePage:=apMTL;
-    1: ActivePage:=apParts;
-    2: ActivePage:=apLights;
-    3: ActivePage:=apCOB;
-    4: ActivePage:=apCPO;
-    5: ActivePage:=apExtra;
-    6: ActivePage:=apBrowse;
-  end;
+  SelectedTreeNode := 0;
+  ActivePage := TActivePage(PageControl1.TabIndex);
 end;
 
 
-procedure TForm1.SetActivePage(ap:apActivePage);
+procedure TForm1.SetActivePage(aPage: TActivePage);
 begin
-  ActivePage:=ap;
-  case ap of
-    apMTL    : PageControl1.ActivePageIndex:=0;
-    apParts  : PageControl1.ActivePageIndex:=1;
-    apLights : PageControl1.ActivePageIndex:=2;
-    apCOB    : PageControl1.ActivePageIndex:=3;
-    apCPO    : PageControl1.ActivePageIndex:=4;
-    apExtra  : PageControl1.ActivePageIndex:=5;
-    apBrowse : PageControl1.ActivePageIndex:=6;
-  end;
+  ActivePage := aPage;
+  PageControl1.ActivePageIndex := Ord(ActivePage);
 end;
 
 
-procedure TForm1.SetRenderObject(ro:roRenderObject);
+procedure TForm1.SetRenderObject(aSet: TRenderObjectSet);
 begin
-  RenderObject:=ro;
+  RenderObject := aSet;
 end;
 
 
@@ -3134,7 +3118,7 @@ begin
     ResetMTLOrder.Enabled:=False;
     CBMonoColor.Checked:=False;
     SendDataToUI(uiMTL);
-    SendDataToUI(uiVin);
+    SendDataToUI(uiVinyl);
   end;
 
   if aClearup in [cuCOB, cuALL] then
@@ -3197,7 +3181,7 @@ begin
     CBMonoColor.Checked:=NumColors=1;
     MatMonoColorClick(nil);
     SendDataToUI(uiMTL);
-    SendDataToUI(uiVin);
+    SendDataToUI(uiVinyl);
   end;
 
   if aClearup=cuCOB then

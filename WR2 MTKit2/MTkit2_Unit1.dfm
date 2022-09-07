@@ -889,13 +889,8 @@ object Form1: TForm1
         ActivePage = PivotSetup
         Anchors = [akLeft, akBottom]
         TabOrder = 4
-        ExplicitTop = 341
         object PivotSetup: TTabSheet
           Caption = 'Pivot point setup'
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object Label51: TLabel
             Left = 166
             Top = 162

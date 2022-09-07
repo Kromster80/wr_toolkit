@@ -4,11 +4,11 @@ uses
   dglOpenGL;
 
 type
-  apActivePage = (apMTL, apParts, apLights, apCOB, apCPO, apExtra, apBrowse);
+  TActivePage = (apMTL, apParts, apLights, apCOB, apCPO, apExtra, apBrowse);
   rmRenderMode = (rmOpenGL, rmShaders);
-  uiSendDataToUI = (uiMOX, uiMTL, uiVin, uiLights, uiParts, uiCOB, uiCPO);
+  TUIDataSection = (uiMOX, uiMTL, uiVinyl, uiLights, uiParts, uiCOB, uiCPO);
   TLoadMode = (lmJustLoad, lmLoadAndShow);
-  roRenderObject = set of (roMOX, roMOX_COB, roCOB, roCPO, roTREE);
+  TRenderObjectSet = set of (roMOX, roMOX_COB, roCOB, roCPO, roTREE);
   TClearUp = (cuMOX, cuMTL, cuCOB, cuCPO, cuTREE, cuALL);
 
 const
