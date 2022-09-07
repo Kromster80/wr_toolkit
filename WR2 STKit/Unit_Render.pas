@@ -1,7 +1,7 @@
 unit Unit_Render;
 interface
 uses
-  OpenGL, Windows,KromOGLUtils,sysutils,math,dglOpenGL,KromUtils;
+  OpenGL, Windows, KromOGLUtils, sysutils, Math, dglOpenGL, KromUtils;
 
 var
   PointSize,LineWidth:single;
@@ -38,7 +38,8 @@ procedure RenderVTX(Mode:string);
 procedure RenderObject(ObjectID:integer);
 
 implementation
-uses Unit1,Unit_Defaults,Unit_RoutineFunctions,LoadObjects,Unit_RenderInit;
+uses
+  Unit1, Unit_Defaults, Unit_RoutineFunctions, LoadObjects, Unit_RenderInit;
 
 
 procedure RenderShaders(Func:string; ShowTex:integer; CBReduceView,CBShowFog,CBCheckers,CBGrass:boolean);
@@ -770,7 +771,7 @@ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 glBindTexture(GL_TEXTURE_2D,0);
 
 if Mode<>'OnlyFlares' then begin
-if A<>0 then 
+if A<>0 then
 for ii:=1 to Qty.Lights do
 if GetLength(Light[ii].Matrix2[13]-xPos,Light[ii].Matrix2[15]-zPos)<fOptions.ViewDistance-300 then begin
 glPushMatrix;
@@ -1390,173 +1391,173 @@ glBindTexture(GL_TEXTURE_2D,0);
 end;
 
 procedure CompileCommonObjects;
-var ii,h,step:integer;
+var
+  ii,h,step:integer;
 begin
+  //Car
+  LoadObjectMOX(fOptions.ExeDir+STKit2_Data_Path+'\Car\Car',0);
 
-//Car
-LoadObjectMOX(fOptions.ExeDir+STKit2_Data_Path+'\Car\Car',0);
-
-//Arrow
-coArrow:=glGenLists(1);
-glNewList (coArrow, GL_COMPILE);
-glBegin (GL_QUADS);
-for ii:=1 to 8 do glvertex3fv(@BArrow[ii,1]);
-for ii:=8 downto 1 do glvertex3fv(@BArrow[ii,1]);
-glEnd;
-glEndList;
-
-//Grass
-for ii:=1 to 4 do begin
-  coGrass[ii]:=glGenLists(1);
-  glNewList(coGrass[ii], GL_COMPILE);
-  glBegin(GL_QUADS);
-  glNormal3f(0,0,1);
-  glTexCoord2f((ii-1)/4,1); glvertex2f(-5, 0);
-  glTexCoord2f(ii/4,    1); glvertex2f( 5, 0);
-  glTexCoord2f(ii/4,    0); glvertex2f( 5,10);
-  glTexCoord2f((ii-1)/4,0); glvertex2f(-5,10);
+  //Arrow
+  coArrow:=glGenLists(1);
+  glNewList (coArrow, GL_COMPILE);
+  glBegin (GL_QUADS);
+  for ii:=1 to 8 do glvertex3fv(@BArrow[ii,1]);
+  for ii:=8 downto 1 do glvertex3fv(@BArrow[ii,1]);
   glEnd;
   glEndList;
-end;
 
-//Square
-coSquare:=glGenLists(1);
-glNewList(coSquare, GL_COMPILE);
-glBegin(GL_QUADS);
-glTexCoord2f(0,0); glvertex2f(-0.5,-0.5);
-glTexCoord2f(1,0); glvertex2f( 0.5,-0.5);
-glTexCoord2f(1,1); glvertex2f( 0.5, 0.5);
-glTexCoord2f(0,1); glvertex2f(-0.5, 0.5);
-glEnd;
-glEndList;
+  //Grass
+  for ii:=1 to 4 do begin
+    coGrass[ii]:=glGenLists(1);
+    glNewList(coGrass[ii], GL_COMPILE);
+    glBegin(GL_QUADS);
+    glNormal3f(0,0,1);
+    glTexCoord2f((ii-1)/4,1); glvertex2f(-5, 0);
+    glTexCoord2f(ii/4,    1); glvertex2f( 5, 0);
+    glTexCoord2f(ii/4,    0); glvertex2f( 5,10);
+    glTexCoord2f((ii-1)/4,0); glvertex2f(-5,10);
+    glEnd;
+    glEndList;
+  end;
 
-//Bounding Box
-coBox:=glGenLists(1);
-glNewList (coBox, GL_COMPILE);
-glBegin (GL_QUADS);
-for ii:=1 to 6 do
-for h:=4 downto 1 do
-glvertex3fv(@BBox[BBoxI[ii,h],1]);
-glEnd;
-glEndList;
-
-//Box Wire
-coBoxW:=glGenLists(1);
-glNewList (coBoxW, GL_COMPILE);
-glbegin (GL_LINE_LOOP);
-for ii:=1 to 4 do glvertex3fv(@BBox[ii,1]);
-glEnd;
-glbegin (GL_LINE_LOOP);
-for ii:=5 to 8 do glvertex3fv(@BBox[ii,1]);
-glEnd;
-glbegin (GL_LINES);
-for ii:=1 to 4 do begin
-glvertex3fv(@BBox[ii,1]);
-glvertex3fv(@BBox[ii+4,1]);
-end;
-glEnd;
-glEndList;
-
-//SkyDome
-coSkyDome:=glGenLists(1);
-glNewList (coSkyDome, GL_COMPILE);
-glbegin (GL_TRIANGLES);
-glColor4f(1,1,1,1);
-for ii:=1 to 45 do for h:=1 to 3 do begin
-glTexCoord2f(OSphere[OSphereP[ii,h],1]/10+0.5,OSphere[OSphereP[ii,h],3]/10+0.5); //Planar Top projection 0..1
-glnormal3fv(@OSphereN[OSphereP[ii,h],1]);
-glvertex3f(OSphere[OSphereP[ii,h],1]*100000,OSphere[OSphereP[ii,h],2]*2500,OSphere[OSphereP[ii,h],3]*100000);
-end;
-glEnd;
-glEndList;
-
-//SkyPlane
-coSkyPlane:=glGenLists(1);
-glNewList (coSkyPlane, GL_COMPILE);
-glbegin (GL_QUADS);
-glColor4f(1,1,1,1);
-glnormal3f(0,-1,0);
-glTexCoord2f(-4,-4); glvertex3f(-100000,5000,-100000);
-glTexCoord2f(-4, 4); glvertex3f(-100000,5000, 100000);
-glTexCoord2f( 4, 4); glvertex3f( 100000,5000, 100000);
-glTexCoord2f( 4,-4); glvertex3f( 100000,5000,-100000);
-glEnd;
-glEndList;
-
-//3arrowsXYZ
-coMover:=glGenLists(1);
-glNewList (coMover, GL_COMPILE);
-  glbegin (GL_LINE_STRIP);
-  glColor4f(1,0,0,1);
-  for ii:=1 to length(ObjMover) do
-  glvertex3f(ObjMover[ii,1],ObjMover[ii,2],ObjMover[ii,3]);
+  //Square
+  coSquare:=glGenLists(1);
+  glNewList(coSquare, GL_COMPILE);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0,0); glvertex2f(-0.5,-0.5);
+  glTexCoord2f(1,0); glvertex2f( 0.5,-0.5);
+  glTexCoord2f(1,1); glvertex2f( 0.5, 0.5);
+  glTexCoord2f(0,1); glvertex2f(-0.5, 0.5);
   glEnd;
-  glbegin (GL_LINE_STRIP);
-  glColor4f(0,0,1,1);
-  for ii:=1 to length(ObjMover) do
-  glvertex3f(ObjMover[ii,3],ObjMover[ii,2],ObjMover[ii,1]);
-  glEnd;
-  glbegin (GL_LINE_STRIP);
-  glColor4f(0,1,0,1);
-  for ii:=1 to length(ObjMover) do
-  glvertex3f(ObjMover[ii,3],ObjMover[ii,1],ObjMover[ii,2]);
-  glEnd;
-glEndList;
+  glEndList;
 
-//CircleXZ
-coCircleXZ:=glGenLists(1);
-glNewList (coCircleXZ, GL_COMPILE);
-  step:=16;
-  glbegin (GL_LINE_STRIP);
-  for ii:=-step to step do
-  glvertex3f(cos(ii/step*pi),0,sin(ii/step*pi));//-1..1
+  //Bounding Box
+  coBox:=glGenLists(1);
+  glNewList (coBox, GL_COMPILE);
+  glBegin (GL_QUADS);
+  for ii:=1 to 6 do
+  for h:=4 downto 1 do
+  glvertex3fv(@BBox[BBoxI[ii,h],1]);
   glEnd;
-glEndList;
+  glEndList;
 
-//CircleYZ
-coCircleYZ:=glGenLists(1);
-glNewList (coCircleYZ, GL_COMPILE);
-  step:=16;
-  glbegin (GL_LINE_STRIP);
-  for ii:=-step to step do
-  glvertex3f(0,cos(ii/step*pi),sin(ii/step*pi));//-1..1
+  //Box Wire
+  coBoxW:=glGenLists(1);
+  glNewList (coBoxW, GL_COMPILE);
+  glbegin (GL_LINE_LOOP);
+  for ii:=1 to 4 do glvertex3fv(@BBox[ii,1]);
+  glEnd;
+  glbegin (GL_LINE_LOOP);
+  for ii:=5 to 8 do glvertex3fv(@BBox[ii,1]);
   glEnd;
   glbegin (GL_LINES);
-  step:=2;
-  for ii:=-step to step do begin
-  glvertex3f(0.2,cos(ii/step*pi),sin(ii/step*pi));//-1..1
-  glvertex3f(-0.2,cos(ii/step*pi),sin(ii/step*pi));//-1..1
+  for ii:=1 to 4 do begin
+  glvertex3fv(@BBox[ii,1]);
+  glvertex3fv(@BBox[ii+4,1]);
   end;
   glEnd;
-glEndList;
+  glEndList;
 
-//RoundXZ
-coRoundXZ:=glGenLists(1);
-glNewList (coRoundXZ, GL_COMPILE);
-  step:=16;
+  //SkyDome
+  coSkyDome:=glGenLists(1);
+  glNewList (coSkyDome, GL_COMPILE);
   glbegin (GL_TRIANGLES);
-  for ii:=-step to step-1 do begin
-  glvertex3f(cos((ii+1)/step*pi),0,sin((ii+1)/step*pi));//-1..1
-  glvertex3f(0,0,0);
-  glvertex3f(cos(ii/step*pi),0,sin(ii/step*pi));//-1..1
+  glColor4f(1,1,1,1);
+  for ii:=1 to 45 do for h:=1 to 3 do begin
+  glTexCoord2f(OSphere[OSphereP[ii,h],1]/10+0.5,OSphere[OSphereP[ii,h],3]/10+0.5); //Planar Top projection 0..1
+  glnormal3fv(@OSphereN[OSphereP[ii,h],1]);
+  glvertex3f(OSphere[OSphereP[ii,h],1]*100000,OSphere[OSphereP[ii,h],2]*2500,OSphere[OSphereP[ii,h],3]*100000);
   end;
   glEnd;
-glEndList;
+  glEndList;
+
+  //SkyPlane
+  coSkyPlane:=glGenLists(1);
+  glNewList (coSkyPlane, GL_COMPILE);
+  glbegin (GL_QUADS);
+  glColor4f(1,1,1,1);
+  glnormal3f(0,-1,0);
+  glTexCoord2f(-4,-4); glvertex3f(-100000,5000,-100000);
+  glTexCoord2f(-4, 4); glvertex3f(-100000,5000, 100000);
+  glTexCoord2f( 4, 4); glvertex3f( 100000,5000, 100000);
+  glTexCoord2f( 4,-4); glvertex3f( 100000,5000,-100000);
+  glEnd;
+  glEndList;
+
+  //3arrowsXYZ
+  coMover:=glGenLists(1);
+  glNewList (coMover, GL_COMPILE);
+    glbegin (GL_LINE_STRIP);
+    glColor4f(1,0,0,1);
+    for ii:=1 to length(ObjMover) do
+    glvertex3f(ObjMover[ii,1],ObjMover[ii,2],ObjMover[ii,3]);
+    glEnd;
+    glbegin (GL_LINE_STRIP);
+    glColor4f(0,0,1,1);
+    for ii:=1 to length(ObjMover) do
+    glvertex3f(ObjMover[ii,3],ObjMover[ii,2],ObjMover[ii,1]);
+    glEnd;
+    glbegin (GL_LINE_STRIP);
+    glColor4f(0,1,0,1);
+    for ii:=1 to length(ObjMover) do
+    glvertex3f(ObjMover[ii,3],ObjMover[ii,1],ObjMover[ii,2]);
+    glEnd;
+  glEndList;
+
+  //CircleXZ
+  coCircleXZ:=glGenLists(1);
+  glNewList (coCircleXZ, GL_COMPILE);
+    step:=16;
+    glbegin (GL_LINE_STRIP);
+    for ii:=-step to step do
+    glvertex3f(cos(ii/step*pi),0,sin(ii/step*pi));//-1..1
+    glEnd;
+  glEndList;
+
+  //CircleYZ
+  coCircleYZ:=glGenLists(1);
+  glNewList (coCircleYZ, GL_COMPILE);
+    step:=16;
+    glbegin (GL_LINE_STRIP);
+    for ii:=-step to step do
+    glvertex3f(0,cos(ii/step*pi),sin(ii/step*pi));//-1..1
+    glEnd;
+    glbegin (GL_LINES);
+    step:=2;
+    for ii:=-step to step do begin
+    glvertex3f(0.2,cos(ii/step*pi),sin(ii/step*pi));//-1..1
+    glvertex3f(-0.2,cos(ii/step*pi),sin(ii/step*pi));//-1..1
+    end;
+    glEnd;
+  glEndList;
+
+  //RoundXZ
+  coRoundXZ:=glGenLists(1);
+  glNewList (coRoundXZ, GL_COMPILE);
+    step:=16;
+    glbegin (GL_TRIANGLES);
+    for ii:=-step to step-1 do begin
+    glvertex3f(cos((ii+1)/step*pi),0,sin((ii+1)/step*pi));//-1..1
+    glvertex3f(0,0,0);
+    glvertex3f(cos(ii/step*pi),0,sin(ii/step*pi));//-1..1
+    end;
+    glEnd;
+  glEndList;
 end;
 
 
 procedure RenderMover(x,y,z:single);
 var a:single;
 begin
-glLineWidth(1+2*power(zoom,3));
-a:=1/power(zoom,2.5); //inverse applied zoom
-glPushMatrix;
-  glTranslatef(x,y,z);
-  glRotatef(-xRot, 0, -1, 0);
-  glScalef(8*a,8*a,8*a);
-  glCallList(coMover);
-glPopMatrix;
-glLineWidth(LineWidth);
+  glLineWidth(1+2*power(zoom,3));
+  a:=1/power(zoom,2.5); //inverse applied zoom
+  glPushMatrix;
+    glTranslatef(x,y,z);
+    glRotatef(-xRot, 0, -1, 0);
+    glScalef(8*a,8*a,8*a);
+    glCallList(coMover);
+  glPopMatrix;
+  glLineWidth(LineWidth);
 end;
 
 
