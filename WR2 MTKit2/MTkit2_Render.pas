@@ -4,11 +4,11 @@ uses
   OpenGL, dglOpenGL, kromOGLUtils, kromUtils, sysutils, Math, Windows,
   TGATexture, PTXTexture;
 
-  procedure SetRenderFrame(RenderFrame:HWND);
+  procedure SetRenderFrame(aHWND: HWND);
   procedure RenderInit;
   function LoadFresnelShader:Boolean;
   function RenderShaders:Boolean;
-  procedure RenderLights(ID,Mode:Integer; ShowDummy:Boolean);
+  procedure RenderLights(ID,Mode:Integer; aShowDummy: Boolean);
   procedure RenderCOB(ID:Integer);
   procedure RenderCPO(ID:Integer);
   procedure RenderTREE;
@@ -30,9 +30,9 @@ uses
   MTkit2_Unit1, MTkit2_Defaults;
 
 
-procedure SetRenderFrame(RenderFrame:HWND);
+procedure SetRenderFrame(aHWND: HWND);
 begin
-  kromOGLUtils.SetRenderFrame(RenderFrame, h_DC, h_RC);
+  kromOGLUtils.SetRenderFrame(aHWND, h_DC, h_RC);
 end;
 
 procedure RenderInit;
@@ -401,7 +401,7 @@ glPopMatrix;
 end;
 
 
-procedure RenderLights(ID,Mode:Integer; ShowDummy:Boolean);
+procedure RenderLights(ID, Mode: Integer; aShowDummy: Boolean);
 var
   i:Integer;
   c:Integer;
@@ -469,62 +469,65 @@ begin
     end;
 
     case MOX.Blinkers[i].TypeID of
-      1:
-        begin  //Flame
-          glDepthFunc(GL_LEQUAL);
-          if Mode=4 then glscale(MOX.Blinkers[i].sMin,MOX.Blinkers[i].sMin,MOX.Blinkers[i].sMax+RandomS(0.125))
-                    else glkScale(MOX.Blinkers[i].sMin);
-          glCallList(FlameSprite);
-          glDepthFunc(GL_ALWAYS);
-        end;
-
+      1:  begin  //Flame
+            glDepthFunc(GL_LEQUAL);
+            if Mode=4 then glScale(MOX.Blinkers[i].sMin,MOX.Blinkers[i].sMin,MOX.Blinkers[i].sMax+RandomS(0.125))
+                      else glkScale(MOX.Blinkers[i].sMin);
+            glCallList(FlameSprite);
+            glDepthFunc(GL_ALWAYS);
+          end;
       2,3://HeadLights //BrakeLights
-        if Mode=1 then glkScale(MOX.Blinkers[i].sMax)
-                  else glkScale(MOX.Blinkers[i].sMin);
-
-      4://ReverseLights
-        if Mode=3 then glkScale(MOX.Blinkers[i].sMin)
-                  else glkScale(0);
-
+          if Mode=1 then glkScale(MOX.Blinkers[i].sMax)
+                    else glkScale(MOX.Blinkers[i].sMin);
+      4:  //ReverseLights
+          if Mode=3 then glkScale(MOX.Blinkers[i].sMin)
+                    else glkScale(0);
       5,6: if (Mode=2) and (round(GetTickCount/500)mod 2 = 0) then //Left //Right
-        glkScale(MOX.Blinkers[i].sMin) else glkScale(0);
+            glkScale(MOX.Blinkers[i].sMin) else glkScale(0);
 
-      7://Start gate
-        if (MOX.Blinkers[i].TypeID<>8)and(round(GetTickCount/500)mod 2 = 0) then
-        glkScale(MOX.Blinkers[i].sMin) else glkScale(0);
+      7:  //Start gate
+          if (MOX.Blinkers[i].TypeID<>8) and (round(GetTickCount/500)mod 2 = 0) then
+            glkScale(MOX.Blinkers[i].sMin) else glkScale(0);
 
-      8://Strobe
-        if (MOX.Blinkers[i].TypeID<>8)and(round(GetTickCount/500)mod 2 = 0) then
-        glkScale(MOX.Blinkers[i].sMin) else glkScale(0);
+      8:  //Strobe
+          if (MOX.Blinkers[i].TypeID<>8) and (round(GetTickCount/500)mod 2 = 0) then
+            glkScale(MOX.Blinkers[i].sMin) else glkScale(0);
 
       9: //Flashing
-      begin //Emergency
-        if (round(GetTickCount/1000*3)mod 2 = 0) then glscale(1,-1,1);
-        glkScale(MOX.Blinkers[i].sMin);
-        end;
+          begin //Emergency
+            if round(GetTickCount/1000*3) mod 2 = 0 then glscale(1,-1,1);
+            glkScale(MOX.Blinkers[i].sMin);
+          end;
 
-      16: begin glColor4f(1,1,1,1); //MotorLocaion
-        glkScale(0.8/zoom);
-        end;
+      16: //MotorLocaion
+          begin
+            glColor4f(1,1,1,1);
+            glkScale(0.8/zoom);
+          end;
 
-      20: begin glColor4f(0,0.8,0,1); //AFC11 WheelPosition
-        glkScale(0.8/zoom);
-        end;
+      20: //AFC11 WheelPosition
+          begin
+            glColor4f(0,0.8,0,1);
+            glkScale(0.8/zoom);
+          end;
 
-      24: begin glColor4f(0,0.8,0.8,1); //AFC11 TowingPoint
-        glkScale(0.8/zoom);
-        end;
+      24: //AFC11 TowingPoint
+          begin
+            glColor4f(0,0.8,0.8,1);
+            glkScale(0.8/zoom);
+          end;
     end;
 
     case MOX.Blinkers[i].TypeID of
       //1:     glCallList(FlameSprite);
       2..9:  glCallList(Sprite1Side);
-      16..24: if ShowDummy then glCallList(Sprite2Side);
+      16..24: if aShowDummy then glCallList(Sprite2Side);
     end;
 
     glPopMatrix;
 
-    if (ID=i) then begin
+    if (ID=i) then
+    begin
       glPushMatrix;
       glMultMatrixf(@MOX.Blinkers[i].Matrix);
       glrotate((round(GetTickCount/15)mod 90),0,0,1);
