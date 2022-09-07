@@ -68,35 +68,41 @@ end;
 
 procedure GetSceneryInfo(s1:string; i1:integer);
 var
-  h,k:integer;
+  w: Word;
+  k:integer;
   f:file;
 begin
-assignfile(f,s1+'\EditScenery.sc2'); FileMode:=0; reset(f,1); FileMode:=2; //read-only
-blockread(f,c,4); if c[1]+c[2]+c[3]+c[4]<>'WR2'+#1 then exit;
-blockread(f,c,2); //Chapters
-with AddonScenery[i1] do begin
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); EngineName:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); BGround:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Name:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); SceneryFlag:=StrPas(@c); end;
+  assignfile(f,s1+'\EditScenery.sc2'); FileMode:=0; reset(f,1); FileMode:=2; //read-only
+  blockread(f,c,4); if c[1]+c[2]+c[3]+c[4]<>'WR2'+#1 then exit;
+  blockread(f,c,2); //Chapters
+  with AddonScenery[i1] do
+  begin
+    blockread(f,w,2);
+    if w<>0 then begin blockread(f,c,w+1); EngineName:=PAnsiChar(@c); end;
+    blockread(f,w,2);
+    if w<>0 then begin blockread(f,c,w+1); BGround:=PAnsiChar(@c); end;
+    blockread(f,w,2);
+    if w<>0 then begin blockread(f,c,w+1); Name:=PAnsiChar(@c); end;
+    blockread(f,w,2);
+    if w<>0 then begin blockread(f,c,w+1); SceneryFlag:=PAnsiChar(@c); end;
 blockread(f,FreeRideID,2);
 blockread(f,TrackQty,2);
   for k:=1 to TrackQty do with AddonScenery[i1].Track[k] do begin
   blockread(f,TrackNo,2);
-  blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Name:=StrPas(@c); end;
+  blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Name:=PAnsiChar(@c); end;
   blockread(f,CheckPoint,2);
   blockread(f,mDistance,2);
   blockread(f,Direction,2);
   blockread(f,WayPoint,2);
-  blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Maps:=StrPas(@c); end;
+  blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Maps:=PAnsiChar(@c); end;
   blockread(f,TypeID,2);
   blockread(f,NumSections,2);
   blockread(f,Order,2);
   end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Author:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Converter:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Contact:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Comment:=StrPas(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Author:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Converter:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Contact:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Comment:=PAnsiChar(@c); end;
 end;
 closefile(f);
 end;
@@ -204,7 +210,7 @@ blockread(f,c,1);
 if c[1]=#1  then begin P_[i1].Value[i,k,j].Typ:=1; blockread(f,P_[i1].Value[i,k,j].Int,4); end;
 if c[1]=#2  then begin P_[i1].Value[i,k,j].Typ:=2; blockread(f,P_[i1].Value[i,k,j].Rel,4); end;
 if c[1]=#16 then begin P_[i1].Value[i,k,j].Typ:=3; blockread(f,h,4); if h<>0 then begin blockread(f,c,h+1);
-                       P_[i1].Value[i,k,j].Str:=StrPas(@c); end; end;
+                       P_[i1].Value[i,k,j].Str:=PAnsiChar(@c); end; end;
 if P_[i1].Value[i,k,j].Typ=0 then exit;
 
 end;//CO.Entries
@@ -437,7 +443,11 @@ end;
 end;
 
 procedure GetMissionInfo(s1:string; i1:integer);
-var Version:byte; h,k:integer; f:file;
+var
+  f:file;
+  Version:byte;
+  w: Word;
+  k:integer;
 begin
 assignfile(f,s1); FileMode:=0; reset(f,1); FileMode:=2; //read-only
 blockread(f,c,4);
@@ -445,21 +455,21 @@ if (c[1]+c[2]+c[3]<>'WR2') then exit;
 Version:=ord(c[4]);
 blockread(f,c,2); //=1 means number of missions inside the file
 with AddonMission[i1] do begin //mission maker ID
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Name:=StrPas(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Name:=PAnsiChar(@c); end;
 blockread(f,EventCode,2);
 blockread(f,ResultTyp,2);
 blockread(f,NumRaces,2);
 blockread(f,MissionClass,2);
 blockread(f,Score,2);
 blockread(f,DefCash,2);
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); RefText1:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); RefText2:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); RefText3:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); RefTextFail:=StrPas(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); RefText1:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); RefText2:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); RefText3:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); RefTextFail:=PAnsiChar(@c); end;
 blockread(f,InitCShip,2);
 for k:=1 to NumRaces do begin
 blockread(f,c,2); //=ID
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Race[k].HeadLineText:=StrPas(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Race[k].HeadLineText:=PAnsiChar(@c); end;
 blockread(f,Race[k].BonusID,24);
 {blockread(f,Race[k].CarID,2);
 blockread(f,Race[k].TrackID,2);
@@ -472,7 +482,7 @@ blockread(f,Race[k].LeadPositions,2);
 blockread(f,Race[k].Nitro,2);
 blockread(f,Race[k].Traffic,2);
 blockread(f,Race[k].RaceMode,2);}
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Race[k].MissionText:=StrPas(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Race[k].MissionText:=PAnsiChar(@c); end;
 blockread(f,Race[k].MinPlace,22);
 {blockread(f,Race[k].AvSpeed,2);
 blockread(f,Race[k].Drifts,2);
@@ -495,19 +505,19 @@ blockread(f,Race[k].OppCar2,2);
 blockread(f,Race[k].OppCar3,2);
 blockread(f,Race[k].OppCar4,2);
 blockread(f,Race[k].OppCar5,2);
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Race[k].TextSuccess:=StrPas(@c); end;
-blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Race[k].TextFail:=StrPas(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Race[k].TextSuccess:=PAnsiChar(@c); end;
+blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Race[k].TextFail:=PAnsiChar(@c); end;
 blockread(f,Race[k].InitCode,2);
 end; //..NumRaces
 
 if Version>=2 then begin
-  blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Author:=StrPas(@c); end;
-  blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Contact:=StrPas(@c); end;
+  blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Author:=PAnsiChar(@c); end;
+  blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Contact:=PAnsiChar(@c); end;
 end;
 if Version>=3 then begin //Include comment, addon cars and tracks
-  blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); Comment:=StrPas(@c); end;
-  blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); CarName:=StrPas(@c); end;
-  blockread(f,h,2); if h<>0 then begin blockread(f,c,h+1); TrackName:=StrPas(@c); end;
+  blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); Comment:=PAnsiChar(@c); end;
+  blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); CarName:=PAnsiChar(@c); end;
+  blockread(f,w,2); if w<>0 then begin blockread(f,c,w+1); TrackName:=PAnsiChar(@c); end;
 end;
 
 end; //..with

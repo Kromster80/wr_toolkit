@@ -32,35 +32,36 @@ Known Bugs:
 All bugs are unknown to me. If you find one please tell me.
 
 Version History:
-0.3l	10.07.14	Added network play button
-0.3k	10.04.11	Expanded addon cars/sceneries limits
-0.3j	09.04.21	Added race class info to selected car
+0.**	2022.09.07	Recompiled in Delphi XE8
+0.3l	2010.07.14	Added network play button
+0.3k	2010.04.11	Expanded addon cars/sceneries limits
+0.3j	2009.04.21	Added race class info to selected car
 			Allowed to select cars from big list
-0.3i	08.12.20	Fixed bug with installing sceneries with more than 32 tracks
+0.3i	2008.12.20	Fixed bug with installing sceneries with more than 32 tracks
 			Fixed bug with names for WP tracks
-0.3h	08.12.03	Fixed bug in addon mission installation
-0.3g	08.06.22	Raised addon car limit to 2048
-0.3f	08.06.05	Added menu mods for CBS version (more stats)
-0.3e	08.05.24	Fixed bug limiting number of tracks to 256
+0.3h	2008.12.03	Fixed bug in addon mission installation
+0.3g	2008.06.22	Raised addon car limit to 2048
+0.3f	2008.06.05	Added menu mods for CBS version (more stats)
+0.3e	2008.05.24	Fixed bug limiting number of tracks to 256
 			Changed WR2-saves backup names to better ones
-0.3d	08.02.24	Internal redesign and UI cleaned up
-0.3c	07.12.22	Fixed bug in scenery order
+0.3d	2008.02.24	Internal redesign and UI cleaned up
+0.3c	2007.12.22	Fixed bug in scenery order
 			Minor UI redesign
 			Minor features and bugfixes
-0.3b	07.11.25	Fixed bug in enabling trackmaps
+0.3b	2007.11.25	Fixed bug in enabling trackmaps
 			Added cheat option
-0.3	07.11.10	Improvements and bugfixes
+0.3	2007.11.10	Improvements and bugfixes
 			CBS version special feature (trackmaps in menu)
-0.2b	07.04.21	Fixed few bugs
-0.2b	07.03.11	Fixed mission maker
-0.2	07.02.19	Fixed multi-race mission texts
-0.1b	06.12.29	Fixed multi-race mission texts
+0.2b	2007.04.21	Fixed few bugs
+0.2b	2007.03.11	Fixed mission maker
+0.2	2007.02.19	Fixed multi-race mission texts
+0.1b	2006.12.29	Fixed multi-race mission texts
 			Fixed track list in case no add-on tracks found
 			Fixed loading of old editcar files
 			Added Author/Contact for mission files.
 			Improved loading info
-0.1	06.12.29	First public release
-beta	06.11.28	First beta
+0.1	2006.12.29	First public release
+beta	2006.11.28	First beta
 
 Author: Krom
 E-mail: krom80@mail.ru kromster80@gmail.com

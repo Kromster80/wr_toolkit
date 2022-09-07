@@ -1,13 +1,13 @@
 unit Unit_WR2DS;
-
 interface
-uses Unit1, KromUtils, FileCtrl, SysUtils, Windows;
+uses
+  Unit1, KromUtils, FileCtrl, SysUtils, Windows;
 
-    procedure OpenDS(filename:string);
-    procedure SaveDS(filename:string);
-    procedure AddTracksToDS();
-    procedure AddMissionsToDS();
-    procedure SaveProfiles();
+  procedure OpenDS(filename:string);
+  procedure SaveDS(filename:string);
+  procedure AddTracksToDS();
+  procedure AddMissionsToDS();
+  procedure SaveProfiles();
 
 implementation
 
@@ -89,12 +89,30 @@ Value[i,k,j].Int:=0;
 Value[i,k,j].Rel:=0;
 Value[i,k,j].Str:='';
 blockread(f,c,1);
-if c[1]=#1  then begin Value[i,k,j].Typ:=1; blockread(f,Value[i,k,j].Int,4); end;
-if c[1]=#2  then begin Value[i,k,j].Typ:=2; blockread(f,Value[i,k,j].Rel,4); end;
-if c[1]=#16 then begin Value[i,k,j].Typ:=3; Value[i,k,j].Str:=''; blockread(f,h,4);
-                       if h<>0 then begin blockread(f,c,h+1);
-                       Value[i,k,j].Str:=StrPas(@c); end; end;
-if Value[i,k,j].Typ=0 then exit;
+
+        if c[1] = #1 then
+        begin
+          Value[i, k, j].Typ := 1;
+          blockread(f, Value[i, k, j].Int, 4);
+        end;
+        if c[1] = #2 then
+        begin
+          Value[i, k, j].Typ := 2;
+          blockread(f, Value[i, k, j].Rel, 4);
+        end;
+        if c[1] = #16 then
+        begin
+          Value[i, k, j].Typ := 3;
+          Value[i, k, j].Str := '';
+          blockread(f, h, 4);
+          if h <> 0 then
+          begin
+            blockread(f, c, h + 1);
+            Value[i, k, j].Str := PAnsiChar(@c);
+          end;
+        end;
+        if Value[i, k, j].Typ = 0 then
+          exit;
 
 end;//CO.Entries
 end;//TB.Entries
@@ -103,7 +121,7 @@ closefile(f);
 end;
 
 procedure SaveDS(filename:string);
-var i,k,j:integer; s:string; f:file;
+var i,k,j:integer; s:AnsiString; f:file;
 begin
 assignfile(f,filename); rewrite(f,1);
 c[1]:=#0;
@@ -312,7 +330,7 @@ end;//1..MissionQty
 end;
 
 procedure SaveProfiles();
-var s1,s2:string; ID,i,j,k,h:integer; s:string; f:file;
+var s1,s2:string; ID,i,j,k,h:integer; s:AnsiString; f:file; timestamp: string;
 begin
 for ID:=1 to ProfileQty do if Profile[ID].Install then begin
 
@@ -419,9 +437,9 @@ end;//TB.Entries
 end; //1..DSqty
 closefile(f);
 
-DateTimeToString(s,'yyyy-mm-dd hh-nn-ss',Now); //2007-12-23 15-24-33
+DateTimeToString(timestamp,'yyyy-mm-dd hh-nn-ss',Now); //2007-12-23 15-24-33
 s1:=RootDir+'\WR2-Saves\'+profile[ID].Folder+'\Career.wrc';
-s2:=RootDir+'\WR2-Saves\'+profile[ID].Folder+'\Career '+s+'.bak';
+s2:=RootDir+'\WR2-Saves\'+profile[ID].Folder+'\Career '+timestamp+'.bak';
 RenameFile(s1,s2);
 s1:=RootDir+'\WR2-Saves\'+profile[ID].Folder+'\Career.new';
 s2:=RootDir+'\WR2-Saves\'+profile[ID].Folder+'\Career.wrc';

@@ -128,11 +128,12 @@ const
 
  AddOnCarPrefix='`';
  TrackType:array[1..4] of string=('All','Series','Rally','Off-Road');
- VersionInfo='WR2 Manager       Version 0.3m (06 Aug 2010)';
+ APP_TITLE = 'WR2 Manager';
+ VER_INFO = 'Version 0.3m (06 Aug 2010)';
 
 var
   Form1: TForm1;
-  c:array[1..1024000]of char;
+  c:array[1..1024000]of AnsiChar;
   RootDir:string;
   zz:string='     '+'                                                                                                     ';
 
@@ -150,7 +151,7 @@ var
   end;
 
 ////////////////////////////////////////////////////////////////////////////////
-  Header:array[1..33]of char;
+  Header:array[1..33]of AnsiChar;
   DSqty:integer;
 
   TB:array of record
@@ -200,7 +201,7 @@ var
 //1..25 DS count
 //1..36 TB count
   P_:array[1..MaxProf]of record
-  Header:array[1..33]of char;
+  Header:array[1..33]of AnsiChar;
   DSqty:integer;
 
   TB:array[1..25] of record
@@ -277,7 +278,7 @@ var
        RaceTime,MaxLapTime,TopSpeed,TopSpeedNum,
        OppStrength,DriveModel,MissionID,MissionRaceOrder,
        TrackFilter,CarFilter,EventCode,InitOppCars,
-       OppCar1,OppCar2,OppCar3,OppCar4,OppCar5:word;
+       OppCar1,OppCar2,OppCar3,OppCar4,OppCar5: Word;
        TextSuccess,TextFail:string;
        InitCode:word;
       end;
@@ -296,12 +297,12 @@ begin
   if Sender<>nil then exit; //Wait until all forms are init
 
   Form1.Hide;
-  Form1.Caption := VersionInfo;
-  Form2.Label1.Caption := VersionInfo;
+  Form1.Caption := APP_TITLE + '    ' + VER_INFO;
+  Form2.Label1.Caption := APP_TITLE + '    ' + VER_INFO;
   Form2.Show;
   Form2.Repaint;
 
-  if fileexists('krom.dev') then ChDir('E:\World Racing 2');
+  if fileexists('krom.dev') then ChDir('D:\World Racing 2');
 
   RootDir := GetCurrentDir;
   if RootDir[length(RootDir)] <> '\' then RootDir := RootDir + '\';
@@ -451,8 +452,8 @@ end;
 procedure TForm1.CLBProfilesClickCheck(Sender: TObject);
 var i:integer;
 begin
- for i:=1 to CLBProfiles.Count do
- Profile[i].Install := CLBProfiles.Checked[i-1];
+  for i:=1 to CLBProfiles.Count do
+    Profile[i].Install := CLBProfiles.Checked[i-1];
 end;
 
 
@@ -483,7 +484,8 @@ begin
     Label43.Caption:=inttostr(AddonCar[id].MenuClass);
     Label9.Caption:=inttostr(AddonCar[id].RaceClass);
     //Panel1.Caption:='AddOns\Autos\'+AddonCar[id].Folder+'\'+AddonCar[id].Folder+'.mox';
-  end else begin
+  end else
+  begin
     GroupBoxCar.Caption:=' '+Value[24,44,id+1].Str+' '+Value[24,3,id+1].Str+' ';
     Label41.Caption:=Value[30,2,Value[24,2,id+1].Int+1].Str;
     Label42.Caption:=inttostr(Value[24,4,id+1].Int);
@@ -496,7 +498,7 @@ end;
 
 procedure TForm1.AboutClick(Sender: TObject);
 begin
-  AboutForm.Show(VersionInfo,'Manages all WR2 addons.','WR2Man');
+  AboutForm.Show(APP_TITLE, VER_INFO, 'Manages all WR2 addons.', 'WR2Man');
 end;
 
 
@@ -540,8 +542,8 @@ end;
 procedure TForm1.SaveAndRunWR2Click(Sender: TObject);
 begin
   SaveAllChangesClick(nil);
-  ChDir(RootDir);
-  ShellExecute(handle, 'open', 'WR2_PC.exe', NiL, Nil, SW_SHOWNORMAL);
+  //ChDir(RootDir);
+  ShellExecute(0, 'open', PWideChar(RootDir + 'WR2_PC.exe'), nil, nil, SW_SHOWNORMAL);
   Form1.Close;
 end;
 
@@ -549,8 +551,8 @@ end;
 procedure TForm1.SaveAndRunMPClick(Sender: TObject);
 begin
   SaveAllChangesClick(nil);
-  ChDir(RootDir);
-  ShellExecute(handle, 'open', 'MP Lounge 2.exe', NiL, Nil, SW_SHOWNORMAL);
+  //ChDir(RootDir);
+  ShellExecute(0, 'open', PWideChar(RootDir + 'MP Lounge 2.exe'), nil, nil, SW_SHOWNORMAL);
   Form1.Close;
 end;
 

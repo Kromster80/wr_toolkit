@@ -144,7 +144,6 @@ object Form1: TForm1
         Style = csDropDownList
         Anchors = [akLeft, akTop, akRight]
         DropDownCount = 28
-        ItemHeight = 13
         Sorted = True
         TabOrder = 2
         OnChange = CBCarsChange
@@ -633,8 +632,6 @@ object Form1: TForm1
     Width = 145
     Height = 40
     Caption = 'Save all changes'
-    TabOrder = 2
-    OnClick = SaveAllChangesClick
     Glyph.Data = {
       360C0000424D360C000000000000360000002800000020000000200000000100
       180000000000000C0000C30E0000C30E00000000000000000000FFFFFFFFFFFF
@@ -736,6 +733,8 @@ object Form1: TForm1
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
     Margin = 8
     Spacing = 8
+    TabOrder = 2
+    OnClick = SaveAllChangesClick
   end
   object About: TBitBtn
     Left = 8
@@ -743,8 +742,6 @@ object Form1: TForm1
     Width = 145
     Height = 40
     Caption = 'About'
-    TabOrder = 3
-    OnClick = AboutClick
     Glyph.Data = {
       360C0000424D360C000000000000360000002800000020000000200000000100
       180000000000000C000000000000000000000000000000000000C8D0D4C8D0D4
@@ -846,6 +843,8 @@ object Form1: TForm1
       D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4}
     Margin = 8
     Spacing = 8
+    TabOrder = 3
+    OnClick = AboutClick
   end
   object GB143: TGroupBox
     Left = 8
@@ -905,8 +904,6 @@ object Form1: TForm1
     Width = 145
     Height = 40
     Caption = 'Save && Run WR2'
-    TabOrder = 6
-    OnClick = SaveAndRunWR2Click
     Glyph.Data = {
       BE040000424DBE04000000000000BE0000002800000020000000200000000100
       08000000000000040000C30E0000C30E00002200000022000000FCFCFC00F4F4
@@ -949,6 +946,8 @@ object Form1: TForm1
       0404}
     Margin = 8
     Spacing = 8
+    TabOrder = 6
+    OnClick = SaveAndRunWR2Click
   end
   object ScAll: TButton
     Left = 8
@@ -974,8 +973,6 @@ object Form1: TForm1
     Width = 145
     Height = 40
     Caption = 'Save && Run MP'
-    TabOrder = 9
-    OnClick = SaveAndRunMPClick
     Glyph.Data = {
       BE040000424DBE04000000000000BE0000002800000020000000200000000100
       08000000000000040000C30E0000C30E00002200000022000000FCFCFC00F4F4
@@ -1018,5 +1015,7 @@ object Form1: TForm1
       0404}
     Margin = 8
     Spacing = 8
+    TabOrder = 9
+    OnClick = SaveAndRunMPClick
   end
 end
