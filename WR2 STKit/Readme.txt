@@ -26,13 +26,13 @@ Policy:
 Use on your own risk.
 
 Version History:
-			Changed driving preview selector
-			Fixed crash when changing STR node info without node selected
-			Fixed bug in changing active track between racetrack and waypoint 
-2.3.6	05.08.2010	Improved culling spheres generation algorithm for terrain
-2.3.5	16.07.2010	Fixed loading of Blender LWO files
-			Raised LWO layers limit from 128 to 1024
-			Raised scenery size limit to 20km in any one direction
+                    Changed driving preview selector
+                    Fixed crash when changing STR node info without node selected
+                    Fixed bug in changing active track between racetrack and waypoint
+2.3.6   2010.08.05  Improved culling spheres generation algorithm for terrain
+2.3.5   2010.07.16  Fixed loading of Blender LWO files
+                    Raised LWO layers limit from 128 to 1024
+                    Raised scenery size limit to 20km in any one direction
 2.3.4	24Apr09	Maintenance release
 2.3.4	20Apr09	Added ability to open AFC11/FVR sceneries, use save function on your own risk
 		Added TRK generation
@@ -48,7 +48,7 @@ Version History:
 		Fixed 2 bugs in LWO import which made scenery look weird until reloading
 		Fixed OpenAL initialization bug which could break STKit2 loading
 2.3.2	26Nov08	Added preliminary live sound playback
-		Improved OpenGL preview		
+		Improved OpenGL preview
 		Minor improvements
 		Fixed bug when choosing grass MaterialMode with OpenGL render
 		Fixed bug with overbright objects
@@ -126,21 +126,21 @@ Version History:
 		Small bugfixes
 2.1.2	30Aug07	Added ability to change object for instances
 2.1.1	29Aug07	Small bugfixes
-2.1	17Aug07	Track generation includes good racing-line approximation now
-		Implemented universal ColorPicker for colors (sky, lights)
-		Improved Sun setup and overall Sky tab functionality
-		Replaced text tabs with icons :-)
-		Fixed Materials import/export to files. Does not compatible with older versions of .dat files
-		Improved Textures and Objects adding/removing
-		Improved Animated objects view
-		Simplified creation on new scenary, doesn't depends on LWO filename from now on
-		Added basic batch handling for LWO import (should be improved later)
-		Added basic grass generation (should be improved later)
-		New render mode "OpenGL" works faster but only for UV mapped materials
-		Number of various bugfixes
-2.0	14Jul07	Public release
-demo	12Jun07	Public demo
-beta	07	Closed version
+2.1     2007.08.17  Track generation includes good racing-line approximation now
+                    Implemented universal ColorPicker for colors (sky, lights)
+                    Improved Sun setup and overall Sky tab functionality
+                    Replaced text tabs with icons :-)
+                    Fixed Materials import/export to files. Does not compatible with older versions of .dat files
+                    Improved Textures and Objects adding/removing
+                    Improved Animated objects view
+                    Simplified creation on new scenary, doesn't depends on LWO filename from now on
+                    Added basic batch handling for LWO import (should be improved later)
+                    Added basic grass generation (should be improved later)
+                    New render mode "OpenGL" works faster but only for UV mapped materials
+                    Number of various bugfixes
+2.0     2007.07.14  Public release
+demo    2007.06.12  Public demo
+beta    2007        Closed version
 
 If You have any questions, comments, bugreports or requests about this tool or just want to send a postcard - contact me by e-mail.
 Author: Krom

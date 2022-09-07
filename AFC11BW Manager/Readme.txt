@@ -1,5 +1,5 @@
 --------------------------------------------------------------------
-     <<Alarm for Cobra 11 - Crash Time>> Manager by Krom v0.1
+     <<Alarm for Cobra 11 - Burning Wheels>> Manager by Krom v0.1
 --------------------------------------------------------------------
 
 Description:
@@ -29,7 +29,7 @@ Known Bugs:
 All bugs are unknown to me. If you find one - tell me.
 
 Version History:
-0.1	08.07.28	Beta
+0.1     2008.07.28  Beta
 
 Author: Krom
 E-mail: kromster80@gmail.com

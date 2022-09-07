@@ -29,10 +29,10 @@ Known Bugs:
 All bugs are unknown to me. If you find one - tell me.
 
 Version History:
-0.**  2022.09.07	Recompiled in Delphi XE8
-0.1c  2007.09.08	Added support for towing vehicles
-0.1b  2007.05.18	Added loading screen (by TomWin)
-0.1   2007.05.03	Release
+                    Recompiled in Delphi XE8
+0.1c    2007.09.08  Added support for towing vehicles
+0.1b    2007.05.18  Added loading screen (by TomWin)
+0.1     2007.05.03  Release
 
 Author: Krom
 E-mail: kromster80@gmail.com

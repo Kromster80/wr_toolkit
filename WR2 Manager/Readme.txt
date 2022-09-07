@@ -32,10 +32,10 @@ Known Bugs:
 All bugs are unknown to me. If you find one please tell me.
 
 Version History:
-0.**	2022.09.07	Recompiled in Delphi XE8
-0.3l	2010.07.14	Added network play button
-0.3k	2010.04.11	Expanded addon cars/sceneries limits
-0.3j	2009.04.21	Added race class info to selected car
+                    Recompiled in Delphi XE8
+0.3l    2010.07.14  Added network play button
+0.3k    2010.04.11  Expanded addon cars/sceneries limits
+0.3j    2009.04.21  Added race class info to selected car
 			Allowed to select cars from big list
 0.3i	2008.12.20	Fixed bug with installing sceneries with more than 32 tracks
 			Fixed bug with names for WP tracks
@@ -60,9 +60,9 @@ Version History:
 			Fixed loading of old editcar files
 			Added Author/Contact for mission files.
 			Improved loading info
-0.1	2006.12.29	First public release
-beta	2006.11.28	First beta
+0.1     2006.12.29  First public release
+beta    2006.11.28  First beta
 
 Author: Krom
-E-mail: krom80@mail.ru kromster80@gmail.com
-Site: http://krom.rscsites.org/
+E-mail: kromster80@gmail.com
+Site: http://krom.reveur.de/

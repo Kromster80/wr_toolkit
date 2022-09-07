@@ -22,49 +22,34 @@ You can use fewer MipMap levels to get sharper picture in game.
 You can use uncompressed PTX images to get better image quality in game.
 
 Changelog:
-v2.7 (01.09.2022)
-  Fixed missing DLL error on opening PTX files associated with PTXTool in Explorer
-v2.6 (02.08.2022)
-  Restored Import BMP Image function
-v2.5 (11.07.2022)
-  Fixed squish.dll (being compiled in debug mode)
-v2.4 (09.06.2022)
-  Refactoring
-  Fixed image brightening in PTX compression
-  Fixed image darkening in PTX and DDS decompression
-  Set focus on file list on start
-v2.3 (06.06.2022)
-  Added Squish.dll DDS compressor (by https://github.com/richgel999/libsquish, MIT license)
-  Improved PTX compression quality
-  Added PTX compression quality selector
-v2.2 (05.06.2022)
-  Fixed GUI paddings
-  Sped up PTX saving by 10%
-v2.1b (2009.04.24)
-  Fixed bug in fog color generation
-v2.1  (2009.04.21)
-  Maintenance release
-v2.1 (2009.02.20)
-  Added checkbox to allow non-PowerOfTwo images to be opened and saved (not for games)
-  Added function to create alpha from color-key
-  Added function to replace color-key with average color of rest pixels
-  Improved TGA saving speed, now it's as good as it was in PTXTool1.*
-v2.0c 2008.08.17)
-  Fixed mask mip-map generation bug
-v2.0b 2008.08.07)
-  Fixed compression bug
-v2.0 (2008.07.29)
-  Complete refactoring
-  DXT compression built-in
-  Added viewing of TDU images (*.2DB)
-  Hopefully fixed incompatibility with Photosho BMP files
-v1.1c (2008.01.11)
-  Fixed fade color display bug
-v1.1b (2007.02.25)
-  Fixed major bug in BMP loading
-v1.1 (2006.12.13)
-  Greatly speed-up image display and PTX read
-  Fixed save dialog to suggest correct PTX name
+v2.7    2022.09.01  Fixed missing DLL error on opening PTX files associated with PTXTool in Explorer
+v2.6    2022.08.02  Restored Import BMP Image function
+v2.5    2022.07.11  Fixed squish.dll (being compiled in debug mode)
+v2.4    2022.06.09  Refactoring
+                    Fixed image brightening in PTX compression
+                    Fixed image darkening in PTX and DDS decompression
+                    Set focus on file list on start
+v2.3    2022.06.06  Added Squish.dll DDS compressor (by https://github.com/richgel999/libsquish, MIT license)
+                    Improved PTX compression quality
+                    Added PTX compression quality selector
+v2.2    2022.06.05  Fixed GUI paddings
+                    Sped up PTX saving by 10%
+v2.1b   2009.04.24  Fixed bug in fog color generation
+v2.1    2009.04.21  Maintenance release
+v2.1    2009.02.20  Added checkbox to allow non-PowerOfTwo images to be opened and saved (not for games)
+                    Added function to create alpha from color-key
+                    Added function to replace color-key with average color of rest pixels
+                    Improved TGA saving speed, now it's as good as it was in PTXTool1.*
+v2.0c   2008.08.17  Fixed mask mip-map generation bug
+v2.0b   2008.08.07  Fixed compression bug
+v2.0    2008.07.29  Complete refactoring
+                    DXT compression built-in
+                    Added viewing of TDU images (*.2DB)
+                    Hopefully fixed incompatibility with Photosho BMP files
+v1.1c   2008.01.11  Fixed fade color display bug
+v1.1b   2007.02.25  Fixed major bug in BMP loading
+v1.1    2006.12.13  Greatly speed-up image display and PTX read
+                    Fixed save dialog to suggest correct PTX name
 v1.0 (2006.08.29)
   Updated to work with newset nvdxt.exe (8.23.627.2205)
   Added menu
@@ -114,14 +99,10 @@ v0.3b (2004.03.31)
   Added check for PTX header on file load.
   Added save without MipMaps.
   Added some info about opened file.
-v0.3 (2004.03.27)
-  Added save of non-compressed PTX files.
-v0.2 (2004.03.**)
-  Closed beta version.
-v0.1b (2004.03.**)
-  Added list view.
-v0.1 (2004.03.08)
-  First release.
+v0.3   2004.03.27  Added save of non-compressed PTX files.
+v0.2   2004.03.**  Closed beta version.
+v0.1b  2004.03.**  Added list view.
+v0.1   2004.03.08  First release.
 
 Have any questions, answers, comments? Send me an E-Mail.
 

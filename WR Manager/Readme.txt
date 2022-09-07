@@ -89,22 +89,22 @@ All other bugs are unknown to me. If you find one
 please tell me.
 
 Version History:
-v0.5  07.04.22	Fixed compatibility with password-protected cars.
-v0.4f 05.12.14	Fixed bug, reading track/progile info with NT file system.
-v0.4e 05.09.14	Fixed critical bug for DEF version of MBWR.
-		Fixed bug in scenery sorting.
-v0.4d 05.07.31	Added "Edit MBWR Settings" button.
-v0.4c 05.05.22	Added info about current file processing to splash screen.
-v0.4b 05.03.27	Fixed bug related to Windows fonts settings.
-v0.4  05.03.25	CarManager and TrackManager got merged in one.
-		Double-click on a car in list launches its editcar.car file with associated program.
-		Available cars/tracks number displayed correctly in MBWR now.
-		Added Release Notes button to Track Manager part.
-		Updated save button functionality and added quick MBWR/MBWR-MP buttons.
-		And of course UI got re-arranged.
-v0.3c 05.02.27	Fixed bug on loading cars without names.
-		Added Revert button.
-		Common libraries are back now.
+v0.5    2007.04.22  Fixed compatibility with password-protected cars.
+v0.4f   2005.12.14  Fixed bug, reading track/progile info with NT file system.
+v0.4e   2005.09.14  Fixed critical bug for DEF version of MBWR.
+                    Fixed bug in scenery sorting.
+v0.4d   2005.07.31  Added "Edit MBWR Settings" button.
+v0.4c   2005.05.22  Added info about current file processing to splash screen.
+v0.4b   2005.03.27  Fixed bug related to Windows fonts settings.
+v0.4    2005.03.25  CarManager and TrackManager got merged in one.
+                    Double-click on a car in list launches its editcar.car file with associated program.
+                    Available cars/tracks number displayed correctly in MBWR now.
+                    Added Release Notes button to Track Manager part.
+                    Updated save button functionality and added quick MBWR/MBWR-MP buttons.
+                    And of course UI got re-arranged.
+v0.3c   2005.02.27  Fixed bug on loading cars without names.
+                    Added Revert button.
+                    Common libraries are back now.
 v0.3b 05.02.26	Fixed accessing of read-only files.
 		Common libraries not included now. (smaller size)
 		Added RaceClass info.
@@ -120,10 +120,10 @@ v0.2  05.01.25	Fixed bug with lowercase named folders.
 		Added autoremoval of duplicate words in car names.
 		Added 5th set.
 		Added marked/total car counter.
-		Interface update.		
+		Interface update.
 v0.1  05.01.17	First release
 
-If You have any questions, answers, comments, bugreports, wishes about this tool, please send me E-Mail.
+If You have any questions, answers, comments, bugreports, wishes about this tool, please send me an E-Mail.
 Author: Krom
 E-mail: kromster80@gmail.com
-HomePage: http://krom.rscsites.org/
+Site: http://krom.reveur.de/

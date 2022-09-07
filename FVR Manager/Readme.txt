@@ -21,9 +21,9 @@ Known Bugs:
 All bugs are unknown to me. If you find one - tell me.
 
 Version History:
-0.1c	2010.08.08	New splash-screen image
-0.1b	2010.07.15	Maintenance release
-0.1	2009.04.01	First version
+0.1c    2010.08.08  New splash-screen image
+0.1b    2010.07.15  Maintenance release
+0.1     2009.04.01  First version
 
 Author: Krom
 E-mail: kromster80@gmail.com

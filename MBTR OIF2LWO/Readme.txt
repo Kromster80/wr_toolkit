@@ -1,5 +1,5 @@
 --------------------------------------------------------------------
-Mercedes-Benz Truck Racing - OIF > LWO converter.
+Mercedes-Benz Truck Racing - OIF > LWO converter
 --------------------------------------------------------------------
 
 Description:
