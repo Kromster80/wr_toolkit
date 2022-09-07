@@ -1251,24 +1251,27 @@ end;
 
 procedure TForm1.LoadTextures;
 var
-  i,k:Integer;
+  i,k: Integer;
 begin
+  // Clear RAM used by textures
   for i:=1 to MOX.Qty.Mat do
-    if MoxTex[i]<>0 then begin
-      glDeleteTextures(1,@MoxTex[i]); //Clear RAM used by textures
-      MoxTex[i]:=0;
+    if MoxTex[i] <> 0 then
+    begin
+      glDeleteTextures(1, @MoxTex[i]);
+      MoxTex[i] := 0;
     end;
-  glDeleteTextures(1,@DirtTex); //Clear RAM used by textures
-  glDeleteTextures(1,@ScratchTex); //Clear RAM used by textures
+  glDeleteTextures(1, @DirtTex);
+  glDeleteTextures(1, @ScratchTex);
 
-  for i:=1 to MOX.Qty.Mat do begin //Load new textures
+  // Load new textures
+  for i:=1 to MOX.Qty.Mat do
+  begin
+    for k:=1 to i-1 do
+      if Material[k].TexName = Material[i].TexName then
+        MoxTex[i] := MoxTex[k]; //use earlier loaded texture ID
 
-    for k:=1 to i-1 do if Material[k].TexName=Material[i].TexName then
-      MoxTex[i]:=MoxTex[k]; //use earlier loaded texture ID
-
-    if MoxTex[i]=0 then
+    if MoxTex[i] = 0 then
       MoxTex[i]:=TryToLoadTexture(Material[i].TexName);
-
   end;
 
   DirtTex := TryToLoadTexture('dirt.tga');
@@ -1276,23 +1279,28 @@ begin
 end;
 
 
-function TForm1.TryToLoadTexture(const aFilename: string):cardinal;
+function TForm1.TryToLoadTexture(const aFilename: string): Cardinal;
 var
   texId: Cardinal;
   fname: string;
 begin
   texId := 0;
-  //Try in following order:
-  //Textures_PC\TGA > Textures\TGA > Textures_PC\PTX > Textures\PTX
-  fname := TruncateExt(aFileName) + '.';
-  if FileExists(fOpenedFolder + '\Textures_PC\' + fname + 'TGA') then
-    LoadTexture(fOpenedFolder + '\Textures_PC\' + fname + 'TGA', texId, 0)
-  else if FileExists(fOpenedFolder + '\Textures\' + fname + 'TGA') then
-    LoadTexture(fOpenedFolder + '\Textures\' + fname + 'TGA', texId, 0)
-  else if FileExists(fOpenedFolder + '\Textures_PC\' + fname + 'PTX') then
-    LoadTexturePTX(fOpenedFolder + '\Textures_PC\' + fname + 'PTX', texId)
-  else if FileExists(fOpenedFolder + '\Textures\' + fname + 'PTX') then
-    LoadTexturePTX(fOpenedFolder + '\Textures\' + fname + 'PTX', texId);
+
+  // Try in following order:
+  // Textures_PC\tga > Textures\tga > Textures_PC\ptx > Textures\ptx
+  fname := ChangeFileExt(aFileName, '');
+  if FileExists(fOpenedFolder + '\Textures_PC\' + fname + '.tga') then
+    LoadTexture(fOpenedFolder + '\Textures_PC\' + fname + '.tga', texId, 0)
+  else
+  if FileExists(fOpenedFolder + '\Textures\' + fname + '.tga') then
+    LoadTexture(fOpenedFolder + '\Textures\' + fname + '.tga', texId, 0)
+  else
+  if FileExists(fOpenedFolder + '\Textures_PC\' + fname + '.ptx') then
+    LoadTexturePTX(fOpenedFolder + '\Textures_PC\' + fname + '.ptx', texId)
+  else
+  if FileExists(fOpenedFolder + '\Textures\' + fname + '.ptx') then
+    LoadTexturePTX(fOpenedFolder + '\Textures\' + fname + '.ptx', texId);
+
   Result := texId;
 end;
 
@@ -1306,14 +1314,14 @@ begin
   LitID:=LBBlinkers.ItemIndex+1;
   if LitID=0 then Exit;
 
-    LightRefresh:=True;
-    blinkerType := MOX.Blinkers[LitID].BlinkerType;
-    case blinkerType of //Fit 0..24 IDs in RG range of 0..12
-      16: blinkerType := 10;
-      20: blinkerType := 11;
-      24: blinkerType := 12;
-      33: blinkerType := 13;
-    end;
+  LightRefresh:=True;
+  blinkerType := MOX.Blinkers[LitID].BlinkerType;
+  case blinkerType of //Fit 0..24 IDs in RG range of 0..12
+    16: blinkerType := 10;
+    20: blinkerType := 11;
+    24: blinkerType := 12;
+    33: blinkerType := 13;
+  end;
 
   RGBlinkType.ItemIndex := blinkerType;
 
@@ -1367,37 +1375,38 @@ end;
 
 procedure TForm1.CBColorChange(Sender: TObject);
 begin
-ColID:=CBColor.ItemIndex+1;
-if MatID=0 then Exit;
-with Material[MatID].Color[ColID] do begin
-  ShapeA.Brush.Color:=Amb.R+Amb.G*256+Amb.B*65536;
-  ShapeD.Brush.Color:=Dif.R+Dif.G*256+Dif.B*65536;
-  ShapeS1.Brush.Color:=Sp1.R+Sp1.G*256+Sp1.B*65536;
-  ShapeS2.Brush.Color:=Sp2.R+Sp2.G*256+Sp2.B*65536;
-  ShapeR.Brush.Color:=Ref.R+Ref.G*256+Ref.B*65536;
-end;
+  ColID:=CBColor.ItemIndex+1;
+  if MatID=0 then Exit;
+  with Material[MatID].Color[ColID] do
+  begin
+    ShapeA.Brush.Color:=Amb.R+Amb.G*256+Amb.B*65536;
+    ShapeD.Brush.Color:=Dif.R+Dif.G*256+Dif.B*65536;
+    ShapeS1.Brush.Color:=Sp1.R+Sp1.G*256+Sp1.B*65536;
+    ShapeS2.Brush.Color:=Sp2.R+Sp2.G*256+Sp2.B*65536;
+    ShapeR.Brush.Color:=Ref.R+Ref.G*256+Ref.B*65536;
+  end;
 end;
 
 
 procedure TForm1.LBMaterialsClick(Sender: TObject);
 begin
-MatID:=LBMaterials.ItemIndex+1;
-if MatID=0 then Exit;
-MatName.Text:=Material[MatID].Title;
-MaterialRefresh:=True;
-TTransparency.Position:=Material[MatID].Transparency;
-ETextureName.Text:=Material[MatID].TexName;
-CBMatClass2.ItemIndex:=Material[MatID].MatClass[2];
-CBMatClass3.ItemIndex:=Material[MatID].MatClass[3];
-CB1.Checked:=(Material[MatID].MatClass[4] AND 1) = 1;
-CB2.Checked:=(Material[MatID].MatClass[4] AND 2) = 2;
-CB3.Checked:=(Material[MatID].MatClass[4] AND 4) = 4;
-CB4.Checked:=(Material[MatID].MatClass[4] AND 8) = 8;
-CBClipU.ItemIndex:=Material[MatID].TexEdge.U;
-CBClipV.ItemIndex:=Material[MatID].TexEdge.V;
-MaterialRefresh:=False;
+  MatID:=LBMaterials.ItemIndex+1;
+  if MatID=0 then Exit;
+  MatName.Text:=Material[MatID].Title;
+  MaterialRefresh:=True;
+  TTransparency.Position:=Material[MatID].Transparency;
+  ETextureName.Text:=Material[MatID].TexName;
+  CBMatClass2.ItemIndex:=Material[MatID].MatClass[2];
+  CBMatClass3.ItemIndex:=Material[MatID].MatClass[3];
+  CB1.Checked:=(Material[MatID].MatClass[4] AND 1) = 1;
+  CB2.Checked:=(Material[MatID].MatClass[4] AND 2) = 2;
+  CB3.Checked:=(Material[MatID].MatClass[4] AND 4) = 4;
+  CB4.Checked:=(Material[MatID].MatClass[4] AND 8) = 8;
+  CBClipU.ItemIndex:=Material[MatID].TexEdge.U;
+  CBClipV.ItemIndex:=Material[MatID].TexEdge.V;
+  MaterialRefresh:=False;
 
-CBColorChange(nil); //update color panels
+  CBColorChange(nil); //update color panels
 end;
 
 
@@ -1405,21 +1414,21 @@ procedure TForm1.MaterialPropertiesChange(Sender: TObject);
 var
   t:Integer;
 begin
-if MatID=0 then Exit;
-Label13.Caption:=IntToStr(TTransparency.Position)+'% Transparency';
-if MaterialRefresh then Exit;
-Material[MatID].Transparency:=TTransparency.Position;
-Material[MatID].TexName:=ETextureName.Text;
-Material[MatID].MatClass[2]:=CBMatClass2.ItemIndex;
-Material[MatID].MatClass[3]:=CBMatClass3.ItemIndex;
-t:=0;
-if CB1.Checked then inc(t,1);
-if CB2.Checked then inc(t,2);
-if CB3.Checked then inc(t,4);
-if CB4.Checked then inc(t,8);
-Material[MatID].MatClass[4]:=t;
-Material[MatID].TexEdge.U:=CBClipU.ItemIndex;
-Material[MatID].TexEdge.V:=CBClipV.ItemIndex;
+  if MatID=0 then Exit;
+  Label13.Caption:=IntToStr(TTransparency.Position)+'% Transparency';
+  if MaterialRefresh then Exit;
+  Material[MatID].Transparency:=TTransparency.Position;
+  Material[MatID].TexName:=ETextureName.Text;
+  Material[MatID].MatClass[2]:=CBMatClass2.ItemIndex;
+  Material[MatID].MatClass[3]:=CBMatClass3.ItemIndex;
+  t:=0;
+  if CB1.Checked then inc(t,1);
+  if CB2.Checked then inc(t,2);
+  if CB3.Checked then inc(t,4);
+  if CB4.Checked then inc(t,8);
+  Material[MatID].MatClass[4]:=t;
+  Material[MatID].TexEdge.U:=CBClipU.ItemIndex;
+  Material[MatID].TexEdge.V:=CBClipV.ItemIndex;
 end;
 
 
@@ -1434,46 +1443,46 @@ end;
 procedure TForm1.TVPartsChange(Sender: TObject; Node: TTreeNode);
 var ID:Integer;
 begin
-ForbidPartsChange:=True;
-Label63.Caption:='ID: '+IntToStr(TVParts.Selected.AbsoluteIndex);
-SelectedTreeNode:=TVParts.Selected.AbsoluteIndex+1;
-ID:=SelectedTreeNode;
-Label23.Caption:='#'+IntToStr(ID)+' P'+IntToStr(MOX.Parts[ID].Parent+1)
-                                 +' C'+IntToStr(MOX.Parts[ID].Child+1)
-                                 +' P'+IntToStr(MOX.Parts[ID].PrevInLevel+1)
-                                 +' N'+IntToStr(MOX.Parts[ID].NextInLevel+1);
+  ForbidPartsChange:=True;
+  Label63.Caption:='ID: '+IntToStr(TVParts.Selected.AbsoluteIndex);
+  SelectedTreeNode:=TVParts.Selected.AbsoluteIndex+1;
+  ID:=SelectedTreeNode;
+  Label23.Caption:='#'+IntToStr(ID)+' P'+IntToStr(MOX.Parts[ID].Parent+1)
+                                   +' C'+IntToStr(MOX.Parts[ID].Child+1)
+                                   +' P'+IntToStr(MOX.Parts[ID].PrevInLevel+1)
+                                   +' N'+IntToStr(MOX.Parts[ID].NextInLevel+1);
 
-EDetailName.Text:=MOX.Parts[SelectedTreeNode].Dname;
-CX.Value:=MOX.Parts[SelectedTreeNode].xMid;
-CY.Value:=MOX.Parts[SelectedTreeNode].yMid;
-CZ.Value:=MOX.Parts[SelectedTreeNode].zMid;
-CRad.Value:=MOX.Parts[SelectedTreeNode].fRadius;
+  EDetailName.Text:=MOX.Parts[SelectedTreeNode].Dname;
+  CX.Value:=MOX.Parts[SelectedTreeNode].xMid;
+  CY.Value:=MOX.Parts[SelectedTreeNode].yMid;
+  CZ.Value:=MOX.Parts[SelectedTreeNode].zMid;
+  CRad.Value:=MOX.Parts[SelectedTreeNode].fRadius;
 
-RGDetailType.ItemIndex:=MOX.Parts[SelectedTreeNode].TypeID;
-if RGDetailType.ItemIndex<>MOX.Parts[SelectedTreeNode].TypeID then
-MessageBox(Handle, 'Unknown detail ID type', 'Discovery', MB_OK or MB_ICONSTOP);;
+  RGDetailType.ItemIndex:=MOX.Parts[SelectedTreeNode].TypeID;
+  if RGDetailType.ItemIndex<>MOX.Parts[SelectedTreeNode].TypeID then
+  MessageBox(Handle, 'Unknown detail ID type', 'Discovery', MB_OK or MB_ICONSTOP);;
 
-LX1.Value:=MOX.Parts[SelectedTreeNode].x1/pi*180;//-YZ rotation
-LX2.Value:=MOX.Parts[SelectedTreeNode].x2/pi*180;//+YZ rotation
-LY1.Value:=MOX.Parts[SelectedTreeNode].y1/pi*180;//-XZ rotation
-LY2.Value:=MOX.Parts[SelectedTreeNode].y2/pi*180;//+XZ rotation
-LZ1.Value:=MOX.Parts[SelectedTreeNode].z1/pi*180;//-XY rotation
-LZ2.Value:=MOX.Parts[SelectedTreeNode].z2/pi*180;//+XY rotation
-ForbidPartsChange:=False;
-FlapParts.Enabled:=SelectedTreeNode<>0;
-Label30.Enabled:=SelectedTreeNode<>0;
-ForbidPivotChange:=True;
-PivotPointActual.MaxValue:=
-MOX.Chunk[MOX.Parts[SelectedTreeNode].FirstMat+1+MOX.Parts[SelectedTreeNode].NumMat-1,4]-
-MOX.Chunk[MOX.Parts[SelectedTreeNode].FirstMat+1,3]+1;
-PivotPointActual.Value:=PartModify[SelectedTreeNode].ActualPoint;
-RGPivotX.ItemIndex:=PartModify[SelectedTreeNode].AxisSetup[1];
-RGPivotY.ItemIndex:=PartModify[SelectedTreeNode].AxisSetup[2];
-RGPivotZ.ItemIndex:=PartModify[SelectedTreeNode].AxisSetup[3];
-CustomPivotX.Value:=PartModify[SelectedTreeNode].Custom[1];
-CustomPivotY.Value:=PartModify[SelectedTreeNode].Custom[2];
-CustomPivotZ.Value:=PartModify[SelectedTreeNode].Custom[3];
-ForbidPivotChange:=False;
+  LX1.Value:=MOX.Parts[SelectedTreeNode].x1/pi*180;//-YZ rotation
+  LX2.Value:=MOX.Parts[SelectedTreeNode].x2/pi*180;//+YZ rotation
+  LY1.Value:=MOX.Parts[SelectedTreeNode].y1/pi*180;//-XZ rotation
+  LY2.Value:=MOX.Parts[SelectedTreeNode].y2/pi*180;//+XZ rotation
+  LZ1.Value:=MOX.Parts[SelectedTreeNode].z1/pi*180;//-XY rotation
+  LZ2.Value:=MOX.Parts[SelectedTreeNode].z2/pi*180;//+XY rotation
+  ForbidPartsChange:=False;
+  FlapParts.Enabled:=SelectedTreeNode<>0;
+  Label30.Enabled:=SelectedTreeNode<>0;
+  ForbidPivotChange:=True;
+  PivotPointActual.MaxValue:=
+  MOX.Chunk[MOX.Parts[SelectedTreeNode].FirstMat+1+MOX.Parts[SelectedTreeNode].NumMat-1,4]-
+  MOX.Chunk[MOX.Parts[SelectedTreeNode].FirstMat+1,3]+1;
+  PivotPointActual.Value:=PartModify[SelectedTreeNode].ActualPoint;
+  RGPivotX.ItemIndex:=PartModify[SelectedTreeNode].AxisSetup[1];
+  RGPivotY.ItemIndex:=PartModify[SelectedTreeNode].AxisSetup[2];
+  RGPivotZ.ItemIndex:=PartModify[SelectedTreeNode].AxisSetup[3];
+  CustomPivotX.Value:=PartModify[SelectedTreeNode].Custom[1];
+  CustomPivotY.Value:=PartModify[SelectedTreeNode].Custom[2];
+  CustomPivotZ.Value:=PartModify[SelectedTreeNode].Custom[3];
+  ForbidPivotChange:=False;
 end;
 
 
@@ -1501,14 +1510,15 @@ var
 begin
   assignfile(f,aFilename); rewrite(f,1);
 
-  if PivotSetup.TabVisible then begin //LWO>MOX only !
-    //Set MoxMat/Sid order continous
+  if PivotSetup.TabVisible then  //LWO>MOX only !
+  begin  //Set MoxMat/Sid order continous
     //kinda lazy to re-do SRange stuff, so just sort it out here :-)
 
     setlength(lazyqty,MOX.Qty.Parts+1);
     lazyqty[0]:=0;
 
-    for i:=1 to MOX.Qty.Parts do begin
+    for i:=1 to MOX.Qty.Parts do
+    begin
       lazyqty[i]:=1;                  //number of MOX.Parts
         for j:=MOX.Parts[i].FirstMat+1 to MOX.Parts[i].FirstMat+MOX.Parts[i].NumMat do
           if (MOX.Chunk[j,2]>0) then begin  //if polycount for part >1
@@ -1528,7 +1538,8 @@ begin
     MOX.Qty.Chunks:=0;
     MOX.Parts[1].FirstMat:=0;
 
-    for i:=1 to MOX.Qty.Parts do begin
+    for i:=1 to MOX.Qty.Parts do
+    begin
       inc(MOX.Qty.Chunks,lazyqty[i]);
       MOX.Parts[i].NumMat:=lazyqty[i];
       MOX.Parts[i+1].FirstMat:=MOX.Parts[i].FirstMat+MOX.Parts[i].NumMat;
@@ -1536,7 +1547,8 @@ begin
     //re-Sorting ends here}
 
     k:=1; m:=0;
-    for i:=1 to MOX.Qty.Vertice do begin
+    for i:=1 to MOX.Qty.Vertice do
+    begin
       if i=MOX.Chunk[k,4]+1 then
         inc(k);//3-point From  //4-point Till //k-partID
 
@@ -1580,14 +1592,16 @@ begin
 
     BlockWrite(f,MOX.Qty,24);
     BlockWrite(f,MOX.Vertice,MOX.Qty.Vertice*40);
-    for ii:=1 to MOX.Qty.Poly do begin
+    for ii:=1 to MOX.Qty.Poly do
+    begin
       dec(MOX.Face[ii,1],1); dec(MOX.Face[ii,2],1); dec(MOX.Face[ii,3],1);//V-1
 
         BlockWrite(f,MOX.Face[ii],6);
       inc(MOX.Face[ii,1],1); inc(MOX.Face[ii,2],1); inc(MOX.Face[ii,3],1);//restore values V+1 !
     end;
 
-    for ii:=1 to MOX.Qty.Chunks do begin
+    for ii:=1 to MOX.Qty.Chunks do
+    begin
       BlockWrite(f,MOX.Sid[ii,1],2); BlockWrite(f,#0+#0,2);
       BlockWrite(f,MOX.Sid[ii,2],2); BlockWrite(f,#0+#0,2);
 
@@ -1768,7 +1782,8 @@ begin
   setlength(VqtyAtSurf,MOX.Qty.Parts+1);
   setlength(PqtyAtSurf,MOX.Qty.Parts+1);
   setlength(v2,MOX.Qty.Parts+1);
-  for i:=1 to MOX.Qty.Parts do begin
+  for i:=1 to MOX.Qty.Parts do
+  begin
     setlength(altpoint[i],MOX.Qty.Mat+1);
     setlength(altpoly[i],MOX.Qty.Mat+1);
     setlength(VqtyAtSurf[i],MOX.Qty.Mat+1);
@@ -1778,52 +1793,60 @@ begin
 
   for m:=1 to MOX.Qty.Parts do
   for i:=1 to Imp.PolyCount do
-    if Imp.Part[i]=m then begin//for all polys belong to current part
-    if i mod 1000 = 0 then
+    if Imp.Part[i]=m then //for all polys belong to current part
     begin
-      Shape2.Width:=round((i/Imp.PolyCount)*100);
-      Label35.Caption:=IntToStr(round((i/Imp.PolyCount)*100))+' %';
-      Label35.Repaint;
-    end;
-
-      for h:=1 to 3 do begin //point-by-point
-      found:=False; //"match found" marker
-        for k:=PqtyAtSurf[m,Imp.Surf[i]] downto 1 do begin
-        //not to compare with self but all others of same surface
-        //reverse direction saves 40-80%
-        for j:=1 to 3 do //scan all previous points of polys
-          if (altpoint[m,Imp.Surf[i],v2[m,Imp.Surf[i],k,j],1]=Imp.Faces[i,h])and  //original points match
-          (Imp.Part[altpoly[m,Imp.Surf[i],k]]=Imp.Part[i])and                                //part tag
-          (Imp.duv[altpoly[m,Imp.Surf[i],k],j].u=Imp.duv[i,h].u)and         //UVs
-          (Imp.duv[altpoly[m,Imp.Surf[i],k],j].v=Imp.duv[i,h].v) then begin //UVs
-      if length(v2[m,Imp.Surf[i]])-1<=PqtyAtSurf[m,Imp.Surf[i]] then
-      setlength(v2[m,Imp.Surf[i]],PqtyAtSurf[m,Imp.Surf[i]]+100);
-
-          v2[m,Imp.Surf[i],PqtyAtSurf[m,Imp.Surf[i]]+1,h]:=v2[m,Imp.Surf[i],k,j]; //make V2 use it
-          found:=True;
-          end;
-        if found then break; //5% save
-        end;
-      if not found then begin
-      inc(VqtyAtSurf[m,Imp.Surf[i]]);
-      if length(altpoint[m,Imp.Surf[i]])<=VqtyAtSurf[m,Imp.Surf[i]] then
-      setlength(altpoint[m,Imp.Surf[i]],VqtyAtSurf[m,Imp.Surf[i]]+100);
-      if length(v2[m,Imp.Surf[i]])-1<=PqtyAtSurf[m,Imp.Surf[i]] then
-      setlength(v2[m,Imp.Surf[i]],PqtyAtSurf[m,Imp.Surf[i]]+100);
-
-      altpoint[m,Imp.Surf[i],VqtyAtSurf[m,Imp.Surf[i]],1]:=Imp.Faces[i,h];      //reference point
-      altpoint[m,Imp.Surf[i],VqtyAtSurf[m,Imp.Surf[i]],2]:=h;                   //DUV point
-      altpoint[m,Imp.Surf[i],VqtyAtSurf[m,Imp.Surf[i]],3]:=i;                   //parent poly
-      v2[m,Imp.Surf[i],PqtyAtSurf[m,Imp.Surf[i]]+1,h]:=VqtyAtSurf[m,Imp.Surf[i]];
+      if i mod 1000 = 0 then
+      begin
+        Shape2.Width:=round((i/Imp.PolyCount)*100);
+        Label35.Caption:=IntToStr(round((i/Imp.PolyCount)*100))+' %';
+        Label35.Repaint;
       end;
-    if h=3 then begin
-    inc(PqtyAtSurf[m,Imp.Surf[i]]);
-        if length(altpoly[m,Imp.Surf[i]])<=PqtyAtSurf[m,Imp.Surf[i]] then
-        setlength(altpoly[m,Imp.Surf[i]],PqtyAtSurf[m,Imp.Surf[i]]+100);
-    altpoly[m,Imp.Surf[i],PqtyAtSurf[m,Imp.Surf[i]]]:=i;
+
+      for h:=1 to 3 do  //point-by-point
+      begin
+        found:=False; //"match found" marker
+        for k:=PqtyAtSurf[m,Imp.Surf[i]] downto 1 do
+        begin
+          //not to compare with self but all others of same surface
+          //reverse direction saves 40-80%
+          for j:=1 to 3 do //scan all previous points of polys
+            if (altpoint[m,Imp.Surf[i],v2[m,Imp.Surf[i],k,j],1]=Imp.Faces[i,h])and  //original points match
+            (Imp.Part[altpoly[m,Imp.Surf[i],k]]=Imp.Part[i])and                                //part tag
+            (Imp.duv[altpoly[m,Imp.Surf[i],k],j].u=Imp.duv[i,h].u)and         //UVs
+            (Imp.duv[altpoly[m,Imp.Surf[i],k],j].v=Imp.duv[i,h].v) then  //UVs
+            begin
+              if length(v2[m,Imp.Surf[i]])-1<=PqtyAtSurf[m,Imp.Surf[i]] then
+                setlength(v2[m,Imp.Surf[i]],PqtyAtSurf[m,Imp.Surf[i]]+100);
+
+              v2[m,Imp.Surf[i],PqtyAtSurf[m,Imp.Surf[i]]+1,h]:=v2[m,Imp.Surf[i],k,j]; //make V2 use it
+              found:=True;
+            end;
+            if found then break; //5% save
+        end;
+
+        if not found then
+        begin
+          inc(VqtyAtSurf[m,Imp.Surf[i]]);
+          if length(altpoint[m,Imp.Surf[i]])<=VqtyAtSurf[m,Imp.Surf[i]] then
+          setlength(altpoint[m,Imp.Surf[i]],VqtyAtSurf[m,Imp.Surf[i]]+100);
+          if length(v2[m,Imp.Surf[i]])-1<=PqtyAtSurf[m,Imp.Surf[i]] then
+          setlength(v2[m,Imp.Surf[i]],PqtyAtSurf[m,Imp.Surf[i]]+100);
+
+          altpoint[m,Imp.Surf[i],VqtyAtSurf[m,Imp.Surf[i]],1]:=Imp.Faces[i,h];      //reference point
+          altpoint[m,Imp.Surf[i],VqtyAtSurf[m,Imp.Surf[i]],2]:=h;                   //DUV point
+          altpoint[m,Imp.Surf[i],VqtyAtSurf[m,Imp.Surf[i]],3]:=i;                   //parent poly
+          v2[m,Imp.Surf[i],PqtyAtSurf[m,Imp.Surf[i]]+1,h]:=VqtyAtSurf[m,Imp.Surf[i]];
+        end;
+
+        if h=3 then
+        begin
+          inc(PqtyAtSurf[m,Imp.Surf[i]]);
+          if length(altpoly[m,Imp.Surf[i]])<=PqtyAtSurf[m,Imp.Surf[i]] then
+            setlength(altpoly[m,Imp.Surf[i]],PqtyAtSurf[m,Imp.Surf[i]]+100);
+          altpoly[m,Imp.Surf[i],PqtyAtSurf[m,Imp.Surf[i]]]:=i;
+        end;
+      end;
     end;
-  end;
-  end;
   Shape2.Width:=100;
 
   h:=1;
@@ -2290,25 +2313,27 @@ begin
   COB.Head.Xmin:=0; COB.Head.Xmax:=0;
   COB.Head.Ymin:=0; COB.Head.Ymax:=0;
   COB.Head.Zmin:=0; COB.Head.Zmax:=0;
-  for i:=1 to COB.Head.PolyQty do begin //computing normal to every polygon
+  for i:=1 to COB.Head.PolyQty do  //computing normal to every polygon
+  begin
     Normal2Poly(COB.Vertices[COB.Faces[i,1]+1],COB.Vertices[COB.Faces[i,2]+1],COB.Vertices[COB.Faces[i,3]+1],@COB.NormalsP[i]);
     Normalize(COB.NormalsP[i]);
   end;
 
-for i:=1 to COB.Head.PointQty do begin
-  COB.Head.Xmax:=max(COB.Head.Xmax,COB.Vertices[i].X);
-  COB.Head.Ymax:=max(COB.Head.Ymax,COB.Vertices[i].Y);
-  COB.Head.Zmax:=max(COB.Head.Zmax,COB.Vertices[i].Z);
-  COB.Head.Xmin:=min(COB.Head.Xmin,COB.Vertices[i].X);
-  COB.Head.Ymin:=min(COB.Head.Ymin,COB.Vertices[i].Y);
-  COB.Head.Zmin:=min(COB.Head.Zmin,COB.Vertices[i].Z);
-end;
+  for i:=1 to COB.Head.PointQty do
+  begin
+    COB.Head.Xmax:=max(COB.Head.Xmax,COB.Vertices[i].X);
+    COB.Head.Ymax:=max(COB.Head.Ymax,COB.Vertices[i].Y);
+    COB.Head.Zmax:=max(COB.Head.Zmax,COB.Vertices[i].Z);
+    COB.Head.Xmin:=min(COB.Head.Xmin,COB.Vertices[i].X);
+    COB.Head.Ymin:=min(COB.Head.Ymin,COB.Vertices[i].Y);
+    COB.Head.Zmin:=min(COB.Head.Zmin,COB.Vertices[i].Z);
+  end;
 
-COB.Head.X:=0;//Cob.Xmax+Cob.Xmin;
-COB.Head.Y:=0;//Cob.Ymax+Cob.Ymin;
-COB.Head.Z:=0;//Cob.Zmax+Cob.Zmin;
+  COB.Head.X:=0;//Cob.Xmax+Cob.Xmin;
+  COB.Head.Y:=0;//Cob.Ymax+Cob.Ymin;
+  COB.Head.Z:=0;//Cob.Zmax+Cob.Zmin;
 
-SendDataToUI(uiCOB);
+  SendDataToUI(uiCOB);
 end;
 
 
@@ -2335,27 +2360,29 @@ end;
 
 
 procedure TForm1.LBCOBPointsClick(Sender: TObject);
-var ID:Integer;
+var
+  ID:Integer;
 begin
-ID:=LBCOBPoints.ItemIndex+1; if ID=0 then Exit;
-COBRefresh:=True;
-COBX.Value:=COB.Vertices[ID].X;
-COBY.Value:=COB.Vertices[ID].Y;
-COBZ.Value:=COB.Vertices[ID].Z;
-COBRefresh:=False;
+  ID:=LBCOBPoints.ItemIndex+1; if ID=0 then Exit;
+  COBRefresh:=True;
+  COBX.Value:=COB.Vertices[ID].X;
+  COBY.Value:=COB.Vertices[ID].Y;
+  COBZ.Value:=COB.Vertices[ID].Z;
+  COBRefresh:=False;
 end;
 
 
 procedure TForm1.COBXChange(Sender: TObject);
-var ID:Integer;
+var ID: Integer;
 begin
-ID:=LBCOBPoints.ItemIndex+1; if ID=0 then Exit;
-if COBRefresh then Exit;
-COB.Vertices[ID].X:=COBX.Value;
-COB.Vertices[ID].Y:=COBY.Value;
-COB.Vertices[ID].Z:=COBZ.Value;
-RebuildCOBBounds;
-SendDataToUI(uiCOB);
+  ID:=LBCOBPoints.ItemIndex+1; if ID=0 then Exit;
+  if COBRefresh then Exit;
+
+  COB.Vertices[ID].X:=COBX.Value;
+  COB.Vertices[ID].Y:=COBY.Value;
+  COB.Vertices[ID].Z:=COBZ.Value;
+  RebuildCOBBounds;
+  SendDataToUI(uiCOB);
 end;
 
 
@@ -2391,18 +2418,22 @@ begin
 
   if ForbidPivotChange then Exit;
 
-  with PartModify[SelectedTreeNode] do begin
-    if Sender=CustomPivotX then begin
-    RGPivotX.ItemIndex:=3;
-    Custom[1]:=CustomPivotX.Value;
+  with PartModify[SelectedTreeNode] do
+  begin
+    if Sender=CustomPivotX then
+    begin
+      RGPivotX.ItemIndex:=3;
+      Custom[1]:=CustomPivotX.Value;
     end;
-    if Sender=CustomPivotY then begin
-    RGPivotY.ItemIndex:=3;
-    Custom[2]:=CustomPivotY.Value;
+    if Sender=CustomPivotY then
+    begin
+      RGPivotY.ItemIndex:=3;
+      Custom[2]:=CustomPivotY.Value;
     end;
-    if Sender=CustomPivotZ then begin
-    RGPivotZ.ItemIndex:=3;
-    Custom[3]:=CustomPivotZ.Value;
+    if Sender=CustomPivotZ then
+    begin
+      RGPivotZ.ItemIndex:=3;
+      Custom[3]:=CustomPivotZ.Value;
     end;
 
     if RGPivotX.ItemIndex=0 then Move[1]:=Low[1];
@@ -2843,8 +2874,8 @@ end;
 
 procedure TForm1.CBChromeClick(Sender: TObject);
 begin
-  Chrome1.Checked:= not Chrome1.Checked;
-  RenderChrome:=Chrome1.Checked;
+  Chrome1.Checked := not Chrome1.Checked;
+  RenderChrome := Chrome1.Checked;
 end;
 
 

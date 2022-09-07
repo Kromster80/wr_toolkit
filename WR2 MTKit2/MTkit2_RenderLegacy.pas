@@ -257,60 +257,70 @@ end;
 
 procedure RenderSpec(ID,PartID:integer; param:string; t:Single);
 begin
-glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-  glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-  glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-  glEnable(GL_TEXTURE_GEN_S);     // Enable spherical
-  glEnable(GL_TEXTURE_GEN_T);     // Environment Mapping
-Dif[3]:=1-Material[MOX.Sid[ID,1]+1].Transparency/100;
-if param='SetTrans' then Dif[3]:=1-t;
-glColor4fv(@Dif);
-TransformAndCall(ID,PartID, 0);
-  glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT);
-  glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT);
-  glDisable(GL_TEXTURE_GEN_S);     // Disable
-  glDisable(GL_TEXTURE_GEN_T);     // Spherical
+  glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+    glEnable(GL_TEXTURE_GEN_S);     // Enable spherical
+    glEnable(GL_TEXTURE_GEN_T);     // Environment Mapping
+  Dif[3]:=1-Material[MOX.Sid[ID,1]+1].Transparency/100;
+  if param='SetTrans' then Dif[3]:=1-t;
+  glColor4fv(@Dif);
+  TransformAndCall(ID,PartID, 0);
+    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT);
+    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT);
+    glDisable(GL_TEXTURE_GEN_S);     // Disable
+    glDisable(GL_TEXTURE_GEN_T);     // Spherical
 end;
 
 procedure RenderSpecular(ID,PartID:integer; param:string; t:Single);
 begin
-glBindTexture(GL_TEXTURE_2D, SpecTexture);
-Dif[0]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp1.R/180,1);
-Dif[1]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp1.G/180,1);
-Dif[2]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp1.B/180,1);
-RenderSpec(ID,PartID,param,t);
+  glBindTexture(GL_TEXTURE_2D, SpecTexture);
+  Dif[0]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp1.R/180,1);
+  Dif[1]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp1.G/180,1);
+  Dif[2]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp1.B/180,1);
+  RenderSpec(ID,PartID,param,t);
 end;
 
 procedure RenderSpecular2(ID,PartID:integer; param:string; t:Single);
 begin
-glBindTexture(GL_TEXTURE_2D, Spec2Texture);
-Dif[0]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp2.R/150,1);
-Dif[1]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp2.G/150,1);
-Dif[2]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp2.B/150,1);
-RenderSpec(ID,PartID,param,t);
+  glBindTexture(GL_TEXTURE_2D, Spec2Texture);
+  Dif[0]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp2.R/150,1);
+  Dif[1]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp2.G/150,1);
+  Dif[2]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp2.B/150,1);
+  RenderSpec(ID,PartID,param,t);
 end;
+
 
 procedure RenderReflection(ID,PartID:integer; param:string; t:Single);
 begin
-glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-if (Material[MOX.Sid[ID,1]+1].Color[ColID].Ref.R=0)and(not RenderChrome) then exit;
-glBindTexture(GL_TEXTURE_2D, EnvTexture);
-  glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-  glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-  glEnable(GL_TEXTURE_GEN_S);     // Enable spherical
-  glEnable(GL_TEXTURE_GEN_T);     // Environment Mapping
-Dif[0]:=1; Dif[1]:=1; Dif[2]:=1;
-if (Material[MOX.Sid[ID,1]+1].MatClass[4] and 8)<>0 then //if 8
-Dif[3]:=Material[MOX.Sid[ID,1]+1].Color[ColID].Ref.R/255//keep a bit transparent
-else if RenderChrome then Dif[3]:=0.8 else Dif[3]:=0.2;
-if param='Blend' then Dif[3]:=Dif[3]*(1-Material[MOX.Sid[ID,1]+1].Transparency/100);
-glColor4fv(@Dif);
-TransformAndCall(ID,PartID, 0);
-  glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT);
-  glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT);
-  glDisable(GL_TEXTURE_GEN_S);     // Disable
-  glDisable(GL_TEXTURE_GEN_T);     // Spherical
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+  if (Material[MOX.Sid[ID,1]+1].Color[ColID].Ref.R=0) and (not RenderChrome) then Exit;
+  glBindTexture(GL_TEXTURE_2D, EnvTexture);
+    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+    glEnable(GL_TEXTURE_GEN_S);     // Enable spherical
+    glEnable(GL_TEXTURE_GEN_T);     // Environment Mapping
+
+  Dif[0]:=1; Dif[1]:=1; Dif[2]:=1;
+  if (Material[MOX.Sid[ID,1]+1].MatClass[4] and 8) <> 0 then //if 8
+    Dif[3]:=Material[MOX.Sid[ID,1]+1].Color[ColID].Ref.R/255//keep a bit transparent
+  else
+  if RenderChrome then
+    Dif[3]:=0.8
+  else
+    Dif[3]:=0.2;
+
+  if param='Blend' then
+    Dif[3]:=Dif[3]*(1-Material[MOX.Sid[ID,1]+1].Transparency/100);
+
+  glColor4fv(@Dif);
+  TransformAndCall(ID,PartID, 0);
+    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT);
+    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_EXT);
+    glDisable(GL_TEXTURE_GEN_S);     // Disable
+    glDisable(GL_TEXTURE_GEN_T);     // Spherical
 end;
+
 
 procedure RenderTexture(ID,PartID:integer; param:string; t:Single);
 begin

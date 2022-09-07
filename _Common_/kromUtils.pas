@@ -23,7 +23,7 @@ function ElapsedTime(i1: pcardinal): string;
 function ExtractOpenedFileName(in_s: string):string;
 function GetFileExt (const FileName: string): string;
 function AssureFileExt(FileName,Ext:string): string;
-function TruncateExt(FileName:string): string;
+function TruncateExt(FileName:string): string; deprecated;
 function GetFileSize(const FileName: string): LongInt;
 function CheckFileExists(const FileName: string; const IsSilent:boolean = false):boolean;
 
