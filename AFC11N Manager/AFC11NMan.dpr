@@ -1,4 +1,4 @@
-program AFC11Man;
+program AFC11NMan;
 
 uses
   Forms,
@@ -11,7 +11,7 @@ uses
 
 begin
   Application.Initialize;
-  Application.Title := 'AFC11 Manager';
+  Application.Title := 'AFC11N Manager';
   Application.CreateForm(TForm2, Form2);
   Application.CreateForm(TForm1, Form1);
   Application.CreateForm(TAboutForm, AboutForm);

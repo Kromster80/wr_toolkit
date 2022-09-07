@@ -106,8 +106,6 @@ object Form1: TForm1
       Height = 57
       Anchors = [akTop, akRight]
       Caption = 'Apply'
-      TabOrder = 5
-      OnClick = SaveDS
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
         180000000000000C0000C30E0000C30E00000000000000000000FFFFFFFFFFFF
@@ -208,6 +206,8 @@ object Form1: TForm1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
       Layout = blGlyphTop
+      TabOrder = 5
+      OnClick = SaveDS
     end
     object BitBtn2: TBitBtn
       Left = 7
@@ -216,8 +216,6 @@ object Form1: TForm1
       Height = 57
       Anchors = [akTop, akRight]
       Caption = 'Apply && Run Cobra11'
-      TabOrder = 6
-      OnClick = BitBtn2Click
       Glyph.Data = {
         36060000424D3606000000000000360200002800000020000000200000000100
         08000000000000040000120B0000120B00008000000000000000030303000C0B
@@ -270,6 +268,8 @@ object Form1: TForm1
         6B797D7D7A6D0B006A27343437454545453D3A3C342B6A6A6A6A6A6A6A6A6A00
         000001040000006A6A6A6A6A6A1835342C2E2B2B6A6A6A6A6A6A}
       Layout = blGlyphTop
+      TabOrder = 6
+      OnClick = BitBtn2Click
     end
     object BitBtn1: TBitBtn
       Left = 7
@@ -278,8 +278,6 @@ object Form1: TForm1
       Height = 57
       Anchors = [akTop, akRight]
       Caption = 'About ...'
-      TabOrder = 7
-      OnClick = Info
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
         180000000000000C000000000000000000000000000000000000C8D0D4C8D0D4
@@ -380,6 +378,8 @@ object Form1: TForm1
         EAEBEBEBEBECECEBECECECEBECECEAE9EEE9E2E4DDD4BCBAB7BABDBEC8D0D4C8
         D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4}
       Layout = blGlyphTop
+      TabOrder = 7
+      OnClick = Info
     end
     object GroupBox1: TGroupBox
       Left = 470
@@ -426,16 +426,10 @@ object Form1: TForm1
         Height = 33
         Max = 15
         Min = 1
-        Orientation = trHorizontal
         PageSize = 1
-        Frequency = 1
         Position = 1
-        SelEnd = 0
-        SelStart = 0
         TabOrder = 0
         ThumbLength = 24
-        TickMarks = tmBottomRight
-        TickStyle = tsAuto
         OnChange = TrackBar1Change
       end
     end

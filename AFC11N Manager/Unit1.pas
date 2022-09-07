@@ -1,6 +1,5 @@
 unit Unit1;
 interface
-
 uses
   ShellApi, Windows, Messages, SysUtils, Classes, Controls, Graphics, ExtCtrls, Forms,
   StdCtrls, KromUtils, ComCtrls, CheckLst, Spin, FloatSpinEdit, Math, Dialogs, Buttons;
@@ -32,13 +31,9 @@ type
     procedure AddTracksToDS(Sender: TObject);
     procedure SearchAutos(Sender: TObject);
     procedure SearchProfiles(Sender: TObject);
-    procedure GetProfileInfo(s1:string;i1:integer);
-    procedure GetAutoInfo(s1:string;i1:integer);
     procedure CLBClickCheck(Sender: TObject);
     procedure Info(Sender: TObject);
-    procedure WriteINI(Sender: TObject);
     procedure CBSimMissionsClick(Sender: TObject);
-    procedure ReadINI(Sender: TObject);
     procedure PopulateCarList(Sender: TObject);
     procedure CBSortCarsClick(Sender: TObject);
     procedure BitBtn2Click(Sender: TObject);
@@ -46,8 +41,11 @@ type
     procedure TrackBar1Change(Sender: TObject);
     procedure Image1MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure Image1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-  private     { Private declarations }
-  public      { Public declarations }
+  private
+    procedure ReadINI;
+    procedure WriteINI;
+    procedure GetAutoInfo(s1:string;i1:integer);
+    procedure GetProfileInfo(s1:string;i1:integer);
   end;
 
 const
@@ -57,7 +55,7 @@ var
   Form1: TForm1;
   f:file;
   ft:textfile;
-  c:array[1..1024000]of char;
+  c:array[1..1024000]of AnsiChar;
   i,j,k,m,h:integer;
   s:string;
   RootDir:string;
@@ -141,11 +139,11 @@ var
 ////////////////////////////////////////////////////////////////////////////////
   AddonCarQty:integer;
   AddonCar:array[1..1024]of record
-  Folder:string;
-  Factory,Model,Name:string;
-  Version:string;
-  ColorID:integer;
-  Install:boolean;
+    Folder:string;
+    Factory,Model,Name:string;
+    Version:string;
+    ColorID:integer;
+    Install:boolean;
   end;
 
 implementation
@@ -155,24 +153,25 @@ uses SupprtUnit2, Unit2, WR_AboutBox;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-Form2.Show;
-Form2.Repaint;
-if fileexists('krom.dev') then ChDir('E:\Cobra 11 - Nitro');
-RootDir:=getcurrentdir;
-if not fileexists('FrontEnd\Cobra11.ds') then begin
-Form2.FormStyle:=fsNormal;
-MessageBox(Form1.Handle,'"FrontEnd\Cobra11.ds" not found. Run AFC11Man from AFC11 folder.','Error',MB_OK);
-Form2.Close;
-exit;
-end;
-if not FileExists('FrontEnd\Cobra11.bak') then CopyFile('FrontEnd\Cobra11.ds','FrontEnd\Cobra11.bak',true);
-if fileexists('FrontEnd\Cobra11.ds') then OpenDS(nil,'FrontEnd\Cobra11.ds');
-ElapsedTime(@TimeCode);
-Form2.Label2.Caption:='Scanning: Profiles ...'; Form2.Label2.Refresh; SearchProfiles(nil);
-Form2.Label2.Caption:='Scanning: Cars ...';     Form2.Label2.Refresh; SearchAutos(nil);         //Form2.Memo1.Lines.Add('Autos - '+ElapsedTime(@TimeCode));
-if Form2.Showing then Form2.Destroy;
-PopulateCarList(nil);
-ReadINI(nil);
+  Form2.Show;
+  Form2.Repaint;
+  if fileexists('krom.dev') then ChDir('D:\Alarm for Cobra 11 - Nitro');
+  RootDir:=GetCurrentDir;
+  if not fileexists('FrontEnd\Cobra11.ds') then
+  begin
+    Form2.FormStyle:=fsNormal;
+    MessageBox(Form1.Handle,'"FrontEnd\Cobra11.ds" not found. Run AFC11NMan from AFC11 folder.','Error',MB_OK);
+    Form2.Close;
+    exit;
+  end;
+  if not FileExists('FrontEnd\Cobra11.bak') then CopyFile('FrontEnd\Cobra11.ds','FrontEnd\Cobra11.bak',true);
+  if fileexists('FrontEnd\Cobra11.ds') then OpenDS(nil,'FrontEnd\Cobra11.ds');
+  ElapsedTime(@TimeCode);
+  Form2.Label2.Caption:='Scanning: Profiles ...'; Form2.Label2.Refresh; SearchProfiles(nil);
+  Form2.Label2.Caption:='Scanning: Cars ...';     Form2.Label2.Refresh; SearchAutos(nil);         //Form2.Memo1.Lines.Add('Autos - '+ElapsedTime(@TimeCode));
+  if Form2.Showing then Form2.Destroy;
+  PopulateCarList(nil);
+  ReadINI;
 end;
 
 procedure TForm1.OpenDS(Sender: TObject; filename:string);
@@ -255,7 +254,7 @@ if c[1]=#2  then begin Value[i,k,j].Typ:=2; blockread(f,Value[i,k,j].Rel,4); end
 if c[1]=#4  then begin Value[i,k,j].Typ:=4; blockread(f,c,4); end; //Prevents Editcar from reding ds file
 if c[1]=#16 then begin Value[i,k,j].Typ:=3; Value[i,k,j].Str:=''; blockread(f,h,4);
                        if h<>0 then begin blockread(f,c,h+1);
-                       Value[i,k,j].Str:=StrPas(@c); end; end;
+                       Value[i,k,j].Str:=PAnsiChar(@c); end; end;
 if Value[i,k,j].Typ=0 then
 exit;
 
@@ -312,7 +311,7 @@ end; //1..DSqty
 closefile(f);
 
 if DirectoryExists('C11-Saves') then SaveProfiles(nil);
-WriteINI(nil);
+WriteINI;
 end;
 
 procedure TForm1.SaveProfiles(Sender: TObject);
@@ -731,7 +730,7 @@ blockread(f,c,1);
 if c[1]=#1  then begin P_[i1].Value[i,k,j].Typ:=1; blockread(f,P_[i1].Value[i,k,j].Int,4); end;
 if c[1]=#2  then begin P_[i1].Value[i,k,j].Typ:=2; blockread(f,P_[i1].Value[i,k,j].Rel,4); end;
 if c[1]=#16 then begin P_[i1].Value[i,k,j].Typ:=3; blockread(f,h,4); if h<>0 then begin blockread(f,c,h+1);
-                       P_[i1].Value[i,k,j].Str:=StrPas(@c); end; end;
+                       P_[i1].Value[i,k,j].Str:=PAnsiChar(@c); end; end;
 if P_[i1].Value[i,k,j].Typ=0 then exit;
 
 end;//CO.Entries
@@ -834,157 +833,164 @@ AddonCar[i1].ColorID:=EC_Value[i1,1,81,2].Int;
 end;
 
 procedure TForm1.CLBClickCheck(Sender: TObject);
+var I: Integer;
 begin
-for i:=1 to CLBProfiles.Count do Profile[i].Install:=CLBProfiles.Checked[i-1];
-for i:=1 to CLBCars.Count do AddonCar[i].Install:=CLBCars.Checked[i-1];
-if CLBCars.ItemIndex<0 then exit;
-TrackBar1.Position:=AddonCar[CLBCars.ItemIndex+1].ColorID;
+  for I:=1 to CLBProfiles.Count do Profile[I].Install:=CLBProfiles.Checked[I-1];
+  for I:=1 to CLBCars.Count do AddonCar[I].Install:=CLBCars.Checked[I-1];
+
+  if CLBCars.ItemIndex>=0 then
+    TrackBar1.Position:=AddonCar[CLBCars.ItemIndex+1].ColorID;
 end;
 
 procedure TForm1.Info(Sender: TObject);
 begin
-  AboutForm.Show('Version 0.1c (08 Sep 2007)','Manages AFC11 addons.','AFC11NMAN' );
+  AboutForm.Show('AFC11N Manager', 'Version 0.1c (08 Sep 2007)', 'Manages AFC11 addons.','AFC11NMAN' );
 end;
 
-procedure TForm1.WriteINI(Sender: TObject);
+procedure TForm1.WriteINI;
 begin
-chdir(RootDir);
-assignfile(ft,'C11Man.ini'); rewrite(ft);
-writeln(ft,'C11 Manager INI file');
+  chdir(RootDir);
+  assignfile(ft,'C11Man.ini'); rewrite(ft);
+  writeln(ft,'C11 Manager INI file');
 
-writeln(ft);
-writeln(ft,'Profiles:');
-for i:=1 to ProfileQty do
-if Profile[i].Install then
-writeln(ft,Profile[i].Folder);
+  writeln(ft);
+  writeln(ft,'Profiles:');
+  for i:=1 to ProfileQty do
+    if Profile[i].Install then
+      writeln(ft,Profile[i].Folder);
 
-writeln(ft);
-writeln(ft,'Cars:');
-for i:=1 to AddOnCarQty do
-if AddonCar[i].Install then begin
-writeln(ft,AddonCar[i].Folder);
-writeln(ft,AddonCar[i].ColorID);
-end;
+  writeln(ft);
+  writeln(ft,'Cars:');
+  for i:=1 to AddOnCarQty do
+  if AddonCar[i].Install then begin
+    writeln(ft,AddonCar[i].Folder);
+    writeln(ft,AddonCar[i].ColorID);
+  end;
 
-writeln(ft);
-writeln(ft,'DrivingMode:');
-if CBSimMissions.Checked then
-writeln(ft,'Sim') else writeln(ft,'Arcade');
+  writeln(ft);
+  writeln(ft,'DrivingMode:');
+  if CBSimMissions.Checked then
+    writeln(ft,'Sim') else writeln(ft,'Arcade');
 
-writeln(ft);
-writeln(ft,'ListingMode:');
-writeln(ft,inttostr(RGListing.ItemIndex));
+  writeln(ft);
+  writeln(ft,'ListingMode:');
+  writeln(ft,inttostr(RGListing.ItemIndex));
 
-closefile(ft);
+  closefile(ft);
 end;
 
 procedure TForm1.CBSimMissionsClick(Sender: TObject);
 begin
-for i:=2 to 30 do if CBSimMissions.Checked then
-Value[49,30,i].Int:=0 else Value[49,30,i].Int:=100; //Missions Arcade / Simulation
+  for i:=2 to 30 do if CBSimMissions.Checked then
+    Value[49,30,i].Int:=0 else Value[49,30,i].Int:=100; //Missions Arcade / Simulation
 end;
 
-procedure TForm1.ReadINI(Sender: TObject);
-var i,col:integer; st:string;
+procedure TForm1.ReadINI;
+var
+  i,col:integer;
+  st:AnsiString;
 begin
-chdir(RootDir);
-if not fileexists('C11Man.ini') then exit;
-assignfile(ft,'C11Man.ini'); reset(ft);
-readln(ft); readln(ft);
+  chdir(RootDir);
+  if not fileexists('C11Man.ini') then exit;
+  assignfile(ft,'C11Man.ini'); reset(ft);
+  readln(ft); readln(ft);
 
-repeat
-readln(ft,s);
-
-  if s='Profiles:' then
-  repeat readln(ft,s);
-  for i:=0 to CLBProfiles.Count-1 do
-  if CLBProfiles.Items[i]=s then //List entries are same as corresponding folder names
-  CLBProfiles.Checked[i]:=true;
-  until(s='');
-
-  if s='Cars:' then
   repeat
     readln(ft,s);
-    if s<>'' then readln(ft,col);
-    for i:=0 to CLBCars.Count-1 do begin
-    st:=CLBCars.Items[i];
-    decs(st,-length(st)+3);
-      if AddonCar[strtoint(st)].Folder=s then begin
-      CLBCars.Checked[i]:=true;
-      AddonCar[strtoint(st)].ColorID:=col;
+
+    if s='Profiles:' then
+    repeat readln(ft,s);
+    for i:=0 to CLBProfiles.Count-1 do
+    if CLBProfiles.Items[i]=s then //List entries are same as corresponding folder names
+    CLBProfiles.Checked[i]:=true;
+    until(s='');
+
+    if s='Cars:' then
+    repeat
+      readln(ft,s);
+      if s<>'' then readln(ft,col);
+      for i:=0 to CLBCars.Count-1 do
+      begin
+        st:=CLBCars.Items[i];
+        decs(st,-length(st)+3);
+        if AddonCar[strtoint(st)].Folder=s then
+        begin
+          CLBCars.Checked[i]:=true;
+          AddonCar[strtoint(st)].ColorID:=col;
+        end;
       end;
+    until(s='');
+
+    if s='DrivingMode:' then
+    begin
+      readln(ft,s);
+      if s='Sim' then CBSimMissions.Checked:=true;
     end;
-  until(s='');
 
-  if s='DrivingMode:' then begin
-  readln(ft,s);
-  if s='Sim' then CBSimMissions.Checked:=true;
-  end;
+    if s='ListingMode:' then
+    begin
+      readln(ft,s);
+      RGListing.ItemIndex:=EnsureRange(strtoint(s),0,RGListing.Items.Count-1);
+    end;
 
-  if s='ListingMode:' then begin
-  readln(ft,s);
-  RGListing.ItemIndex:=EnsureRange(strtoint(s),0,RGListing.Items.Count-1);
-  end;
-
-until(eof(ft));
-closefile(ft);
-CLBClickCheck(nil);
+  until(eof(ft));
+  closefile(ft);
+  CLBClickCheck(nil);
 end;
 
 procedure TForm1.PopulateCarList(Sender: TObject);
 var i:integer;
 begin
-for i:=1 to AddonCarQty do begin
+  for i:=1 to AddonCarQty do
+    if RGListing.Items[RGListing.ItemIndex]='Folders' then
+      CLBCars.AddItem(AddonCar[i].Folder+zz+int2fix(i,3),nil);
 
-if RGListing.Items[RGListing.ItemIndex]='Folders' then
-CLBCars.AddItem(AddonCar[i].Folder+zz+int2fix(i,3),nil);
-
-end;
-CLBCars.Refresh;
+  CLBCars.Refresh;
 end;
 
 procedure TForm1.CBSortCarsClick(Sender: TObject);
 begin
-CLBCars.Sorted:=CBSortCars.Checked;
+  CLBCars.Sorted:=CBSortCars.Checked;
 end;
 
 procedure TForm1.BitBtn2Click(Sender: TObject);
 begin
-SaveChanges.Click();
-Form1.Close;
-ChDir(RootDir);
-ShellExecute(handle, 'open', 'C11_PC.exe', nil, nil, SW_SHOWNORMAL);
+  SaveChanges.Click();
+  Form1.Close;
+  ChDir(RootDir);
+  ShellExecute(handle, 'open', 'C11_PC.exe', nil, nil, SW_SHOWNORMAL);
 end;
+
 
 procedure TForm1.CLBCarsDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
 begin
-CLBCars.Canvas.TextOut(Rect.Left+22,Rect.Top,CLBCars.Items[Index]);
-CLBCars.Canvas.Brush.Color:=PresetColor[AddonCar[Index+1].ColorID];
-CLBCars.Canvas.TextOut(Rect.Left+2,Rect.Top,'      ');
+  CLBCars.Canvas.TextOut(Rect.Left+22,Rect.Top,CLBCars.Items[Index]);
+  CLBCars.Canvas.Brush.Color:=PresetColor[AddonCar[Index+1].ColorID];
+  CLBCars.Canvas.TextOut(Rect.Left+2,Rect.Top,'      ');
 end;
+
 
 procedure TForm1.TrackBar1Change(Sender: TObject);
 begin
-if CLBCars.ItemIndex<0 then exit;
-AddonCar[CLBCars.ItemIndex+1].ColorID:=TrackBar1.Position;
-Shape1.Brush.Color:=PresetColor[AddonCar[CLBCars.ItemIndex+1].ColorID]; //coloring solution
-CLBCars.Repaint;
+  if CLBCars.ItemIndex<0 then exit;
+  AddonCar[CLBCars.ItemIndex+1].ColorID:=TrackBar1.Position;
+  Shape1.Brush.Color:=PresetColor[AddonCar[CLBCars.ItemIndex+1].ColorID]; //coloring solution
+  CLBCars.Repaint;
 end;
+
 
 procedure TForm1.Image1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-Image1MouseUp(Sender, Button, Shift, X, Y);
+  Image1MouseUp(Sender, Button, Shift, X, Y);
 end;
+
 
 procedure TForm1.Image1MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var Col:byte;
 begin
-Col:=X div (Image1.Width div 15) + 1;
-TrackBar1.Position:=Col;
+  Col:=X div (Image1.Width div 15) + 1;
+  TrackBar1.Position:=Col;
 end;
-
-
-
 
 
 end.

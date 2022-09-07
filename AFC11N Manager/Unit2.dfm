@@ -3,7 +3,7 @@ object Form2: TForm2
   Top = 179
   BorderIcons = []
   BorderStyle = bsNone
-  Caption = 'AFC11Man'
+  Caption = 'AFC11NMan'
   ClientHeight = 267
   ClientWidth = 504
   Color = clBtnFace
