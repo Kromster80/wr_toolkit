@@ -18,10 +18,10 @@ uses
 
 const
   MatClassMax=4;
-  
+
 var
   vs:Integer;
-  po,fs:array[0..MatClassMax,0..MatClassMax]of Integer;
+  po,fs: array [0..MatClassMax,0..MatClassMax]of Integer;
   S_Tex1, S_Tex2, S_Tex3, S_Tex4: Integer;
   Mat_Ambi, Mat_Diff, Mat_Spec, Mat_Spec2, Mat_Refl, Mat_Dirt, Mat_ReflF :Integer;
 
@@ -405,7 +405,7 @@ procedure RenderLights(ID,Mode:Integer; ShowDummy:Boolean);
 var
   i:Integer;
   c:Integer;
-  cam:array[1..3]of Single;
+  cam: array [1..3]of Single;
 begin
   glDisable(GL_LIGHTING);
   glDepthFunc(GL_ALWAYS); //Render on top of all
@@ -544,7 +544,7 @@ procedure RenderGrid;
 var
   i,h:Integer;
   xx,zz:Integer;
-  Step:array[1..2]of Integer;
+  Step: array [1..2]of Integer;
 begin
 XX:=25;
 ZZ:=40;

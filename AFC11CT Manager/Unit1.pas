@@ -1,6 +1,5 @@
 unit Unit1;
 interface
-
 uses
   ShellApi, Windows, Messages, SysUtils, Classes, Controls, Graphics, ExtCtrls, Forms,
   StdCtrls, KromUtils, ComCtrls, CheckLst, Spin, FloatSpinEdit, Math, Dialogs, Buttons;
@@ -44,20 +43,17 @@ type
     procedure Image1MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure Image1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure BitBtn3Click(Sender: TObject);
-  private     { Private declarations }
-  public      { Public declarations }
   end;
 
 const
  StockCars=55;
  MaxCars=256;
 
-
 var
   Form1: TForm1;
   f:file;
   ft:textfile;
-  c:array[1..1024000]of char;
+  c: array [1..1024000]of char;
   i,j,k,m,h:integer;
   s:string;
   RootDir:string;
@@ -65,7 +61,7 @@ var
   zz:string='     '{;//}+'                                                                                        ';
 
 ////////////////////////////////////////////////////////////////////////////////
-  Header:array[1..33]of char;
+  Header: array [1..33]of char;
   DSqty:integer;
 
   TB:array of record
@@ -88,22 +84,22 @@ var
   Value:array of array of array of record
   Typ:byte; Int:integer; Rel:single; Str:string; end;
 ////////////////////////////////////////////////////////////////////////////////
-  EC_DSqty:array[1..MaxCars]of integer;
+  EC_DSqty: array [1..MaxCars]of integer;
 
-  EC_TB:array[1..MaxCars,1..3] of record //2+1
+  EC_TB: array [1..MaxCars,1..3] of record //2+1
   Entries,Index:integer;   //VA_Index
   Cond:byte;       //Cond switch
   CondText:array of string; //Cond text
   end;
 
-  EC_CO:array[1..MaxCars,1..3,1..512] of record Entries,Index:integer; end;
+  EC_CO: array [1..MaxCars,1..3,1..512] of record Entries,Index:integer; end;
 
-  EC_Value:array[1..MaxCars,1..3,1..512] of array of record
+  EC_Value: array [1..MaxCars,1..3,1..512] of array of record
   Typ:byte; Int:integer; Rel:single; Str:string; end;
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
   ProfileQty:integer;
-  Profile:array[1..32]of record
+  Profile: array [1..32]of record
   Folder:string;
   Install:bool;
   end;
@@ -113,11 +109,11 @@ var
 //1..32 Profiles count
 //1..32 DS count
 //1..40 TB count
-  P_:array[1..32]of record
-  Header:array[1..33]of char;
+  P_: array [1..32]of record
+  Header: array [1..33]of char;
   DSqty:integer;
 
-  TB:array[1..32] of record
+  TB: array [1..32] of record
   Entries:integer; //VA_Entries
   Index:integer;   //VA_Index
   iC:byte;         //VA_iC ?
@@ -126,7 +122,7 @@ var
   CondText:array of string; //Cond text
   end;
 
-  CO:array[1..32,1..40] of record
+  CO: array [1..32,1..40] of record
   Entries:integer; //VA_Entries
   Index:integer;   //VA_Index
   Lib:string;      //VA_Lib
@@ -134,13 +130,13 @@ var
   SM,ST,IC,SC:string;       //VA_database path, VA_ST, VA_IC, VA_SC
   end;
 
-  Value:array[1..32,1..40] of array of record
+  Value: array [1..32,1..40] of array of record
   Typ:byte; Int:integer; Rel:single; Str:string; end;
   end;
 
 ////////////////////////////////////////////////////////////////////////////////
   AddonCarQty:integer;
-  AddonCar:array[1..1024]of record
+  AddonCar: array [1..1024]of record
   Folder:string;
   Factory,Model,Name:string;
   ColorID:integer;
@@ -996,12 +992,12 @@ procedure TForm1.BitBtn3Click(Sender: TObject);
   i,k,h:integer;
   CTABcount,
   CTAB_Index:integer;
-  CTABSize:array[1..128]of integer;
+  CTABSize: array [1..128]of integer;
   ps_2Count:integer;
-  ps_2Size:array[1..128]of integer;
+  ps_2Size: array [1..128]of integer;
   IsPixelShader:boolean;
-  Head:array[1..128]of record
-    ID:array[1..4]of char;
+  Head: array [1..128]of record
+    ID: array [1..4]of char;
     c1:integer;           //c28
     CodeOffset:integer;
     c2:integer;
@@ -1009,8 +1005,8 @@ procedure TForm1.BitBtn3Click(Sender: TObject);
     c3:integer;           //c28
     c4:integer;
     c5:integer;
-    NamesInfo:array[1..16]of record
-      Inf:array[1..10]of word;
+    NamesInfo: array [1..16]of record
+      Inf: array [1..10]of word;
     end;
   end;
        }

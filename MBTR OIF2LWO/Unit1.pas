@@ -3,35 +3,35 @@ interface
 uses
   Windows, Messages, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, FileCtrl, ExtCtrls, sysutils;
+
 type
   TForm1 = class(TForm)
     Button1: TButton;
     Memo1: TMemo;
     OpenDialog1: TOpenDialog;
     procedure MOX2LWO(Sender: TObject);
-
-  private     { Private declarations }
-  public      { Public declarations }
   end;
 
 var
   Form1: TForm1;
   f:file;
   fo,flog:textfile;
-  v:array[1..65536,0..12]of integer;
-  uv:array[1..65536,1..12,1..2]of real;
-  surf2,surf:array[1..65536] of integer;       //Surfaces
-  xyz:array[1..65536,1..3]of real;
-  tname:array[1..256]of string;
-  c:array[1..256] of char;
+  v: array [1..65536,0..12]of integer;
+  uv: array [1..65536,1..12,1..2]of real;
+  surf2,surf: array [1..65536] of integer;       //Surfaces
+  xyz: array [1..65536,1..3]of real;
+  tname: array [1..256]of string;
+  c: array [1..256] of char;
   m:integer;
   i,j,k,l:integer;
   pqty,lqty,sqty,tqty:integer;
   res:string[4];
   oifname,s2,s:string;
   NumRead:integer;
-implementation  {$R *.DFM}
 
+implementation
+
+  {$R *.DFM}
 
 function real2(c1,c2,c3,c4:char):real;
 var i,sign,exponent:integer; t,mantissa:real;
@@ -284,10 +284,6 @@ memo1.Lines.Add('Conversion complete.');
 //Gauge3.Progress:=100;
 //end; //No file case
 end;
-
-
-
-
 
 
 end.

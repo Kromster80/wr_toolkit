@@ -1,8 +1,10 @@
 unit Unit_Tracing;
 interface
-uses Unit1, Sysutils, Math, KromUtils, Unit_Defaults;
+uses
+  Unit1, Sysutils, Math, KromUtils, Unit_Defaults;
 
-type TPickDirection = (pd_Top, pd_Bottom, pd_Near);
+type
+  TPickDirection = (pd_Top, pd_Bottom, pd_Near);
 
 function TraceHeightY(inx,iny,inz:single; aPickDir:TPickDirection):single;
 procedure TraceHeight(inx,iny,inz:single; aPickDir:TPickDirection; ResultY:psingle; ResultPoly:pinteger);
@@ -23,8 +25,8 @@ const Num=16; //how many polys to check
 var
   i,k,PolyQty,ci,cb:integer;
   x1,z1,x2,z2,x3,z3,ytemp,nx,ny,nz,D:single;
-  v1,v2,v3:array[1..3] of single;
-  tp:array[1..Num]of integer;
+  v1,v2,v3: array [1..3] of single;
+  tp: array [1..Num]of integer;
 begin
   PolyQty:=1; ci:=1;
   FillChar(tp,SizeOf(tp),#0);
@@ -91,7 +93,7 @@ var
   tx,tz,Step:integer;
   ind1,ind2:integer;
   v1,v2,v3,n1,n2,n3{,tmp}:Vector3f;
-  Strip:array[1..16]of shortint;
+  Strip: array [1..16]of shortint;
   StripQuest:byte;
   tb:byte;
   vp,vs,sp,ip:Vector3f; //Point: VectorPos,VectorToSun,SunPos,IntersectionPos
@@ -102,13 +104,13 @@ var
   bx,bz:integer;
   //Trace from Block to Sun
   L1x,L1y,L2x,L2y,L3x,L3y,L4x,L4y,Sx,Sy:integer;
-  Edge:array[1..8]of integer;
+  Edge: array [1..8]of integer;
   e1,e2,ID,ttt:integer;
   UniqV:array of integer;
   ShadAcc:array of record Count,Value:word; end;
   ShowLog:boolean;
   ShadHi,ShadLo,Shad2,Shad4:integer;
-  CutOff:record a,b,c,d,e,f,g:array[1..2]of integer; end;
+  CutOff:record a,b,c,d,e,f,g: array [1..2]of integer; end;
   s:string;
 begin
 

@@ -1,6 +1,5 @@
 unit WR_Manager_unit1;
 interface
-
 uses
   Windows, ShellApi, Forms, sysutils, filectrl, KromUtils,
   ExtCtrls, StdCtrls, Controls, Classes, Graphics, Buttons, ComCtrls,
@@ -98,12 +97,13 @@ type
     procedure Button1Click(Sender: TObject);
   end;
 
-const MaxCars=2048; zz:string=#13+#10;
-strasse:array[1..13]of string=(
-'Tarmac','Tarmac/Gravel','Tarmac/Sand','Tarmac/Grass','Tarmac/Snow','Tarmac/Concrete',
-'Sand','Sand/Gravel','Sand/Grass','Gravel','Grass','Snow','Concrete');
-gelaende:array[1..7]of string=(
-'Off the Road','Flat','Rolling','Ondulating','Hilly','Mountainous','Terrain');
+const
+  MaxCars=2048; zz:string=#13+#10;
+  strasse: array [1..13]of string=(
+    'Tarmac','Tarmac/Gravel','Tarmac/Sand','Tarmac/Grass','Tarmac/Snow','Tarmac/Concrete',
+    'Sand','Sand/Gravel','Sand/Grass','Gravel','Grass','Snow','Concrete');
+  gelaende: array [1..7]of string=(
+    'Off the Road','Flat','Rolling','Ondulating','Hilly','Mountainous','Terrain');
 
 
 var
@@ -117,33 +117,34 @@ fw,fh:integer;
 s:string;
 
 nodeqty,scnqty:integer;
-mauth,mconv,misc:array[1..256]of string;
-trkscn,trkstage,trkrel,trkmark,trkdriv,trkchk,trksurf,trkshape,trkoffr:array[1..256,1..20]of integer;
-trkname,trkimage:array[1..256,1..20]of string;
-trklen:array[1..256,1..256]of real;
-scndir,scnbg,scnol,scnfl,scnld,scningame,scnname:array[1..256]of string;
-TrackQty,scnlast:array[1..256]of integer;
+mauth,mconv,misc: array [1..256]of string;
+trkscn,trkstage,trkrel,trkmark,trkdriv,trkchk,trksurf,trkshape,trkoffr: array [1..256,1..20]of integer;
+trkname,trkimage: array [1..256,1..20]of string;
+trklen: array [1..256,1..256]of real;
+scndir,scnbg,scnol,scnfl,scnld,scningame,scnname: array [1..256]of string;
+TrackQty,scnlast: array [1..256]of integer;
 
-TBname,DSname:array[1..512]of string; //1..287 for password protected cars
+TBname,DSname: array [1..512]of string; //1..287 for password protected cars
 DSqty,TBqty,COqty:integer;  //Number of parameters(176), temp
 
 
 aqty,pqty,Checkedqty,Checkedqty_S,ReleasedCars,ReleasedTracks,fqty:integer;
 ii,kk,ID,id2,h,i,j,k,l,m:integer;
-installed,installed_S:array[1..MaxCars]of boolean;
+installed,installed_S: array [1..MaxCars]of boolean;
 incl:boolean;
-rclass:array[1..MaxCars]of word;
-addon,location:array[1..MaxCars]of string;
-modelname,carname,origcarname:array[1..MaxCars]of string;
-cmprof,profile,s2,s3:array[1..32]of string;
-favqty:array[1..8]of integer;
-fav:array[1..8,1..MaxCars]of string;
-favname:array[1..8]of string;
-c,d:array[1..4096]of char;
+rclass: array [1..MaxCars]of word;
+addon,location: array [1..MaxCars]of string;
+modelname,carname,origcarname: array [1..MaxCars]of string;
+cmprof,profile,s2,s3: array [1..32]of string;
+favqty: array [1..8]of integer;
+fav: array [1..8,1..MaxCars]of string;
+favname: array [1..8]of string;
+c,d: array [1..4096]of char;
 
 implementation
+uses
+  WR_AboutBox, WR_Manager_SetName, WR_Manager_Splash, WR_Manager_ReleaseNotesForm;
 
-uses WR_AboutBox, WR_Manager_SetName, WR_Manager_Splash, WR_Manager_ReleaseNotesForm;
 {$R *.dfm}
 
 procedure TForm1.Err(ErrorID:integer; parameter:string);
@@ -1309,7 +1310,7 @@ fh:=Form1.Height;
 end;
 
 procedure TForm1.CLBox1DblClick(Sender: TObject);
-Var St:Array[0..512] of char;
+Var St: array [0..512] of char;
 begin
 //Made to allow editing .car by double click, nothing more !
 id:=0;

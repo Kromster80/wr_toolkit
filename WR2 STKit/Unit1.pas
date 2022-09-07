@@ -13,7 +13,6 @@ type
 const
   CarDrivingMode: array [TCarDrivingMode] of string = ('Sim', 'Arcade');
 
-
 type
   TForm1 = class(TForm)
     OpenDialog: TOpenDialog;
@@ -902,10 +901,10 @@ const
 
 
 var //temp
-BlockHi:array of single;
-BlockLo:array of single;
-Trace2Sun:array of array of word;
-ShadowEdgeW:integer;
+  BlockHi:array of single;
+  BlockLo:array of single;
+  Trace2Sun:array of array of word;
+  ShadowEdgeW:integer;
 
 var
   h_DC: HDC;
@@ -926,7 +925,7 @@ var
     Stopped:boolean;
   end;
 
-  CarWheels:array[1..4]of record
+  CarWheels: array [1..4]of record
     Diam:single;
     Pos:Vector3f;
     Angle:record H,P,B:integer; end;
@@ -949,7 +948,7 @@ var
   MousePos:TPoint;
   ObjectMoveScale:single=1;
   ObjectX,ObjectY:integer;
-  SelectionQueue1:array[0..1024]of integer;
+  SelectionQueue1: array [0..1024]of integer;
   PickCode:packed record
     Mode:byte;
     ID:word;
@@ -958,29 +957,29 @@ var
 
   TracePt:integer;
 
-  ScnCall,ScnCall2:array[1..65000]of glUint;
-  Texture:array[1..512]of glUint;
-  TextureCHK:array[1..512]of glUint; //Checkers texture
+  ScnCall,ScnCall2: array [1..65000]of glUint;
+  Texture: array [1..512]of glUint;
+  TextureCHK: array [1..512]of glUint; //Checkers texture
 
-  ObjCall:array[0..1024]of record //0 for Car
+  ObjCall: array [0..1024]of record //0 for Car
     Call: array of glUint;
     MTLClass:integer;
-    Ambi,Diff:array[1..3]of byte;
+    Ambi,Diff: array [1..3]of byte;
   end;
 
-  ObjTex:array[0..1024]of array of glUint;
-  GrassCall:array[1..4]of integer;
+  ObjTex: array [0..1024]of array of glUint;
+  GrassCall: array [1..4]of integer;
 
-  ChunkMode:array[1..512]of array of word; //512 material qty
-  ChunkModeParent:array[1..512]of array of record
+  ChunkMode: array [1..512]of array of word; //512 material qty
+  ChunkModeParent: array [1..512]of array of record
     x,z:word; //Parent Block X:Z
   end;
 
   bmp:array of array[1..4]of byte; //2k x 2k
-  pix:array[1..4]of byte;
+  pix: array [1..4]of byte;
 
   Form1: TForm1;
-  c:array[1..16777216] of AnsiChar;
+  c: array [1..16777216] of AnsiChar;
   list_id,list_ogl,list_tx,list_obj,list_sky:integer;
   Scenery,SceneryPath,SceneryVersion:string;
   SaveButton:boolean=true;
@@ -990,7 +989,7 @@ var
   IDXQty:integer;
   v:array of array[1..3]of integer;
 
-  VTXQty:array[0..64]of integer;
+  VTXQty: array [0..64]of integer;
   VTX:array of record
     X,Y,Z:single;
     nZ,nY,nX,n0:byte;
@@ -999,43 +998,43 @@ var
   end;
 
   SNIHead:record Obj,Node,x1,x2:integer; end; //x1=0 x2=0
-  SNIObj:array[1..MaxSNI]of record
+  SNIObj: array [1..MaxSNI]of record
     NumNodes,objID,firstNode,Mode:word;
-    Sound:array[1..32]of AnsiChar;
+    Sound: array [1..32]of AnsiChar;
     Volume,Tempo,Radius,x4:word;
   end;
-  SNINode:array[1..MaxSNINodes]of record
+  SNINode: array [1..MaxSNINodes]of record
   X,Y,Z,Speed,B:single;
   end;
-  SNISpawnW:array[1..MaxSNI]of record
+  SNISpawnW: array [1..MaxSNI]of record
   Density,Speed,Turbulence,TrackID:integer;
   end;
 
-      SNISubNode:array[1..MaxSNI]of array of record
+      SNISubNode: array [1..MaxSNI]of array of record
       X,Y,Z:single;
       end;
-      SNISubDist:array[1..MaxSNI]of array of single;
-      SNITang:array[1..MaxSNINodes,1..2,1..3]of single;
+      SNISubDist: array [1..MaxSNI]of array of single;
+      SNITang: array [1..MaxSNINodes,1..2,1..3]of single;
 
-      SNILen:array[1..MaxSNI]of single;
-      SNILoc:array[1..MaxSNI]of single; //2nd value controls number of instances per route
+      SNILen: array [1..MaxSNI]of single;
+      SNILoc: array [1..MaxSNI]of single; //2nd value controls number of instances per route
 
   LVL:record
     a,b,c:single;
-    Matrix:array[1..9]of single;
+    Matrix: array [1..9]of single;
     SunX,SunY,SunZ,SunO:single;
   end;
 
   SMPHead:record
   A,B:integer;
   Left,ScaleWidth,Bottom,ScaleHeight,NearClip,FullClip:single;
-  Matrix:array[1..9]of single;
+  Matrix: array [1..9]of single;
   end;
   SMPData:array of single;
 
 //new AFC11CT streets format
     NETHead:record
-    Header:array[1..4]of char;
+    Header: array [1..4]of char;
     Version,Options:word;
     Num1,Num2,Num3,Num4,Num5:integer;
     end;
@@ -1045,8 +1044,8 @@ var
     end;
     NET2:array of packed record
     a,b:word;                   //4
-    c:array[1..19]of single;    //76
-    d:array[1..75]of single;    //300
+    c: array [1..19]of single;    //76
+    d: array [1..75]of single;    //300
     end;
     NET3:array of packed record
     a,b:word;
@@ -1056,10 +1055,10 @@ var
     end;
     NET4:array of packed record
     a,b:word;                   //4
-    d:array[1..20]of single;    //80
+    d: array [1..20]of single;    //80
     end;
     NET5:array of packed record
-    d:array[1..32]of single;    //128
+    d: array [1..32]of single;    //128
     end;
 
   fGrass:TSGrass;
@@ -1067,33 +1066,33 @@ var
   fTriggers:TSTriggersCollection;
 
   SKYQty:integer;
-  SKY:array[1..32]of record
+  SKY: array [1..32]of record
     SkyTex,FogTab:string;
     FogCol,SunCol,AmbCol,WlkAmb,WlkSun:record R,G,B:byte; end;
     CarShd:record A,R,G,B:byte; end;
   end;
-  SKYTex:array[1..32,1..2]of GLuint;
+  SKYTex: array [1..32,1..2]of GLuint;
   SunTex:GLuint;
 //  SKY_MB,SKY_Y:integer;
   SKYIndex:byte;
 
   TracksQty:integer;
-  TRKQty:array[1..MAX_TRACKS]of record
+  TRKQty: array [1..MAX_TRACKS]of record
     Nodes,LoopFlag:integer; WR2Flag1,WR2Flag2,u3,u4:word; //Part1
     a1,a2,Turns,a4,Arrows,a6,a7,a8:word;                  //Part2
   end;
-  TRK:array[1..MAX_TRACKS]of record
+  TRK: array [1..MAX_TRACKS]of record
     Route:array of packed record
       X,Y,Z,Delta,CurveRad:single;
-      Matrix:array[1..9]of single;
+      Matrix: array [1..9]of single;
       Ideal,Delta2:single;
       Margin1,Margin2,Tunnel,Column:smallint;
       v1,v2,v3,v4:byte;
     end;
-    Turns:array[1..256]of record Node1,Node2,Arrow1,ArrowNum,BitFlag,u1:word;
-      Arrows:array[1..256]of record
+    Turns: array [1..256]of record Node1,Node2,Arrow1,ArrowNum,BitFlag,u1:word;
+      Arrows: array [1..256]of record
         X,Y,Z:single;
-        Matrix:array[1..9]of single;
+        Matrix: array [1..9]of single;
         Delta:single;
         BitFlag:integer; //Left/Right/Turn/Junction/etc..
       end;
@@ -1101,35 +1100,35 @@ var
   end;
   TrackID,TurnID,TrackWP:integer;
 
-  TOBHead:array[1..MAX_TRACKS]of record
+  TOBHead: array [1..MAX_TRACKS]of record
     Qty:word;
-    Clear:array[1..14]of byte;
+    Clear: array [1..14]of byte;
   end;
-  TOB:array[1..MAX_TRACKS]of array of packed record
+  TOB: array [1..MAX_TRACKS]of array of packed record
     Name:string[32];
     ID:word;
     TypeID:smallint;
     X,Y,Z:single;
-    M:array[1..9]of single;
+    M: array [1..9]of single;
     A,B:single;
     x1,x2,x3,x4:word;
-    M2:array[1..3]of single;
+    M2: array [1..3]of single;
     R1,R2,R3:integer; //rotation angles computed from M
   end;
 
   TracksQtyWP:integer;
-  WTR:array[1..MAX_WP_TRACKS]of record
+  WTR: array [1..MAX_WP_TRACKS]of record
     NodeQty:integer;
-    Empty:array[1..3]of integer;
+    Empty: array [1..3]of integer;
     Node:array of packed record
       CheckPointID:integer;
       X,Y,Z:single;
-      M:array[1..9]of single;
+      M: array [1..9]of single;
     end;
   end;
-  WTRLength:array[1..MAX_WP_TRACKS]of integer;
+  WTRLength: array [1..MAX_WP_TRACKS]of integer;
 
-  MakeTrack:array[1..MAX_TRACKS]of record
+  MakeTrack: array [1..MAX_TRACKS]of record
     NodeQty:integer;
     Node:array of packed record
       X,Y,Z:single;
@@ -1142,10 +1141,10 @@ var
 
   EditingFormat:TEditingFormat = ef_WR2;
 
-  BumpTexName:array[1..256]of string;
-  CTMaterial:array[0..512]of record
+  BumpTexName: array [1..256]of string;
+  CTMaterial: array [0..512]of record
     Tex1,Tex2,Tex3,Clear1,Clear2,Clear3,Clear4,Mode:word; //16byte
-    Matrix:array[1..8] of single;                         //32byte
+    Matrix: array [1..8] of single;                         //32byte
     U1,U2,U3,U4:word; //8byte
   end;
 
@@ -1156,68 +1155,68 @@ var
     Lights,x1,x2,x3:word;
     Sounds:integer;
   end;
-  TexName:array[1..256]of string;
-  ObjName:array[1..256]of string;
-  ObjProp:array[1..256]of record
+  TexName: array [1..256]of string;
+  ObjName: array [1..256]of string;
+  ObjProp: array [1..256]of record
     Mode,Shape,Weight,p4:word;
     x1,x2,x3:integer;
     HitSound,FallSound:string[48]; end;
-  Block:array[1..MAX_BLOCKS_X,1..MAX_BLOCKS_Z]of record
+  Block: array [1..MAX_BLOCKS_X,1..MAX_BLOCKS_Z]of record
     X,Z:word;
     FirstPoly,NumPoly,FirstTex,NumTex:integer;
     CenterX,CenterY,CenterZ,Rad:single;
     FirstObj,NumObj,FirstLight,NumLight:smallint;
     Chunk65k,x1:smallint; end;
-  v05:array[1..65536]of integer;
+  v05: array [1..65536]of integer;
   v06:array of array of word;
   v07:array of record
     FirstPoly,NumPoly,SurfaceID:integer; end;
-  Material:array[0..512]of record
+  Material: array [0..512]of record
     Tex1,Tex2,Tex3,Mode:word;
-    Matrix:array[1..3,1..2,1..4] of single; //3matrices, 1 for each layer
-    CRC:array[1..3]of integer; end;
-  TextureW:array[0..256]of record Name:string; GrowGrass:byte; end;
-  MaterialW:array[0..512]of record
+    Matrix: array [1..3,1..2,1..4] of single; //3matrices, 1 for each layer
+    CRC: array [1..3]of integer; end;
+  TextureW: array [0..256]of record Name:string; GrowGrass:byte; end;
+  MaterialW: array [0..512]of record
     Name:string;
     GrowGrass:byte;
     Enlite:byte;
     NoShadow:byte;
   end;
-  Obj:array[1..MaxObjInst]of record
+  Obj: array [1..MaxObjInst]of record
     Name:string[32];
     ID:integer;
     PosX,PosY,PosZ,Angl,Size:single;
-    Matrix2:array[1..9] of single;
+    Matrix2: array [1..9] of single;
     x1,InShadow:word;
     x5:single;
     end;
-  ObjW:array[1..MaxObjInst]of record
+  ObjW: array [1..MaxObjInst]of record
     ParentBlock:integer; end; //Is not stored in WRK, can be recomputed easily
-  Light:array[1..MAX_LIGHTS]of record
+  Light: array [1..MAX_LIGHTS]of record
     Mode:integer;
     Size,Offset,Freq:single;
     B,G,R,A:byte;
     b1,b2,b3,b4:byte;
-    Matrix2:array[1..16] of single;
+    Matrix2: array [1..16] of single;
     end;
-  Ground:array[1..MaxGrounds]of record
+  Ground: array [1..MaxGrounds]of record
     Name:string[64];
     Dirt,GripF,GripR,Stick,NoiseID,SkidID:word;
-    Clear1:array[1..32] of word; //empty
+    Clear1: array [1..32] of word; //empty
     NoColliFlag,x8:word;
-    Clear2:array[1..6] of word; //empty
+    Clear2: array [1..6] of word; //empty
     end;
-  Tex2Ground:array[1..256]of word;
-  Sound:array[1..1024]of record
+  Tex2Ground: array [1..256]of word;
+  Sound: array [1..1024]of record
     X,Y,Z:single;
     Name:string[32];
     Volume,PlaySpeed,Radius,z4,z5,Delay:word;
-    misc:array[1..12] of char;
+    misc: array [1..12] of char;
     end;
 
 
   //This is a list of all sound instances in scenery, first static, then animated (sni)
-  SoundW:array[1..1024]of record
+  SoundW: array [1..1024]of record
     Name:string; //this value is for reference only
     WaveID:integer; //cossresponding wave index
     IsPlaying:boolean;
@@ -1227,12 +1226,12 @@ var
 
   //This is a list with all sound files used in scenery
   QtyWave:integer;
-  WaveW:array[1..24]of string[32];
-  WaveList:array[1..24]of record
+  WaveW: array [1..24]of string[32];
+  WaveList: array [1..24]of record
     Dist:single;
   end;
 
-  LightW:array[1..MAX_LIGHTS]of record
+  LightW: array [1..MAX_LIGHTS]of record
     Radius:word;
     Mode:word;
     ParentBlock:integer;
@@ -1244,7 +1243,7 @@ var
 
   LWOSceneryFile:string;
   LWQty:record
-    Vert,Poly,AddPoly,UV,VW,DUV,RGBA,Surf,Tags:array[0..MAX_LWO_LAYERS] of integer; //max 128 layers
+    Vert,Poly,AddPoly,UV,VW,DUV,RGBA,Surf,Tags: array [0..MAX_LWO_LAYERS] of integer; //max 128 layers
   end;
   LW:record
     XYZ:array of array[1..3]of single;
@@ -1260,17 +1259,17 @@ var
       uv:integer;
     end;
     Surf:array of integer;
-    ClipTex:array[1..512]of string;
+    ClipTex: array [1..512]of string;
     SName,SText:array of string;
   end;
   vmad: record
     poly,vert:integer;
   end;
 
-  {RO:array[1..4]of record
+  {RO: array [1..4]of record
     Head:record x1,x2,x3,sizeX,sizeZ,XZ,Qty,Density:integer; end;
     Tex:string[32];
-    UV:array[1..4]of record X:array[1..8]of single; end;
+    UV: array [1..4]of record X: array [1..8]of single; end;
     Chunks:array of array of record First,Num:integer; end;
     Grass:array of record
       X,Y,Z:single;
@@ -1282,10 +1281,10 @@ var
 
   SizeX,SizeZ:integer;       //map dimensions
   pblock:array of integer;                       //Parent block of poly
-  pqtyb:array[1..MAX_BLOCK_COUNT,1..2]of integer;                    //First Poly/number polys
-  sqtyb:array[1..MAX_BLOCK_COUNT,1..2]of integer;                    //First Surf/number surfs
+  pqtyb: array [1..MAX_BLOCK_COUNT,1..2]of integer;                    //First Poly/number polys
+  sqtyb: array [1..MAX_BLOCK_COUNT,1..2]of integer;                    //First Surf/number surfs
   repoint,recreat:array of integer;             //sorts polys by appearing in Blocks
-  split:array[1..64,1..2]of integer;                    //65K poly group split point
+  split: array [1..64,1..2]of integer;                    //65K poly group split point
   Cbl:array of array of integer;                      //Polys of collision block
 
   Bi:array of array[1..256]of integer; //Blocks intersected by poly
@@ -1294,8 +1293,8 @@ var
 
   Changes:record
     SMP:boolean;
-    TOB,TRK:array[1..MAX_TRACKS]of boolean;
-    WTR:array[1..MAX_WP_TRACKS]of boolean;
+    TOB,TRK: array [1..MAX_TRACKS]of boolean;
+    WTR: array [1..MAX_WP_TRACKS]of boolean;
     IDX,VTX,QAD,SKY,SNI,LVL:boolean;
     SC2,WRK:boolean;
   end;
@@ -2143,7 +2142,7 @@ procedure TForm1.CompileLoaded(Sender:string; ID,Num:integer);
 var
   f:file;
   i,j,k,h,x,z:integer;
-  ap:array[1..2]of pointer;
+  ap: array [1..2]of pointer;
   bm:array of integer;
   t:single;
   s,s2:AnsiString;
@@ -3412,8 +3411,8 @@ end;
 
 procedure TForm1.AddTextureToList(Sender:TTexSend; aText:string);
 var i,k,ID:integer;
-  st:array[1..256]of string; t1,t2,t3:boolean;
-  gr:array[1..256]of byte;
+  st: array [1..256]of string; t1,t2,t3:boolean;
+  gr: array [1..256]of byte;
   TexString:string;
 begin
 if Qty.TexturesFiles>=256 then begin
@@ -3554,7 +3553,7 @@ Changes.VTX:=true;
 end;
 
 procedure TForm1.SwitchC11_VCol(Sender: TObject);
-var i:integer; //t:array[0..256,0..256]of integer;
+var i:integer; //t: array [0..256,0..256]of integer;
 begin
 //for i:=0 to 256 do for k:=0 to 256 do t[i,k]:=0;
 for i:=1 to VTXQty[64] do begin //123 112
@@ -5231,7 +5230,7 @@ procedure TForm1.ImportMaterialsClick(Sender: TObject);
 var
   f:file;
   i,k,h,EntryQty,NumRead:integer;
-  remap:array[1..512]of integer;
+  remap: array [1..512]of integer;
   s:string;
 begin
 if AutoImportMaterialsList<>'' then
@@ -6387,7 +6386,7 @@ end;
 
 procedure TForm1.PrepareSMP(Sender: TObject);
 var dx,dy,dz:single; i:integer;
-M:array[1..9]of single; a,b,c,d,e,f:single;
+M: array [1..9]of single; a,b,c,d,e,f:single;
 begin
       dx:=LVL.SunX/GetLength(LVL.SunX,LVL.SunZ);
       dy:=LVL.SunY;
@@ -7083,8 +7082,8 @@ end;
 
 procedure TForm1.Button4Click(Sender: TObject);
 var SearchRec:TSearchRec; s:AnsiString; i,k,count:integer; TexAlreadyExists:boolean;
-  Arr:array[0..256]of word;
-  ArrS:array[0..256]of string;
+  Arr: array [0..256]of word;
+  ArrS: array [0..256]of string;
 begin
 
   //Make a list of textures that can be added to the list
@@ -7510,8 +7509,8 @@ var
     z1,z2,z3,z4,z5,z6,z7,
     TextureAssign,TextureCount,TextureNames:integer;
   end;
-  IndicePerPoly,Indices:array[1..1024]of integer;
-  SurfRemap:array[1..256]of integer;
+  IndicePerPoly,Indices: array [1..1024]of integer;
+  SurfRemap: array [1..256]of integer;
 begin
 
   if not fileexists(Sender) then exit;

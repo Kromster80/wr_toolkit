@@ -1,6 +1,5 @@
 unit Unit1;
 interface
-
 uses
   ShellApi, Windows, Messages, SysUtils, Classes, Controls, ExtCtrls, Forms,
   StdCtrls, KromUtils, ComCtrls, CheckLst, Buttons, Dialogs;
@@ -31,8 +30,6 @@ type
     procedure BitBtn2Click(Sender: TObject);
     procedure CLBCarsClick(Sender: TObject);
     procedure SAllClick(Sender: TObject);
-  private     { Private declarations }
-  public      { Public declarations }
   end;
 
 const
@@ -44,7 +41,7 @@ var
   Form1: TForm1;
   f:file;
   ft:textfile;
-  c:array[1..1024000]of char;
+  c: array [1..1024000]of char;
   i,j,k,m,h:integer;
   s:string;
   RootDir:string;
@@ -52,7 +49,7 @@ var
   zz:string='     '{;//}+'                                                                                        ';
 
 ////////////////////////////////////////////////////////////////////////////////
-  Header:array[1..33]of char;
+  Header: array [1..33]of char;
   DSqty:integer;
 
   TB:array of record
@@ -75,22 +72,22 @@ var
   Value:array of array of array of record
   Typ:byte; Int:integer; Rel:single; Str:string; end;
 ////////////////////////////////////////////////////////////////////////////////
-  EC_DSqty:array[1..MaxCars]of integer;
+  EC_DSqty: array [1..MaxCars]of integer;
 
-  EC_TB:array[1..MaxCars,1..3] of record //2+1
+  EC_TB: array [1..MaxCars,1..3] of record //2+1
   Entries,Index:integer;   //VA_Index
   Cond:byte;       //Cond switch
   CondText:array of string; //Cond text
   end;
 
-  EC_CO:array[1..MaxCars,1..3,1..512] of record Entries,Index:integer; end;
+  EC_CO: array [1..MaxCars,1..3,1..512] of record Entries,Index:integer; end;
 
-  EC_Value:array[1..MaxCars,1..3,1..512] of array of record
+  EC_Value: array [1..MaxCars,1..3,1..512] of array of record
   Typ:byte; Int:integer; Rel:single; Str:string; end;
 
 ////////////////////////////////////////////////////////////////////////////////
   AddonCarQty:integer;
-  AddonCar:array[1..1024]of record
+  AddonCar: array [1..1024]of record
     Folder:string;
     Factory,Model,Name:string;
     Install:boolean;

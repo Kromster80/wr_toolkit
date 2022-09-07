@@ -88,13 +88,13 @@ var
   end;
   CurLev        :integer; //counter
   NumRead       :Integer;
-  MipHead:array[1..16]of record
+  MipHead: array [1..16]of record
   Size,SYNSize  :integer;
   end;
-  MipLevel:array[1..32] of pointer;
+  MipLevel: array [1..32] of pointer;
   SYNData:array of byte;
   i,k,ci,CurChr,addv,x:integer;
-  flag:array[1..8]of byte;
+  flag: array [1..8]of byte;
   Dist,Leng:integer;
   Dat,Dat2:^byte;
 begin
@@ -215,7 +215,7 @@ function LoadTextureBMP(Filename:string; var Texture : GLuint): Boolean;
 var
   BMPi:TBitmap;
   MipData:array of cardinal;
-  pData:array[0..1]of pointer;
+  pData: array [0..1]of pointer;
   i,k:integer;
   Line : ^cardinal;
 begin       //todo: scanline
@@ -258,7 +258,7 @@ var
   JPGi:TJPEGImage;
   BMPi:TBitmap;
   MipData:array of cardinal;
-  pData:array[0..1]of pointer;
+  pData: array [0..1]of pointer;
   i,k:integer;
   Line : ^cardinal;
 begin
@@ -311,7 +311,7 @@ var
   JPGi:TJPEGImage;
   BMPi:TBitmap;
   MipData:array of cardinal;
-  pData:array[0..1]of pointer;
+  pData: array [0..1]of pointer;
   i,k:integer;
   Line : ^cardinal;
 begin

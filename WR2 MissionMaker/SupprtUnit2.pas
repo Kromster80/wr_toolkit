@@ -1,15 +1,17 @@
 unit SupprtUnit2;
 interface
-uses SysUtils, KromUtils;
+uses
+  SysUtils, KromUtils;
 
 function IDfromSTR(txt:string; IDOrder:integer):integer;
 function WRTexte(txt:string):string;
 
 const
-ResultType:array[1..3]of string = ('Gold/Silver/Bronze','Special Test','x Multi Speedbucks');
+  ResultType: array [1..3]of string = ('Gold/Silver/Bronze','Special Test','x Multi Speedbucks');
 
 implementation
-uses Unit1;
+uses
+  Unit1;
 
 function IDfromSTR(txt:string; IDOrder:integer):integer;
 var ID,kk,ii:integer;

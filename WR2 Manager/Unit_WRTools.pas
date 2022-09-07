@@ -1,12 +1,13 @@
 unit Unit_WRTools;
 interface
-uses sysutils;
+uses
+  sysutils;
 
 function IDfromSTR(txt:string; Num:integer):integer;
 function WRTexte(txt:string):string;
 
 const
-ResultType:array[1..3]of string = ('Gold/Silver/Bronze','Special Test','x Multi Speedbucks');
+  ResultType: array [1..3]of string = ('Gold/Silver/Bronze','Special Test','x Multi Speedbucks');
 
 implementation
 uses Unit1;

@@ -72,7 +72,7 @@ end;
 function LoadShader():boolean;
 var src: PAnsiChar; // PGLcharARB = PAnsiChar;
     ff: file;
-    c:array[1..16384] of AnsiChar;
+    c: array [1..16384] of AnsiChar;
     i,NumRead:integer;
     ShowGLSLWarning:boolean;
     s: AnsiString;

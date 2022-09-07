@@ -43,7 +43,7 @@ var
   f:textfile;
   h,i:Integer;
   VerticeCount,TexCoordCount,NormalCount:Integer;
-  vID,tID,nID:array[1..3]of Integer;
+  vID,tID,nID: array [1..3]of Integer;
   SurfID,SmoothGroup:Word;
   MtlLib:string;
   OBJxyz:array of Vector3f;
@@ -244,13 +244,13 @@ var
     ID:Word;
     Len:Integer;
   end;
-  ChunkLen:array[1..5]of Integer;
+  ChunkLen: array [1..5]of Integer;
   PivotMtx:record
-    RotMtx:array[1..9]of Single;
-    Offset:array[1..3]of Single;
+    RotMtx: array [1..9]of Single;
+    Offset: array [1..3]of Single;
   end;
   ObjName:string;
-  VCount,PCount:array[1..256]of Word; //That is 3ds layers/blocks
+  VCount,PCount: array [1..256]of Word; //That is 3ds layers/blocks
 begin
   Result:=False;
   Log:='';
@@ -500,7 +500,7 @@ var
   PrevChunk,tags:Integer;
   MatCount,PartCount,ColWireCount:Integer;
   PTag: array [1..MAX_PARTS * 2] of Byte; //1=surf 2=part 3=color
-  cliptex:array[1..512]of string;
+  cliptex: array [1..512]of string;
 begin
   Result:=False;
   Log:='';
@@ -1468,11 +1468,11 @@ var
   h,i,k:Integer;
   ft:textfile;
   DQty:Integer;
-  name:array[1..256]of string;
-  Parent,child,next,prev:array[1..256]of smallint;
+  name: array [1..256]of string;
+  Parent,child,next,prev: array [1..256]of smallint;
   DetailMet:Boolean;
-  TmpX,TmpY,TmpZ,TmpR,TmpX1,TmpX2,TmpY1,TmpY2,TmpZ1,TmpZ2:array[1..256]of Single;
-  TmpID:array[1..256]of Integer;
+  TmpX,TmpY,TmpZ,TmpR,TmpX1,TmpX2,TmpY1,TmpY2,TmpZ1,TmpZ2: array [1..256]of Single;
+  TmpID: array [1..256]of Integer;
 begin
   Result:=False;
   if not FileExists(aFilename) then exit;
@@ -1598,8 +1598,8 @@ function LoadPSF(const aFilename: string):Boolean;
 var
   i,k:Integer;
   ft:textfile;
-  tmp1,tmp2,tmp3:array[1..256]of Single;
-  name:array[1..256]of string;
+  tmp1,tmp2,tmp3: array [1..256]of Single;
+  name: array [1..256]of string;
   DQty:Integer;
 begin
   Result:=False;

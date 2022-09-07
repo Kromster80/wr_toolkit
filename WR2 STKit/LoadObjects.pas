@@ -1,13 +1,14 @@
 unit LoadObjects;
 interface
-uses OpenGL,dglOpenGL,SysUtils,KromUtils,PTXTexture;
+uses
+  OpenGL, dglOpenGL, SysUtils, KromUtils, PTXTexture;
 
 function LoadObjectMOX(FileName:string; ListID:integer):boolean;
 function LoadObjectTREE(FileName:string; ListID:integer):boolean;
 
 implementation
-
-uses Unit1,Unit_RoutineFunctions;
+uses
+  Unit1,Unit_RoutineFunctions;
 
 function LoadObjectMOX(FileName:string; ListID:integer):boolean;
 var     f:file;
@@ -16,7 +17,7 @@ var     f:file;
         k,i,h,a,b,MatID:integer;
 
         MOXHead:record
-        Head:array[1..4]of AnsiChar;
+        Head: array [1..4]of AnsiChar;
         Fmt:integer;
         Vert,Poly,Tex,Mat,Clear1,Clear2:integer;
         end;
@@ -27,8 +28,8 @@ var     f:file;
         mox_C2:array of array[1..6]of integer;
 
         CHname:AnsiString;
-//        MTL_DiffColor:array[1..256,1..3]of byte;
-        MTL_TgaFile:array[1..256]of AnsiString;
+//        MTL_DiffColor: array [1..256,1..3]of byte;
+        MTL_TgaFile: array [1..256]of AnsiString;
 begin
 result:=false;
 if not FileExists(FileName+'.MOX') then exit;
@@ -130,20 +131,20 @@ end;
 function LoadObjectTREE(FileName:string; ListID:integer):boolean;
 var
         f:file;
-        c:array[1..256]of char;
+        c: array [1..256]of char;
         k,h,m:integer;
         Tree:record
-        header:array[1..4]of AnsiChar;
+        header: array [1..4]of AnsiChar;
         NumVertex,NumLeaves,NumIndices:integer;
         end;
         s,TREEname:AnsiString;
 
-        TreeTexNames:array[1..16]of AnsiString;
-        TreeLOD:array[1..3] of record First,Count,Offset,PolyCount:integer; end;
-        TreeChunks:array[1..20]of integer;
-        TreeVertex:array[1..16384]of record X,Y,Z,nX,nY,nZ,U,V:single; end;
-        TreePoly:array[1..16384,1..3]of word;
-        TreeLeaves:array[1..1024]of record X,Y,Z:single; R,G,B,A:byte; end;
+        TreeTexNames: array [1..16]of AnsiString;
+        TreeLOD: array [1..3] of record First,Count,Offset,PolyCount:integer; end;
+        TreeChunks: array [1..20]of integer;
+        TreeVertex: array [1..16384]of record X,Y,Z,nX,nY,nZ,U,V:single; end;
+        TreePoly: array [1..16384,1..3]of word;
+        TreeLeaves: array [1..1024]of record X,Y,Z:single; R,G,B,A:byte; end;
 begin
 result:=false;
 if not FileExists(FileName+'.TREE') then exit;

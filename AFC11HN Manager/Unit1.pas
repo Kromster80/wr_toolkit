@@ -1,8 +1,6 @@
 unit Unit1;
-{$IFDEF FPC} {$MODE Delphi} {$ENDIF}
 interface
 uses
-  {$IFDEF FPC} LResources, LCLIntf, {$ENDIF}
   Windows, SysUtils, Classes, Controls, ExtCtrls, Forms,
   StdCtrls, KromUtils, ComCtrls, CheckLst, Buttons, WR_DataSet, ShellApi, Dialogs;
 
@@ -59,15 +57,17 @@ var
   fHighwayDataSet:TDataSet;
 
   AddonCarQty:integer;
-  AddonCar:array[1..MaxCars]of record
+  AddonCar: array [1..MaxCars]of record
     Folder:string;
     Factory,Model,Name:string;
     Install:boolean;
   end;
 
 implementation
-uses Unit2, WR_AboutBox;
+uses
+  Unit2, WR_AboutBox;
 
+{$R *.dfm}
 
 procedure TForm1.FormCreate(Sender: TObject);
 var s1,s2:string;
@@ -466,14 +466,6 @@ begin
   end;
 end;
 
-
-{$IFDEF VER140} {$R *.dfm} {$ENDIF}
-{$IFDEF VER150} {$R *.dfm} {$ENDIF}
-
-initialization
-{$IFDEF FPC}
-  {$I Unit1.lrs}
-{$ENDIF}
 
 end.
 

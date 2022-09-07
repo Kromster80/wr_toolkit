@@ -7,7 +7,7 @@ type
   TDSVersion = (dsvUnknown=0, dsvMBWR, dsvWR2, dsvAFC11N, dsvAFC11CT, dsvAFC11BW, dsvFVR, dsvAFC11HN);
 
 const
-  DSVersionName:array[TDSVersion,1..2] of string = (
+  DSVersionName: array [TDSVersion,1..2] of string = (
     ('Unknown',  'Unknown'),
     ('MBWR',     'Mercedes-Benz World Racing'),
     ('WR2',      'World Racing 2'),
@@ -35,7 +35,7 @@ type
 type
   TDataSet = class
   private
-    Header:array[1..33]of char;
+    Header: array [1..33]of char;
     DSqty:integer;
 
     TB:array of record
@@ -129,7 +129,7 @@ function TDataSet.LoadDS(FileName:string):boolean;
 var
   IgnoreTyp:boolean;
   f:file;
-  c:array[1..32768]of char;
+  c: array [1..32768]of char;
   ErrS:string;
   iDS,iTB,iCO:integer;
   i:integer;

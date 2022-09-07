@@ -60,7 +60,7 @@ var
   Form1: TForm1;
   f:file;
   ft:textfile;
-  c:array[1..1024000]of AnsiChar;
+  c: array [1..1024000]of AnsiChar;
   i,j,k,m,h:integer;
   s:string;
   RootDir:string;
@@ -68,7 +68,7 @@ var
   zz:string='     '{;//}+'                                                                                        ';
 
 ////////////////////////////////////////////////////////////////////////////////
-  Header:array[1..33]of char;
+  Header: array [1..33]of char;
   DSqty:integer;
 
   TB:array of record
@@ -91,22 +91,22 @@ var
   Value:array of array of array of record
   Typ:byte; Int:integer; Rel:single; Str:string; end;
 ////////////////////////////////////////////////////////////////////////////////
-  EC_DSqty:array[1..MaxCars]of integer;
+  EC_DSqty: array [1..MaxCars]of integer;
 
-  EC_TB:array[1..MaxCars,1..3] of record //2+1
+  EC_TB: array [1..MaxCars,1..3] of record //2+1
   Entries,Index:integer;   //VA_Index
   Cond:byte;       //Cond switch
   CondText:array of string; //Cond text
   end;
 
-  EC_CO:array[1..MaxCars,1..3,1..512] of record Entries,Index:integer; end;
+  EC_CO: array [1..MaxCars,1..3,1..512] of record Entries,Index:integer; end;
 
-  EC_Value:array[1..MaxCars,1..3,1..512] of array of record
+  EC_Value: array [1..MaxCars,1..3,1..512] of array of record
   Typ:byte; Int:integer; Rel:single; Str:string; end;
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
   ProfileQty:integer;
-  Profile:array[1..32]of record
+  Profile: array [1..32]of record
   Folder:string;
   Install:bool;
   end;
@@ -116,11 +116,11 @@ var
 //1..32 Profiles count
 //1..32 DS count
 //1..36 TB count
-  P_:array[1..32]of record
-  Header:array[1..33]of char;
+  P_: array [1..32]of record
+  Header: array [1..33]of char;
   DSqty:integer;
 
-  TB:array[1..32] of record
+  TB: array [1..32] of record
   Entries:integer; //VA_Entries
   Index:integer;   //VA_Index
   iC:byte;         //VA_iC ?
@@ -129,7 +129,7 @@ var
   CondText:array of string; //Cond text
   end;
 
-  CO:array[1..32,1..36] of record
+  CO: array [1..32,1..36] of record
   Entries:integer; //VA_Entries
   Index:integer;   //VA_Index
   Lib:string;      //VA_Lib
@@ -137,13 +137,13 @@ var
   SM,ST,IC,SC:string;       //VA_database path, VA_ST, VA_IC, VA_SC
   end;
 
-  Value:array[1..32,1..36] of array of record
+  Value: array [1..32,1..36] of array of record
   Typ:byte; Int:integer; Rel:single; Str:string; end;
   end;
 
 ////////////////////////////////////////////////////////////////////////////////
   AddonCarQty:integer;
-  AddonCar:array[1..1024]of record
+  AddonCar: array [1..1024]of record
     Folder:string;
     Factory,Model,Name:string;
     Version:string;

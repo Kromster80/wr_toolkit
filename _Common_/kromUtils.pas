@@ -400,7 +400,7 @@ end;
 
 function real2(c1,c2,c3,c4: AnsiChar): Real;
 var //i,sign,exponent:integer; t,mantissa:real;
-  Tmp:array[1..4] of AnsiChar;
+  Tmp: array [1..4] of AnsiChar;
 begin
   Tmp[1]:=c1; Tmp[2]:=c2; Tmp[3]:=c3; Tmp[4]:=c4;
   Result := Single(Tmp);
@@ -585,7 +585,7 @@ A1:=pointer(integer(matrix)+N*4); A1^:=A*C;
 end;
 
 procedure Matrix2Angles(matrix09:array of single; Qty:integer; i1,i2,i3:pinteger);
-var Ax,Ay,Az:single; Num:byte; a1,a2,a3:integer; m:array[1..9] of single;
+var Ax,Ay,Az:single; Num:byte; a1,a2,a3:integer; m: array [1..9] of single;
 begin
 if Qty=16 then Num:=1 else Num:=0;
 m[1]:=matrix09[0]; m[2]:=matrix09[1]; m[3]:=matrix09[2];

@@ -753,14 +753,14 @@ end;
 procedure DXT_RGB_Encode(aRow1,aRow2,aRow3,aRow4: Pointer; out OutDat: Int64; out RMS: Single);
 var
   i,k,h:integer;
-  Col:array[1..16,1..3]of byte; //Input colors
-  c0:array[1..4,1..3]of byte;   //
-  c2:array[1..4,1..3]of byte;
-  Crms:array[1..48]of byte;
-  im:array[1..16]of word;
+  Col: array [1..16,1..3]of byte; //Input colors
+  c0: array [1..4,1..3]of byte;   //
+  c2: array [1..4,1..3]of byte;
+  Crms: array [1..48]of byte;
+  im: array [1..16]of word;
   m1,m2:word;
-  tRMS:array[1..4]of integer;
-  Trial:array[1..6]of record
+  tRMS: array [1..4]of integer;
+  Trial: array [1..6]of record
     Dat:int64;
     tRMS:integer;
   end;
@@ -1067,8 +1067,8 @@ end;
 procedure DXT_RGB_Decode(aInDat:Pointer; out OutDat: array of Byte);
 var
   i,h,x:integer;
-  c:array[1..8]of byte;
-  Colors:array[1..4,1..3]of Byte; //4colors in R,G,B
+  c: array [1..8]of byte;
+  Colors: array [1..4,1..3]of Byte; //4colors in R,G,B
 begin
   for I := 1 to 8 do //cast into array of byte
     c[i] := PByte(Cardinal(aInDat)+I-1)^;

@@ -1,6 +1,7 @@
 unit Unit_Grass;
 interface
-uses StdCtrls, Windows, Unit_Defaults, KromUtils, Math, SysUtils, OpenGL, dglOpenGL, Unit_Render, PTXTexture;
+uses
+  StdCtrls, Windows, Unit_Defaults, KromUtils, Math, SysUtils, OpenGL, dglOpenGL, Unit_Render, PTXTexture;
 
 { Although there are 4 distinct LOD files we will treat them as one Grass setup
   There's no need to treat them separately for any reasons, that brings only confusion. }
@@ -15,7 +16,7 @@ type
           x1,x2,x3,sizeX,sizeZ,XZ,Qty,Density:integer;
         end;
         Tex:string[32];
-        UV: array[1..4]of record X:array[1..8]of single; end;
+        UV: array[1..4]of record X: array [1..8]of single; end;
         Chunks: array of array of record First,Num:integer; end;
         Grass: array of record
           X,Y,Z:single;
@@ -87,8 +88,8 @@ var
   inx,ResultY,inz:single; //XYZ for height finding
   PolyQty:integer;
   x1,z1,x2,z2,x3,z3,ytemp,nx,ny,nz,D:single;
-  v1,v2,v3:array[1..3] of single;
-  tp:array[1..Num]of integer;
+  v1,v2,v3: array [1..3] of single;
+  tp: array [1..Num]of integer;
   s:string;
 begin
   for LOD:=1 to MAX_RO_FILES do begin
@@ -341,7 +342,7 @@ function TSGrass.LoadFromFile(aFile:string):boolean;
 var
   i,LOD:integer;
   f:file;
-  FileName:string; c:array[1..33]of char;
+  FileName:string; c: array [1..33]of char;
 begin
   Result := false;
 

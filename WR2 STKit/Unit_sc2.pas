@@ -1,6 +1,7 @@
 unit Unit_sc2;
 interface
-uses Unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture, Unit_Defaults;
+uses
+  Unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture, Unit_Defaults;
 
   procedure AutoFill_SC2(Sender: TObject);
   procedure EditSC2Click(Sender: TObject);
@@ -13,10 +14,10 @@ uses Unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture, Unit_D
   procedure WriteCommonDataToSC2();
 
 var
-    AddonScenery:record
+    AddonScenery: record
       EngineName,BGround,Name,SceneryFlag:string;
       FreeRideID,TrackQty:integer;
-      Track:array[1..MAX_TRACKS+MAX_WP_TRACKS]of record
+      Track: array [1..MAX_TRACKS+MAX_WP_TRACKS]of record
         TrackNo:byte;
         Name:string;
         CheckPoint:byte;

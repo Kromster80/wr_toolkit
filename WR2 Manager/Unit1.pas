@@ -127,13 +127,13 @@ const
  BaseTracks = 184; //WR2 has this much of tracks in stock
 
  AddOnCarPrefix='`';
- TrackType:array[1..4] of string=('All','Series','Rally','Off-Road');
+ TrackType: array [1..4] of string=('All','Series','Rally','Off-Road');
  APP_TITLE = 'WR2 Manager';
  VER_INFO = 'Version 0.3m (06 Aug 2010)';
 
 var
   Form1: TForm1;
-  c:array[1..1024000]of AnsiChar;
+  c: array [1..1024000]of AnsiChar;
   RootDir:string;
   zz:string='     '+'                                                                                                     ';
 
@@ -141,17 +141,17 @@ var
   Runtime:array of string;
 
   AddQty:integer=0;
-  AddRuntime:array[1..MaxScen+256]of record //Add total of MaxScen + overhead for various things
+  AddRuntime: array [1..MaxScen+256]of record //Add total of MaxScen + overhead for various things
     Title:string;    //Short ID
     Mode:string;     //Add/Replace
     LandMark:string; //unique text line in fxp
     Offset:word;     //offset from LandMark
     Length:word;     //number of addon lines
-    Lines:array[1..2048]of string; //max lines per injection =  Maps*Track (70*30)
+    Lines: array [1..2048]of string; //max lines per injection =  Maps*Track (70*30)
   end;
 
 ////////////////////////////////////////////////////////////////////////////////
-  Header:array[1..33]of AnsiChar;
+  Header: array [1..33]of AnsiChar;
   DSqty:integer;
 
   TB:array of record
@@ -176,22 +176,22 @@ var
 ////////////////////////////////////////////////////////////////////////////////
   EC_DSqty:integer;
 
-  EC_TB:array[1..3] of record //2+1
+  EC_TB: array [1..3] of record //2+1
   Entries,Index:integer;   //VA_Index
   Cond:byte;       //Cond switch
   CondText:array of string; //Cond text
   end;
 
-  EC_CO:array[1..3] of array[1..512] of record
+  EC_CO: array [1..3] of array[1..512] of record
   Entries,Index:integer;   //VA_Index
   end;
 
-  EC_Value:array[1..3] of array[1..512] of array of record
+  EC_Value: array [1..3] of array[1..512] of array of record
   Typ:byte; Int:integer; Rel:single; Str:string; end;
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
   ProfileQty:integer;
-  Profile:array[1..MaxProf]of record
+  Profile: array [1..MaxProf]of record
     Folder:string;
     Install:bool;
   end;
@@ -200,11 +200,11 @@ var
 //1..MaxProf Profiles count
 //1..25 DS count
 //1..36 TB count
-  P_:array[1..MaxProf]of record
-  Header:array[1..33]of AnsiChar;
+  P_: array [1..MaxProf]of record
+  Header: array [1..33]of AnsiChar;
   DSqty:integer;
 
-  TB:array[1..25] of record
+  TB: array [1..25] of record
   Entries:integer; //VA_Entries
   Index:integer;   //VA_Index
   iC:byte;         //VA_iC ?
@@ -213,7 +213,7 @@ var
   CondText:array of string; //Cond text
   end;
 
-  CO:array[1..25,1..36] of record
+  CO: array [1..25,1..36] of record
   Entries:integer; //VA_Entries
   Index:integer;   //VA_Index
   Lib:string;      //VA_Lib
@@ -221,25 +221,25 @@ var
   SM,ST,IC,SC:string;       //VA_database path, VA_ST, VA_IC, VA_SC
   end;
 
-  Value:array[1..25,1..36] of array of record
+  Value: array [1..25,1..36] of array of record
   Typ:byte; Int:integer; Rel:single; Str:string; end;
   end;
 ////////////////////////////////////////////////////////////////////////////////
 
   AddonCarQty:integer;
-  AddonCar:array[1..MaxCars]of record
+  AddonCar: array [1..MaxCars]of record
   Folder:string;
   Factory,Model,Name:string;
   Score,MenuClass,RaceClass:integer;
   end;
-  CarsInClass:array[1..MaxCars]of integer;
+  CarsInClass: array [1..MaxCars]of integer;
 
   AddonSceneryQty:integer;
-    AddonScenery:array[1..MaxScen]of record
+    AddonScenery: array [1..MaxScen]of record
     Folder:string;
     EngineName,BGround,Name,SceneryFlag:string;
     FreeRideID,FreeRideID_abs,TrackQty:integer;
-      Track:array[1..64]of record //WR2 uses up to 32 tracks in fact
+      Track: array [1..64]of record //WR2 uses up to 32 tracks in fact
       TrackNo:byte;
       Name:string;
       CheckPoint:byte;
@@ -255,7 +255,7 @@ var
     end;
 
     AddonMissionQty:integer;
-    AddonMission:array[1..MaxMiss]of record
+    AddonMission: array [1..MaxMiss]of record
      FileName:string;
      EventCode:byte;
      Score:integer;
@@ -268,7 +268,7 @@ var
      Author,Contact:string; //Version 2+
      Comment,CarName,TrackName:string; //Version 3+
 
-      Race:array[1..32]of record
+      Race: array [1..32]of record
        HeadLineText:string;
        BonusID,CarID,TrackID,Laps,Drivers,StartPosition,
        LeadTime,LeadMeter,LeadPositions,Nitro,Traffic,
@@ -284,7 +284,7 @@ var
       end;
     Install:bool;
     end;
-  MNode:array[1..MaxMiss]of TTreeNode;
+  MNode: array [1..MaxMiss]of TTreeNode;
 
 implementation
 

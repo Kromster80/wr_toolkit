@@ -2,27 +2,27 @@ unit WR_EditCar_Lang;
 interface
 
 const
-kmhID:Array[1..9] of string = (
+kmhID: array [1..9] of string = (
 '0-220 Km/h','0-240 Km/h','0-260 Km/h','0-280 Km/h',
 '0-300 Km/h','0-330 Km/h','0-360 Km/h','0-480 Km/h','none');
 
-mphID:Array[1..7] of string = (
+mphID: array [1..7] of string = (
 '0-140 Mph','0-160 Mph','0-180 Mph','0-200 Mph',
 '0-220 Mph','0-300 Mph','none');
 
-WRkmhID:Array[1..9] of string = (
+WRkmhID: array [1..9] of string = (
 '0-140 Km/h','0-160 Km/h','0-180 Km/h','0-220 Km/h',
 '0-240 Km/h','0-280 Km/h','0-320 Km/h','0-360 Km/h','0-440 Km/h');
 
-WRmphID:Array[1..7] of string = (
+WRmphID: array [1..7] of string = (
 '0-140 Mph','0-160 Mph','0-180 Mph','0-220 Mph',
 '0-240 Mph','0-280 Mph','0-100 Mph');
 
-WRtachoID:Array[1..7] of string = (
+WRtachoID: array [1..7] of string = (
 '0-6.000 rpm','0-7.000 rpm','0-8.000 rpm','0-10.000 rpm',
 '0-12.000 rpm','0-13.000 rpm','0-9.000 rpm');
 
-dataType:array[1..2,0..329] of integer =(
+dataType: array [1..2,0..329] of integer =(
 (3 //int,real,str                                                                                                                                                    ///////
 ,1,3,3,1,2,2,2,2,1,1,1,1,1,1,2,2,2,2,2,2,1,3,1,3,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1,2,2,1,1,1,1,1
 ,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
@@ -40,7 +40,7 @@ dataType:array[1..2,0..329] of integer =(
 ,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 ,1,1));
 
-dataText:array[1..2,0..329,1..5] of string =(
+dataText: array [1..2,0..329,1..5] of string =(
 (('Kommentar','D:\NxNlocal\MBC Entwicklung\FrontEnd\_Database\MBWR-Autos.mdb','_3D_FzeugData','Index','Klassenbezeichnung')
 ,('Index','D:\NxNlocal\MBC Entwicklung\FrontEnd\_Database\MBWR-Autos.mdb','_3D_FZeugData','Index','Index')
 ,('EngineName','D:\NxNlocal\MBC Entwicklung\FrontEnd\_Database\MBWR-Autos.mdb','_3D_FZeugData','Index','BasisModellName')

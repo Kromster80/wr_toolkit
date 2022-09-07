@@ -8,7 +8,7 @@ var
 
   coArrow,coSquare,coBox,coBoxW,coSkyDome,coSkyPlane,coMover,coCircleXZ,coCircleYZ,coRoundXZ:glUint; //common objects
   coCar:glUint;
-  coGrass:array[1..4]of glUint;
+  coGrass: array [1..4]of glUint;
   coGrassTex:glUint;
   EnvMap,FlareTex,BlackTex,WhiteTex:glUint;
 
@@ -46,7 +46,7 @@ procedure RenderShaders(Func:string; ShowTex:integer; CBReduceView,CBShowFog,CBC
 var a,b,K,i,ii,ID,MatMode,x1,z1,x0,z0:integer;
 SetNewMat,RenderMat,OutOfSight:boolean;
 ReloadShaderData:boolean;
-Gr:array[1..3]of boolean;
+Gr: array [1..3]of boolean;
 s:string;
 begin
 if UseShaders=false then exit;
@@ -444,7 +444,7 @@ end;
 
 
 procedure RenderAnimated(A:single; Mode:string; ObjID,NodeID:integer);
-var ii,kk:integer; xyz,hpb:array[1..3]of single;
+var ii,kk:integer; xyz,hpb: array [1..3]of single;
 begin
 if Mode='Paths' then
 if A<>0 then begin
@@ -1295,7 +1295,7 @@ end;
 
 procedure RenderWire;
 var ii,i:integer;
-v1,v2,v3:array[1..3]of single;
+v1,v2,v3: array [1..3]of single;
 A,B,C:single;
 begin
 glLineWidth(2);

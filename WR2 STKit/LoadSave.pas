@@ -1,6 +1,7 @@
 unit LoadSave;
 interface
-uses unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_RoutineFunctions,Unit_Defaults;
+uses
+  unit1,FileCtrl,sysutils,Windows,KromUtils,Math,dglOpenGL,PTXTexture,Unit_RoutineFunctions,Unit_Defaults;
 
     procedure LoadQAD(Input:string);
     procedure LoadQAD_BW(Input:string);
@@ -168,12 +169,12 @@ var
   f:file;
   i,j,k:integer;
   Head:record
-    Header:array[1..4]of char;
+    Header: array [1..4]of char;
     Version:integer;
   end;
-  BWMaterial:array[1..512]of record
+  BWMaterial: array [1..512]of record
     Tex1,Tex2,Tex3,Clear1,Clear2,Clear3,Clear4,Mode:word; //16byte
-    Matrix:array[1..8] of single;                         //32byte
+    Matrix: array [1..8] of single;                         //32byte
     U1,U2,U3,U4,U5,U6:word; //8byte
   end;
 
@@ -351,7 +352,7 @@ function LoadGEO(Input:string):boolean;
 var
   f:file;
   Head:record
-    Header:array[1..4]of char;
+    Header: array [1..4]of char;
     x2,x3,sizeX,sizeZ,XZ,Qty,Density:integer;
   end;
   VTX2:record
@@ -817,7 +818,7 @@ procedure SaveIDX(Input:string);
 var
   f:file;
   i,k,h,Chunk65k,x,z:integer;
-  idx:array[1..3]of word;
+  idx: array [1..3]of word;
 begin
 assignfile(f,Input); rewrite(f,1);
 blockwrite(f,IDXQty,4); //8mb
@@ -871,7 +872,7 @@ procedure SaveTRK(Input:string;ID:integer);
 var
   f:file;
   ii,kk,N:integer;
-  order:array[1..256]of word;
+  order: array [1..256]of word;
 begin
 ElapsedTime(@OldTime);
 

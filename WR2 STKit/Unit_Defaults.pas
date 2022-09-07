@@ -71,27 +71,27 @@ TMouseAction = (tmaNone, tmaMove, tmaRotate, tmaZoom);
 TEditingMode = (emNone, emTrigger, emTriggerDest, emStreetNode, emStreetAnchor, emStreetAnchorLength, emStreetSpline);
 
 const
-BArrow:array[1..8,1..3]of single =(
+BArrow: array [1..8,1..3]of single =(
 (0,-0.50,-0.25),(0,-0.29,-0.25),(0, 0, 0.05),(0, 0, 0.25), //
 (0, 0, 0.25),(0, 0, 0.05),(0, 0.29,-0.25),(0, 0.50,-0.25));  //
 
-BBox:array[1..8,1..3]of single =(
+BBox: array [1..8,1..3]of single =(
 (-0.5,-0.5,-0.5),( 0.5,-0.5,-0.5),( 0.5, 0.5,-0.5),(-0.5, 0.5,-0.5),
 (-0.5,-0.5, 0.5),( 0.5,-0.5, 0.5),( 0.5, 0.5, 0.5),(-0.5, 0.5, 0.5));
 
-BBoxI:array[1..6,1..4]of byte =((4,3,2,1),(5,6,7,8),(1,2,6,5),(2,3,7,6),(3,4,8,7),(4,1,5,8));
+BBoxI: array [1..6,1..4]of byte =((4,3,2,1),(5,6,7,8),(1,2,6,5),(2,3,7,6),(3,4,8,7),(4,1,5,8));
 
-WheelsM:array[1..4,1..4]of shortint =(
+WheelsM: array [1..4,1..4]of shortint =(
 (-1,+1,-1,-1),(-1,-1,-1,+1),  //Front
 (+1,+1,+1,-1),(+1,-1,+1,+1)); //Rear
 
 ShadQty=19; ObjShadQty=1;
 
-MatModeV:array[1..ShadQty]of string = (
+MatModeV: array [1..ShadQty]of string = (
 '','','','','','','','','','','','','','','','',
 '','',''); //corresponding filename & index FRAG
 
-MatModeF:array[1..ShadQty]of string = (
+MatModeF: array [1..ShadQty]of string = (
 'Mat_000','Mat_016','Mat_032','Mat_048','Mat_064','Mat_080','Mat_096','Mat_112',
 'Mat_128','Mat_144','Mat_160','Mat_176','Mat_192','Mat_208','Mat_224','Mat_240',
 'Mat_Blend','Mat_Smoothshade','Mat_Materials'); //corresponding filename & index FRAG
@@ -108,7 +108,7 @@ MatModeDefaultF:string=
   '{ vec3 kColor = smoothstep(0.4375,.5625,kBlend.rgb); '+
   'gl_FragColor = vec4(kColor.rgb,1);}';
 
-ObjMover:array[1..6,1..3]of single=
+ObjMover: array [1..6,1..3]of single=
 ((-5,0,0),(5,0,0),(4,0,-0.5),(5,0,0),(4,0,0.5),(5,0,0));
 
 PRESET_COLORS: array[1..30,1..3] of byte = (
@@ -127,10 +127,10 @@ PRESET_COLORS: array[1..30,1..3] of byte = (
 //Grey colors
 (208,208,208),(144,144,144),( 84, 84, 84));//Light,Medium,Dark
 
-ObjTypes1:array[0..8]of byte = (0,3,4,5,6,7,8,16,17);
-ObjTypes1inv:array[0..17]of byte = (0,0,0,1,2,3,4,5,6,0,0,0,0,0,0,0,7,8);
+ObjTypes1: array [0..8]of byte = (0,3,4,5,6,7,8,16,17);
+ObjTypes1inv: array [0..17]of byte = (0,0,0,1,2,3,4,5,6,0,0,0,0,0,0,0,7,8);
 
-PageCaption:array[TActivePage] of string = (
+PageCaption: array [TActivePage] of string = (
 '[LW] Convert LWO to Scenery',
 '[GR] Grounds setup',
 '[TX] Textures',
@@ -150,12 +150,12 @@ PageCaption:array[TActivePage] of string = (
 '[TRL] Triggers',
 '[SC2] Addon description');
 
-PageShortcut:Array[1..16] of string = (
+PageShortcut: array [1..16] of string = (
 'LW','GR','TX','MT','OB','SN','LI','ST',
 'TRK','TOB','STR','SNI','SKY','RO#','TRL','SC2');
 
 
-OSphere:array[1..92,1..3]of single =(
+OSphere: array [1..92,1..3]of single =(
 (0,5,0),(1.715,4.663,0.557),(0,4.663,1.804),(3.2,3.699,1.04),(1.784,3.973,2.456),
 (0,3.699,3.364),(4.253,2.236,1.382),(3.2,2.584,2.843),(1.715,2.584,3.922),(0,2.236,4.472),
 (1.06,4.663,-1.459),(1.978,3.699,-2.722),(2.887,3.973,-0.938),(2.629,2.236,-3.618),(3.693,2.584,-2.165),
@@ -176,7 +176,7 @@ OSphere:array[1..92,1..3]of single =(
 (-1.06,0.78,4.824),(-1.978,-0.78,4.526),(4.671,-0.938,1.518),(2.887,-0.938,-3.973),(-2.887,-0.938,-3.973),
 (-4.671,-0.938,1.518),(0,-0.938,4.911));
 
-OSphereN:array[1..92,1..3]of single =(
+OSphereN: array [1..92,1..3]of single =(
 (0,1,0),(0.336,0.936,0.109),(0,0.936,0.353),(0.646,0.734,0.21),(0.357,0.795,0.491),
 (0,0.734,0.679),(0.851,0.447,0.276),(0.646,0.516,0.563),(0.336,0.516,0.788),(0,0.447,0.894),
 (0.208,0.936,-0.286),(0.399,0.734,-0.549),(0.577,0.795,-0.188),(0.526,0.447,-0.724),(0.735,0.516,-0.44),
@@ -197,7 +197,7 @@ OSphereN:array[1..92,1..3]of single =(
 (-0.208,0.163,0.965),(-0.399,-0.163,0.902),(0.934,-0.188,0.304),(0.577,-0.188,-0.795),(-0.577,-0.188,-0.795),
 (-0.934,-0.188,0.304),(0,-0.188,0.982));
 
-OSphereP:array[1..180,1..3]of byte = (
+OSphereP: array [1..180,1..3]of byte = (
 (2,1,3),(4,2,5),(6,5,3),(5,2,3),(7,4,8),(8,5,9),(10,9,6),(8,4,5),(9,5,6),(11,1,2),
 (12,11,13),(4,13,2),(13,11,2),(14,12,15),(15,13,16),(7,16,4),(15,12,13),(16,13,4),(17,1,11),(18,17,19),
 (12,19,11),(19,17,11),(20,18,21),(21,19,22),(14,22,12),(21,18,19),(22,19,12),(17,23,1),(24,23,25),(18,25,17),
@@ -217,7 +217,7 @@ OSphereP:array[1..180,1..3]of byte = (
 (51,90,77),(90,78,76),(58,59,85),(57,58,91),(91,85,83),(58,85,91),(57,82,53),(91,81,82),(81,83,26),(57,91,82),
 (91,83,81),(62,38,65),(61,62,92),(92,65,63),(62,65,92),(61,87,59),(92,86,87),(86,63,10),(61,92,87),(92,63,86));
 
-RandomArray:Array[0..255]of word=(
+RandomArray: array [0..255]of word=(
 42995,13667,15106,18912,23214,63544,57718,34660,48200,33639
 ,28732,25944,43247,44767,62676,56393,60194,48369,51749,50740
 ,10182,46244,9186,15102,62218,64317,47772,22960,284,54100
@@ -246,9 +246,9 @@ RandomArray:Array[0..255]of word=(
 ,36870,34700,61681,31793,34982,58357);
 
 var
-LightPos:Array[0..3] of GLfloat = (40,30,40,0);
-LightSpec:Array[0..3] of GLfloat = (0.7,0.7,0.7,0);
-LightDiff:Array[0..3] of GLfloat = (1,1,1,0);
+LightPos: array [0..3] of GLfloat = (40,30,40,0);
+LightSpec: array [0..3] of GLfloat = (0.7,0.7,0.7,0);
+LightDiff: array [0..3] of GLfloat = (1,1,1,0);
 
 Dif: array[0..3] of GLfloat;
 

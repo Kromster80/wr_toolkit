@@ -1,4 +1,4 @@
-unit Unit1;  
+unit Unit1;
 interface
 uses
   Windows, Messages, SysUtils, Classes, Controls, Buttons,
@@ -312,7 +312,7 @@ type
 var
   f:file;
   ft:textfile;
-  c:array[1..1024000]of AnsiChar;
+  c: array [1..1024000]of AnsiChar;
   i,j,k,m:integer;
   s:string;
   RootDir:string;
@@ -321,14 +321,14 @@ var
   AddOnCarPrefix:string='`';
 
   ForbidRefreshSceneryList:boolean=false;
-  Scn:array[1..8]of TComboBox;
-  Trk:array[1..8]of TComboBox;
-  Lap:array[1..8]of TSpinEdit;
-  Car:array[1..8]of TSpinEdit;
-  Nit:array[1..8]of TComboBox;
-  Tra:array[1..8]of TComboBox;
+  Scn: array [1..8]of TComboBox;
+  Trk: array [1..8]of TComboBox;
+  Lap: array [1..8]of TSpinEdit;
+  Car: array [1..8]of TSpinEdit;
+  Nit: array [1..8]of TComboBox;
+  Tra: array [1..8]of TComboBox;
 ////////////////////////////////////////////////////////////////////////////////
-  Header:array[1..33]of AnsiChar;
+  Header: array [1..33]of AnsiChar;
   DSqty:integer;
 
   TB:array of record
@@ -353,35 +353,35 @@ var
 ////////////////////////////////////////////////////////////////////////////////
   EC_DSqty:integer;
 
-  EC_TB:array[1..3] of record //2+1
+  EC_TB: array [1..3] of record //2+1
   Entries,Index:integer;   //VA_Index
   Cond:byte;       //Cond switch
   CondText:array of string; //Cond text
   end;
 
-  EC_CO:array[1..3] of array[1..512] of record
+  EC_CO: array [1..3] of array[1..512] of record
   Entries,Index:integer;   //VA_Index
   end;
 
-  EC_Value:array[1..3] of array[1..512] of array of record
+  EC_Value: array [1..3] of array[1..512] of array of record
   Typ:byte; Int:integer; Rel:single; Str:string; end;
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
   AddonCarQty:integer;
-  AddonCar:array[1..1024]of record
+  AddonCar: array [1..1024]of record
   Folder:string;
   Factory,Model,Name:string;
   Score,MenuClass,RaceClass:integer;
   end;
-  CarsInClass:array[1..1024]of integer;
+  CarsInClass: array [1..1024]of integer;
 
   AddonSceneryQty:integer;
-    AddonScenery:array[1..128]of record
+    AddonScenery: array [1..128]of record
     Folder:string;
     EngineName,BGround,Name,SceneryFlag:string;
     FreeRideID,FreeRideID_abs,TrackQty:integer;
-      Track:array[1..32]of record
+      Track: array [1..32]of record
       TrackNo:byte;
       Name:string;
       CheckPoint:byte;
@@ -397,8 +397,8 @@ var
     TotalTracks:record
       Stock:record Circuit,Asphaltz,Rallyz,OffRoadz:word; end;
       AddOn:record Circuit,Asphaltz,Rallyz,OffRoadz:word; end;
-    circuit,asphaltz,rallyz,offroadz:array[1..1024]of word;
-    Qty:array[1..8]of word;
+    circuit,asphaltz,rallyz,offroadz: array [1..1024]of word;
+    Qty: array [1..8]of word;
     end;
 
     AddonMission:record
@@ -420,7 +420,7 @@ var
      Author,Contact:string; //Version 2+
      Comment,CarName,TrackName:string; //Version 3+
 
-     Race:array[1..32]of record
+     Race: array [1..32]of record
        HeadLineText:string;
        BonusID,CarID,TrackID,NumLaps,NumDrivers,StartPosition,
        LeadTime,LeadMeter,LeadPositions,Nitro,Traffic,
@@ -435,7 +435,7 @@ var
        InitCode:word;
       end;
     end;
-  MNode:array[1..1024]of TTreeNode;
+  MNode: array [1..1024]of TTreeNode;
   MRaceOld:integer=1;
 
   OldPosition:byte=0;
@@ -1040,7 +1040,7 @@ closefile(f);
 end;
 
 procedure TForm1.RefreshSceneryList(Sender: TObject);
-var ScnID:array[1..8] of integer;
+var ScnID: array [1..8] of integer;
 begin
   if ForbidRefreshSceneryList then exit;
   ForbidRefreshSceneryList:=true;
@@ -1068,7 +1068,7 @@ end;
 procedure TForm1.RefreshTrackList(Sender: TObject);
 var
   ii,kk:integer;
-  TrkID:array[1..8] of integer;
+  TrkID: array [1..8] of integer;
 begin
   for ii:=1 to TBRaceQty.Position do begin
     TrkID[ii]:=Trk[ii].ItemIndex;

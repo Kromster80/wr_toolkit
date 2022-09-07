@@ -1,11 +1,11 @@
 unit Unit_RuntimeFXP;
-
 interface
-uses Unit1, KromUtils, FileCtrl, SysUtils, Windows;
+uses
+  Unit1, KromUtils, FileCtrl, SysUtils, Windows;
 
-    procedure ReadRuntimeFXP(Sender: TObject);
-    procedure SaveRuntimeFXP(Sender: TObject);
-    procedure MakeRuntimeFXPEntries(Sender: TObject);
+  procedure ReadRuntimeFXP(Sender: TObject);
+  procedure SaveRuntimeFXP(Sender: TObject);
+  procedure MakeRuntimeFXPEntries(Sender: TObject);
 
 implementation
 
@@ -76,7 +76,7 @@ end;
 
 
 procedure MakeRuntimeFXPEntries(Sender: TObject);
-var i,k,h,m:integer; t:array[1..10]of integer;
+var i,k,h,m:integer; t: array [1..10]of integer;
 begin
   AddQty:=0;
 

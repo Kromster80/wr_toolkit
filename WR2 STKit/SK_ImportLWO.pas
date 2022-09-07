@@ -1,14 +1,15 @@
 unit SK_ImportLWO;
 interface
-uses Unit1,sysutils,Windows,KromUtils,Math,dglOpenGL,Unit_Defaults;
+uses
+  Unit1,sysutils,Windows,KromUtils,Math,dglOpenGL,Unit_Defaults;
 
   procedure LoadLWO(Input:string);
-  procedure PrepareLWOData();
-  procedure CompileVTX_IDX();
-  procedure CompileQAD();
-  procedure OptimizeVerticesClick_();
-  procedure OptimizeCullingSpheresClick_();
-  procedure PrepareOtherData();
+  procedure PrepareLWOData;
+  procedure CompileVTX_IDX;
+  procedure CompileQAD;
+  procedure OptimizeVerticesClick_;
+  procedure OptimizeCullingSpheresClick_;
+  procedure PrepareOtherData;
 
 implementation
 
@@ -18,7 +19,7 @@ var
   ii,kk,j:integer;
   ChapSize,FileSize,sz:integer;
   ChapName:string[4];
-  lay,SurfaceID:integer;           //
+  lay,SurfaceID:integer;
   s:string;
 begin
   if not fileexists(Input) then exit;
@@ -344,7 +345,7 @@ end;
 procedure PrepareLWOData();
 var
   ii,kk,VQty,PQty:integer;
-  Scn_Bound:array[1..2,1..2]of single;
+  Scn_Bound: array [1..2,1..2]of single;
   Scn_Low:single;
 begin
 
@@ -981,7 +982,7 @@ end;
 procedure OptimizeCullingSpheresClick_();
 var
   ii,kk,ci,ck:integer;
-  BlockBounds:array[1..MAX_BLOCKS_X, 1..MAX_BLOCKS_Z, 1..2] of Vector3f;
+  BlockBounds: array [1..MAX_BLOCKS_X, 1..MAX_BLOCKS_Z, 1..2] of Vector3f;
 begin
   //Init minimum and maximum values
   for ii:=1 to MAX_BLOCKS_X do for kk:=1 to MAX_BLOCKS_Z do begin
