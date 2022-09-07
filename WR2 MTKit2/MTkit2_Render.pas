@@ -17,13 +17,13 @@ uses
   procedure CompileCommonObjects;
 
 const
-  MatClassMax=4;
+  MAX_MAT_CLASS = 4;
 
 var
   vs:Integer;
-  po,fs: array [0..MatClassMax,0..MatClassMax]of Integer;
+  po,fs: array [0..MAX_MAT_CLASS, 0..MAX_MAT_CLASS] of Integer;
   S_Tex1, S_Tex2, S_Tex3, S_Tex4: Integer;
-  Mat_Ambi, Mat_Diff, Mat_Spec, Mat_Spec2, Mat_Refl, Mat_Dirt, Mat_ReflF :Integer;
+  Mat_Ambi, Mat_Diff, Mat_Spec, Mat_Spec2, Mat_Refl, Mat_Dirt, Mat_ReflF: Integer;
 
 implementation
 uses
@@ -94,15 +94,17 @@ begin
 
   Assert(Assigned(glCreateShaderObjectARB));
 
-  for i:=0 to MatClassMax do for k:=0 to MatClassMax do begin
+  for i:=0 to MAX_MAT_CLASS do for k:=0 to MAX_MAT_CLASS do
+  begin
     po[i,k]:=glCreateProgramObjectARB;
     fs[i,k]:=glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
   end;
 
   vs:=glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB); //one for all
 
-  if (not fileexists(ExeDir+'MTKit2 Data\Common.vert'))or
-     (not fileexists(ExeDir+'MTKit2 Data\Common.frag')) then begin
+  if not fileexists(ExeDir+'MTKit2 Data\Common.vert')
+  or not fileexists(ExeDir+'MTKit2 Data\Common.frag') then
+  begin
     MessageBox(Form1.Handle, 'Unable to locate "MTKit2 Data\Common.vert" or "MTKit2 Data\Common.frag"', 'Error', MB_OK or MB_ICONERROR);
     exit;
   end;
@@ -115,7 +117,8 @@ begin
   src := PAnsiChar(@c[1]);
   glShaderSourceARB(vs, 1, @src, @NumRead);
 
-  for i:=0 to MatClassMax do for k:=0 to MatClassMax do begin
+  for i:=0 to MAX_MAT_CLASS do for k:=0 to MAX_MAT_CLASS do
+  begin
     fname:=int2fix(i,2)+' '+int2fix(k,2);
     if fileexists(ExeDir+'MTKit2 Data\'+fname+'.frag') then
       fname:='MTKit2 Data\'+fname+'.frag'
@@ -134,7 +137,8 @@ begin
   glCompileShaderARB(vs);
   CheckGLSLError(Form1.Handle, vs, GL_OBJECT_COMPILE_STATUS_ARB, false, 'Compile VS');
 
-  for i:=0 to MatClassMax do for k:=0 to MatClassMax do begin
+  for i:=0 to MAX_MAT_CLASS do for k:=0 to MAX_MAT_CLASS do
+  begin
     glCompileShaderARB(fs[i,k]);
     CheckGLSLError(Form1.Handle, fs[i,k], GL_OBJECT_COMPILE_STATUS_ARB, false, 'FS');
 
@@ -146,7 +150,7 @@ begin
     CheckGLSLError(Form1.Handle, po[i,k],GL_OBJECT_VALIDATE_STATUS_ARB, false, 'PO');
   end;
 
-Result:=true;
+  Result:=true;
 end;
 
 function RenderShaders:Boolean;
