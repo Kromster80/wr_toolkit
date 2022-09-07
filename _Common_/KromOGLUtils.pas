@@ -20,7 +20,7 @@ type KCode = (kNil=0,kPoint=1,kSpline=2,kSplineAnchor=3,kSplineAnchorLength=4,
     procedure SetRenderFrame(RenderFrame:HWND; out h_DC: HDC; out h_RC: HGLRC);
 
     procedure SetRenderDefaults;
-    procedure CheckGLSLError(FormHandle:hWND; Handle: GLhandleARB; Param: GLenum; ShowWarnings:boolean; Text:string);
+    procedure CheckGLSLError(aHandle: GLhandleARB; aParam: GLenum; aText: string);
     procedure BuildFont(h_DC:HDC; FontSize:integer; FontWeight:word=FW_NORMAL);
     procedure glPrint(text: AnsiString);
     function ReadClick(X, Y: word): Vector3f;
@@ -242,23 +242,20 @@ begin
 end;
 
 
-procedure CheckGLSLError(FormHandle:hWND; Handle: GLhandleARB; Param: GLenum; ShowWarnings:boolean; Text:string);
-var l,glsl_ok:GLint; s:PChar; i:integer; ShowMessage:boolean;
+procedure CheckGLSLError(aHandle: GLhandleARB; aParam: GLenum; aText:string);
+var
+  l, glsl_ok: GLint;
+  s: array [0..999] of AnsiChar;
+  i: integer;
+  w: String;
 begin
-  glGetObjectParameterivARB(Handle, Param, @glsl_ok);
-  s := StrAlloc(1000); //Allocate space
-  glGetInfoLogARB(Handle, StrBufSize(s), l, PGLcharARB(s));
-//Intent to hide all Warning messages
-  ShowMessage:=ShowWarnings;
-  for i:=1 to length(s) do
-  if (s[i]=#13)and(i+1<length(s)) then
-  if (s[i+1]<>'W')and(s[i+1]<>'L')and(not ShowMessage) then ShowMessage:=true;
-  if ShowMessage and (s[0]<>'') then
-  begin
-    s := StrPCopy(s,Text + StrPas(s));
-    MessageBox(HWND(nil), s,'GLSL Log', MB_OK);
-  end;
-  StrDispose(s); //Free-up space
+  glGetObjectParameterivARB(aHandle, aParam, @glsl_ok);
+  glGetInfoLogARB(aHandle, Length(s), l, PGLcharARB(@s[0]));
+
+  w := PAnsiChar(@s[0]);
+
+  if w <> '' then
+    MessageBox(0, PWideChar(aText + sLineBreak + w), 'GLSL Log', MB_OK);
 end;
 
 

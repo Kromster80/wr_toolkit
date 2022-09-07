@@ -21,15 +21,13 @@ type
 const
   MAX_MAT_CLASS = 4;
 
-var
-  vs: Integer;
-  po,fs: array [0..MAX_MAT_CLASS, 0..MAX_MAT_CLASS] of Integer;
-  S_Tex1, S_Tex2, S_Tex3, S_Tex4: Integer;
-  Mat_Ambi, Mat_Diff, Mat_Spec, Mat_Spec2, Mat_Refl, Mat_Dirt, Mat_ReflF: Integer;
 
 implementation
 uses
   MTkit2_Unit1, MTkit2_Defaults;
+
+var
+  po, fs: array [0..MAX_MAT_CLASS, 0..MAX_MAT_CLASS] of Integer;
 
 procedure RenderInit;
 begin
@@ -67,6 +65,7 @@ end;
 
 function LoadFresnelShader: Boolean;
 var
+  vs: Integer;
   c: array [1..MAX_READ_BUFFER] of AnsiChar;
   src: PAnsiChar; // PGLcharARB = PAnsiChar;
   ff:file;
@@ -131,26 +130,28 @@ begin
   end;
 
   glCompileShaderARB(vs);
-  CheckGLSLError(Form1.Handle, vs, GL_OBJECT_COMPILE_STATUS_ARB, false, 'Compile VS');
+  CheckGLSLError(vs, GL_OBJECT_COMPILE_STATUS_ARB, 'Compile VS');
 
   for i:=0 to MAX_MAT_CLASS do for k:=0 to MAX_MAT_CLASS do
   begin
     glCompileShaderARB(fs[i,k]);
-    CheckGLSLError(Form1.Handle, fs[i,k], GL_OBJECT_COMPILE_STATUS_ARB, false, 'FS');
+    CheckGLSLError(fs[i,k], GL_OBJECT_COMPILE_STATUS_ARB, Format('FS compile %2d %2d', [I,K]));
 
     glAttachObjectARB(po[i,k],vs);
     glAttachObjectARB(po[i,k],fs[i,k]);
     glLinkProgramARB(po[i,k]);
-    CheckGLSLError(Form1.Handle, po[i,k],GL_OBJECT_LINK_STATUS_ARB, false, 'PO');
+    CheckGLSLError(po[i,k],GL_OBJECT_LINK_STATUS_ARB, Format('PO link %2d %2d', [I,K]));
     glValidateProgramARB(po[i,k]);
-    CheckGLSLError(Form1.Handle, po[i,k],GL_OBJECT_VALIDATE_STATUS_ARB, false, 'PO');
+    CheckGLSLError(po[i,k],GL_OBJECT_VALIDATE_STATUS_ARB, Format('PO validate %2d %2d', [I,K]));
   end;
 
-  Result:=true;
+  Result := true;
 end;
 
-function RenderShaders:Boolean;
+function RenderShaders: Boolean;
 var
+  Mat_Ambi, Mat_Diff, Mat_Spec, Mat_Spec2, Mat_Refl, Mat_Dirt, Mat_ReflF: Integer;
+  S_Tex1, S_Tex2, S_Tex3, S_Tex4: Integer;
   mc2,mc3,mc4: Byte;
   i,k,h:Integer;
 begin
@@ -169,27 +170,27 @@ begin
 
     for k:=MOX.Parts[i].FirstMat+1 to MOX.Parts[i].FirstMat+MOX.Parts[i].NumMat do
     begin
-
       //if (RenderOpts.ShowMaterial<>0)and(MatID<>MOX.Sid[k,1]+1) then exit;
 
-      mc2:=Material[MOX.Sid[k,1]+1].MatClass[2];
-      mc3:=Material[MOX.Sid[k,1]+1].MatClass[3];
-      mc4:=Material[MOX.Sid[k,1]+1].MatClass[4];
+      mc2 := Material[MOX.Sid[k,1]+1].MatClass[2];
+      mc3 := Material[MOX.Sid[k,1]+1].MatClass[3];
+      mc4 := Material[MOX.Sid[k,1]+1].MatClass[4];
 
       glUseProgramObjectARB(po[mc2,mc3]);
-      S_Tex1 := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Tex1')));
-      S_Tex2 := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Tex2')));
-      S_Tex3 := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Tex3')));
-      S_Tex4 := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Tex4')));
-      Mat_Ambi := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_Ambi')));
-      Mat_Diff := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_Diff')));
-      Mat_Spec := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_Spec1')));
-      Mat_Spec2:= glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_Spec2')));
-      Mat_Refl := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_Refl')));
-      Mat_Dirt := glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_DirtAm')));
-      Mat_ReflF:= glGetUniformLocationARB(po[mc2,mc3], PGLcharARB(PChar('Mat_ReflFres')));
+      S_Tex1 := glGetUniformLocationARB(po[mc2,mc3], 'Tex1');
+      S_Tex2 := glGetUniformLocationARB(po[mc2,mc3], 'Tex2');
+      S_Tex3 := glGetUniformLocationARB(po[mc2,mc3], 'Tex3');
+      S_Tex4 := glGetUniformLocationARB(po[mc2,mc3], 'Tex4');
+      Mat_Ambi := glGetUniformLocationARB(po[mc2,mc3], 'Mat_Ambi');
+      Mat_Diff := glGetUniformLocationARB(po[mc2,mc3], 'Mat_Diff');
+      Mat_Spec := glGetUniformLocationARB(po[mc2,mc3], 'Mat_Spec1');
+      Mat_Spec2:= glGetUniformLocationARB(po[mc2,mc3], 'Mat_Spec2');
+      Mat_Refl := glGetUniformLocationARB(po[mc2,mc3], 'Mat_Refl');
+      Mat_Dirt := glGetUniformLocationARB(po[mc2,mc3], 'Mat_DirtAm');
+      Mat_ReflF:= glGetUniformLocationARB(po[mc2,mc3], 'Mat_ReflFres');
 
-      glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, MoxTex[MOX.Sid[k,1]+1]); //
+      glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, MoxTex[MOX.Sid[k,1]+1]);
+
       if (Form1.CBVinyl.ItemIndex>0) and (mc4 and 1 = 1) then
         glBindTexture(GL_TEXTURE_2D, VinylsTex);
 
@@ -209,12 +210,12 @@ begin
         glUniform3fARB(Mat_Spec2,Sp2.R/255,Sp2.G/255,Sp2.B/255);
         if mc4 and 8 = 8 then
         begin
-          glUniform3fARB(Mat_Refl , Ref.R/255,Ref.G/255,Ref.B/255); //ReflectionControl /on
-          glUniform1fARB(Mat_ReflF,1);                              //ReflectionControl /on
+          glUniform3fARB(Mat_Refl, Ref.R/255, Ref.G/255, Ref.B/255); //ReflectionControl /on
+          glUniform1fARB(Mat_ReflF, 1);                              //ReflectionControl /on
         end else
         begin
           glUniform1fARB(Mat_ReflF, 0);                            //ReflectionControl /off
-          glUniform3fARB(Mat_Refl,Byte(Ref.R<>0),Byte(Ref.G<>0),Byte(Ref.B<>0)); //Fresnel /on/off
+          glUniform3fARB(Mat_Refl, Byte(Ref.R<>0), Byte(Ref.G<>0), Byte(Ref.B<>0)); //Fresnel /on/off
         end;
         glUniform1fARB(Mat_Dirt, (Form1.TBDirt.Position/100) * Byte(mc4 and 4 = 4));
       end;
@@ -231,7 +232,6 @@ begin
         h:=MOX.Parts[h].Parent+1;
       end;
     end;
-
   end;
 
   glUseProgramObjectARB(0);
