@@ -10,6 +10,7 @@ type
   TLoadMode = (lmJustLoad, lmLoadAndShow);
   TRenderObjectSet = set of (roMOX, roMOX_COB, roCOB, roCPO, roTREE);
   TClearUp = (cuMOX, cuMTL, cuCOB, cuCPO, cuTREE, cuALL);
+  TCameraAction = (caNone, caRotate, caMove, caZoom);
 
 const
   BBoxV: array [1..8,1..3] of Single =(

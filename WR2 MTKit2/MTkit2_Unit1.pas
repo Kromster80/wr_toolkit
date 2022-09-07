@@ -388,6 +388,7 @@ type
     fOpenedFileMask: string;
     fOpenedFolder: string;
     fRenderMode: TRenderMode;
+    fCameraAction: TCameraAction;
 
     fLightCopyID: Integer;
     fColorCopyID: Integer;
@@ -448,7 +449,6 @@ var
   ExeDir: string;
   ActivePage: TActivePage;
   RenderObject: TRenderObjectSet;
-  CameraAction: string='';
 
   MatID,ColID,LitID:Integer;
   SelectedTreeNode:Integer;
@@ -716,7 +716,7 @@ var
   frameTime: Cardinal;
 begin
   if not Form1.Active and not Form_ColorPicker.Active then Exit;
-  if CameraAction <> '' then Exit;
+  if fCameraAction <> caNone then Exit;
 
   Done := False;
   frameTime := GetTickCount - OldTimeFPS;
@@ -1053,8 +1053,9 @@ begin
   glLightfv(GL_LIGHT1, GL_POSITION, @LightPos2); //static lights
   glPointSize(8);
 
-  if RenderOpts.UVMap then begin
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA); //Set alpha mode
+  if RenderOpts.UVMap then
+  begin
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //Set alpha mode
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_LIGHTING);
@@ -1066,10 +1067,10 @@ begin
 
     RenderUVGrid(CBShowGrid.Checked);
     RenderOpenGL;
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     RenderDirt('', TBDirt.Position);
-
-  end else begin
+  end else
+  begin
     glTranslatef(0,0,-6);
     glTranslatef(xMov,yMov,0);
     glRotatef(yRot, 1, 0, 0);
@@ -1093,9 +1094,13 @@ begin
     if CBShowGrid.Checked then RenderGrid;
     glEnable(GL_LIGHTING);
 
-    if roMOX in RenderObject then begin
-      if fRenderMode = rmShaders then RenderShaders;
-      if fRenderMode = rmOpenGL then begin
+    if roMOX in RenderObject then
+    begin
+      if fRenderMode = rmShaders then
+        RenderShaders;
+
+      if fRenderMode = rmOpenGL then
+      begin
         RenderOpenGL;
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
         RenderDirt('', TBDirt.Position);
@@ -1124,17 +1129,17 @@ begin
 
 //      glDisable(GL_DEPTH_TEST);
     if (roCPO in RenderObject) then
-      if (ActivePage=apCPO)or(RenderOpts.Colli)or
-      (ActivePage=apBrowse)and not(roMOX in RenderObject) then begin
+      if (ActivePage = apCPO) or (RenderOpts.Colli)
+      or (ActivePage = apBrowse) and not (roMOX in RenderObject) then
+      begin
 //      glDisable(GL_DEPTH_FUNC);
-      glDepthFunc(GL_ALWAYS);
+        glDepthFunc(GL_ALWAYS);
 //      RenderCPO(LBCPOShapes.ItemIndex+1);
 //      glEnable(GL_DEPTH_FUNC);
-      glDepthFunc(GL_LEQUAL);
-      RenderCPO(LBCPOShapes.ItemIndex+1);
+        glDepthFunc(GL_LEQUAL);
+        RenderCPO(LBCPOShapes.ItemIndex+1);
       end;
 //      glEnable(GL_DEPTH_TEST);
-
   end;
 
   swapBuffers(h_DC);
@@ -1162,7 +1167,9 @@ begin
 end;
 
 procedure TForm1.RenderResize(Sender: TObject);
-var minsize:Integer; xo,yo:Single;
+var
+  minsize: Integer;
+  xo, yo: Single;
 begin
   if (RenderPanel.Height = 0) then RenderPanel.Height := 1;
   if (RenderPanel.Width = 0) then RenderPanel.Width := 1;
@@ -1186,10 +1193,12 @@ end;
 
 procedure TForm1.Panel1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  if (Sender=ImageR)or((Sender=RenderPanel)and(Button=mbLeft)) then CameraAction:='Rotate';
-  if (Sender=ImageM)or((Sender=RenderPanel)and(Button=mbRight)) then CameraAction:='Move';
-  if (Sender=ImageZ) then CameraAction:='Zoom';
+  if (Sender = ImageR) or ((Sender = RenderPanel) and (Button = mbLeft)) then fCameraAction := caRotate;
+  if (Sender = ImageM) or ((Sender = RenderPanel) and (Button = mbRight)) then fCameraAction := caMove;
+  if (Sender = ImageZ) then fCameraAction := caZoom;
+
   MouseX:=X; MouseY:=Y;
+
   //ShowCursor(False);
 end;
 
@@ -1198,40 +1207,44 @@ procedure TForm1.Panel1MouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integ
 var
   dx,dy:Integer;
 begin
-dx:=0;
-dy:=0;
-if CameraAction='' then Exit;
-if CameraAction='Rotate' then begin
-  xRot:=xRot-(X-MouseX);
-  yRot:=yRot+(Y-MouseY);
-  dx:=Form1.ClientOrigin.X+ImageR.Left+MouseX;
-  dy:=Form1.ClientOrigin.Y+ImageR.Top+MouseY;
-end;
-if CameraAction='Zoom' then begin
-  Zoom:=EnsureRange(Zoom+(X-MouseX)/150,0.06125,2);
-  dx:=Form1.ClientOrigin.X+ImageZ.Left+MouseX;
-  dy:=Form1.ClientOrigin.Y+ImageZ.Top+MouseY;
-end;
-if CameraAction='Move' then begin
-  xMov:=xMov-(X-MouseX)/100;
-  yMov:=yMov-(Y-MouseY)/100;
-  dx:=Form1.ClientOrigin.X+ImageM.Left+MouseX;
-  dy:=Form1.ClientOrigin.Y+ImageM.Top+MouseY;
-end;
-if (Sender=RenderPanel) then begin
-  dx:=Form1.ClientOrigin.X+RenderPanel.Left+MouseX;
-  dy:=Form1.ClientOrigin.Y+RenderPanel.Top+MouseY;
-end;
-//return cursor to start location = "stick it"
-SetCursorPos(dx,dy);
-//MouseX:=X; MouseY:=Y;
-RenderFrame(nil);
+  dx:=0;
+  dy:=0;
+  if fCameraAction=caNone then Exit;
+  if fCameraAction=caRotate then
+  begin
+    xRot:=xRot-(X-MouseX);
+    yRot:=yRot+(Y-MouseY);
+    dx:=Form1.ClientOrigin.X+ImageR.Left+MouseX;
+    dy:=Form1.ClientOrigin.Y+ImageR.Top+MouseY;
+  end;
+  if fCameraAction=caZoom then
+  begin
+    Zoom:=EnsureRange(Zoom+(X-MouseX)/150,0.06125,2);
+    dx:=Form1.ClientOrigin.X+ImageZ.Left+MouseX;
+    dy:=Form1.ClientOrigin.Y+ImageZ.Top+MouseY;
+  end;
+  if fCameraAction=caMove then
+  begin
+    xMov := xMov-(X-MouseX)/100;
+    yMov := yMov-(Y-MouseY)/100;
+    dx := Form1.ClientOrigin.X+ImageM.Left+MouseX;
+    dy := Form1.ClientOrigin.Y+ImageM.Top+MouseY;
+  end;
+  if (Sender=RenderPanel) then
+  begin
+    dx := Form1.ClientOrigin.X+RenderPanel.Left+MouseX;
+    dy := Form1.ClientOrigin.Y+RenderPanel.Top+MouseY;
+  end;
+  //return cursor to start location = "stick it"
+  SetCursorPos(dx,dy);
+  //MouseX:=X; MouseY:=Y;
+  RenderFrame(nil);
 end;
 
 
 procedure TForm1.Panel1MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  CameraAction:='';
+  fCameraAction := caNone;
   ShowCursor(True);
 end;
 
