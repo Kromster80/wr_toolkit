@@ -49,9 +49,9 @@ type
   end;
 
 const
-  MaxCars=256;
+  MaxCars = 256;
 
-  PresetColor: array[1..15]of TColor = (
+  PRESET_COLORS: array [1..15] of TColor = (
     $000000,$000080,$0000D0,$0060C0,$00B0D0,
     $0080F0,$D0D0D0,$404040,$405000,$006000,
     $600000,$A05050,$602060,$909090,$808080);
@@ -981,7 +981,7 @@ end;
 procedure TForm1.CLBCarsDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
 begin
   CLBCars.Canvas.TextOut(Rect.Left+22,Rect.Top,CLBCars.Items[Index]);
-  CLBCars.Canvas.Brush.Color:=PresetColor[AddonCar[Index+1].ColorID];
+  CLBCars.Canvas.Brush.Color:=PRESET_COLORS[AddonCar[Index+1].ColorID];
   CLBCars.Canvas.TextOut(Rect.Left+2,Rect.Top,'      ');
 end;
 
@@ -990,7 +990,7 @@ procedure TForm1.TrackBar1Change(Sender: TObject);
 begin
   if CLBCars.ItemIndex<0 then exit;
   AddonCar[CLBCars.ItemIndex+1].ColorID:=TrackBar1.Position;
-  Shape1.Brush.Color:=PresetColor[AddonCar[CLBCars.ItemIndex+1].ColorID]; //coloring solution
+  Shape1.Brush.Color:=PRESET_COLORS[AddonCar[CLBCars.ItemIndex+1].ColorID]; //coloring solution
   CLBCars.Repaint;
 end;
 

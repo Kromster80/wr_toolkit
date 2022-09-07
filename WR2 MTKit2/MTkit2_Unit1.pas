@@ -921,9 +921,9 @@ begin
               end;
     uiVin:    begin
                 CBVinyl.Clear;
-                CBVinyl.AddItem('-Default-',nil);
+                CBVinyl.AddItem('-Default-', nil);
                 for ii:=1 to VinylsCount do
-                  CBVinyl.AddItem(VinylsList[ii],nil);
+                  CBVinyl.AddItem(VinylsList[ii], nil);
                 CBVinyl.ItemIndex:=0;
               end;
     uiLights: begin
@@ -931,11 +931,11 @@ begin
                 oldID1:=LBBlinkers.ItemIndex;
                 LBBlinkers.Clear;
                 for ii:=1 to MOX.Qty.Blink do
-                LBBlinkers.Items.Add(IntToStr(ii)+'. '+BlinkerType[MOX.Blinkers[ii].TypeID]+'  '+
-                FloatToStrF(MOX.Blinkers[ii].sMin,ffGeneral,5,7)+'->'+
-                FloatToStrF(MOX.Blinkers[ii].sMax,ffGeneral,5,7)+'  '+
-                IntToStr(MOX.Blinkers[ii].Parent)
-                );
+                  LBBlinkers.Items.Add(IntToStr(ii)+'. '+BLINKER_TYPE_SHORTNAME[MOX.Blinkers[ii].TypeID]+'  '+
+                    FloatToStrF(MOX.Blinkers[ii].sMin,ffGeneral,5,7)+'->'+
+                    FloatToStrF(MOX.Blinkers[ii].sMax,ffGeneral,5,7)+'  '+
+                    IntToStr(MOX.Blinkers[ii].Parent)
+                    );
                 if oldID1<LBBlinkers.Count then LBBlinkers.ItemIndex:=oldID1;
                 LightRefresh:=False;
               end;

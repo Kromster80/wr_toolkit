@@ -111,7 +111,7 @@ MatModeDefaultF:string=
 ObjMover:array[1..6,1..3]of single=
 ((-5,0,0),(5,0,0),(4,0,-0.5),(5,0,0),(4,0,0.5),(5,0,0));
 
-PresetColor:Array[1..30,1..3] of byte = (
+PRESET_COLORS: array[1..30,1..3] of byte = (
 //Light colors
 (255,108,108),(255,182,108),(255,255,108),//Red,Orange,Yellow
 (108,255,108),(108,255,255),(108,182,255),//Green,Cyan,Blueish
@@ -246,14 +246,13 @@ RandomArray:Array[0..255]of word=(
 ,36870,34700,61681,31793,34982,58357);
 
 var
-
 LightPos:Array[0..3] of GLfloat = (40,30,40,0);
 LightSpec:Array[0..3] of GLfloat = (0.7,0.7,0.7,0);
 LightDiff:Array[0..3] of GLfloat = (1,1,1,0);
 
-Dif:array[0..3] of GLfloat;
+Dif: array[0..3] of GLfloat;
 
-Loc:array[1..3] of GLfloat;
+Loc: array[1..3] of GLfloat;
 
   ALBuffer : array [1..256] of TALuint;
   ALSource : array [1..256] of TALuint;
@@ -266,23 +265,25 @@ Loc:array[1..3] of GLfloat;
   end;
 
 implementation
+uses
+  Unit1;
 
-uses Unit1;
-
-function GetPresetColor(ID:integer):TColor;
+function GetPresetColor(ID: Integer): TColor;
 begin
-  ID := (ID-1) mod length(PresetColor) + 1;
-  Result := PresetColor[ID,1] + PresetColor[ID,2] shl 8 + PresetColor[ID,3] shl 16;
+  ID := (ID-1) mod length(PRESET_COLORS) + 1;
+  Result := PRESET_COLORS[ID,1] + PRESET_COLORS[ID,2] shl 8 + PRESET_COLORS[ID,3] shl 16;
 end;
 
+
 procedure SetPresetColorGL(ID:integer; A:single);
-var IDn:integer;
+var
+  IDn:integer;
 begin
-  IDn := (ID-1) mod length(PresetColor) + 1;
+  IDn := (ID-1) mod length(PRESET_COLORS) + 1;
   if IDn = 0 then
     glColor4f(0,0,0,A)
   else
-    glColor4f(PresetColor[IDn,1]/255,PresetColor[IDn,2]/255,PresetColor[IDn,3]/255,A)
+    glColor4f(PRESET_COLORS[IDn,1]/255, PRESET_COLORS[IDn,2]/255, PRESET_COLORS[IDn,3]/255, A);
 end;
 
 

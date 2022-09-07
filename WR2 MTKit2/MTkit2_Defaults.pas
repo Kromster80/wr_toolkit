@@ -1,7 +1,7 @@
 unit MTkit2_Defaults;
 interface
 uses
-  OpenGL;
+  dglOpenGL;
 
 type
   apActivePage = (apMTL, apParts, apLights, apCOB, apCPO, apExtra, apBrowse);
@@ -479,7 +479,7 @@ const
   (111,112,99),
   (112,100,99));
 
-  BlinkerType: array [0..33] of string = (
+  BLINKER_TYPE_SHORTNAME: array [0..33] of string = (
   'null','EF','HL','BL','RL','LB',
   'RB','SG','SL','FL','??',
   '??','??','??','??','??',
@@ -487,14 +487,6 @@ const
   '??','??','??','TP','??',
   '??','??','??','??','??',
   '??','??','NF');
-
-  ColorNamesMBWR: array [1..15] of string = (
-  '"01Schwarz"','"02Rot"','"03Rot"','"04DunkelRot"','"05Gelb"',
-  '"06Gelb"','"07Weiss"','"08Anthrazit"','"09DunkelGruen"','"10DunkelGruen"',
-  '"11Blau"','"12QuarzBlau"','"13Blau"','"14Silber"','"15Silber"');
-
-  PresetColor: array [1..6,1..3] of Byte = (
-  (255,255,255),(254,64,64),(254,191,64),(0,0,0),(0,0,0),(0,0,0));
 
   DefaultColor: array [1..15,1..3] of Byte = (
   (0,0,0),(39,0,2),(130,10,5),(20,4,0),(140,98,0),(159,71,0),(150,150,160),(10,10,10),
@@ -519,4 +511,5 @@ var
   Dif: array [0..3] of GLfloat;
 
 implementation
+
 end.
