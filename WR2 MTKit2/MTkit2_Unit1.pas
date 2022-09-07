@@ -752,7 +752,7 @@ end;
 procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   if cbAskOnClose.Checked then
-    CanClose := (MessageBox(Form1.Handle, 'Close MTKit2?', 'Question', MB_YESNO or MB_ICONQUESTION) = ID_YES);
+    CanClose := (MessageBox(Handle, 'Close MTKit2?', 'Question', MB_YESNO or MB_ICONQUESTION) = ID_YES);
 end;
 
 
@@ -784,7 +784,7 @@ begin
 
   if c[1]+c[2]+c[3]+c[4]<>('!XOM') then
   begin
-    MessageBox(Form1.Handle, PChar('Unknown format - '+c[1]+c[2]+c[3]+c[4]), 'Error', MB_OK or MB_ICONERROR);
+    MessageBox(Handle, PChar('Unknown format - '+c[1]+c[2]+c[3]+c[4]), 'Error', MB_OK or MB_ICONERROR);
     closefile(f);
     Exit;
   end;
@@ -793,7 +793,7 @@ begin
   if c[6]+c[7]+c[8]=(#0+#0+#2) then MOXFormat:='WR02' else //32bit chunks
   if c[6]+c[7]+c[8]=(#0+#1+#0) then MOXFormat:='MBWR' else //16bit chunks
   begin
-    MessageBox(Form1.Handle, PChar('Unknown version - '+IntToStr(ord(c[1]))+IntToStr(ord(c[2]))+IntToStr(ord(c[3])) + IntToStr(ord(c[4]))), 'Error', MB_OK or MB_ICONERROR);
+    MessageBox(Handle, PChar('Unknown version - '+IntToStr(ord(c[1]))+IntToStr(ord(c[2]))+IntToStr(ord(c[3])) + IntToStr(ord(c[4]))), 'Error', MB_OK or MB_ICONERROR);
     closefile(f);
     Exit;
   end;
@@ -877,7 +877,7 @@ begin
   if MOX.Qty.Blink > MAX_BLINKERS then
   begin
     MOX.Qty.Blink := MAX_BLINKERS;
-    MessageBox(Form1.Handle, PChar('Blinker quantity limited to '+IntToStr(MAX_BLINKERS)+' due to compatibility issues.'), 'Warning', MB_OK or MB_ICONWARNING);
+    MessageBox(Handle, PChar('Blinker quantity limited to '+IntToStr(MAX_BLINKERS)+' due to compatibility issues.'), 'Warning', MB_OK or MB_ICONWARNING);
   end;
   if MOXFormat='WR22' then blockread(f,MOX.Blinkers,88*MOX.Qty.Blink);
   closefile(f);
@@ -1431,7 +1431,7 @@ CRad.Value:=MOX.Parts[SelectedTreeNode].fRadius;
 
 RGDetailType.ItemIndex:=MOX.Parts[SelectedTreeNode].TypeID;
 if RGDetailType.ItemIndex<>MOX.Parts[SelectedTreeNode].TypeID then
-MessageBox(Form1.Handle, 'Unknown detail ID type', 'Discovery', MB_OK or MB_ICONSTOP);;
+MessageBox(Handle, 'Unknown detail ID type', 'Discovery', MB_OK or MB_ICONSTOP);;
 
 LX1.Value:=MOX.Parts[SelectedTreeNode].x1/pi*180;//-YZ rotation
 LX2.Value:=MOX.Parts[SelectedTreeNode].x2/pi*180;//+YZ rotation
@@ -2103,7 +2103,7 @@ begin
   glGetIntegerv(GL_MAX_VARYING_FLOATS_ARB, @vfl);
 
   MessageBox(
-    Form1.Handle,
+    Handle,
     PChar(
       VersionInfo + eol + eol +
       'using OpenGL ' + glGetString(GL_VERSION) + ' by ' + glGetString(GL_RENDERER) + eol +
@@ -2250,9 +2250,9 @@ procedure TForm1.ConverseImp_COB;
 var
   i,h:Integer;
 begin
-  if (Imp.VerticeCount>255)or(Imp.PolyCount>255) then
+  if (Imp.VerticeCount>255) or (Imp.PolyCount>255) then
   begin
-    MessageBox(Form1.Handle, 'Can''t import more than 255 vertices to COB', 'Error', MB_OK or MB_ICONERROR);
+    MessageBox(Handle, 'Can''t import more than 255 vertices to COB', 'Error', MB_OK or MB_ICONERROR);
     Exit;
   end;
 
@@ -3077,7 +3077,7 @@ begin
 
   Memo1.Lines.Add('Writing MOX>LWO file');
 
-  doSpread := MessageBox(Form1.Handle, 'Do you want to spread parts over X axis?', 'Question', MB_YESNO or MB_ICONQUESTION) = ID_YES;
+  doSpread := MessageBox(Handle, 'Do you want to spread parts over X axis?', 'Question', MB_YESNO or MB_ICONQUESTION) = ID_YES;
 
   SaveMOX2LWO(Save1.FileName, doSpread);
 
@@ -3333,7 +3333,7 @@ begin
   I := LBCPOShapes.ItemIndex+1;
   if (I=0)or(CPO[I].Format=2) then
   begin
-    MessageBox(Form1.Handle, 'Select a freeform shape from list above', 'Error', MB_OK or MB_ICONERROR);
+    MessageBox(Handle, 'Select a freeform shape from list above', 'Error', MB_OK or MB_ICONERROR);
     Exit;
   end;
 
@@ -3347,7 +3347,8 @@ end;
 
 
 procedure TForm1.LBBlinkersDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
-var MyRect:TRect; MyColor:TColor; ID:Integer; ColorID:Integer;
+var
+  MyRect:TRect; MyColor:TColor; ID:Integer; ColorID:Integer;
 begin
   ID := Index+1;
   MyRect := Rect;
@@ -3392,7 +3393,7 @@ end;
 procedure TForm1.Button2Click(Sender: TObject);
 begin
   RegisterFileType('mox', Application.ExeName);
-  MessageBox(Form1.Handle, 'Registered', 'Info', MB_OK or MB_ICONINFORMATION);
+  MessageBox(Handle, 'Registered', 'Info', MB_OK or MB_ICONINFORMATION);
 end;
 
 
