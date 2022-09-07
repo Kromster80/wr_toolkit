@@ -5,7 +5,7 @@ uses
   Windows, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, kromUtils, KromOGLUtils, Unit_Defaults, Math, Menus,
   LoadObjects, Grids,  ImgList, OpenAL, WR_AboutBox, SK_Options, FileCtrl,
-  Buttons, Spin, ComCtrls, Unit_Grass, Unit_Streets, Unit_Triggers;
+  Buttons, Spin, ComCtrls, Unit_Grass, Unit_Streets, Unit_Triggers, System.ImageList;
 
 type
   TCarDrivingMode = (cdm_Sim, cdm_Arcade);
@@ -889,8 +889,7 @@ type
     procedure CBDriveModeClick(Sender: TObject);
     procedure FormCanResize(Sender: TObject; var NewWidth, NewHeight: Integer; var Resize: Boolean);
     procedure CB_AutoCrossClick(Sender: TObject);
-
-  private     { Private declarations }
+  private
     procedure OnIdle(Sender: TObject; var Done: Boolean);
   end;
 
@@ -5603,13 +5602,15 @@ end;
 
 
 procedure TForm1.About1Click(Sender: TObject);
-var ver,vfl:integer; s:string;
+var
+  ver, vfl: Integer;
+  s: string;
 begin
   glGetIntegerv(GL_SHADING_LANGUAGE_VERSION_ARB,@ver);
   glGetIntegerv(GL_MAX_VARYING_FLOATS_ARB,@vfl);
   s:='OpenGL '+glGetString(GL_VERSION)+' by '+glGetString(GL_RENDERER)+eol+
      'GLSL version '+inttostr(ver)+' with max floats '+inttostr(vfl);
-  AboutForm.Show(VersionInfo,s,'STKit2');
+  AboutForm.Show('STKit2', VersionInfo, s, 'STKit2');
 end;
 
 procedure TForm1.ExportLightsClick(Sender: TObject);
