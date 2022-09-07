@@ -389,6 +389,10 @@ type
     fOpenedFolder: string;
     fRenderMode: TRenderMode;
 
+    fLightCopyID: Integer;
+    fColorCopyID: Integer;
+    fCOBCopyItem: Integer;
+
     procedure LoadSettingsFromIni(const aFilename: string);
     procedure SaveSettingsToIni(const aFilename: string);
     procedure OnIdle(Sender: TObject; var Done: Boolean);
@@ -449,9 +453,6 @@ var
   CameraAction: string='';
 
   MatID,ColID,LitID:Integer;
-  LightCopyID:Integer;
-  ColorCopyID:Integer;
-  COBCopyItem:Integer;
   SelectedTreeNode:Integer;
   DefColor:Byte; //Yellow
 
@@ -496,29 +497,29 @@ var
     Parts: array [1..MAX_PARTS] of record
       Dname: string[64];
       Matrix: TMatrix;
-      Parent,Child,PrevInLevel,NextInLevel: smallint;
+      Parent,Child,PrevInLevel,NextInLevel: SmallInt;
       FirstMat,NumMat: Word;
       xMid,yMid,zMid,fRadius: Single;
-      w1,w2,w3: smallint;
-      TypeID: smallint;
+      w1,w2,w3: SmallInt;
+      TypeID: SmallInt;
       x1,x2,y1,y2,z1,z2: Single;
       w4,w5: Integer;
     end;
 
     Blinkers: array [1..MAX_BLINKERS] of record
       BlinkerType: Integer;                      //4b Type of object
-      sMin,sMax,Freq: Single;               //Min,Max
+      sMin, sMax, Freq: Single;               //Min,Max
       B,G,R,A: Byte;                //20
-      z1,Parent: smallint;                      //24
+      z1, Parent: SmallInt;                      //24
       Matrix: TMatrix;  //88
     end;
   end;
 
   BlinkWrite: array [1..MAX_BLINKERS] of Byte;
 
-  //This should be universal exchange format in MTKit2
+  // This should be universal exchange format in MTKit2
   Imp: record
-    VerticeCount,PolyCount,SurfCount,PartCount: Integer;
+    VerticeCount, PolyCount, SurfCount, PartCount: Integer;
     XYZ: array [1..65280] of Vector3f;
     Np: array [1..65280] of Vector3f;
     Nv: array [1..65280] of Vector3f;
@@ -938,7 +939,7 @@ begin
                     FloatToStrF(MOX.Blinkers[ii].sMin,ffGeneral,5,7)+'->'+
                     FloatToStrF(MOX.Blinkers[ii].sMax,ffGeneral,5,7)+'  '+
                     IntToStr(MOX.Blinkers[ii].Parent)
-                    );
+                  );
                 if oldID1<LBBlinkers.Count then LBBlinkers.ItemIndex:=oldID1;
                 LightRefresh:=False;
               end;
@@ -1292,43 +1293,44 @@ var
   ax,ay,az: Integer;
   m: array [1..9] of Single;
 begin
-LitID:=LBBlinkers.ItemIndex+1;
-if LitID=0 then Exit;
+  LitID:=LBBlinkers.ItemIndex+1;
+  if LitID=0 then Exit;
 
-  LightRefresh:=True;
-  blinkerType := MOX.Blinkers[LitID].BlinkerType;
-  case blinkerType of //Fit 0..24 IDs in RG range of 0..12
-    16: blinkerType := 10;
-    20: blinkerType := 11;
-    24: blinkerType := 12;
-    33: blinkerType := 13;
+    LightRefresh:=True;
+    blinkerType := MOX.Blinkers[LitID].BlinkerType;
+    case blinkerType of //Fit 0..24 IDs in RG range of 0..12
+      16: blinkerType := 10;
+      20: blinkerType := 11;
+      24: blinkerType := 12;
+      33: blinkerType := 13;
+    end;
+
+  RGBlinkType.ItemIndex := blinkerType;
+
+  FS1.Value:=MOX.Blinkers[LitID].sMin;
+  FS2.Value:=MOX.Blinkers[LitID].sMax;
+  FS3.Value:=MOX.Blinkers[LitID].Freq;
+  //S1.Value:=MOX.Blinkers[LBBlinkers.ItemIndex+1].z1;
+  S2.Value:=MOX.Blinkers[LitID].Parent;
+  FSX.Value:=MOX.Blinkers[LitID].Matrix[4,1]/10;
+  FSY.Value:=MOX.Blinkers[LitID].Matrix[4,2]/10;
+  FSZ.Value:=MOX.Blinkers[LitID].Matrix[4,3]/10;
+  ShapeL.Brush.Color:=MOX.Blinkers[LitID].R+MOX.Blinkers[LitID].G*256+MOX.Blinkers[LitID].B*65536;
+
+  with MOX.Blinkers[LitID] do
+  begin
+    m[1]:=Matrix[1,1]; m[2]:=Matrix[1,2]; m[3]:=Matrix[1,3];
+    m[4]:=Matrix[2,1]; m[5]:=Matrix[2,2]; m[6]:=Matrix[2,3];
+    m[7]:=Matrix[3,1]; m[8]:=Matrix[3,2]; m[9]:=Matrix[3,3];
   end;
 
-RGBlinkType.ItemIndex := blinkerType;
+  Matrix2Angles(m,9,@ax,@ay,@az);
 
-FS1.Value:=MOX.Blinkers[LitID].sMin;
-FS2.Value:=MOX.Blinkers[LitID].sMax;
-FS3.Value:=MOX.Blinkers[LitID].Freq;
-//S1.Value:=MOX.Blinkers[LBBlinkers.ItemIndex+1].z1;
-S2.Value:=MOX.Blinkers[LitID].Parent;
-FSX.Value:=MOX.Blinkers[LitID].Matrix[4,1]/10;
-FSY.Value:=MOX.Blinkers[LitID].Matrix[4,2]/10;
-FSZ.Value:=MOX.Blinkers[LitID].Matrix[4,3]/10;
-ShapeL.Brush.Color:=MOX.Blinkers[LitID].R+MOX.Blinkers[LitID].G*256+MOX.Blinkers[LitID].B*65536;
+  FSH.Value:=round(ax);
+  FSP.Value:=round(ay);
+  FSB.Value:=round(az);
 
-with MOX.Blinkers[LitID] do begin
-m[1]:=Matrix[1,1]; m[2]:=Matrix[1,2]; m[3]:=Matrix[1,3];
-m[4]:=Matrix[2,1]; m[5]:=Matrix[2,2]; m[6]:=Matrix[2,3];
-m[7]:=Matrix[3,1]; m[8]:=Matrix[3,2]; m[9]:=Matrix[3,3];
-end;
-
-Matrix2Angles(m,9,@ax,@ay,@az);
-
-FSH.Value:=round(ax);
-FSP.Value:=round(ay);
-FSB.Value:=round(az);
-
-LightRefresh:=False;
+  LightRefresh:=False;
 end;
 
 
@@ -2061,8 +2063,8 @@ end;
 
 procedure TForm1.BlinkCopyClick(Sender: TObject);
 begin
-  LightCopyID:=LBBlinkers.ItemIndex+1;
-  if LightCopyID>0 then BlinkerPaste.Enabled:=True;
+  fLightCopyID := LBBlinkers.ItemIndex + 1;
+  BlinkerPaste.Enabled := InRange(fLightCopyID, 1, MOX.Qty.Blink);
 end;
 
 
@@ -2071,24 +2073,25 @@ var
   ID: Integer;
 begin
   ID := LBBlinkers.ItemIndex+1;
-  if ID=0 then Exit;
+  if ID = 0 then Exit;
 
-  if LightCopyID<>EnsureRange(LightCopyID,1,MOX.Qty.Blink) then
+  if fLightCopyID <> EnsureRange(fLightCopyID, 1, MOX.Qty.Blink) then
   begin
-    BlinkerPaste.Enabled:=False;
+    BlinkerPaste.Enabled := False;
     Exit;
   end;
 
-  MOX.Blinkers[ID].BlinkerType := MOX.Blinkers[LightCopyID].BlinkerType;
-  MOX.Blinkers[ID].sMin:=MOX.Blinkers[LightCopyID].sMin;
-  MOX.Blinkers[ID].sMax:=MOX.Blinkers[LightCopyID].sMax;
-  MOX.Blinkers[ID].Freq:=MOX.Blinkers[LightCopyID].Freq;
-  MOX.Blinkers[ID].B:=MOX.Blinkers[LightCopyID].B;
-  MOX.Blinkers[ID].G:=MOX.Blinkers[LightCopyID].G;
-  MOX.Blinkers[ID].R:=MOX.Blinkers[LightCopyID].R;
-  MOX.Blinkers[ID].A:=MOX.Blinkers[LightCopyID].A;
-  MOX.Blinkers[ID].z1:=MOX.Blinkers[LightCopyID].z1;
-  MOX.Blinkers[ID].Parent:=MOX.Blinkers[LightCopyID].Parent;
+  MOX.Blinkers[ID].BlinkerType := MOX.Blinkers[fLightCopyID].BlinkerType;
+  MOX.Blinkers[ID].sMin:=MOX.Blinkers[fLightCopyID].sMin;
+  MOX.Blinkers[ID].sMax:=MOX.Blinkers[fLightCopyID].sMax;
+  MOX.Blinkers[ID].Freq:=MOX.Blinkers[fLightCopyID].Freq;
+  MOX.Blinkers[ID].B:=MOX.Blinkers[fLightCopyID].B;
+  MOX.Blinkers[ID].G:=MOX.Blinkers[fLightCopyID].G;
+  MOX.Blinkers[ID].R:=MOX.Blinkers[fLightCopyID].R;
+  MOX.Blinkers[ID].A:=MOX.Blinkers[fLightCopyID].A;
+  MOX.Blinkers[ID].z1:=MOX.Blinkers[fLightCopyID].z1;
+  MOX.Blinkers[ID].Parent:=MOX.Blinkers[fLightCopyID].Parent;
+
   SendDataToUI(uiLights);
   LBBlinkersClick(nil);
 end;
@@ -2297,13 +2300,13 @@ procedure TForm1.RebuildCOBBounds;
 var
   i:Integer;
 begin
-COB.Head.Xmin:=0; COB.Head.Xmax:=0;
-COB.Head.Ymin:=0; COB.Head.Ymax:=0;
-COB.Head.Zmin:=0; COB.Head.Zmax:=0;
-for i:=1 to COB.Head.PolyQty do begin //computing normal to every polygon
-  Normal2Poly(COB.Vertices[COB.Faces[i,1]+1],COB.Vertices[COB.Faces[i,2]+1],COB.Vertices[COB.Faces[i,3]+1],@COB.NormalsP[i]);
-  Normalize(COB.NormalsP[i]);
-end;
+  COB.Head.Xmin:=0; COB.Head.Xmax:=0;
+  COB.Head.Ymin:=0; COB.Head.Ymax:=0;
+  COB.Head.Zmin:=0; COB.Head.Zmax:=0;
+  for i:=1 to COB.Head.PolyQty do begin //computing normal to every polygon
+    Normal2Poly(COB.Vertices[COB.Faces[i,1]+1],COB.Vertices[COB.Faces[i,2]+1],COB.Vertices[COB.Faces[i,3]+1],@COB.NormalsP[i]);
+    Normalize(COB.NormalsP[i]);
+  end;
 
 for i:=1 to COB.Head.PointQty do begin
   COB.Head.Xmax:=max(COB.Head.Xmax,COB.Vertices[i].X);
@@ -2321,24 +2324,28 @@ COB.Head.Z:=0;//Cob.Zmax+Cob.Zmin;
 SendDataToUI(uiCOB);
 end;
 
+
 procedure TForm1.CoBCopyClick(Sender: TObject);
 begin
-COBCopyItem:=LBCOBPoints.ItemIndex+1;
-if COBCopyItem>0 then COBPaste.Enabled:=True;
+  fCOBCopyItem := LBCOBPoints.ItemIndex+1;
+  COBPaste.Enabled := InRange(fCOBCopyItem, 1, MOX.Qty.Blink);
 end;
+
 
 procedure TForm1.COBPasteClick(Sender: TObject);
 begin
-if COBCopyItem<>EnsureRange(COBCopyItem,1,MOX.Qty.Blink) then begin
-COBPaste.Enabled:=False;
-Exit;
+  if fCOBCopyItem<>EnsureRange(fCOBCopyItem, 1, MOX.Qty.Blink) then
+  begin
+    COBPaste.Enabled:=False;
+    Exit;
+  end;
+  COB.Vertices[LBCOBPoints.ItemIndex+1].X:=COB.Vertices[fCOBCopyItem].X;
+  COB.Vertices[LBCOBPoints.ItemIndex+1].Y:=COB.Vertices[fCOBCopyItem].Y;
+  COB.Vertices[LBCOBPoints.ItemIndex+1].Z:=COB.Vertices[fCOBCopyItem].Z;
+  RebuildCOBBounds;
+  SendDataToUI(uiCOB);
 end;
-COB.Vertices[LBCOBPoints.ItemIndex+1].X:=COB.Vertices[COBCopyItem].X;
-COB.Vertices[LBCOBPoints.ItemIndex+1].Y:=COB.Vertices[COBCopyItem].Y;
-COB.Vertices[LBCOBPoints.ItemIndex+1].Z:=COB.Vertices[COBCopyItem].Z;
-RebuildCOBBounds;
-SendDataToUI(uiCOB);
-end;
+
 
 procedure TForm1.LBCOBPointsClick(Sender: TObject);
 var ID:Integer;
@@ -2350,6 +2357,7 @@ COBY.Value:=COB.Vertices[ID].Y;
 COBZ.Value:=COB.Vertices[ID].Z;
 COBRefresh:=False;
 end;
+
 
 procedure TForm1.COBXChange(Sender: TObject);
 var ID:Integer;
@@ -2363,22 +2371,29 @@ RebuildCOBBounds;
 SendDataToUI(uiCOB);
 end;
 
+
 procedure TForm1.MatCopyClick(Sender: TObject);
 begin
-if MatID=0 then Exit;
-ColorCopyID:=MatID;
-MatPaste.Enabled:=True;
+  if MatID=0 then Exit;
+  fColorCopyID := MatID;
+  MatPaste.Enabled:=True;
 end;
+
 
 procedure TForm1.MatPasteClick(Sender: TObject);
 var
   i:Integer;
 begin
-if ColorCopyID<>EnsureRange(ColorCopyID,1,MOX.Qty.Mat) then begin
-MatPaste.Enabled:=False; Exit; end;
-for i:=1 to MAX_COLORS do Material[MatID].Color[i]:=Material[ColorCopyID].Color[i];
-CBColorChange(nil);
+  if fColorCopyID <> EnsureRange(fColorCopyID, 1, MOX.Qty.Mat) then
+  begin
+    MatPaste.Enabled:=False;
+    Exit;
+  end;
+
+  for i:=1 to MAX_COLORS do Material[MatID].Color[i]:=Material[fColorCopyID].Color[i];
+  CBColorChange(nil);
 end;
+
 
 procedure TForm1.RGPivotClick(Sender: TObject);
 begin
