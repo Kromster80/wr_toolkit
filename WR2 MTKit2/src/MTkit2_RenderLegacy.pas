@@ -20,7 +20,7 @@ uses
 
 implementation
 uses
-  MTkit2_Unit1, MTkit2_Defaults, Windows, sysutils;
+  MTkit2_Unit1, MTkit2_MOX, MTkit2_Defaults, Windows, sysutils;
 
 procedure RenderOpenGL;
 var

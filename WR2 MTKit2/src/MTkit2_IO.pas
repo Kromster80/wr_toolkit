@@ -36,7 +36,7 @@ function  ScanVinyls(aPath: string): Boolean;
 
 implementation
 uses
-  MTkit2_Unit1;
+  MTkit2_Unit1, MTkit2_MOX, MTkit2_Vertex;
 
 function LoadOBJ(const aFilename: string; out Log:string):Boolean;
 var
