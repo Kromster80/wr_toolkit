@@ -403,6 +403,7 @@ type
     procedure SendDataToUI(aSection: TUIDataSection);
     procedure SetActivePage(aPage: TActivePage);
     procedure SetRenderObject(aSet: TRenderObjectSet);
+    procedure MOXBlinkerAdd(aIndex: Integer);
   end;
 
 const
@@ -1309,13 +1310,13 @@ begin
     m[7]:=Matrix[3,1]; m[8]:=Matrix[3,2]; m[9]:=Matrix[3,3];
   end;
 
-  Matrix2Angles(m,9,@ax,@ay,@az);
+  Matrix2Angles(m, 9, @ax, @ay, @az);
 
-  FSH.Value:=round(ax);
-  FSP.Value:=round(ay);
-  FSB.Value:=round(az);
+  FSH.Value := Round(ax);
+  FSP.Value := Round(ay);
+  FSB.Value := Round(az);
 
-  LightRefresh:=False;
+  LightRefresh := False;
 end;
 
 
@@ -1995,46 +1996,59 @@ end;
 
 procedure TForm1.BlinkAddClick(Sender: TObject);
 begin
-  if MOX.Qty.Blink>=MAX_BLINKERS then Exit;
-  inc(MOX.Qty.Blink);
+  MOXBlinkerAdd(LBBlinkers.ItemIndex+1);
 
-  if LBBlinkers.ItemIndex >= 0 then
+  SendDataToUI(uiLights);
+end;
+
+
+procedure TForm1.MOXBlinkerAdd(aIndex: Integer);
+begin
+  if MOX.Qty.Blink >= MAX_BLINKERS then Exit;
+
+  Inc(MOX.Qty.Blink);
+
+  if InRange(aIndex, 1, MOX.Qty.Blink) then
     // Duplicate existing
-    MOX.Blinkers[MOX.Qty.Blink] := MOX.Blinkers[LBBlinkers.ItemIndex+1]
+    MOX.Blinkers[MOX.Qty.Blink] := MOX.Blinkers[aIndex]
   else
   begin
     // Create new
-    MOX.Blinkers[MOX.Qty.Blink].BlinkerType:=0;
-    MOX.Blinkers[MOX.Qty.Blink].sMin:=0;
-    MOX.Blinkers[MOX.Qty.Blink].sMax:=1;
-    MOX.Blinkers[MOX.Qty.Blink].Freq:=0;
-    MOX.Blinkers[MOX.Qty.Blink].B:=255;
-    MOX.Blinkers[MOX.Qty.Blink].G:=64;
-    MOX.Blinkers[MOX.Qty.Blink].R:=0;
-    MOX.Blinkers[MOX.Qty.Blink].A:=255;
-    MOX.Blinkers[MOX.Qty.Blink].z1:=0;
-    MOX.Blinkers[MOX.Qty.Blink].Parent:=0;
-    FillChar(MOX.Blinkers[MOX.Qty.Blink].Matrix,SizeOf(MOX.Blinkers[MOX.Qty.Blink].Matrix),#0);
-    MOX.Blinkers[MOX.Qty.Blink].Matrix[1,1]:=1;
-    MOX.Blinkers[MOX.Qty.Blink].Matrix[2,2]:=1;
-    MOX.Blinkers[MOX.Qty.Blink].Matrix[3,3]:=1;
-    MOX.Blinkers[MOX.Qty.Blink].Matrix[4,4]:=1;
+    MOX.Blinkers[MOX.Qty.Blink].BlinkerType := 0;
+    MOX.Blinkers[MOX.Qty.Blink].sMin := 0;
+    MOX.Blinkers[MOX.Qty.Blink].sMax := 1;
+    MOX.Blinkers[MOX.Qty.Blink].Freq := 0;
+    MOX.Blinkers[MOX.Qty.Blink].B := 255;
+    MOX.Blinkers[MOX.Qty.Blink].G := 64;
+    MOX.Blinkers[MOX.Qty.Blink].R := 0;
+    MOX.Blinkers[MOX.Qty.Blink].A := 255;
+    MOX.Blinkers[MOX.Qty.Blink].z1 := 0;
+    MOX.Blinkers[MOX.Qty.Blink].Parent := 0;
+    FillChar(MOX.Blinkers[MOX.Qty.Blink].Matrix, SizeOf(MOX.Blinkers[MOX.Qty.Blink].Matrix), #0);
+    MOX.Blinkers[MOX.Qty.Blink].Matrix[1, 1] := 1;
+    MOX.Blinkers[MOX.Qty.Blink].Matrix[2, 2] := 1;
+    MOX.Blinkers[MOX.Qty.Blink].Matrix[3, 3] := 1;
+    MOX.Blinkers[MOX.Qty.Blink].Matrix[4, 4] := 1;
   end;
-  SendDataToUI(uiLights);
 end;
 
 
 procedure TForm1.BlinkRemoveClick(Sender: TObject);
 var
-  i:Integer;
+  I: Integer;
 begin
-  if LBBlinkers.ItemIndex=-1 then Exit;
-  for i:=LBBlinkers.ItemIndex+1 to MOX.Qty.Blink-1 do
-  MOX.Blinkers[i]:=MOX.Blinkers[i+1];
-  dec(MOX.Qty.Blink);
+  if LBBlinkers.ItemIndex = -1 then Exit;
+
+  for I := LBBlinkers.ItemIndex + 1 to MOX.Qty.Blink - 1 do
+    MOX.Blinkers[I] := MOX.Blinkers[I + 1];
+  Dec(MOX.Qty.Blink);
+
   SendDataToUI(uiLights);
-  if LBBlinkers.ItemIndex=-1 then LBBlinkers.ItemIndex:=LBBlinkers.Count-1;
-  if LBBlinkers.ItemIndex<>-1 then LBBlinkersClick(nil);
+
+  if LBBlinkers.ItemIndex = -1 then
+    LBBlinkers.ItemIndex := LBBlinkers.Count - 1;
+
+  LBBlinkersClick(nil);
 end;
 
 
