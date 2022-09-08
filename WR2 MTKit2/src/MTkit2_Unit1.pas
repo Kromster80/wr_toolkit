@@ -1275,10 +1275,10 @@ var
   ax,ay,az: Integer;
   m: array [1..9] of Single;
 begin
-  LitID:=LBBlinkers.ItemIndex+1;
-  if LitID=0 then Exit;
+  LitID := LBBlinkers.ItemIndex+1;
+  if LitID = 0 then Exit;
 
-  LightRefresh:=True;
+  LightRefresh := True;
   blinkerType := MOX.Blinkers[LitID].BlinkerType;
   case blinkerType of //Fit 0..24 IDs in RG range of 0..12
     16: blinkerType := 10;
@@ -2044,27 +2044,18 @@ end;
 
 procedure TForm1.BlinkPasteClick(Sender: TObject);
 var
-  ID: Integer;
+  idx: Integer;
 begin
-  ID := LBBlinkers.ItemIndex+1;
-  if ID = 0 then Exit;
+  idx := LBBlinkers.ItemIndex+1;
+  if idx = 0 then Exit;
 
-  if fLightCopyID <> EnsureRange(fLightCopyID, 1, MOX.Qty.Blink) then
+  if not InRange(fLightCopyID, 1, MOX.Qty.Blink) then
   begin
     BlinkerPaste.Enabled := False;
     Exit;
   end;
 
-  MOX.Blinkers[ID].BlinkerType := MOX.Blinkers[fLightCopyID].BlinkerType;
-  MOX.Blinkers[ID].sMin:=MOX.Blinkers[fLightCopyID].sMin;
-  MOX.Blinkers[ID].sMax:=MOX.Blinkers[fLightCopyID].sMax;
-  MOX.Blinkers[ID].Freq:=MOX.Blinkers[fLightCopyID].Freq;
-  MOX.Blinkers[ID].B:=MOX.Blinkers[fLightCopyID].B;
-  MOX.Blinkers[ID].G:=MOX.Blinkers[fLightCopyID].G;
-  MOX.Blinkers[ID].R:=MOX.Blinkers[fLightCopyID].R;
-  MOX.Blinkers[ID].A:=MOX.Blinkers[fLightCopyID].A;
-  MOX.Blinkers[ID].z1:=MOX.Blinkers[fLightCopyID].z1;
-  MOX.Blinkers[ID].Parent:=MOX.Blinkers[fLightCopyID].Parent;
+  MOX.Blinkers[idx] := MOX.Blinkers[fLightCopyID];
 
   SendDataToUI(uiLights);
   LBBlinkersClick(nil);
