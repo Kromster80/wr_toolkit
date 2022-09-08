@@ -39,15 +39,15 @@ type
     CBMatClass3: TComboBox;
     Memo1: TMemo;
     LBMaterials: TListBox;
-    LBBlinkers: TListBox;
-    RGBlinkType: TRadioGroup;
-    FS1: TFloatSpinEdit;
-    FS2: TFloatSpinEdit;
-    FS3: TFloatSpinEdit;
-    S2: TSpinEdit;
-    FSX: TFloatSpinEdit;
-    FSY: TFloatSpinEdit;
-    FSZ: TFloatSpinEdit;
+    lbBlinkers: TListBox;
+    rgBlinkerType: TRadioGroup;
+    fsBlinkerSizeMin: TFloatSpinEdit;
+    fsBlinkerSizeMax: TFloatSpinEdit;
+    fsBlinkerFreq: TFloatSpinEdit;
+    seBlinkerParent: TSpinEdit;
+    fsBlinkerX: TFloatSpinEdit;
+    fsBlinkerY: TFloatSpinEdit;
+    fsBlinkerZ: TFloatSpinEdit;
     MatName: TEdit;
     SaveMOX1: TMenuItem;
     Save1: TSaveDialog;
@@ -58,26 +58,26 @@ type
     Label41: TLabel;
     TexBrowse: TButton;
     CBShowMat: TCheckBox;
-    CBShowLight: TCheckBox;
+    cbTargetLight: TCheckBox;
     CB1: TCheckBox; CB2: TCheckBox; CB3: TCheckBox; CB4: TCheckBox;
     Label44: TLabel;
     Label45: TLabel;
     Bevel9: TBevel;
     Bevel10: TBevel;
-    FSH: TFloatSpinEdit;
-    FSP: TFloatSpinEdit;
-    FSB: TFloatSpinEdit;
+    fsBlinkerH: TFloatSpinEdit;
+    fsBlinkerP: TFloatSpinEdit;
+    fsBlinkerB: TFloatSpinEdit;
     Label46: TLabel;
     Label47: TLabel;
     Label48: TLabel;
     Bevel11: TBevel;
     Bevel12: TBevel;
-    AddBlink: TButton;
-    RemBlink: TButton;
-    LoadBlink: TButton;
-    SaveBlink: TButton;
-    BlinkerCopy: TSpeedButton;
-    BlinkerPaste: TSpeedButton;
+    btnBlinkerAdd: TButton;
+    btnBlinkerRem: TButton;
+    btnBlinkersLoad: TButton;
+    btnBlinkersSave: TButton;
+    btnBlinkerCopy: TSpeedButton;
+    btnBlinkerPaste: TSpeedButton;
     Shape2: TShape;
     LoadCOB1: TMenuItem;
     SaveCOB1: TMenuItem;
@@ -170,7 +170,7 @@ type
     Extra1: TMenuItem;
     Label74: TLabel;
     Label76: TLabel;
-    RGActBlink: TRadioGroup;
+    rgBlinkerPreview: TRadioGroup;
     LoadCPO1: TMenuItem;
     Label23: TLabel;
     TabSheet6: TTabSheet;
@@ -276,8 +276,6 @@ type
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure RenderFrame(Sender:TObject);
-    procedure LoadTextures;
     function TryToLoadTexture(const aFilename: string):cardinal;
     procedure CompileLoaded(aTypename: string);
     procedure RenderResize(Sender: TObject);
@@ -285,7 +283,7 @@ type
     procedure Panel1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure Panel1MouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
     procedure Panel1MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure LBBlinkersClick(Sender: TObject);
+    procedure lbBlinkersClick(Sender: TObject);
     procedure BlinkChange(Sender: TObject);
     procedure CBColorChange(Sender: TObject);
     procedure LBMaterialsClick(Sender: TObject);
@@ -309,8 +307,8 @@ type
     procedure BlinkRemoveClick(Sender: TObject);
     procedure BlinkCopyClick(Sender: TObject);
     procedure BlinkPasteClick(Sender: TObject);
-    procedure SaveBlinkClick(Sender: TObject);
-    procedure LoadBlinkClick(Sender: TObject);
+    procedure btnBlinkersSaveClick(Sender: TObject);
+    procedure btnBlinkersLoadClick(Sender: TObject);
     procedure About1Click(Sender: TObject);
     procedure LoadCOBClick(Sender: TObject);
     procedure SaveCOB1Click(Sender: TObject);
@@ -378,7 +376,7 @@ type
     procedure KnowScale(Sender: TObject);
     procedure B_CPOImportClick(Sender: TObject);
     procedure B_CPOExportClick(Sender: TObject);
-    procedure LBBlinkersDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
+    procedure lbBlinkersDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
     procedure Button2Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
@@ -392,6 +390,7 @@ type
     fOpenedFolder: string;
     fRenderMode: TRenderMode;
     fCameraAction: TCameraAction;
+    fOriginCursorX, fOriginCursorY: Integer;
 
     fLightCopyID: Integer;
     fColorCopyID: Integer;
@@ -400,6 +399,8 @@ type
     procedure LoadSettingsFromIni(const aFilename: string);
     procedure SaveSettingsToIni(const aFilename: string);
     procedure OnIdle(Sender: TObject; var Done: Boolean);
+    procedure Render;
+    procedure LoadTextures;
     procedure SendDataToUI(aSection: TUIDataSection);
     procedure SetActivePage(aPage: TActivePage);
     procedure SetRenderObject(aSet: TRenderObjectSet);
@@ -438,7 +439,6 @@ var
   XRot:Single=25;
   YRot:Single=20;
   zoom: Single=0.3125;
-  MouseX,MouseY:Integer;
 
   RenderOpts:record
     ShowPart:Boolean;
@@ -707,7 +707,7 @@ begin
     fFrameCount := 0;
   end; // FPS calculation complete
 
-  RenderFrame(nil);
+  Render;
 end;
 
 
@@ -1012,7 +1012,7 @@ begin
   end;
 end;
 
-procedure TForm1.RenderFrame(Sender:TObject);
+procedure TForm1.Render;
 begin
   glClearColor(BGColor[1]/255, BGColor[2]/255, BGColor[3]/255, 0); 	   // Grey Background
   glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT);    // Clear The Screen And The Depth Buffer
@@ -1039,17 +1039,17 @@ begin
     RenderDirt('', TBDirt.Position);
   end else
   begin
-    glTranslatef(0,0,-6);
-    glTranslatef(xMov,yMov,0);
+    glTranslatef(0, 0, -6);
+    glTranslatef(xMov, yMov, 0);
     glRotatef(yRot, 1, 0, 0);
     glRotatef(xRot, 0, 1, 0);
-    glkScale(sqr(zoom));
+    glkScale(Sqr(zoom));
 
-    if (RenderOpts.ShowPart)and(ActivePage=apParts)and(SelectedTreeNode<>0) then
+    if RenderOpts.ShowPart and (ActivePage=apParts) and (SelectedTreeNode<>0) then
       glTranslatef(-MOX.Parts[SelectedTreeNode].Matrix[4,1]-PartModify[SelectedTreeNode].Move[1],
                    -MOX.Parts[SelectedTreeNode].Matrix[4,2]-PartModify[SelectedTreeNode].Move[2],
                    -MOX.Parts[SelectedTreeNode].Matrix[4,3]-PartModify[SelectedTreeNode].Move[3]);
-    if (CBShowLight.Checked)and(ActivePage=apLights)and(LBBlinkers.ItemIndex<>-1) then
+    if cbTargetLight.Checked and (ActivePage=apLights) and (LBBlinkers.ItemIndex<>-1) then
       glTranslatef(-MOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix[4,1],
                    -MOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix[4,2],
                    -MOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix[4,3]);
@@ -1083,7 +1083,7 @@ begin
       end;
       glDisable(GL_DEPTH_TEST);
       if (ActivePage = apLights) or RenderOpts.LightVec then
-        RenderLights(LBBlinkers.ItemIndex+1, TBlinkerPreviewMode(RGActBlink.ItemIndex), ActivePage = apLights, Lightvectors1.Checked);
+        RenderLights(LBBlinkers.ItemIndex+1, TBlinkerPreviewMode(rgBlinkerPreview.ItemIndex), ActivePage = apLights, Lightvectors1.Checked);
       glEnable(GL_DEPTH_TEST);
     end;
 
@@ -1165,7 +1165,8 @@ begin
   if (Sender = ImageM) or ((Sender = RenderPanel) and (Button = mbRight)) then fCameraAction := caMove;
   if (Sender = ImageZ) then fCameraAction := caZoom;
 
-  MouseX:=X; MouseY:=Y;
+  fOriginCursorX := X;
+  fOriginCursorY := Y;
 
   //ShowCursor(False);
 end;
@@ -1173,40 +1174,32 @@ end;
 
 procedure TForm1.Panel1MouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
 var
-  dx,dy:Integer;
+  dx, dy: Integer;
 begin
-  dx:=0;
-  dy:=0;
-  if fCameraAction=caNone then Exit;
-  if fCameraAction=caRotate then
-  begin
-    xRot:=xRot-(X-MouseX);
-    yRot:=yRot+(Y-MouseY);
-    dx:=Form1.ClientOrigin.X+ImageR.Left+MouseX;
-    dy:=Form1.ClientOrigin.Y+ImageR.Top+MouseY;
+  case fCameraAction of
+    caRotate: begin
+                xRot := xRot - (X - fOriginCursorX);
+                yRot := yRot + (Y - fOriginCursorY);
+              end;
+    caZoom:   begin
+                Zoom := EnsureRange(zoom + (X - fOriginCursorX) / 150, 0.06125, 2);
+              end;
+    caMove:   begin
+                xMov := xMov - (X - fOriginCursorX) / 100;
+                yMov := yMov - (Y - fOriginCursorY) / 100;
+              end;
+  else
+    Exit;
   end;
-  if fCameraAction=caZoom then
-  begin
-    Zoom:=EnsureRange(Zoom+(X-MouseX)/150,0.06125,2);
-    dx:=Form1.ClientOrigin.X+ImageZ.Left+MouseX;
-    dy:=Form1.ClientOrigin.Y+ImageZ.Top+MouseY;
-  end;
-  if fCameraAction=caMove then
-  begin
-    xMov := xMov-(X-MouseX)/100;
-    yMov := yMov-(Y-MouseY)/100;
-    dx := Form1.ClientOrigin.X+ImageM.Left+MouseX;
-    dy := Form1.ClientOrigin.Y+ImageM.Top+MouseY;
-  end;
-  if (Sender=RenderPanel) then
-  begin
-    dx := Form1.ClientOrigin.X+RenderPanel.Left+MouseX;
-    dy := Form1.ClientOrigin.Y+RenderPanel.Top+MouseY;
-  end;
-  //return cursor to start location = "stick it"
-  SetCursorPos(dx,dy);
-  //MouseX:=X; MouseY:=Y;
-  RenderFrame(nil);
+
+  dx := ClientOrigin.X + TControl(Sender).Left + fOriginCursorX;
+  dy := ClientOrigin.Y + TControl(Sender).Top + fOriginCursorY;
+
+  // Stick cursor to start location
+  SetCursorPos(dx, dy);
+
+  //fPrevCursorX:=X; fPrevCursorY:=Y;
+  Render;
 end;
 
 
@@ -1273,7 +1266,7 @@ begin
 end;
 
 
-procedure TForm1.LBBlinkersClick(Sender: TObject);
+procedure TForm1.lbBlinkersClick(Sender: TObject);
 var
   blinkerType: Integer;
   ax,ay,az: Integer;
@@ -1291,16 +1284,16 @@ begin
     33: blinkerType := 13;
   end;
 
-  RGBlinkType.ItemIndex := blinkerType;
+  rgBlinkerType.ItemIndex := blinkerType;
 
-  FS1.Value:=MOX.Blinkers[LitID].sMin;
-  FS2.Value:=MOX.Blinkers[LitID].sMax;
-  FS3.Value:=MOX.Blinkers[LitID].Freq;
+  fsBlinkerSizeMin.Value := MOX.Blinkers[LitID].sMin;
+  fsBlinkerSizeMax.Value := MOX.Blinkers[LitID].sMax;
+  fsBlinkerFreq.Value := MOX.Blinkers[LitID].Freq;
   //S1.Value:=MOX.Blinkers[LBBlinkers.ItemIndex+1].z1;
-  S2.Value:=MOX.Blinkers[LitID].Parent;
-  FSX.Value:=MOX.Blinkers[LitID].Matrix[4,1]/10;
-  FSY.Value:=MOX.Blinkers[LitID].Matrix[4,2]/10;
-  FSZ.Value:=MOX.Blinkers[LitID].Matrix[4,3]/10;
+  seBlinkerParent.Value:=MOX.Blinkers[LitID].Parent;
+  fsBlinkerX.Value:=MOX.Blinkers[LitID].Matrix[4,1]/10;
+  fsBlinkerY.Value:=MOX.Blinkers[LitID].Matrix[4,2]/10;
+  fsBlinkerZ.Value:=MOX.Blinkers[LitID].Matrix[4,3]/10;
   ShapeL.Brush.Color:=MOX.Blinkers[LitID].R+MOX.Blinkers[LitID].G*256+MOX.Blinkers[LitID].B*65536;
 
   with MOX.Blinkers[LitID] do
@@ -1312,9 +1305,9 @@ begin
 
   Matrix2Angles(m, 9, @ax, @ay, @az);
 
-  FSH.Value := Round(ax);
-  FSP.Value := Round(ay);
-  FSB.Value := Round(az);
+  fsBlinkerH.Value := Round(ax);
+  fsBlinkerP.Value := Round(ay);
+  fsBlinkerB.Value := Round(az);
 
   LightRefresh := False;
 end;
@@ -1325,19 +1318,19 @@ begin
   if LitID = 0 then Exit;
   if LightRefresh then Exit;
 
-  case RGBlinkType.ItemIndex of
-    0..9: MOX.Blinkers[LitID].BlinkerType := RGBlinkType.ItemIndex;
+  case rgBlinkerType.ItemIndex of
+    0..9: MOX.Blinkers[LitID].BlinkerType := rgBlinkerType.ItemIndex;
     10:   MOX.Blinkers[LitID].BlinkerType := 16;
     11:   MOX.Blinkers[LitID].BlinkerType := 20;
     12:   MOX.Blinkers[LitID].BlinkerType := 24;
     13:   MOX.Blinkers[LitID].BlinkerType := 33;
   end;
 
-  MOX.Blinkers[LitID].sMin:=FS1.Value;
-  MOX.Blinkers[LitID].sMax:=FS2.Value;
-  MOX.Blinkers[LitID].Freq:=FS3.Value;
-  MOX.Blinkers[LitID].z1:=0;//S1.Value;
-  MOX.Blinkers[LitID].Parent:=S2.Value;
+  MOX.Blinkers[LitID].sMin := fsBlinkerSizeMin.Value;
+  MOX.Blinkers[LitID].sMax := fsBlinkerSizeMax.Value;
+  MOX.Blinkers[LitID].Freq := fsBlinkerFreq.Value;
+  MOX.Blinkers[LitID].Unused := 0;
+  MOX.Blinkers[LitID].Parent := seBlinkerParent.Value;
   SendDataToUI(uiLights);
 end;
 
@@ -1732,8 +1725,8 @@ begin
       end;
     end;
   SendDataToUI(uiLights);
-  LoadBlink.Enabled:=True;
-  SaveBlink.Enabled:=True;
+  btnBlinkersLoad.Enabled:=True;
+  btnBlinkersSave.Enabled:=True;
 
   for i:=1 to Imp.PolyCount do
     for h:=1 to 3 do begin //Remapping UVs to DUVs
@@ -1987,10 +1980,10 @@ procedure TForm1.BlinkPositionChange(Sender: TObject);
 begin
   if LitID=0 then Exit;
   if LightRefresh then Exit;
-  MOX.Blinkers[LitID].Matrix[4,1]:=FSX.Value*10;
-  MOX.Blinkers[LitID].Matrix[4,2]:=FSY.Value*10;
-  MOX.Blinkers[LitID].Matrix[4,3]:=FSZ.Value*10;
-  Angles2Matrix(FSH.Value,FSP.Value,FSB.Value, @MOX.Blinkers[LitID].Matrix, 16);
+  MOX.Blinkers[LitID].Matrix[4,1] := fsBlinkerX.Value*10;
+  MOX.Blinkers[LitID].Matrix[4,2] := fsBlinkerY.Value*10;
+  MOX.Blinkers[LitID].Matrix[4,3] := fsBlinkerZ.Value*10;
+  Angles2Matrix(fsBlinkerH.Value, fsBlinkerP.Value, fsBlinkerB.Value, @MOX.Blinkers[LitID].Matrix, 16);
 end;
 
 
@@ -2022,7 +2015,7 @@ begin
     MOX.Blinkers[MOX.Qty.Blink].G := 64;
     MOX.Blinkers[MOX.Qty.Blink].R := 0;
     MOX.Blinkers[MOX.Qty.Blink].A := 255;
-    MOX.Blinkers[MOX.Qty.Blink].z1 := 0;
+    MOX.Blinkers[MOX.Qty.Blink].Unused := 0;
     MOX.Blinkers[MOX.Qty.Blink].Parent := 0;
     FillChar(MOX.Blinkers[MOX.Qty.Blink].Matrix, SizeOf(MOX.Blinkers[MOX.Qty.Blink].Matrix), #0);
     MOX.Blinkers[MOX.Qty.Blink].Matrix[1, 1] := 1;
@@ -2055,7 +2048,7 @@ end;
 procedure TForm1.BlinkCopyClick(Sender: TObject);
 begin
   fLightCopyID := LBBlinkers.ItemIndex + 1;
-  BlinkerPaste.Enabled := InRange(fLightCopyID, 1, MOX.Qty.Blink);
+  btnBlinkerPaste.Enabled := InRange(fLightCopyID, 1, MOX.Qty.Blink);
 end;
 
 
@@ -2068,7 +2061,7 @@ begin
 
   if not InRange(fLightCopyID, 1, MOX.Qty.Blink) then
   begin
-    BlinkerPaste.Enabled := False;
+    btnBlinkerPaste.Enabled := False;
     Exit;
   end;
 
@@ -2079,18 +2072,18 @@ begin
 end;
 
 
-procedure TForm1.LoadBlinkClick(Sender: TObject);
+procedure TForm1.btnBlinkersLoadClick(Sender: TObject);
 begin
   if not RunOpenDialog(Open1, '', '', 'MTKit2 Lights Setup Files (*.lsf)|*.lsf') then
     Exit;
 
   LoadLights(Open1.FileName);
   SendDataToUI(uiLights);
-  BlinkerPaste.Enabled := False;
+  btnBlinkerPaste.Enabled := False;
 end;
 
 
-procedure TForm1.SaveBlinkClick(Sender: TObject);
+procedure TForm1.btnBlinkersSaveClick(Sender: TObject);
 begin
   if not RunSaveDialog(Save1, fOpenedFileMask + '.lsf', '', 'MTKit2 Lights Setup Files (*.lsf)|*.lsf', 'lsf') then Exit;
   SaveLights(Save1.FileName);
@@ -3064,7 +3057,7 @@ begin
   LoadLights(fOpenedFileMask+'.lsf');
 
   SendDataToUI(uiLights);
-  BlinkerPaste.Enabled:=False;
+  btnBlinkerPaste.Enabled:=False;
 end;
 
 
@@ -3113,12 +3106,12 @@ begin
   if aClearup in [cuMOX, cuALL] then
   begin
     FillChar(MOX,SizeOf(MOX),#0);
-    BlinkerCopy.Enabled:=False;
-    BlinkerPaste.Enabled:=False;
-    LoadBlink.Enabled:=False;
-    SaveBlink.Enabled:=False;
-    AddBlink.Enabled:=False;
-    RemBlink.Enabled:=False;
+    btnBlinkerCopy.Enabled:=False;
+    btnBlinkerPaste.Enabled:=False;
+    btnBlinkersLoad.Enabled:=False;
+    btnBlinkersSave.Enabled:=False;
+    btnBlinkerAdd.Enabled:=False;
+    btnBlinkerRem.Enabled:=False;
     PBFLoad.Enabled:=False;
     PBFSave.Enabled:=False;
     SB_Light.Down:=False;
@@ -3183,12 +3176,12 @@ begin
     SendDataToUI(uiLights);
     SendDataToUI(uiMOX);
 
-    BlinkerCopy.Enabled:=True;
-    BlinkerPaste.Enabled:=False;
-    AddBlink.Enabled:=True;
-    RemBlink.Enabled:=True;
-    LoadBlink.Enabled:=True;
-    SaveBlink.Enabled:=True;
+    btnBlinkerCopy.Enabled:=True;
+    btnBlinkerPaste.Enabled:=False;
+    btnBlinkerAdd.Enabled:=True;
+    btnBlinkerRem.Enabled:=True;
+    btnBlinkersLoad.Enabled:=True;
+    btnBlinkersSave.Enabled:=True;
     PBFLoad.Enabled:=True;
     PBFSave.Enabled:=True;
     SB_Light.Enabled:=True;
@@ -3196,7 +3189,7 @@ begin
     SB_UVMap.Enabled:=True;
   end;
 
-  if aClearup=cuMTL then
+  if aClearup = cuMTL then
   begin
     SaveMTL1.Enabled:=True;
     MatCopy.Enabled:=True;
@@ -3354,7 +3347,7 @@ begin
 end;
 
 
-procedure TForm1.LBBlinkersDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
+procedure TForm1.lbBlinkersDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
 var
   MyRect:TRect; MyColor:TColor; ID:Integer; ColorID:Integer;
 begin

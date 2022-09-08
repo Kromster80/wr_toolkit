@@ -27,7 +27,7 @@ type
     BlinkerType: Integer;     // 4b Type of object
     sMin, sMax, Freq: Single; // Min, Max
     B,G,R,A: Byte;            // 20
-    z1, Parent: SmallInt;     // 24
+    Unused, Parent: SmallInt; // 24
     Matrix: TMatrix;          // 88
   end;
 

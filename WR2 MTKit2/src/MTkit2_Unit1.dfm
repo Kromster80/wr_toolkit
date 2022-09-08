@@ -199,7 +199,6 @@ object Form1: TForm1
     Caption = 'RenderPanel'
     Color = clBlack
     TabOrder = 0
-    OnClick = RenderFrame
     OnMouseDown = Panel1MouseDown
     OnMouseMove = Panel1MouseMove
     OnMouseUp = Panel1MouseUp
@@ -708,7 +707,7 @@ object Form1: TForm1
         ItemHeight = 13
         TabOrder = 0
         OnClick = LBMaterialsClick
-        OnDrawItem = LBBlinkersDrawItem
+        OnDrawItem = lbBlinkersDrawItem
       end
       object MatName: TEdit
         Left = 134
@@ -1479,7 +1478,7 @@ object Form1: TForm1
         Width = 97
         Height = 2
       end
-      object BlinkerCopy: TSpeedButton
+      object btnBlinkerCopy: TSpeedButton
         Left = 133
         Top = 356
         Width = 25
@@ -1527,7 +1526,7 @@ object Form1: TForm1
           D4C8D0D4C8D0D4C8D0D4}
         OnClick = BlinkCopyClick
       end
-      object BlinkerPaste: TSpeedButton
+      object btnBlinkerPaste: TSpeedButton
         Left = 157
         Top = 356
         Width = 25
@@ -1603,7 +1602,7 @@ object Form1: TForm1
         Width = 97
         Height = 2
       end
-      object LBBlinkers: TListBox
+      object lbBlinkers: TListBox
         Left = 0
         Top = 0
         Width = 129
@@ -1618,10 +1617,10 @@ object Form1: TForm1
         ItemHeight = 13
         ParentFont = False
         TabOrder = 0
-        OnClick = LBBlinkersClick
-        OnDrawItem = LBBlinkersDrawItem
+        OnClick = lbBlinkersClick
+        OnDrawItem = lbBlinkersDrawItem
       end
-      object RGBlinkType: TRadioGroup
+      object rgBlinkerType: TRadioGroup
         Left = 0
         Top = 302
         Width = 129
@@ -1646,7 +1645,7 @@ object Form1: TForm1
         TabOrder = 1
         OnClick = BlinkChange
       end
-      object FS1: TFloatSpinEdit
+      object fsBlinkerSizeMin: TFloatSpinEdit
         Left = 134
         Top = 420
         Width = 49
@@ -1656,7 +1655,7 @@ object Form1: TForm1
         TabOrder = 7
         OnChange = BlinkChange
       end
-      object FS2: TFloatSpinEdit
+      object fsBlinkerSizeMax: TFloatSpinEdit
         Left = 134
         Top = 444
         Width = 49
@@ -1666,7 +1665,7 @@ object Form1: TForm1
         TabOrder = 8
         OnChange = BlinkChange
       end
-      object FS3: TFloatSpinEdit
+      object fsBlinkerFreq: TFloatSpinEdit
         Left = 134
         Top = 468
         Width = 49
@@ -1676,7 +1675,7 @@ object Form1: TForm1
         TabOrder = 9
         OnChange = BlinkChange
       end
-      object S2: TSpinEdit
+      object seBlinkerParent: TSpinEdit
         Left = 134
         Top = 492
         Width = 39
@@ -1687,7 +1686,7 @@ object Form1: TForm1
         Value = 0
         OnChange = BlinkChange
       end
-      object FSX: TFloatSpinEdit
+      object fsBlinkerX: TFloatSpinEdit
         Left = 134
         Top = 155
         Width = 57
@@ -1697,7 +1696,7 @@ object Form1: TForm1
         TabOrder = 11
         OnChange = BlinkPositionChange
       end
-      object FSY: TFloatSpinEdit
+      object fsBlinkerY: TFloatSpinEdit
         Left = 134
         Top = 179
         Width = 57
@@ -1707,7 +1706,7 @@ object Form1: TForm1
         TabOrder = 12
         OnChange = BlinkPositionChange
       end
-      object FSZ: TFloatSpinEdit
+      object fsBlinkerZ: TFloatSpinEdit
         Left = 134
         Top = 203
         Width = 57
@@ -1717,15 +1716,15 @@ object Form1: TForm1
         TabOrder = 13
         OnChange = BlinkPositionChange
       end
-      object CBShowLight: TCheckBox
+      object cbTargetLight: TCheckBox
         Left = 134
         Top = 110
         Width = 91
         Height = 17
-        Caption = 'Aim light'
+        Caption = 'Target light'
         TabOrder = 4
       end
-      object FSH: TFloatSpinEdit
+      object fsBlinkerH: TFloatSpinEdit
         Left = 134
         Top = 256
         Width = 57
@@ -1735,7 +1734,7 @@ object Form1: TForm1
         TabOrder = 14
         OnChange = BlinkPositionChange
       end
-      object FSP: TFloatSpinEdit
+      object fsBlinkerP: TFloatSpinEdit
         Left = 134
         Top = 280
         Width = 57
@@ -1745,7 +1744,7 @@ object Form1: TForm1
         TabOrder = 15
         OnChange = BlinkPositionChange
       end
-      object FSB: TFloatSpinEdit
+      object fsBlinkerB: TFloatSpinEdit
         Left = 134
         Top = 304
         Width = 57
@@ -1755,7 +1754,7 @@ object Form1: TForm1
         TabOrder = 16
         OnChange = BlinkPositionChange
       end
-      object AddBlink: TButton
+      object btnBlinkerAdd: TButton
         Left = 134
         Top = 0
         Width = 25
@@ -1770,7 +1769,7 @@ object Form1: TForm1
         TabOrder = 5
         OnClick = BlinkAddClick
       end
-      object LoadBlink: TButton
+      object btnBlinkersLoad: TButton
         Left = 0
         Top = 523
         Width = 65
@@ -1785,9 +1784,9 @@ object Form1: TForm1
         Font.Style = []
         ParentFont = False
         TabOrder = 2
-        OnClick = LoadBlinkClick
+        OnClick = btnBlinkersLoadClick
       end
-      object SaveBlink: TButton
+      object btnBlinkersSave: TButton
         Left = 64
         Top = 523
         Width = 65
@@ -1802,9 +1801,9 @@ object Form1: TForm1
         Font.Style = []
         ParentFont = False
         TabOrder = 3
-        OnClick = SaveBlinkClick
+        OnClick = btnBlinkersSaveClick
       end
-      object RemBlink: TButton
+      object btnBlinkerRem: TButton
         Left = 158
         Top = 0
         Width = 25
@@ -1819,7 +1818,7 @@ object Form1: TForm1
         TabOrder = 6
         OnClick = BlinkRemoveClick
       end
-      object RGActBlink: TRadioGroup
+      object rgBlinkerPreview: TRadioGroup
         Left = 136
         Top = 28
         Width = 97
@@ -2636,7 +2635,7 @@ object Form1: TForm1
         OnMouseUp = ShapeAMouseUp
       end
       object Label7: TLabel
-        Left = 68
+        Left = 76
         Top = 15
         Width = 84
         Height = 13
@@ -2665,7 +2664,7 @@ object Form1: TForm1
         OnMouseUp = ShapeAMouseUp
       end
       object Label15: TLabel
-        Left = 68
+        Left = 76
         Top = 35
         Width = 74
         Height = 13
@@ -2678,7 +2677,7 @@ object Form1: TForm1
         Height = 19
         BevelInner = bvRaised
         BevelOuter = bvLowered
-        Caption = 'Colors'
+        Caption = 'Info'
         TabOrder = 10
       end
       object Panel7: TPanel
