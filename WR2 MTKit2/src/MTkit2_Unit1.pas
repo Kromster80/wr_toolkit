@@ -384,6 +384,9 @@ type
   private
     h_DC: HDC;
     h_RC: HGLRC;
+    fOldTimeFPS: Cardinal;
+    fOldFrameTimes: Cardinal;
+    fFrameCount: Cardinal;
 
     fOpenedFileMask: string;
     fOpenedFolder: string;
@@ -413,10 +416,10 @@ const
 
 var
   Form1: TForm1;
-  s,s2,chname: AnsiString;            //Strings
+  s,s2,chname: AnsiString;
 
   FPSLag: Word = 33;
-  OldTimeFPS,OldTimeRC,OldTimeLWO,OldFrameTimes,FrameCount:cardinal;
+  OldTimeLWO: Cardinal;
   UseShaders: Boolean;
   EnvTexture,SpecTexture,Spec2Texture:glUint;
   DirtTex,ScratchTex:glUint;
@@ -683,8 +686,8 @@ begin
   if fCameraAction <> caNone then Exit;
 
   Done := False;
-  frameTime := GetTickCount - OldTimeFPS;
-  OldTimeFPS := GetTickCount;
+  frameTime := GetTickCount - fOldTimeFPS;
+  fOldTimeFPS := GetTickCount;
   if (FPSLag <> 1) and (frameTime < FPSLag) then
   begin
     Sleep(FPSLag - frameTime);
@@ -693,14 +696,14 @@ begin
 
   if frameTime > 1000 then
     frameTime := 1000;
-  OldFrameTimes := OldFrameTimes + frameTime;
-  Inc(FrameCount);
-  if OldFrameTimes >= FPS_INTERVAL then
+  fOldFrameTimes := fOldFrameTimes + frameTime;
+  Inc(fFrameCount);
+  if fOldFrameTimes >= FPS_INTERVAL then
   begin
     StatusBar1.Panels[1].Text :=
-      FloatToStr(Round((1000 / (OldFrameTimes / FrameCount)) * 10) / 10) + ' fps (' + IntToStr(1000 div FPSLag) + ')';
-    OldFrameTimes := 0;
-    FrameCount := 0;
+      FloatToStr(Round((1000 / (fOldFrameTimes / fFrameCount)) * 10) / 10) + ' fps (' + IntToStr(1000 div FPSLag) + ')';
+    fOldFrameTimes := 0;
+    fFrameCount := 0;
   end; // FPS calculation complete
 
   RenderFrame(nil);
