@@ -98,13 +98,13 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="MTkit2_Unit1.pas">
+        <DCCReference Include="src\MTkit2_Unit1.pas">
             <Form>Form1</Form>
         </DCCReference>
-        <DCCReference Include="MTkit2_Defaults.pas"/>
-        <DCCReference Include="MTkit2_IO.pas"/>
-        <DCCReference Include="MTkit2_Render.pas"/>
-        <DCCReference Include="MTkit2_RenderLegacy.pas"/>
+        <DCCReference Include="src\MTkit2_Defaults.pas"/>
+        <DCCReference Include="src\MTkit2_IO.pas"/>
+        <DCCReference Include="src\MTkit2_Render.pas"/>
+        <DCCReference Include="src\MTkit2_RenderLegacy.pas"/>
         <DCCReference Include="..\_Common_\KromUtils.pas"/>
         <DCCReference Include="..\_Common_\ColorPicker.pas">
             <Form>Form2</Form>
@@ -131,7 +131,7 @@
                 </Source>
                 <Language>
                     <Language Name="ProjectLang">$00000419</Language>
-                    <Language Name="RootDir">..\wr_toolkit.git\WR2 MTKit2\</Language>
+                    <Language Name="RootDir">C:\Users\Krom\Desktop\Delphi\wr_toolkit.git\WR2 MTKit2\</Language>
                 </Language>
                 <VersionInfo>
                     <VersionInfo Name="IncludeVerInfo">False</VersionInfo>
