@@ -3,12 +3,15 @@ interface
 uses
   Buttons, Classes, ComCtrls, Controls, Dialogs, ExtCtrls, FileCtrl, Forms,
   Graphics, INIFiles, Math, Menus, ShellCtrls, Spin, StdCtrls, SysUtils, Windows,
+  Messages,
 
   dglOpenGL, FloatSpinEdit, KromOGLUtils, KromUtils, TGATexture, PTXTexture,
 
   MTkit2_Defaults, MTkit2_Render, MTkit2_RenderLegacy, MTkit2_IO, MTkit2_MOX, MTkit2_Vertex;
 
 type
+  TInputMode = (imRelative, imAbsolute);
+
   TForm1 = class(TForm)
     Open1: TOpenDialog;
     RenderPanel: TPanel;
@@ -303,8 +306,8 @@ type
     procedure SaveMTL1Click(Sender: TObject);
     procedure MatTexBrowseClick(Sender: TObject);
     procedure BlinkPositionChange(Sender: TObject);
-    procedure BlinkAddClick(Sender: TObject);
-    procedure BlinkRemoveClick(Sender: TObject);
+    procedure btnBlinkerAddClick(Sender: TObject);
+    procedure btnBlinkerRemClick(Sender: TObject);
     procedure BlinkCopyClick(Sender: TObject);
     procedure BlinkPasteClick(Sender: TObject);
     procedure btnBlinkersSaveClick(Sender: TObject);
@@ -385,6 +388,7 @@ type
     fOldTimeFPS: Cardinal;
     fOldFrameTimes: Cardinal;
     fFrameCount: Cardinal;
+    fLastInputMode: TInputMode;
 
     fOpenedFileMask: string;
     fOpenedFolder: string;
@@ -399,6 +403,7 @@ type
     procedure LoadSettingsFromIni(const aFilename: string);
     procedure SaveSettingsToIni(const aFilename: string);
     procedure OnIdle(Sender: TObject; var Done: Boolean);
+    procedure OnMessage(var aMsg: TMsg; var aHandled: Boolean);
     procedure Render;
     procedure LoadTextures;
     procedure SendDataToUI(aSection: TUIDataSection);
@@ -573,9 +578,33 @@ var
 
 implementation
 uses
-  ColorPicker;
+  ColorPicker, UnitRawInputHeaders;
 
 {$R *.dfm}
+
+procedure RegisterListener;
+const
+  // https://docs.microsoft.com/en-us/windows-hardware/drivers/hid/hid-usages#usage-page
+  HID_USAGE_PAGE_GENERIC = 1;
+  HID_USAGE_PAGE_GAME = 5;
+  HID_USAGE_PAGE_LED = 8;
+  HID_USAGE_PAGE_BUTTON = 9;
+  // https://docs.microsoft.com/en-us/windows-hardware/drivers/hid/hid-usages#usage-id
+  HID_USAGE_GENERIC_MOUSE = 2;
+  HID_USAGE_GENERIC_KEYBOARD = 6;
+var
+  rid: tagRAWINPUTDEVICE;
+begin
+  // To receive WM_INPUT messages, an application must first register the raw input devices using RegisterRawInputDevices.
+  // By default, an application does not receive raw input.
+  rid.usUsagePage := HID_USAGE_PAGE_GENERIC;
+  rid.usUsage := HID_USAGE_GENERIC_MOUSE;
+  rid.dwFlags := 0;
+  rid.hwndTarget := 0; // If NULL it follows the keyboard focus
+  RegisterRawInputDevices(@rid, 1, SizeOf(rid));
+end;
+
+
 
 procedure TForm1.FormCreate(Sender: TObject);
 var
@@ -599,6 +628,8 @@ begin
 
   PivotSetup.TabVisible := False;
   Application.OnIdle := OnIdle;
+  RegisterListener;
+  Application.OnMessage := OnMessage;
   PageControl1Change(nil); //update ActivePage
   CBRenderModeChange(nil); //update RenderMode
   FormatSettings.DecimalSeparator := '.';
@@ -708,6 +739,34 @@ begin
   end; // FPS calculation complete
 
   Render;
+end;
+
+
+procedure TForm1.OnMessage(var aMsg: TMsg; var aHandled: Boolean);
+var
+  dwSize: Cardinal;
+  ri: tagRAWINPUT;
+begin
+  if aMsg.message = WM_INPUT then
+  begin
+    GetRawInputData(aMsg.lParam, RID_INPUT, nil, dwSize, SizeOf(RAWINPUTHEADER));
+
+    if dwSize = 0 then
+      ShowMessage('Can not allocate memory');
+
+    if GetRawInputData(aMsg.lParam, RID_INPUT, @ri, dwSize, SizeOf(RAWINPUTHEADER)) <> dwSize then
+      ShowMessage('GetRawInputData doesn''t return correct size !');
+
+    if ri.header.dwType = RIM_TYPEMOUSE then
+    begin
+      if ri.mouse.usFlags and $1 = 0 then
+        fLastInputMode := imRelative
+      else
+        fLastInputMode := imAbsolute;
+
+
+    end;
+  end;
 end;
 
 
@@ -1168,13 +1227,13 @@ begin
   fOriginCursorX := X;
   fOriginCursorY := Y;
 
-  //ShowCursor(False);
+  ShowCursor(False);
 end;
 
 
 procedure TForm1.Panel1MouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
 var
-  dx, dy: Integer;
+  origin: TPoint;
 begin
   case fCameraAction of
     caRotate: begin
@@ -1192,13 +1251,19 @@ begin
     Exit;
   end;
 
-  dx := ClientOrigin.X + TControl(Sender).Left + fOriginCursorX;
-  dy := ClientOrigin.Y + TControl(Sender).Top + fOriginCursorY;
+  case fLastInputMode of
+    imRelative: begin
+                  // Stick mouse cursor to start location, otherwise it stucks at screen border
+                  origin := TControl(Sender).ClientToScreen(Point(fOriginCursorX, fOriginCursorY));
+                  SetCursorPos(origin.X, origin.Y)
+                end;
+    imAbsolute: begin
+                  // Update tablet cursor origin, otherwise its offset will grow exponentially
+                  fOriginCursorX := X;
+                  fOriginCursorY := Y;
+                end;
+  end;
 
-  // Stick cursor to start location
-  SetCursorPos(dx, dy);
-
-  //fPrevCursorX:=X; fPrevCursorY:=Y;
   Render;
 end;
 
@@ -1987,7 +2052,7 @@ begin
 end;
 
 
-procedure TForm1.BlinkAddClick(Sender: TObject);
+procedure TForm1.btnBlinkerAddClick(Sender: TObject);
 begin
   MOXBlinkerAdd(LBBlinkers.ItemIndex+1);
 
@@ -2026,7 +2091,7 @@ begin
 end;
 
 
-procedure TForm1.BlinkRemoveClick(Sender: TObject);
+procedure TForm1.btnBlinkerRemClick(Sender: TObject);
 var
   I: Integer;
 begin

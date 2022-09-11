@@ -29,28 +29,29 @@ MTKit2 shows you preview of a car, WR2 will display it bit differently.
 AFC11/FVR support is limited.
 
 Version History:
-2.3.9	  2022.03.09  Added option to spread model parts over X axis on MOX > LWO export
+                    Fixed uniformity of 3D model view rotation/pane/zoom on mouse/tablet input
+2.3.9   2022.03.09  Added option to spread model parts over X axis on MOX > LWO export
                     Fixed LWO export (broken in 2.3.8)
-2.3.8	  2021.02.21  Added option to ask if you really want to close MTKit2
+2.3.8   2021.02.21  Added option to ask if you really want to close MTKit2
                     Added confirmation after registering file association of MOX files
                     Removed password protection
                     Build using Delphi XE8
-2.3.7	  2011.05.11  Fixed bug with registering file association of MOX files, now it's optional
-2.3.6	  2010.10.25  Improved loading speed of MOX files
+2.3.7   2011.05.11  Fixed bug with registering file association of MOX files, now it's optional
+2.3.6   2010.10.25  Improved loading speed of MOX files
                     Added association of MOX files with MTKit
                     Renamed unknown Light to Nozzle flash (it marks gunshot flash location)
-2.3.5	  2009.11.07  Materials and lights lists now have color boxes
+2.3.5   2009.11.07  Materials and lights lists now have color boxes
                     Quick fix to open AFC11HN models
                     Blinkers are sorted descending on save now
-2.3.4	  2008.09.04	Fixed bug in COB saving which crashed WR2
-2.3.3	  2008.08.27	Added CPO freeform shapes import/export
+2.3.4   2008.09.04  Fixed bug in COB saving which crashed WR2
+2.3.3   2008.08.27  Added CPO freeform shapes import/export
                     Fixed a bug which made CPO don't work in game
                     Added quad support for LWO import, sweet!
                     Improved 3DS import
                     Added preliminary OBJ import
-2.3.2	2008.07.26	Added support for packed ptx textures
-2.3.1	2008.07.12	Half a dozen of bugfixes
-			Wireframe color can be changed now
+2.3.2   2008.07.26  Added support for packed ptx textures
+2.3.1   2008.07.12  Half a dozen of bugfixes
+                    Wireframe color can be changed now
 2.3.0	2008.06.30	Major code refactoring and clean-up
 			Improved MOX > LWO export
 			Added 3DS import

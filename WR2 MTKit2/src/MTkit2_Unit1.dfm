@@ -1767,7 +1767,7 @@ object Form1: TForm1
         Font.Style = []
         ParentFont = False
         TabOrder = 5
-        OnClick = BlinkAddClick
+        OnClick = btnBlinkerAddClick
       end
       object btnBlinkersLoad: TButton
         Left = 0
@@ -1816,7 +1816,7 @@ object Form1: TForm1
         Font.Style = []
         ParentFont = False
         TabOrder = 6
-        OnClick = BlinkRemoveClick
+        OnClick = btnBlinkerRemClick
       end
       object rgBlinkerPreview: TRadioGroup
         Left = 136
