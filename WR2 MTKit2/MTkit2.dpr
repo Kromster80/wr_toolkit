@@ -5,6 +5,7 @@ uses
   MTkit2_Defaults in 'src\MTkit2_Defaults.pas',
   MTkit2_IO in 'src\MTkit2_IO.pas',
   MTkit2_MOX in 'src\MTkit2_MOX.pas',
+  MTkit2_Tree in 'src\MTkit2_Tree.pas',
   MTkit2_Render in 'src\MTkit2_Render.pas',
   MTkit2_RenderLegacy in 'src\MTkit2_RenderLegacy.pas',
   MTkit2_Vertex in 'src\MTkit2_Vertex.pas',

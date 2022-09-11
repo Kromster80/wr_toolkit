@@ -7,7 +7,7 @@ uses
 
   dglOpenGL, FloatSpinEdit, KromOGLUtils, KromUtils, TGATexture, PTXTexture,
 
-  MTkit2_Defaults, MTkit2_Render, MTkit2_RenderLegacy, MTkit2_IO, MTkit2_MOX, MTkit2_Vertex;
+  MTkit2_Defaults, MTkit2_Render, MTkit2_RenderLegacy, MTkit2_IO, MTkit2_MOX, MTkit2_Tree, MTkit2_Vertex;
 
 type
   TInputMode = (imRelative, imAbsolute);
@@ -299,9 +299,6 @@ type
     procedure PartTypeChange(Sender: TObject);
     procedure ImportLWO1Click(Sender: TObject);
     procedure UpdateOpenedFileInfo(const aFilename: string);
-    procedure ConverseImp_MOX;
-    procedure ConverseImp_COB;
-    procedure RebuildCOBBounds;
     procedure SaveMTL1Click(Sender: TObject);
     procedure MatTexBrowseClick(Sender: TObject);
     procedure BlinkPositionChange(Sender: TObject);
@@ -410,6 +407,9 @@ type
     procedure SetActivePage(aPage: TActivePage);
     procedure SetRenderObject(aSet: TRenderObjectSet);
     procedure MOXBlinkerAdd(aIndex: Integer);
+    procedure ConverseImp_MOX;
+    procedure ConverseImp_COB;
+    procedure RebuildCOBBounds;
   end;
 
 const
@@ -543,29 +543,6 @@ var
     Custom: array [1..3]of Single;
     Move: array [1..3]of Single;
   end;
-
-
-  //TreeViewExchange
-  order: array [1..MAX_PARTS] of Integer;
-  aDname: array [1..MAX_PARTS]of string;
-  aPartModify: array [1..MAX_PARTS]of record ActualPoint:Integer; AxisSetup: array [1..3]of Byte; Low: array [1..3]of Single; High: array [1..3]of Single; Custom: array [1..3]of Single; Move: array [1..3]of Single; end;
-  aParts: array [1..MAX_PARTS]of record xMid,yMid,zMid,fRadius:Single; TypeID:smallint; x1,x2,y1,y2,z1,z2:Single; end;
-  aSRange: array [1..2048,1..4]of Word;
-  aVertex: array [1..65280] of record X,Y,Z,nX,nY,nZ,U,V,x1,x2: Single; end; //40Bytes
-  av: array [1..65280,1..3] of Word;                                         //6Bytes
-
-
-  Tree: record
-    header: array [1..4] of AnsiChar;
-    NumVertex, NumLeaves, NumIndices: Integer;
-  end;
-  TreeTexNames: array [1..2] of string;
-  TreeLOD: array [1..3] of record First,Count,Offset,PolyCount: Integer; end;
-  TreeChunks: array [1..20] of Integer;
-  TreeVertex: array [1..16384] of record X,Y,Z,nX,nY,nZ,U,V: Single; end;
-  TreePoly: array [1..16384,1..3] of Word;
-  TreeLeaves: array [1..1024] of record X,Y,Z: Single; R,G,B,A: Byte; end;
-  TreeHeight: Integer;
 
   RenderChrome: Boolean;
   IsLightwave2MOX: Boolean=False;
@@ -2200,7 +2177,14 @@ var
   i,j,k: Integer;
   kp,kv: Integer;
   i1,i2: Integer;
-begin //Exchanging MOX.Parts ordering
+  order: array [1..MAX_PARTS] of Integer;
+  aDname: array [1..MAX_PARTS]of string;
+  aPartModify: array [1..MAX_PARTS]of record ActualPoint:Integer; AxisSetup: array [1..3]of Byte; Low: array [1..3]of Single; High: array [1..3]of Single; Custom: array [1..3]of Single; Move: array [1..3]of Single; end;
+  aParts: array [1..MAX_PARTS]of record xMid,yMid,zMid,fRadius:Single; TypeID:smallint; x1,x2,y1,y2,z1,z2:Single; end;
+  aSRange: array [1..2048,1..4]of Word;
+  aVertex: array [1..65280] of record X,Y,Z,nX,nY,nZ,U,V,x1,x2: Single; end; //40Bytes
+  av: array [1..65280,1..3] of Word;                                         //6Bytes
+begin
   for i := 1 to MOX.Qty.Parts do
     for k := 1 to MOX.Qty.Parts do
       if MOX.Parts[i].Dname = TVParts.Items[k - 1].Text then

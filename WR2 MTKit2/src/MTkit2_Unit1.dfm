@@ -208,7 +208,7 @@ object Form1: TForm1
     Top = 8
     Width = 242
     Height = 585
-    ActivePage = TabSheet5
+    ActivePage = TabSheet6
     Anchors = [akLeft, akTop, akBottom]
     MultiLine = True
     Style = tsButtons

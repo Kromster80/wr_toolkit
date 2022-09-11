@@ -104,6 +104,7 @@
         <DCCReference Include="src\MTkit2_Defaults.pas"/>
         <DCCReference Include="src\MTkit2_IO.pas"/>
         <DCCReference Include="src\MTkit2_MOX.pas"/>
+        <DCCReference Include="src\MTkit2_Tree.pas"/>
         <DCCReference Include="src\MTkit2_Render.pas"/>
         <DCCReference Include="src\MTkit2_RenderLegacy.pas"/>
         <DCCReference Include="src\MTkit2_Vertex.pas"/>
