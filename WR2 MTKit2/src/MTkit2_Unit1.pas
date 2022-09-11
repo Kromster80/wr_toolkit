@@ -279,7 +279,6 @@ type
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    function TryToLoadTexture(const aFilename: string):cardinal;
     procedure CompileLoaded(aTypename: string);
     procedure RenderResize(Sender: TObject);
     procedure LoadMOX(const aFilename: string);
@@ -345,7 +344,6 @@ type
     procedure LoadMOXClick(Sender: TObject);
     procedure LoadCPOClick(Sender: TObject);
     procedure FileListBox1Click(Sender: TObject);
-    function  LoadFile(const aFilename: string; lm: TLoadMode):Boolean;
     procedure PageControl1Change(Sender: TObject);
     procedure ResetView(Sender: TObject);
     procedure CBRenderModeChange(Sender: TObject);
@@ -405,7 +403,9 @@ type
     procedure OnIdle(Sender: TObject; var Done: Boolean);
     procedure OnMessage(var aMsg: TMsg; var aHandled: Boolean);
     procedure Render;
+    function  LoadFile(const aFilename: string; lm: TLoadMode):Boolean;
     procedure LoadTextures;
+    function TryToLoadTexture(const aFilename: string):cardinal;
     procedure SendDataToUI(aSection: TUIDataSection);
     procedure SetActivePage(aPage: TActivePage);
     procedure SetRenderObject(aSet: TRenderObjectSet);
@@ -546,7 +546,7 @@ var
 
 
   //TreeViewExchange
-  kp,kv,i1,i2:Integer; order: array [1..MAX_PARTS] of Integer;
+  order: array [1..MAX_PARTS] of Integer;
   aDname: array [1..MAX_PARTS]of string;
   aPartModify: array [1..MAX_PARTS]of record ActualPoint:Integer; AxisSetup: array [1..3]of Byte; Low: array [1..3]of Single; High: array [1..3]of Single; Custom: array [1..3]of Single; Move: array [1..3]of Single; end;
   aParts: array [1..MAX_PARTS]of record xMid,yMid,zMid,fRadius:Single; TypeID:smallint; x1,x2,y1,y2,z1,z2:Single; end;
@@ -2197,7 +2197,9 @@ end;
 
 procedure TForm1.ExchangePartsOrdering;
 var
-  i,j,k:Integer;
+  i,j,k: Integer;
+  kp,kv: Integer;
+  i1,i2: Integer;
 begin //Exchanging MOX.Parts ordering
   for i := 1 to MOX.Qty.Parts do
     for k := 1 to MOX.Qty.Parts do
@@ -2232,7 +2234,8 @@ begin //Exchanging MOX.Parts ordering
 
       for j:=aSRange[i1,3] to aSRange[i1,4] do
       CopyMemory(@aVertex[j],@MOX.Vertice[MOX.Chunk[i2,3]+(j-aSRange[i1,3])],40);
-      for j:=1 to aSRange[i1,2] do begin
+      for j:=1 to aSRange[i1,2] do
+      begin
         av[aSRange[i1,1]+j,1]:=MOX.Face[MOX.Chunk[i2,1]+j,1]+aSRange[i1,3]-MOX.Chunk[i2,3];
         av[aSRange[i1,1]+j,2]:=MOX.Face[MOX.Chunk[i2,1]+j,2]+aSRange[i1,3]-MOX.Chunk[i2,3];
         av[aSRange[i1,1]+j,3]:=MOX.Face[MOX.Chunk[i2,1]+j,3]+aSRange[i1,3]-MOX.Chunk[i2,3];
@@ -2639,10 +2642,10 @@ begin
   begin
     LoadMOX(aFilename);
     ShowUpClick(cuMOX);
-      LoadMTL(decs(aFilename,4,0)+'.mtl');
-      LoadTextures;
-      ScanVinyls(fOpenedFolder);
-      ShowUpClick(cuMTL);
+    LoadMTL(decs(aFilename,4,0)+'.mtl');
+    LoadTextures;
+    ScanVinyls(fOpenedFolder);
+    ShowUpClick(cuMTL);
     SetRenderObject([roMOX]);
     if LoadCOB(decs(aFilename,4,0)+'_colli.cob') then
     begin
@@ -2679,13 +2682,14 @@ begin
       if lm=lmLoadAndShow then SetActivePage(apCPO);
     end;
 
-  if GetFileExt(aFilename)='TREE'then
+  if GetFileExt(aFilename)='TREE' then
   begin
     LoadTree(aFilename);
     CompileLoaded('TREE');
-    for i:=1 to 2 do begin
-      glDeleteTextures(1,@TreeTex[i]); //Clear RAM used by textures
-      TreeTex[i]:=TryToLoadTexture(TreeTexNames[i]);
+    for i:=1 to 2 do
+    begin
+      glDeleteTextures(1, @TreeTex[i]); //Clear RAM used by textures
+      TreeTex[i] := TryToLoadTexture(TreeTexNames[i]);
     end;
     ShowUpClick(cuTREE);
     Memo1.Lines.Add('TREE Loaded ...');

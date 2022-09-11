@@ -1414,8 +1414,8 @@ begin
   FileMode := 2;
 
   BlockRead(f,Tree,16);
-  BlockRead(f,c,64); TreeTexNames[1]:=PAnsiChar(@c[1]);
-  BlockRead(f,c,64); TreeTexNames[2]:=PAnsiChar(@c[1]);
+  BlockRead(f,c,64); TreeTexNames[1] := PAnsiChar(@c[1]);
+  BlockRead(f,c,64); TreeTexNames[2] := PAnsiChar(@c[1]);
   BlockRead(f,TreeLOD,48);//
   BlockRead(f,TreeChunks,60);//
   //for i:=1 to 15 do
@@ -1426,10 +1426,10 @@ begin
   //BlockRead(f,c,Tree.NumIndices);
   CloseFile(f);
 
-  TreeHeight:=0;
-  for i:=1 to Tree.NumVertex do
-  if TreeHeight<TreeVertex[i].Y then
-    TreeHeight:=Round(TreeVertex[i].Y);
+  TreeHeight := 0;
+  for i := 1 to Tree.NumVertex do
+    TreeHeight := Max(TreeHeight, Round(TreeVertex[i].Y));
+
   //RGExtra.Items[1]:='Show TREE ('+floattostr(TreeHeight/10)+'m)';
 end;
 
