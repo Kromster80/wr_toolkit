@@ -24,213 +24,212 @@ uses
 
 procedure RenderOpenGL;
 var
-  h:integer;
-  ID,PartID:integer;
+  h: integer;
+  ID,PartID: integer;
 begin
-h:=0; PartID:=1;
-for ID:=1 to MOX.Qty.Chunks do
-begin
-if ID>(MOX.Parts[PartID].NumMat+h) then begin inc(h,MOX.Parts[PartID].NumMat); inc(PartID); end; //define detail
-if (ActivePage=apMTL)or
-   (SelectedTreeNode=0)or
-   (not RenderOpts.ShowPart)or
-   ((RenderOpts.ShowPart)and(PartID=SelectedTreeNode)) then //skip render of unseen parts
+  h:=0; PartID:=1;
+  for ID:=1 to MOX.Qty.Chunks do
+  begin
+    if ID>(MOX.Parts[PartID].NumMat+h) then begin inc(h,MOX.Parts[PartID].NumMat); inc(PartID); end; //define detail
 
-case Material[MOX.Sid[ID,1]+1].MatClass[2] of
-0:case Material[MOX.Sid[ID,1]+1].MatClass[3]of
- 0:begin                                                                        //++
- RenderDiffuse(ID,PartID,'SetTrans',0);
- RenderSpecular2(ID,PartID,'SetTrans',0);
- RenderReflection(ID,PartID,'SetTrans',0);
- RenderSpecular(ID,PartID,'SetTrans',0);
- end;
-end;
+    if (ActivePage=apMTL)
+    or (SelectedTreeNode=0)
+    or (not RenderOpts.ShowPart)
+    or ((RenderOpts.ShowPart) and (PartID = SelectedTreeNode)) then //skip render of unseen parts
+      case Material[MOX.Sid[ID,1]+1].MatClass[2] of
+        0:  case Material[MOX.Sid[ID,1]+1].MatClass[3] of
+              0:  begin                                                                        //++
+                    RenderDiffuse(ID,PartID,'SetTrans',0);
+                    RenderSpecular2(ID,PartID,'SetTrans',0);
+                    RenderReflection(ID,PartID,'SetTrans',0);
+                    RenderSpecular(ID,PartID,'SetTrans',0);
+                  end;
+            end;
+        3:  case Material[MOX.Sid[ID,1]+1].MatClass[3] of
+              0:  begin                                                                        //++
+                    RenderDiffuse(ID,PartID,'SetTrans',0);
+                    RenderSpecular2(ID,PartID,'SetTrans',0);
+                    RenderTexture(ID,PartID,'SetTrans',0);
+                    RenderReflection(ID,PartID,'',1);
+                    RenderSpecular(ID,PartID,'SetTrans',0);
+                  end;
+             1:   begin                                                                        //++
+                    RenderDiffuse(ID,PartID,'',0);                                                           //wheels
+                    RenderSpecular2(ID,PartID,'',0);
+                    RenderTexture(ID,PartID,'**',0);
+                    RenderReflection(ID,PartID,'Blend',0);
+                    RenderSpecular(ID,PartID,'',0);
+                  end;
+             2:   begin                                                                        //++
+                    RenderDiffuse(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/400);              //wheels
+                    RenderSpecular2(ID,PartID,'SetTrans',0);
+                    RenderTexture(ID,PartID,'SetTrans',0);
+                    RenderReflection(ID,PartID,'',0);
+                    RenderSpecular(ID,PartID,'SetTrans',0);
+                  end;
+             3:   begin                                                                        //++
+                    RenderDiffuse(ID,PartID,'SetTrans',0.25+Material[MOX.Sid[ID,1]+1].Transparency/70);          //wheels
+                    RenderSpecular2(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
+                    RenderTexture(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
+                    RenderReflection(ID,PartID,'Blend',0);
+                    RenderSpecular(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
+                  end;
+             4:   if Material[MOX.Sid[ID,1]+1].Transparency<=50 then                         //++
+                  begin
+                    RenderDiffuse(ID,PartID,'SetTrans',0);
+                    RenderSpecular2(ID,PartID,'SetTrans',0);
+                    RenderTexture(ID,PartID,'SetTrans',0);
+                    RenderReflection(ID,PartID,'',1);
+                    RenderSpecular(ID,PartID,'SetTrans',0);
+                  end;
+            end;
 
-3:case Material[MOX.Sid[ID,1]+1].MatClass[3]of
- 0:begin                                                                        //++
- RenderDiffuse(ID,PartID,'SetTrans',0);
- RenderSpecular2(ID,PartID,'SetTrans',0);
- RenderTexture(ID,PartID,'SetTrans',0);
- RenderReflection(ID,PartID,'',1);
- RenderSpecular(ID,PartID,'SetTrans',0);
- end;
- 1:begin                                                                        //++
- RenderDiffuse(ID,PartID,'',0);                                                           //wheels
- RenderSpecular2(ID,PartID,'',0);
- RenderTexture(ID,PartID,'**',0);
- RenderReflection(ID,PartID,'Blend',0);
- RenderSpecular(ID,PartID,'',0);
- end;
- 2:begin                                                                        //++
- RenderDiffuse(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/400);              //wheels
- RenderSpecular2(ID,PartID,'SetTrans',0);
- RenderTexture(ID,PartID,'SetTrans',0);
- RenderReflection(ID,PartID,'',0);
- RenderSpecular(ID,PartID,'SetTrans',0);
- end;
- 3:begin                                                                        //++
- RenderDiffuse(ID,PartID,'SetTrans',0.25+Material[MOX.Sid[ID,1]+1].Transparency/70);          //wheels
- RenderSpecular2(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
- RenderTexture(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
- RenderReflection(ID,PartID,'Blend',0);
- RenderSpecular(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
- end;
- 4: if Material[MOX.Sid[ID,1]+1].Transparency<=50 then begin                        //++
- RenderDiffuse(ID,PartID,'SetTrans',0);
- RenderSpecular2(ID,PartID,'SetTrans',0);
- RenderTexture(ID,PartID,'SetTrans',0);
- RenderReflection(ID,PartID,'',1);
- RenderSpecular(ID,PartID,'SetTrans',0);
- end;
-end;
+        4:  case Material[MOX.Sid[ID,1]+1].MatClass[3]of
+              0:  begin                                                                        //+
+                    RenderDiffuse(ID,PartID,'SetTrans',0);
+                    RenderSpecular2(ID,PartID,'SetTrans',0);
+                    RenderReflection(ID,PartID,'',1);
+                    RenderSpecular(ID,PartID,'SetTrans',0);
+                    RenderTexture(ID,PartID,'SetTrans',0);
+                  end;
+              1:  begin                                                                        //+
+                    RenderDiffuse(ID,PartID,'',0);                                                           //wheels
+                    RenderSpecular2(ID,PartID,'',0);
+                    RenderReflection(ID,PartID,'Blend',0);
+                    RenderSpecular(ID,PartID,'',0);
+                    RenderTexture(ID,PartID,'**',0);
+                  end;
+              2:  begin                                                                        //+
+                    RenderDiffuse(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/400);
+                    RenderSpecular2(ID,PartID,'SetTrans',0);
+                    RenderReflection(ID,PartID,'',0);
+                    RenderSpecular(ID,PartID,'SetTrans',0);
+                    RenderTexture(ID,PartID,'SetTrans',0);
+                  end;
+              3:  begin                                                                        //+
+                    RenderDiffuse(ID,PartID,'SetTrans',0.25+Material[MOX.Sid[ID,1]+1].Transparency/70);
+                    RenderSpecular2(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
+                    RenderReflection(ID,PartID,'Blend',1);
+                    RenderSpecular(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
+                    RenderTexture(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
+                  end;
+              4:  if Material[MOX.Sid[ID,1]+1].Transparency<=50 then
+                  begin
+                    RenderDiffuse(ID,PartID,'SetTrans',0);
+                    RenderSpecular2(ID,PartID,'SetTrans',0);
+                    RenderReflection(ID,PartID,'',1);
+                    RenderSpecular(ID,PartID,'SetTrans',0);
+                    RenderTexture(ID,PartID,'SetTrans',0);
+                  end;
+            end;
+      end;
+  end;
 
-4:case Material[MOX.Sid[ID,1]+1].MatClass[3]of
- 0:begin                                                                        //+
- RenderDiffuse(ID,PartID,'SetTrans',0);
- RenderSpecular2(ID,PartID,'SetTrans',0);
- RenderReflection(ID,PartID,'',1);
- RenderSpecular(ID,PartID,'SetTrans',0);
- RenderTexture(ID,PartID,'SetTrans',0);
- end;
- 1:begin                                                                        //+
- RenderDiffuse(ID,PartID,'',0);                                                           //wheels
- RenderSpecular2(ID,PartID,'',0);
- RenderReflection(ID,PartID,'Blend',0);
- RenderSpecular(ID,PartID,'',0);
- RenderTexture(ID,PartID,'**',0);
- end;
- 2:begin                                                                        //+
- RenderDiffuse(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/400);
- RenderSpecular2(ID,PartID,'SetTrans',0);
- RenderReflection(ID,PartID,'',0);
- RenderSpecular(ID,PartID,'SetTrans',0);
- RenderTexture(ID,PartID,'SetTrans',0);
- end;
- 3:begin                                                                        //+
- RenderDiffuse(ID,PartID,'SetTrans',0.25+Material[MOX.Sid[ID,1]+1].Transparency/70);
- RenderSpecular2(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
- RenderReflection(ID,PartID,'Blend',1);
- RenderSpecular(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
- RenderTexture(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
- end;
- 4: if Material[MOX.Sid[ID,1]+1].Transparency<=50 then begin
- RenderDiffuse(ID,PartID,'SetTrans',0);
- RenderSpecular2(ID,PartID,'SetTrans',0);
- RenderReflection(ID,PartID,'',1);
- RenderSpecular(ID,PartID,'SetTrans',0);
- RenderTexture(ID,PartID,'SetTrans',0);
- end;
-end;
-end;
-end;
+  h:=0; PartID:=1;
+  for ID:=1 to MOX.Qty.Chunks do
+  begin
+  if ID>(MOX.Parts[PartID].NumMat+h) then begin inc(h,MOX.Parts[PartID].NumMat); inc(PartID); end; //define detail
 
-h:=0; PartID:=1;
-for ID:=1 to MOX.Qty.Chunks do begin
-if ID>(MOX.Parts[PartID].NumMat+h) then begin inc(h,MOX.Parts[PartID].NumMat); inc(PartID); end; //define detail
-//mat:=Material[MOX.Sid[ID,1]+1].Transparency;
-if (ActivePage=apMTL)or
-   (SelectedTreeNode=0)or
-   (not RenderOpts.ShowPart)or
-   ((RenderOpts.ShowPart)and(PartID=SelectedTreeNode)) then //skip render of unseen parts
-case Material[MOX.Sid[ID,1]+1].MatClass[2] of
-0:case Material[MOX.Sid[ID,1]+1].MatClass[3]of
- 1: begin                                                                       //++
- RenderDiffuse(ID,PartID,'',1);                                                           //wheels
- RenderSpecular2(ID,PartID,'',1);
- RenderReflection(ID,PartID,'Blend',1);
- RenderSpecular(ID,PartID,'',1);
- end;
- 2: begin                                                                       //++
- RenderDiffuse(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/400);              //wheels
- RenderSpecular2(ID,PartID,'',1);
- RenderReflection(ID,PartID,'',1);
- RenderSpecular(ID,PartID,'',1);
- end;
- 3: begin                                                                       //++
- RenderDiffuse(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);           //wheels
- RenderSpecular2(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
- RenderReflection(ID,PartID,'Blend',1);
- RenderSpecular(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
- end;
- 4:if Material[MOX.Sid[ID,1]+1].Transparency<=50 then begin                         //+
- RenderDiffuse(ID,PartID,'SetTrans',0);
- RenderSpecular2(ID,PartID,'SetTrans',0);
- RenderReflection(ID,PartID,'SetTrans',0);
- RenderSpecular(ID,PartID,'SetTrans',0);
- end;
-end;
-
-1:case Material[MOX.Sid[ID,1]+1].MatClass[3]of
- 0: begin                                                                       //++
- RenderDiffuse(ID,PartID,'SetTrans',0.33);
- RenderTexture(ID,PartID,'14',0);
- RenderReflection(ID,PartID,'SetTrans',0.33);
- RenderSpecular2(ID,PartID,'SetTrans',0.33);
- RenderSpecular(ID,PartID,'SetTrans',0.33);
- end;
- 1: begin
- if MoxTex[MOX.Sid[ID,1]+1]=0 then RenderDiffuse(ID,PartID,'',1);                                                           //only texture need to reflect
- RenderTexture(ID,PartID,'11',0);                                                         //++
- RenderReflection(ID,PartID,'',1);                                                        //wheels
- RenderSpecular2(ID,PartID,'',1);
- RenderSpecular(ID,PartID,'',1);
- end;
- 2: begin                                                                       //++
- RenderDiffuse(ID,PartID,'SetTrans',0.75);                                                //wheels
- RenderTexture(ID,PartID,'14',0);
- RenderReflection(ID,PartID,'SetTrans',0.75);
- RenderSpecular2(ID,PartID,'SetTrans',0.75);
- RenderSpecular(ID,PartID,'SetTrans',0.75);
- end;
- 3:RenderTexture(ID,PartID,'1*',0);                                                       //++ wheels
- 4: begin                                                                       //++
- glEnable(GL_ALPHA_TEST);                                                       //only texture reflects
- glAlphaFunc(GL_GREATER,Material[MOX.Sid[ID,1]+1].Transparency/50);
- RenderTexture(ID,PartID,'14',0);
- glDisable(GL_ALPHA_TEST);
- RenderReflection(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
- RenderSpecular2(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
- RenderSpecular(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
- end;
-end;
-
-2:begin
- case Material[MOX.Sid[ID,1]+1].MatClass[3]of
- 0: begin                                                                       //only texture reflects
- RenderDiffuse(ID,PartID,'SetTrans',0.33);                                                //++
- RenderTexture(ID,PartID,'14',0);
- RenderReflection(ID,PartID,'SetTrans',0.33);
- RenderSpecular2(ID,PartID,'SetTrans',0.33);
- RenderSpecular(ID,PartID,'SetTrans',0.33);
- end;
- 1: begin                                                                       //only texture reflects
- RenderTexture(ID,PartID,'11',0);                                                         //++
- RenderReflection(ID,PartID,'',1);                                                        //wheels
- RenderSpecular2(ID,PartID,'',1);
- RenderSpecular(ID,PartID,'',1);
- end;
- 2: begin                                                                       //+
- RenderDiffuse(ID,PartID,'SetTrans',0.75);                                                //wheels
- RenderTexture(ID,PartID,'14',0);
- RenderReflection(ID,PartID,'SetTrans',0.75);
- RenderSpecular2(ID,PartID,'SetTrans',0.75);
- RenderSpecular(ID,PartID,'SetTrans',0.75);
- end;
- 3: RenderTexture(ID,PartID,'11',0);                                                      //only texture reflects wheels
- 4: begin                                                                       //++
- glEnable(GL_ALPHA_TEST);                                                       //only texture reflects
- glAlphaFunc(GL_GREATER,Material[MOX.Sid[ID,1]+1].Transparency/50);
- RenderTexture(ID,PartID,'14',0);
- glDisable(GL_ALPHA_TEST);
- RenderReflection(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
- RenderSpecular2(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
- RenderSpecular(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
- end;
-end;
-end;
-
-end;
-end;
+  //mat:=Material[MOX.Sid[ID,1]+1].Transparency;
+  if (ActivePage=apMTL)
+  or (SelectedTreeNode=0)
+  or (not RenderOpts.ShowPart)
+  or ((RenderOpts.ShowPart)and(PartID=SelectedTreeNode)) then //skip render of unseen parts
+    case Material[MOX.Sid[ID,1]+1].MatClass[2] of
+      0:  case Material[MOX.Sid[ID,1]+1].MatClass[3]of
+            1:  begin                                                                       //++
+                  RenderDiffuse(ID,PartID,'',1);                                                           //wheels
+                  RenderSpecular2(ID,PartID,'',1);
+                  RenderReflection(ID,PartID,'Blend',1);
+                  RenderSpecular(ID,PartID,'',1);
+                end;
+            2:  begin                                                                       //++
+                  RenderDiffuse(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/400);              //wheels
+                  RenderSpecular2(ID,PartID,'',1);
+                  RenderReflection(ID,PartID,'',1);
+                  RenderSpecular(ID,PartID,'',1);
+                end;
+            3:  begin                                                                       //++
+                  RenderDiffuse(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);           //wheels
+                  RenderSpecular2(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
+                  RenderReflection(ID,PartID,'Blend',1);
+                  RenderSpecular(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
+                end;
+            4:  if Material[MOX.Sid[ID,1]+1].Transparency<=50 then                          //+
+                begin
+                  RenderDiffuse(ID,PartID,'SetTrans',0);
+                  RenderSpecular2(ID,PartID,'SetTrans',0);
+                  RenderReflection(ID,PartID,'SetTrans',0);
+                  RenderSpecular(ID,PartID,'SetTrans',0);
+                end;
+          end;
+      1:  case Material[MOX.Sid[ID,1]+1].MatClass[3]of
+            0:  begin                                                                       //++
+                  RenderDiffuse(ID,PartID,'SetTrans',0.33);
+                  RenderTexture(ID,PartID,'14',0);
+                  RenderReflection(ID,PartID,'SetTrans',0.33);
+                  RenderSpecular2(ID,PartID,'SetTrans',0.33);
+                  RenderSpecular(ID,PartID,'SetTrans',0.33);
+                end;
+            1:  begin
+                  if MoxTex[MOX.Sid[ID,1]+1]=0 then RenderDiffuse(ID,PartID,'',1);                                                           //only texture need to reflect
+                  RenderTexture(ID,PartID,'11',0);                                                         //++
+                  RenderReflection(ID,PartID,'',1);                                                        //wheels
+                  RenderSpecular2(ID,PartID,'',1);
+                  RenderSpecular(ID,PartID,'',1);
+                end;
+            2:  begin                                                                       //++
+                  RenderDiffuse(ID,PartID,'SetTrans',0.75);                                                //wheels
+                  RenderTexture(ID,PartID,'14',0);
+                  RenderReflection(ID,PartID,'SetTrans',0.75);
+                  RenderSpecular2(ID,PartID,'SetTrans',0.75);
+                  RenderSpecular(ID,PartID,'SetTrans',0.75);
+                end;
+            3:  RenderTexture(ID,PartID,'1*',0);                                                       //++ wheels
+            4:  begin                                                                       //++
+                  glEnable(GL_ALPHA_TEST);                                                       //only texture reflects
+                  glAlphaFunc(GL_GREATER,Material[MOX.Sid[ID,1]+1].Transparency/50);
+                  RenderTexture(ID,PartID,'14',0);
+                  glDisable(GL_ALPHA_TEST);
+                  RenderReflection(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
+                  RenderSpecular2(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
+                  RenderSpecular(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
+                end;
+          end;
+      2:  case Material[MOX.Sid[ID,1]+1].MatClass[3]of
+            0:  begin                                                                       //only texture reflects
+                  RenderDiffuse(ID,PartID,'SetTrans',0.33);                                                //++
+                  RenderTexture(ID,PartID,'14',0);
+                  RenderReflection(ID,PartID,'SetTrans',0.33);
+                  RenderSpecular2(ID,PartID,'SetTrans',0.33);
+                  RenderSpecular(ID,PartID,'SetTrans',0.33);
+                end;
+            1:  begin                                                                       //only texture reflects
+                  RenderTexture(ID,PartID,'11',0);                                                         //++
+                  RenderReflection(ID,PartID,'',1);                                                        //wheels
+                  RenderSpecular2(ID,PartID,'',1);
+                  RenderSpecular(ID,PartID,'',1);
+                end;
+            2:  begin                                                                       //+
+                  RenderDiffuse(ID,PartID,'SetTrans',0.75);                                                //wheels
+                  RenderTexture(ID,PartID,'14',0);
+                  RenderReflection(ID,PartID,'SetTrans',0.75);
+                  RenderSpecular2(ID,PartID,'SetTrans',0.75);
+                  RenderSpecular(ID,PartID,'SetTrans',0.75);
+                end;
+            3:  RenderTexture(ID,PartID,'11',0);                                                      //only texture reflects wheels
+            4:  begin                                                                       //++
+                  glEnable(GL_ALPHA_TEST);                                                       //only texture reflects
+                  glAlphaFunc(GL_GREATER,Material[MOX.Sid[ID,1]+1].Transparency/50);
+                  RenderTexture(ID,PartID,'14',0);
+                  glDisable(GL_ALPHA_TEST);
+                  RenderReflection(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
+                  RenderSpecular2(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
+                  RenderSpecular(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
+                end;
+          end;
+    end;
+  end;
 end;
 
 procedure RenderDiffuse(ID,PartID:integer; param:string; t:Single);

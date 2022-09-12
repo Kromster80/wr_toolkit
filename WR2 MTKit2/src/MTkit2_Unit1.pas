@@ -439,17 +439,17 @@ var
   WFColor: array [1..3]of Byte;
 
   // Viewport controls
-  xMov,yMov:Single;
-  XRot:Single=25;
-  YRot:Single=20;
+  xMov, yMov: Single;
+  XRot: Single=25;
+  YRot: Single=20;
   zoom: Single=0.3125;
 
   RenderOpts:record
-    ShowPart:Boolean;
-    ShowMaterial:Integer;
-    ShowDamage:Boolean;
-    PartsFlapPos:Single;
-    LightVec,Colli,Wire,UVMap:Boolean;
+    ShowPart: Boolean;
+    ShowMaterial: Integer;
+    ShowDamage: Boolean;
+    PartsFlapPos: Single;
+    LightVec, Colli, Wire, UVMap: Boolean;
   end;
 
   ExeDir: string;
