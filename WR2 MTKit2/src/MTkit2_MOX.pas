@@ -94,14 +94,14 @@ var
   cChunk12: array [1..12] of AnsiChar;
   cChunk24: array [1..24] of AnsiChar;
   cPart64: array [1..64] of AnsiChar;
-  h,i,j,k: Integer;
+  i,j: Integer;
   f: file;
   face6: array [1..3] of Word;
   face12: array [1..3] of Cardinal;
 begin
   assignfile(f,aFilename); FileMode:=0; reset(f,1); FileMode:=2;
 
-  FillChar(MOX,SizeOf(MOX),#0);
+  FillChar(MOX, SizeOf(MOX), #0);
 
   blockread(f,c4,4);
   MOX.Header1.Fmt := c4[1]+c4[2]+c4[3]+c4[4];
@@ -141,10 +141,10 @@ begin
     MOX.Face[i, 3] := face6[3] + 1
   end;
 
-  if MOX.MOXFormatStr = 'MBWR' then
+  if MOX.MOXFormatStr = 'MBWR'{0010} then
   for j:=1 to MOX.Header.ChunkCount do
   begin
-    blockread(f,cChunk12,12);
+    blockread(f, cChunk12, 12);
     MOX.Sid[j,1]:=ord(cChunk12[1])+ord(cChunk12[2])*256;
     MOX.Sid[j,2]:=ord(cChunk12[3])+ord(cChunk12[4])*256;
     MOX.Chunk[j,1]:=ord(cChunk12[5])+ord(cChunk12[6])*256; //first Poly
@@ -153,10 +153,10 @@ begin
     MOX.Chunk[j,4]:=ord(cChunk12[11])+ord(cChunk12[12])*256+1; //point Till
   end;
 
-  if (MOX.MOXFormatStr = 'WR22') or (MOX.MOXFormatStr = 'WR02') then
+  if (MOX.MOXFormatStr = 'WR22') or (MOX.MOXFormatStr = 'WR02'){0002, 0022} then
   for j:=1 to MOX.Header.ChunkCount do
   begin
-    blockread(f,cChunk24,24);
+    blockread(f, cChunk24, 24);
     MOX.Sid[j,1]:=ord(cChunk24[1])+ord(cChunk24[2])*256;
     MOX.Sid[j,2]:=ord(cChunk24[5])+ord(cChunk24[6])*256;
     MOX.Chunk[j,1]:=ord(cChunk24[9])+ord(cChunk24[10])*256; //first Poly
