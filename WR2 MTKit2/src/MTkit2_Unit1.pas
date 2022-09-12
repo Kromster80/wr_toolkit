@@ -807,9 +807,9 @@ begin
     Exit;
   end;
 
-  TVParts.ReadOnly:=True;
-  IsLightwave2MOX:=False;
-  PivotSetup.TabVisible:=False;
+  TVParts.ReadOnly := True;
+  IsLightwave2MOX := False;
+  PivotSetup.TabVisible := False;
 
   blockread(f,MOX.Qty,24);
 
@@ -936,7 +936,7 @@ begin
                 CBVinyl.ItemIndex:=0;
               end;
     uiLights: begin
-                LightRefresh:=True;
+                LightRefresh := True;
                 oldID1:=LBBlinkers.ItemIndex;
                 LBBlinkers.Clear;
                 for ii:=1 to MOX.Qty.Blink do
@@ -946,31 +946,31 @@ begin
                     IntToStr(MOX.Blinkers[ii].Parent)
                   );
                 if oldID1<LBBlinkers.Count then LBBlinkers.ItemIndex:=oldID1;
-                LightRefresh:=False;
+                LightRefresh := False;
               end;
     uiParts:  begin
                 TVParts.Items.Clear;
                 for ii:=1 to MOX.Qty.Parts do
                 begin
-                  if MOX.Parts[ii].Parent=-1 then Dnode[ii]:=TVParts.Items.Add(nil,MOX.Parts[ii].Dname) else //make Root
-                  Dnode[ii]:=TVParts.Items.AddChild(Dnode[MOX.Parts[ii].Parent+1],MOX.Parts[ii].Dname);      //child
+                  if MOX.Parts[ii].Parent=-1 then Dnode[ii] := TVParts.Items.Add(nil,MOX.Parts[ii].Dname) else //make Root
+                  Dnode[ii] := TVParts.Items.AddChild(Dnode[MOX.Parts[ii].Parent+1],MOX.Parts[ii].Dname);      //child
                 end;
                 if MOX.Qty.Parts>=1 then Dnode[1].Expand(False);
               end;
     uiCOB:    begin
-                COBRefresh:=True;
+                COBRefresh := True;
                 oldID1:=LBCOBPoints.ItemIndex;
                 LBCOBPoints.Clear;
                 LBCPOShapes.Clear;
                 for ii:=1 to COB.Head.PointQty do LBCOBPoints.Items.Add(IntToStr(ii));
                 LBCOBPoints.ItemIndex:=EnsureRange(oldID1,0,LBCOBPoints.Count-1);
-                COBRefresh:=False;
+                COBRefresh := False;
                 COB_X.Value:=COB.Head.X; COB_Y.Value:=COB.Head.Y; COB_Z.Value:=COB.Head.Z;
                 COB_X1.Value:=COB.Head.Xmin; COB_Y1.Value:=COB.Head.Ymin; COB_Z1.Value:=COB.Head.Zmin;
                 COB_X2.Value:=COB.Head.Xmax; COB_Y2.Value:=COB.Head.Ymax; COB_Z2.Value:=COB.Head.Zmax;
               end;
     uiCPO:    begin
-                CPORefresh:=True;
+                CPORefresh := True;
                 oldID1:=LBCPOShapes.ItemIndex;
                 LBCPOShapes.Clear;
                 for ii:=1 to CPOHead.Qty do
@@ -979,7 +979,7 @@ begin
                     3: LBCPOShapes.Items.Add('Shape #'+IntToStr(ii)+' '+IntToStr(CPO[ii].IndiceSize div 2));
                     else LBCPOShapes.Items.Add('Unknown #'+IntToStr(ii));
                   end;
-                CPORefresh:=False;
+                CPORefresh := False;
                 LBCPOShapes.ItemIndex:=EnsureRange(oldID1,0,LBCPOShapes.Count-1);
                 LBCPOShapesClick(nil);
                 Label82.Caption:='Shapes: '+IntToStr(CPOHead.Qty);
@@ -1356,7 +1356,7 @@ begin
   MatID:=LBMaterials.ItemIndex+1;
   if MatID=0 then Exit;
   MatName.Text:=Material[MatID].Title;
-  MaterialRefresh:=True;
+  MaterialRefresh := True;
   TTransparency.Position:=Material[MatID].Transparency;
   ETextureName.Text:=Material[MatID].TexName;
   CBMatClass2.ItemIndex:=Material[MatID].MatClass[2];
@@ -1367,7 +1367,7 @@ begin
   CB4.Checked:=(Material[MatID].MatClass[4] AND 8) = 8;
   CBClipU.ItemIndex:=Material[MatID].TexEdge.U;
   CBClipV.ItemIndex:=Material[MatID].TexEdge.V;
-  MaterialRefresh:=False;
+  MaterialRefresh := False;
 
   CBColorChange(nil); //update color panels
 end;
@@ -1380,7 +1380,7 @@ begin
   if MatID=0 then Exit;
   Label13.Caption:=IntToStr(TTransparency.Position)+'% Transparency';
   if MaterialRefresh then Exit;
-  Material[MatID].Transparency:=TTransparency.Position;
+  Material[MatID].Transparency := TTransparency.Position;
   Material[MatID].TexName:=ETextureName.Text;
   Material[MatID].MatClass[2]:=CBMatClass2.ItemIndex;
   Material[MatID].MatClass[3]:=CBMatClass3.ItemIndex;
@@ -1389,7 +1389,7 @@ begin
   if CB2.Checked then inc(t,2);
   if CB3.Checked then inc(t,4);
   if CB4.Checked then inc(t,8);
-  Material[MatID].MatClass[4]:=t;
+  Material[MatID].MatClass[4] := T;
   Material[MatID].TexEdge.U:=CBClipU.ItemIndex;
   Material[MatID].TexEdge.V:=CBClipV.ItemIndex;
 end;
@@ -1406,9 +1406,9 @@ end;
 procedure TForm1.TVPartsChange(Sender: TObject; Node: TTreeNode);
 var ID:Integer;
 begin
-  ForbidPartsChange:=True;
+  ForbidPartsChange := True;
   Label63.Caption:='ID: '+IntToStr(TVParts.Selected.AbsoluteIndex);
-  SelectedTreeNode:=TVParts.Selected.AbsoluteIndex+1;
+  SelectedTreeNode := TVParts.Selected.AbsoluteIndex+1;
   ID:=SelectedTreeNode;
   Label23.Caption:='#'+IntToStr(ID)+' P'+IntToStr(MOX.Parts[ID].Parent+1)
                                    +' C'+IntToStr(MOX.Parts[ID].Child+1)
@@ -1431,10 +1431,10 @@ begin
   LY2.Value:=MOX.Parts[SelectedTreeNode].y2/pi*180;//+XZ rotation
   LZ1.Value:=MOX.Parts[SelectedTreeNode].z1/pi*180;//-XY rotation
   LZ2.Value:=MOX.Parts[SelectedTreeNode].z2/pi*180;//+XY rotation
-  ForbidPartsChange:=False;
+  ForbidPartsChange := False;
   FlapParts.Enabled:=SelectedTreeNode<>0;
   Label30.Enabled:=SelectedTreeNode<>0;
-  ForbidPivotChange:=True;
+  ForbidPivotChange := True;
   PivotPointActual.MaxValue:=
   MOX.Chunk[MOX.Parts[SelectedTreeNode].FirstMat+1+MOX.Parts[SelectedTreeNode].NumMat-1,4]-
   MOX.Chunk[MOX.Parts[SelectedTreeNode].FirstMat+1,3]+1;
@@ -1445,7 +1445,7 @@ begin
   CustomPivotX.Value:=PartModify[SelectedTreeNode].Custom[1];
   CustomPivotY.Value:=PartModify[SelectedTreeNode].Custom[2];
   CustomPivotZ.Value:=PartModify[SelectedTreeNode].Custom[3];
-  ForbidPivotChange:=False;
+  ForbidPivotChange := False;
 end;
 
 
@@ -1522,14 +1522,14 @@ begin
         //repeat
           if (MOX.Parts[Lev].Parent<>-1) then begin
             Lev:=MOX.Parts[Lev].Parent+1; //parentID
-            tx[m]:=tx[m]-PartModify[Lev].Move[1];
-            ty[m]:=ty[m]-PartModify[Lev].Move[2];
-            tz[m]:=tz[m]-PartModify[Lev].Move[3];
+            tx[m] := Tx[m]-PartModify[Lev].Move[1];
+            ty[m] := Ty[m]-PartModify[Lev].Move[2];
+            tz[m] := Tz[m]-PartModify[Lev].Move[3];
           end;
         //until(MOX.Parts[Lev].Parent=-1);
-        tx[m]:=tx[m]+PartModify[m].Move[1];
-        ty[m]:=ty[m]+PartModify[m].Move[2];
-        tz[m]:=tz[m]+PartModify[m].Move[3];
+        tx[m] := Tx[m]+PartModify[m].Move[1];
+        ty[m] := Ty[m]+PartModify[m].Move[2];
+        tz[m] := Tz[m]+PartModify[m].Move[3];
       end;
 
       MOX.Vertice[i].X:=MOX.Vertice[i].X-PartModify[m].Move[1];
@@ -1538,9 +1538,9 @@ begin
     end;
 
     for i:=1 to MOX.Qty.Parts do begin
-      MOX.Parts[i].Matrix[4,1]:=tx[i];//PartModify[i].Move[1];
-      MOX.Parts[i].Matrix[4,2]:=ty[i];//PartModify[i].Move[2];
-      MOX.Parts[i].Matrix[4,3]:=tz[i];//PartModify[i].Move[3];
+      MOX.Parts[i].Matrix[4,1] := Tx[i];//PartModify[i].Move[1];
+      MOX.Parts[i].Matrix[4,2] := Ty[i];//PartModify[i].Move[2];
+      MOX.Parts[i].Matrix[4,3] := Tz[i];//PartModify[i].Move[3];
       MOX.Parts[i].xMid:=MOX.Parts[i].xMid-PartModify[i].Move[1];
       MOX.Parts[i].yMid:=MOX.Parts[i].yMid-PartModify[i].Move[2];
       MOX.Parts[i].zMid:=MOX.Parts[i].zMid-PartModify[i].Move[3];
@@ -1548,7 +1548,7 @@ begin
 
   end;
 
-    PivotSetup.TabVisible:=False;
+    PivotSetup.TabVisible := False;
 
     // Make sure we write Ansi chars
     BlockWrite(f, PAnsiChar(MOX_FORMAT_HEADER)^, 8);
@@ -1626,7 +1626,7 @@ begin
   if Sender=LY1 then LY2.Value:=LY1.Value else LY1.Value:=LY2.Value;
   if LZ1.Value>LZ2.Value then
   if Sender=LZ1 then LZ2.Value:=LZ1.Value else LZ1.Value:=LZ2.Value;
-  SelectedTreeNode:=TVParts.Selected.AbsoluteIndex+1;
+  SelectedTreeNode := TVParts.Selected.AbsoluteIndex+1;
   MOX.Parts[SelectedTreeNode].Dname:=EDetailName.Text;
   MOX.Parts[SelectedTreeNode].xMid:=CX.Value;
   MOX.Parts[SelectedTreeNode].yMid:=CY.Value;
@@ -1678,22 +1678,22 @@ begin
   MOX.Qty.Parts:=Imp.PartCount;
   MOX.Qty.Mat:=Imp.SurfCount;
 
-  TVParts.ReadOnly:=False;
+  TVParts.ReadOnly := False;
   FillChar(PartModify,SizeOf(PartModify),#0);
 
   RGPivotClick(nil);
 
   //Convert all unused vertices into blinkers later
-  for i:=1 to Imp.VerticeCount do sprite[i]:=True;
+  for i:=1 to Imp.VerticeCount do sprite[i] := True;
   for i:=1 to Imp.PolyCount do begin
-    sprite[Imp.Faces[i,1]]:=False;
-    sprite[Imp.Faces[i,2]]:=False;
-    sprite[Imp.Faces[i,3]]:=False;
+    sprite[Imp.Faces[i,1]] := False;
+    sprite[Imp.Faces[i,2]] := False;
+    sprite[Imp.Faces[i,3]] := False;
   end;
 
-  MakeDefaultPart:=False;
+  MakeDefaultPart := False;
   for i:=1 to Imp.PolyCount do
-  if Imp.Part[i]=0 then MakeDefaultPart:=True;
+  if Imp.Part[i]=0 then MakeDefaultPart := True;
 
   if MakeDefaultPart then begin //insert part for default
     for i:=MAX_PARTS-1 downto 1 do Imp.PartName[i+1]:=Imp.PartName[i];
@@ -1727,8 +1727,8 @@ begin
       end;
     end;
   SendDataToUI(uiLights);
-  btnBlinkersLoad.Enabled:=True;
-  btnBlinkersSave.Enabled:=True;
+  btnBlinkersLoad.Enabled := True;
+  btnBlinkersSave.Enabled := True;
 
   for i:=1 to Imp.PolyCount do
     for h:=1 to 3 do begin //Remapping UVs to DUVs
@@ -1767,7 +1767,7 @@ begin
 
       for h:=1 to 3 do  //point-by-point
       begin
-        found:=False; //"match found" marker
+        found := False; //"match found" marker
         for k:=PqtyAtSurf[m,Imp.Surf[i]] downto 1 do
         begin
           //not to compare with self but all others of same surface
@@ -1782,7 +1782,7 @@ begin
                 setlength(v2[m,Imp.Surf[i]],PqtyAtSurf[m,Imp.Surf[i]]+100);
 
               v2[m,Imp.Surf[i],PqtyAtSurf[m,Imp.Surf[i]]+1,h]:=v2[m,Imp.Surf[i],k,j]; //make V2 use it
-              found:=True;
+              found := True;
             end;
             if found then break; //5% save
         end;
@@ -1955,17 +1955,17 @@ begin
 
   CompileLoadedMOX;
 
-  Label35.Caption:=floattostr(round((GetTickCount-OldTimeLWO)/100)/10)+' s';
+  Label35.Caption := Floattostr(round((GetTickCount-OldTimeLWO)/100)/10)+' s';
 
   ShowUpClick(cuMOX);
   ShowUpClick(cuMTL);
   SetRenderObject([roMOX]);
   SetActivePage(apMTL);
 
-  SaveMOX1.Enabled:=True;
+  SaveMOX1.Enabled := True;
 
-  IsLightwave2MOX:=True;
-  PivotSetup.TabVisible:=True;
+  IsLightwave2MOX := True;
+  PivotSetup.TabVisible := True;
 end;
 
 
@@ -2128,7 +2128,7 @@ begin
   TVParts.Selected.MoveTo(TVParts.GetNodeAt(X,Y),naAddChild); //First?
   RebuildPartsTree;
   ExchangePartsOrdering;
-  SelectedTreeNode:=TVParts.Selected.AbsoluteIndex+1;
+  SelectedTreeNode := TVParts.Selected.AbsoluteIndex+1;
 end;
 
 
@@ -2325,7 +2325,7 @@ procedure TForm1.COBPasteClick(Sender: TObject);
 begin
   if fCOBCopyItem<>EnsureRange(fCOBCopyItem, 1, MOX.Qty.Blink) then
   begin
-    COBPaste.Enabled:=False;
+    COBPaste.Enabled := False;
     Exit;
   end;
   COB.Vertices[LBCOBPoints.ItemIndex+1].X:=COB.Vertices[fCOBCopyItem].X;
@@ -2341,11 +2341,11 @@ var
   ID:Integer;
 begin
   ID:=LBCOBPoints.ItemIndex+1; if ID=0 then Exit;
-  COBRefresh:=True;
+  COBRefresh := True;
   COBX.Value:=COB.Vertices[ID].X;
   COBY.Value:=COB.Vertices[ID].Y;
   COBZ.Value:=COB.Vertices[ID].Z;
-  COBRefresh:=False;
+  COBRefresh := False;
 end;
 
 
@@ -2367,7 +2367,7 @@ procedure TForm1.MatCopyClick(Sender: TObject);
 begin
   if MatID=0 then Exit;
   fColorCopyID := MatID;
-  MatPaste.Enabled:=True;
+  MatPaste.Enabled := True;
 end;
 
 
@@ -2377,7 +2377,7 @@ var
 begin
   if fColorCopyID <> EnsureRange(fColorCopyID, 1, MOX.Qty.Mat) then
   begin
-    MatPaste.Enabled:=False;
+    MatPaste.Enabled := False;
     Exit;
   end;
 
@@ -2440,7 +2440,7 @@ var
 begin
   if SelectedTreeNode=0 then Exit;
   ID:=PivotPointActual.Value;
-  ForbidPivotChange:=True;
+  ForbidPivotChange := True;
   with PartModify[SelectedTreeNode] do
   begin
     Custom[1]:=MOX.Vertice[ID+MOX.Chunk[MOX.Parts[SelectedTreeNode].FirstMat+1,3]-1].X;
@@ -2451,7 +2451,7 @@ begin
     CustomPivotZ.Value:=Custom[3];
     ActualPoint:=ID;
   end;
-  ForbidPivotChange:=False;
+  ForbidPivotChange := False;
   RGPivotClick(nil);//force update
 end;
 
@@ -2578,7 +2578,7 @@ function TForm1.LoadFile(const aFilename: string; lm: TLoadMode):Boolean;
 var
   i: Integer;
 begin
-  Result:=False;
+  Result := False;
   UpdateOpenedFileInfo(aFilename);
   ClearUpClick(cuALL);
 
@@ -2636,7 +2636,7 @@ begin
     SetRenderObject([roTREE]);
   end;
 
-  Result:=True;
+  Result := True;
 end;
 
 
@@ -2752,7 +2752,7 @@ var
 begin
   I:=LBCPOShapes.ItemIndex+1;
   if I = 0 then Exit;
-  COBRefresh:=True;
+  COBRefresh := True;
 
   CPOX.Value:=CPO[I].PosX;
   CPOY.Value:=CPO[I].PosY;
@@ -2770,7 +2770,7 @@ begin
   CPORH.Value:=round(ax);
   CPORP.Value:=round(ay);
   CPORB.Value:=round(az);
-  COBRefresh:=False;
+  COBRefresh := False;
 end;
 
 procedure TForm1.CPOChange(Sender: TObject);
@@ -3066,7 +3066,7 @@ begin
   LoadLights(fOpenedFileMask+'.lsf');
 
   SendDataToUI(uiLights);
-  btnBlinkerPaste.Enabled:=False;
+  btnBlinkerPaste.Enabled := False;
 end;
 
 
@@ -3106,29 +3106,29 @@ end;
 
 procedure TForm1.ClearUpClick(aClearup: TClearUp);
 begin
-  RenderOpts.LightVec:=False;
-  RenderOpts.Colli:=False;
-  RenderOpts.Wire:=False;
-  RenderOpts.UVMap:=False;
+  RenderOpts.LightVec := False;
+  RenderOpts.Colli := False;
+  RenderOpts.Wire := False;
+  RenderOpts.UVMap := False;
   RenderResize(nil);
 
   if aClearup in [cuMOX, cuALL] then
   begin
     FillChar(MOX,SizeOf(MOX),#0);
-    btnBlinkerCopy.Enabled:=False;
-    btnBlinkerPaste.Enabled:=False;
-    btnBlinkersLoad.Enabled:=False;
-    btnBlinkersSave.Enabled:=False;
-    btnBlinkerAdd.Enabled:=False;
-    btnBlinkerRem.Enabled:=False;
-    PBFLoad.Enabled:=False;
-    PBFSave.Enabled:=False;
-    SB_Light.Down:=False;
-    SB_Light.Enabled:=False;
-    SB_UVMap.Down:=False;
-    SB_UVMap.Enabled:=False;
-    SB_Wire.Down:=False;
-    SB_Wire.Enabled:=False;
+    btnBlinkerCopy.Enabled := False;
+    btnBlinkerPaste.Enabled := False;
+    btnBlinkersLoad.Enabled := False;
+    btnBlinkersSave.Enabled := False;
+    btnBlinkerAdd.Enabled := False;
+    btnBlinkerRem.Enabled := False;
+    PBFLoad.Enabled := False;
+    PBFSave.Enabled := False;
+    SB_Light.Down := False;
+    SB_Light.Enabled := False;
+    SB_UVMap.Down := False;
+    SB_UVMap.Enabled := False;
+    SB_Wire.Down := False;
+    SB_Wire.Enabled := False;
     SendDataToUI(uiParts);
     SendDataToUI(uiLights);
     SendDataToUI(uiMOX);
@@ -3138,11 +3138,11 @@ begin
   begin
     FillChar(Material,SizeOf(Material),#0);
     NumColors:=0;
-    SaveMTL1.Enabled:=False;
-    MatCopy.Enabled:=False;
-    MatPaste.Enabled:=False;
-    ResetMTLOrder.Enabled:=False;
-    CBMonoColor.Checked:=False;
+    SaveMTL1.Enabled := False;
+    MatCopy.Enabled := False;
+    MatPaste.Enabled := False;
+    ResetMTLOrder.Enabled := False;
+    CBMonoColor.Checked := False;
     SendDataToUI(uiMTL);
     SendDataToUI(uiVinyl);
   end;
@@ -3150,12 +3150,12 @@ begin
   if aClearup in [cuCOB, cuALL] then
   begin
     FillChar(COB,SizeOf(COB),#0);
-    SB_Colli.Down:=False;
-    SB_Colli.Enabled:=False;
-    SaveCOB1.Enabled:=False;
-    COBCopy.Enabled:=False;
-    COBPaste.Enabled:=False;
-    ExportCOB1.Enabled:=False;
+    SB_Colli.Down := False;
+    SB_Colli.Enabled := False;
+    SaveCOB1.Enabled := False;
+    COBCopy.Enabled := False;
+    COBPaste.Enabled := False;
+    ExportCOB1.Enabled := False;
     SendDataToUI(uiCOB);
   end;
 
@@ -3163,9 +3163,9 @@ begin
   begin
     FillChar(CPO,SizeOf(CPO),#0);
     FillChar(CPOHead,SizeOf(CPOHead),#0);
-    SB_Colli.Down:=False;
-    SB_Colli.Enabled:=False;
-    SaveCPO1.Enabled:=False;
+    SB_Colli.Down := False;
+    SB_Colli.Enabled := False;
+    SaveCPO1.Enabled := False;
     SendDataToUI(uiCPO);
   end;
 
@@ -3185,25 +3185,25 @@ begin
     SendDataToUI(uiLights);
     SendDataToUI(uiMOX);
 
-    btnBlinkerCopy.Enabled:=True;
-    btnBlinkerPaste.Enabled:=False;
-    btnBlinkerAdd.Enabled:=True;
-    btnBlinkerRem.Enabled:=True;
-    btnBlinkersLoad.Enabled:=True;
-    btnBlinkersSave.Enabled:=True;
-    PBFLoad.Enabled:=True;
-    PBFSave.Enabled:=True;
-    SB_Light.Enabled:=True;
-    SB_Wire.Enabled:=True;
-    SB_UVMap.Enabled:=True;
+    btnBlinkerCopy.Enabled := True;
+    btnBlinkerPaste.Enabled := False;
+    btnBlinkerAdd.Enabled := True;
+    btnBlinkerRem.Enabled := True;
+    btnBlinkersLoad.Enabled := True;
+    btnBlinkersSave.Enabled := True;
+    PBFLoad.Enabled := True;
+    PBFSave.Enabled := True;
+    SB_Light.Enabled := True;
+    SB_Wire.Enabled := True;
+    SB_UVMap.Enabled := True;
   end;
 
   if aClearup = cuMTL then
   begin
-    SaveMTL1.Enabled:=True;
-    MatCopy.Enabled:=True;
-    MatPaste.Enabled:=False;
-    ResetMTLOrder.Enabled:=True;
+    SaveMTL1.Enabled := True;
+    MatCopy.Enabled := True;
+    MatPaste.Enabled := False;
+    ResetMTLOrder.Enabled := True;
     CBMonoColor.Checked:=NumColors=1;
     MatMonoColorClick(nil);
     SendDataToUI(uiMTL);
@@ -3212,23 +3212,23 @@ begin
 
   if aClearup=cuCOB then
   begin
-    SB_Colli.Enabled:=True;
-    SaveCOB1.Enabled:=True;
-    ExportCOB1.Enabled:=True;
-    COBCopy.Enabled:=True;
-    COBPaste.Enabled:=False;
+    SB_Colli.Enabled := True;
+    SaveCOB1.Enabled := True;
+    ExportCOB1.Enabled := True;
+    COBCopy.Enabled := True;
+    COBPaste.Enabled := False;
     SendDataToUI(uiCOB);
   end;
 
   if aClearup=cuCPO then
   begin
-    SB_Colli.Enabled:=True;
-    SaveCPO1.Enabled:=True;
+    SB_Colli.Enabled := True;
+    SaveCPO1.Enabled := True;
     SendDataToUI(uiCPO);
   end;
 
   if aClearup=cuTREE then
-    SB_Wire.Enabled:=True;
+    SB_Wire.Enabled := True;
 end;
 
 
