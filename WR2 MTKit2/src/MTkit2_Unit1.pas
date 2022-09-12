@@ -281,7 +281,6 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure CompileLoadedMOX;
     procedure RenderResize(Sender: TObject);
-    procedure LoadMOX(const aFilename: string);
     procedure Panel1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure Panel1MouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
     procedure Panel1MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -293,7 +292,6 @@ type
     procedure MatNameChange(Sender: TObject);
     procedure TVPartsChange(Sender: TObject; Node: TTreeNode);
     procedure MatEdSetAllColorsToCurrent(Sender: TObject);
-    procedure SaveMOX(const aFilename: string);
     procedure MatTexReloadClick(Sender: TObject);
     procedure CBChromeClick(Sender: TObject);
     procedure PartTypeChange(Sender: TObject);
@@ -411,6 +409,8 @@ type
     procedure ConverseImp_MOX;
     procedure ConverseImp_COB;
     procedure RebuildCOBBounds;
+    procedure LoadMOX(const aFilename: string);
+    procedure SaveMOX(const aFilename: string);
   end;
 
 const
@@ -742,8 +742,6 @@ begin
         fLastInputMode := imRelative
       else
         fLastInputMode := imAbsolute;
-
-
     end;
   end;
 end;
@@ -778,7 +776,6 @@ var
   h,i,j,k: Integer;
   f: file;
   vv: array [1..65280,1..3] of longWord;
-  MOXFormat: string;
 begin
   if not fileexists(aFilename) then Exit;
 
@@ -789,18 +786,18 @@ begin
 
   FillChar(MOX,SizeOf(MOX),#0);
 
-  blockread(f,c,8);
-
-  if c[1]+c[2]+c[3]+c[4]<>('!XOM') then
+  blockread(f,c,4);
+  MOX.Header1.Fmt := c[1]+c[2]+c[3]+c[4];
+  if MOX.Header1.Fmt <> ('!XOM') then
   begin
     MessageBox(Handle, PChar('Unknown format - '+c[1]+c[2]+c[3]+c[4]), 'Error', MB_OK or MB_ICONERROR);
     closefile(f);
     Exit;
   end;
 
-  if c[6]+c[7]+c[8]=(#0+#2+#2) then MOXFormat:='WR22' else //32bit chunks, parts, blinkers
-  if c[6]+c[7]+c[8]=(#0+#0+#2) then MOXFormat:='WR02' else //32bit chunks
-  if c[6]+c[7]+c[8]=(#0+#1+#0) then MOXFormat:='MBWR' else //16bit chunks
+  blockread(f, MOX.Header1.A, 4);
+
+  if MOX.MOXFormat = 'Unknown' then
   begin
     MessageBox(Handle, PChar('Unknown version - '+IntToStr(ord(c[1]))+IntToStr(ord(c[2]))+IntToStr(ord(c[3])) + IntToStr(ord(c[4]))), 'Error', MB_OK or MB_ICONERROR);
     closefile(f);
@@ -811,9 +808,9 @@ begin
   IsLightwave2MOX := False;
   PivotSetup.TabVisible := False;
 
-  blockread(f,MOX.Header,24);
+  blockread(f, MOX.Header, 24);
 
-  blockread(f,MOX.Vertice,MOX.Header.VerticeCount*40);
+  blockread(f, MOX.Vertice, MOX.Header.VerticeCount*40);
 
   Memo1.Lines.Add('Loading polygons ...');
   for i:=1 to MOX.Header.PolyCount do
@@ -829,7 +826,7 @@ begin
   end;
 
   Memo1.Lines.Add('Loading surface assignments ...');
-  if MOXFormat='MBWR' then
+  if MOX.MOXFormat='MBWR' then
   for j:=1 to MOX.Header.ChunkCount do
   begin
     blockread(f,c,12);
@@ -841,7 +838,7 @@ begin
     MOX.Chunk[j,4]:=ord(c[11])+ord(c[12])*256+1; //point Till
   end;
 
-  if (MOXFormat='WR22')or(MOXFormat='WR02') then
+  if (MOX.MOXFormat='WR22') or (MOX.MOXFormat='WR02') then
   for j:=1 to MOX.Header.ChunkCount do
   begin
     blockread(f,c,24);
@@ -857,7 +854,7 @@ begin
 
   Memo1.Lines.Add('Reading Parts ...');
 
-  if MOXFormat='WR22' then
+  if MOX.MOXFormat='WR22' then
     for j:=1 to MOX.Header.PartCount do
     begin
       blockread(f,c,64);
@@ -865,22 +862,23 @@ begin
       blockread(f,MOX.Parts[j].Matrix,132);
     end;
 
-  if (MOXFormat='MBWR')or(MOXFormat='WR02') then
+  if (MOX.MOXFormat='MBWR')or(MOX.MOXFormat='WR02') then
   begin
-    MOX.Header.PartCount:=1;
-    FillChar(MOX.Parts[1],SizeOf(MOX.Parts[1]),#0);
-    with MOX.Parts[1] do
-    begin
-      Dname:='Default';
-      Matrix[1,1]:=1; Matrix[2,2]:=1; Matrix[3,3]:=1; Matrix[4,4]:=1;
-      Parent:=-1;
-      Child:=-1;
-      PrevInLevel:=-1;
-      NextInLevel:=-1;
-      FirstMat:=0;
-      NumMat:=MOX.Header.MatCount;
-      fRadius:=10;
-    end;
+    MOX.Header.PartCount := 1;
+
+    FillChar(MOX.Parts[1], SizeOf(MOX.Parts[1]), #0);
+    MOX.Parts[1].Dname := 'Default';
+    MOX.Parts[1].Matrix[1, 1] := 1;
+    MOX.Parts[1].Matrix[2, 2] := 1;
+    MOX.Parts[1].Matrix[3, 3] := 1;
+    MOX.Parts[1].Matrix[4, 4] := 1;
+    MOX.Parts[1].Parent := -1;
+    MOX.Parts[1].Child := -1;
+    MOX.Parts[1].PrevInLevel := -1;
+    MOX.Parts[1].NextInLevel := -1;
+    MOX.Parts[1].FirstMat := 0;
+    MOX.Parts[1].NumMat := MOX.header.MatCount;
+    MOX.Parts[1].fRadius := 10;
   end;
 
   Memo1.Lines.Add('Reading Blinkers ...');
@@ -889,7 +887,8 @@ begin
     MOX.Header.BlinkerCount := MAX_BLINKERS;
     MessageBox(Handle, PChar('Blinker quantity limited to '+IntToStr(MAX_BLINKERS)+' due to compatibility issues.'), 'Warning', MB_OK or MB_ICONWARNING);
   end;
-  if MOXFormat='WR22' then blockread(f,MOX.Blinkers,88*MOX.Header.BlinkerCount);
+  if MOX.MOXFormat='WR22' then
+    blockread(f, MOX.Blinkers, 88*MOX.Header.BlinkerCount);
   closefile(f);
   Memo1.Lines.Add('MOX file closed');
 
@@ -1484,20 +1483,20 @@ begin
     for i:=1 to MOX.Header.PartCount do
     begin
       lazyqty[i]:=1;                  //number of MOX.Parts
-        for j:=MOX.Parts[i].FirstMat+1 to MOX.Parts[i].FirstMat+MOX.Parts[i].NumMat do
-          if (MOX.Chunk[j,2]>0) then begin  //if polycount for part >1
-            MOX.Chunk[lazyqty[0]+lazyqty[i],1]:=MOX.Chunk[j,1];
-            MOX.Chunk[lazyqty[0]+lazyqty[i],2]:=MOX.Chunk[j,2];
-            MOX.Chunk[lazyqty[0]+lazyqty[i],3]:=MOX.Chunk[j,3];
-            MOX.Chunk[lazyqty[0]+lazyqty[i],4]:=MOX.Chunk[j,4];
-              MOX.Sid[lazyqty[0]+lazyqty[i],1]:=MOX.Sid   [j,1];
-              MOX.Sid[lazyqty[0]+lazyqty[i],2]:=MOX.Sid   [j,2];
-            //MoxMat[lazyqty[0]+lazyqty[i]].ID:=MoxMat[j].ID;
-            inc(lazyqty[i]);
-          end;
+      for j:=MOX.Parts[i].FirstMat+1 to MOX.Parts[i].FirstMat+MOX.Parts[i].NumMat do
+        if (MOX.Chunk[j,2]>0) then begin  //if polycount for part >1
+          MOX.Chunk[lazyqty[0]+lazyqty[i],1]:=MOX.Chunk[j,1];
+          MOX.Chunk[lazyqty[0]+lazyqty[i],2]:=MOX.Chunk[j,2];
+          MOX.Chunk[lazyqty[0]+lazyqty[i],3]:=MOX.Chunk[j,3];
+          MOX.Chunk[lazyqty[0]+lazyqty[i],4]:=MOX.Chunk[j,4];
+            MOX.Sid[lazyqty[0]+lazyqty[i],1]:=MOX.Sid   [j,1];
+            MOX.Sid[lazyqty[0]+lazyqty[i],2]:=MOX.Sid   [j,2];
+          //MoxMat[lazyqty[0]+lazyqty[i]].ID:=MoxMat[j].ID;
+          inc(lazyqty[i]);
+        end;
       dec(lazyqty[i]);
       inc(lazyqty[0],lazyqty[i]);
-      end;
+    end;
 
     MOX.Header.ChunkCount:=0;
     MOX.Parts[1].FirstMat:=0;
@@ -1549,39 +1548,37 @@ begin
       MOX.Parts[i].yMid:=MOX.Parts[i].yMid-PartModify[i].Move[2];
       MOX.Parts[i].zMid:=MOX.Parts[i].zMid-PartModify[i].Move[3];
     end;
-
   end;
 
-    PivotSetup.TabVisible := False;
+  PivotSetup.TabVisible := False;
 
-    // Make sure we write Ansi chars
-    BlockWrite(f, PAnsiChar(MOX_FORMAT_HEADER)^, 8);
+  // Make sure we write Ansi chars
+  BlockWrite(f, PAnsiChar(MOX_FORMAT_HEADER)^, 8);
 
-    BlockWrite(f,MOX.Header,24);
-    BlockWrite(f,MOX.Vertice,MOX.Header.VerticeCount*40);
-    for ii:=1 to MOX.Header.PolyCount do
-    begin
-      dec(MOX.Face[ii,1],1); dec(MOX.Face[ii,2],1); dec(MOX.Face[ii,3],1);//V-1
+  BlockWrite(f, MOX.Header, 24);
+  BlockWrite(f, MOX.Vertice, MOX.Header.VerticeCount*40);
+  for ii:=1 to MOX.Header.PolyCount do
+  begin
+    dec(MOX.Face[ii,1],1); dec(MOX.Face[ii,2],1); dec(MOX.Face[ii,3],1);//V-1
 
-        BlockWrite(f,MOX.Face[ii],6);
-      inc(MOX.Face[ii,1],1); inc(MOX.Face[ii,2],1); inc(MOX.Face[ii,3],1);//restore values V+1 !
-    end;
+      BlockWrite(f,MOX.Face[ii],6);
+    inc(MOX.Face[ii,1],1); inc(MOX.Face[ii,2],1); inc(MOX.Face[ii,3],1);//restore values V+1 !
+  end;
 
-    for ii:=1 to MOX.Header.ChunkCount do
-    begin
-      BlockWrite(f,MOX.Sid[ii,1],2); BlockWrite(f,#0+#0,2);
-      BlockWrite(f,MOX.Sid[ii,2],2); BlockWrite(f,#0+#0,2);
+  for ii:=1 to MOX.Header.ChunkCount do
+  begin
+    BlockWrite(f,MOX.Sid[ii,1],2); BlockWrite(f,#0+#0,2);
+    BlockWrite(f,MOX.Sid[ii,2],2); BlockWrite(f,#0+#0,2);
 
-      dec(MOX.Chunk[ii,3]); dec(MOX.Chunk[ii,4]);
-      BlockWrite(f,MOX.Chunk[ii,1],2); BlockWrite(f,#0+#0,2);
-      BlockWrite(f,MOX.Chunk[ii,2],2); BlockWrite(f,#0+#0,2);
-      BlockWrite(f,MOX.Chunk[ii,3],2); BlockWrite(f,#0+#0,2);
-      BlockWrite(f,MOX.Chunk[ii,4],2); BlockWrite(f,#0+#0,2);
-      inc(MOX.Chunk[ii,3]); inc(MOX.Chunk[ii,4]);
-    end;
+    dec(MOX.Chunk[ii,3]); dec(MOX.Chunk[ii,4]);
+    BlockWrite(f,MOX.Chunk[ii,1],2); BlockWrite(f,#0+#0,2);
+    BlockWrite(f,MOX.Chunk[ii,2],2); BlockWrite(f,#0+#0,2);
+    BlockWrite(f,MOX.Chunk[ii,3],2); BlockWrite(f,#0+#0,2);
+    BlockWrite(f,MOX.Chunk[ii,4],2); BlockWrite(f,#0+#0,2);
+    inc(MOX.Chunk[ii,3]); inc(MOX.Chunk[ii,4]);
+  end;
 
-
-  BlockWrite(f,MOX.MoxMat, 336*MOX.Header.MatCount);   //4+332
+  BlockWrite(f, MOX.MoxMat, 336*MOX.Header.MatCount);   //4+332
 
   for ii:=1 to MOX.Header.PartCount do
   begin

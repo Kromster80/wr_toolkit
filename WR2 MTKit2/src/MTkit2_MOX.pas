@@ -39,8 +39,9 @@ const
   MAX_PARTS = 255;
   MAX_MATERIALS = 1024;
 
-var
-  MOX: record
+type
+  TMOX = record
+    Header1: record Fmt: AnsiString; A, B, C, D: Byte; end;
     Header: record VerticeCount, PolyCount, ChunkCount, MatCount, PartCount, BlinkerCount: Integer; end;
     Vertice: array [1..MAX_MOX_VTX] of TMOXVertice;
     Face: array [1..MAX_MOX_IDX,1..3] of Word;  // Polygon links
@@ -52,8 +53,29 @@ var
     end;
     Parts: array [1..MAX_PARTS] of TMOXPart;
     Blinkers: array [1..MAX_BLINKERS] of TMOXBlinker;
+
+    function MOXFormat: string;
   end;
 
+var
+  MOX: TMOX;
+
 implementation
+
+
+function TMOX.MOXFormat: string;
+begin
+  if (Header1.B = 0) and (Header1.C = 2) and (Header1.D = 2) then
+    Result := 'WR22' //32bit chunks, parts, blinkers
+  else
+  if (Header1.B = 0) and (Header1.C = 0) and (Header1.D = 2) then
+    Result := 'WR02' //32bit chunks
+  else
+  if (Header1.B = 0) and (Header1.C = 1) and (Header1.D = 0) then
+    Result := 'MBWR' //16bit chunks
+  else
+    Result := 'Unknown';
+end;
+
 
 end.
