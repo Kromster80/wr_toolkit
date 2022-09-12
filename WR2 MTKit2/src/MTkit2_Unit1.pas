@@ -409,7 +409,6 @@ type
     procedure ConverseImp_MOX;
     procedure ConverseImp_COB;
     procedure RebuildCOBBounds;
-    procedure LoadMOX(const aFilename: string);
     procedure SaveMOX(const aFilename: string);
   end;
 
@@ -767,137 +766,6 @@ begin
 
   wglMakeCurrent(h_DC, 0);
   wglDeleteContext(h_RC);
-end;
-
-
-procedure TForm1.LoadMOX(const aFilename: string);
-var
-  c: array [1..MAX_READ_BUFFER] of AnsiChar;
-  h,i,j,k: Integer;
-  f: file;
-  vv: array [1..65280,1..3] of longWord;
-begin
-  if not fileexists(aFilename) then Exit;
-
-  Memo1.Lines.Add('Loading MOX ...');
-  Memo1.Lines.Add(aFilename);
-
-  assignfile(f,aFilename); FileMode:=0; reset(f,1); FileMode:=2;
-
-  FillChar(MOX,SizeOf(MOX),#0);
-
-  blockread(f,c,4);
-  MOX.Header1.Fmt := c[1]+c[2]+c[3]+c[4];
-  if MOX.Header1.Fmt <> ('!XOM') then
-  begin
-    MessageBox(Handle, PChar('Unknown format - '+c[1]+c[2]+c[3]+c[4]), 'Error', MB_OK or MB_ICONERROR);
-    closefile(f);
-    Exit;
-  end;
-
-  blockread(f, MOX.Header1.A, 4);
-
-  if MOX.MOXFormat = 'Unknown' then
-  begin
-    MessageBox(Handle, PChar('Unknown version - '+IntToStr(ord(c[1]))+IntToStr(ord(c[2]))+IntToStr(ord(c[3])) + IntToStr(ord(c[4]))), 'Error', MB_OK or MB_ICONERROR);
-    closefile(f);
-    Exit;
-  end;
-
-  TVParts.ReadOnly := True;
-  IsLightwave2MOX := False;
-  PivotSetup.TabVisible := False;
-
-  blockread(f, MOX.Header, 24);
-
-  blockread(f, MOX.Vertice, MOX.Header.VerticeCount*40);
-
-  Memo1.Lines.Add('Loading polygons ...');
-  for i:=1 to MOX.Header.PolyCount do
-  if c[5]=#1 then
-  begin
-    blockread(f,vv[i],12);
-    MOX.Face[i,1]:=vv[i,1]+1;
-    MOX.Face[i,2]:=vv[i,2]+1;
-    MOX.Face[i,3]:=vv[i,3]+1
-  end else begin
-    blockread(f,MOX.Face[i],6);
-    inc(MOX.Face[i,1],1); inc(MOX.Face[i,2],1); inc(MOX.Face[i,3],1);
-  end;
-
-  Memo1.Lines.Add('Loading surface assignments ...');
-  if MOX.MOXFormat='MBWR' then
-  for j:=1 to MOX.Header.ChunkCount do
-  begin
-    blockread(f,c,12);
-    MOX.Sid[j,1]:=ord(c[1])+ord(c[2])*256;
-    MOX.Sid[j,2]:=ord(c[3])+ord(c[4])*256;
-    MOX.Chunk[j,1]:=ord(c[5])+ord(c[6])*256; //first Poly
-    MOX.Chunk[j,2]:=ord(c[7])+ord(c[8])*256; //number Polys
-    MOX.Chunk[j,3]:=ord(c[9])+ord(c[10])*256+1; //point From
-    MOX.Chunk[j,4]:=ord(c[11])+ord(c[12])*256+1; //point Till
-  end;
-
-  if (MOX.MOXFormat='WR22') or (MOX.MOXFormat='WR02') then
-  for j:=1 to MOX.Header.ChunkCount do
-  begin
-    blockread(f,c,24);
-    MOX.Sid[j,1]:=ord(c[1])+ord(c[2])*256;
-    MOX.Sid[j,2]:=ord(c[5])+ord(c[6])*256;
-    MOX.Chunk[j,1]:=ord(c[9])+ord(c[10])*256; //first Poly
-    MOX.Chunk[j,2]:=ord(c[13])+ord(c[14])*256; //number Polys
-    MOX.Chunk[j,3]:=ord(c[17])+ord(c[18])*256+1; //point From
-    MOX.Chunk[j,4]:=ord(c[21])+ord(c[22])*256+1; //point Till
-  end;
-
-  blockread(f,MOX.MoxMat,(80+256)*MOX.Header.MatCount);   //Crap&Mess
-
-  Memo1.Lines.Add('Reading Parts ...');
-
-  if MOX.MOXFormat='WR22' then
-    for j:=1 to MOX.Header.PartCount do
-    begin
-      blockread(f,c,64);
-      MOX.Parts[j].Dname:=PAnsiChar(@c[1]);
-      blockread(f,MOX.Parts[j].Matrix,132);
-    end;
-
-  if (MOX.MOXFormat='MBWR')or(MOX.MOXFormat='WR02') then
-  begin
-    MOX.Header.PartCount := 1;
-
-    FillChar(MOX.Parts[1], SizeOf(MOX.Parts[1]), #0);
-    MOX.Parts[1].Dname := 'Default';
-    MOX.Parts[1].Matrix[1, 1] := 1;
-    MOX.Parts[1].Matrix[2, 2] := 1;
-    MOX.Parts[1].Matrix[3, 3] := 1;
-    MOX.Parts[1].Matrix[4, 4] := 1;
-    MOX.Parts[1].Parent := -1;
-    MOX.Parts[1].Child := -1;
-    MOX.Parts[1].PrevInLevel := -1;
-    MOX.Parts[1].NextInLevel := -1;
-    MOX.Parts[1].FirstMat := 0;
-    MOX.Parts[1].NumMat := MOX.header.MatCount;
-    MOX.Parts[1].fRadius := 10;
-  end;
-
-  Memo1.Lines.Add('Reading Blinkers ...');
-  if MOX.Header.BlinkerCount > MAX_BLINKERS then
-  begin
-    MOX.Header.BlinkerCount := MAX_BLINKERS;
-    MessageBox(Handle, PChar('Blinker quantity limited to '+IntToStr(MAX_BLINKERS)+' due to compatibility issues.'), 'Warning', MB_OK or MB_ICONWARNING);
-  end;
-  if MOX.MOXFormat='WR22' then
-    blockread(f, MOX.Blinkers, 88*MOX.Header.BlinkerCount);
-  closefile(f);
-  Memo1.Lines.Add('MOX file closed');
-
-  ShowUpClick(cuMOX);
-
-  CompileLoadedMOX;
-
-  SaveMOX1.Enabled := True;
-  ExportMOX1.Enabled := True;
 end;
 
 procedure TForm1.Button4Click(Sender: TObject); begin {Placeholder} end;
@@ -2591,7 +2459,27 @@ begin
 
   if GetFileExt(aFilename)='MOX' then
   begin
-    LoadMOX(aFilename);
+    if FileExists(aFilename) then
+    begin
+      Memo1.Lines.Add('Loading MOX ...');
+      Memo1.Lines.Add(aFilename);
+
+      TVParts.ReadOnly := True;
+      IsLightwave2MOX := False;
+      PivotSetup.TabVisible := False;
+
+      MTkit2_MOX.LoadMOX(aFilename);
+
+      Memo1.Lines.Add('MOX file closed');
+
+      ShowUpClick(cuMOX);
+
+      CompileLoadedMOX;
+
+      SaveMOX1.Enabled := True;
+      ExportMOX1.Enabled := True;
+    end;
+
     ShowUpClick(cuMOX);
     LoadMTL(decs(aFilename,4,0)+'.mtl');
     LoadTextures;
