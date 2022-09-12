@@ -33,8 +33,8 @@ type
   end;
 
 const
-  MAX_MOX_VTX = 131072;
-  MAX_MOX_IDX = 131072;
+  MAX_MOX_VTX = 256000;
+  MAX_MOX_IDX = 256000;
 
   MAX_BLINKERS = 128;
   MAX_PARTS = 255;
@@ -45,7 +45,7 @@ type
     Header1: record Fmt: AnsiString; A, B, C, D: Byte; end;
     Header: record VerticeCount, PolyCount, ChunkCount, MatCount, PartCount, BlinkerCount: Integer; end;
     Vertice: array [1..MAX_MOX_VTX] of TMOXVertice;
-    Face: array [1..MAX_MOX_IDX,1..3] of Word;  // Polygon links
+    Face: array [1..MAX_MOX_IDX,1..3] of Integer;  // Polygon links
     Chunk: array [1..2048, 1..4] of Word;  // Surface ranges (points/polys) 40 parts * 40 materials
     Sid: array [1..2048, 1..2] of Word;
     MoxMat: array [1..MAX_MATERIALS] of record
@@ -55,7 +55,8 @@ type
     Parts: array [1..MAX_PARTS] of TMOXPart;
     Blinkers: array [1..MAX_BLINKERS] of TMOXBlinker;
 
-    function MOXFormat: string;
+    function MOXFormatInt: string;
+    function MOXFormatStr: string;
   end;
 
   procedure LoadMOX(const aFilename: string);
@@ -66,7 +67,13 @@ var
 implementation
 
 
-function TMOX.MOXFormat: string;
+function TMOX.MOXFormatInt: string;
+begin
+  Result := Format('%d%d%d%d', [Header1.A, Header1.B, Header1.C, Header1.D]);
+end;
+
+
+function TMOX.MOXFormatStr: string;
 begin
   if (Header1.B = 0) and (Header1.C = 2) and (Header1.D = 2) then
     Result := 'WR22' //32bit chunks, parts, blinkers
@@ -83,29 +90,33 @@ end;
 
 procedure LoadMOX(const aFilename: string);
 var
-  c: array [1..262144] of AnsiChar;
+  c4: array [1..4] of AnsiChar;
+  cChunk12: array [1..12] of AnsiChar;
+  cChunk24: array [1..24] of AnsiChar;
+  cPart64: array [1..64] of AnsiChar;
   h,i,j,k: Integer;
   f: file;
-  vv: array [1..65280,1..3] of longWord;
+  face6: array [1..3] of Word;
+  face12: array [1..3] of Cardinal;
 begin
   assignfile(f,aFilename); FileMode:=0; reset(f,1); FileMode:=2;
 
   FillChar(MOX,SizeOf(MOX),#0);
 
-  blockread(f,c,4);
-  MOX.Header1.Fmt := c[1]+c[2]+c[3]+c[4];
+  blockread(f,c4,4);
+  MOX.Header1.Fmt := c4[1]+c4[2]+c4[3]+c4[4];
   if MOX.Header1.Fmt <> ('!XOM') then
   begin
-    MessageBox(0, PChar('Unknown format - '+c[1]+c[2]+c[3]+c[4]), 'Error', MB_OK or MB_ICONERROR);
+    MessageBox(0, PChar(MOX.Header1.Fmt), 'Error', MB_OK or MB_ICONERROR);
     closefile(f);
     Exit;
   end;
 
   blockread(f, MOX.Header1.A, 4);
 
-  if MOX.MOXFormat = 'Unknown' then
+  if MOX.MOXFormatStr = 'Unknown' then
   begin
-    MessageBox(0, PChar('Unknown version - '+IntToStr(ord(c[1]))+IntToStr(ord(c[2]))+IntToStr(ord(c[3])) + IntToStr(ord(c[4]))), 'Error', MB_OK or MB_ICONERROR);
+    MessageBox(0, PChar('Unknown version - ' + MOX.MOXFormatInt), 'Error', MB_OK or MB_ICONERROR);
     closefile(f);
     Exit;
   end;
@@ -118,53 +129,53 @@ begin
   for i:=1 to MOX.Header.PolyCount do
   if MOX.Header1.A = 1 then
   begin
-    blockread(f, vv[i], 12);
-    MOX.Face[i, 1] := vv[i, 1] + 1;
-    MOX.Face[i, 2] := vv[i, 2] + 1;
-    MOX.Face[i, 3] := vv[i, 3] + 1
+    blockread(f, face12, 12);
+    MOX.Face[i, 1] := face12[1] + 1;
+    MOX.Face[i, 2] := face12[2] + 1;
+    MOX.Face[i, 3] := face12[3] + 1
   end else
   begin
-    blockread(f, MOX.Face[i], 6);
-    inc(MOX.Face[i,1],1);
-    inc(MOX.Face[i,2],1);
-    inc(MOX.Face[i,3],1);
+    blockread(f, face6, 6);
+    MOX.Face[i, 1] := face6[1] + 1;
+    MOX.Face[i, 2] := face6[2] + 1;
+    MOX.Face[i, 3] := face6[3] + 1
   end;
 
-  if MOX.MOXFormat = 'MBWR' then
+  if MOX.MOXFormatStr = 'MBWR' then
   for j:=1 to MOX.Header.ChunkCount do
   begin
-    blockread(f,c,12);
-    MOX.Sid[j,1]:=ord(c[1])+ord(c[2])*256;
-    MOX.Sid[j,2]:=ord(c[3])+ord(c[4])*256;
-    MOX.Chunk[j,1]:=ord(c[5])+ord(c[6])*256; //first Poly
-    MOX.Chunk[j,2]:=ord(c[7])+ord(c[8])*256; //number Polys
-    MOX.Chunk[j,3]:=ord(c[9])+ord(c[10])*256+1; //point From
-    MOX.Chunk[j,4]:=ord(c[11])+ord(c[12])*256+1; //point Till
+    blockread(f,cChunk12,12);
+    MOX.Sid[j,1]:=ord(cChunk12[1])+ord(cChunk12[2])*256;
+    MOX.Sid[j,2]:=ord(cChunk12[3])+ord(cChunk12[4])*256;
+    MOX.Chunk[j,1]:=ord(cChunk12[5])+ord(cChunk12[6])*256; //first Poly
+    MOX.Chunk[j,2]:=ord(cChunk12[7])+ord(cChunk12[8])*256; //number Polys
+    MOX.Chunk[j,3]:=ord(cChunk12[9])+ord(cChunk12[10])*256+1; //point From
+    MOX.Chunk[j,4]:=ord(cChunk12[11])+ord(cChunk12[12])*256+1; //point Till
   end;
 
-  if (MOX.MOXFormat = 'WR22') or (MOX.MOXFormat = 'WR02') then
+  if (MOX.MOXFormatStr = 'WR22') or (MOX.MOXFormatStr = 'WR02') then
   for j:=1 to MOX.Header.ChunkCount do
   begin
-    blockread(f,c,24);
-    MOX.Sid[j,1]:=ord(c[1])+ord(c[2])*256;
-    MOX.Sid[j,2]:=ord(c[5])+ord(c[6])*256;
-    MOX.Chunk[j,1]:=ord(c[9])+ord(c[10])*256; //first Poly
-    MOX.Chunk[j,2]:=ord(c[13])+ord(c[14])*256; //number Polys
-    MOX.Chunk[j,3]:=ord(c[17])+ord(c[18])*256+1; //point From
-    MOX.Chunk[j,4]:=ord(c[21])+ord(c[22])*256+1; //point Till
+    blockread(f,cChunk24,24);
+    MOX.Sid[j,1]:=ord(cChunk24[1])+ord(cChunk24[2])*256;
+    MOX.Sid[j,2]:=ord(cChunk24[5])+ord(cChunk24[6])*256;
+    MOX.Chunk[j,1]:=ord(cChunk24[9])+ord(cChunk24[10])*256; //first Poly
+    MOX.Chunk[j,2]:=ord(cChunk24[13])+ord(cChunk24[14])*256; //number Polys
+    MOX.Chunk[j,3]:=ord(cChunk24[17])+ord(cChunk24[18])*256+1; //point From
+    MOX.Chunk[j,4]:=ord(cChunk24[21])+ord(cChunk24[22])*256+1; //point Till
   end;
 
-  blockread(f,MOX.MoxMat,(80+256)*MOX.Header.MatCount);   //Crap&Mess
+  blockread(f, MOX.MoxMat, (80+256)*MOX.Header.MatCount);   //Crap&Mess
 
-  if MOX.MOXFormat = 'WR22' then
+  if MOX.MOXFormatStr = 'WR22' then
     for j:=1 to MOX.Header.PartCount do
     begin
-      blockread(f,c,64);
-      MOX.Parts[j].Dname:=PAnsiChar(@c[1]);
+      blockread(f,cPart64,64);
+      MOX.Parts[j].Dname:=PAnsiChar(@cPart64[1]);
       blockread(f,MOX.Parts[j].Matrix,132);
     end;
 
-  if (MOX.MOXFormat = 'MBWR') or (MOX.MOXFormat = 'WR02') then
+  if (MOX.MOXFormatStr = 'MBWR') or (MOX.MOXFormatStr = 'WR02') then
   begin
     MOX.Header.PartCount := 1;
 
@@ -190,7 +201,7 @@ begin
       + ' due to compatibility issues.'), 'Warning', MB_OK or MB_ICONWARNING);
   end;
 
-  if MOX.MOXFormat = 'WR22' then
+  if MOX.MOXFormatStr = 'WR22' then
     blockread(f, MOX.Blinkers, 88*MOX.Header.BlinkerCount);
 
   closefile(f);

@@ -1338,6 +1338,7 @@ var
   tx,ty,tz: array [1..256]of real;
   Lev:Integer;
   lazyqty: array of Integer;
+  face6: array [1..3] of Word;
 begin
   assignfile(f,aFilename); rewrite(f,1);
 
@@ -1427,10 +1428,11 @@ begin
   BlockWrite(f, MOX.Vertice, MOX.Header.VerticeCount*40);
   for ii:=1 to MOX.Header.PolyCount do
   begin
-    dec(MOX.Face[ii,1],1); dec(MOX.Face[ii,2],1); dec(MOX.Face[ii,3],1);//V-1
+    face6[1] := MOX.Face[ii,1] - 1;
+    face6[2] := MOX.Face[ii,2] - 1;
+    face6[3] := MOX.Face[ii,3] - 1;
 
-      BlockWrite(f,MOX.Face[ii],6);
-    inc(MOX.Face[ii,1],1); inc(MOX.Face[ii,2],1); inc(MOX.Face[ii,3],1);//restore values V+1 !
+    BlockWrite(f, face6, 6);
   end;
 
   for ii:=1 to MOX.Header.ChunkCount do
@@ -2468,7 +2470,7 @@ begin
       IsLightwave2MOX := False;
       PivotSetup.TabVisible := False;
 
-      MTkit2_MOX.LoadMOX(aFilename);
+      LoadMOX(aFilename);
 
       Memo1.Lines.Add('MOX file closed');
 
@@ -2479,6 +2481,8 @@ begin
       SaveMOX1.Enabled := True;
       ExportMOX1.Enabled := True;
     end;
+
+    StatusBar1.Panels[0].Text := MOX.MOXFormatInt + ' - ' + MOX.MOXFormatStr;
 
     ShowUpClick(cuMOX);
     LoadMTL(decs(aFilename,4,0)+'.mtl');
