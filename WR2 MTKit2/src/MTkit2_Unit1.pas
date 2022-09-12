@@ -811,12 +811,12 @@ begin
   IsLightwave2MOX := False;
   PivotSetup.TabVisible := False;
 
-  blockread(f,MOX.Qty,24);
+  blockread(f,MOX.Header,24);
 
-  blockread(f,MOX.Vertice,MOX.Qty.VerticeCount*40);
+  blockread(f,MOX.Vertice,MOX.Header.VerticeCount*40);
 
   Memo1.Lines.Add('Loading polygons ...');
-  for i:=1 to MOX.Qty.PolyCount do
+  for i:=1 to MOX.Header.PolyCount do
   if c[5]=#1 then
   begin
     blockread(f,vv[i],12);
@@ -830,7 +830,7 @@ begin
 
   Memo1.Lines.Add('Loading surface assignments ...');
   if MOXFormat='MBWR' then
-  for j:=1 to MOX.Qty.ChunkCount do
+  for j:=1 to MOX.Header.ChunkCount do
   begin
     blockread(f,c,12);
     MOX.Sid[j,1]:=ord(c[1])+ord(c[2])*256;
@@ -842,7 +842,7 @@ begin
   end;
 
   if (MOXFormat='WR22')or(MOXFormat='WR02') then
-  for j:=1 to MOX.Qty.ChunkCount do
+  for j:=1 to MOX.Header.ChunkCount do
   begin
     blockread(f,c,24);
     MOX.Sid[j,1]:=ord(c[1])+ord(c[2])*256;
@@ -853,12 +853,12 @@ begin
     MOX.Chunk[j,4]:=ord(c[21])+ord(c[22])*256+1; //point Till
   end;
 
-  blockread(f,MOX.MoxMat,(80+256)*MOX.Qty.MatCount);   //Crap&Mess
+  blockread(f,MOX.MoxMat,(80+256)*MOX.Header.MatCount);   //Crap&Mess
 
   Memo1.Lines.Add('Reading Parts ...');
 
   if MOXFormat='WR22' then
-    for j:=1 to MOX.Qty.PartCount do
+    for j:=1 to MOX.Header.PartCount do
     begin
       blockread(f,c,64);
       MOX.Parts[j].Dname:=PAnsiChar(@c[1]);
@@ -867,7 +867,7 @@ begin
 
   if (MOXFormat='MBWR')or(MOXFormat='WR02') then
   begin
-    MOX.Qty.PartCount:=1;
+    MOX.Header.PartCount:=1;
     FillChar(MOX.Parts[1],SizeOf(MOX.Parts[1]),#0);
     with MOX.Parts[1] do
     begin
@@ -878,18 +878,18 @@ begin
       PrevInLevel:=-1;
       NextInLevel:=-1;
       FirstMat:=0;
-      NumMat:=MOX.Qty.MatCount;
+      NumMat:=MOX.Header.MatCount;
       fRadius:=10;
     end;
   end;
 
   Memo1.Lines.Add('Reading Blinkers ...');
-  if MOX.Qty.BlinkerCount > MAX_BLINKERS then
+  if MOX.Header.BlinkerCount > MAX_BLINKERS then
   begin
-    MOX.Qty.BlinkerCount := MAX_BLINKERS;
+    MOX.Header.BlinkerCount := MAX_BLINKERS;
     MessageBox(Handle, PChar('Blinker quantity limited to '+IntToStr(MAX_BLINKERS)+' due to compatibility issues.'), 'Warning', MB_OK or MB_ICONWARNING);
   end;
-  if MOXFormat='WR22' then blockread(f,MOX.Blinkers,88*MOX.Qty.BlinkerCount);
+  if MOXFormat='WR22' then blockread(f,MOX.Blinkers,88*MOX.Header.BlinkerCount);
   closefile(f);
   Memo1.Lines.Add('MOX file closed');
 
@@ -910,17 +910,17 @@ var
 begin
   case aSection of
     uiMOX:    begin
-                Edit3Dqty.Text:=IntToStr(MOX.Qty.VerticeCount);
-                EditUVqty.Text:=IntToStr(MOX.Qty.VerticeCount);
-                EditPqty.Text:=IntToStr(MOX.Qty.PolyCount);
-                EditSqty.Text:=IntToStr(MOX.Qty.PartCount);
-                EditMqty.Text:=IntToStr(MOX.Qty.MatCount);
-                EditCqty.Text:=IntToStr(MOX.Qty.ChunkCount);
-                EditBqty.Text:=IntToStr(MOX.Qty.BlinkerCount);
+                Edit3Dqty.Text:=IntToStr(MOX.Header.VerticeCount);
+                EditUVqty.Text:=IntToStr(MOX.Header.VerticeCount);
+                EditPqty.Text:=IntToStr(MOX.Header.PolyCount);
+                EditSqty.Text:=IntToStr(MOX.Header.PartCount);
+                EditMqty.Text:=IntToStr(MOX.Header.MatCount);
+                EditCqty.Text:=IntToStr(MOX.Header.ChunkCount);
+                EditBqty.Text:=IntToStr(MOX.Header.BlinkerCount);
               end;
     uiMTL:    begin
                 LBMaterials.Clear;
-                for ii:=1 to MOX.Qty.MatCount do
+                for ii:=1 to MOX.Header.MatCount do
                   LBMaterials.AddItem(Material[ii].Mtag+' '+Material[ii].Title,nil);
                 LBMaterials.ItemIndex:=0;
                 if NumColors=1 then
@@ -940,7 +940,7 @@ begin
                 LightRefresh := True;
                 oldID1:=LBBlinkers.ItemIndex;
                 LBBlinkers.Clear;
-                for ii:=1 to MOX.Qty.BlinkerCount do
+                for ii:=1 to MOX.Header.BlinkerCount do
                   LBBlinkers.Items.Add(IntToStr(ii)+'. '+BLINKER_TYPE_SHORTNAME[MOX.Blinkers[ii].BlinkerType]+'  '+
                     FloatToStrF(MOX.Blinkers[ii].sMin,ffGeneral,5,7)+'->'+
                     FloatToStrF(MOX.Blinkers[ii].sMax,ffGeneral,5,7)+'  '+
@@ -951,12 +951,12 @@ begin
               end;
     uiParts:  begin
                 TVParts.Items.Clear;
-                for ii:=1 to MOX.Qty.PartCount do
+                for ii:=1 to MOX.Header.PartCount do
                 begin
                   if MOX.Parts[ii].Parent=-1 then Dnode[ii] := TVParts.Items.Add(nil,MOX.Parts[ii].Dname) else //make Root
                   Dnode[ii] := TVParts.Items.AddChild(Dnode[MOX.Parts[ii].Parent+1],MOX.Parts[ii].Dname);      //child
                 end;
-                if MOX.Qty.PartCount>=1 then Dnode[1].Expand(False);
+                if MOX.Header.PartCount>=1 then Dnode[1].Expand(False);
               end;
     uiCOB:    begin
                 COBRefresh := True;
@@ -993,7 +993,7 @@ var
   h,i,k,LOD:Integer;
   t:Single;
 begin
-  for i:=1 to MOX.Qty.ChunkCount do
+  for i:=1 to MOX.Header.ChunkCount do
   begin
     if MoxCall[i]=0 then MoxCall[i]:=glGenLists(1);
     glNewList (MoxCall[i], GL_COMPILE);
@@ -1244,7 +1244,7 @@ var
   i,k: Integer;
 begin
   // Clear RAM used by textures
-  for i:=1 to MOX.Qty.MatCount do
+  for i:=1 to MOX.Header.MatCount do
     if MoxTex[i] <> 0 then
     begin
       glDeleteTextures(1, @MoxTex[i]);
@@ -1254,7 +1254,7 @@ begin
   glDeleteTextures(1, @ScratchTex);
 
   // Load new textures
-  for i:=1 to MOX.Qty.MatCount do
+  for i:=1 to MOX.Header.MatCount do
   begin
     for k:=1 to i-1 do
       if Material[k].TexName = Material[i].TexName then
@@ -1478,10 +1478,10 @@ begin
   begin  //Set MoxMat/Sid order continous
     //kinda lazy to re-do SRange stuff, so just sort it out here :-)
 
-    setlength(lazyqty,MOX.Qty.PartCount+1);
+    setlength(lazyqty,MOX.Header.PartCount+1);
     lazyqty[0]:=0;
 
-    for i:=1 to MOX.Qty.PartCount do
+    for i:=1 to MOX.Header.PartCount do
     begin
       lazyqty[i]:=1;                  //number of MOX.Parts
         for j:=MOX.Parts[i].FirstMat+1 to MOX.Parts[i].FirstMat+MOX.Parts[i].NumMat do
@@ -1499,19 +1499,19 @@ begin
       inc(lazyqty[0],lazyqty[i]);
       end;
 
-    MOX.Qty.ChunkCount:=0;
+    MOX.Header.ChunkCount:=0;
     MOX.Parts[1].FirstMat:=0;
 
-    for i:=1 to MOX.Qty.PartCount do
+    for i:=1 to MOX.Header.PartCount do
     begin
-      inc(MOX.Qty.ChunkCount, lazyqty[i]);
+      inc(MOX.Header.ChunkCount, lazyqty[i]);
       MOX.Parts[i].NumMat:=lazyqty[i];
       MOX.Parts[i+1].FirstMat:=MOX.Parts[i].FirstMat+MOX.Parts[i].NumMat;
     end;
     //re-Sorting ends here}
 
     k:=1; m:=0;
-    for i:=1 to MOX.Qty.VerticeCount do
+    for i:=1 to MOX.Header.VerticeCount do
     begin
       if i=MOX.Chunk[k,4]+1 then
         inc(k);//3-point From  //4-point Till //k-partID
@@ -1540,7 +1540,7 @@ begin
       MOX.Vertice[i].Z:=MOX.Vertice[i].Z-PartModify[m].Move[3];
     end;
 
-    for i:=1 to MOX.Qty.PartCount do
+    for i:=1 to MOX.Header.PartCount do
     begin
       MOX.Parts[i].Matrix[4,1] := Tx[i];//PartModify[i].Move[1];
       MOX.Parts[i].Matrix[4,2] := Ty[i];//PartModify[i].Move[2];
@@ -1557,9 +1557,9 @@ begin
     // Make sure we write Ansi chars
     BlockWrite(f, PAnsiChar(MOX_FORMAT_HEADER)^, 8);
 
-    BlockWrite(f,MOX.Qty,24);
-    BlockWrite(f,MOX.Vertice,MOX.Qty.VerticeCount*40);
-    for ii:=1 to MOX.Qty.PolyCount do
+    BlockWrite(f,MOX.Header,24);
+    BlockWrite(f,MOX.Vertice,MOX.Header.VerticeCount*40);
+    for ii:=1 to MOX.Header.PolyCount do
     begin
       dec(MOX.Face[ii,1],1); dec(MOX.Face[ii,2],1); dec(MOX.Face[ii,3],1);//V-1
 
@@ -1567,7 +1567,7 @@ begin
       inc(MOX.Face[ii,1],1); inc(MOX.Face[ii,2],1); inc(MOX.Face[ii,3],1);//restore values V+1 !
     end;
 
-    for ii:=1 to MOX.Qty.ChunkCount do
+    for ii:=1 to MOX.Header.ChunkCount do
     begin
       BlockWrite(f,MOX.Sid[ii,1],2); BlockWrite(f,#0+#0,2);
       BlockWrite(f,MOX.Sid[ii,2],2); BlockWrite(f,#0+#0,2);
@@ -1581,9 +1581,9 @@ begin
     end;
 
 
-  BlockWrite(f,MOX.MoxMat, 336*MOX.Qty.MatCount);   //4+332
+  BlockWrite(f,MOX.MoxMat, 336*MOX.Header.MatCount);   //4+332
 
-  for ii:=1 to MOX.Qty.PartCount do
+  for ii:=1 to MOX.Header.PartCount do
   begin
     s:=chr2(MOX.Parts[ii].Dname,64);
     BlockWrite(f,s[1],64);
@@ -1592,14 +1592,14 @@ begin
 
   //todo: It is worth writing more important blinkers first (deprioritize LED decoys),
   // since the game has a limit on how many blinkers it can show at once (255 iirc)
-  for ii:=1 to MOX.Qty.BlinkerCount do //Write blinkers in order
+  for ii:=1 to MOX.Header.BlinkerCount do //Write blinkers in order
     for kk:=0 to 33 do //todo: Looks like this loop should be on the outside
      if MOX.Blinkers[ii].BlinkerType = kk then
        BlockWrite(f, MOX.Blinkers[ii], 88);
 
   closefile(f);
   Memo1.Lines.Add('MOX file closed');
-  for i:=1 to MOX.Qty.PartCount do
+  for i:=1 to MOX.Header.PartCount do
   begin
     PartModify[i].Custom[1]:=0;
     PartModify[i].Custom[2]:=0;
@@ -1679,8 +1679,8 @@ begin
 
   FillChar(MOX,SizeOf(MOX),#0);
 
-  MOX.Qty.PartCount:=Imp.PartCount;
-  MOX.Qty.MatCount:=Imp.SurfCount;
+  MOX.Header.PartCount:=Imp.PartCount;
+  MOX.Header.MatCount:=Imp.SurfCount;
 
   TVParts.ReadOnly := False;
   FillChar(PartModify,SizeOf(PartModify),#0);
@@ -1703,15 +1703,15 @@ begin
     for i:=MAX_PARTS-1 downto 1 do Imp.PartName[i+1]:=Imp.PartName[i];
     Imp.PartName[1]:='Default(Body)';
     for i:=1 to Imp.PolyCount do inc(Imp.Part[i]); //set part #1
-    inc(MOX.Qty.PartCount);
+    inc(MOX.Header.PartCount);
   end;
 
-  MOX.Qty.BlinkerCount := 0;
+  MOX.Header.BlinkerCount := 0;
   for i:=1 to Imp.VerticeCount do
-    if sprite[i] and (MOX.Qty.BlinkerCount < MAX_BLINKERS) then
+    if sprite[i] and (MOX.Header.BlinkerCount < MAX_BLINKERS) then
     begin
-      Inc(MOX.Qty.BlinkerCount);                                 //63+1=64
-      with MOX.Blinkers[MOX.Qty.BlinkerCount] do
+      Inc(MOX.Header.BlinkerCount);                                 //63+1=64
+      with MOX.Blinkers[MOX.Header.BlinkerCount] do
       begin //0..63
         BlinkerType := 2;
         Matrix[1,1]:=1; Matrix[1,2]:=0; Matrix[1,3]:=0; Matrix[1,4]:=0;
@@ -1744,21 +1744,21 @@ begin
   //Splitting                                                                   //
   ////////////////////////////////////////////////////////////////////////////////
 
-  setlength(altpoint,MOX.Qty.PartCount+1);
-  setlength(altpoly,MOX.Qty.PartCount+1);
-  setlength(VqtyAtSurf,MOX.Qty.PartCount+1);
-  setlength(PqtyAtSurf,MOX.Qty.PartCount+1);
-  setlength(v2,MOX.Qty.PartCount+1);
-  for i:=1 to MOX.Qty.PartCount do
+  setlength(altpoint,MOX.Header.PartCount+1);
+  setlength(altpoly,MOX.Header.PartCount+1);
+  setlength(VqtyAtSurf,MOX.Header.PartCount+1);
+  setlength(PqtyAtSurf,MOX.Header.PartCount+1);
+  setlength(v2,MOX.Header.PartCount+1);
+  for i:=1 to MOX.Header.PartCount do
   begin
-    setlength(altpoint[i],MOX.Qty.MatCount+1);
-    setlength(altpoly[i],MOX.Qty.MatCount+1);
-    setlength(VqtyAtSurf[i],MOX.Qty.MatCount+1);
-    setlength(PqtyAtSurf[i],MOX.Qty.MatCount+1);
-    setlength(v2[i],MOX.Qty.MatCount+1);
+    setlength(altpoint[i],MOX.Header.MatCount+1);
+    setlength(altpoly[i],MOX.Header.MatCount+1);
+    setlength(VqtyAtSurf[i],MOX.Header.MatCount+1);
+    setlength(PqtyAtSurf[i],MOX.Header.MatCount+1);
+    setlength(v2[i],MOX.Header.MatCount+1);
   end;
 
-  for m:=1 to MOX.Qty.PartCount do
+  for m:=1 to MOX.Header.PartCount do
   for i:=1 to Imp.PolyCount do
     if Imp.Part[i]=m then //for all polys belong to current part
     begin
@@ -1817,10 +1817,10 @@ begin
   Shape2.Width:=100;
 
   h:=1;
-  for m:=1 to MOX.Qty.PartCount do
+  for m:=1 to MOX.Header.PartCount do
   begin
     t:=1;
-    for i:=1 to MOX.Qty.MatCount do
+    for i:=1 to MOX.Header.MatCount do
       for k:=1 to VqtyAtSurf[m,i] do
       begin
         MOX.Vertice[h].X:=Imp.XYZ[altpoint[m,i,k,1]].X;
@@ -1831,7 +1831,7 @@ begin
         MOX.Vertice[h].nZ:=Imp.Nv[altpoint[m,i,k,1]].Z;
         MOX.Vertice[h].U:=Imp.DUV[altpoint[m,i,k,3],altpoint[m,i,k,2]].U;
         MOX.Vertice[h].V:=1-Imp.DUV[altpoint[m,i,k,3],altpoint[m,i,k,2]].V;
-        MOX.Qty.VerticeCount:=h;
+        MOX.Header.VerticeCount:=h;
 
           if (t=1) then begin //Take 1st point of material as beginning for bounds checking
           t:=0;
@@ -1858,18 +1858,18 @@ begin
   FillChar(MOX.Parts,SizeOf(MOX.Parts),#0);
 
   h:=1;
-  for m:=1 to MOX.Qty.PartCount do
-  for i:=1 to MOX.Qty.MatCount do
+  for m:=1 to MOX.Header.PartCount do
+  for i:=1 to MOX.Header.MatCount do
   begin
     if h>1 then MOX.Chunk[h,3]:=MOX.Chunk[h-1,4]+1 else MOX.Chunk[h,3]:=1;
     MOX.Chunk[h,4]:=MOX.Chunk[h,3]+VqtyAtSurf[m,i]-1;
-    MOX.Qty.ChunkCount := h;
+    MOX.Header.ChunkCount := h;
     inc(h);
   end;
 
   j:=1; t:=1;
-  for m:=1 to MOX.Qty.PartCount do
-    for i:=1 to MOX.Qty.MatCount do
+  for m:=1 to MOX.Header.PartCount do
+    for i:=1 to MOX.Header.MatCount do
     begin
       for k:=1 to PqtyAtSurf[m,i] do
       begin
@@ -1880,20 +1880,20 @@ begin
     end;
 
   h:=1;
-  for m:=1 to MOX.Qty.PartCount do
+  for m:=1 to MOX.Header.PartCount do
   begin
     MOX.Parts[m].NumMat:=0;
-    for i:=1 to MOX.Qty.MatCount do
+    for i:=1 to MOX.Header.MatCount do
     begin
       MOX.Chunk[h,2]:=PqtyAtSurf[m,i];
       if h>1 then MOX.Chunk[h,1]:=MOX.Chunk[h-1,1]+MOX.Chunk[h-1,2] else MOX.Chunk[h,1]:=0;
-      MOX.Qty.PolyCount := MOX.Chunk[h,1]+MOX.Chunk[h,2];
+      MOX.Header.PolyCount := MOX.Chunk[h,1]+MOX.Chunk[h,2];
       inc(MOX.Parts[m].NumMat);
       inc(h);
     end;
   end;
 
-  for i:=1 to MOX.Qty.MatCount do
+  for i:=1 to MOX.Header.MatCount do
   begin
     Material[i].Mtag:=inttohex((i-1),4);
     Material[i].Title:=Imp.Mtl[i].Title;
@@ -1918,26 +1918,26 @@ begin
 
   NumColors:=MAX_COLORS;
 
-  for i:=1 to MOX.Qty.MatCount do for k:=2 to MAX_COLORS do
+  for i:=1 to MOX.Header.MatCount do for k:=2 to MAX_COLORS do
   Material[i].Color[k]:=Material[i].Color[1]; //Set all colors same
   LoadTextures;
 
   h:=1;
-  for m:=1 to MOX.Qty.PartCount do
-    for i:=1 to MOX.Qty.MatCount do
+  for m:=1 to MOX.Header.PartCount do
+    for i:=1 to MOX.Header.MatCount do
     begin
       MOX.Sid[h,1]:=i-1;
       MOX.Sid[h,2]:=i-1;
       inc(h);
     end;
 
-  for i:=1 to MOX.Qty.MatCount do
+  for i:=1 to MOX.Header.MatCount do
   begin
     MOX.MoxMat[i].ID:=i-1;
     for k:=1 to 332 do MOX.MoxMat[i].xxx[k]:=#0;
   end;
 
-  for i:=1 to MOX.Qty.PartCount do
+  for i:=1 to MOX.Header.PartCount do
   begin
     MOX.Parts[i].Dname:=Imp.PartName[i];
     MOX.Parts[i].Matrix[1,1]:=1;
@@ -2009,31 +2009,31 @@ end;
 
 procedure TForm1.MOXBlinkerAdd(aIndex: Integer);
 begin
-  if MOX.Qty.BlinkerCount >= MAX_BLINKERS then Exit;
+  if MOX.Header.BlinkerCount >= MAX_BLINKERS then Exit;
 
-  Inc(MOX.Qty.BlinkerCount);
+  Inc(MOX.Header.BlinkerCount);
 
-  if InRange(aIndex, 1, MOX.Qty.BlinkerCount) then
+  if InRange(aIndex, 1, MOX.Header.BlinkerCount) then
     // Duplicate existing
-    MOX.Blinkers[MOX.Qty.BlinkerCount] := MOX.Blinkers[aIndex]
+    MOX.Blinkers[MOX.Header.BlinkerCount] := MOX.Blinkers[aIndex]
   else
   begin
     // Create new
-    MOX.Blinkers[MOX.Qty.BlinkerCount].BlinkerType := 0;
-    MOX.Blinkers[MOX.Qty.BlinkerCount].sMin := 0;
-    MOX.Blinkers[MOX.Qty.BlinkerCount].sMax := 1;
-    MOX.Blinkers[MOX.Qty.BlinkerCount].Freq := 0;
-    MOX.Blinkers[MOX.Qty.BlinkerCount].B := 255;
-    MOX.Blinkers[MOX.Qty.BlinkerCount].G := 64;
-    MOX.Blinkers[MOX.Qty.BlinkerCount].R := 0;
-    MOX.Blinkers[MOX.Qty.BlinkerCount].A := 255;
-    MOX.Blinkers[MOX.Qty.BlinkerCount].Unused := 0;
-    MOX.Blinkers[MOX.Qty.BlinkerCount].Parent := 0;
-    FillChar(MOX.Blinkers[MOX.Qty.BlinkerCount].Matrix, SizeOf(MOX.Blinkers[MOX.Qty.BlinkerCount].Matrix), #0);
-    MOX.Blinkers[MOX.Qty.BlinkerCount].Matrix[1, 1] := 1;
-    MOX.Blinkers[MOX.Qty.BlinkerCount].Matrix[2, 2] := 1;
-    MOX.Blinkers[MOX.Qty.BlinkerCount].Matrix[3, 3] := 1;
-    MOX.Blinkers[MOX.Qty.BlinkerCount].Matrix[4, 4] := 1;
+    MOX.Blinkers[MOX.Header.BlinkerCount].BlinkerType := 0;
+    MOX.Blinkers[MOX.Header.BlinkerCount].sMin := 0;
+    MOX.Blinkers[MOX.Header.BlinkerCount].sMax := 1;
+    MOX.Blinkers[MOX.Header.BlinkerCount].Freq := 0;
+    MOX.Blinkers[MOX.Header.BlinkerCount].B := 255;
+    MOX.Blinkers[MOX.Header.BlinkerCount].G := 64;
+    MOX.Blinkers[MOX.Header.BlinkerCount].R := 0;
+    MOX.Blinkers[MOX.Header.BlinkerCount].A := 255;
+    MOX.Blinkers[MOX.Header.BlinkerCount].Unused := 0;
+    MOX.Blinkers[MOX.Header.BlinkerCount].Parent := 0;
+    FillChar(MOX.Blinkers[MOX.Header.BlinkerCount].Matrix, SizeOf(MOX.Blinkers[MOX.Header.BlinkerCount].Matrix), #0);
+    MOX.Blinkers[MOX.Header.BlinkerCount].Matrix[1, 1] := 1;
+    MOX.Blinkers[MOX.Header.BlinkerCount].Matrix[2, 2] := 1;
+    MOX.Blinkers[MOX.Header.BlinkerCount].Matrix[3, 3] := 1;
+    MOX.Blinkers[MOX.Header.BlinkerCount].Matrix[4, 4] := 1;
   end;
 end;
 
@@ -2044,9 +2044,9 @@ var
 begin
   if LBBlinkers.ItemIndex = -1 then Exit;
 
-  for I := LBBlinkers.ItemIndex + 1 to MOX.Qty.BlinkerCount - 1 do
+  for I := LBBlinkers.ItemIndex + 1 to MOX.Header.BlinkerCount - 1 do
     MOX.Blinkers[I] := MOX.Blinkers[I + 1];
-  Dec(MOX.Qty.BlinkerCount);
+  Dec(MOX.Header.BlinkerCount);
 
   SendDataToUI(uiLights);
 
@@ -2060,7 +2060,7 @@ end;
 procedure TForm1.BlinkCopyClick(Sender: TObject);
 begin
   fLightCopyID := LBBlinkers.ItemIndex + 1;
-  btnBlinkerPaste.Enabled := InRange(fLightCopyID, 1, MOX.Qty.BlinkerCount);
+  btnBlinkerPaste.Enabled := InRange(fLightCopyID, 1, MOX.Header.BlinkerCount);
 end;
 
 
@@ -2071,7 +2071,7 @@ begin
   idx := LBBlinkers.ItemIndex+1;
   if idx = 0 then Exit;
 
-  if not InRange(fLightCopyID, 1, MOX.Qty.BlinkerCount) then
+  if not InRange(fLightCopyID, 1, MOX.Header.BlinkerCount) then
   begin
     btnBlinkerPaste.Enabled := False;
     Exit;
@@ -2155,13 +2155,13 @@ var
   aVertex: array [1..65280] of record X,Y,Z,nX,nY,nZ,U,V,x1,x2: Single; end; //40Bytes
   av: array [1..65280,1..3] of Word;                                         //6Bytes
 begin
-  for i := 1 to MOX.Qty.PartCount do
-    for k := 1 to MOX.Qty.PartCount do
+  for i := 1 to MOX.Header.PartCount do
+    for k := 1 to MOX.Header.PartCount do
       if MOX.Parts[i].Dname = TVParts.Items[k - 1].Text then
         order[k] := i;
 
   kp:=0; kv:=0;
-  for i:=1 to MOX.Qty.PartCount do
+  for i:=1 to MOX.Header.PartCount do
   begin
     aDname[i]:=MOX.Parts[order[i]].Dname;
     aParts[i].xMid:=MOX.Parts[order[i]].xMid;
@@ -2174,10 +2174,10 @@ begin
     aParts[i].z1:=MOX.Parts[order[i]].z1; aParts[i].z2:=MOX.Parts[order[i]].z2;
     CopyMemory(@aPartModify[i],@PartModify[order[i]],56); //55+1 !
 
-    for k:=1 to MOX.Qty.MatCount do
+    for k:=1 to MOX.Header.MatCount do
     begin
-      i1:=(i-1)*MOX.Qty.MatCount+k;            //destination
-      i2:=(order[i]-1)*MOX.Qty.MatCount+k;     //source
+      i1:=(i-1)*MOX.Header.MatCount+k;            //destination
+      i2:=(order[i]-1)*MOX.Header.MatCount+k;     //source
 
       aSRange[i1,1]:=kp;                                   //first poly
       aSRange[i1,2]:=MOX.Chunk[i2,2];                         //poly count
@@ -2201,7 +2201,7 @@ begin
   CopyMemory(@MOX.Chunk,@aSRange,length(MOX.Chunk)*8); //1..4 of Word
   CopyMemory(@MOX.Vertice,@aVertex,length(MOX.Vertice)*40);//XYZXYZUV00 of Single
   CopyMemory(@MOX.Face,@av,length(MOX.Face)*6);                //1..3 of Word
-  for i:=1 to MOX.Qty.PartCount do
+  for i:=1 to MOX.Header.PartCount do
   begin
     MOX.Parts[i].Dname:=aDname[i];
     MOX.Parts[i].xMid:=aParts[i].xMid;
@@ -2327,13 +2327,13 @@ end;
 procedure TForm1.CoBCopyClick(Sender: TObject);
 begin
   fCOBCopyItem := LBCOBPoints.ItemIndex+1;
-  COBPaste.Enabled := InRange(fCOBCopyItem, 1, MOX.Qty.BlinkerCount);
+  COBPaste.Enabled := InRange(fCOBCopyItem, 1, MOX.Header.BlinkerCount);
 end;
 
 
 procedure TForm1.COBPasteClick(Sender: TObject);
 begin
-  if fCOBCopyItem<>EnsureRange(fCOBCopyItem, 1, MOX.Qty.BlinkerCount) then
+  if fCOBCopyItem<>EnsureRange(fCOBCopyItem, 1, MOX.Header.BlinkerCount) then
   begin
     COBPaste.Enabled := False;
     Exit;
@@ -2385,7 +2385,7 @@ procedure TForm1.MatPasteClick(Sender: TObject);
 var
   i:Integer;
 begin
-  if fColorCopyID <> EnsureRange(fColorCopyID, 1, MOX.Qty.MatCount) then
+  if fColorCopyID <> EnsureRange(fColorCopyID, 1, MOX.Header.MatCount) then
   begin
     MatPaste.Enabled := False;
     Exit;
@@ -2543,7 +2543,7 @@ procedure TForm1.ResetMTLOrderClick(Sender: TObject);
 var
   i:Integer;
 begin
-  for i:=1 to MOX.Qty.MatCount do
+  for i:=1 to MOX.Header.MatCount do
     Material[i].Mtag:=IntToHex((i-1),4);
   SendDataToUI(uiMTL);
 end;
@@ -2576,7 +2576,7 @@ end;
 
 procedure TForm1.FileListBox1Click(Sender: TObject);
 begin
-  FillChar(MOX.Qty, SizeOf(MOX.Qty), #0);
+  FillChar(MOX.Header, SizeOf(MOX.Header), #0);
   FillChar(COB, SizeOf(COB), #0);
   fTree.Clear;
   ResetView(nil);
@@ -3287,7 +3287,7 @@ var
 begin
   AbsMin := MaxSingle;
   AbsMax := -MaxSingle;
-  for i := 1 to MOX.Qty.VerticeCount do
+  for i := 1 to MOX.Header.VerticeCount do
   begin
     AbsMin := min(AbsMin, MOX.Vertice[i].X, MOX.Vertice[i].Y);
     AbsMin := min(AbsMin, MOX.Vertice[i].Z);

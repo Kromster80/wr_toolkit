@@ -28,7 +28,7 @@ var
   ID,PartID: integer;
 begin
   h:=0; PartID:=1;
-  for ID:=1 to MOX.Qty.ChunkCount do
+  for ID:=1 to MOX.Header.ChunkCount do
   begin
     // define detail
     if ID > (MOX.Parts[PartID].NumMat + h) then
@@ -131,7 +131,7 @@ begin
   end;
 
   h:=0; PartID:=1;
-  for ID:=1 to MOX.Qty.ChunkCount do
+  for ID:=1 to MOX.Header.ChunkCount do
   begin
     // define detail
     if ID > (MOX.Parts[PartID].NumMat + h) then
@@ -362,7 +362,7 @@ begin
   glBindTexture(GL_TEXTURE_2D, DirtTex); //UV map texture
   glColor3f(1,1,1);
   h:=0; IDk:=1;
-  for ID:=1 to MOX.Qty.ChunkCount do
+  for ID:=1 to MOX.Header.ChunkCount do
   begin
     if ID>(MOX.Parts[IDk].NumMat+h) then begin inc(h,MOX.Parts[IDk].NumMat); inc(IDk); end; //define detail
     if (SelectedTreeNode=0)or(ActivePage=apParts)or(not(RenderOpts.ShowPart)or //skip render of unseen parts
@@ -402,7 +402,7 @@ var
   i,k:integer;
 begin
   if Form1.PageControl2.ActivePageIndex<>0 then Exit;
-  if (param>MOX.Qty.VerticeCount)or(param<=0) then Exit;
+  if (param>MOX.Header.VerticeCount)or(param<=0) then Exit;
 
   glDisable(GL_LIGHTING);
   glPushMatrix;
@@ -422,13 +422,14 @@ begin
 end;
 
 procedure RenderWireframe(param:string);
-var h,ID,IDk:integer;
+var
+  h,ID,IDk:integer;
 begin
   glPolygonMode(GL_FRONT,GL_LINE);
   glBindTexture(GL_TEXTURE_2D, 0);
   glColor3ubv(@WFColor[1]);
   h:=0; IDk:=1;
-  for ID:=1 to MOX.Qty.ChunkCount do
+  for ID:=1 to MOX.Header.ChunkCount do
   begin
     if ID>(MOX.Parts[IDk].NumMat+h) then begin inc(h,MOX.Parts[IDk].NumMat); inc(IDk); end; //define detail
     if (SelectedTreeNode=0)or(ActivePage=apParts)or(not(RenderOpts.ShowPart)or //skip render of unseen parts

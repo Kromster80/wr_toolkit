@@ -154,7 +154,7 @@ var
   mc2,mc3,mc4: Byte;
   i,k,h: Integer;
 begin
-  for i:=1 to MOX.Qty.PartCount do
+  for i:=1 to MOX.Header.PartCount do
   begin
     glPushMatrix;
     glMultMatrixf(@MOX.Parts[i].Matrix);
@@ -383,7 +383,7 @@ begin
   Angles2Vector(-xRot, yRot, 0, cam[1], cam[2], cam[3]);
   Normalize(cam[1],cam[2],cam[3]);
 
-  for I := 1 to MOX.Qty.BlinkerCount do
+  for I := 1 to MOX.Header.BlinkerCount do
   begin
     if aVectors then
     begin

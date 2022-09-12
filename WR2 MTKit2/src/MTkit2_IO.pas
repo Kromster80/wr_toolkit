@@ -800,7 +800,7 @@ begin
   m:=0;
   m:=m+12;                                        //+'LWO2TAGS   2'
 
-  for i:=1 to MOX.Qty.MatCount do
+  for i:=1 to MOX.Header.MatCount do
     if Material[i].Title<>'' then
       if (Length(Material[i].Title) mod 2)=1 then
         Inc(m,Length(Material[i].Title)+1)
@@ -810,12 +810,12 @@ begin
       if Material[i].Mtag<>'' then Inc(m,6); //4+2
 
   m:=m+8+18;                                      //+LAYR_
-  m:=m+8+MOX.Qty.VerticeCount*12;                      //+PNTS+3D
-  m:=m+14+10+MOX.Qty.VerticeCount*10;                  //+UV
-  m:=m+12+MOX.Qty.PolyCount*8;                         //+Face 3.x.x.x
-  m:=m+12+MOX.Qty.PolyCount*4;                         //+Surface
+  m:=m+8+MOX.Header.VerticeCount*12;                      //+PNTS+3D
+  m:=m+14+10+MOX.Header.VerticeCount*10;                  //+UV
+  m:=m+12+MOX.Header.PolyCount*8;                         //+Face 3.x.x.x
+  m:=m+12+MOX.Header.PolyCount*4;                         //+Surface
 
-  for i:=1 to MOX.Qty.MatCount do
+  for i:=1 to MOX.Header.MatCount do
     if Material[i].TexName<>'' then begin
       if (Length(Material[i].TexName) mod 2)=1 then
         m:=m+Length(Material[i].TexName)+1
@@ -824,7 +824,7 @@ begin
       m:=8+10+m+4;                                //+CLIP+STIL+name+path
     end;
 
-  for i:=1 to MOX.Qty.MatCount do
+  for i:=1 to MOX.Header.MatCount do
     if Material[i].Title<>'' then
       if (Length(Material[i].Title) mod 2)=1 then
         Inc(m,Length(Material[i].Title)+1)
@@ -833,7 +833,7 @@ begin
     else
      if Material[i].Mtag<>'' then Inc(m,6);       //Writing tagID instead of name, 4+2
 
-  m:=m+(8+2+66+252)*MOX.Qty.MatCount;                  //+SURF Data
+  m:=m+(8+2+66+252)*MOX.Header.MatCount;                  //+SURF Data
 
   //=========================Writing data
 
@@ -841,7 +841,7 @@ begin
   Write(ft, 'LWO2', 'TAGS');
 
   m:=0;
-  for i:=1 to MOX.Qty.MatCount do
+  for i:=1 to MOX.Header.MatCount do
     if Material[i].Title<>'' then
       if (Length(Material[i].Title) mod 2)=1 then
         Inc(m,Length(Material[i].Title)+1)
@@ -852,7 +852,7 @@ begin
 
   Write(ft,#0,#0,AnsiChar(m div 256),AnsiChar(m));
 
-  for i:=1 to MOX.Qty.MatCount do
+  for i:=1 to MOX.Header.MatCount do
     if Material[i].Title<>'' then
       if (Length(Material[i].Title) mod 2)=1 then
         Write(ft,Material[i].Title,#0)
@@ -865,10 +865,10 @@ begin
   Write(ft,'LAYR',#0,#0,#0,#18,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0);
 
   Write(ft,'PNTS');
-  m:=MOX.Qty.VerticeCount*12; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
+  m:=MOX.Header.VerticeCount*12; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
   ID:=0; ID2:=0;
 
-  for j:=1 to MOX.Qty.VerticeCount do
+  for j:=1 to MOX.Header.VerticeCount do
   begin
     t.x:=MOX.Vertice[j].X;
     t.y:=MOX.Vertice[j].Y;
@@ -907,11 +907,11 @@ begin
   end;
 
   Write(ft,'VMAP');
-  m:=6+10+MOX.Qty.VerticeCount*10; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
+  m:=6+10+MOX.Header.VerticeCount*10; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
   Write(ft,'TXUV',#0,#2);
   Write(ft,'Texture01',#0);           //TextureMap name in LW
   j:=0;
-  for k:=1 to MOX.Qty.VerticeCount do
+  for k:=1 to MOX.Header.VerticeCount do
   begin
     if k=MOX.Chunk[j+1,3] then Inc(j); //j=1 ...
     Write(ft,AnsiChar((k-1) div 256),AnsiChar(k-1));
@@ -926,9 +926,9 @@ begin
   end;
 
   Write(ft,'POLS');
-  m:=MOX.Qty.PolyCount*8+4; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
+  m:=MOX.Header.PolyCount*8+4; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
   Write(ft,'FACE');
-  for j:=1 to MOX.Qty.PolyCount do
+  for j:=1 to MOX.Header.PolyCount do
   begin
     Write(ft,#0,#3 // 3 Points/Polygon
     ,AnsiChar((MOX.Face[j,1]-1) div 256),AnsiChar(MOX.Face[j,1]-1)
@@ -937,15 +937,15 @@ begin
   end;
 
   Write(ft,'PTAG');
-  m:=MOX.Qty.PolyCount*4+4; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
+  m:=MOX.Header.PolyCount*4+4; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
   Write(ft,'SURF'); ID:=0;
-  for i:=1 to MOX.Qty.PolyCount do
+  for i:=1 to MOX.Header.PolyCount do
   begin
     if i-1=MOX.Chunk[ID+1,1] then Inc(ID);
     Write(ft,AnsiChar((i-1) div 256),AnsiChar(i-1),AnsiChar((MOX.Sid[ID,1]) div 256),AnsiChar(MOX.Sid[ID,1]));
   end;
 
-  for i:=1 to MOX.Qty.MatCount do if Material[i].TexName<>'' then
+  for i:=1 to MOX.Header.MatCount do if Material[i].TexName<>'' then
   begin
     Write(ft,'CLIP');
     if (Length(Material[i].TexName) mod 2)=1 then m:=Length(Material[i].TexName)+1 else m:=Length(Material[i].TexName)+2;
@@ -956,7 +956,7 @@ begin
     if (Length(Material[i].TexName) mod 2)=1 then Write(ft,#0) else Write(ft,#0,#0);
   end;
 
-  for i:=1 to MOX.Qty.MatCount do
+  for i:=1 to MOX.Header.MatCount do
   begin
     Write(ft,'SURF');
     m:=2+66+252;      ////Data Len
@@ -1153,7 +1153,7 @@ begin
 
   begin //FileNotExists or append incomplete MTL
 
-    for i:=NumMaterials+1 to MOX.Qty.MatCount do
+    for i:=NumMaterials+1 to MOX.Header.MatCount do
     with Material[i] do begin
       Mtag:=inttohex((i-1),4);
       Color[1].Amb.R:=0;  Color[1].Amb.G:=0;  Color[1].Amb.B:=0;
@@ -1164,7 +1164,7 @@ begin
       TexEdge.U:=1; TexEdge.V:=1;
     end;
 
-    for i:=NumMaterials+1 to MOX.Qty.MatCount do
+    for i:=NumMaterials+1 to MOX.Header.MatCount do
     for k:=1 to MAX_COLORS do
       Material[i].Color[k]:=Material[i].Color[1]; //Set all colors same
   end;
@@ -1182,7 +1182,7 @@ begin
   else
     writeln(ft,'ColSetInf "Default"');
 
-  for i:=1 to MOX.Qty.MatCount do
+  for i:=1 to MOX.Header.MatCount do
   with Material[i] do
   begin
     writeln(ft,'');
@@ -1421,10 +1421,10 @@ begin
   FileMode := 0;
   Reset(f, 1);
   FileMode := 2;
-  BlockRead(f, MOX.Qty.BlinkerCount, 4);
-  if MOX.Qty.BlinkerCount > MAX_BLINKERS then
-    MOX.Qty.BlinkerCount := MAX_BLINKERS;
-  BlockRead(f, MOX.Blinkers, 88 * MOX.Qty.BlinkerCount);
+  BlockRead(f, MOX.Header.BlinkerCount, 4);
+  if MOX.Header.BlinkerCount > MAX_BLINKERS then
+    MOX.Header.BlinkerCount := MAX_BLINKERS;
+  BlockRead(f, MOX.Blinkers, 88 * MOX.Header.BlinkerCount);
   CloseFile(f);
 end;
 
@@ -1434,8 +1434,8 @@ var
   f:file;
 begin
   AssignFile(f,aFilename); Rewrite(f,1);
-  BlockWrite(f,MOX.Qty.BlinkerCount,4);
-  BlockWrite(f,MOX.Blinkers,88*MOX.Qty.BlinkerCount);
+  BlockWrite(f,MOX.Header.BlinkerCount,4);
+  BlockWrite(f,MOX.Blinkers,88*MOX.Header.BlinkerCount);
   CloseFile(f);
 end;
 
@@ -1487,8 +1487,8 @@ begin
   end;
   CloseFile(ft);
 
-  for i:=1 to MOX.Qty.PartCount do
-    for k:=1 to MOX.Qty.PartCount do
+  for i:=1 to MOX.Header.PartCount do
+    for k:=1 to MOX.Header.PartCount do
       if MOX.Parts[i].Dname=name[k] then
       begin
         MOX.Parts[i].TypeID:=TmpID[k];
@@ -1505,10 +1505,10 @@ begin
       end;
 
   Form1.TVParts.Items.Clear; h:=1;
-  for i:=1 to MOX.Qty.PartCount do
+  for i:=1 to MOX.Header.PartCount do
   begin //Add matching nodes
     DetailMet:=False;
-    for k:=1 to MOX.Qty.PartCount do
+    for k:=1 to MOX.Header.PartCount do
       if name[i]=MOX.Parts[k].Dname then
         DetailMet:=True;
 
@@ -1521,17 +1521,17 @@ begin
     end;
   end;
 
-  for i:=1 to MOX.Qty.PartCount do
+  for i:=1 to MOX.Header.PartCount do
   begin //Add non-matching nodes from LWO
     DetailMet:=False;
-    for k:=1 to MOX.Qty.PartCount do if MOX.Parts[k].Dname=name[k] then DetailMet:=True;
+    for k:=1 to MOX.Header.PartCount do if MOX.Parts[k].Dname=name[k] then DetailMet:=True;
     if not DetailMet then begin
       Dnode[h]:=Form1.TVParts.Items.Add(nil,MOX.Parts[i].Dname);
       Inc(h);
     end;
   end;
 
-  if MOX.Qty.PartCount>=1 then Dnode[1].Expand(False);
+  if MOX.Header.PartCount>=1 then Dnode[1].Expand(False);
 
   Form1.ExchangePartsOrdering;
   Form1.RebuildPartsTree;
@@ -1547,9 +1547,9 @@ begin
   AssignFile(ft,aFilename); Rewrite(ft);
 
   writeln(ft,'Part Behaviour File by MTKit2');
-  writeln(ft,'Parts#=',MOX.Qty.PartCount);
+  writeln(ft,'Parts#=',MOX.Header.PartCount);
   writeln(ft);
-  for i:=1 to MOX.Qty.PartCount do
+  for i:=1 to MOX.Header.PartCount do
   begin
     writeln(ft,MOX.Parts[i].Dname);
     writeln(ft,floattostr(MOX.Parts[i].TypeID));
@@ -1597,7 +1597,8 @@ begin
   end;
 
   Readln(ft); //empty row
-  for i:=1 to DQty do begin
+  for i:=1 to DQty do
+  begin
     Readln(ft,name[i]);
     Readln(ft,tmp1[i]);
     Readln(ft,tmp2[i]);
@@ -1605,7 +1606,7 @@ begin
     Readln(ft);
   end;
 
-  for i:=1 to MOX.Qty.PartCount do
+  for i:=1 to MOX.Header.PartCount do
     for k:=1 to DQty do
       if MOX.Parts[i].Dname=name[k] then
       begin
@@ -1632,10 +1633,10 @@ begin
   AssignFile(ft,aFilename); Rewrite(ft);
 
   writeln(ft,'PivotSetupFile by MTKit2');
-  writeln(ft,'Parts#=', MOX.Qty.PartCount);
+  writeln(ft,'Parts#=', MOX.Header.PartCount);
   writeln(ft);
 
-  for i:=1 to MOX.Qty.PartCount do
+  for i:=1 to MOX.Header.PartCount do
   begin
     writeln(ft,MOX.Parts[i].Dname);
     writeln(ft,floattostr(PartModify[i].Move[1]));
