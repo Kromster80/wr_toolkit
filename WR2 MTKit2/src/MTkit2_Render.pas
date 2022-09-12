@@ -154,7 +154,7 @@ var
   mc2,mc3,mc4: Byte;
   i,k,h:Integer;
 begin
-  for i:=1 to MOX.Qty.Parts do
+  for i:=1 to MOX.Qty.PartCount do
   begin
     glPushMatrix;
     glMultMatrixf(@MOX.Parts[i].Matrix);

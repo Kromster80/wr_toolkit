@@ -489,14 +489,14 @@ var
   // This should be universal exchange format in MTKit2
   Imp: record
     VerticeCount, PolyCount, SurfCount, PartCount: Integer;
-    XYZ: array [1..65280] of Vector3f;
-    Np: array [1..65280] of Vector3f;
-    Nv: array [1..65280] of Vector3f;
-    UV: array [1..65280] of Vector2f;
-    DUV: array [1..65280,1..4] of Vector2f; //poly.point.value
-    Faces: array [1..65280,1..4]of Word;    //Polygon links
-    Surf: array [1..65280]of Word;
-    Part: array [1..65280]of Word;
+    XYZ: array [1..MAX_MOX_VTX] of Vector3f;
+    Np: array [1..MAX_MOX_VTX] of Vector3f;
+    Nv: array [1..MAX_MOX_VTX] of Vector3f;
+    UV: array [1..MAX_MOX_VTX] of Vector2f;
+    DUV: array [1..MAX_MOX_VTX,1..4] of Vector2f; //poly.point.value
+    Faces: array [1..MAX_MOX_IDX,1..4]of Integer;    //Polygon links
+    Surf: array [1..MAX_MOX_IDX]of Word;
+    Part: array [1..MAX_MOX_IDX]of Word;
     PartName: array [1..MAX_PARTS]of string;
     Mtl: array [1..MAX_MATERIALS]of record
       Title:string;
@@ -813,10 +813,10 @@ begin
 
   blockread(f,MOX.Qty,24);
 
-  blockread(f,MOX.Vertice,MOX.Qty.Vertice*40);
+  blockread(f,MOX.Vertice,MOX.Qty.VerticeCount*40);
 
   Memo1.Lines.Add('Loading polygons ...');
-  for i:=1 to MOX.Qty.Poly do
+  for i:=1 to MOX.Qty.PolyCount do
   if c[5]=#1 then
   begin
     blockread(f,vv[i],12);
@@ -830,7 +830,7 @@ begin
 
   Memo1.Lines.Add('Loading surface assignments ...');
   if MOXFormat='MBWR' then
-  for j:=1 to MOX.Qty.Chunks do
+  for j:=1 to MOX.Qty.ChunkCount do
   begin
     blockread(f,c,12);
     MOX.Sid[j,1]:=ord(c[1])+ord(c[2])*256;
@@ -842,7 +842,7 @@ begin
   end;
 
   if (MOXFormat='WR22')or(MOXFormat='WR02') then
-  for j:=1 to MOX.Qty.Chunks do
+  for j:=1 to MOX.Qty.ChunkCount do
   begin
     blockread(f,c,24);
     MOX.Sid[j,1]:=ord(c[1])+ord(c[2])*256;
@@ -853,12 +853,13 @@ begin
     MOX.Chunk[j,4]:=ord(c[21])+ord(c[22])*256+1; //point Till
   end;
 
-  blockread(f,MOX.MoxMat,(80+256)*MOX.Qty.Mat);   //Crap&Mess
+  blockread(f,MOX.MoxMat,(80+256)*MOX.Qty.MatCount);   //Crap&Mess
 
   Memo1.Lines.Add('Reading Parts ...');
 
   if MOXFormat='WR22' then
-    for j:=1 to MOX.Qty.Parts do begin
+    for j:=1 to MOX.Qty.PartCount do
+    begin
       blockread(f,c,64);
       MOX.Parts[j].Dname:=PAnsiChar(@c[1]);
       blockread(f,MOX.Parts[j].Matrix,132);
@@ -866,7 +867,7 @@ begin
 
   if (MOXFormat='MBWR')or(MOXFormat='WR02') then
   begin
-    MOX.Qty.Parts:=1;
+    MOX.Qty.PartCount:=1;
     FillChar(MOX.Parts[1],SizeOf(MOX.Parts[1]),#0);
     with MOX.Parts[1] do
     begin
@@ -877,7 +878,7 @@ begin
       PrevInLevel:=-1;
       NextInLevel:=-1;
       FirstMat:=0;
-      NumMat:=MOX.Qty.Mat;
+      NumMat:=MOX.Qty.MatCount;
       fRadius:=10;
     end;
   end;
@@ -909,17 +910,17 @@ var
 begin
   case aSection of
     uiMOX:    begin
-                Edit3Dqty.Text:=IntToStr(MOX.Qty.Vertice);
-                EditUVqty.Text:=IntToStr(MOX.Qty.Vertice);
-                EditPqty.Text:=IntToStr(MOX.Qty.Poly);
-                EditSqty.Text:=IntToStr(MOX.Qty.Parts);
-                EditMqty.Text:=IntToStr(MOX.Qty.Mat);
-                EditCqty.Text:=IntToStr(MOX.Qty.Chunks);
+                Edit3Dqty.Text:=IntToStr(MOX.Qty.VerticeCount);
+                EditUVqty.Text:=IntToStr(MOX.Qty.VerticeCount);
+                EditPqty.Text:=IntToStr(MOX.Qty.PolyCount);
+                EditSqty.Text:=IntToStr(MOX.Qty.PartCount);
+                EditMqty.Text:=IntToStr(MOX.Qty.MatCount);
+                EditCqty.Text:=IntToStr(MOX.Qty.ChunkCount);
                 EditBqty.Text:=IntToStr(MOX.Qty.Blink);
               end;
     uiMTL:    begin
                 LBMaterials.Clear;
-                for ii:=1 to MOX.Qty.Mat do
+                for ii:=1 to MOX.Qty.MatCount do
                   LBMaterials.AddItem(Material[ii].Mtag+' '+Material[ii].Title,nil);
                 LBMaterials.ItemIndex:=0;
                 if NumColors=1 then
@@ -950,12 +951,12 @@ begin
               end;
     uiParts:  begin
                 TVParts.Items.Clear;
-                for ii:=1 to MOX.Qty.Parts do
+                for ii:=1 to MOX.Qty.PartCount do
                 begin
                   if MOX.Parts[ii].Parent=-1 then Dnode[ii] := TVParts.Items.Add(nil,MOX.Parts[ii].Dname) else //make Root
                   Dnode[ii] := TVParts.Items.AddChild(Dnode[MOX.Parts[ii].Parent+1],MOX.Parts[ii].Dname);      //child
                 end;
-                if MOX.Qty.Parts>=1 then Dnode[1].Expand(False);
+                if MOX.Qty.PartCount>=1 then Dnode[1].Expand(False);
               end;
     uiCOB:    begin
                 COBRefresh := True;
@@ -992,7 +993,7 @@ var
   h,i,k,LOD:Integer;
   t:Single;
 begin
-  for i:=1 to MOX.Qty.Chunks do
+  for i:=1 to MOX.Qty.ChunkCount do
   begin
     if MoxCall[i]=0 then MoxCall[i]:=glGenLists(1);
     glNewList (MoxCall[i], GL_COMPILE);
@@ -1243,7 +1244,7 @@ var
   i,k: Integer;
 begin
   // Clear RAM used by textures
-  for i:=1 to MOX.Qty.Mat do
+  for i:=1 to MOX.Qty.MatCount do
     if MoxTex[i] <> 0 then
     begin
       glDeleteTextures(1, @MoxTex[i]);
@@ -1253,7 +1254,7 @@ begin
   glDeleteTextures(1, @ScratchTex);
 
   // Load new textures
-  for i:=1 to MOX.Qty.Mat do
+  for i:=1 to MOX.Qty.MatCount do
   begin
     for k:=1 to i-1 do
       if Material[k].TexName = Material[i].TexName then
@@ -1477,10 +1478,10 @@ begin
   begin  //Set MoxMat/Sid order continous
     //kinda lazy to re-do SRange stuff, so just sort it out here :-)
 
-    setlength(lazyqty,MOX.Qty.Parts+1);
+    setlength(lazyqty,MOX.Qty.PartCount+1);
     lazyqty[0]:=0;
 
-    for i:=1 to MOX.Qty.Parts do
+    for i:=1 to MOX.Qty.PartCount do
     begin
       lazyqty[i]:=1;                  //number of MOX.Parts
         for j:=MOX.Parts[i].FirstMat+1 to MOX.Parts[i].FirstMat+MOX.Parts[i].NumMat do
@@ -1498,29 +1499,31 @@ begin
       inc(lazyqty[0],lazyqty[i]);
       end;
 
-    MOX.Qty.Chunks:=0;
+    MOX.Qty.ChunkCount:=0;
     MOX.Parts[1].FirstMat:=0;
 
-    for i:=1 to MOX.Qty.Parts do
+    for i:=1 to MOX.Qty.PartCount do
     begin
-      inc(MOX.Qty.Chunks,lazyqty[i]);
+      inc(MOX.Qty.ChunkCount, lazyqty[i]);
       MOX.Parts[i].NumMat:=lazyqty[i];
       MOX.Parts[i+1].FirstMat:=MOX.Parts[i].FirstMat+MOX.Parts[i].NumMat;
     end;
     //re-Sorting ends here}
 
     k:=1; m:=0;
-    for i:=1 to MOX.Qty.Vertice do
+    for i:=1 to MOX.Qty.VerticeCount do
     begin
       if i=MOX.Chunk[k,4]+1 then
         inc(k);//3-point From  //4-point Till //k-partID
 
-      if MOX.Parts[m+1].FirstMat+1=k then begin
+      if MOX.Parts[m+1].FirstMat+1=k then
+      begin
         inc(m); //m-detailID
         tx[m]:=0; ty[m]:=0; tz[m]:=0;
         Lev:=m;
         //repeat
-          if (MOX.Parts[Lev].Parent<>-1) then begin
+          if (MOX.Parts[Lev].Parent<>-1) then
+          begin
             Lev:=MOX.Parts[Lev].Parent+1; //parentID
             tx[m] := Tx[m]-PartModify[Lev].Move[1];
             ty[m] := Ty[m]-PartModify[Lev].Move[2];
@@ -1537,7 +1540,8 @@ begin
       MOX.Vertice[i].Z:=MOX.Vertice[i].Z-PartModify[m].Move[3];
     end;
 
-    for i:=1 to MOX.Qty.Parts do begin
+    for i:=1 to MOX.Qty.PartCount do
+    begin
       MOX.Parts[i].Matrix[4,1] := Tx[i];//PartModify[i].Move[1];
       MOX.Parts[i].Matrix[4,2] := Ty[i];//PartModify[i].Move[2];
       MOX.Parts[i].Matrix[4,3] := Tz[i];//PartModify[i].Move[3];
@@ -1554,8 +1558,8 @@ begin
     BlockWrite(f, PAnsiChar(MOX_FORMAT_HEADER)^, 8);
 
     BlockWrite(f,MOX.Qty,24);
-    BlockWrite(f,MOX.Vertice,MOX.Qty.Vertice*40);
-    for ii:=1 to MOX.Qty.Poly do
+    BlockWrite(f,MOX.Vertice,MOX.Qty.VerticeCount*40);
+    for ii:=1 to MOX.Qty.PolyCount do
     begin
       dec(MOX.Face[ii,1],1); dec(MOX.Face[ii,2],1); dec(MOX.Face[ii,3],1);//V-1
 
@@ -1563,7 +1567,7 @@ begin
       inc(MOX.Face[ii,1],1); inc(MOX.Face[ii,2],1); inc(MOX.Face[ii,3],1);//restore values V+1 !
     end;
 
-    for ii:=1 to MOX.Qty.Chunks do
+    for ii:=1 to MOX.Qty.ChunkCount do
     begin
       BlockWrite(f,MOX.Sid[ii,1],2); BlockWrite(f,#0+#0,2);
       BlockWrite(f,MOX.Sid[ii,2],2); BlockWrite(f,#0+#0,2);
@@ -1577,9 +1581,9 @@ begin
     end;
 
 
-  BlockWrite(f,MOX.MoxMat,336*MOX.Qty.Mat);   //4+332
+  BlockWrite(f,MOX.MoxMat, 336*MOX.Qty.MatCount);   //4+332
 
-  for ii:=1 to MOX.Qty.Parts do
+  for ii:=1 to MOX.Qty.PartCount do
   begin
     s:=chr2(MOX.Parts[ii].Dname,64);
     BlockWrite(f,s[1],64);
@@ -1595,7 +1599,7 @@ begin
 
   closefile(f);
   Memo1.Lines.Add('MOX file closed');
-  for i:=1 to MOX.Qty.Parts do
+  for i:=1 to MOX.Qty.PartCount do
   begin
     PartModify[i].Custom[1]:=0;
     PartModify[i].Custom[2]:=0;
@@ -1663,20 +1667,20 @@ end;
 procedure TForm1.ConverseImp_MOX;
 var
   h,i,j,k,m,t:Integer;
-  VqtyAtSurf,PqtyAtSurf: array of array of Word;
-  altpoint: array of array of array of array[1..3] of Word; found: Boolean; //MOX.Parts,materials,points
-  altpoly: array of array of array of Word;                                //MOX.Parts,materials,points
-  v2: array of array of array of array[1..3] of Word;
-  PolyPerMaterial: array [1..512]of Word;
-  MakeDefaultPart:Boolean;
-  sprite: array [1..65280]of Boolean;
+  VqtyAtSurf,PqtyAtSurf: array of array of Integer;
+  altpoint: array of array of array of array[1..3] of Integer; found: Boolean; //MOX.Parts,materials,points
+  altpoly: array of array of array of Integer;                                //MOX.Parts,materials,points
+  v2: array of array of array of array[1..3] of Integer;
+  PolyPerMaterial: array [1..512] of Integer;
+  MakeDefaultPart: Boolean;
+  sprite: array [1..MAX_MOX_VTX]of Boolean;
 begin
   Shape2.Width:=32;
 
   FillChar(MOX,SizeOf(MOX),#0);
 
-  MOX.Qty.Parts:=Imp.PartCount;
-  MOX.Qty.Mat:=Imp.SurfCount;
+  MOX.Qty.PartCount:=Imp.PartCount;
+  MOX.Qty.MatCount:=Imp.SurfCount;
 
   TVParts.ReadOnly := False;
   FillChar(PartModify,SizeOf(PartModify),#0);
@@ -1699,7 +1703,7 @@ begin
     for i:=MAX_PARTS-1 downto 1 do Imp.PartName[i+1]:=Imp.PartName[i];
     Imp.PartName[1]:='Default(Body)';
     for i:=1 to Imp.PolyCount do inc(Imp.Part[i]); //set part #1
-    inc(MOX.Qty.Parts);
+    inc(MOX.Qty.PartCount);
   end;
 
   MOX.Qty.Blink := 0;
@@ -1740,21 +1744,21 @@ begin
   //Splitting                                                                   //
   ////////////////////////////////////////////////////////////////////////////////
 
-  setlength(altpoint,MOX.Qty.Parts+1);
-  setlength(altpoly,MOX.Qty.Parts+1);
-  setlength(VqtyAtSurf,MOX.Qty.Parts+1);
-  setlength(PqtyAtSurf,MOX.Qty.Parts+1);
-  setlength(v2,MOX.Qty.Parts+1);
-  for i:=1 to MOX.Qty.Parts do
+  setlength(altpoint,MOX.Qty.PartCount+1);
+  setlength(altpoly,MOX.Qty.PartCount+1);
+  setlength(VqtyAtSurf,MOX.Qty.PartCount+1);
+  setlength(PqtyAtSurf,MOX.Qty.PartCount+1);
+  setlength(v2,MOX.Qty.PartCount+1);
+  for i:=1 to MOX.Qty.PartCount do
   begin
-    setlength(altpoint[i],MOX.Qty.Mat+1);
-    setlength(altpoly[i],MOX.Qty.Mat+1);
-    setlength(VqtyAtSurf[i],MOX.Qty.Mat+1);
-    setlength(PqtyAtSurf[i],MOX.Qty.Mat+1);
-    setlength(v2[i],MOX.Qty.Mat+1);
+    setlength(altpoint[i],MOX.Qty.MatCount+1);
+    setlength(altpoly[i],MOX.Qty.MatCount+1);
+    setlength(VqtyAtSurf[i],MOX.Qty.MatCount+1);
+    setlength(PqtyAtSurf[i],MOX.Qty.MatCount+1);
+    setlength(v2[i],MOX.Qty.MatCount+1);
   end;
 
-  for m:=1 to MOX.Qty.Parts do
+  for m:=1 to MOX.Qty.PartCount do
   for i:=1 to Imp.PolyCount do
     if Imp.Part[i]=m then //for all polys belong to current part
     begin
@@ -1813,10 +1817,10 @@ begin
   Shape2.Width:=100;
 
   h:=1;
-  for m:=1 to MOX.Qty.Parts do
+  for m:=1 to MOX.Qty.PartCount do
   begin
     t:=1;
-    for i:=1 to MOX.Qty.Mat do
+    for i:=1 to MOX.Qty.MatCount do
       for k:=1 to VqtyAtSurf[m,i] do
       begin
         MOX.Vertice[h].X:=Imp.XYZ[altpoint[m,i,k,1]].X;
@@ -1827,7 +1831,7 @@ begin
         MOX.Vertice[h].nZ:=Imp.Nv[altpoint[m,i,k,1]].Z;
         MOX.Vertice[h].U:=Imp.DUV[altpoint[m,i,k,3],altpoint[m,i,k,2]].U;
         MOX.Vertice[h].V:=1-Imp.DUV[altpoint[m,i,k,3],altpoint[m,i,k,2]].V;
-        MOX.Qty.Vertice:=h;
+        MOX.Qty.VerticeCount:=h;
 
           if (t=1) then begin //Take 1st point of material as beginning for bounds checking
           t:=0;
@@ -1854,39 +1858,42 @@ begin
   FillChar(MOX.Parts,SizeOf(MOX.Parts),#0);
 
   h:=1;
-  for m:=1 to MOX.Qty.Parts do
-    for i:=1 to MOX.Qty.Mat do begin
-  if h>1 then MOX.Chunk[h,3]:=MOX.Chunk[h-1,4]+1 else MOX.Chunk[h,3]:=1;
-  MOX.Chunk[h,4]:=MOX.Chunk[h,3]+VqtyAtSurf[m,i]-1;
-  MOX.Qty.Chunks:=h;
-  inc(h);
+  for m:=1 to MOX.Qty.PartCount do
+  for i:=1 to MOX.Qty.MatCount do
+  begin
+    if h>1 then MOX.Chunk[h,3]:=MOX.Chunk[h-1,4]+1 else MOX.Chunk[h,3]:=1;
+    MOX.Chunk[h,4]:=MOX.Chunk[h,3]+VqtyAtSurf[m,i]-1;
+    MOX.Qty.ChunkCount := h;
+    inc(h);
   end;
 
   j:=1; t:=1;
-  for m:=1 to MOX.Qty.Parts do
-    for i:=1 to MOX.Qty.Mat do begin
-      for k:=1 to PqtyAtSurf[m,i] do begin
-      for h:=1 to 3 do MOX.Face[j,h]:=v2[m,i,k,h]+MOX.Chunk[t,3]-1;
-      inc(j);
+  for m:=1 to MOX.Qty.PartCount do
+    for i:=1 to MOX.Qty.MatCount do
+    begin
+      for k:=1 to PqtyAtSurf[m,i] do
+      begin
+        for h:=1 to 3 do MOX.Face[j,h]:=v2[m,i,k,h]+MOX.Chunk[t,3]-1;
+        inc(j);
       end;
     inc(t);
     end;
 
   h:=1;
-  for m:=1 to MOX.Qty.Parts do
+  for m:=1 to MOX.Qty.PartCount do
   begin
     MOX.Parts[m].NumMat:=0;
-    for i:=1 to MOX.Qty.Mat do
+    for i:=1 to MOX.Qty.MatCount do
     begin
       MOX.Chunk[h,2]:=PqtyAtSurf[m,i];
       if h>1 then MOX.Chunk[h,1]:=MOX.Chunk[h-1,1]+MOX.Chunk[h-1,2] else MOX.Chunk[h,1]:=0;
-      MOX.Qty.Poly:=MOX.Chunk[h,1]+MOX.Chunk[h,2];
+      MOX.Qty.PolyCount := MOX.Chunk[h,1]+MOX.Chunk[h,2];
       inc(MOX.Parts[m].NumMat);
       inc(h);
     end;
   end;
 
-  for i:=1 to MOX.Qty.Mat do
+  for i:=1 to MOX.Qty.MatCount do
   begin
     Material[i].Mtag:=inttohex((i-1),4);
     Material[i].Title:=Imp.Mtl[i].Title;
@@ -1911,24 +1918,27 @@ begin
 
   NumColors:=MAX_COLORS;
 
-  for i:=1 to MOX.Qty.Mat do for k:=2 to MAX_COLORS do
+  for i:=1 to MOX.Qty.MatCount do for k:=2 to MAX_COLORS do
   Material[i].Color[k]:=Material[i].Color[1]; //Set all colors same
   LoadTextures;
 
   h:=1;
-  for m:=1 to MOX.Qty.Parts do
-    for i:=1 to MOX.Qty.Mat do begin
+  for m:=1 to MOX.Qty.PartCount do
+    for i:=1 to MOX.Qty.MatCount do
+    begin
       MOX.Sid[h,1]:=i-1;
       MOX.Sid[h,2]:=i-1;
       inc(h);
     end;
 
-  for i:=1 to MOX.Qty.Mat do begin
+  for i:=1 to MOX.Qty.MatCount do
+  begin
     MOX.MoxMat[i].ID:=i-1;
     for k:=1 to 332 do MOX.MoxMat[i].xxx[k]:=#0;
   end;
 
-  for i:=1 to MOX.Qty.Parts do begin
+  for i:=1 to MOX.Qty.PartCount do
+  begin
     MOX.Parts[i].Dname:=Imp.PartName[i];
     MOX.Parts[i].Matrix[1,1]:=1;
     MOX.Parts[i].Matrix[2,2]:=1;
@@ -2145,13 +2155,13 @@ var
   aVertex: array [1..65280] of record X,Y,Z,nX,nY,nZ,U,V,x1,x2: Single; end; //40Bytes
   av: array [1..65280,1..3] of Word;                                         //6Bytes
 begin
-  for i := 1 to MOX.Qty.Parts do
-    for k := 1 to MOX.Qty.Parts do
+  for i := 1 to MOX.Qty.PartCount do
+    for k := 1 to MOX.Qty.PartCount do
       if MOX.Parts[i].Dname = TVParts.Items[k - 1].Text then
         order[k] := i;
 
   kp:=0; kv:=0;
-  for i:=1 to MOX.Qty.Parts do
+  for i:=1 to MOX.Qty.PartCount do
   begin
     aDname[i]:=MOX.Parts[order[i]].Dname;
     aParts[i].xMid:=MOX.Parts[order[i]].xMid;
@@ -2164,10 +2174,10 @@ begin
     aParts[i].z1:=MOX.Parts[order[i]].z1; aParts[i].z2:=MOX.Parts[order[i]].z2;
     CopyMemory(@aPartModify[i],@PartModify[order[i]],56); //55+1 !
 
-    for k:=1 to MOX.Qty.Mat do
+    for k:=1 to MOX.Qty.MatCount do
     begin
-      i1:=(i-1)*MOX.Qty.Mat+k;            //destination
-      i2:=(order[i]-1)*MOX.Qty.Mat+k;     //source
+      i1:=(i-1)*MOX.Qty.MatCount+k;            //destination
+      i2:=(order[i]-1)*MOX.Qty.MatCount+k;     //source
 
       aSRange[i1,1]:=kp;                                   //first poly
       aSRange[i1,2]:=MOX.Chunk[i2,2];                         //poly count
@@ -2191,7 +2201,7 @@ begin
   CopyMemory(@MOX.Chunk,@aSRange,length(MOX.Chunk)*8); //1..4 of Word
   CopyMemory(@MOX.Vertice,@aVertex,length(MOX.Vertice)*40);//XYZXYZUV00 of Single
   CopyMemory(@MOX.Face,@av,length(MOX.Face)*6);                //1..3 of Word
-  for i:=1 to MOX.Qty.Parts do
+  for i:=1 to MOX.Qty.PartCount do
   begin
     MOX.Parts[i].Dname:=aDname[i];
     MOX.Parts[i].xMid:=aParts[i].xMid;
@@ -2375,7 +2385,7 @@ procedure TForm1.MatPasteClick(Sender: TObject);
 var
   i:Integer;
 begin
-  if fColorCopyID <> EnsureRange(fColorCopyID, 1, MOX.Qty.Mat) then
+  if fColorCopyID <> EnsureRange(fColorCopyID, 1, MOX.Qty.MatCount) then
   begin
     MatPaste.Enabled := False;
     Exit;
@@ -2533,7 +2543,7 @@ procedure TForm1.ResetMTLOrderClick(Sender: TObject);
 var
   i:Integer;
 begin
-  for i:=1 to MOX.Qty.Mat do
+  for i:=1 to MOX.Qty.MatCount do
     Material[i].Mtag:=IntToHex((i-1),4);
   SendDataToUI(uiMTL);
 end;
@@ -3277,7 +3287,7 @@ var
 begin
   AbsMin := MaxSingle;
   AbsMax := -MaxSingle;
-  for i := 1 to MOX.Qty.Vertice do
+  for i := 1 to MOX.Qty.VerticeCount do
   begin
     AbsMin := min(AbsMin, MOX.Vertice[i].X, MOX.Vertice[i].Y);
     AbsMin := min(AbsMin, MOX.Vertice[i].Z);

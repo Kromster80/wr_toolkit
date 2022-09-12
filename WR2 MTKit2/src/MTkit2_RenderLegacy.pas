@@ -28,9 +28,14 @@ var
   ID,PartID: integer;
 begin
   h:=0; PartID:=1;
-  for ID:=1 to MOX.Qty.Chunks do
+  for ID:=1 to MOX.Qty.ChunkCount do
   begin
-    if ID>(MOX.Parts[PartID].NumMat+h) then begin inc(h,MOX.Parts[PartID].NumMat); inc(PartID); end; //define detail
+    // define detail
+    if ID > (MOX.Parts[PartID].NumMat + h) then
+    begin
+      inc(h, MOX.Parts[PartID].NumMat);
+      inc(PartID);
+    end;
 
     if (ActivePage=apMTL)
     or (SelectedTreeNode=0)
@@ -126,9 +131,14 @@ begin
   end;
 
   h:=0; PartID:=1;
-  for ID:=1 to MOX.Qty.Chunks do
+  for ID:=1 to MOX.Qty.ChunkCount do
   begin
-  if ID>(MOX.Parts[PartID].NumMat+h) then begin inc(h,MOX.Parts[PartID].NumMat); inc(PartID); end; //define detail
+    // define detail
+    if ID > (MOX.Parts[PartID].NumMat + h) then
+    begin
+      inc(h, MOX.Parts[PartID].NumMat);
+      inc(PartID);
+    end;
 
   //mat:=Material[MOX.Sid[ID,1]+1].Transparency;
   if (ActivePage=apMTL)
@@ -352,7 +362,8 @@ begin
   glBindTexture(GL_TEXTURE_2D, DirtTex); //UV map texture
   glColor3f(1,1,1);
   h:=0; IDk:=1;
-  for ID:=1 to MOX.Qty.Chunks do begin
+  for ID:=1 to MOX.Qty.ChunkCount do
+  begin
     if ID>(MOX.Parts[IDk].NumMat+h) then begin inc(h,MOX.Parts[IDk].NumMat); inc(IDk); end; //define detail
     if (SelectedTreeNode=0)or(ActivePage=apParts)or(not(RenderOpts.ShowPart)or //skip render of unseen parts
        (RenderOpts.ShowPart)and(IDk=SelectedTreeNode)) then
@@ -386,12 +397,13 @@ glPopMatrix;
 glEnable(GL_LIGHTING);
 end;
 
-procedure RenderPivotSetup(param,param2,p3:integer);
+procedure RenderPivotSetup(param, param2, p3: Integer);
 var
   i,k:integer;
 begin
-  if Form1.PageControl2.ActivePageIndex<>0 then exit;
-  if (param>MOX.Qty.Vertice)or(param<=0) then exit;
+  if Form1.PageControl2.ActivePageIndex<>0 then Exit;
+  if (param>MOX.Qty.VerticeCount)or(param<=0) then Exit;
+
   glDisable(GL_LIGHTING);
   glPushMatrix;
     TransformParent(SelectedTreeNode);
@@ -412,17 +424,18 @@ end;
 procedure RenderWireframe(param:string);
 var h,ID,IDk:integer;
 begin
-glPolygonMode(GL_FRONT,GL_LINE);
-glBindTexture(GL_TEXTURE_2D, 0);
-glColor3ubv(@WFColor[1]);
-h:=0; IDk:=1;
-for ID:=1 to MOX.Qty.Chunks do begin
-  if ID>(MOX.Parts[IDk].NumMat+h) then begin inc(h,MOX.Parts[IDk].NumMat); inc(IDk); end; //define detail
-  if (SelectedTreeNode=0)or(ActivePage=apParts)or(not(RenderOpts.ShowPart)or //skip render of unseen parts
-     (RenderOpts.ShowPart)and(IDk=SelectedTreeNode)) then
-      TransformAndCall(ID,IDk, 1);
-end;
-glPolygonMode(GL_FRONT,GL_FILL);
+  glPolygonMode(GL_FRONT,GL_LINE);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glColor3ubv(@WFColor[1]);
+  h:=0; IDk:=1;
+  for ID:=1 to MOX.Qty.ChunkCount do
+  begin
+    if ID>(MOX.Parts[IDk].NumMat+h) then begin inc(h,MOX.Parts[IDk].NumMat); inc(IDk); end; //define detail
+    if (SelectedTreeNode=0)or(ActivePage=apParts)or(not(RenderOpts.ShowPart)or //skip render of unseen parts
+       (RenderOpts.ShowPart)and(IDk=SelectedTreeNode)) then
+        TransformAndCall(ID,IDk, 1);
+  end;
+  glPolygonMode(GL_FRONT,GL_FILL);
 end;
 
 procedure TransformAndCall(ID,PartID:integer; mode:Byte);

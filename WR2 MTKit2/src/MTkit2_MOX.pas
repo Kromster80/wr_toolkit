@@ -32,17 +32,21 @@ type
   end;
 
 const
+  MAX_MOX_VTX = 131072;
+  MAX_MOX_IDX = 131072;
+
   MAX_BLINKERS = 128;
   MAX_PARTS = 255;
+  MAX_MATERIALS = 1024;
 
 var
   MOX: record
-    Qty: record Vertice, Poly, Chunks, Mat, Parts, Blink: Integer; end;
-    Vertice: array [1..65280] of TMOXVertice;
-    Face: array [1..65280,1..3] of Word;  // Polygon links
-    Chunk: array [1..2048,1..4] of Word;  // Surface ranges (points/polys) 40 parts * 40 materials
-    Sid: array [1..2048,1..2] of Word;
-    MoxMat: array [1..1024] of record
+    Qty: record VerticeCount, PolyCount, ChunkCount, MatCount, PartCount, Blink: Integer; end;
+    Vertice: array [1..MAX_MOX_VTX] of TMOXVertice;
+    Face: array [1..MAX_MOX_IDX,1..3] of Word;  // Polygon links
+    Chunk: array [1..2048, 1..4] of Word;  // Surface ranges (points/polys) 40 parts * 40 materials
+    Sid: array [1..2048, 1..2] of Word;
+    MoxMat: array [1..MAX_MATERIALS] of record
       ID: Integer;
       xxx: array [1..332] of AnsiChar;
     end;
