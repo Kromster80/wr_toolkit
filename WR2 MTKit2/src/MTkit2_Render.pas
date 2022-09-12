@@ -13,7 +13,6 @@ type
   procedure RenderLights(aSelected: Integer; aMode: TBlinkerPreviewMode; aShowDummy, aVectors: Boolean);
   procedure RenderCOB(ID: Integer);
   procedure RenderCPO(ID: Integer);
-  procedure RenderTREE;
   procedure RenderGrid;
   procedure RenderUVGrid(ShowGrid: Boolean);
   procedure CompileCommonObjects;
@@ -366,55 +365,6 @@ begin
     glPopMatrix;
   end;
   glEnable(GL_LIGHTING);
-end;
-
-
-procedure RenderTREE;
-var
-  i,h:Integer;
-begin
-if Tree.NumVertex=0 then exit;
-
-glPushMatrix;
-  glTranslate(0,-TreeHeight/3,0);
-  glBindTexture(GL_TEXTURE_2D, TreeTex[1]); //UV map texture
-  glCallList(Pivot); //Pivot
-  glColor4f(0.75,0.75,0.75,1);
-  glCallList(TreeCall);
-
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_GREATER,0.5);
-  glBindTexture(GL_TEXTURE_2D, TreeTex[2]); //UV map texture
-  glColor4f(0.75,0.75,0.75,1);
-  for i:=1 to Tree.NumLeaves do
-  begin
-    glPushMatrix;
-      glTranslate(TreeLeaves[i].X,TreeLeaves[i].Y,TreeLeaves[i].Z);
-      glRotatef(xRot, 0, -1, 0); //face camera
-      glRotatef(yRot, -1, 0, 0);
-      glbegin (gl_triangles);
-      for h:=1 to 3 do begin
-        glTexCoord2f(TreeVertex[TreePoly[i,h]+1].U , -TreeVertex[TreePoly[i,h]+1].V);
-        glNormal3fv(@TreeVertex[TreePoly[i,h]+1].nX);
-        glvertex3fv(@TreeVertex[TreePoly[i,h]+1].X);
-      end;
-      glEnd;
-    glPopMatrix;
-  end;
-  glDisable(GL_ALPHA_TEST);
-
-  if RenderOpts.Wire then
-  begin
-    glBindTexture(GL_TEXTURE_2D,0); //UV map texture
-    glDepthFunc(GL_ALWAYS);
-    glColor4f(0.6,0.9,0.6,0.1);
-    glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-    glCallList(TreeCall);
-    glPolygonMode(GL_FRONT,GL_FILL);
-    glDepthFunc(GL_LEQUAL);
-  end;
-
-  glPopMatrix;
 end;
 
 

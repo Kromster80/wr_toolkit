@@ -279,7 +279,7 @@ type
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure CompileLoaded(aTypename: string);
+    procedure CompileLoadedMOX;
     procedure RenderResize(Sender: TObject);
     procedure LoadMOX(const aFilename: string);
     procedure Panel1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -395,6 +395,8 @@ type
     fColorCopyID: Integer;
     fCOBCopyItem: Integer;
 
+    fTree: TModelTree;
+
     procedure LoadSettingsFromIni(const aFilename: string);
     procedure SaveSettingsToIni(const aFilename: string);
     procedure OnIdle(Sender: TObject; var Done: Boolean);
@@ -402,7 +404,6 @@ type
     procedure Render;
     function  LoadFile(const aFilename: string; lm: TLoadMode):Boolean;
     procedure LoadTextures;
-    function TryToLoadTexture(const aFilename: string):cardinal;
     procedure SendDataToUI(aSection: TUIDataSection);
     procedure SetActivePage(aPage: TActivePage);
     procedure SetRenderObject(aSet: TRenderObjectSet);
@@ -434,8 +435,6 @@ var
   Dummy,Pivot,BBox,BBoxW,Center,FlameSprite,Sprite1Side,Sprite2Side,SelectionSphere:glUint;
   MoxCall,MoxUVCall: array [1..16384]of Word;
   MoxTex: array [1..256]of glUint;
-  TreeCall:Integer;
-  TreeTex: array [1..2]of glUint;
   BGColor: array [1..3]of Byte;
   WFColor: array [1..3]of Byte;
 
@@ -555,7 +554,8 @@ var
 
 implementation
 uses
-  ColorPicker, UnitRawInputHeaders;
+  ColorPicker, UnitRawInputHeaders,
+  MTKit2_Textures;
 
 {$R *.dfm}
 
@@ -610,6 +610,8 @@ begin
   PageControl1Change(nil); //update ActivePage
   CBRenderModeChange(nil); //update RenderMode
   FormatSettings.DecimalSeparator := '.';
+
+  fTree := TModelTree.Create;
 
   ClearUpClick(cuALL);
 
@@ -763,6 +765,8 @@ end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
+  FreeAndNil(fTree);
+
   wglMakeCurrent(h_DC, 0);
   wglDeleteContext(h_RC);
 end;
@@ -890,7 +894,7 @@ begin
 
   ShowUpClick(cuMOX);
 
-  CompileLoaded('MOX');
+  CompileLoadedMOX;
 
   SaveMOX1.Enabled := True;
   ExportMOX1.Enabled := True;
@@ -983,69 +987,50 @@ begin
   end;
 end;
 
-procedure TForm1.CompileLoaded(aTypename: string);
+procedure TForm1.CompileLoadedMOX;
 var
   h,i,k,LOD:Integer;
   t:Single;
 begin
-  if aTypename = 'MOX' then
+  for i:=1 to MOX.Qty.Chunks do
   begin
-    for i:=1 to MOX.Qty.Chunks do
-    begin
-      if MoxCall[i]=0 then MoxCall[i]:=glGenLists(1);
-      glNewList (MoxCall[i], GL_COMPILE);
-      glbegin (gl_triangles);
-        for k:=1 to MOX.Chunk[i,2] do  //1..number polys
-        for h:=3 downto 1 do begin
-          glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].U);
-          glNormal3fv(@MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].nX);
-          glVertex3fv(@MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].X);
-        end;
-      glEnd;
-      glEndList;
-
-      if MoxUVCall[i]=0 then MoxUVCall[i]:=glGenLists(1);
-      glNewList (MoxUVCall[i], GL_COMPILE);
-      glbegin (gl_triangles);
-        for k:=1 to MOX.Chunk[i,2] do begin
-          Normal2Poly(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,1]].U,MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,1]].V,
-                      MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,2]].U,MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,2]].V,
-                      MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,3]].U,MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,3]].V,t);
-          if t>=0 then
-            for h:=3 downto 1 do begin
-              glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].U);
-              glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].U,-MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].V+1);
-              //glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].x1,-MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].x2+1);//AFC11CT
-            end
-          else
-            for h:=1 to 3 do begin
-              glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].U);
-              glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].U,-MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].V+1);
-              //glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].x1,-MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].x2+1);//AFC11CT
-            end;
-        end;
-      glEnd;
-      glEndList;
-    end;
-
-    KnowScale(nil);
-  end else
-  if aTypename = 'TREE' then
-  begin
-    LOD:=1;
-    if TreeCall=0 then TreeCall:=glGenLists(1);
-    glNewList (TreeCall, GL_COMPILE);
+    if MoxCall[i]=0 then MoxCall[i]:=glGenLists(1);
+    glNewList (MoxCall[i], GL_COMPILE);
     glbegin (gl_triangles);
-      for i:=TreeLOD[LOD].Offset div 3+1 to TreeLOD[LOD].Offset div 3+TreeLOD[LOD].PolyCount do
-      for h:=3 downto 1 do
-      begin
-        glTexCoord2fv(@TreeVertex[TreePoly[i,h]+1].U);
-        glNormal3fv(@TreeVertex[TreePoly[i,h]+1].nX);
-        glVertex3fv(@TreeVertex[TreePoly[i,h]+1].X);
+      for k:=1 to MOX.Chunk[i,2] do  //1..number polys
+      for h:=3 downto 1 do begin
+        glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].U);
+        glNormal3fv(@MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].nX);
+        glVertex3fv(@MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].X);
+      end;
+    glEnd;
+    glEndList;
+
+    if MoxUVCall[i]=0 then MoxUVCall[i]:=glGenLists(1);
+    glNewList (MoxUVCall[i], GL_COMPILE);
+    glbegin (gl_triangles);
+      for k:=1 to MOX.Chunk[i,2] do begin
+        Normal2Poly(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,1]].U,MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,1]].V,
+                    MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,2]].U,MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,2]].V,
+                    MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,3]].U,MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,3]].V,t);
+        if t>=0 then
+          for h:=3 downto 1 do begin
+            glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].U);
+            glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].U,-MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].V+1);
+            //glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].x1,-MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].x2+1);//AFC11CT
+          end
+        else
+          for h:=1 to 3 do begin
+            glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].U);
+            glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].U,-MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].V+1);
+            //glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].x1,-MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].x2+1);//AFC11CT
+          end;
       end;
     glEnd;
     glEndList;
   end;
+
+  KnowScale(nil);
 end;
 
 procedure TForm1.Render;
@@ -1123,7 +1108,8 @@ begin
       glEnable(GL_DEPTH_TEST);
     end;
 
-    if roTREE in RenderObject then RenderTREE;
+    if roTREE in RenderObject then
+      fTree.Render(Pivot, xRot, yRot, RenderOpts.Wire);
 
     if (roCOB in RenderObject) then
       if (ActivePage=apCOB)or(RenderOpts.Colli)or
@@ -1274,37 +1260,11 @@ begin
         MoxTex[i] := MoxTex[k]; //use earlier loaded texture ID
 
     if MoxTex[i] = 0 then
-      MoxTex[i]:=TryToLoadTexture(Material[i].TexName);
+      MoxTex[i] := TryToLoadTexture(fOpenedFolder, Material[i].TexName);
   end;
 
-  DirtTex := TryToLoadTexture('dirt.tga');
-  ScratchTex := TryToLoadTexture('scratch.tga');
-end;
-
-
-function TForm1.TryToLoadTexture(const aFilename: string): Cardinal;
-var
-  texId: Cardinal;
-  fname: string;
-begin
-  texId := 0;
-
-  // Try in following order:
-  // Textures_PC\tga > Textures\tga > Textures_PC\ptx > Textures\ptx
-  fname := ChangeFileExt(aFileName, '');
-  if FileExists(fOpenedFolder + '\Textures_PC\' + fname + '.tga') then
-    LoadTexture(fOpenedFolder + '\Textures_PC\' + fname + '.tga', texId, 0)
-  else
-  if FileExists(fOpenedFolder + '\Textures\' + fname + '.tga') then
-    LoadTexture(fOpenedFolder + '\Textures\' + fname + '.tga', texId, 0)
-  else
-  if FileExists(fOpenedFolder + '\Textures_PC\' + fname + '.ptx') then
-    LoadTexturePTX(fOpenedFolder + '\Textures_PC\' + fname + '.ptx', texId)
-  else
-  if FileExists(fOpenedFolder + '\Textures\' + fname + '.ptx') then
-    LoadTexturePTX(fOpenedFolder + '\Textures\' + fname + '.ptx', texId);
-
-  Result := texId;
+  DirtTex := TryToLoadTexture(fOpenedFolder, 'dirt.tga');
+  ScratchTex := TryToLoadTexture(fOpenedFolder, 'scratch.tga');
 end;
 
 
@@ -1645,7 +1605,7 @@ begin
     PartModify[i].Move[3]:=0;
   end;
 
-  CompileLoaded('MOX'); // To make sure it looks just right
+  CompileLoadedMOX; // To make sure it looks just right
 end;
 
 
@@ -1993,7 +1953,7 @@ begin
   setlength(altpoly,0);
   setlength(v2,0);
 
-  CompileLoaded('MOX');
+  CompileLoadedMOX;
 
   Label35.Caption:=floattostr(round((GetTickCount-OldTimeLWO)/100)/10)+' s';
 
@@ -2244,7 +2204,7 @@ begin
     MOX.Parts[i].z1:=aParts[i].z1; MOX.Parts[i].z2:=aParts[i].z2;
   end;
 
-  CompileLoaded('MOX');
+  CompileLoadedMOX;
 end;
 
 
@@ -2606,11 +2566,11 @@ end;
 
 procedure TForm1.FileListBox1Click(Sender: TObject);
 begin
-  FillChar(MOX.Qty,SizeOf(MOX.Qty),#0);
-  FillChar(COB,SizeOf(COB),#0);
-  FillChar(Tree,SizeOf(Tree),#0);
+  FillChar(MOX.Qty, SizeOf(MOX.Qty), #0);
+  FillChar(COB, SizeOf(COB), #0);
+  fTree.Clear;
   ResetView(nil);
-  LoadFile(FileListBox1.FileName,lmJustLoad);
+  LoadFile(FileListBox1.FileName, lmJustLoad);
 end;
 
 
@@ -2668,13 +2628,9 @@ begin
 
   if GetFileExt(aFilename)='TREE' then
   begin
-    LoadTree(aFilename);
-    CompileLoaded('TREE');
-    for i:=1 to 2 do
-    begin
-      glDeleteTextures(1, @TreeTex[i]); //Clear RAM used by textures
-      TreeTex[i] := TryToLoadTexture(TreeTexNames[i]);
-    end;
+    fTree.LoadFromFile(aFilename);
+    fTree.PrepareDisplayList;
+    fTree.PrepareTextures(fOpenedFolder);
     ShowUpClick(cuTREE);
     Memo1.Lines.Add('TREE Loaded ...');
     SetRenderObject([roTREE]);
@@ -3215,9 +3171,9 @@ begin
 
   if aClearup in [cuTREE, cuALL] then
   begin
-    FillChar(Tree,SizeOf(Tree),#0);
-    SB_Wire.Down:=False;
-    SB_Wire.Enabled:=False;
+    fTree.Clear;
+    SB_Wire.Down := False;
+    SB_Wire.Enabled := False;
   end;
 end;
 

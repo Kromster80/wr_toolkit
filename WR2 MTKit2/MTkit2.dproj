@@ -107,6 +107,7 @@
         <DCCReference Include="src\MTkit2_Tree.pas"/>
         <DCCReference Include="src\MTkit2_Render.pas"/>
         <DCCReference Include="src\MTkit2_RenderLegacy.pas"/>
+        <DCCReference Include="src\MTkit2_Textures.pas"/>
         <DCCReference Include="src\MTkit2_Vertex.pas"/>
         <DCCReference Include="..\_Common_\KromUtils.pas"/>
         <DCCReference Include="..\_Common_\ColorPicker.pas">
