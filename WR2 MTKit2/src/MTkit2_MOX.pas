@@ -41,7 +41,7 @@ const
 
 var
   MOX: record
-    Qty: record VerticeCount, PolyCount, ChunkCount, MatCount, PartCount, Blink: Integer; end;
+    Qty: record VerticeCount, PolyCount, ChunkCount, MatCount, PartCount, BlinkerCount: Integer; end;
     Vertice: array [1..MAX_MOX_VTX] of TMOXVertice;
     Face: array [1..MAX_MOX_IDX,1..3] of Word;  // Polygon links
     Chunk: array [1..2048, 1..4] of Word;  // Surface ranges (points/polys) 40 parts * 40 materials

@@ -884,12 +884,12 @@ begin
   end;
 
   Memo1.Lines.Add('Reading Blinkers ...');
-  if MOX.Qty.Blink > MAX_BLINKERS then
+  if MOX.Qty.BlinkerCount > MAX_BLINKERS then
   begin
-    MOX.Qty.Blink := MAX_BLINKERS;
+    MOX.Qty.BlinkerCount := MAX_BLINKERS;
     MessageBox(Handle, PChar('Blinker quantity limited to '+IntToStr(MAX_BLINKERS)+' due to compatibility issues.'), 'Warning', MB_OK or MB_ICONWARNING);
   end;
-  if MOXFormat='WR22' then blockread(f,MOX.Blinkers,88*MOX.Qty.Blink);
+  if MOXFormat='WR22' then blockread(f,MOX.Blinkers,88*MOX.Qty.BlinkerCount);
   closefile(f);
   Memo1.Lines.Add('MOX file closed');
 
@@ -916,7 +916,7 @@ begin
                 EditSqty.Text:=IntToStr(MOX.Qty.PartCount);
                 EditMqty.Text:=IntToStr(MOX.Qty.MatCount);
                 EditCqty.Text:=IntToStr(MOX.Qty.ChunkCount);
-                EditBqty.Text:=IntToStr(MOX.Qty.Blink);
+                EditBqty.Text:=IntToStr(MOX.Qty.BlinkerCount);
               end;
     uiMTL:    begin
                 LBMaterials.Clear;
@@ -940,7 +940,7 @@ begin
                 LightRefresh := True;
                 oldID1:=LBBlinkers.ItemIndex;
                 LBBlinkers.Clear;
-                for ii:=1 to MOX.Qty.Blink do
+                for ii:=1 to MOX.Qty.BlinkerCount do
                   LBBlinkers.Items.Add(IntToStr(ii)+'. '+BLINKER_TYPE_SHORTNAME[MOX.Blinkers[ii].BlinkerType]+'  '+
                     FloatToStrF(MOX.Blinkers[ii].sMin,ffGeneral,5,7)+'->'+
                     FloatToStrF(MOX.Blinkers[ii].sMax,ffGeneral,5,7)+'  '+
@@ -1592,7 +1592,7 @@ begin
 
   //todo: It is worth writing more important blinkers first (deprioritize LED decoys),
   // since the game has a limit on how many blinkers it can show at once (255 iirc)
-  for ii:=1 to MOX.Qty.Blink do //Write blinkers in order
+  for ii:=1 to MOX.Qty.BlinkerCount do //Write blinkers in order
     for kk:=0 to 33 do //todo: Looks like this loop should be on the outside
      if MOX.Blinkers[ii].BlinkerType = kk then
        BlockWrite(f, MOX.Blinkers[ii], 88);
@@ -1706,12 +1706,12 @@ begin
     inc(MOX.Qty.PartCount);
   end;
 
-  MOX.Qty.Blink := 0;
+  MOX.Qty.BlinkerCount := 0;
   for i:=1 to Imp.VerticeCount do
-    if sprite[i] and (MOX.Qty.Blink < MAX_BLINKERS) then
+    if sprite[i] and (MOX.Qty.BlinkerCount < MAX_BLINKERS) then
     begin
-      Inc(MOX.Qty.Blink);                                 //63+1=64
-      with MOX.Blinkers[MOX.Qty.Blink] do
+      Inc(MOX.Qty.BlinkerCount);                                 //63+1=64
+      with MOX.Blinkers[MOX.Qty.BlinkerCount] do
       begin //0..63
         BlinkerType := 2;
         Matrix[1,1]:=1; Matrix[1,2]:=0; Matrix[1,3]:=0; Matrix[1,4]:=0;
@@ -2009,31 +2009,31 @@ end;
 
 procedure TForm1.MOXBlinkerAdd(aIndex: Integer);
 begin
-  if MOX.Qty.Blink >= MAX_BLINKERS then Exit;
+  if MOX.Qty.BlinkerCount >= MAX_BLINKERS then Exit;
 
-  Inc(MOX.Qty.Blink);
+  Inc(MOX.Qty.BlinkerCount);
 
-  if InRange(aIndex, 1, MOX.Qty.Blink) then
+  if InRange(aIndex, 1, MOX.Qty.BlinkerCount) then
     // Duplicate existing
-    MOX.Blinkers[MOX.Qty.Blink] := MOX.Blinkers[aIndex]
+    MOX.Blinkers[MOX.Qty.BlinkerCount] := MOX.Blinkers[aIndex]
   else
   begin
     // Create new
-    MOX.Blinkers[MOX.Qty.Blink].BlinkerType := 0;
-    MOX.Blinkers[MOX.Qty.Blink].sMin := 0;
-    MOX.Blinkers[MOX.Qty.Blink].sMax := 1;
-    MOX.Blinkers[MOX.Qty.Blink].Freq := 0;
-    MOX.Blinkers[MOX.Qty.Blink].B := 255;
-    MOX.Blinkers[MOX.Qty.Blink].G := 64;
-    MOX.Blinkers[MOX.Qty.Blink].R := 0;
-    MOX.Blinkers[MOX.Qty.Blink].A := 255;
-    MOX.Blinkers[MOX.Qty.Blink].Unused := 0;
-    MOX.Blinkers[MOX.Qty.Blink].Parent := 0;
-    FillChar(MOX.Blinkers[MOX.Qty.Blink].Matrix, SizeOf(MOX.Blinkers[MOX.Qty.Blink].Matrix), #0);
-    MOX.Blinkers[MOX.Qty.Blink].Matrix[1, 1] := 1;
-    MOX.Blinkers[MOX.Qty.Blink].Matrix[2, 2] := 1;
-    MOX.Blinkers[MOX.Qty.Blink].Matrix[3, 3] := 1;
-    MOX.Blinkers[MOX.Qty.Blink].Matrix[4, 4] := 1;
+    MOX.Blinkers[MOX.Qty.BlinkerCount].BlinkerType := 0;
+    MOX.Blinkers[MOX.Qty.BlinkerCount].sMin := 0;
+    MOX.Blinkers[MOX.Qty.BlinkerCount].sMax := 1;
+    MOX.Blinkers[MOX.Qty.BlinkerCount].Freq := 0;
+    MOX.Blinkers[MOX.Qty.BlinkerCount].B := 255;
+    MOX.Blinkers[MOX.Qty.BlinkerCount].G := 64;
+    MOX.Blinkers[MOX.Qty.BlinkerCount].R := 0;
+    MOX.Blinkers[MOX.Qty.BlinkerCount].A := 255;
+    MOX.Blinkers[MOX.Qty.BlinkerCount].Unused := 0;
+    MOX.Blinkers[MOX.Qty.BlinkerCount].Parent := 0;
+    FillChar(MOX.Blinkers[MOX.Qty.BlinkerCount].Matrix, SizeOf(MOX.Blinkers[MOX.Qty.BlinkerCount].Matrix), #0);
+    MOX.Blinkers[MOX.Qty.BlinkerCount].Matrix[1, 1] := 1;
+    MOX.Blinkers[MOX.Qty.BlinkerCount].Matrix[2, 2] := 1;
+    MOX.Blinkers[MOX.Qty.BlinkerCount].Matrix[3, 3] := 1;
+    MOX.Blinkers[MOX.Qty.BlinkerCount].Matrix[4, 4] := 1;
   end;
 end;
 
@@ -2044,9 +2044,9 @@ var
 begin
   if LBBlinkers.ItemIndex = -1 then Exit;
 
-  for I := LBBlinkers.ItemIndex + 1 to MOX.Qty.Blink - 1 do
+  for I := LBBlinkers.ItemIndex + 1 to MOX.Qty.BlinkerCount - 1 do
     MOX.Blinkers[I] := MOX.Blinkers[I + 1];
-  Dec(MOX.Qty.Blink);
+  Dec(MOX.Qty.BlinkerCount);
 
   SendDataToUI(uiLights);
 
@@ -2060,7 +2060,7 @@ end;
 procedure TForm1.BlinkCopyClick(Sender: TObject);
 begin
   fLightCopyID := LBBlinkers.ItemIndex + 1;
-  btnBlinkerPaste.Enabled := InRange(fLightCopyID, 1, MOX.Qty.Blink);
+  btnBlinkerPaste.Enabled := InRange(fLightCopyID, 1, MOX.Qty.BlinkerCount);
 end;
 
 
@@ -2071,7 +2071,7 @@ begin
   idx := LBBlinkers.ItemIndex+1;
   if idx = 0 then Exit;
 
-  if not InRange(fLightCopyID, 1, MOX.Qty.Blink) then
+  if not InRange(fLightCopyID, 1, MOX.Qty.BlinkerCount) then
   begin
     btnBlinkerPaste.Enabled := False;
     Exit;
@@ -2086,10 +2086,9 @@ end;
 
 procedure TForm1.btnBlinkersLoadClick(Sender: TObject);
 begin
-  if not RunOpenDialog(Open1, '', '', 'MTKit2 Lights Setup Files (*.lsf)|*.lsf') then
-    Exit;
+  if not RunOpenDialog(Open1, '', '', 'MTKit2 Lights Setup Files (*.lsf)|*.lsf') then Exit;
 
-  LoadLights(Open1.FileName);
+  LoadBlinkers(Open1.FileName);
   SendDataToUI(uiLights);
   btnBlinkerPaste.Enabled := False;
 end;
@@ -2098,7 +2097,8 @@ end;
 procedure TForm1.btnBlinkersSaveClick(Sender: TObject);
 begin
   if not RunSaveDialog(Save1, fOpenedFileMask + '.lsf', '', 'MTKit2 Lights Setup Files (*.lsf)|*.lsf', 'lsf') then Exit;
-  SaveLights(Save1.FileName);
+
+  SaveBlinkers(Save1.FileName);
 end;
 
 
@@ -2327,13 +2327,13 @@ end;
 procedure TForm1.CoBCopyClick(Sender: TObject);
 begin
   fCOBCopyItem := LBCOBPoints.ItemIndex+1;
-  COBPaste.Enabled := InRange(fCOBCopyItem, 1, MOX.Qty.Blink);
+  COBPaste.Enabled := InRange(fCOBCopyItem, 1, MOX.Qty.BlinkerCount);
 end;
 
 
 procedure TForm1.COBPasteClick(Sender: TObject);
 begin
-  if fCOBCopyItem<>EnsureRange(fCOBCopyItem, 1, MOX.Qty.Blink) then
+  if fCOBCopyItem<>EnsureRange(fCOBCopyItem, 1, MOX.Qty.BlinkerCount) then
   begin
     COBPaste.Enabled := False;
     Exit;
@@ -3073,7 +3073,7 @@ begin
 
   LoadPSF(fOpenedFileMask+'.psf');
   LoadPBF(fOpenedFileMask+'.pbf');
-  LoadLights(fOpenedFileMask+'.lsf');
+  LoadBlinkers(fOpenedFileMask+'.lsf');
 
   SendDataToUI(uiLights);
   btnBlinkerPaste.Enabled := False;

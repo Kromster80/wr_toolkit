@@ -21,8 +21,8 @@ procedure SaveCOB(const aFilename: string);
 procedure SaveCOB2LWO(const aFilename: string);
 procedure SaveCPO2LWO(const aFilename: string; ShapeID: Integer);
 
-procedure LoadLights(const aFilename: string);
-procedure SaveLights(const aFilename: string);
+procedure LoadBlinkers(const aFilename: string);
+procedure SaveBlinkers(const aFilename: string);
 
 function  LoadPBF(const aFilename: string): Boolean;
 procedure SavePBF(const aFilename: string);
@@ -1411,7 +1411,7 @@ begin
 end;
 
 
-procedure LoadLights(const aFilename: string);
+procedure LoadBlinkers(const aFilename: string);
 var
   f:file;
 begin
@@ -1421,21 +1421,21 @@ begin
   FileMode := 0;
   Reset(f, 1);
   FileMode := 2;
-  BlockRead(f, MOX.Qty.Blink, 4);
-  if MOX.Qty.Blink > MAX_BLINKERS then
-    MOX.Qty.Blink := MAX_BLINKERS;
-  BlockRead(f, MOX.Blinkers, 88 * MOX.Qty.Blink);
+  BlockRead(f, MOX.Qty.BlinkerCount, 4);
+  if MOX.Qty.BlinkerCount > MAX_BLINKERS then
+    MOX.Qty.BlinkerCount := MAX_BLINKERS;
+  BlockRead(f, MOX.Blinkers, 88 * MOX.Qty.BlinkerCount);
   CloseFile(f);
 end;
 
 
-procedure SaveLights(const aFilename: string);
+procedure SaveBlinkers(const aFilename: string);
 var
   f:file;
 begin
   AssignFile(f,aFilename); Rewrite(f,1);
-  BlockWrite(f,MOX.Qty.Blink,4);
-  BlockWrite(f,MOX.Blinkers,88*MOX.Qty.Blink);
+  BlockWrite(f,MOX.Qty.BlinkerCount,4);
+  BlockWrite(f,MOX.Blinkers,88*MOX.Qty.BlinkerCount);
   CloseFile(f);
 end;
 

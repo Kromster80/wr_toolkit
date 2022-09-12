@@ -152,7 +152,7 @@ var
   Mat_Ambi, Mat_Diff, Mat_Spec, Mat_Spec2, Mat_Refl, Mat_Dirt, Mat_ReflF: Integer;
   S_Tex1, S_Tex2, S_Tex3, S_Tex4: Integer;
   mc2,mc3,mc4: Byte;
-  i,k,h:Integer;
+  i,k,h: Integer;
 begin
   for i:=1 to MOX.Qty.PartCount do
   begin
@@ -383,7 +383,7 @@ begin
   Angles2Vector(-xRot, yRot, 0, cam[1], cam[2], cam[3]);
   Normalize(cam[1],cam[2],cam[3]);
 
-  for I := 1 to MOX.Qty.Blink do
+  for I := 1 to MOX.Qty.BlinkerCount do
   begin
     if aVectors then
     begin
