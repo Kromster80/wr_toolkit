@@ -413,6 +413,7 @@ type
     procedure ConverseImp_COB;
     procedure RebuildCOBBounds;
     procedure SaveMOX(const aFilename: string);
+    procedure DevScanMOXHeaders;
   end;
 
 const
@@ -1297,9 +1298,9 @@ begin
   CZ.Value:=MOX.Parts[SelectedTreeNode].zMid;
   CRad.Value:=MOX.Parts[SelectedTreeNode].fRadius;
 
-  RGDetailType.ItemIndex:=MOX.Parts[SelectedTreeNode].TypeID;
+  RGDetailType.ItemIndex := MOX.Parts[SelectedTreeNode].TypeID;
   if RGDetailType.ItemIndex<>MOX.Parts[SelectedTreeNode].TypeID then
-  MessageBox(Handle, 'Unknown detail ID type', 'Discovery', MB_OK or MB_ICONSTOP);;
+    MessageBox(Handle, 'Unknown detail ID type', 'Discovery', MB_OK or MB_ICONSTOP);;
 
   LX1.Value:=MOX.Parts[SelectedTreeNode].x1/pi*180;//-YZ rotation
   LX2.Value:=MOX.Parts[SelectedTreeNode].x2/pi*180;//+YZ rotation
@@ -1517,7 +1518,7 @@ begin
   MOX.Parts[SelectedTreeNode].w3:=0;//SpinEdit7.Value;
   MOX.Parts[SelectedTreeNode].w4:=0;//SpinEdit8.Value;
   MOX.Parts[SelectedTreeNode].w5:=0;//SpinEdit9.Value;
-  MOX.Parts[SelectedTreeNode].TypeID:=RGDetailType.ItemIndex;
+  MOX.Parts[SelectedTreeNode].TypeID := RGDetailType.ItemIndex;
   MOX.Parts[SelectedTreeNode].x1:=LX1.Value/180*pi;//-YZ rotation
   MOX.Parts[SelectedTreeNode].x2:=LX2.Value/180*pi;//-YZ rotation
   MOX.Parts[SelectedTreeNode].y1:=LY1.Value/180*pi;//-YZ rotation
@@ -1733,15 +1734,21 @@ begin
   FillChar(MOX.Chunks,SizeOf(MOX.Chunks),#0);
   FillChar(MOX.Parts,SizeOf(MOX.Parts),#0);
 
+  SetLength(MOX.Chunks, MOX.Header.PartCount * MOX.Header.MatCount + 1);
   h:=1;
   for m:=1 to MOX.Header.PartCount do
   for i:=1 to MOX.Header.MatCount do
   begin
-    if h>1 then MOX.Chunks[h].FirstVtx:=MOX.Chunks[h-1].LastVtx+1 else MOX.Chunks[h].FirstVtx:=1;
+    if h > 1 then
+      MOX.Chunks[h].FirstVtx := MOX.Chunks[h-1].LastVtx+1
+    else
+      MOX.Chunks[h].FirstVtx := 1;
+
     MOX.Chunks[h].LastVtx:=MOX.Chunks[h].FirstVtx+VqtyAtSurf[m,i]-1;
     MOX.Header.ChunkCount := h;
     inc(h);
   end;
+  SetLength(MOX.Chunks, MOX.Header.ChunkCount + 1);
 
   j:=1; t:=1;
   for m:=1 to MOX.Header.PartCount do
@@ -2859,6 +2866,12 @@ end;
 
 procedure TForm1.ScanMOXheaders1Click(Sender: TObject);
 begin
+  DevScanMOXHeaders;
+end;
+
+
+procedure TForm1.DevScanMOXHeaders;
+begin
   TThread.CreateAnonymousThread(
     procedure
     var
@@ -2880,9 +2893,10 @@ begin
           StatusBar1.Panels[2].Text := Format('Loading %d/%d - \%s', [I, slFiles.Count, slFiles[I]]);
 
         LoadMOX('D:\' + slFiles[I]);
-        slLog.Append(MOX.MOXFormatInt + #9 + MOX.MOXFormatStr + #9 + 'OK  ' + #9 + slFiles[I]);
+        //slLog.Append(MOX.MOXFormatInt + #9 + MOX.MOXFormatStr + #9 + 'OK  ' + #9 + slFiles[I]);
       except
-        slLog.Append(MOX.MOXFormatInt + #9 + MOX.MOXFormatStr + #9 + 'FAIL' + #9 + slFiles[I]);
+        on E: Exception do
+          slLog.Append(MOX.MOXFormatInt + #9 + MOX.MOXFormatStr + #9 + 'FAIL' + #9 + slFiles[I] + #9 + E.Message);
       end;
 
       slLog.SaveToFile('mox.txt');

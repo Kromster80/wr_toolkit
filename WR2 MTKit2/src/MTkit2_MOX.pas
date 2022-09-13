@@ -1,7 +1,7 @@
 unit MTkit2_MOX;
 interface
 uses
-  SysUtils, Windows,
+  Math, SysUtils, Windows,
   MTkit2_Vertex;
 
 type
@@ -50,7 +50,7 @@ type
     Header: record VerticeCount, PolyCount, ChunkCount, MatCount, PartCount, BlinkerCount: Integer; end;
     Vertice: array [1..MAX_MOX_VTX] of TMOXVertice;
     Face: array [1..MAX_MOX_IDX,1..3] of Integer;  // Polygon links
-    Chunks: array [1..2048] of TMOXChunk;
+    Chunks: array of TMOXChunk;
     MoxMat: array [1..MAX_MATERIALS] of record
       ID: Integer;
       xxx: array [1..332] of AnsiChar;
@@ -136,6 +136,8 @@ begin
       MOX.Face[i, 3] := face6[3] + 1
     end;
 
+    SetLength(MOX.Chunks, MOX.Header.ChunkCount + 1);
+
     if MOX.MOXFormatStr = 'MBWR'{0010} then
     for j:=1 to MOX.Header.ChunkCount do
     begin
@@ -160,15 +162,39 @@ begin
       MOX.Chunks[j].LastVtx := ord(cChunk24[21]) + ord(cChunk24[22]) * 256 + 1;
     end;
 
+    // Verify faces
+    for I := 1 to MOX.Header.PolyCount do
+    begin
+      Assert(MOX.Face[I,1] <= MOX.Header.VerticeCount);
+      Assert(MOX.Face[I,2] <= MOX.Header.VerticeCount);
+      Assert(MOX.Face[I,3] <= MOX.Header.VerticeCount);
+    end;
+
+    // Verify vertex ranges
+    Assert(MOX.Chunks[1].FirstVtx = 1);
+    for j:=2 to MOX.Header.ChunkCount do
+      Assert(MOX.Chunks[j].FirstVtx = MOX.Chunks[j-1].LastVtx + 1);
+    Assert(MOX.Chunks[MOX.Header.ChunkCount].LastVtx = MOX.Header.VerticeCount);
+
+    // Verify poly ranges
+    Assert(MOX.Chunks[1].FirstPoly = 0);
+    for j:=2 to MOX.Header.ChunkCount do
+      Assert(MOX.Chunks[j].FirstPoly = MOX.Chunks[j-1].FirstPoly + MOX.Chunks[j-1].PolyCount);
+    Assert(MOX.Chunks[MOX.Header.ChunkCount].FirstPoly + MOX.Chunks[MOX.Header.ChunkCount].PolyCount = MOX.Header.PolyCount);
+
     blockread(f, MOX.MoxMat, (80+256)*MOX.Header.MatCount);   //Crap&Mess
 
     if MOX.MOXFormatStr = 'WR22' then
       for j:=1 to MOX.Header.PartCount do
       begin
-        blockread(f,cPart64,64);
-        MOX.Parts[j].Dname:=PAnsiChar(@cPart64[1]);
-        blockread(f,MOX.Parts[j].Matrix,132);
+        blockread(f, cPart64, 64);
+        MOX.Parts[j].Dname := PAnsiChar(@cPart64[1]);
+        blockread(f, MOX.Parts[j].Matrix, 132);
       end;
+
+    // Verify damage parts
+    for j:=1 to MOX.Header.PartCount do
+      Assert(MOX.Parts[j].TypeID in [0..6]);
 
     if (MOX.MOXFormatStr = 'MBWR') or (MOX.MOXFormatStr = 'WR02') then
     begin
@@ -195,6 +221,10 @@ begin
       MessageBox(0, PChar('Blinker quantity limited to ' + IntToStr(MAX_BLINKERS)
         + ' due to compatibility issues.'), 'Warning', MB_OK or MB_ICONWARNING);
     end;
+
+    // Verify blinkers
+    for j:=1 to MOX.Header.BlinkerCount do
+      Assert(MOX.Blinkers[j].BlinkerType in [0..9,16,20,24,33]);
 
     if MOX.MOXFormatStr = 'WR22' then
       blockread(f, MOX.Blinkers, 88*MOX.Header.BlinkerCount);

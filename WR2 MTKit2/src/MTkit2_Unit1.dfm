@@ -208,7 +208,7 @@ object Form1: TForm1
     Top = 8
     Width = 242
     Height = 585
-    ActivePage = TabSheet5
+    ActivePage = TabSheet3
     Anchors = [akLeft, akTop, akBottom]
     MultiLine = True
     Style = tsButtons
@@ -890,10 +890,6 @@ object Form1: TForm1
         TabOrder = 4
         object PivotSetup: TTabSheet
           Caption = 'Pivot point setup'
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object Label51: TLabel
             Left = 166
             Top = 162
@@ -1089,10 +1085,6 @@ object Form1: TForm1
         object Behaviour: TTabSheet
           Caption = 'Behaviour'
           ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object Label39: TLabel
             Left = 67
             Top = 150
