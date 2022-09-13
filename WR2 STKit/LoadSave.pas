@@ -363,45 +363,49 @@ var
   end;
   i,k,j,xt,Pos,preXT:integer;
 begin
-Result:=false;
-if not fileexists(Input+'.geo') then begin
-  FillChar(VTXQty,sizeof(VTXQty),#0);
-  IDXQty:=0;
-  exit;
-end;
-assignfile(f,Input+'.geo'); reset(f,1);
-blockread(f,Head,32);
-blockread(f,VTXQty[1],256); VTXQty[64]:=0;
-for i:=1 to 63 do inc(VTXQty[64],VTXQty[i]);
-setlength(VTX,VTXQty[64]+1);
+  Result:=false;
+  if not fileexists(Input+'.geo') then
+  begin
+    FillChar(VTXQty,sizeof(VTXQty),#0);
+    IDXQty:=0;
+    exit;
+  end;
+  assignfile(f,Input+'.geo'); reset(f,1);
+  blockread(f,Head,32);
+  blockread(f,VTXQty[1],256); VTXQty[64]:=0;
+  for i:=1 to 63 do inc(VTXQty[64],VTXQty[i]);
+  setlength(VTX,VTXQty[64]+1);
 
-for i:=1 to VTXQty[64] do begin
-  blockread(f,VTX2,40);
-  VTX[i].X:=VTX2.X; VTX[i].Y:=VTX2.Y; VTX[i].Z:=VTX2.Z;
-  VTX[i].nX:=VTX2.nX; VTX[i].nY:=VTX2.nY; VTX[i].nZ:=VTX2.nZ;
-  VTX[i].U:=VTX2.U; VTX[i].V:=VTX2.V;
-  VTX[i].BlendR:=VTX2.BlendR; VTX[i].BlendG:=VTX2.BlendG; VTX[i].BlendB:=VTX2.BlendB; VTX[i].Shadow:=VTX2.Shadow;
-  VTX[i].B:=VTX2.B; VTX[i].G:=VTX2.G; VTX[i].R:=VTX2.R; VTX[i].A:=VTX2.A;
-end;
+  for i:=1 to VTXQty[64] do
+  begin
+    blockread(f,VTX2,40);
+    VTX[i].X:=VTX2.X; VTX[i].Y:=VTX2.Y; VTX[i].Z:=VTX2.Z;
+    VTX[i].nX:=VTX2.nX; VTX[i].nY:=VTX2.nY; VTX[i].nZ:=VTX2.nZ;
+    VTX[i].U:=VTX2.U; VTX[i].V:=VTX2.V;
+    VTX[i].BlendR:=VTX2.BlendR; VTX[i].BlendG:=VTX2.BlendG; VTX[i].BlendB:=VTX2.BlendB; VTX[i].Shadow:=VTX2.Shadow;
+    VTX[i].B:=VTX2.B; VTX[i].G:=VTX2.G; VTX[i].R:=VTX2.R; VTX[i].A:=VTX2.A;
+  end;
 
-IDXQty:=Head.sizeZ;
-blockread(f,c,length(c),Pos); //16mb should me more than enough
-if Pos>=length(c) then MessageBox(Form1.Handle,'16mb IDX file couldn''t be loaded fully.','Loading error',MB_OK or MB_ICONWARNING);
-closefile(f);
+  IDXQty:=Head.sizeZ;
+  blockread(f,c,length(c),Pos); //16mb should me more than enough
+  if Pos>=length(c) then
+    MessageBox(Form1.Handle,'16mb IDX file couldn''t be loaded fully.','Loading error',MB_OK or MB_ICONWARNING);
+  closefile(f);
 
-setlength(v,IDXQty div 3+1);
-Pos:=0; xt:=0; preXT:=0;
-for k:=1 to Qty.BlocksZ do
-for i:=1 to Qty.BlocksX do
-for j:=Block[k,i].FirstPoly+1 to Block[k,i].FirstPoly+Block[k,i].NumPoly do begin
-if Block[k,i].Chunk65k<>preXT then begin preXT:=Block[k,i].Chunk65k; inc(xt,VTXQty[Block[k,i].Chunk65k]); end;
-v[j,1]:=ord(c[Pos+1])+ord(c[Pos+2])*256+xt+1;
-v[j,2]:=ord(c[Pos+3])+ord(c[Pos+4])*256+xt+1;
-v[j,3]:=ord(c[Pos+5])+ord(c[Pos+6])*256+xt+1;
-inc(Pos,6);
-end;
+  setlength(v,IDXQty div 3+1);
+  Pos:=0; xt:=0; preXT:=0;
+  for k:=1 to Qty.BlocksZ do
+  for i:=1 to Qty.BlocksX do
+  for j:=Block[k,i].FirstPoly+1 to Block[k,i].FirstPoly+Block[k,i].NumPoly do
+  begin
+    if Block[k,i].Chunk65k<>preXT then begin preXT:=Block[k,i].Chunk65k; inc(xt,VTXQty[Block[k,i].Chunk65k]); end;
+    v[j,1]:=ord(c[Pos+1])+ord(c[Pos+2])*256+xt+1;
+    v[j,2]:=ord(c[Pos+3])+ord(c[Pos+4])*256+xt+1;
+    v[j,3]:=ord(c[Pos+5])+ord(c[Pos+6])*256+xt+1;
+    inc(Pos,6);
+  end;
 
-Result:=true;
+  Result:=true;
 end;
 
 
@@ -409,17 +413,18 @@ function LoadSNI(Input:string):boolean;
 var
   f:file;
 begin
-if not fileexists(Input+'.sni') then begin
-SNIHead.Obj:=0; SNIHead.Node:=0;
-Result:=false; exit;
-end;
-assignfile(f,Input+'.sni'); reset(f,1);
-blockread(f,SNIHead,16);
-blockread(f,SNIObj,SNIHead.Obj*48);
-blockread(f,SNINode,SNIHead.Node*20);
-closefile(f);
-CalculateSNIRoutes();
-Result:=true;
+  if not fileexists(Input+'.sni') then
+  begin
+    SNIHead.Obj:=0; SNIHead.Node:=0;
+    Result:=false; exit;
+  end;
+  assignfile(f,Input+'.sni'); reset(f,1);
+  blockread(f,SNIHead,16);
+  blockread(f,SNIObj,SNIHead.Obj*48);
+  blockread(f,SNINode,SNIHead.Node*20);
+  closefile(f);
+  CalculateSNIRoutes();
+  Result:=true;
 end;
 
 procedure LoadLVL(Input:string);
