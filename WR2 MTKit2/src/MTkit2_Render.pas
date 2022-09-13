@@ -171,9 +171,9 @@ begin
     begin
       //if (RenderOpts.ShowMaterial<>0)and(MatID<>MOX.Sid[k,1]+1) then exit;
 
-      mc2 := Material[MOX.Sid[k,1]+1].MatClass[2];
-      mc3 := Material[MOX.Sid[k,1]+1].MatClass[3];
-      mc4 := Material[MOX.Sid[k,1]+1].MatClass[4];
+      mc2 := Material[MOX.Chunks[k].SidA+1].MatClass[2];
+      mc3 := Material[MOX.Chunks[k].SidA+1].MatClass[3];
+      mc4 := Material[MOX.Chunks[k].SidA+1].MatClass[4];
 
       glUseProgramObjectARB(po[mc2,mc3]);
       S_Tex1 := glGetUniformLocationARB(po[mc2,mc3], 'Tex1');
@@ -188,7 +188,7 @@ begin
       Mat_Dirt := glGetUniformLocationARB(po[mc2,mc3], 'Mat_DirtAm');
       Mat_ReflF:= glGetUniformLocationARB(po[mc2,mc3], 'Mat_ReflFres');
 
-      glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, MoxTex[MOX.Sid[k,1]+1]);
+      glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, MoxTex[MOX.Chunks[k].SidA+1]);
 
       if (Form1.CBVinyl.ItemIndex>0) and (mc4 and 1 = 1) then
         glBindTexture(GL_TEXTURE_2D, VinylsTex);
@@ -201,7 +201,7 @@ begin
       glUniform1iARB(S_Tex3, 2);
       glUniform1iARB(S_Tex4, 3);
 
-      with Material[MOX.Sid[k,1]+1].Color[ColID] do
+      with Material[MOX.Chunks[k].SidA+1].Color[ColID] do
       begin
         glUniform3fARB(Mat_Diff ,Dif.R/255,Dif.G/255,Dif.B/255);
         glUniform3fARB(Mat_Ambi ,Amb.R/255,Amb.G/255,Amb.B/255);

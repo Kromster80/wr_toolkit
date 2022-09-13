@@ -276,6 +276,8 @@ type
     Bevel4: TBevel;
     Button2: TButton;
     cbAskOnClose: TCheckBox;
+    Dev1: TMenuItem;
+    ScanMOXheaders1: TMenuItem;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -375,6 +377,7 @@ type
     procedure lbBlinkersDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
     procedure Button2Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure ScanMOXheaders1Click(Sender: TObject);
   private
     h_DC: HDC;
     h_RC: HGLRC;
@@ -613,6 +616,8 @@ begin
   fTree := TModelTree.Create;
 
   ClearUpClick(cuALL);
+
+  Dev1.Visible := FileExists('krom.dev');
 
   if not FileExists('krom.dev') then SetActivePage(apMTL);
   //aFilename:='E:\World Racing 2\AddOns\Autos\3000gt\3000gt.mox';
@@ -863,34 +868,37 @@ begin
   for i:=1 to MOX.Header.ChunkCount do
   begin
     if MoxCall[i]=0 then MoxCall[i]:=glGenLists(1);
-    glNewList (MoxCall[i], GL_COMPILE);
-    glbegin (gl_triangles);
-      for k:=1 to MOX.Chunk[i,2] do  //1..number polys
-      for h:=3 downto 1 do begin
-        glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].U);
-        glNormal3fv(@MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].nX);
-        glVertex3fv(@MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].X);
+    glNewList(MoxCall[i], GL_COMPILE);
+    glBegin(GL_TRIANGLES);
+      for k:=1 to MOX.Chunks[i].PolyCount do  //1..number polys
+      for h:=3 downto 1 do
+      begin
+        glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].U);
+        glNormal3fv(@MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].nX);
+        glVertex3fv(@MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].X);
       end;
     glEnd;
     glEndList;
 
     if MoxUVCall[i]=0 then MoxUVCall[i]:=glGenLists(1);
-    glNewList (MoxUVCall[i], GL_COMPILE);
-    glbegin (gl_triangles);
-      for k:=1 to MOX.Chunk[i,2] do begin
-        Normal2Poly(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,1]].U,MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,1]].V,
-                    MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,2]].U,MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,2]].V,
-                    MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,3]].U,MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,3]].V,t);
+    glNewList(MoxUVCall[i], GL_COMPILE);
+    glbegin(GL_TRIANGLES);
+      for k:=1 to MOX.Chunks[i].PolyCount do
+      begin
+        Normal2Poly(MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,1]].U,MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,1]].V,
+                    MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,2]].U,MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,2]].V,
+                    MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,3]].U,MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,3]].V,t);
         if t>=0 then
-          for h:=3 downto 1 do begin
-            glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].U);
-            glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].U,-MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].V+1);
+          for h:=3 downto 1 do
+          begin
+            glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].U);
+            glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].U,-MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].V+1);
             //glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].x1,-MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].x2+1);//AFC11CT
           end
         else
           for h:=1 to 3 do begin
-            glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].U);
-            glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].U,-MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].V+1);
+            glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].U);
+            glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].U,-MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].V+1);
             //glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].x1,-MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].x2+1);//AFC11CT
           end;
       end;
@@ -962,7 +970,7 @@ begin
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
         RenderDirt('', TBDirt.Position);
         if SelectedTreeNode<>0 then
-          RenderPivotSetup(PivotPointActual.Value+MOX.Chunk[MOX.Parts[SelectedTreeNode].FirstMat+1,3]-1,
+          RenderPivotSetup(PivotPointActual.Value+MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1,
                            PivotPointActual.MaxValue,
                            PivotPointActual.Value); //PivotPointActual & SRnage both have +1
         RenderDummy;
@@ -1304,8 +1312,8 @@ begin
   Label30.Enabled:=SelectedTreeNode<>0;
   ForbidPivotChange := True;
   PivotPointActual.MaxValue:=
-  MOX.Chunk[MOX.Parts[SelectedTreeNode].FirstMat+1+MOX.Parts[SelectedTreeNode].NumMat-1,4]-
-  MOX.Chunk[MOX.Parts[SelectedTreeNode].FirstMat+1,3]+1;
+    MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1+MOX.Parts[SelectedTreeNode].NumMat-1].LastVtx -
+    MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx+1;
   PivotPointActual.Value:=PartModify[SelectedTreeNode].ActualPoint;
   RGPivotX.ItemIndex:=PartModify[SelectedTreeNode].AxisSetup[1];
   RGPivotY.ItemIndex:=PartModify[SelectedTreeNode].AxisSetup[2];
@@ -1353,13 +1361,14 @@ begin
     begin
       lazyqty[i]:=1;                  //number of MOX.Parts
       for j:=MOX.Parts[i].FirstMat+1 to MOX.Parts[i].FirstMat+MOX.Parts[i].NumMat do
-        if (MOX.Chunk[j,2]>0) then begin  //if polycount for part >1
-          MOX.Chunk[lazyqty[0]+lazyqty[i],1]:=MOX.Chunk[j,1];
-          MOX.Chunk[lazyqty[0]+lazyqty[i],2]:=MOX.Chunk[j,2];
-          MOX.Chunk[lazyqty[0]+lazyqty[i],3]:=MOX.Chunk[j,3];
-          MOX.Chunk[lazyqty[0]+lazyqty[i],4]:=MOX.Chunk[j,4];
-            MOX.Sid[lazyqty[0]+lazyqty[i],1]:=MOX.Sid   [j,1];
-            MOX.Sid[lazyqty[0]+lazyqty[i],2]:=MOX.Sid   [j,2];
+        if (MOX.Chunks[j].PolyCount>0) then
+        begin  //if polycount for part >1
+          MOX.Chunks[lazyqty[0]+lazyqty[i]].FirstPoly:=MOX.Chunks[j].FirstPoly;
+          MOX.Chunks[lazyqty[0]+lazyqty[i]].PolyCount:=MOX.Chunks[j].PolyCount;
+          MOX.Chunks[lazyqty[0]+lazyqty[i]].FirstVtx:=MOX.Chunks[j].FirstVtx;
+          MOX.Chunks[lazyqty[0]+lazyqty[i]].LastVtx:=MOX.Chunks[j].LastVtx;
+          MOX.Chunks[lazyqty[0]+lazyqty[i]].SidA:=MOX.Chunks   [j].SidA;
+          MOX.Chunks[lazyqty[0]+lazyqty[i]].SidB:=MOX.Chunks   [j].SidB;
           //MoxMat[lazyqty[0]+lazyqty[i]].ID:=MoxMat[j].ID;
           inc(lazyqty[i]);
         end;
@@ -1381,7 +1390,7 @@ begin
     k:=1; m:=0;
     for i:=1 to MOX.Header.VerticeCount do
     begin
-      if i=MOX.Chunk[k,4]+1 then
+      if i=MOX.Chunks[k].LastVtx+1 then
         inc(k);//3-point From  //4-point Till //k-partID
 
       if MOX.Parts[m+1].FirstMat+1=k then
@@ -1437,15 +1446,15 @@ begin
 
   for ii:=1 to MOX.Header.ChunkCount do
   begin
-    BlockWrite(f,MOX.Sid[ii,1],2); BlockWrite(f,#0+#0,2);
-    BlockWrite(f,MOX.Sid[ii,2],2); BlockWrite(f,#0+#0,2);
+    BlockWrite(f,MOX.Chunks[ii].SidA,2); BlockWrite(f,#0+#0,2);
+    BlockWrite(f,MOX.Chunks[ii].SidB,2); BlockWrite(f,#0+#0,2);
 
-    dec(MOX.Chunk[ii,3]); dec(MOX.Chunk[ii,4]);
-    BlockWrite(f,MOX.Chunk[ii,1],2); BlockWrite(f,#0+#0,2);
-    BlockWrite(f,MOX.Chunk[ii,2],2); BlockWrite(f,#0+#0,2);
-    BlockWrite(f,MOX.Chunk[ii,3],2); BlockWrite(f,#0+#0,2);
-    BlockWrite(f,MOX.Chunk[ii,4],2); BlockWrite(f,#0+#0,2);
-    inc(MOX.Chunk[ii,3]); inc(MOX.Chunk[ii,4]);
+    dec(MOX.Chunks[ii].FirstVtx); dec(MOX.Chunks[ii].LastVtx);
+    BlockWrite(f,MOX.Chunks[ii].FirstPoly,2); BlockWrite(f,#0+#0,2);
+    BlockWrite(f,MOX.Chunks[ii].PolyCount,2); BlockWrite(f,#0+#0,2);
+    BlockWrite(f,MOX.Chunks[ii].FirstVtx,2); BlockWrite(f,#0+#0,2);
+    BlockWrite(f,MOX.Chunks[ii].LastVtx,2); BlockWrite(f,#0+#0,2);
+    inc(MOX.Chunks[ii].FirstVtx); inc(MOX.Chunks[ii].LastVtx);
   end;
 
   BlockWrite(f, MOX.MoxMat, 336*MOX.Header.MatCount);   //4+332
@@ -1721,15 +1730,15 @@ begin
       end;
   end;
 
-  FillChar(MOX.Chunk,SizeOf(MOX.Chunk),#0);
+  FillChar(MOX.Chunks,SizeOf(MOX.Chunks),#0);
   FillChar(MOX.Parts,SizeOf(MOX.Parts),#0);
 
   h:=1;
   for m:=1 to MOX.Header.PartCount do
   for i:=1 to MOX.Header.MatCount do
   begin
-    if h>1 then MOX.Chunk[h,3]:=MOX.Chunk[h-1,4]+1 else MOX.Chunk[h,3]:=1;
-    MOX.Chunk[h,4]:=MOX.Chunk[h,3]+VqtyAtSurf[m,i]-1;
+    if h>1 then MOX.Chunks[h].FirstVtx:=MOX.Chunks[h-1].LastVtx+1 else MOX.Chunks[h].FirstVtx:=1;
+    MOX.Chunks[h].LastVtx:=MOX.Chunks[h].FirstVtx+VqtyAtSurf[m,i]-1;
     MOX.Header.ChunkCount := h;
     inc(h);
   end;
@@ -1740,7 +1749,7 @@ begin
     begin
       for k:=1 to PqtyAtSurf[m,i] do
       begin
-        for h:=1 to 3 do MOX.Face[j,h]:=v2[m,i,k,h]+MOX.Chunk[t,3]-1;
+        for h:=1 to 3 do MOX.Face[j,h]:=v2[m,i,k,h]+MOX.Chunks[t].FirstVtx-1;
         inc(j);
       end;
     inc(t);
@@ -1752,9 +1761,9 @@ begin
     MOX.Parts[m].NumMat:=0;
     for i:=1 to MOX.Header.MatCount do
     begin
-      MOX.Chunk[h,2]:=PqtyAtSurf[m,i];
-      if h>1 then MOX.Chunk[h,1]:=MOX.Chunk[h-1,1]+MOX.Chunk[h-1,2] else MOX.Chunk[h,1]:=0;
-      MOX.Header.PolyCount := MOX.Chunk[h,1]+MOX.Chunk[h,2];
+      MOX.Chunks[h].PolyCount:=PqtyAtSurf[m,i];
+      if h>1 then MOX.Chunks[h].FirstPoly:=MOX.Chunks[h-1].FirstPoly+MOX.Chunks[h-1].PolyCount else MOX.Chunks[h].FirstPoly:=0;
+      MOX.Header.PolyCount := MOX.Chunks[h].FirstPoly+MOX.Chunks[h].PolyCount;
       inc(MOX.Parts[m].NumMat);
       inc(h);
     end;
@@ -1793,8 +1802,8 @@ begin
   for m:=1 to MOX.Header.PartCount do
     for i:=1 to MOX.Header.MatCount do
     begin
-      MOX.Sid[h,1]:=i-1;
-      MOX.Sid[h,2]:=i-1;
+      MOX.Chunks[h].SidA:=i-1;
+      MOX.Chunks[h].SidB:=i-1;
       inc(h);
     end;
 
@@ -2047,25 +2056,25 @@ begin
       i2:=(order[i]-1)*MOX.Header.MatCount+k;     //source
 
       aSRange[i1,1]:=kp;                                   //first poly
-      aSRange[i1,2]:=MOX.Chunk[i2,2];                         //poly count
-      inc(kp,MOX.Chunk[i2,2]);
+      aSRange[i1,2]:=MOX.Chunks[i2].PolyCount;                         //poly count
+      inc(kp,MOX.Chunks[i2].PolyCount);
       aSRange[i1,3]:=kv+1;                                 //first point
-      inc(kv,MOX.Chunk[i2,4]-MOX.Chunk[i2,3]+1);
+      inc(kv,MOX.Chunks[i2].LastVtx-MOX.Chunks[i2].FirstVtx+1);
       aSRange[i1,4]:=kv;                                   //last point
 
       for j:=aSRange[i1,3] to aSRange[i1,4] do
-      CopyMemory(@aVertex[j],@MOX.Vertice[MOX.Chunk[i2,3]+(j-aSRange[i1,3])],40);
+      CopyMemory(@aVertex[j],@MOX.Vertice[MOX.Chunks[i2].FirstVtx+(j-aSRange[i1,3])],40);
       for j:=1 to aSRange[i1,2] do
       begin
-        av[aSRange[i1,1]+j,1]:=MOX.Face[MOX.Chunk[i2,1]+j,1]+aSRange[i1,3]-MOX.Chunk[i2,3];
-        av[aSRange[i1,1]+j,2]:=MOX.Face[MOX.Chunk[i2,1]+j,2]+aSRange[i1,3]-MOX.Chunk[i2,3];
-        av[aSRange[i1,1]+j,3]:=MOX.Face[MOX.Chunk[i2,1]+j,3]+aSRange[i1,3]-MOX.Chunk[i2,3];
+        av[aSRange[i1,1]+j,1]:=MOX.Face[MOX.Chunks[i2].FirstPoly+j,1]+aSRange[i1,3]-MOX.Chunks[i2].FirstVtx;
+        av[aSRange[i1,1]+j,2]:=MOX.Face[MOX.Chunks[i2].FirstPoly+j,2]+aSRange[i1,3]-MOX.Chunks[i2].FirstVtx;
+        av[aSRange[i1,1]+j,3]:=MOX.Face[MOX.Chunks[i2].FirstPoly+j,3]+aSRange[i1,3]-MOX.Chunks[i2].FirstVtx;
       end;
     end;
   end;
 
   CopyMemory(@PartModify,@aPartModify,length(PartModify)*56); //55+1 !
-  CopyMemory(@MOX.Chunk,@aSRange,length(MOX.Chunk)*8); //1..4 of Word
+  CopyMemory(@MOX.Chunks,@aSRange,length(MOX.Chunks)*8); //1..4 of Word
   CopyMemory(@MOX.Vertice,@aVertex,length(MOX.Vertice)*40);//XYZXYZUV00 of Single
   CopyMemory(@MOX.Face,@av,length(MOX.Face)*6);                //1..3 of Word
   for i:=1 to MOX.Header.PartCount do
@@ -2320,9 +2329,9 @@ begin
   ForbidPivotChange := True;
   with PartModify[SelectedTreeNode] do
   begin
-    Custom[1]:=MOX.Vertice[ID+MOX.Chunk[MOX.Parts[SelectedTreeNode].FirstMat+1,3]-1].X;
-    Custom[2]:=MOX.Vertice[ID+MOX.Chunk[MOX.Parts[SelectedTreeNode].FirstMat+1,3]-1].Y;
-    Custom[3]:=MOX.Vertice[ID+MOX.Chunk[MOX.Parts[SelectedTreeNode].FirstMat+1,3]-1].Z;
+    Custom[1]:=MOX.Vertice[ID+MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1].X;
+    Custom[2]:=MOX.Vertice[ID+MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1].Y;
+    Custom[3]:=MOX.Vertice[ID+MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1].Z;
     CustomPivotX.Value:=Custom[1];
     CustomPivotY.Value:=Custom[2];
     CustomPivotZ.Value:=Custom[3];
@@ -2470,7 +2479,12 @@ begin
       IsLightwave2MOX := False;
       PivotSetup.TabVisible := False;
 
-      LoadMOX(aFilename);
+      try
+        LoadMOX(aFilename);
+      except
+        on E: Exception do
+          MessageBox(0, PChar(E.Message), 'Error', MB_OK or MB_ICONERROR);
+      end;
 
       Memo1.Lines.Add('MOX file closed');
 
@@ -2835,14 +2849,54 @@ begin
   if Sender=SB_Light then RenderOpts.LightVec:=SB_Light.Down;
   if Sender=SB_Colli then RenderOpts.Colli:=SB_Colli.Down;
   if Sender=SB_Wire then RenderOpts.Wire:=SB_Wire.Down;
-  if Sender=SB_UVmap then begin
+  if Sender=SB_UVmap then
+  begin
     RenderOpts.UVMap:=SB_UVmap.Down;
     RenderResize(nil);
   end;
 end;
 
 
-  /////////////////////////////////////////////////////////
+procedure TForm1.ScanMOXheaders1Click(Sender: TObject);
+begin
+  TThread.CreateAnonymousThread(
+    procedure
+    var
+      slFiles, slLog: TStringList;
+      I: Integer;
+    begin
+      slFiles := TStringList.Create;
+      ListFiles('D:\' { ExeDir } , '.mox', True, slFiles,
+        procedure(aMsg: string)
+        begin
+          if slFiles.Count mod 100 = 0 then
+            StatusBar1.Panels[2].Text := Format('Searching %d - \%s', [slFiles.Count, aMsg]);
+        end);
+
+      slLog := TStringList.Create;
+      for I := 0 to slFiles.Count - 1 do
+      try
+        if I mod 100 = 0 then
+          StatusBar1.Panels[2].Text := Format('Loading %d/%d - \%s', [I, slFiles.Count, slFiles[I]]);
+
+        LoadMOX('D:\' + slFiles[I]);
+        slLog.Append(MOX.MOXFormatInt + #9 + MOX.MOXFormatStr + #9 + 'OK  ' + #9 + slFiles[I]);
+      except
+        slLog.Append(MOX.MOXFormatInt + #9 + MOX.MOXFormatStr + #9 + 'FAIL' + #9 + slFiles[I]);
+      end;
+
+      slLog.SaveToFile('mox.txt');
+
+      MessageBox(0, PChar(Format('Scanned %d MOX files', [slFiles.Count])), '', MB_OK or MB_ICONINFORMATION);
+
+      slLog.Free;
+      slFiles.Free;
+    end
+  ).Start;
+end;
+
+
+/////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////
 //                                                         //

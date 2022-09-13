@@ -208,7 +208,7 @@ object Form1: TForm1
     Top = 8
     Width = 242
     Height = 585
-    ActivePage = TabSheet6
+    ActivePage = TabSheet5
     Anchors = [akLeft, akTop, akBottom]
     MultiLine = True
     Style = tsButtons
@@ -890,6 +890,10 @@ object Form1: TForm1
         TabOrder = 4
         object PivotSetup: TTabSheet
           Caption = 'Pivot point setup'
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object Label51: TLabel
             Left = 166
             Top = 162
@@ -3083,6 +3087,13 @@ object Form1: TForm1
       object ResetMTLOrder: TMenuItem
         Caption = 'Reset material order'
         OnClick = ResetMTLOrderClick
+      end
+    end
+    object Dev1: TMenuItem
+      Caption = 'Dev'
+      object ScanMOXheaders1: TMenuItem
+        Caption = 'Scan MOX headers'
+        OnClick = ScanMOXheaders1Click
       end
     end
     object About1: TMenuItem

@@ -1,7 +1,7 @@
 unit MTkit2_IO;
 interface
 uses
-  Windows, SysUtils, MTkit2_Defaults, KromUtils, Math, Dialogs;
+  Windows, Classes, SysUtils, MTkit2_Defaults, KromUtils, Math, Dialogs;
 
 function  LoadOBJ(const aFilename: string; out Log: string): Boolean;
 function  Load3DS(const aFilename: string; out Log: string): Boolean;
@@ -31,6 +31,8 @@ function  LoadPSF(const aFilename: string): Boolean;
 procedure SavePSF(const aFilename: string);
 
 function  ScanVinyls(aPath: string): Boolean;
+
+procedure ListFiles(const aPath, aExt: string; aRecurseSubFolders: Boolean; aFiles: TStringList; aOnProgress: TProc<string>);
 
 implementation
 uses
@@ -874,7 +876,7 @@ begin
     t.y:=MOX.Vertice[j].Y;
     t.z:=MOX.Vertice[j].Z;
 
-    if j=MOX.Chunk[ID+1,3] then //current point matches first point of next chunk
+    if j=MOX.Chunks[ID+1].FirstVtx then //current point matches first point of next chunk
       Inc(ID); //This is ID of current chunk
     if (ID = MOX.Parts[ID2+1].FirstMat+1) and (MOX.Parts[ID2+1].NumMat <> 0) then
       Inc(ID2); //This is ID of current detail
@@ -913,7 +915,7 @@ begin
   j:=0;
   for k:=1 to MOX.Header.VerticeCount do
   begin
-    if k=MOX.Chunk[j+1,3] then Inc(j); //j=1 ...
+    if k=MOX.Chunks[j+1].FirstVtx then Inc(j); //j=1 ...
     Write(ft,AnsiChar((k-1) div 256),AnsiChar(k-1));
     if Material[j].TexScale.U=0 then Material[j].TexScale.U:=1;
     if Material[j].TexScale.V=0 then Material[j].TexScale.V:=1;
@@ -941,8 +943,8 @@ begin
   Write(ft,'SURF'); ID:=0;
   for i:=1 to MOX.Header.PolyCount do
   begin
-    if i-1=MOX.Chunk[ID+1,1] then Inc(ID);
-    Write(ft,AnsiChar((i-1) div 256),AnsiChar(i-1),AnsiChar((MOX.Sid[ID,1]) div 256),AnsiChar(MOX.Sid[ID,1]));
+    if i-1=MOX.Chunks[ID+1].FirstPoly then Inc(ID);
+    Write(ft,AnsiChar((i-1) div 256),AnsiChar(i-1),AnsiChar((MOX.Chunks[ID].SidA) div 256),AnsiChar(MOX.Chunks[ID].SidA));
   end;
 
   for i:=1 to MOX.Header.MatCount do if Material[i].TexName<>'' then
@@ -1681,6 +1683,54 @@ begin
   VinylsCount:=ii-1;
 
   Result := True;
+end;
+
+
+procedure ListFiles(const aPath, aExt: string; aRecurseSubFolders: Boolean; aFiles: TStringList; aOnProgress: TProc<string>);
+var
+  slPaths: TStringList;
+  I: Integer;
+  SearchRec: TSearchRec;
+  localName: string;
+  Key: string;
+  fileName: string;
+begin
+  aFiles.Clear;
+
+  if not DirectoryExists(aPath) then Exit;
+
+  slPaths := TStringList.Create;
+  slPaths.Add('');
+  I := 0;
+
+  // Read from file on HDD
+  while I < slPaths.Count do
+  begin
+    if FindFirst(aPath + slPaths[I] + '*', faAnyFile, SearchRec) = 0 then
+    begin
+      repeat
+        if (SearchRec.Attr and faDirectory) <> 0 then
+        begin
+          if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') and aRecurseSubFolders then
+            slPaths.Append(slPaths[I] + SearchRec.Name + '\');
+        end else
+        if SameText(ExtractFileExt(SearchRec.Name), aExt) then
+        begin
+
+          aFiles.Append(slPaths[I] + SearchRec.Name);
+
+          if Assigned(aOnProgress) then
+            aOnProgress(slPaths[I] + SearchRec.Name);
+        end;
+      until (FindNext(SearchRec) <> 0);
+
+      FindClose(SearchRec);
+    end;
+
+    Inc(I);
+  end;
+
+  slPaths.Free;
 end;
 
 

@@ -41,8 +41,8 @@ begin
     or (SelectedTreeNode=0)
     or (not RenderOpts.ShowPart)
     or ((RenderOpts.ShowPart) and (PartID = SelectedTreeNode)) then //skip render of unseen parts
-      case Material[MOX.Sid[ID,1]+1].MatClass[2] of
-        0:  case Material[MOX.Sid[ID,1]+1].MatClass[3] of
+      case Material[MOX.Chunks[ID].SidA+1].MatClass[2] of
+        0:  case Material[MOX.Chunks[ID].SidA+1].MatClass[3] of
               0:  begin                                                                        //++
                     RenderDiffuse(ID,PartID,'SetTrans',0);
                     RenderSpecular2(ID,PartID,'SetTrans',0);
@@ -50,7 +50,7 @@ begin
                     RenderSpecular(ID,PartID,'SetTrans',0);
                   end;
             end;
-        3:  case Material[MOX.Sid[ID,1]+1].MatClass[3] of
+        3:  case Material[MOX.Chunks[ID].SidA+1].MatClass[3] of
               0:  begin                                                                        //++
                     RenderDiffuse(ID,PartID,'SetTrans',0);
                     RenderSpecular2(ID,PartID,'SetTrans',0);
@@ -66,20 +66,20 @@ begin
                     RenderSpecular(ID,PartID,'',0);
                   end;
              2:   begin                                                                        //++
-                    RenderDiffuse(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/400);              //wheels
+                    RenderDiffuse(ID,PartID,'SetTrans',Material[MOX.Chunks[ID].SidA+1].Transparency/400);              //wheels
                     RenderSpecular2(ID,PartID,'SetTrans',0);
                     RenderTexture(ID,PartID,'SetTrans',0);
                     RenderReflection(ID,PartID,'',0);
                     RenderSpecular(ID,PartID,'SetTrans',0);
                   end;
              3:   begin                                                                        //++
-                    RenderDiffuse(ID,PartID,'SetTrans',0.25+Material[MOX.Sid[ID,1]+1].Transparency/70);          //wheels
-                    RenderSpecular2(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
-                    RenderTexture(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
+                    RenderDiffuse(ID,PartID,'SetTrans',0.25+Material[MOX.Chunks[ID].SidA+1].Transparency/70);          //wheels
+                    RenderSpecular2(ID,PartID,'SetTrans',0.2+Material[MOX.Chunks[ID].SidA+1].Transparency/70);
+                    RenderTexture(ID,PartID,'SetTrans',0.2+Material[MOX.Chunks[ID].SidA+1].Transparency/70);
                     RenderReflection(ID,PartID,'Blend',0);
-                    RenderSpecular(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
+                    RenderSpecular(ID,PartID,'SetTrans',0.2+Material[MOX.Chunks[ID].SidA+1].Transparency/70);
                   end;
-             4:   if Material[MOX.Sid[ID,1]+1].Transparency<=50 then                         //++
+             4:   if Material[MOX.Chunks[ID].SidA+1].Transparency<=50 then                         //++
                   begin
                     RenderDiffuse(ID,PartID,'SetTrans',0);
                     RenderSpecular2(ID,PartID,'SetTrans',0);
@@ -89,7 +89,7 @@ begin
                   end;
             end;
 
-        4:  case Material[MOX.Sid[ID,1]+1].MatClass[3]of
+        4:  case Material[MOX.Chunks[ID].SidA+1].MatClass[3]of
               0:  begin                                                                        //+
                     RenderDiffuse(ID,PartID,'SetTrans',0);
                     RenderSpecular2(ID,PartID,'SetTrans',0);
@@ -105,20 +105,20 @@ begin
                     RenderTexture(ID,PartID,'**',0);
                   end;
               2:  begin                                                                        //+
-                    RenderDiffuse(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/400);
+                    RenderDiffuse(ID,PartID,'SetTrans',Material[MOX.Chunks[ID].SidA+1].Transparency/400);
                     RenderSpecular2(ID,PartID,'SetTrans',0);
                     RenderReflection(ID,PartID,'',0);
                     RenderSpecular(ID,PartID,'SetTrans',0);
                     RenderTexture(ID,PartID,'SetTrans',0);
                   end;
               3:  begin                                                                        //+
-                    RenderDiffuse(ID,PartID,'SetTrans',0.25+Material[MOX.Sid[ID,1]+1].Transparency/70);
-                    RenderSpecular2(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
+                    RenderDiffuse(ID,PartID,'SetTrans',0.25+Material[MOX.Chunks[ID].SidA+1].Transparency/70);
+                    RenderSpecular2(ID,PartID,'SetTrans',0.2+Material[MOX.Chunks[ID].SidA+1].Transparency/70);
                     RenderReflection(ID,PartID,'Blend',1);
-                    RenderSpecular(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
-                    RenderTexture(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
+                    RenderSpecular(ID,PartID,'SetTrans',0.2+Material[MOX.Chunks[ID].SidA+1].Transparency/70);
+                    RenderTexture(ID,PartID,'SetTrans',0.2+Material[MOX.Chunks[ID].SidA+1].Transparency/70);
                   end;
-              4:  if Material[MOX.Sid[ID,1]+1].Transparency<=50 then
+              4:  if Material[MOX.Chunks[ID].SidA+1].Transparency<=50 then
                   begin
                     RenderDiffuse(ID,PartID,'SetTrans',0);
                     RenderSpecular2(ID,PartID,'SetTrans',0);
@@ -140,13 +140,13 @@ begin
       inc(PartID);
     end;
 
-  //mat:=Material[MOX.Sid[ID,1]+1].Transparency;
+  //mat:=Material[MOX.Chunks[ID].SidA+1].Transparency;
   if (ActivePage=apMTL)
   or (SelectedTreeNode=0)
   or (not RenderOpts.ShowPart)
   or ((RenderOpts.ShowPart)and(PartID=SelectedTreeNode)) then //skip render of unseen parts
-    case Material[MOX.Sid[ID,1]+1].MatClass[2] of
-      0:  case Material[MOX.Sid[ID,1]+1].MatClass[3]of
+    case Material[MOX.Chunks[ID].SidA+1].MatClass[2] of
+      0:  case Material[MOX.Chunks[ID].SidA+1].MatClass[3]of
             1:  begin                                                                       //++
                   RenderDiffuse(ID,PartID,'',1);                                                           //wheels
                   RenderSpecular2(ID,PartID,'',1);
@@ -154,18 +154,18 @@ begin
                   RenderSpecular(ID,PartID,'',1);
                 end;
             2:  begin                                                                       //++
-                  RenderDiffuse(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/400);              //wheels
+                  RenderDiffuse(ID,PartID,'SetTrans',Material[MOX.Chunks[ID].SidA+1].Transparency/400);              //wheels
                   RenderSpecular2(ID,PartID,'',1);
                   RenderReflection(ID,PartID,'',1);
                   RenderSpecular(ID,PartID,'',1);
                 end;
             3:  begin                                                                       //++
-                  RenderDiffuse(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);           //wheels
-                  RenderSpecular2(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
+                  RenderDiffuse(ID,PartID,'SetTrans',0.2+Material[MOX.Chunks[ID].SidA+1].Transparency/70);           //wheels
+                  RenderSpecular2(ID,PartID,'SetTrans',0.2+Material[MOX.Chunks[ID].SidA+1].Transparency/70);
                   RenderReflection(ID,PartID,'Blend',1);
-                  RenderSpecular(ID,PartID,'SetTrans',0.2+Material[MOX.Sid[ID,1]+1].Transparency/70);
+                  RenderSpecular(ID,PartID,'SetTrans',0.2+Material[MOX.Chunks[ID].SidA+1].Transparency/70);
                 end;
-            4:  if Material[MOX.Sid[ID,1]+1].Transparency<=50 then                          //+
+            4:  if Material[MOX.Chunks[ID].SidA+1].Transparency<=50 then                          //+
                 begin
                   RenderDiffuse(ID,PartID,'SetTrans',0);
                   RenderSpecular2(ID,PartID,'SetTrans',0);
@@ -173,7 +173,7 @@ begin
                   RenderSpecular(ID,PartID,'SetTrans',0);
                 end;
           end;
-      1:  case Material[MOX.Sid[ID,1]+1].MatClass[3]of
+      1:  case Material[MOX.Chunks[ID].SidA+1].MatClass[3]of
             0:  begin                                                                       //++
                   RenderDiffuse(ID,PartID,'SetTrans',0.33);
                   RenderTexture(ID,PartID,'14',0);
@@ -182,7 +182,7 @@ begin
                   RenderSpecular(ID,PartID,'SetTrans',0.33);
                 end;
             1:  begin
-                  if MoxTex[MOX.Sid[ID,1]+1]=0 then RenderDiffuse(ID,PartID,'',1);                                                           //only texture need to reflect
+                  if MoxTex[MOX.Chunks[ID].SidA+1]=0 then RenderDiffuse(ID,PartID,'',1);                                                           //only texture need to reflect
                   RenderTexture(ID,PartID,'11',0);                                                         //++
                   RenderReflection(ID,PartID,'',1);                                                        //wheels
                   RenderSpecular2(ID,PartID,'',1);
@@ -198,15 +198,15 @@ begin
             3:  RenderTexture(ID,PartID,'1*',0);                                                       //++ wheels
             4:  begin                                                                       //++
                   glEnable(GL_ALPHA_TEST);                                                       //only texture reflects
-                  glAlphaFunc(GL_GREATER,Material[MOX.Sid[ID,1]+1].Transparency/50);
+                  glAlphaFunc(GL_GREATER,Material[MOX.Chunks[ID].SidA+1].Transparency/50);
                   RenderTexture(ID,PartID,'14',0);
                   glDisable(GL_ALPHA_TEST);
-                  RenderReflection(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
-                  RenderSpecular2(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
-                  RenderSpecular(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
+                  RenderReflection(ID,PartID,'SetTrans',Material[MOX.Chunks[ID].SidA+1].Transparency/50);
+                  RenderSpecular2(ID,PartID,'SetTrans',Material[MOX.Chunks[ID].SidA+1].Transparency/50);
+                  RenderSpecular(ID,PartID,'SetTrans',Material[MOX.Chunks[ID].SidA+1].Transparency/50);
                 end;
           end;
-      2:  case Material[MOX.Sid[ID,1]+1].MatClass[3]of
+      2:  case Material[MOX.Chunks[ID].SidA+1].MatClass[3]of
             0:  begin                                                                       //only texture reflects
                   RenderDiffuse(ID,PartID,'SetTrans',0.33);                                                //++
                   RenderTexture(ID,PartID,'14',0);
@@ -230,12 +230,12 @@ begin
             3:  RenderTexture(ID,PartID,'11',0);                                                      //only texture reflects wheels
             4:  begin                                                                       //++
                   glEnable(GL_ALPHA_TEST);                                                       //only texture reflects
-                  glAlphaFunc(GL_GREATER,Material[MOX.Sid[ID,1]+1].Transparency/50);
+                  glAlphaFunc(GL_GREATER,Material[MOX.Chunks[ID].SidA+1].Transparency/50);
                   RenderTexture(ID,PartID,'14',0);
                   glDisable(GL_ALPHA_TEST);
-                  RenderReflection(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
-                  RenderSpecular2(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
-                  RenderSpecular(ID,PartID,'SetTrans',Material[MOX.Sid[ID,1]+1].Transparency/50);
+                  RenderReflection(ID,PartID,'SetTrans',Material[MOX.Chunks[ID].SidA+1].Transparency/50);
+                  RenderSpecular2(ID,PartID,'SetTrans',Material[MOX.Chunks[ID].SidA+1].Transparency/50);
+                  RenderSpecular(ID,PartID,'SetTrans',Material[MOX.Chunks[ID].SidA+1].Transparency/50);
                 end;
           end;
     end;
@@ -249,12 +249,12 @@ begin
   glBindTexture(GL_TEXTURE_2D, 0); //UV map texture
 
   if param='Mask' then
-    glBindTexture(GL_TEXTURE_2D, MoxTex[MOX.Sid[ID,1]+1]); //UV map texture
+    glBindTexture(GL_TEXTURE_2D, MoxTex[MOX.Chunks[ID].SidA+1]); //UV map texture
 
-  Dif[0]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Dif.R/180,1);
-  Dif[1]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Dif.G/180,1);
-  Dif[2]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Dif.B/180,1);
-  Dif[3]:=1-Material[MOX.Sid[ID,1]+1].Transparency/100;
+  Dif[0]:=min(Material[MOX.Chunks[ID].SidA+1].Color[ColID].Dif.R/180,1);
+  Dif[1]:=min(Material[MOX.Chunks[ID].SidA+1].Color[ColID].Dif.G/180,1);
+  Dif[2]:=min(Material[MOX.Chunks[ID].SidA+1].Color[ColID].Dif.B/180,1);
+  Dif[3]:=1-Material[MOX.Chunks[ID].SidA+1].Transparency/100;
 
   if param='SetTrans' then
     Dif[3]:=1-t;
@@ -271,7 +271,7 @@ begin
     glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
     glEnable(GL_TEXTURE_GEN_S);     // Enable spherical
     glEnable(GL_TEXTURE_GEN_T);     // Environment Mapping
-  Dif[3]:=1-Material[MOX.Sid[ID,1]+1].Transparency/100;
+  Dif[3]:=1-Material[MOX.Chunks[ID].SidA+1].Transparency/100;
   if param='SetTrans' then Dif[3]:=1-t;
   glColor4fv(@Dif);
   TransformAndCall(ID,PartID, 0);
@@ -284,18 +284,18 @@ end;
 procedure RenderSpecular(ID,PartID:integer; param:string; t:Single);
 begin
   glBindTexture(GL_TEXTURE_2D, SpecTexture);
-  Dif[0]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp1.R/180,1);
-  Dif[1]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp1.G/180,1);
-  Dif[2]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp1.B/180,1);
+  Dif[0]:=min(Material[MOX.Chunks[ID].SidA+1].Color[ColID].Sp1.R/180,1);
+  Dif[1]:=min(Material[MOX.Chunks[ID].SidA+1].Color[ColID].Sp1.G/180,1);
+  Dif[2]:=min(Material[MOX.Chunks[ID].SidA+1].Color[ColID].Sp1.B/180,1);
   RenderSpec(ID,PartID,param,t);
 end;
 
 procedure RenderSpecular2(ID,PartID:integer; param:string; t:Single);
 begin
   glBindTexture(GL_TEXTURE_2D, Spec2Texture);
-  Dif[0]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp2.R/150,1);
-  Dif[1]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp2.G/150,1);
-  Dif[2]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Sp2.B/150,1);
+  Dif[0]:=min(Material[MOX.Chunks[ID].SidA+1].Color[ColID].Sp2.R/150,1);
+  Dif[1]:=min(Material[MOX.Chunks[ID].SidA+1].Color[ColID].Sp2.G/150,1);
+  Dif[2]:=min(Material[MOX.Chunks[ID].SidA+1].Color[ColID].Sp2.B/150,1);
   RenderSpec(ID,PartID,param,t);
 end;
 
@@ -303,7 +303,7 @@ end;
 procedure RenderReflection(ID,PartID:integer; param:string; t:Single);
 begin
   glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-  if (Material[MOX.Sid[ID,1]+1].Color[ColID].Ref.R=0) and (not RenderChrome) then Exit;
+  if (Material[MOX.Chunks[ID].SidA+1].Color[ColID].Ref.R=0) and (not RenderChrome) then Exit;
   glBindTexture(GL_TEXTURE_2D, EnvTexture);
     glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
     glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
@@ -311,8 +311,8 @@ begin
     glEnable(GL_TEXTURE_GEN_T);     // Environment Mapping
 
   Dif[0]:=1; Dif[1]:=1; Dif[2]:=1;
-  if (Material[MOX.Sid[ID,1]+1].MatClass[4] and 8) <> 0 then //if 8
-    Dif[3]:=Material[MOX.Sid[ID,1]+1].Color[ColID].Ref.R/255//keep a bit transparent
+  if (Material[MOX.Chunks[ID].SidA+1].MatClass[4] and 8) <> 0 then //if 8
+    Dif[3]:=Material[MOX.Chunks[ID].SidA+1].Color[ColID].Ref.R/255//keep a bit transparent
   else
   if RenderChrome then
     Dif[3]:=0.8
@@ -320,7 +320,7 @@ begin
     Dif[3]:=0.2;
 
   if param='Blend' then
-    Dif[3]:=Dif[3]*(1-Material[MOX.Sid[ID,1]+1].Transparency/100);
+    Dif[3]:=Dif[3]*(1-Material[MOX.Chunks[ID].SidA+1].Transparency/100);
 
   glColor4fv(@Dif);
   TransformAndCall(ID,PartID, 0);
@@ -334,19 +334,19 @@ end;
 procedure RenderTexture(ID,PartID:integer; param:string; t:Single);
 begin
   glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-  if MoxTex[MOX.Sid[ID,1]+1]=0 then exit;
-  glBindTexture(GL_TEXTURE_2D, MoxTex[MOX.Sid[ID,1]+1]); //UV map texture
+  if MoxTex[MOX.Chunks[ID].SidA+1]=0 then exit;
+  glBindTexture(GL_TEXTURE_2D, MoxTex[MOX.Chunks[ID].SidA+1]); //UV map texture
 
   if (Form1.CBVinyl.ItemIndex+1>1) then
-    if (Material[MOX.Sid[ID,1]+1].MatClass[4] AND 1 = 1) then
+    if (Material[MOX.Chunks[ID].SidA+1].MatClass[4] AND 1 = 1) then
       glBindTexture(GL_TEXTURE_2D, VinylsTex); //UV map texture
 
-  Dif[0]:=1; Dif[1]:=1; Dif[2]:=1; Dif[3]:=1-Material[MOX.Sid[ID,1]+1].Transparency/100;
+  Dif[0]:=1; Dif[1]:=1; Dif[2]:=1; Dif[3]:=1-Material[MOX.Chunks[ID].SidA+1].Transparency/100;
   if param='SetTrans' then Dif[3]:=1-t;
   if param[1]='1' then begin
-    Dif[0]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Dif.R/180,1);
-    Dif[1]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Dif.G/180,1);
-    Dif[2]:=min(Material[MOX.Sid[ID,1]+1].Color[ColID].Dif.B/180,1);
+    Dif[0]:=min(Material[MOX.Chunks[ID].SidA+1].Color[ColID].Dif.R/180,1);
+    Dif[1]:=min(Material[MOX.Chunks[ID].SidA+1].Color[ColID].Dif.G/180,1);
+    Dif[2]:=min(Material[MOX.Chunks[ID].SidA+1].Color[ColID].Dif.B/180,1);
   end;
   if param[2]='4' then Dif[3]:=1-t;
   glColor4fv(@Dif);
@@ -367,7 +367,7 @@ begin
     if ID>(MOX.Parts[IDk].NumMat+h) then begin inc(h,MOX.Parts[IDk].NumMat); inc(IDk); end; //define detail
     if (SelectedTreeNode=0)or(ActivePage=apParts)or(not(RenderOpts.ShowPart)or //skip render of unseen parts
        (RenderOpts.ShowPart)and(IDk=SelectedTreeNode)) then
-      if Material[MOX.Sid[ID,1]+1].MatClass[4] and 4=4 then
+      if Material[MOX.Chunks[ID].SidA+1].MatClass[4] and 4=4 then
         TransformAndCall(ID,IDk, 1);
   end;
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -408,8 +408,9 @@ begin
   glPushMatrix;
     TransformParent(SelectedTreeNode);
     glBindTexture(GL_TEXTURE_2D, 0);
-    k:=MOX.Chunk[MOX.Parts[SelectedTreeNode].FirstMat+1,3]-1;
-    for i:=1 to param2 do begin
+    k:=MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1;
+    for i:=1 to param2 do
+    begin
       glColor4f(0.9,0.9,0.9,1);
       glRasterPos3f(MOX.Vertice[i+k].X,MOX.Vertice[i+k].Y,MOX.Vertice[i+k].Z);
       glPrint(inttostr(i));
@@ -441,7 +442,7 @@ end;
 
 procedure TransformAndCall(ID,PartID:integer; mode:Byte);
 begin
-if (Form1.CBShowMat.Checked)and(MOX.Sid[ID,1]+1<>MatID) then exit;
+if (Form1.CBShowMat.Checked)and(MOX.Chunks[ID].SidA+1<>MatID) then exit;
   if RenderOpts.UVMap then begin
     if mode=1 then RenderUVMap(ID)
   end else begin
