@@ -5,6 +5,10 @@ uses
   MTkit2_Vertex;
 
 type
+  EExceptionTooNew = class(Exception);
+
+  TMOXFormat = (mfUnknown, mf10MBWR, mf02WR2, mf22WR2);
+
   TMOXVertice = packed record
     X, Y, Z: Single;
     nX, nY, nZ: Single;
@@ -25,11 +29,19 @@ type
   end;
 
   TMOXBlinker = packed record
-    BlinkerType: Integer;     // 4b Type of object
+    BlinkerType: Integer;     // 4b Type of object (0..9,16,17,20,24,28,32,33,34,255)
     sMin, sMax, Freq: Single; // Min, Max
     B,G,R,A: Byte;            // 20
     Unused, Parent: SmallInt; // 24
     Matrix: TMatrix;          // 88
+  end;
+
+  TMOXChunk16 = packed record
+    SidA, SidB, FirstPoly, PolyCount, FirstVtx, LastVtx: Word;
+  end;
+
+  TMOXChunk32 = packed record
+    SidA, SidB, FirstPoly, PolyCount, FirstVtx, LastVtx: Cardinal;
   end;
 
   TMOXChunk = packed record
@@ -46,7 +58,12 @@ const
 
 type
   TMOX = record
-    Header1: record Fmt: AnsiString; A, B, C, D: Byte; end;
+    Header1: record
+      Fmt: AnsiString;
+      A: Byte; // 0 - 16bit indices, 1 - 32bit indices, 2 - 32bit indices + tangents
+      B: Byte; // Always 0
+      C, D: Byte;
+    end;
     Header: record VerticeCount, PolyCount, ChunkCount, MatCount, PartCount, BlinkerCount: Integer; end;
     Vertice: array [1..MAX_MOX_VTX] of TMOXVertice;
     Face: array [1..MAX_MOX_IDX,1..3] of Integer;  // Polygon links
@@ -58,6 +75,7 @@ type
     Parts: array [1..MAX_PARTS] of TMOXPart;
     Blinkers: array [1..MAX_BLINKERS] of TMOXBlinker;
 
+    function MOXFormat: TMOXFormat;
     function MOXFormatInt: string;
     function MOXFormatStr: string;
   end;
@@ -70,6 +88,21 @@ var
 implementation
 
 
+function TMOX.MOXFormat: TMOXFormat;
+begin
+  if (Header1.C = 2) and (Header1.D = 2) then
+    Result := mf22WR2 //32bit chunks, parts, blinkers
+  else
+  if (Header1.C = 0) and (Header1.D = 2) then
+    Result := mf02WR2 //32bit chunks
+  else
+  if (Header1.C = 1) and (Header1.D = 0) then
+    Result := mf10MBWR //16bit chunks
+  else
+    Result := mfUnknown;
+end;
+
+
 function TMOX.MOXFormatInt: string;
 begin
   Result := Format('%d%d%d%d', [Header1.A, Header1.B, Header1.C, Header1.D]);
@@ -77,25 +110,18 @@ end;
 
 
 function TMOX.MOXFormatStr: string;
+const
+  S: array [TMOXFormat] of string = ('Unknown', 'MBWR', 'WR02', 'WR22');
 begin
-  if (Header1.B = 0) and (Header1.C = 2) and (Header1.D = 2) then
-    Result := 'WR22' //32bit chunks, parts, blinkers
-  else
-  if (Header1.B = 0) and (Header1.C = 0) and (Header1.D = 2) then
-    Result := 'WR02' //32bit chunks
-  else
-  if (Header1.B = 0) and (Header1.C = 1) and (Header1.D = 0) then
-    Result := 'MBWR' //16bit chunks
-  else
-    Result := 'Unknown';
+  Result := S[MOXFormat];
 end;
 
 
 procedure LoadMOX(const aFilename: string);
 var
   c4: array [1..4] of AnsiChar;
-  cChunk12: array [1..12] of AnsiChar;
-  cChunk24: array [1..24] of AnsiChar;
+  chunk16: TMOXChunk16;
+  chunk32: TMOXChunk32;
   cPart64: array [1..64] of AnsiChar;
   i,j: Integer;
   f: file;
@@ -113,7 +139,14 @@ begin
 
     blockread(f, MOX.Header1.A, 4);
 
-    if MOX.MOXFormatStr = 'Unknown' then
+    Assert(mox.Header1.B = 0);
+
+    if MOX.Header1.A > 1 then
+      raise EExceptionTooNew.Create('Unsupported MOX version - ' + MOX.MOXFormatInt);
+    if MOX.Header1.C > 2 then
+      raise EExceptionTooNew.Create('Unsupported MOX version - ' + MOX.MOXFormatInt);
+
+    if MOX.MOXFormat = mfUnknown then
       raise Exception.Create('Unknown MOX version - ' + MOX.MOXFormatInt);
 
     blockread(f, MOX.Header, 24);
@@ -138,28 +171,28 @@ begin
 
     SetLength(MOX.Chunks, MOX.Header.ChunkCount + 1);
 
-    if MOX.MOXFormatStr = 'MBWR'{0010} then
+    if MOX.MOXFormat = mf10MBWR then
     for j:=1 to MOX.Header.ChunkCount do
     begin
-      blockread(f, cChunk12, 12);
-      MOX.Chunks[j].SidA := ord(cChunk12[1]) + ord(cChunk12[2]) * 256;
-      MOX.Chunks[j].SidB := ord(cChunk12[3]) + ord(cChunk12[4]) * 256;
-      MOX.Chunks[j].FirstPoly := ord(cChunk12[5]) + ord(cChunk12[6]) * 256;
-      MOX.Chunks[j].PolyCount := ord(cChunk12[7]) + ord(cChunk12[8]) * 256;
-      MOX.Chunks[j].FirstVtx := ord(cChunk12[9]) + ord(cChunk12[10]) * 256 + 1;
-      MOX.Chunks[j].LastVtx := ord(cChunk12[11]) + ord(cChunk12[12]) * 256 + 1;
+      blockread(f, chunk16, 12);
+      MOX.Chunks[j].SidA := chunk16.SidA;
+      MOX.Chunks[j].SidB := chunk16.SidB;
+      MOX.Chunks[j].FirstPoly := chunk16.FirstPoly;
+      MOX.Chunks[j].PolyCount := chunk16.PolyCount;
+      MOX.Chunks[j].FirstVtx := chunk16.FirstVtx + 1;
+      MOX.Chunks[j].LastVtx := chunk16.LastVtx + 1;
     end;
 
-    if (MOX.MOXFormatStr = 'WR22') or (MOX.MOXFormatStr = 'WR02'){0002, 0022} then
+    if MOX.MOXFormat in [mf02WR2, mf22WR2] then
     for j:=1 to MOX.Header.ChunkCount do
     begin
-      blockread(f, cChunk24, 24);
-      MOX.Chunks[j].SidA := ord(cChunk24[1]) + ord(cChunk24[2]) * 256;
-      MOX.Chunks[j].SidB := ord(cChunk24[5]) + ord(cChunk24[6]) * 256;
-      MOX.Chunks[j].FirstPoly := ord(cChunk24[9]) + ord(cChunk24[10]) * 256;
-      MOX.Chunks[j].PolyCount := ord(cChunk24[13]) + ord(cChunk24[14]) * 256;
-      MOX.Chunks[j].FirstVtx := ord(cChunk24[17]) + ord(cChunk24[18]) * 256 + 1;
-      MOX.Chunks[j].LastVtx := ord(cChunk24[21]) + ord(cChunk24[22]) * 256 + 1;
+      blockread(f, chunk32, 24);
+      MOX.Chunks[j].SidA := chunk32.SidA;
+      MOX.Chunks[j].SidB := chunk32.SidB;
+      MOX.Chunks[j].FirstPoly := chunk32.FirstPoly;
+      MOX.Chunks[j].PolyCount := chunk32.PolyCount;
+      MOX.Chunks[j].FirstVtx := chunk32.FirstVtx + 1;
+      MOX.Chunks[j].LastVtx := chunk32.LastVtx + 1;
     end;
 
     // Verify faces
@@ -171,20 +204,26 @@ begin
     end;
 
     // Verify vertex ranges
-    Assert(MOX.Chunks[1].FirstVtx = 1);
-    for j:=2 to MOX.Header.ChunkCount do
-      Assert(MOX.Chunks[j].FirstVtx = MOX.Chunks[j-1].LastVtx + 1);
-    Assert(MOX.Chunks[MOX.Header.ChunkCount].LastVtx = MOX.Header.VerticeCount);
+    // Some models can be empty - 0 vertices, 0 polys, etc. They are still "valid"
+    if MOX.Header.ChunkCount > 0 then
+      Assert(MOX.Chunks[1].FirstVtx = 1);
+    // This is actually violated in some Synetic models
+    {for j:=2 to MOX.Header.ChunkCount do
+      if MOX.Chunks[j].FirstVtx <> MOX.Chunks[j-1].LastVtx + 1 then
+        Assert(False);}
+    // This is actually violated in some Synetic models
+    //Assert(MOX.Chunks[MOX.Header.ChunkCount].LastVtx = MOX.Header.VerticeCount);
 
     // Verify poly ranges
-    Assert(MOX.Chunks[1].FirstPoly = 0);
+    if MOX.Header.ChunkCount > 0 then
+      Assert(MOX.Chunks[1].FirstPoly = 0);
     for j:=2 to MOX.Header.ChunkCount do
       Assert(MOX.Chunks[j].FirstPoly = MOX.Chunks[j-1].FirstPoly + MOX.Chunks[j-1].PolyCount);
-    Assert(MOX.Chunks[MOX.Header.ChunkCount].FirstPoly + MOX.Chunks[MOX.Header.ChunkCount].PolyCount = MOX.Header.PolyCount);
+    //Assert(MOX.Chunks[MOX.Header.ChunkCount].FirstPoly + MOX.Chunks[MOX.Header.ChunkCount].PolyCount = MOX.Header.PolyCount);
 
     blockread(f, MOX.MoxMat, (80+256)*MOX.Header.MatCount);   //Crap&Mess
 
-    if MOX.MOXFormatStr = 'WR22' then
+    if MOX.MOXFormat = mf22WR2 then
       for j:=1 to MOX.Header.PartCount do
       begin
         blockread(f, cPart64, 64);
@@ -196,7 +235,8 @@ begin
     for j:=1 to MOX.Header.PartCount do
       Assert(MOX.Parts[j].TypeID in [0..6]);
 
-    if (MOX.MOXFormatStr = 'MBWR') or (MOX.MOXFormatStr = 'WR02') then
+    // Add fake damage part
+    if MOX.MOXFormat in [mf10MBWR, mf02WR2] then
     begin
       MOX.Header.PartCount := 1;
 
@@ -222,12 +262,12 @@ begin
         + ' due to compatibility issues.'), 'Warning', MB_OK or MB_ICONWARNING);
     end;
 
+    if MOX.MOXFormat = mf22WR2 then
+      blockread(f, MOX.Blinkers, 88*MOX.Header.BlinkerCount);
+
     // Verify blinkers
     for j:=1 to MOX.Header.BlinkerCount do
-      Assert(MOX.Blinkers[j].BlinkerType in [0..9,16,20,24,33]);
-
-    if MOX.MOXFormatStr = 'WR22' then
-      blockread(f, MOX.Blinkers, 88*MOX.Header.BlinkerCount);
+      Assert(MOX.Blinkers[j].BlinkerType in [0..9,16,17,20,24,28,32,33,34,255], Format('Unsupported blinker type %d', [MOX.Blinkers[j].BlinkerType]));
   finally
     closefile(f);
   end;

@@ -29,6 +29,8 @@ MTKit2 shows you preview of a car, WR2 will display it bit differently.
 AFC11/FVR support is limited.
 
 Version History:
+                    Added error on loading unsupported MOX versions (newer AFC11 cars)
+                    Fixed display of cars with more than 65k vertices/polys
                     Fixed uniformity of 3D model view rotation/pane/zoom on mouse/tablet input
 2.3.9   2022.03.09  Added option to spread model parts over X axis on MOX > LWO export
                     Fixed LWO export (broken in 2.3.8)

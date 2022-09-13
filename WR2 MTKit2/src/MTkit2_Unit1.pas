@@ -1468,11 +1468,9 @@ begin
   end;
 
   //todo: It is worth writing more important blinkers first (deprioritize LED decoys),
-  // since the game has a limit on how many blinkers it can show at once (255 iirc)
+  // since the game has a limit on how many blinkers it can show at once (384)
   for ii:=1 to MOX.Header.BlinkerCount do //Write blinkers in order
-    for kk:=0 to 33 do //todo: Looks like this loop should be on the outside
-     if MOX.Blinkers[ii].BlinkerType = kk then
-       BlockWrite(f, MOX.Blinkers[ii], 88);
+   BlockWrite(f, MOX.Blinkers[ii], 88);
 
   closefile(f);
   Memo1.Lines.Add('MOX file closed');
@@ -2874,12 +2872,14 @@ procedure TForm1.DevScanMOXHeaders;
 begin
   TThread.CreateAnonymousThread(
     procedure
+    const
+      SCAN_PATH = 'D:\';
     var
       slFiles, slLog: TStringList;
       I: Integer;
     begin
       slFiles := TStringList.Create;
-      ListFiles('D:\' { ExeDir } , '.mox', True, slFiles,
+      ListFiles(SCAN_PATH { ExeDir } , '.mox', True, slFiles,
         procedure(aMsg: string)
         begin
           if slFiles.Count mod 100 = 0 then
@@ -2892,9 +2892,11 @@ begin
         if I mod 100 = 0 then
           StatusBar1.Panels[2].Text := Format('Loading %d/%d - \%s', [I, slFiles.Count, slFiles[I]]);
 
-        LoadMOX('D:\' + slFiles[I]);
+        LoadMOX(SCAN_PATH + slFiles[I]);
         //slLog.Append(MOX.MOXFormatInt + #9 + MOX.MOXFormatStr + #9 + 'OK  ' + #9 + slFiles[I]);
       except
+        on E: EExceptionTooNew do
+          { We dont support newer formats yet };
         on E: Exception do
           slLog.Append(MOX.MOXFormatInt + #9 + MOX.MOXFormatStr + #9 + 'FAIL' + #9 + slFiles[I] + #9 + E.Message);
       end;

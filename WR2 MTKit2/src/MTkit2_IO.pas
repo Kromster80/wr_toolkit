@@ -1691,9 +1691,6 @@ var
   slPaths: TStringList;
   I: Integer;
   SearchRec: TSearchRec;
-  localName: string;
-  Key: string;
-  fileName: string;
 begin
   aFiles.Clear;
 
