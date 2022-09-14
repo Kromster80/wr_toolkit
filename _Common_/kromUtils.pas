@@ -119,7 +119,7 @@ function BrowseURL(const URL: string) : boolean;
 procedure MailTo(Address,Subject,Body:string);
 procedure OpenMySite(ToolName:string; Address:string='http://krom.reveur.de');
 
-procedure RegisterFileType(ExtName:string; AppName:string);
+procedure RegisterFileType(const aExtName, aAppPath: string);
 function GetExeBuildTime: TDateTime;
 
 const
@@ -1207,27 +1207,35 @@ begin
 end;
 
 
-procedure RegisterFileType(ExtName:string; AppName:string);
+procedure RegisterFileType(const aExtName, aAppPath: string);
 var
   reg: TRegistry;
+  entryName: string;
 begin
+  Assert(Pos('.', aExtName) = 1, 'Extension must start with a dot .');
+
+  entryName := Copy(aExtName, 2, Length(aExtName)) + '_file';
+
   reg := TRegistry.Create;
   try
-    reg.RootKey := HKEY_CLASSES_ROOT;
-    reg.OpenKey('.'+ExtName, true);
-    reg.WriteString('', ExtName+'file');
+    reg.RootKey := HKEY_CURRENT_USER;
+    reg.OpenKey('\Software\Classes\' + aExtName, True);
+    reg.WriteString('', entryName);
     reg.CloseKey;
-    reg.CreateKey(ExtName+'file');
-    reg.OpenKey(ExtName+'file\DefaultIcon', true);
-    reg.WriteString('', '"'+AppName+'"'+',0');
+
+    reg.OpenKey('\Software\Classes\' + entryName + '\DefaultIcon', True);
+    reg.WriteString('', '"' + aAppPath + '"' + ',0'); // Use 0th icon
     reg.CloseKey;
-    reg.OpenKey(ExtName+'file\shell\open\command', true);
-    reg.WriteString('', '"'+AppName+'"'+' "%1"');
+
+    reg.OpenKey('\Software\Classes\' + entryName + '\shell\open\command', True);
+    reg.WriteString('', '"' + aAppPath + '"' + ' "%1"'); // "C:\path_to_exe\app.exe" "%1"
     reg.CloseKey;
   finally
     reg.Free;
   end;
-  SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, nil, nil) ;
+
+  // Tells Explorer to 'reload' itself to reflect the changes made to the file association
+  SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, nil, nil);
 end;
 
 

@@ -6,7 +6,7 @@ uses
 type
   TActivePage = (apMTL, apParts, apLights, apCOB, apCPO, apExtra, apBrowse);
   TRenderMode = (rmOpenGL, rmShaders);
-  TUIDataSection = (uiMOX, uiMTL, uiVinyl, uiLights, uiParts, uiCOB, uiCPO);
+  TUIDataSection = (uiMOX, uiMTL, uiVinyl, uiBlinkers, uiParts, uiCOB, uiCPO);
   TLoadMode = (lmJustLoad, lmLoadAndShow);
   TRenderObjectSet = set of (roMOX, roMOX_COB, roCOB, roCPO, roTREE);
   TClearUp = (cuMOX, cuMTL, cuCOB, cuCPO, cuTREE, cuALL);
@@ -480,22 +480,16 @@ const
   (111,112,99),
   (112,100,99));
 
-  BLINKER_TYPE_SHORTNAME: array [0..33] of string = (
-    'null','EF','HL','BL','RL','LB',
-    'RB','SG','SL','FL','??',
-    '??','??','??','??','??',
-    'ML','??','??','??','WP',
-    '??','??','??','TP','??',
-    '??','??','??','??','??',
-    '??','??','NF');
-
   DefaultColor: array [1..15,1..3] of Byte = (
   (0,0,0),(39,0,2),(130,10,5),(20,4,0),(140,98,0),(159,71,0),(150,150,160),(10,10,10),
   (0,5,10),(2,10,4),(0,2,8),(17,17,30),(5,2,8),(50,50,50),(40,40,40));
+
   DefaultReflect: array [1..15,1..3] of Byte = (
   (12,12,12),(12,12,12),(12,12,12),(12,12,12),(12,12,12),(12,12,12),(12,12,12),
   (12,12,12),(12,12,12),(12,12,12),(12,12,12),(12,12,12),(12,12,12),(12,12,12),(0,0,0));
+
   DefaultSpec: array [1..3] of Byte = (145,145,145);
+
   DefaultSpec2: array [1..15,1..3] of Byte = (
   (12,12,12),(85,0,5),(0,0,0),(130,32,15),(0,0,0),(0,0,0),(0,0,0),(50,50,50),
   (0,40,28),(10,40,18),(0,13,40),(74,75,130),(53,34,60),(100,100,100),(120,120,120));

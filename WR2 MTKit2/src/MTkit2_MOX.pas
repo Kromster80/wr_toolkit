@@ -29,13 +29,27 @@ type
   end;
 
   TMOXBlinker = packed record
+  public
     BlinkerType: Integer;     // 4b Type of object (0..9,16,17,20,24,28,32,33,34,255)
     sMin, sMax, Freq: Single; // Min, Max
     B,G,R,A: Byte;            // 20
     Unused, Parent: SmallInt; // 24
     Matrix: TMatrix;          // 88
+
+    function GetStr: string;
   end;
 
+const
+  BLINKER_TYPE_SHORTNAME: array [0..34] of string = (
+    'null','EF','HL','BL','RL','LB',
+    'RB','SG','SL','FL','??',
+    '??','??','??','??','??',
+    'ML','??','??','??','WP',
+    '??','??','??','TP','??',
+    '??','??','??','??','??',
+    '??','??','NF','??');
+
+type
   TMOXChunk16 = packed record
     SidA, SidB, FirstPoly, PolyCount, FirstVtx, LastVtx: Word;
   end;
@@ -88,6 +102,14 @@ var
 implementation
 
 
+{ TMOXBlinker }
+function TMOXBlinker.GetStr: string;
+begin
+  Result := Format('%s %.3g->%.3g %d', [BLINKER_TYPE_SHORTNAME[BlinkerType], sMin, sMax, Parent]);
+end;
+
+
+{ TMOX }
 function TMOX.MOXFormat: TMOXFormat;
 begin
   if (Header1.C = 2) and (Header1.D = 2) then

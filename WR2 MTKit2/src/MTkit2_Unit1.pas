@@ -384,6 +384,7 @@ type
     fOldFrameTimes: Cardinal;
     fFrameCount: Cardinal;
     fLastInputMode: TInputMode;
+    fUIRefresh: Boolean;
 
     fOpenedFileMask: string;
     fOpenedFolder: string;
@@ -534,23 +535,19 @@ var
 
   VinylsCount:Integer;
   VinylsTex:GLUint;
-  VinylsList: array [1..128]of string;
+  VinylsList: array [1..128] of string;
 
-  PartModify: array [1..MAX_PARTS]of record
+  PartModify: array [1..MAX_PARTS] of record
     ActualPoint:Integer;
-    AxisSetup: array [1..3]of Byte;
-    Low: array [1..3]of Single;
-    High: array [1..3]of Single;
-    Custom: array [1..3]of Single;
-    Move: array [1..3]of Single;
+    AxisSetup: array [1..3] of Byte;
+    Low: array [1..3] of Single;
+    High: array [1..3] of Single;
+    Custom: array [1..3] of Single;
+    Move: array [1..3] of Single;
   end;
 
   RenderChrome: Boolean;
   IsLightwave2MOX: Boolean=False;
-  COBRefresh: Boolean=False;
-  CPORefresh: Boolean=False;
-  LightRefresh: Boolean=True;
-  MaterialRefresh: Boolean=True;
   ForbidPartsChange: Boolean=True;
   ForbidPivotChange: Boolean=False;
 
@@ -784,81 +781,78 @@ var
   oldID1: Integer;
 begin
   case aSection of
-    uiMOX:    begin
-                edVerticeCount.Text := IntToStr(MOX.header.VerticeCount);
-                edPolyCount.Text := IntToStr(MOX.header.PolyCount);
-                edPartCount.Text := IntToStr(MOX.header.PartCount);
-                edMaterialCount.Text := IntToStr(MOX.header.MatCount);
-                edChunkCount.Text := IntToStr(MOX.header.ChunkCount);
-                edBlinkerCount.Text := IntToStr(MOX.header.BlinkerCount);
-              end;
-    uiMTL:    begin
-                LBMaterials.Clear;
-                for ii:=1 to MOX.Header.MatCount do
-                  LBMaterials.AddItem(Material[ii].Mtag+' '+Material[ii].Title,nil);
-                LBMaterials.ItemIndex:=0;
-                if NumColors=1 then
-                  CBColor.ItemIndex:=0
-                else
-                  CBColor.ItemIndex:=DefColor;
-                LBMaterialsClick(nil);
-              end;
-    uiVinyl:  begin
-                CBVinyl.Clear;
-                CBVinyl.AddItem('-Default-', nil);
-                for ii:=1 to VinylsCount do
-                  CBVinyl.AddItem(VinylsList[ii], nil);
-                CBVinyl.ItemIndex:=0;
-              end;
-    uiLights: begin
-                LightRefresh := True;
-                oldID1:=LBBlinkers.ItemIndex;
-                LBBlinkers.Clear;
-                for ii:=1 to MOX.Header.BlinkerCount do
-                  LBBlinkers.Items.Add(IntToStr(ii)+'. '+BLINKER_TYPE_SHORTNAME[MOX.Blinkers[ii].BlinkerType]+'  '+
-                    FloatToStrF(MOX.Blinkers[ii].sMin,ffGeneral,5,7)+'->'+
-                    FloatToStrF(MOX.Blinkers[ii].sMax,ffGeneral,5,7)+'  '+
-                    IntToStr(MOX.Blinkers[ii].Parent)
-                  );
-                if oldID1<LBBlinkers.Count then LBBlinkers.ItemIndex:=oldID1;
-                LightRefresh := False;
-              end;
-    uiParts:  begin
-                TVParts.Items.Clear;
-                for ii:=1 to MOX.Header.PartCount do
-                begin
-                  if MOX.Parts[ii].Parent=-1 then Dnode[ii] := TVParts.Items.Add(nil,MOX.Parts[ii].Dname) else //make Root
-                  Dnode[ii] := TVParts.Items.AddChild(Dnode[MOX.Parts[ii].Parent+1],MOX.Parts[ii].Dname);      //child
+    uiMOX:      begin
+                  edVerticeCount.Text := IntToStr(MOX.Header.VerticeCount);
+                  edPolyCount.Text := IntToStr(MOX.Header.PolyCount);
+                  edPartCount.Text := IntToStr(MOX.Header.PartCount);
+                  edMaterialCount.Text := IntToStr(MOX.Header.MatCount);
+                  edChunkCount.Text := IntToStr(MOX.Header.ChunkCount);
+                  edBlinkerCount.Text := IntToStr(MOX.Header.BlinkerCount);
                 end;
-                if MOX.Header.PartCount>=1 then Dnode[1].Expand(False);
-              end;
-    uiCOB:    begin
-                COBRefresh := True;
-                oldID1:=LBCOBPoints.ItemIndex;
-                LBCOBPoints.Clear;
-                LBCPOShapes.Clear;
-                for ii:=1 to COB.Head.PointQty do LBCOBPoints.Items.Add(IntToStr(ii));
-                LBCOBPoints.ItemIndex:=EnsureRange(oldID1,0,LBCOBPoints.Count-1);
-                COBRefresh := False;
-                COB_X.Value:=COB.Head.X; COB_Y.Value:=COB.Head.Y; COB_Z.Value:=COB.Head.Z;
-                COB_X1.Value:=COB.Head.Xmin; COB_Y1.Value:=COB.Head.Ymin; COB_Z1.Value:=COB.Head.Zmin;
-                COB_X2.Value:=COB.Head.Xmax; COB_Y2.Value:=COB.Head.Ymax; COB_Z2.Value:=COB.Head.Zmax;
-              end;
-    uiCPO:    begin
-                CPORefresh := True;
-                oldID1:=LBCPOShapes.ItemIndex;
-                LBCPOShapes.Clear;
-                for ii:=1 to CPOHead.Qty do
-                  case  CPO[ii].Format of
-                    2: LBCPOShapes.Items.Add('Bound #'+IntToStr(ii));
-                    3: LBCPOShapes.Items.Add('Shape #'+IntToStr(ii)+' '+IntToStr(CPO[ii].IndiceSize div 2));
-                    else LBCPOShapes.Items.Add('Unknown #'+IntToStr(ii));
+    uiMTL:      begin
+                  LBMaterials.Clear;
+                  for ii:=1 to MOX.Header.MatCount do
+                    LBMaterials.AddItem(Material[ii].Mtag+' '+Material[ii].Title,nil);
+                  LBMaterials.ItemIndex:=0;
+                  if NumColors=1 then
+                    CBColor.ItemIndex:=0
+                  else
+                    CBColor.ItemIndex:=DefColor;
+                  LBMaterialsClick(nil);
+                end;
+    uiVinyl:    begin
+                  CBVinyl.Clear;
+                  CBVinyl.AddItem('-Default-', nil);
+                  for ii:=1 to VinylsCount do
+                    CBVinyl.AddItem(VinylsList[ii], nil);
+                  CBVinyl.ItemIndex:=0;
+                end;
+    uiBlinkers: begin
+                  fUIRefresh := True;
+                  oldID1:=LBBlinkers.ItemIndex;
+                  LBBlinkers.Clear;
+                  for ii:=1 to MOX.Header.BlinkerCount do
+                    LBBlinkers.Items.Add(IntToStr(ii)+'. '+ MOX.Blinkers[ii].GetStr);
+                  if oldID1<LBBlinkers.Count then LBBlinkers.ItemIndex:=oldID1;
+                  fUIRefresh := False;
+                end;
+    uiParts:    begin
+                  TVParts.Items.Clear;
+                  for ii:=1 to MOX.Header.PartCount do
+                  begin
+                    if MOX.Parts[ii].Parent=-1 then Dnode[ii] := TVParts.Items.Add(nil,MOX.Parts[ii].Dname) else //make Root
+                    Dnode[ii] := TVParts.Items.AddChild(Dnode[MOX.Parts[ii].Parent+1],MOX.Parts[ii].Dname);      //child
                   end;
-                CPORefresh := False;
-                LBCPOShapes.ItemIndex:=EnsureRange(oldID1,0,LBCPOShapes.Count-1);
-                LBCPOShapesClick(nil);
-                Label82.Caption:='Shapes: '+IntToStr(CPOHead.Qty);
-              end;
+                  if MOX.Header.PartCount>=1 then Dnode[1].Expand(False);
+                end;
+    uiCOB:      begin
+                  fUIRefresh := True;
+                  oldID1:=LBCOBPoints.ItemIndex;
+                  LBCOBPoints.Clear;
+                  LBCPOShapes.Clear;
+                  for ii:=1 to COB.Head.PointQty do LBCOBPoints.Items.Add(IntToStr(ii));
+                  LBCOBPoints.ItemIndex:=EnsureRange(oldID1,0,LBCOBPoints.Count-1);
+                  fUIRefresh := False;
+                  COB_X.Value:=COB.Head.X; COB_Y.Value:=COB.Head.Y; COB_Z.Value:=COB.Head.Z;
+                  COB_X1.Value:=COB.Head.Xmin; COB_Y1.Value:=COB.Head.Ymin; COB_Z1.Value:=COB.Head.Zmin;
+                  COB_X2.Value:=COB.Head.Xmax; COB_Y2.Value:=COB.Head.Ymax; COB_Z2.Value:=COB.Head.Zmax;
+                end;
+    uiCPO:      begin
+                  fUIRefresh := True;
+                  oldID1:=LBCPOShapes.ItemIndex;
+                  LBCPOShapes.Clear;
+                  for ii:=1 to CPOHead.Qty do
+                    case  CPO[ii].Format of
+                      2:  LBCPOShapes.Items.Add('Bound #'+IntToStr(ii));
+                      3:  LBCPOShapes.Items.Add('Shape #'+IntToStr(ii)+' '+IntToStr(CPO[ii].IndiceSize div 2));
+                    else
+                      LBCPOShapes.Items.Add('Unknown #'+IntToStr(ii));
+                    end;
+                  fUIRefresh := False;
+                  LBCPOShapes.ItemIndex:=EnsureRange(oldID1,0,LBCPOShapes.Count-1);
+                  LBCPOShapesClick(nil);
+                  Label82.Caption:='Shapes: '+IntToStr(CPOHead.Qty);
+                end;
   end;
 end;
 
@@ -1155,48 +1149,50 @@ begin
   LitID := LBBlinkers.ItemIndex+1;
   if LitID = 0 then Exit;
 
-  LightRefresh := True;
-  blinkerType := MOX.Blinkers[LitID].BlinkerType;
-  case blinkerType of //Fit 0..24 IDs in RG range of 0..12
-    16: blinkerType := 10;
-    20: blinkerType := 11;
-    24: blinkerType := 12;
-    33: blinkerType := 13;
+  fUIRefresh := True;
+  try
+    blinkerType := MOX.Blinkers[LitID].BlinkerType;
+    case blinkerType of //Fit 0..24 IDs in RG range of 0..12
+      16: blinkerType := 10;
+      20: blinkerType := 11;
+      24: blinkerType := 12;
+      33: blinkerType := 13;
+    end;
+
+    rgBlinkerType.ItemIndex := blinkerType;
+
+    fsBlinkerSizeMin.Value := MOX.Blinkers[LitID].sMin;
+    fsBlinkerSizeMax.Value := MOX.Blinkers[LitID].sMax;
+    fsBlinkerFreq.Value := MOX.Blinkers[LitID].Freq;
+    //S1.Value:=MOX.Blinkers[LBBlinkers.ItemIndex+1].z1;
+    seBlinkerParent.Value:=MOX.Blinkers[LitID].Parent;
+    fsBlinkerX.Value:=MOX.Blinkers[LitID].Matrix[4,1]/10;
+    fsBlinkerY.Value:=MOX.Blinkers[LitID].Matrix[4,2]/10;
+    fsBlinkerZ.Value:=MOX.Blinkers[LitID].Matrix[4,3]/10;
+    ShapeL.Brush.Color:=MOX.Blinkers[LitID].R+MOX.Blinkers[LitID].G*256+MOX.Blinkers[LitID].B*65536;
+
+    with MOX.Blinkers[LitID] do
+    begin
+      m[1]:=Matrix[1,1]; m[2]:=Matrix[1,2]; m[3]:=Matrix[1,3];
+      m[4]:=Matrix[2,1]; m[5]:=Matrix[2,2]; m[6]:=Matrix[2,3];
+      m[7]:=Matrix[3,1]; m[8]:=Matrix[3,2]; m[9]:=Matrix[3,3];
+    end;
+
+    Matrix2Angles(m, 9, @ax, @ay, @az);
+
+    fsBlinkerH.Value := Round(ax);
+    fsBlinkerP.Value := Round(ay);
+    fsBlinkerB.Value := Round(az);
+  finally
+    fUIRefresh := False;
   end;
-
-  rgBlinkerType.ItemIndex := blinkerType;
-
-  fsBlinkerSizeMin.Value := MOX.Blinkers[LitID].sMin;
-  fsBlinkerSizeMax.Value := MOX.Blinkers[LitID].sMax;
-  fsBlinkerFreq.Value := MOX.Blinkers[LitID].Freq;
-  //S1.Value:=MOX.Blinkers[LBBlinkers.ItemIndex+1].z1;
-  seBlinkerParent.Value:=MOX.Blinkers[LitID].Parent;
-  fsBlinkerX.Value:=MOX.Blinkers[LitID].Matrix[4,1]/10;
-  fsBlinkerY.Value:=MOX.Blinkers[LitID].Matrix[4,2]/10;
-  fsBlinkerZ.Value:=MOX.Blinkers[LitID].Matrix[4,3]/10;
-  ShapeL.Brush.Color:=MOX.Blinkers[LitID].R+MOX.Blinkers[LitID].G*256+MOX.Blinkers[LitID].B*65536;
-
-  with MOX.Blinkers[LitID] do
-  begin
-    m[1]:=Matrix[1,1]; m[2]:=Matrix[1,2]; m[3]:=Matrix[1,3];
-    m[4]:=Matrix[2,1]; m[5]:=Matrix[2,2]; m[6]:=Matrix[2,3];
-    m[7]:=Matrix[3,1]; m[8]:=Matrix[3,2]; m[9]:=Matrix[3,3];
-  end;
-
-  Matrix2Angles(m, 9, @ax, @ay, @az);
-
-  fsBlinkerH.Value := Round(ax);
-  fsBlinkerP.Value := Round(ay);
-  fsBlinkerB.Value := Round(az);
-
-  LightRefresh := False;
 end;
 
 
 procedure TForm1.BlinkChange(Sender: TObject);
 begin
   if LitID = 0 then Exit;
-  if LightRefresh then Exit;
+  if fUIRefresh then Exit;
 
   case rgBlinkerType.ItemIndex of
     0..9: MOX.Blinkers[LitID].BlinkerType := rgBlinkerType.ItemIndex;
@@ -1211,8 +1207,9 @@ begin
   MOX.Blinkers[LitID].Freq := fsBlinkerFreq.Value;
   MOX.Blinkers[LitID].Unused := 0;
   MOX.Blinkers[LitID].Parent := seBlinkerParent.Value;
-  SendDataToUI(uiLights);
+  SendDataToUI(uiBlinkers);
 end;
+
 
 procedure TForm1.CBColorChange(Sender: TObject);
 begin
@@ -1231,21 +1228,26 @@ end;
 
 procedure TForm1.LBMaterialsClick(Sender: TObject);
 begin
-  MatID:=LBMaterials.ItemIndex+1;
-  if MatID=0 then Exit;
-  MatName.Text:=Material[MatID].Title;
-  MaterialRefresh := True;
-  TTransparency.Position:=Material[MatID].Transparency;
-  ETextureName.Text:=Material[MatID].TexName;
-  CBMatClass2.ItemIndex:=Material[MatID].MatClass[2];
-  CBMatClass3.ItemIndex:=Material[MatID].MatClass[3];
-  CB1.Checked:=(Material[MatID].MatClass[4] AND 1) = 1;
-  CB2.Checked:=(Material[MatID].MatClass[4] AND 2) = 2;
-  CB3.Checked:=(Material[MatID].MatClass[4] AND 4) = 4;
-  CB4.Checked:=(Material[MatID].MatClass[4] AND 8) = 8;
-  CBClipU.ItemIndex:=Material[MatID].TexEdge.U;
-  CBClipV.ItemIndex:=Material[MatID].TexEdge.V;
-  MaterialRefresh := False;
+  MatID := LBMaterials.ItemIndex + 1;
+  if MatID = 0 then Exit;
+
+  MatName.Text := Material[MatID].Title;
+
+  fUIRefresh := True;
+  try
+    TTransparency.Position := Material[MatID].Transparency;
+    ETextureName.Text := Material[MatID].TexName;
+    CBMatClass2.ItemIndex := Material[MatID].MatClass[2];
+    CBMatClass3.ItemIndex := Material[MatID].MatClass[3];
+    CB1.Checked := (Material[MatID].MatClass[4] AND 1) = 1;
+    CB2.Checked := (Material[MatID].MatClass[4] AND 2) = 2;
+    CB3.Checked := (Material[MatID].MatClass[4] AND 4) = 4;
+    CB4.Checked := (Material[MatID].MatClass[4] AND 8) = 8;
+    CBClipU.ItemIndex := Material[MatID].TexEdge.U;
+    CBClipV.ItemIndex := Material[MatID].TexEdge.V;
+  finally
+    fUIRefresh := False;
+  end;
 
   CBColorChange(nil); //update color panels
 end;
@@ -1255,9 +1257,10 @@ procedure TForm1.MaterialPropertiesChange(Sender: TObject);
 var
   t:Integer;
 begin
-  if MatID=0 then Exit;
-  Label13.Caption:=IntToStr(TTransparency.Position)+'% Transparency';
-  if MaterialRefresh then Exit;
+  if MatID = 0 then Exit;
+  Label13.Caption := IntToStr(TTransparency.Position) + '% Transparency';
+  if fUIRefresh then Exit;
+
   Material[MatID].Transparency := TTransparency.Position;
   Material[MatID].TexName:=ETextureName.Text;
   Material[MatID].MatClass[2]:=CBMatClass2.ItemIndex;
@@ -1606,7 +1609,7 @@ begin
         A:=255;
       end;
     end;
-  SendDataToUI(uiLights);
+  SendDataToUI(uiBlinkers);
   btnBlinkersLoad.Enabled := True;
   btnBlinkersSave.Enabled := True;
 
@@ -1872,8 +1875,9 @@ end;
 
 procedure TForm1.BlinkPositionChange(Sender: TObject);
 begin
-  if LitID=0 then Exit;
-  if LightRefresh then Exit;
+  if LitID = 0 then Exit;
+  if fUIRefresh then Exit;
+
   MOX.Blinkers[LitID].Matrix[4,1] := fsBlinkerX.Value*10;
   MOX.Blinkers[LitID].Matrix[4,2] := fsBlinkerY.Value*10;
   MOX.Blinkers[LitID].Matrix[4,3] := fsBlinkerZ.Value*10;
@@ -1885,7 +1889,7 @@ procedure TForm1.btnBlinkerAddClick(Sender: TObject);
 begin
   MOXBlinkerAdd(LBBlinkers.ItemIndex+1);
 
-  SendDataToUI(uiLights);
+  SendDataToUI(uiBlinkers);
 end;
 
 
@@ -1930,7 +1934,7 @@ begin
     MOX.Blinkers[I] := MOX.Blinkers[I + 1];
   Dec(MOX.Header.BlinkerCount);
 
-  SendDataToUI(uiLights);
+  SendDataToUI(uiBlinkers);
 
   if LBBlinkers.ItemIndex = -1 then
     LBBlinkers.ItemIndex := LBBlinkers.Count - 1;
@@ -1961,7 +1965,7 @@ begin
 
   MOX.Blinkers[idx] := MOX.Blinkers[fLightCopyID];
 
-  SendDataToUI(uiLights);
+  SendDataToUI(uiBlinkers);
   LBBlinkersClick(nil);
 end;
 
@@ -1971,7 +1975,7 @@ begin
   if not RunOpenDialog(odOpen, '', '', 'MTKit2 Lights Setup Files (*.lsf)|*.lsf') then Exit;
 
   LoadBlinkers(odOpen.FileName);
-  SendDataToUI(uiLights);
+  SendDataToUI(uiBlinkers);
   btnBlinkerPaste.Enabled := False;
 end;
 
@@ -2233,23 +2237,25 @@ var
   ID:Integer;
 begin
   ID:=LBCOBPoints.ItemIndex+1; if ID=0 then Exit;
-  COBRefresh := True;
+  fUIRefresh := True;
   COBX.Value:=COB.Vertices[ID].X;
   COBY.Value:=COB.Vertices[ID].Y;
   COBZ.Value:=COB.Vertices[ID].Z;
-  COBRefresh := False;
+  fUIRefresh := False;
 end;
 
 
 procedure TForm1.COBXChange(Sender: TObject);
-var ID: Integer;
+var
+  idx: Integer;
 begin
-  ID:=LBCOBPoints.ItemIndex+1; if ID=0 then Exit;
-  if COBRefresh then Exit;
+  idx := LBCOBPoints.ItemIndex+1;
+  if idx = 0 then Exit;
+  if fUIRefresh then Exit;
 
-  COB.Vertices[ID].X:=COBX.Value;
-  COB.Vertices[ID].Y:=COBY.Value;
-  COB.Vertices[ID].Z:=COBZ.Value;
+  COB.Vertices[idx].X:=COBX.Value;
+  COB.Vertices[idx].Y:=COBY.Value;
+  COB.Vertices[idx].Z:=COBZ.Value;
   RebuildCOBBounds;
   SendDataToUI(uiCOB);
 end;
@@ -2435,18 +2441,18 @@ procedure TForm1.SpeedButton3Click(Sender: TObject);
 begin
   if TVParts.Selected = nil then Exit;
 
-  SelectedTreeNode := TVParts.Selected.AbsoluteIndex+1;
+  SelectedTreeNode := TVParts.Selected.AbsoluteIndex + 1;
   with PartModify[SelectedTreeNode] do
   begin
-    MOX.Parts[SelectedTreeNode].xMid:=(High[1]+Low[1])/2;
-    MOX.Parts[SelectedTreeNode].yMid:=(High[2]+Low[2])/2;
-    MOX.Parts[SelectedTreeNode].zMid:=(High[3]+Low[3])/2;
-    MOX.Parts[SelectedTreeNode].fRadius:=(High[1]-Low[1])/3+(High[2]-Low[2])/3+(High[3]-Low[3])/3;
+    MOX.Parts[SelectedTreeNode].xMid := (High[1] + Low[1]) / 2;
+    MOX.Parts[SelectedTreeNode].yMid := (High[2] + Low[2]) / 2;
+    MOX.Parts[SelectedTreeNode].zMid := (High[3] + Low[3]) / 2;
+    MOX.Parts[SelectedTreeNode].fRadius := (High[1] - Low[1]) / 3 + (High[2] - Low[2]) / 3 + (High[3] - Low[3]) / 3;
   end;
-  CX.Value:=MOX.Parts[SelectedTreeNode].xMid;
-  CY.Value:=MOX.Parts[SelectedTreeNode].yMid;
-  CZ.Value:=MOX.Parts[SelectedTreeNode].zMid;
-  CRad.Value:=MOX.Parts[SelectedTreeNode].fRadius;
+  CX.Value := MOX.Parts[SelectedTreeNode].xMid;
+  CY.Value := MOX.Parts[SelectedTreeNode].yMid;
+  CZ.Value := MOX.Parts[SelectedTreeNode].zMid;
+  CRad.Value := MOX.Parts[SelectedTreeNode].fRadius;
 end;
 
 
@@ -2581,11 +2587,11 @@ end;
 
 procedure TForm1.ResetView(Sender: TObject);
 begin
-  xMov:=0;
-  yMov:=0;
-  xRot:=-30;
-  yRot:=20;
-  Zoom:=0.3125;
+  xMov := 0;
+  yMov := 0;
+  XRot := -30;
+  YRot := 20;
+  zoom := 0.3125;
 end;
 
 
@@ -2661,51 +2667,57 @@ end;
 
 procedure TForm1.ComboBox1Change(Sender: TObject);
 begin
-  DefColor:=ComboBox1.ItemIndex;
+  DefColor := ComboBox1.ItemIndex;
 end;
 
 procedure TForm1.LBCPOShapesClick(Sender: TObject);
 var
-  I: Integer;
-  ax,ay,az: Integer;
+  idx: Integer;
+  ax, ay, az: Integer;
 begin
-  I:=LBCPOShapes.ItemIndex+1;
-  if I = 0 then Exit;
-  COBRefresh := True;
+  idx := LBCPOShapes.ItemIndex + 1;
+  if idx = 0 then Exit;
 
-  CPOX.Value:=CPO[I].PosX;
-  CPOY.Value:=CPO[I].PosY;
-  CPOZ.Value:=CPO[I].PosZ;
-  CPOSX.Enabled:=CPO[I].Format=2;
-  CPOSY.Enabled:=CPO[I].Format=2;
-  CPOSZ.Enabled:=CPO[I].Format=2;
-  if CPO[I].Format=2 then begin
-    CPOSX.Value:=CPO[I].ScaleX;
-    CPOSY.Value:=CPO[I].ScaleY;
-    CPOSZ.Value:=CPO[I].ScaleZ;
+  fUIRefresh := True;
+  try
+    CPOX.Value := CPO[idx].PosX;
+    CPOY.Value := CPO[idx].PosY;
+    CPOZ.Value := CPO[idx].PosZ;
+    CPOSX.Enabled := CPO[idx].Format = 2;
+    CPOSY.Enabled := CPO[idx].Format = 2;
+    CPOSZ.Enabled := CPO[idx].Format = 2;
+    if CPO[idx].Format = 2 then
+    begin
+      CPOSX.Value := CPO[idx].ScaleX;
+      CPOSY.Value := CPO[idx].ScaleY;
+      CPOSZ.Value := CPO[idx].ScaleZ;
+    end;
+    Matrix2Angles(CPO[idx].Matrix9, 9, @ax, @ay, @az);
+
+    CPORH.Value := Round(ax);
+    CPORP.Value := Round(ay);
+    CPORB.Value := Round(az);
+  finally
+    fUIRefresh := False;
   end;
-  Matrix2Angles(CPO[I].Matrix9,9,@ax,@ay,@az);
-
-  CPORH.Value:=round(ax);
-  CPORP.Value:=round(ay);
-  CPORB.Value:=round(az);
-  COBRefresh := False;
 end;
 
 procedure TForm1.CPOChange(Sender: TObject);
 var
-  I: Integer;
+  idx: Integer;
 begin
-  I:=LBCPOShapes.ItemIndex+1; if I=0 then Exit;
-  if COBRefresh then Exit;
-  CPO[I].PosX:=CPOX.Value;
-  CPO[I].PosY:=CPOY.Value;
-  CPO[I].PosZ:=CPOZ.Value;
-  CPO[I].ScaleX:=CPOSX.Value;
-  CPO[I].ScaleY:=CPOSY.Value;
-  CPO[I].ScaleZ:=CPOSZ.Value;
+  idx := LBCPOShapes.ItemIndex+1;
+  if idx = 0 then Exit;
+  if fUIRefresh then Exit;
 
-  Angles2Matrix(CPORH.Value,CPORP.Value,CPORB.Value, @CPO[I].Matrix9, 9);
+  CPO[idx].PosX := CPOX.Value;
+  CPO[idx].PosY := CPOY.Value;
+  CPO[idx].PosZ := CPOZ.Value;
+  CPO[idx].ScaleX := CPOSX.Value;
+  CPO[idx].ScaleY := CPOSY.Value;
+  CPO[idx].ScaleZ := CPOSZ.Value;
+
+  Angles2Matrix(CPORH.Value,CPORP.Value,CPORB.Value, @CPO[idx].Matrix9, 9);
 end;
 
 procedure TForm1.CPOAddClick(Sender: TObject);
@@ -3035,7 +3047,7 @@ begin
   LoadPBF(fOpenedFileMask+'.pbf');
   LoadBlinkers(fOpenedFileMask+'.lsf');
 
-  SendDataToUI(uiLights);
+  SendDataToUI(uiBlinkers);
   btnBlinkerPaste.Enabled := False;
 end;
 
@@ -3100,7 +3112,7 @@ begin
     SB_Wire.Down := False;
     SB_Wire.Enabled := False;
     SendDataToUI(uiParts);
-    SendDataToUI(uiLights);
+    SendDataToUI(uiBlinkers);
     SendDataToUI(uiMOX);
   end;
 
@@ -3152,7 +3164,7 @@ begin
   if aClearup = cuMOX then
   begin
     SendDataToUI(uiParts);
-    SendDataToUI(uiLights);
+    SendDataToUI(uiBlinkers);
     SendDataToUI(uiMOX);
 
     btnBlinkerCopy.Enabled := True;
