@@ -2680,7 +2680,7 @@ object Form1: TForm1
       end
       object Panel7: TPanel
         Left = -2
-        Top = 294
+        Top = 286
         Width = 238
         Height = 19
         BevelInner = bvRaised
@@ -2726,9 +2726,9 @@ object Form1: TForm1
       end
       object meLog: TMemo
         Left = 0
-        Top = 320
+        Top = 312
         Width = 233
-        Height = 229
+        Height = 237
         Anchors = [akLeft, akTop, akBottom]
         ScrollBars = ssVertical
         TabOrder = 4
@@ -2934,7 +2934,7 @@ object Form1: TForm1
     Visible = False
     OnClick = Button1Click
   end
-  object Open1: TOpenDialog
+  object odOpen: TOpenDialog
     InitialDir = '.'
     Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
     Title = 'Open file'
@@ -3086,7 +3086,7 @@ object Form1: TForm1
       OnClick = About1Click
     end
   end
-  object Save1: TSaveDialog
+  object sdSave: TSaveDialog
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Left = 310
     Top = 80
