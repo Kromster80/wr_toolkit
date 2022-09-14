@@ -45,7 +45,7 @@ type
   end;
 
   TMOXChunk = packed record
-    SidA, SidB, FirstPoly, PolyCount, FirstVtx, LastVtx: Integer;
+    SidA, SidB, FirstPoly, PolyCount, FirstVtx, LastVtx: Cardinal;
   end;
 
 const
@@ -221,7 +221,7 @@ begin
       Assert(MOX.Chunks[j].FirstPoly = MOX.Chunks[j-1].FirstPoly + MOX.Chunks[j-1].PolyCount);
     //Assert(MOX.Chunks[MOX.Header.ChunkCount].FirstPoly + MOX.Chunks[MOX.Header.ChunkCount].PolyCount = MOX.Header.PolyCount);
 
-    blockread(f, MOX.MoxMat, (80+256)*MOX.Header.MatCount);   //Crap&Mess
+    blockread(f, MOX.MoxMat, (80+256)*MOX.Header.MatCount);
 
     if MOX.MOXFormat = mf22WR2 then
       for j:=1 to MOX.Header.PartCount do

@@ -585,7 +585,6 @@ begin
 end;
 
 
-
 procedure TForm1.FormCreate(Sender: TObject);
 var
   aFilename: string;
@@ -741,6 +740,8 @@ begin
     if GetRawInputData(aMsg.lParam, RID_INPUT, @ri, dwSize, SizeOf(RAWINPUTHEADER)) <> dwSize then
       ShowMessage('GetRawInputData doesn''t return correct size !');
 
+    // https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-rawinputdevicelist
+    // https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-rawmouse
     if ri.header.dwType = RIM_TYPEMOUSE then
     begin
       if ri.mouse.usFlags and $1 = 0 then
@@ -774,7 +775,9 @@ begin
   wglDeleteContext(h_RC);
 end;
 
+
 procedure TForm1.Button4Click(Sender: TObject); begin {Placeholder} end;
+
 
 procedure TForm1.SendDataToUI(aSection: TUIDataSection);
 var
