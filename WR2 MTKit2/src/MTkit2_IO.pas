@@ -1692,8 +1692,6 @@ var
   I: Integer;
   SearchRec: TSearchRec;
 begin
-  aFiles.Clear;
-
   if not DirectoryExists(aPath) then Exit;
 
   slPaths := TStringList.Create;
@@ -1713,11 +1711,10 @@ begin
         end else
         if SameText(ExtractFileExt(SearchRec.Name), aExt) then
         begin
-
-          aFiles.Append(slPaths[I] + SearchRec.Name);
+          aFiles.Append(aPath + slPaths[I] + SearchRec.Name);
 
           if Assigned(aOnProgress) then
-            aOnProgress(slPaths[I] + SearchRec.Name);
+            aOnProgress(aPath + slPaths[I] + SearchRec.Name);
         end;
       until (FindNext(SearchRec) <> 0);
 

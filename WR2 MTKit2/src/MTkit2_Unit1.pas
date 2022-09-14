@@ -2885,14 +2885,14 @@ procedure TForm1.DevScanMOXHeaders;
 begin
   TThread.CreateAnonymousThread(
     procedure
-    const
-      SCAN_PATH = 'D:\';
     var
       slFiles, slLog: TStringList;
       I: Integer;
     begin
       slFiles := TStringList.Create;
-      ListFiles(SCAN_PATH { ExeDir } , '.mox', True, slFiles,
+
+      ListFiles('..\..\', '.mox', True, slFiles, nil);
+      ListFiles('D:\', '.mox', True, slFiles,
         procedure(aMsg: string)
         begin
           if slFiles.Count mod 100 = 0 then
@@ -2900,13 +2900,19 @@ begin
         end);
 
       slLog := TStringList.Create;
+      slLog.Append('Ver'#9'Fmt'#9'Result'#9'Path'#9'Vertices'#9'Polys'#9'Chunks'#9'Materials'#9'Parts'#9'Blinkers');
+
       for I := 0 to slFiles.Count - 1 do
       try
         if I mod 100 = 0 then
           StatusBar1.Panels[2].Text := Format('Loading %d/%d - \%s', [I, slFiles.Count, slFiles[I]]);
 
-        LoadMOX(SCAN_PATH + slFiles[I]);
-        //slLog.Append(MOX.MOXFormatInt + #9 + MOX.MOXFormatStr + #9 + 'OK  ' + #9 + slFiles[I]);
+        LoadMOX(slFiles[I]);
+        slLog.Append(Format('%s'#9'%s'#9'%s'#9'%s'#9'%d'#9'%d'#9'%d'#9'%d'#9'%d'#9'%d',
+          [MOX.MOXFormatInt, MOX.MOXFormatStr, 'OK  ', slFiles[i],
+            MOX.header.VerticeCount, MOX.header.PolyCount,
+            MOX.header.ChunkCount, MOX.header.MatCount,
+            MOX.header.PartCount, MOX.header.BlinkerCount]));
       except
         on E: EExceptionTooNew do
           { We dont support newer formats yet };
@@ -2914,9 +2920,10 @@ begin
           slLog.Append(MOX.MOXFormatInt + #9 + MOX.MOXFormatStr + #9 + 'FAIL' + #9 + slFiles[I] + #9 + E.Message);
       end;
 
+      slLog.Append(Format('%d files', [slFiles.Count]));
       slLog.SaveToFile('mox.txt');
 
-      MessageBox(0, PChar(Format('Scanned %d MOX files', [slFiles.Count])), '', MB_OK or MB_ICONINFORMATION);
+      MessageBox(Handle, PChar(Format('Scanned %d MOX files', [slFiles.Count])), '', MB_OK or MB_ICONINFORMATION);
 
       slLog.Free;
       slFiles.Free;
@@ -3356,7 +3363,7 @@ begin
 
   lbCanvas := TListBox(Control).Canvas;
 
-  prevColor := lbCanvas.Brush.Color; //Save default color
+  prevColor := lbCanvas.Brush.Color; // Save old color
   lbCanvas.FillRect(Rect);
 
   if Control = lbBlinkers then
