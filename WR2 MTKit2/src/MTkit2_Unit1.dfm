@@ -4,10 +4,10 @@ object Form1: TForm1
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   Caption = 'MTKit2'
   ClientHeight = 622
-  ClientWidth = 884
+  ClientWidth = 889
   Color = clBtnFace
   Constraints.MinHeight = 680
-  Constraints.MinWidth = 900
+  Constraints.MinWidth = 905
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -24,7 +24,7 @@ object Form1: TForm1
   OnMouseWheel = FormMouseWheel
   OnResize = RenderResize
   DesignSize = (
-    884
+    889
     622)
   PixelsPerInch = 96
   TextHeight = 13
@@ -136,7 +136,7 @@ object Form1: TForm1
     OnClick = SB_RenderOpts
   end
   object ImageM: TSpeedButton
-    Left = 816
+    Left = 808
     Top = 24
     Width = 23
     Height = 22
@@ -154,7 +154,7 @@ object Form1: TForm1
     OnMouseUp = Panel1MouseUp
   end
   object ImageR: TSpeedButton
-    Left = 840
+    Left = 832
     Top = 24
     Width = 23
     Height = 22
@@ -172,7 +172,7 @@ object Form1: TForm1
     OnMouseUp = Panel1MouseUp
   end
   object ImageZ: TSpeedButton
-    Left = 864
+    Left = 856
     Top = 24
     Width = 23
     Height = 22
@@ -192,7 +192,7 @@ object Form1: TForm1
   object RenderPanel: TPanel
     Left = 246
     Top = 56
-    Width = 644
+    Width = 649
     Height = 537
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
@@ -202,13 +202,14 @@ object Form1: TForm1
     OnMouseDown = Panel1MouseDown
     OnMouseMove = Panel1MouseMove
     OnMouseUp = Panel1MouseUp
+    ExplicitWidth = 644
   end
   object PageControl1: TPageControl
     Left = 2
     Top = 8
     Width = 242
     Height = 585
-    ActivePage = TabSheet3
+    ActivePage = TabSheet5
     Anchors = [akLeft, akTop, akBottom]
     MultiLine = True
     Style = tsButtons
@@ -890,6 +891,10 @@ object Form1: TForm1
         TabOrder = 4
         object PivotSetup: TTabSheet
           Caption = 'Pivot point setup'
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object Label51: TLabel
             Left = 166
             Top = 162
@@ -1085,6 +1090,10 @@ object Form1: TForm1
         object Behaviour: TTabSheet
           Caption = 'Behaviour'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object Label39: TLabel
             Left = 67
             Top = 150
@@ -2560,50 +2569,43 @@ object Form1: TForm1
         234
         551)
       object Label1: TLabel
-        Left = 52
-        Top = 183
+        Left = 56
+        Top = 187
         Width = 29
         Height = 13
         Caption = 'Points'
       end
-      object Label2: TLabel
-        Left = 52
-        Top = 205
-        Width = 46
-        Height = 13
-        Caption = 'UV points'
-      end
       object Label3: TLabel
-        Left = 52
-        Top = 227
+        Left = 56
+        Top = 211
         Width = 43
         Height = 13
         Caption = 'Polygons'
       end
       object Label4: TLabel
-        Left = 52
-        Top = 249
+        Left = 56
+        Top = 235
         Width = 24
         Height = 13
         Caption = 'Parts'
       end
       object Label41: TLabel
-        Left = 52
-        Top = 271
+        Left = 56
+        Top = 259
         Width = 42
         Height = 13
         Caption = 'Materials'
       end
       object Label71: TLabel
-        Left = 180
-        Top = 205
+        Left = 176
+        Top = 211
         Width = 28
         Height = 13
         Caption = 'Lights'
       end
       object Label72: TLabel
-        Left = 180
-        Top = 183
+        Left = 176
+        Top = 187
         Width = 36
         Height = 13
         Caption = 'Chunks'
@@ -2674,7 +2676,7 @@ object Form1: TForm1
         BevelInner = bvRaised
         BevelOuter = bvLowered
         Caption = 'Info'
-        TabOrder = 10
+        TabOrder = 9
       end
       object Panel7: TPanel
         Left = -2
@@ -2684,11 +2686,11 @@ object Form1: TForm1
         BevelInner = bvRaised
         BevelOuter = bvLowered
         Caption = 'Log'
-        TabOrder = 11
+        TabOrder = 10
       end
-      object Edit3Dqty: TEdit
+      object edVerticeCount: TEdit
         Left = 0
-        Top = 180
+        Top = 184
         Width = 45
         Height = 21
         TabStop = False
@@ -2702,9 +2704,9 @@ object Form1: TForm1
         TabOrder = 0
         Text = '      -'
       end
-      object EditUVqty: TEdit
+      object edPolyCount: TEdit
         Left = 0
-        Top = 202
+        Top = 208
         Width = 45
         Height = 21
         TabStop = False
@@ -2712,9 +2714,9 @@ object Form1: TForm1
         TabOrder = 1
         Text = '      -'
       end
-      object EditPqty: TEdit
+      object edPartCount: TEdit
         Left = 0
-        Top = 224
+        Top = 232
         Width = 45
         Height = 21
         TabStop = False
@@ -2722,9 +2724,18 @@ object Form1: TForm1
         TabOrder = 2
         Text = '      -'
       end
-      object EditSqty: TEdit
+      object meLog: TMemo
         Left = 0
-        Top = 246
+        Top = 320
+        Width = 233
+        Height = 229
+        Anchors = [akLeft, akTop, akBottom]
+        ScrollBars = ssVertical
+        TabOrder = 4
+      end
+      object edMaterialCount: TEdit
+        Left = 0
+        Top = 256
         Width = 45
         Height = 21
         TabStop = False
@@ -2732,43 +2743,24 @@ object Form1: TForm1
         TabOrder = 3
         Text = '      -'
       end
-      object Memo1: TMemo
-        Left = 0
-        Top = 320
-        Width = 233
-        Height = 229
-        Anchors = [akLeft, akTop, akBottom]
-        ScrollBars = ssVertical
-        TabOrder = 5
-      end
-      object EditMqty: TEdit
-        Left = 0
-        Top = 268
+      object edChunkCount: TEdit
+        Left = 128
+        Top = 184
         Width = 45
         Height = 21
         TabStop = False
         ReadOnly = True
-        TabOrder = 4
+        TabOrder = 5
         Text = '      -'
       end
-      object EditCqty: TEdit
+      object edBlinkerCount: TEdit
         Left = 128
-        Top = 180
+        Top = 208
         Width = 45
         Height = 21
         TabStop = False
         ReadOnly = True
         TabOrder = 6
-        Text = '      -'
-      end
-      object EditBqty: TEdit
-        Left = 128
-        Top = 202
-        Width = 45
-        Height = 21
-        TabStop = False
-        ReadOnly = True
-        TabOrder = 7
         Text = '      -'
       end
       object FPSLimitEdit: TFloatSpinEdit
@@ -2779,7 +2771,7 @@ object Form1: TForm1
         Accuracy = 0
         Increment = 1.000000000000000000
         MaxValue = 1000.000000000000000000
-        TabOrder = 8
+        TabOrder = 7
         OnChange = FPSLimitEditChange
       end
       object ComboBox1: TComboBox
@@ -2788,7 +2780,7 @@ object Form1: TForm1
         Width = 97
         Height = 21
         ItemIndex = 4
-        TabOrder = 9
+        TabOrder = 8
         Text = 'Yellow'
         OnChange = ComboBox1Change
         Items.Strings = (
@@ -2808,14 +2800,14 @@ object Form1: TForm1
           'Grey'
           'Silver')
       end
-      object Button2: TButton
+      object btnRegisterMOX: TButton
         Left = 8
         Top = 112
         Width = 217
         Height = 25
         Caption = 'Register MTKit2 to open MOX files'
-        TabOrder = 12
-        OnClick = Button2Click
+        TabOrder = 11
+        OnClick = btnRegisterMOXClick
       end
       object cbAskOnClose: TCheckBox
         Left = 128
@@ -2823,7 +2815,7 @@ object Form1: TForm1
         Width = 81
         Height = 17
         Caption = 'Ask on close'
-        TabOrder = 13
+        TabOrder = 12
       end
     end
     object TabSheet6: TTabSheet
@@ -2880,9 +2872,9 @@ object Form1: TForm1
     TabOrder = 3
   end
   object ViewReset: TButton
-    Left = 828
+    Left = 808
     Top = 4
-    Width = 59
+    Width = 65
     Height = 17
     Anchors = [akTop, akRight]
     Caption = 'reset'
@@ -2916,7 +2908,7 @@ object Form1: TForm1
   object StatusBar1: TStatusBar
     Left = 0
     Top = 603
-    Width = 884
+    Width = 889
     Height = 19
     Panels = <
       item
@@ -2929,6 +2921,7 @@ object Form1: TForm1
         Text = '<<<LEER>>>'
         Width = 50
       end>
+    ExplicitWidth = 884
   end
   object Button1: TButton
     Left = 250

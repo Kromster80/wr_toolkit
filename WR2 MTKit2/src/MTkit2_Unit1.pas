@@ -23,16 +23,15 @@ type
     TabSheet1: TTabSheet; TabSheet2: TTabSheet; TabSheet3: TTabSheet;
     TVParts: TTreeView;
     TabSheet5: TTabSheet;
-    Label1: TLabel; Label2: TLabel; Label3: TLabel; Label4: TLabel; Label5: TLabel;
+    Label1: TLabel; Label3: TLabel; Label4: TLabel; Label5: TLabel;
     Label6: TLabel; Label8: TLabel; Label9: TLabel; Label10: TLabel;
     Label11: TLabel; Label12: TLabel; Label13: TLabel; Label14: TLabel; Label17: TLabel; Label18: TLabel; Label19: TLabel; Label20: TLabel;
     Label21: TLabel; Label22: TLabel; Label24: TLabel; Label25: TLabel;
     Label26: TLabel; Label27: TLabel; Label28: TLabel; Label29: TLabel; Label30: TLabel; Label32: TLabel; Label33: TLabel; Label35: TLabel;
     Label36: TLabel; Label37: TLabel; Label38: TLabel; Label39: TLabel;
-    Edit3Dqty: TEdit;
-    EditUVqty: TEdit;
-    EditPqty: TEdit;
-    EditSqty: TEdit;
+    edVerticeCount: TEdit;
+    edPolyCount: TEdit;
+    edPartCount: TEdit;
     CBColor: TComboBox;
     ETextureName: TEdit;
     CBClipU: TComboBox;
@@ -40,7 +39,7 @@ type
     CBClipV: TComboBox;
     CBMatClass2: TComboBox;
     CBMatClass3: TComboBox;
-    Memo1: TMemo;
+    meLog: TMemo;
     LBMaterials: TListBox;
     lbBlinkers: TListBox;
     rgBlinkerType: TRadioGroup;
@@ -57,7 +56,7 @@ type
     ImportLWO1: TMenuItem;
     Shape1: TShape;
     SaveMTL1: TMenuItem;
-    EditMqty: TEdit;
+    edMaterialCount: TEdit;
     Label41: TLabel;
     TexBrowse: TButton;
     CBShowMat: TCheckBox;
@@ -166,8 +165,8 @@ type
     Label68: TLabel;
     Label69: TLabel;
     B_COBRecompute: TButton;
-    EditCqty: TEdit;
-    EditBqty: TEdit;
+    edChunkCount: TEdit;
+    edBlinkerCount: TEdit;
     Label71: TLabel;
     Label72: TLabel;
     Extra1: TMenuItem;
@@ -274,7 +273,7 @@ type
     Label16: TLabel;
     Bevel1: TBevel;
     Bevel4: TBevel;
-    Button2: TButton;
+    btnRegisterMOX: TButton;
     cbAskOnClose: TCheckBox;
     Dev1: TMenuItem;
     ScanMOXheaders1: TMenuItem;
@@ -375,7 +374,7 @@ type
     procedure B_CPOImportClick(Sender: TObject);
     procedure B_CPOExportClick(Sender: TObject);
     procedure lbBlinkersDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
-    procedure Button2Click(Sender: TObject);
+    procedure btnRegisterMOXClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure ScanMOXheaders1Click(Sender: TObject);
   private
@@ -591,19 +590,19 @@ var
 begin
   aFilename := ParamStr(1); //Get filename parameter
   ExeDir := ExtractFilePath(Application.ExeName);
-  Memo1.Lines.Add(aFilename);
+  meLog.Lines.Add(aFilename);
   Caption := APP_TITLE + '    ' + VER_INFO;
 
   LoadSettingsFromIni(ExeDir + 'MTKit2 Data\options.ini');
   SetRenderFrame(RenderPanel.Handle, h_DC, h_RC);
-  Memo1.Lines.Add('Basic OpenGL init complete');
+  meLog.Lines.Add('Basic OpenGL init complete');
 
   BuildFont(h_DC, 20);
   RenderInit;
   RenderResize(nil);
   CompileCommonObjects;
   UseShaders := LoadFresnelShader;
-  if UseShaders then Memo1.Lines.Add('Shaders loaded');
+  if UseShaders then meLog.Lines.Add('Shaders loaded');
 
   PivotSetup.TabVisible := False;
   Application.OnIdle := OnIdle;
@@ -642,7 +641,7 @@ procedure TForm1.LoadSettingsFromIni(const aFilename: string);
 var
   iniFile: TIniFile;
 begin
-  Memo1.Lines.Add('Reading options.ini ...');
+  meLog.Lines.Add('Reading options.ini ...');
   iniFile := TIniFile.Create(aFilename);
 
   BGColor[1] := iniFile.ReadInteger('Background color', 'R', 128);
@@ -670,7 +669,7 @@ procedure TForm1.SaveSettingsToIni(const aFilename: string);
 var
   iniFile: TIniFile;
 begin
-  Memo1.Lines.Add('Writing options.ini ...');
+  meLog.Lines.Add('Writing options.ini ...');
   iniFile := TIniFile.Create(aFilename);
 
   iniFile.WriteInteger('Background color', 'R', BGColor[1]);
@@ -786,13 +785,12 @@ var
 begin
   case aSection of
     uiMOX:    begin
-                Edit3Dqty.Text:=IntToStr(MOX.Header.VerticeCount);
-                EditUVqty.Text:=IntToStr(MOX.Header.VerticeCount);
-                EditPqty.Text:=IntToStr(MOX.Header.PolyCount);
-                EditSqty.Text:=IntToStr(MOX.Header.PartCount);
-                EditMqty.Text:=IntToStr(MOX.Header.MatCount);
-                EditCqty.Text:=IntToStr(MOX.Header.ChunkCount);
-                EditBqty.Text:=IntToStr(MOX.Header.BlinkerCount);
+                edVerticeCount.Text := IntToStr(MOX.header.VerticeCount);
+                edPolyCount.Text := IntToStr(MOX.header.PolyCount);
+                edPartCount.Text := IntToStr(MOX.header.PartCount);
+                edMaterialCount.Text := IntToStr(MOX.header.MatCount);
+                edChunkCount.Text := IntToStr(MOX.header.ChunkCount);
+                edBlinkerCount.Text := IntToStr(MOX.header.BlinkerCount);
               end;
     uiMTL:    begin
                 LBMaterials.Clear;
@@ -1476,7 +1474,7 @@ begin
    BlockWrite(f, MOX.Blinkers[ii], 88);
 
   closefile(f);
-  Memo1.Lines.Add('MOX file closed');
+  meLog.Lines.Add('MOX file closed');
   for i:=1 to MOX.Header.PartCount do
   begin
     PartModify[i].Custom[1]:=0;
@@ -2353,9 +2351,9 @@ end;
 procedure TForm1.PSFSaveClick(Sender: TObject);
 begin
   if not RunSaveDialog(Save1, fOpenedFileMask + '.psf', '', 'MTKit2 Pivot Setup Files (*.psf)|*.psf', 'psf') then Exit;
-  Memo1.Lines.Add('Assigning PSF file ...');
+  meLog.Lines.Add('Assigning PSF file ...');
   SavePSF(Save1.FileName);
-  Memo1.Lines.Add('PSF file closed');
+  meLog.Lines.Add('PSF file closed');
 end;
 
 
@@ -2364,27 +2362,27 @@ begin
   if TVParts.Items.Count<1 then Exit;
   //if Sender=PSFLoad then begin
   if not RunOpenDialog(Open1,'','','MTKit2 Pivot Setup Files (*.psf)|*.psf') then Exit;
-  Memo1.Lines.Add('Reading PSF ...');
+  meLog.Lines.Add('Reading PSF ...');
   if not LoadPSF(Open1.FileName) then Exit;
-  Memo1.Lines.Add('PSF file closed');
+  meLog.Lines.Add('PSF file closed');
 end;
 
 
 procedure TForm1.PBFSaveClick(Sender: TObject);
 begin
   if not RunSaveDialog(Save1, fOpenedFileMask + '_colli.pbf', '', 'MTKit2 Part Behaviour Files (*.pbf)|*.pbf', 'pbf') then Exit;
-  Memo1.Lines.Add('Assigning PBF file ...');
+  meLog.Lines.Add('Assigning PBF file ...');
   SavePBF(Save1.FileName);
-  Memo1.Lines.Add('PBF file closed');
+  meLog.Lines.Add('PBF file closed');
 end;
 
 
 procedure TForm1.PBFLoadClick(Sender: TObject);
 begin
   if not RunOpenDialog(Open1,'','','MTKit2 Part Behaviour Files (*.pbf)|*.pbf') then Exit;
-  Memo1.Lines.Add('Reading PBF ...');
+  meLog.Lines.Add('Reading PBF ...');
   LoadPBF(Open1.FileName);
-  Memo1.Lines.Add('PBF file processed and closed');
+  meLog.Lines.Add('PBF file processed and closed');
 end;
 
 
@@ -2480,8 +2478,8 @@ begin
   begin
     if FileExists(aFilename) then
     begin
-      Memo1.Lines.Add('Loading MOX ...');
-      Memo1.Lines.Add(aFilename);
+      meLog.Lines.Add('Loading MOX ...');
+      meLog.Lines.Add(aFilename);
 
       TVParts.ReadOnly := True;
       IsLightwave2MOX := False;
@@ -2494,7 +2492,7 @@ begin
           MessageBox(0, PChar(E.Message), 'Error', MB_OK or MB_ICONERROR);
       end;
 
-      Memo1.Lines.Add('MOX file closed');
+      meLog.Lines.Add('MOX file closed');
 
       ShowUpClick(cuMOX);
 
@@ -2553,7 +2551,7 @@ begin
     fTree.PrepareDisplayList;
     fTree.PrepareTextures(fOpenedFolder);
     ShowUpClick(cuTREE);
-    Memo1.Lines.Add('TREE Loaded ...');
+    meLog.Lines.Add('TREE Loaded ...');
     SetRenderObject([roTREE]);
   end;
 
@@ -2959,18 +2957,18 @@ procedure TForm1.SaveMOXClick(Sender: TObject);
 begin
   if not RunSaveDialog(Save1, fOpenedFileMask + '.mox', '', 'World Racing 2 object files (*.mox)|*.mox', 'mox') then Exit;
 
-  Memo1.Lines.Add('Saving MOX file ...');
+  meLog.Lines.Add('Saving MOX file ...');
   SaveMOX(Save1.FileName);
-  Memo1.Lines.Add('MOX file written');
+  meLog.Lines.Add('MOX file written');
 end;
 
 procedure TForm1.SaveMTL1Click(Sender: TObject);
 begin
   if not RunSaveDialog(Save1, fOpenedFileMask+'.mtl','','World Racing Material files (*.mtl)|*.mtl','mtl') then Exit;
   //Save1.FileName:=AssureFileExt(Save1.FileName,'mtl');
-  Memo1.Lines.Add('Saving MTL file ...');
+  meLog.Lines.Add('Saving MTL file ...');
   SaveMTL(Save1.FileName);
-  Memo1.Lines.Add('MTL file written');
+  meLog.Lines.Add('MTL file written');
 end;
 
 procedure TForm1.SaveCOB1Click(Sender: TObject);
@@ -2994,7 +2992,7 @@ var
 begin
   if not RunOpenDialog(Open1,'',fOpenedFolder,'3DMax object files (*.3ds)|*.3ds') then Exit;
   if not Load3DS(Open1.FileName,log) then Exit;
-  Memo1.Lines.Add(log);
+  meLog.Lines.Add(log);
   RebuildImpNormals;
   ConverseImp_MOX;
   UpdateOpenedFileInfo(Open1.FileName)
@@ -3006,7 +3004,7 @@ var
 begin
   if not RunOpenDialog(Open1,'',fOpenedFolder,'OBJ object files (*.obj)|*.obj') then Exit;
   if not LoadOBJ(Open1.FileName,log) then Exit;
-  Memo1.Lines.Add(log);
+  meLog.Lines.Add(log);
   ConverseImp_MOX;
   UpdateOpenedFileInfo(Open1.FileName)
 end;
@@ -3017,7 +3015,7 @@ var
 begin
   if not RunOpenDialog(Open1,'',fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
   if not LoadLWO(Open1.FileName,log) then Exit;
-  Memo1.Lines.Add(log);
+  meLog.Lines.Add(log);
   RebuildImpNormals;
   ConverseImp_MOX;
   UpdateOpenedFileInfo(Open1.FileName);
@@ -3057,22 +3055,22 @@ var
 begin
   if not RunSaveDialog(Save1, fOpenedFileMask+'.lwo','','Lightwave 3D files (*.lwo)|*.lwo','lwo') then Exit;
 
-  Memo1.Lines.Add('Writing MOX>LWO file');
+  meLog.Lines.Add('Writing MOX>LWO file');
 
   doSpread := MessageBox(Handle, 'Do you want to spread parts over X axis?', 'Question', MB_YESNO or MB_ICONQUESTION) = ID_YES;
 
   SaveMOX2LWO(Save1.FileName, doSpread);
 
-  Memo1.Lines.Add('MOX>LWO Save Complete');
+  meLog.Lines.Add('MOX>LWO Save Complete');
 end;
 
 
 procedure TForm1.ExportCOB1Click(Sender: TObject);
 begin
   if not RunSaveDialog(Save1, fOpenedFileMask+'_colli.lwo','','Lightwave 3D files (*.lwo)|*.lwo','lwo') then Exit;
-  Memo1.Lines.Add('Writing COB>LWO file');
+  meLog.Lines.Add('Writing COB>LWO file');
   SaveCOB2LWO(Save1.FileName);
-  Memo1.Lines.Add('COB>LWO Save Complete');
+  meLog.Lines.Add('COB>LWO Save Complete');
 end;
 
 
@@ -3237,7 +3235,7 @@ begin
   filename := ExeDir + 'LoadOBJ\clkdtm.obj';
   //filename:=ExeDir+'LoadOBJ\oacwr2.obj';
   if not LoadOBJ(filename, log) then Exit;
-  Memo1.Lines.Add(log);
+  meLog.Lines.Add(log);
   ConverseImp_MOX;
   UpdateOpenedFileInfo(filename);
 end;
@@ -3268,7 +3266,7 @@ var
 begin
   if not RunOpenDialog(Open1,'',fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
   if not LoadLWO(Open1.FileName,log) then Exit;
-  Memo1.Lines.Add(log);
+  meLog.Lines.Add(log);
 
   if CPOHead.Qty >= MAX_CPO_SHAPES then Exit;
 
@@ -3322,9 +3320,9 @@ begin
   if not RunSaveDialog(Save1, fOpenedFileMask+'.lwo','','Lightwave 3D files (*.lwo)|*.lwo','lwo') then
     Exit;
 
-  Memo1.Lines.Add('Writing CPO>LWO file');
+  meLog.Lines.Add('Writing CPO>LWO file');
   SaveCPO2LWO(Save1.FileName,I);
-  Memo1.Lines.Add('CPO>LWO Save Complete');
+  meLog.Lines.Add('CPO>LWO Save Complete');
 end;
 
 
@@ -3372,9 +3370,9 @@ begin
 end;
 
 
-procedure TForm1.Button2Click(Sender: TObject);
+procedure TForm1.btnRegisterMOXClick(Sender: TObject);
 begin
-  RegisterFileType('mox', Application.ExeName);
+  RegisterFileType('.mox', Application.ExeName);
   MessageBox(Handle, 'Registered', 'Info', MB_OK or MB_ICONINFORMATION);
 end;
 
