@@ -189,7 +189,7 @@ type
     ShapeR: TShape;
     Label31: TLabel;
     Panel1: TPanel;
-    ShapeL: TShape;
+    shpBlinkerColor: TShape;
     Button4: TButton;
     ShapeBG: TShape;
     FPSLimitEdit: TFloatSpinEdit;
@@ -377,6 +377,7 @@ type
     procedure btnRegisterMOXClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure ScanMOXheaders1Click(Sender: TObject);
+    procedure shpBlinkerColorMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   private
     h_DC: HDC;
     h_RC: HGLRC;
@@ -408,7 +409,8 @@ type
     procedure SendDataToUI(aSection: TUIDataSection);
     procedure SetActivePage(aPage: TActivePage);
     procedure SetRenderObject(aSet: TRenderObjectSet);
-    procedure MOXBlinkerAdd(aIndex: Integer);
+    procedure BlinkerAdd(aIndex: Integer);
+    procedure BlinkerRemove(aIndex: Integer);
     procedure ConverseImp_MOX;
     procedure ConverseImp_COB;
     procedure RebuildCOBBounds;
@@ -459,7 +461,7 @@ var
   ActivePage: TActivePage;
   RenderObject: TRenderObjectSet;
 
-  MatID,ColID,LitID:Integer;
+  MatID,ColID:Integer;
   SelectedTreeNode:Integer;
   DefColor:Byte; //Yellow
 
@@ -553,7 +555,7 @@ var
 
 implementation
 uses
-  ColorPicker, UnitRawInputHeaders,
+  ColorPicker, ColorPicker2, UnitRawInputHeaders,
   MTKit2_Textures;
 
 {$R *.dfm}
@@ -1142,16 +1144,17 @@ end;
 
 procedure TForm1.lbBlinkersClick(Sender: TObject);
 var
+  idx: Integer;
   blinkerType: Integer;
   ax,ay,az: Integer;
   m: array [1..9] of Single;
 begin
-  LitID := LBBlinkers.ItemIndex+1;
-  if LitID = 0 then Exit;
+  idx := LBBlinkers.ItemIndex+1;
+  if idx = 0 then Exit;
 
   fUIRefresh := True;
   try
-    blinkerType := MOX.Blinkers[LitID].BlinkerType;
+    blinkerType := MOX.Blinkers[idx].BlinkerType;
     case blinkerType of //Fit 0..24 IDs in RG range of 0..12
       16: blinkerType := 10;
       20: blinkerType := 11;
@@ -1161,17 +1164,17 @@ begin
 
     rgBlinkerType.ItemIndex := blinkerType;
 
-    fsBlinkerSizeMin.Value := MOX.Blinkers[LitID].sMin;
-    fsBlinkerSizeMax.Value := MOX.Blinkers[LitID].sMax;
-    fsBlinkerFreq.Value := MOX.Blinkers[LitID].Freq;
+    fsBlinkerSizeMin.Value := MOX.Blinkers[idx].sMin;
+    fsBlinkerSizeMax.Value := MOX.Blinkers[idx].sMax;
+    fsBlinkerFreq.Value := MOX.Blinkers[idx].Freq;
     //S1.Value:=MOX.Blinkers[LBBlinkers.ItemIndex+1].z1;
-    seBlinkerParent.Value:=MOX.Blinkers[LitID].Parent;
-    fsBlinkerX.Value:=MOX.Blinkers[LitID].Matrix[4,1]/10;
-    fsBlinkerY.Value:=MOX.Blinkers[LitID].Matrix[4,2]/10;
-    fsBlinkerZ.Value:=MOX.Blinkers[LitID].Matrix[4,3]/10;
-    ShapeL.Brush.Color:=MOX.Blinkers[LitID].R+MOX.Blinkers[LitID].G*256+MOX.Blinkers[LitID].B*65536;
+    seBlinkerParent.Value:=MOX.Blinkers[idx].Parent;
+    fsBlinkerX.Value:=MOX.Blinkers[idx].Matrix[4,1]/10;
+    fsBlinkerY.Value:=MOX.Blinkers[idx].Matrix[4,2]/10;
+    fsBlinkerZ.Value:=MOX.Blinkers[idx].Matrix[4,3]/10;
+    shpBlinkerColor.Brush.Color := MOX.Blinkers[idx].R+MOX.Blinkers[idx].G*256+MOX.Blinkers[idx].B*65536;
 
-    with MOX.Blinkers[LitID] do
+    with MOX.Blinkers[idx] do
     begin
       m[1]:=Matrix[1,1]; m[2]:=Matrix[1,2]; m[3]:=Matrix[1,3];
       m[4]:=Matrix[2,1]; m[5]:=Matrix[2,2]; m[6]:=Matrix[2,3];
@@ -1190,23 +1193,26 @@ end;
 
 
 procedure TForm1.BlinkChange(Sender: TObject);
+var
+  idx: Integer;
 begin
-  if LitID = 0 then Exit;
+  idx := LBBlinkers.ItemIndex+1;
+  if idx = 0 then Exit;
   if fUIRefresh then Exit;
 
   case rgBlinkerType.ItemIndex of
-    0..9: MOX.Blinkers[LitID].BlinkerType := rgBlinkerType.ItemIndex;
-    10:   MOX.Blinkers[LitID].BlinkerType := 16;
-    11:   MOX.Blinkers[LitID].BlinkerType := 20;
-    12:   MOX.Blinkers[LitID].BlinkerType := 24;
-    13:   MOX.Blinkers[LitID].BlinkerType := 33;
+    0..9: MOX.Blinkers[idx].BlinkerType := rgBlinkerType.ItemIndex;
+    10:   MOX.Blinkers[idx].BlinkerType := 16;
+    11:   MOX.Blinkers[idx].BlinkerType := 20;
+    12:   MOX.Blinkers[idx].BlinkerType := 24;
+    13:   MOX.Blinkers[idx].BlinkerType := 33;
   end;
 
-  MOX.Blinkers[LitID].sMin := fsBlinkerSizeMin.Value;
-  MOX.Blinkers[LitID].sMax := fsBlinkerSizeMax.Value;
-  MOX.Blinkers[LitID].Freq := fsBlinkerFreq.Value;
-  MOX.Blinkers[LitID].Unused := 0;
-  MOX.Blinkers[LitID].Parent := seBlinkerParent.Value;
+  MOX.Blinkers[idx].sMin := fsBlinkerSizeMin.Value;
+  MOX.Blinkers[idx].sMax := fsBlinkerSizeMax.Value;
+  MOX.Blinkers[idx].Freq := fsBlinkerFreq.Value;
+  MOX.Blinkers[idx].Unused := 0;
+  MOX.Blinkers[idx].Parent := seBlinkerParent.Value;
   SendDataToUI(uiBlinkers);
 end;
 
@@ -1874,26 +1880,29 @@ end;
 
 
 procedure TForm1.BlinkPositionChange(Sender: TObject);
+var
+  idx: Integer;
 begin
-  if LitID = 0 then Exit;
+  idx := LBBlinkers.ItemIndex+1;
+  if idx = 0 then Exit;
   if fUIRefresh then Exit;
 
-  MOX.Blinkers[LitID].Matrix[4,1] := fsBlinkerX.Value*10;
-  MOX.Blinkers[LitID].Matrix[4,2] := fsBlinkerY.Value*10;
-  MOX.Blinkers[LitID].Matrix[4,3] := fsBlinkerZ.Value*10;
-  Angles2Matrix(fsBlinkerH.Value, fsBlinkerP.Value, fsBlinkerB.Value, @MOX.Blinkers[LitID].Matrix, 16);
+  MOX.Blinkers[idx].Matrix[4,1] := fsBlinkerX.Value*10;
+  MOX.Blinkers[idx].Matrix[4,2] := fsBlinkerY.Value*10;
+  MOX.Blinkers[idx].Matrix[4,3] := fsBlinkerZ.Value*10;
+  Angles2Matrix(fsBlinkerH.Value, fsBlinkerP.Value, fsBlinkerB.Value, @MOX.Blinkers[idx].Matrix, 16);
 end;
 
 
 procedure TForm1.btnBlinkerAddClick(Sender: TObject);
 begin
-  MOXBlinkerAdd(LBBlinkers.ItemIndex+1);
+  BlinkerAdd(LBBlinkers.ItemIndex+1);
 
   SendDataToUI(uiBlinkers);
 end;
 
 
-procedure TForm1.MOXBlinkerAdd(aIndex: Integer);
+procedure TForm1.BlinkerAdd(aIndex: Integer);
 begin
   if MOX.Header.BlinkerCount >= MAX_BLINKERS then Exit;
 
@@ -1925,21 +1934,27 @@ end;
 
 
 procedure TForm1.btnBlinkerRemClick(Sender: TObject);
-var
-  I: Integer;
 begin
   if LBBlinkers.ItemIndex = -1 then Exit;
 
-  for I := LBBlinkers.ItemIndex + 1 to MOX.Header.BlinkerCount - 1 do
-    MOX.Blinkers[I] := MOX.Blinkers[I + 1];
-  Dec(MOX.Header.BlinkerCount);
-
-  SendDataToUI(uiBlinkers);
+  BlinkerRemove(LBBlinkers.ItemIndex + 1);
 
   if LBBlinkers.ItemIndex = -1 then
     LBBlinkers.ItemIndex := LBBlinkers.Count - 1;
 
+  SendDataToUI(uiBlinkers);
   LBBlinkersClick(nil);
+end;
+
+
+procedure TForm1.BlinkerRemove(aIndex: Integer);
+var
+  I: Integer;
+begin
+  for I := aIndex to MOX.Header.BlinkerCount - 1 do
+    MOX.Blinkers[I] := MOX.Blinkers[I + 1];
+
+  Dec(MOX.Header.BlinkerCount);
 end;
 
 
@@ -2473,8 +2488,6 @@ end;
 
 
 function TForm1.LoadFile(const aFilename: string; lm: TLoadMode):Boolean;
-var
-  i: Integer;
 begin
   Result := False;
   UpdateOpenedFileInfo(aFilename);
@@ -2600,7 +2613,7 @@ begin
   if not UseShaders then
     CBRenderMode.ItemIndex := 0;
 
-  fRenderMode:= TRenderMode(CBRenderMode.ItemIndex);
+  fRenderMode := TRenderMode(CBRenderMode.ItemIndex);
 end;
 
 
@@ -2617,6 +2630,8 @@ begin
   DefineInputColor(r,g,b,Sender);
 end;
 
+
+// Event fired by the ColorPicker form
 procedure TForm1.ShapeADragDrop(Sender, Source: TObject; X, Y: Integer);
 begin
   if (MatID <> 0) and (ColID <> 0) then
@@ -2637,15 +2652,6 @@ begin
     Ref.R:=ShapeR.Brush.Color mod 256;
     Ref.G:=ShapeR.Brush.Color div 256 mod 256;
     Ref.B:=ShapeR.Brush.Color div 65536;
-  end;
-
-  if LitID <> 0 then
-  if ActivePage = apLights then
-  begin
-    MOX.Blinkers[LitID].R:=ShapeL.Brush.Color mod 256;
-    MOX.Blinkers[LitID].G:=ShapeL.Brush.Color div 256 mod 256;
-    MOX.Blinkers[LitID].B:=ShapeL.Brush.Color div 65536;
-    MOX.Blinkers[LitID].A:=255;
   end;
 
   if ActivePage = apExtra then
@@ -3220,6 +3226,40 @@ begin
     SB_Wire.Enabled := True;
 end;
 
+
+procedure TForm1.shpBlinkerColorMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  idx: Integer;
+  blinker: TMOXBlinker;
+begin
+  idx := LBBlinkers.ItemIndex+1;
+  if idx = 0 then Exit;
+
+  // Copy
+  blinker := MOX.Blinkers[idx];
+
+  TForm_ColorPicker2.Execute(
+    blinker.R + blinker.G shl 8 + blinker.B shl 16,
+    procedure(aColor: Cardinal)
+    begin
+      // Live preview
+      shpBlinkerColor.Brush.Color := aColor;
+
+      MOX.Blinkers[idx].R := aColor mod 256;
+      MOX.Blinkers[idx].G := aColor div 256 mod 256;
+      MOX.Blinkers[idx].B := aColor div 65536;
+      MOX.Blinkers[idx].A := 255;
+
+      Render;
+    end,
+    nil,
+    procedure
+    begin
+      // Cancel - restore original color
+      MOX.Blinkers[idx] := blinker;
+      shpBlinkerColor.Brush.Color := blinker.R + blinker.G shl 8 + blinker.B shl 16;
+    end);
+end;
 
 procedure TForm1.CBVinylChange(Sender: TObject);
 var

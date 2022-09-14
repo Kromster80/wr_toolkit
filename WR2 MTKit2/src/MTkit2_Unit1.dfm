@@ -202,14 +202,13 @@ object Form1: TForm1
     OnMouseDown = Panel1MouseDown
     OnMouseMove = Panel1MouseMove
     OnMouseUp = Panel1MouseUp
-    ExplicitWidth = 644
   end
   object PageControl1: TPageControl
     Left = 2
     Top = 8
     Width = 242
     Height = 585
-    ActivePage = TabSheet5
+    ActivePage = TabSheet3
     Anchors = [akLeft, akTop, akBottom]
     MultiLine = True
     Style = tsButtons
@@ -1580,13 +1579,12 @@ object Form1: TForm1
           D4C8D0D4C8D0D4C8D0D4}
         OnClick = BlinkPasteClick
       end
-      object ShapeL: TShape
+      object shpBlinkerColor: TShape
         Left = 136
         Top = 386
         Width = 33
         Height = 29
-        OnDragDrop = ShapeADragDrop
-        OnMouseUp = ShapeAMouseUp
+        OnMouseUp = shpBlinkerColorMouseUp
       end
       object Label16: TLabel
         Left = 162
@@ -2921,7 +2919,6 @@ object Form1: TForm1
         Text = '<<<LEER>>>'
         Width = 50
       end>
-    ExplicitWidth = 884
   end
   object Button1: TButton
     Left = 250

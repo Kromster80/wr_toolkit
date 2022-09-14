@@ -55,9 +55,9 @@ type
     procedure FormDestroy(Sender: TObject);
   end;
 
-procedure DefineInputColor(R,G,B:byte; Sender:TObject); overload;
-procedure DefineInputColor(RGB:TColor; Sender:TObject); overload;
-procedure DefineInputColorRGB(R,G,B:byte; Sender:TObject);
+procedure DefineInputColor(R,G,B:byte; Sender:TObject); overload; deprecated;
+procedure DefineInputColor(RGB:TColor; Sender:TObject); overload; deprecated;
+procedure DefineInputColorRGB(R,G,B:byte; Sender:TObject); deprecated;
 
 var
   Form_ColorPicker: TForm_ColorPicker;
@@ -78,27 +78,27 @@ implementation
 
 procedure TForm_ColorPicker.FormShow(Sender: TObject);
 begin
-{BitmapHueSat:=Tbitmap.Create;
-BitmapHueSat.PixelFormat:=pf24bit;
-BitmapHueSat.Width:=HSImage.Width;;
-BitmapHueSat.Height:=HSImage.Height;
-BitmapBri:=Tbitmap.Create;
-BitmapBri.PixelFormat:=pf24bit;
-BitmapBri.Width:=1;
-BitmapBri.Height:=BriImage.Height;}
+  {BitmapHueSat:=Tbitmap.Create;
+  BitmapHueSat.PixelFormat:=pf24bit;
+  BitmapHueSat.Width:=HSImage.Width;;
+  BitmapHueSat.Height:=HSImage.Height;
+  BitmapBri:=Tbitmap.Create;
+  BitmapBri.PixelFormat:=pf24bit;
+  BitmapBri.Width:=1;
+  BitmapBri.Height:=BriImage.Height;}
 end;
 
 //This is wrap to acquire data in different formats and convert them to internal R,G,B
 //Required since we can't make a call to overloaded procedure itself
 procedure DefineInputColor(R,G,B:byte; Sender:TObject); overload;
 begin
-DefineInputColorRGB(R,G,B, Sender);
+  DefineInputColorRGB(R,G,B, Sender);
 end;
 
 //This is wrap for TColor
 procedure DefineInputColor(RGB:TColor; Sender:TObject); overload;
 begin
-DefineInputColorRGB(RGB AND $FF, RGB AND $FF00 SHR 8, RGB AND $FF0000 SHR 16, Sender);
+  DefineInputColorRGB(RGB AND $FF, RGB AND $FF00 SHR 8, RGB AND $FF0000 SHR 16, Sender);
 end;
 
 procedure DefineInputColorRGB(R,G,B:byte; Sender:TObject);
@@ -246,44 +246,48 @@ ApplyBri2RGB(R,G,B,B_in,R,G,B);
 end;
 
 procedure TForm_ColorPicker.DisplayResultColor(Sender:string);
-var R,G,B,Ht,St,Bt:integer;
+var
+  R,G,B,Ht,St,Bt:integer;
 begin
-RGBRefresh:=true;
-HSBRefresh:=true;
-if Sender='RGB' then begin
-R:=EnsureRange(round(SpinR.Value),0,255);
-G:=EnsureRange(round(SpinG.Value),0,255);
-B:=EnsureRange(round(SpinB.Value),0,255);
-ConvertRGB2HSB(R,G,B,Ht,St,Bt);
-SpinH.Value:=Hue;
-SpinS.Value:=255-Sat;
-SpinBr.Value:=255-Bri;
-end;
-if Sender='HSB' then begin
-ConvertHSB2RGB(Hue,Sat,Bri,R,G,B);
-SpinR.Value:=R;
-SpinG.Value:=G;
-SpinB.Value:=B;
-end;
-if Sender='Both' then begin
-ConvertHSB2RGB(Hue,Sat,Bri,R,G,B);
-SpinR.Value:=R;
-SpinG.Value:=G;
-SpinB.Value:=B;
-SpinH.Value:=Hue;
-SpinS.Value:=255-Sat;
-SpinBr.Value:=255-Bri;
-end;
-Shape2.Brush.Color:=round(R)+round(G)*256+round(B)*65536;
-SenderShape.Brush.Color:=round(R)+round(G)*256+round(B)*65536;
-SenderShape.OnDragDrop(nil,nil,0,0);
-RGBRefresh:=false;
-HSBRefresh:=false;
+  RGBRefresh:=true;
+  HSBRefresh:=true;
+  if Sender='RGB' then
+  begin
+    R:=EnsureRange(round(SpinR.Value),0,255);
+    G:=EnsureRange(round(SpinG.Value),0,255);
+    B:=EnsureRange(round(SpinB.Value),0,255);
+    ConvertRGB2HSB(R,G,B,Ht,St,Bt);
+    SpinH.Value:=Hue;
+    SpinS.Value:=255-Sat;
+    SpinBr.Value:=255-Bri;
+  end;
+  if Sender='HSB' then
+  begin
+    ConvertHSB2RGB(Hue,Sat,Bri,R,G,B);
+    SpinR.Value:=R;
+    SpinG.Value:=G;
+    SpinB.Value:=B;
+  end;
+  if Sender='Both' then
+  begin
+    ConvertHSB2RGB(Hue,Sat,Bri,R,G,B);
+    SpinR.Value:=R;
+    SpinG.Value:=G;
+    SpinB.Value:=B;
+    SpinH.Value:=Hue;
+    SpinS.Value:=255-Sat;
+    SpinBr.Value:=255-Bri;
+  end;
+  Shape2.Brush.Color:=round(R)+round(G)*256+round(B)*65536;
+  SenderShape.Brush.Color:=round(R)+round(G)*256+round(B)*65536;
+  SenderShape.OnDragDrop(nil,nil,0,0);
+  RGBRefresh:=false;
+  HSBRefresh:=false;
 end;
 
 procedure TForm_ColorPicker.HSImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); begin
-SpyMouseH:=true;
-HSImageMouseMove(nil,Shift,X,Y);
+  SpyMouseH:=true;
+  HSImageMouseMove(nil,Shift,X,Y);
 end;
 
 procedure TForm_ColorPicker.HSImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
