@@ -3340,45 +3340,51 @@ end;
 
 procedure TForm1.lbBlinkersDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
 var
-  MyRect:TRect; MyColor:TColor; ID:Integer; ColorID:Integer;
+  myRect: TRect;
+  prevColor: TColor;
+  idx: Integer;
+  idColor: Integer;
+  lbCanvas: TCanvas;
 begin
-  ID := Index+1;
-  MyRect := Rect;
+  idx := Index + 1;
+  myRect := Rect;
 
-  MyRect.Left := 1;
-  MyRect.Right := 15;
-  inc(MyRect.Top);
-  dec(MyRect.Bottom,2);
+  myRect.Left := 1;
+  myRect.Right := 15;
+  Inc(myRect.Top);
+  Dec(myRect.Bottom, 2);
 
-  with (Control as TListBox).Canvas do begin
-    MyColor := Brush.Color; //Save default color
-    FillRect(Rect);
+  lbCanvas := TListBox(Control).Canvas;
 
-    if Control.Name='LBBlinkers' then
-    begin
-      Brush.Color := MOX.Blinkers[ID].R+MOX.Blinkers[ID].G*256+MOX.Blinkers[ID].B*65536;
-      FillRect(MyRect);
-    end;
+  prevColor := lbCanvas.Brush.Color; //Save default color
+  lbCanvas.FillRect(Rect);
 
-    if Control.Name='LBMaterials' then
-    begin
-      ColorID := CBColor.ItemIndex+1;
-      with Material[ID].Color[ColorID].Dif do
-      Brush.Color := R + G shl 8 + B shl 16;
-      FillRect(MyRect);
-      inc(MyRect.Left,5);
-      with Material[ID].Color[ColorID].Sp2 do
-      Brush.Color := R + G shl 8 + B shl 16;
-      FillRect(MyRect);
-      inc(MyRect.Left,5);
-      with Material[ID].Color[ColorID].Sp1 do
-      Brush.Color := R + G shl 8 + B shl 16;
-      FillRect(MyRect);
-    end;
-
-    Brush.Color:=MyColor;
-    TextOut(MyRect.Right+4, Rect.Top, (Control as TListBox).Items[Index]);
+  if Control = lbBlinkers then
+  begin
+    lbCanvas.Brush.Color := MOX.Blinkers[idx].R + MOX.Blinkers[idx].G shl 8 + MOX.Blinkers[idx].B shl 16;
+    lbCanvas.FillRect(myRect);
   end;
+
+  if Control = lbMaterials then
+  begin
+    idColor := CBColor.ItemIndex+1;
+    with Material[idx].Color[idColor].Dif do
+      lbCanvas.Brush.Color := R + G shl 8 + B shl 16;
+    lbCanvas.FillRect(myRect);
+
+    Inc(myRect.Left, 5);
+    with Material[idx].Color[idColor].Sp2 do
+      lbCanvas.Brush.Color := R + G shl 8 + B shl 16;
+    lbCanvas.FillRect(myRect);
+
+    Inc(myRect.Left, 5);
+    with Material[idx].Color[idColor].Sp1 do
+      lbCanvas.Brush.Color := R + G shl 8 + B shl 16;
+    lbCanvas.FillRect(myRect);
+  end;
+
+  lbCanvas.Brush.Color := prevColor;
+  lbCanvas.TextOut(myRect.Right+4, Rect.Top, TListBox(Control).Items[Index]);
 end;
 
 
