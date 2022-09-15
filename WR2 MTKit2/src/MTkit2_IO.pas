@@ -512,7 +512,8 @@ begin
 
   FillChar(Imp,SizeOf(Imp),#0);
   for i:=1 to 65280 do
-    for h:=1 to 4 do begin
+    for h:=1 to 4 do
+    begin
       Imp.DUV[i,h].U:=123456;
       Imp.DUV[i,h].V:=123456;
     end;
@@ -524,233 +525,275 @@ begin
   AssignFile(f,aFilename); FileMode:=0; Reset(f,1); FileMode:=2;
   BlockRead(f,c,12);
 
-  if (c[1]+c[2]+c[3]+c[4]+c[9]+c[10]+c[11]+c[12])<>'FORMLWO2' then begin
-    MessageDlg('Wrong header. File is not Lightwave 7.0+ format',mtError,[mbOK],0);
-    CloseFile(f); exit;
+  if (c[1]+c[2]+c[3]+c[4]+c[9]+c[10]+c[11]+c[12])<>'FORMLWO2' then
+  begin
+    MessageDlg('Wrong header. File is not Lightwave 7.0+ format', mtError, [mbOK], 0);
+    CloseFile(f);
+    Exit;
   end;
 
   m:=int2(c[8],c[7],c[6],c[5])-4;
 
   repeat
-  BlockRead(f,c,8);
-  chname:=c[1]+c[2]+c[3]+c[4];
-  chsize:=int2(c[8],c[7],c[6],c[5]);
-  m:=m-chsize-8;
+    BlockRead(f,c,8);
+    chname:=c[1]+c[2]+c[3]+c[4];
+    chsize:=int2(c[8],c[7],c[6],c[5]);
+    m:=m-chsize-8;
 
-  if chsize<>0 then
+    if chsize<>0 then
 
-  if chname='TAGS' then begin
-    BlockRead(f,c,chsize);
-    i:=0; k:=0;
-    repeat
-      Inc(k);
+    if chname='TAGS' then
+    begin
+      BlockRead(f,c,chsize);
+      i:=0; k:=0;
       repeat
-        Inc(i,2);
-        if c[i-1]<>#0 then Imp.PartName[k]:=Imp.PartName[k]+c[i-1];
-        if c[i]<>#0 then Imp.PartName[k]:=Imp.PartName[k]+c[i];
-        if c[i]=#0 then begin Inc(tags); ptag[tags]:=3; end; //set as colorwire=unuse
-      until(c[i]=#0);
-    until(i>=chsize);
-  end else
+        Inc(k);
+        repeat
+          Inc(i,2);
+          if c[i-1]<>#0 then Imp.PartName[k]:=Imp.PartName[k]+c[i-1];
+          if c[i]<>#0 then Imp.PartName[k]:=Imp.PartName[k]+c[i];
+          if c[i]=#0 then begin Inc(tags); ptag[tags]:=3; end; //set as colorwire=unuse
+        until(c[i]=#0);
+      until(i>=chsize);
+    end else
 
-  if chname='LAYR' then begin
-  BlockRead(f,c,chsize); Inc(lay); //Layers come not sorted !!! May cause problems later
-  end else
+    if chname='LAYR' then
+    begin
+      BlockRead(f,c,chsize);
+      Inc(lay); //Layers come not sorted !!! May cause problems later
+    end else
 
-  if chname='PNTS' then begin
-    LWOQty.XYZ[lay]:=chsize div 12;
+    if chname='PNTS' then
+    begin
+      LWOQty.XYZ[lay]:=chsize div 12;
 
-    if LWOQty.XYZ[lay]>65280 then begin
-      MessageDlg('Point quantity exceeds 65`280 limit',mtError,[mbOK],0);
-      CloseFile(f); exit;
-    end;
-
-    for i:=1 to LWOQty.XYZ[lay] do begin
-      BlockRead(f,c,12);
-      Imp.XYZ[Imp.VerticeCount+i].X:=real2(c[4],c[3],c[2],c[1])*10;
-      Imp.XYZ[Imp.VerticeCount+i].Y:=real2(c[8],c[7],c[6],c[5])*10;
-      Imp.XYZ[Imp.VerticeCount+i].Z:=real2(c[12],c[11],c[10],c[9])*10;
-    end;
-
-    Inc(Imp.VerticeCount,LWOQty.XYZ[lay]);
-  end else
-
-  if chname='VMAP' then begin
-    BlockRead(f,c,6);    //TXUV_2
-    if (c[1]+c[2]+c[3]+c[4])<>'TXUV' then begin
-      Log:=Log+'VMAP '+c[1]+c[2]+c[3]+c[4]+' skipped'+eol;
-      BlockRead(f,c,chsize-6); end
-    else begin
-      repeat
-        BlockRead(f,c,2); chsize:=chsize-2; //UV-map name
-      until((c[1]=#0)or(c[2]=#0));
-      LWOQty.UV[lay]:=(chsize-6) div 10;
-      for i:=1 to LWOQty.UV[lay] do begin
-        BlockRead(f,c,2);
-        k:=ord(c[1])*256+ord(c[2])+1;// if k>LWOQty.XYZ[lay] then fail;
-        BlockRead(f,c,8);
-        Imp.UV[Imp.VerticeCount-LWOQty.XYZ[lay]+k].U:=real2(c[4],c[3],c[2],c[1]);
-        Imp.UV[Imp.VerticeCount-LWOQty.XYZ[lay]+k].V:=real2(c[8],c[7],c[6],c[5]);
+      if LWOQty.XYZ[lay]>65280 then
+      begin
+        MessageDlg('Point quantity exceeds 65`280 limit', mtError, [mbOK], 0);
+        CloseFile(f);
+        Exit;
       end;
-    end;
-    Inc(LWOQty.UV[0],LWOQty.UV[lay]);
-  end else
 
-  if chname='POLS' then begin
-    BlockRead(f,c,4); chsize:=chsize-4;
-    LWOQty.Poly[lay]:=0;
-    repeat
+      for i:=1 to LWOQty.XYZ[lay] do
+      begin
+        BlockRead(f,c,12);
+        Imp.XYZ[Imp.VerticeCount+i].X:=real2(c[4],c[3],c[2],c[1])*10;
+        Imp.XYZ[Imp.VerticeCount+i].Y:=real2(c[8],c[7],c[6],c[5])*10;
+        Imp.XYZ[Imp.VerticeCount+i].Z:=real2(c[12],c[11],c[10],c[9])*10;
+      end;
 
-      BlockRead(f,c,2); Dec(chsize,2);
-      k:=ord(c[1])*256+ord(c[2]);
-      BlockRead(f,c,2*k); Dec(chsize,2*k);
+      Inc(Imp.VerticeCount,LWOQty.XYZ[lay]);
+    end else
 
-      if (k=3)or(k=4) then begin
-        Inc(LWOQty.Poly[lay]);
-        Imp.Faces[LWOQty.Poly[lay]+Imp.PolyCount,1]:=ord(c[1])*256+ord(c[2])+Imp.VerticeCount-LWOQty.XYZ[lay]+1;
-        Imp.Faces[LWOQty.Poly[lay]+Imp.PolyCount,2]:=ord(c[3])*256+ord(c[4])+Imp.VerticeCount-LWOQty.XYZ[lay]+1;
-        Imp.Faces[LWOQty.Poly[lay]+Imp.PolyCount,3]:=ord(c[5])*256+ord(c[6])+Imp.VerticeCount-LWOQty.XYZ[lay]+1;
+    if chname='VMAP' then
+    begin
+      BlockRead(f,c,6);    //TXUV_2
+      if (c[1]+c[2]+c[3]+c[4])<>'TXUV' then
+      begin
+        Log:=Log+'VMAP '+c[1]+c[2]+c[3]+c[4]+' skipped'+eol;
+        BlockRead(f,c,chsize-6);
       end else
-        MessageDlg('Only triangle polygons are accepted',mtError,[mbOK],0);
+      begin
+        repeat
+          BlockRead(f,c,2); chsize:=chsize-2; //UV-map name
+        until((c[1]=#0)or(c[2]=#0));
+        LWOQty.UV[lay]:=(chsize-6) div 10;
+        for i:=1 to LWOQty.UV[lay] do begin
+          BlockRead(f,c,2);
+          k:=ord(c[1])*256+ord(c[2])+1;// if k>LWOQty.XYZ[lay] then fail;
+          BlockRead(f,c,8);
+          Imp.UV[Imp.VerticeCount-LWOQty.XYZ[lay]+k].U:=real2(c[4],c[3],c[2],c[1]);
+          Imp.UV[Imp.VerticeCount-LWOQty.XYZ[lay]+k].V:=real2(c[8],c[7],c[6],c[5]);
+        end;
+      end;
+      Inc(LWOQty.UV[0],LWOQty.UV[lay]);
+    end else
 
-      if k=4 then
-        Imp.Faces[LWOQty.Poly[lay]+Imp.PolyCount,4]:=ord(c[7])*256+ord(c[8])+Imp.VerticeCount-LWOQty.XYZ[lay]+1
-      else
-        Imp.Faces[LWOQty.Poly[lay]+Imp.PolyCount,4]:=0;
+    if chname='POLS' then
+    begin
+      BlockRead(f,c,4); chsize:=chsize-4;
+      LWOQty.Poly[lay]:=0;
+      repeat
+        BlockRead(f,c,2); Dec(chsize,2);
+        k:=ord(c[1])*256+ord(c[2]);
+        BlockRead(f,c,2*k); Dec(chsize,2*k);
 
-    until(chsize<=0);
-    if chsize<0 then begin
-      MessageDlg('Unknown error in POLS chunk',mtError,[mbOK],0);
-      CloseFile(f); exit;
-    end;
-    Inc(Imp.PolyCount,LWOQty.Poly[lay]);
-  end else
+        if (k=3)or(k=4) then
+        begin
+          Inc(LWOQty.Poly[lay]);
+          Imp.Faces[LWOQty.Poly[lay]+Imp.PolyCount,1]:=ord(c[1])*256+ord(c[2])+Imp.VerticeCount-LWOQty.XYZ[lay]+1;
+          Imp.Faces[LWOQty.Poly[lay]+Imp.PolyCount,2]:=ord(c[3])*256+ord(c[4])+Imp.VerticeCount-LWOQty.XYZ[lay]+1;
+          Imp.Faces[LWOQty.Poly[lay]+Imp.PolyCount,3]:=ord(c[5])*256+ord(c[6])+Imp.VerticeCount-LWOQty.XYZ[lay]+1;
+        end else
+          MessageDlg('Only triangle polygons are accepted',mtError,[mbOK],0);
 
-  if chname='PTAG' then begin
-    BlockRead(f,c,4);
-    if (c[1]+c[2]+c[3]+c[4])='PART' then begin
-      chsize:=chsize-4;
-      for i:=1 to (chsize div 4) do begin
-        BlockRead(f,c,4);
-        k:=ord(c[1])*256+ord(c[2])+1;           //polygon
-        Imp.Part[k+Imp.PolyCount-LWOQty.Poly[lay]]:=ord(c[3])*256+ord(c[4])+1;    //part assignment
-        Ptag[(ord(c[3])*256+ord(c[4])+1)]:=2;
+        if k=4 then
+          Imp.Faces[LWOQty.Poly[lay]+Imp.PolyCount,4]:=ord(c[7])*256+ord(c[8])+Imp.VerticeCount-LWOQty.XYZ[lay]+1
+        else
+          Imp.Faces[LWOQty.Poly[lay]+Imp.PolyCount,4]:=0;
+
+      until(chsize<=0);
+      if chsize<0 then
+      begin
+        MessageDlg('Unknown error in POLS chunk',mtError,[mbOK],0);
+        CloseFile(f);
+        Exit;
+      end;
+      Inc(Imp.PolyCount,LWOQty.Poly[lay]);
+    end else
+
+    if chname='PTAG' then
+    begin
+      BlockRead(f,c,4);
+      if (c[1]+c[2]+c[3]+c[4])='PART' then
+      begin
+        chsize:=chsize-4;
+        for i:=1 to (chsize div 4) do begin
+          BlockRead(f,c,4);
+          k:=ord(c[1])*256+ord(c[2])+1;           //polygon
+          Imp.Part[k+Imp.PolyCount-LWOQty.Poly[lay]]:=ord(c[3])*256+ord(c[4])+1;    //part assignment
+          Ptag[(ord(c[3])*256+ord(c[4])+1)]:=2;
+        end;
+      end else
+      if (c[1]+c[2]+c[3]+c[4])='SURF' then
+      begin
+      //  chsize:=chsize-4;
+        j:=0;
+        for i:=1 to LWOQty.Poly[lay] do
+        begin
+          BlockRead(f,c,4);
+          k:=ord(c[1])*256+ord(c[2])+1;           //polygon
+          Imp.Surf[k+Imp.PolyCount-LWOQty.Poly[lay]]:=ord(c[3])*256+ord(c[4])+1;    //surface assignment
+          Ptag[ord(c[3])*256+ord(c[4])+1]:=1;
+        end;
+      end else
+      begin
+        Log:=Log+'PTAG '+c[1]+c[2]+c[3]+c[4]+' skipped'+eol;
+        BlockRead(f,c,chsize-4)
       end;
     end else
-    if (c[1]+c[2]+c[3]+c[4])='SURF' then begin
-    //  chsize:=chsize-4;
-      j:=0;
-      for i:=1 to LWOQty.Poly[lay] do begin
-        BlockRead(f,c,4);
-        k:=ord(c[1])*256+ord(c[2])+1;           //polygon
-        Imp.Surf[k+Imp.PolyCount-LWOQty.Poly[lay]]:=ord(c[3])*256+ord(c[4])+1;    //surface assignment
-        Ptag[ord(c[3])*256+ord(c[4])+1]:=1;
-      end;
-    end else begin
-      Log:=Log+'PTAG '+c[1]+c[2]+c[3]+c[4]+' skipped'+eol;
-      BlockRead(f,c,chsize-4)
-    end;
-  end else
 
-  if chname='VMAD' then begin
-    BlockRead(f,c,6);    //TXUV_2
-    if (c[1]+c[2]+c[3]+c[4])<>'TXUV' then begin
-      Log:=Log+'VMAD '+c[1]+c[2]+c[3]+c[4]+' skipped'+eol;
-      BlockRead(f,c,chsize-6);
-    end
-    else begin
+    if chname='VMAD' then
+    begin
+      BlockRead(f,c,6);    //TXUV_2
+      if (c[1]+c[2]+c[3]+c[4])<>'TXUV' then
+      begin
+        Log:=Log+'VMAD '+c[1]+c[2]+c[3]+c[4]+' skipped'+eol;
+        BlockRead(f,c,chsize-6);
+      end
+      else
+      begin
+        repeat
+          BlockRead(f,c,2);
+          Dec(chsize,2); //UV-map name
+        until((c[1]=#0)or(c[2]=#0));
+        LWOQty.DUV[lay]:=(chsize-6) div 12;
+        for i:=1 to LWOQty.DUV[lay] do
+        begin
+          BlockRead(f,c,4);
+          k:=ord(c[1])*256+ord(c[2])+1;  //point
+          h:=ord(c[3])*256+ord(c[4])+1;  //poly
+          BlockRead(f,c,8);              //coords
+          for j:=1 to 4 do
+            if Imp.Faces[h+Imp.PolyCount-LWOQty.Poly[lay],j]=k+Imp.VerticeCount-LWOQty.XYZ[lay] then begin
+              Imp.DUV[h+Imp.PolyCount-LWOQty.Poly[lay],j].U:=real2(c[4],c[3],c[2],c[1]);
+              Imp.DUV[h+Imp.PolyCount-LWOQty.Poly[lay],j].V:=real2(c[8],c[7],c[6],c[5]);
+            end;
+        end;
+      end;
+      Inc(LWOQty.DUV[0],LWOQty.DUV[lay]);
+    end else
+
+    if chname='CLIP' then
+    begin
+      BlockRead(f,c,chsize);
+      s:=''; i:=9;
       repeat
-        BlockRead(f,c,2);
-        Dec(chsize,2); //UV-map name
-      until((c[1]=#0)or(c[2]=#0));
-      LWOQty.DUV[lay]:=(chsize-6) div 12;
-      for i:=1 to LWOQty.DUV[lay] do begin
-        BlockRead(f,c,4);
-        k:=ord(c[1])*256+ord(c[2])+1;  //point
-        h:=ord(c[3])*256+ord(c[4])+1;  //poly
-        BlockRead(f,c,8);              //coords
-        for j:=1 to 4 do
-          if Imp.Faces[h+Imp.PolyCount-LWOQty.Poly[lay],j]=k+Imp.VerticeCount-LWOQty.XYZ[lay] then begin
-            Imp.DUV[h+Imp.PolyCount-LWOQty.Poly[lay],j].U:=real2(c[4],c[3],c[2],c[1]);
-            Imp.DUV[h+Imp.PolyCount-LWOQty.Poly[lay],j].V:=real2(c[8],c[7],c[6],c[5]);
-          end;
-      end;
+        i:=i+2;
+        if c[i]<>#0 then s:=s+c[i];
+        if c[i+1]<>#0 then s:=s+c[i+1];
+      until(c[i+1]=#0);
+      k:=1;
+      repeat
+        cliptex[ord(c[3])*256+ord(c[4])]:=cliptex[ord(c[3])*256+ord(c[4])]+s[k];
+        if s[k]='/' then cliptex[ord(c[3])*256+ord(c[4])]:='';
+        Inc(k);
+      until((k=Length(s))or(s[k]='.'));
+    end else
+
+    if chname='SURF' then
+    begin
+      BlockRead(f,c,chsize);
+      i:=-1;
+      Imp.Mtl[stag].Title:='';
+      Imp.Mtl[stag].TexName:='';
+      repeat
+        i:=i+2;
+        if c[i]<>#0 then Imp.Mtl[stag].Title:=Imp.Mtl[stag].Title+c[i];
+        if c[i+1]<>#0 then Imp.Mtl[stag].Title:=Imp.Mtl[stag].Title+c[i+1];
+      until(c[i+1]=#0);
+      //Log:=Log+' - '+Imp.Mtl[stag].Title+eol;
+      i:=i+4;
+      repeat
+        if c[i]+c[i+1]+c[i+2]+c[i+3]+c[i+4]+c[i+5]='COLR'+#0+#14 then
+        begin
+          i:=i+6;
+          Imp.Mtl[stag].Dif.R:=Round(real2(c[i+3],c[i+2],c[i+1],c[i])*255);
+          Imp.Mtl[stag].Dif.G:=Round(real2(c[i+7],c[i+6],c[i+5],c[i+4])*255);
+          Imp.Mtl[stag].Dif.B:=Round(real2(c[i+11],c[i+10],c[i+9],c[i+8])*255);
+          i:=i+14-1;
+        end;
+        if c[i]+c[i+1]+c[i+2]+c[i+3]+c[i+4]+c[i+5]='SPEC'+#0+#6 then
+        begin
+          i:=i+6;
+          xt:=Round(real2(c[i+3],c[i+2],c[i+1],c[i])*255); xt:=EnsureRange(xt,0,255);
+          Imp.Mtl[stag].Spec.R:=xt;
+          Imp.Mtl[stag].Spec.G:=xt;
+          Imp.Mtl[stag].Spec.B:=xt;
+          i:=i+6-1;
+        end;
+        if c[i]+c[i+1]+c[i+2]+c[i+3]+c[i+4]+c[i+5]='REFL'+#0+#6 then
+        begin i:=i+6;
+          if Round(real2(c[i+3],c[i+2],c[i+1],c[i])*100)<>0 then Imp.Mtl[stag].Reflect:=50;
+          i:=i+6-1;
+        end;
+        if c[i]+c[i+1]+c[i+2]+c[i+3]+c[i+4]+c[i+5]='LUMI'+#0+#6 then
+        begin i:=i+6;
+          Imp.Mtl[stag].Amb.R:=Round(real2(c[i+3],c[i+2],c[i+1],c[i])*255);
+          Imp.Mtl[stag].Amb.G:=Round(real2(c[i+3],c[i+2],c[i+1],c[i])*255);
+          Imp.Mtl[stag].Amb.B:=Round(real2(c[i+3],c[i+2],c[i+1],c[i])*255);
+          i:=i+6-1;
+        end;
+        if c[i]+c[i+1]+c[i+2]+c[i+3]+c[i+4]+c[i+5]='TRAN'+#0+#6 then
+        begin i:=i+6;
+          xt:=Round(real2(c[i+3],c[i+2],c[i+1],c[i])*100);
+          Imp.Mtl[stag].Transparency:=EnsureRange(Round(real2(c[i+3],c[i+2],c[i+1],c[i])*100),0,255); //0..255 only
+          i:=i+6-1;
+        end;
+        if c[i]+c[i+1]+c[i+2]+c[i+3]+c[i+4]+c[i+5]='IMAG'+#0+#2 then
+        begin
+          i:=i+6;
+          if (c[i+1]<>#0)and(cliptex[ord(c[i+1])]<>'') then Imp.Mtl[stag].TexName:=cliptex[ord(c[i+1])]+'.tga';
+          i:=i+2-1;
+        end;
+
+        if i<chsize then i:=i+1
+      until(i>=chsize);
+      Imp.SurfCount:=stag;
+      Inc(stag);          //finaly stag = surf qty+1
+    end else
+    begin
+      Log:=Log+chname+' skipped'+eol;
+      for i:=1 to (chsize div MAX_READ_BUFFER) do BlockRead(f,c,MAX_READ_BUFFER);
+      BlockRead(f,c,chsize mod MAX_READ_BUFFER);
     end;
-    Inc(LWOQty.DUV[0],LWOQty.DUV[lay]);
-  end else
-
-  if chname='CLIP' then begin
-    BlockRead(f,c,chsize);
-    s:=''; i:=9;
-    repeat
-      i:=i+2;
-      if c[i]<>#0 then s:=s+c[i];
-      if c[i+1]<>#0 then s:=s+c[i+1];
-    until(c[i+1]=#0);
-    k:=1;
-    repeat
-      cliptex[ord(c[3])*256+ord(c[4])]:=cliptex[ord(c[3])*256+ord(c[4])]+s[k];
-      if s[k]='/' then cliptex[ord(c[3])*256+ord(c[4])]:='';
-      Inc(k);
-    until((k=Length(s))or(s[k]='.'));
-  end else
-
-  if chname='SURF' then begin
-  BlockRead(f,c,chsize);
-  i:=-1;
-  Imp.Mtl[stag].Title:='';
-  Imp.Mtl[stag].TexName:='';
-  repeat
-  i:=i+2;
-  if c[i]<>#0 then Imp.Mtl[stag].Title:=Imp.Mtl[stag].Title+c[i];
-  if c[i+1]<>#0 then Imp.Mtl[stag].Title:=Imp.Mtl[stag].Title+c[i+1];
-  until(c[i+1]=#0);
-  //Log:=Log+' - '+Imp.Mtl[stag].Title+eol;
-  i:=i+4;
-  repeat
-  if c[i]+c[i+1]+c[i+2]+c[i+3]+c[i+4]+c[i+5]='COLR'+#0+#14 then begin i:=i+6;
-  Imp.Mtl[stag].Dif.R:=Round(real2(c[i+3],c[i+2],c[i+1],c[i])*255);
-  Imp.Mtl[stag].Dif.G:=Round(real2(c[i+7],c[i+6],c[i+5],c[i+4])*255);
-  Imp.Mtl[stag].Dif.B:=Round(real2(c[i+11],c[i+10],c[i+9],c[i+8])*255);
-  i:=i+14-1; end;
-  if c[i]+c[i+1]+c[i+2]+c[i+3]+c[i+4]+c[i+5]='SPEC'+#0+#6 then begin i:=i+6;
-  xt:=Round(real2(c[i+3],c[i+2],c[i+1],c[i])*255); xt:=EnsureRange(xt,0,255);
-  Imp.Mtl[stag].Spec.R:=xt;
-  Imp.Mtl[stag].Spec.G:=xt;
-  Imp.Mtl[stag].Spec.B:=xt;
-  i:=i+6-1; end;
-  if c[i]+c[i+1]+c[i+2]+c[i+3]+c[i+4]+c[i+5]='REFL'+#0+#6 then begin i:=i+6;
-  if Round(real2(c[i+3],c[i+2],c[i+1],c[i])*100)<>0 then Imp.Mtl[stag].Reflect:=50;
-  i:=i+6-1; end;
-  if c[i]+c[i+1]+c[i+2]+c[i+3]+c[i+4]+c[i+5]='LUMI'+#0+#6 then begin i:=i+6;
-  Imp.Mtl[stag].Amb.R:=Round(real2(c[i+3],c[i+2],c[i+1],c[i])*255);
-  Imp.Mtl[stag].Amb.G:=Round(real2(c[i+3],c[i+2],c[i+1],c[i])*255);
-  Imp.Mtl[stag].Amb.B:=Round(real2(c[i+3],c[i+2],c[i+1],c[i])*255);
-  i:=i+6-1; end;
-  if c[i]+c[i+1]+c[i+2]+c[i+3]+c[i+4]+c[i+5]='TRAN'+#0+#6 then begin i:=i+6;
-  xt:=Round(real2(c[i+3],c[i+2],c[i+1],c[i])*100);
-  Imp.Mtl[stag].Transparency:=EnsureRange(Round(real2(c[i+3],c[i+2],c[i+1],c[i])*100),0,255); //0..255 only
-  i:=i+6-1; end;
-  if c[i]+c[i+1]+c[i+2]+c[i+3]+c[i+4]+c[i+5]='IMAG'+#0+#2 then begin i:=i+6;
-  if (c[i+1]<>#0)and(cliptex[ord(c[i+1])]<>'') then Imp.Mtl[stag].TexName:=cliptex[ord(c[i+1])]+'.tga';
-  i:=i+2-1; end;
-
-  if i<chsize then i:=i+1
-  until(i>=chsize);
-  Imp.SurfCount:=stag;
-  Inc(stag);          //finaly stag = surf qty+1
-  end else
-
-  begin
-  Log:=Log+chname+' skipped'+eol;
-  for i:=1 to (chsize div MAX_READ_BUFFER) do BlockRead(f,c,MAX_READ_BUFFER);
-  BlockRead(f,c,chsize mod MAX_READ_BUFFER);
-  end;
   until(m<=0);
 
-  if m<0 then begin
-    MessageDlg('Uknown error happened while processing LWO file',mtError,[mbOK],0);
-    CloseFile(f); exit;
+  if m<0 then
+  begin
+    MessageDlg('Uknown error happened while processing LWO file', mtError, [mbOK], 0);
+    CloseFile(f);
+    Exit;
   end;
   CloseFile(f);
 
@@ -772,9 +815,10 @@ begin
   for i:=ColWireCount+1 to MAX_PARTS do
     Imp.PartName[i-ColWireCount]:=Imp.PartName[i];
 
-  for i:=1 to Imp.PolyCount do begin
-  if (PartCount<>0)and(Imp.Part[i]<>0) then Dec(Imp.Part[i],ColWireCount);//getting rid of colorwires
-  Imp.Surf[i]:=Imp.Surf[i]-ColWireCount-PartCount;//getting rid of colorwires
+  for i:=1 to Imp.PolyCount do
+  begin
+    if (PartCount<>0)and(Imp.Part[i]<>0) then Dec(Imp.Part[i],ColWireCount);//getting rid of colorwires
+    Imp.Surf[i]:=Imp.Surf[i]-ColWireCount-PartCount;//getting rid of colorwires
   end;
 
   Imp.SurfCount:=MatCount;

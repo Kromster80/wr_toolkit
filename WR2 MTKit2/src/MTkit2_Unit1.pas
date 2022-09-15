@@ -1220,8 +1220,9 @@ end;
 
 procedure TForm1.CBColorChange(Sender: TObject);
 begin
-  ColID:=CBColor.ItemIndex+1;
-  if MatID=0 then Exit;
+  ColID := CBColor.ItemIndex+1;
+  if MatID = 0 then Exit;
+
   with Material[MatID].Color[ColID] do
   begin
     ShapeA.Brush.Color:=Amb.R+Amb.G*256+Amb.B*65536;
