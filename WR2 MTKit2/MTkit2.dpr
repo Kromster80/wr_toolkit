@@ -11,7 +11,7 @@ uses
   MTkit2_Textures in 'src\MTkit2_Textures.pas',
   MTkit2_Vertex in 'src\MTkit2_Vertex.pas',
   KromUtils in '..\_Common_\KromUtils.pas',
-  ColorPicker in '..\_Common_\ColorPicker.pas' {Form2};
+  ColorPicker2 in '..\_Common_\ColorPicker2.pas' {Form2};
 
 {$R *.RES}
 
@@ -19,6 +19,5 @@ begin
   Application.Initialize;
   Application.Title := 'MTKit2';
   Application.CreateForm(TForm1, Form1);
-  Application.CreateForm(TForm_ColorPicker, Form_ColorPicker);
   Application.Run;
 end.

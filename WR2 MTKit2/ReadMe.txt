@@ -29,7 +29,7 @@ MTKit2 shows you preview of a car, WR2 will display it bit differently.
 AFC11/FVR support is limited.
 
 Version History:
-                    Closing blinker color picker with [X] will now revert the changes
+                    Closing color picker with [X] will now revert the changes in color
                     Blinker color picker wont show up if no blinker is selected
                     Fixed the way .mox file associations are written in Windows Registry
                     Added error on loading unsupported MOX versions (newer AFC11 cars)

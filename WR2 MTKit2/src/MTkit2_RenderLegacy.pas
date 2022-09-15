@@ -1,7 +1,7 @@
 unit MTkit2_RenderLegacy;
 interface
 uses
-  OpenGL, dglOpenGL, kromOGLUtils,kromUtils, Math;
+  OpenGL, dglOpenGL, KromOGLUtils, KromUtils, Math;
 
   procedure RenderOpenGL;
   procedure RenderDiffuse(ID,PartID:integer; param:string; t:Single);
@@ -13,7 +13,7 @@ uses
   procedure RenderDirt(param:string; t:Single);
   procedure RenderDummy;
   procedure RenderPivotSetup(param,param2,p3:integer);
-  procedure RenderWireframe(param:string);
+  procedure RenderWireframe(aWireColor: Cardinal);
   procedure TransformAndCall(ID,PartID:integer; mode:Byte);
   procedure TransformParent(param:integer);
   procedure RenderUVMap(ID:integer);
@@ -422,23 +422,33 @@ begin
   glEnable(GL_LIGHTING);
 end;
 
-procedure RenderWireframe(param:string);
+
+procedure RenderWireframe(aWireColor: Cardinal);
 var
-  h,ID,IDk:integer;
+  h,ID,IDk: Integer;
 begin
-  glPolygonMode(GL_FRONT,GL_LINE);
+  glPolygonMode(GL_FRONT, GL_LINE);
   glBindTexture(GL_TEXTURE_2D, 0);
-  glColor3ubv(@WFColor[1]);
+  glColor3ubv(@aWireColor);
   h:=0; IDk:=1;
   for ID:=1 to MOX.Header.ChunkCount do
   begin
-    if ID>(MOX.Parts[IDk].NumMat+h) then begin inc(h,MOX.Parts[IDk].NumMat); inc(IDk); end; //define detail
-    if (SelectedTreeNode=0)or(ActivePage=apParts)or(not(RenderOpts.ShowPart)or //skip render of unseen parts
-       (RenderOpts.ShowPart)and(IDk=SelectedTreeNode)) then
-        TransformAndCall(ID,IDk, 1);
+    // Define detail
+    if ID > (MOX.Parts[IDk].NumMat + h) then
+    begin
+      Inc(h, MOX.Parts[IDk].NumMat);
+      Inc(IDk);
+    end;
+
+    // Skip render of unseen parts
+    if (SelectedTreeNode = 0)
+    or (ActivePage = apParts)
+    or (not RenderOpts.ShowPart or RenderOpts.ShowPart and (IDk = SelectedTreeNode)) then
+      TransformAndCall(ID,IDk, 1);
   end;
-  glPolygonMode(GL_FRONT,GL_FILL);
+  glPolygonMode(GL_FRONT, GL_FILL);
 end;
+
 
 procedure TransformAndCall(ID,PartID:integer; mode:Byte);
 begin

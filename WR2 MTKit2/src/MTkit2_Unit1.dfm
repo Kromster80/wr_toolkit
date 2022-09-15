@@ -208,7 +208,7 @@ object Form1: TForm1
     Top = 8
     Width = 242
     Height = 585
-    ActivePage = TabSheet3
+    ActivePage = TabSheet1
     Anchors = [akLeft, akTop, akBottom]
     MultiLine = True
     Style = tsButtons
@@ -520,7 +520,6 @@ object Form1: TForm1
         Top = 298
         Width = 33
         Height = 29
-        OnDragDrop = ShapeADragDrop
         OnMouseUp = ShapeAMouseUp
       end
       object ShapeD: TShape
@@ -528,7 +527,6 @@ object Form1: TForm1
         Top = 298
         Width = 33
         Height = 29
-        OnDragDrop = ShapeADragDrop
         OnMouseUp = ShapeAMouseUp
       end
       object ShapeS1: TShape
@@ -536,7 +534,6 @@ object Form1: TForm1
         Top = 298
         Width = 33
         Height = 29
-        OnDragDrop = ShapeADragDrop
         OnMouseUp = ShapeAMouseUp
       end
       object ShapeS2: TShape
@@ -544,7 +541,6 @@ object Form1: TForm1
         Top = 298
         Width = 33
         Height = 29
-        OnDragDrop = ShapeADragDrop
         OnMouseUp = ShapeAMouseUp
       end
       object ShapeR: TShape
@@ -552,7 +548,6 @@ object Form1: TForm1
         Top = 298
         Width = 33
         Height = 29
-        OnDragDrop = ShapeADragDrop
         OnMouseUp = ShapeAMouseUp
       end
       object Label31: TLabel
@@ -2627,8 +2622,7 @@ object Form1: TForm1
         Top = 10
         Width = 57
         Height = 23
-        OnDragDrop = ShapeADragDrop
-        OnMouseUp = ShapeAMouseUp
+        OnMouseUp = ShapeBGMouseUp
       end
       object Label7: TLabel
         Left = 76
@@ -2656,8 +2650,7 @@ object Form1: TForm1
         Top = 30
         Width = 57
         Height = 23
-        OnDragDrop = ShapeADragDrop
-        OnMouseUp = ShapeAMouseUp
+        OnMouseUp = ShapeBGMouseUp
       end
       object Label15: TLabel
         Left = 76

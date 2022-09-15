@@ -344,7 +344,6 @@ type
     procedure ResetView(Sender: TObject);
     procedure CBRenderModeChange(Sender: TObject);
     procedure ShapeAMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure ShapeADragDrop(Sender, Source: TObject; X, Y: Integer);
     procedure Button4Click(Sender: TObject);
     procedure FPSLimitEditChange(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
@@ -378,6 +377,7 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure ScanMOXheaders1Click(Sender: TObject);
     procedure shpBlinkerColorMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure ShapeBGMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   private
     h_DC: HDC;
     h_RC: HGLRC;
@@ -386,6 +386,9 @@ type
     fFrameCount: Cardinal;
     fLastInputMode: TInputMode;
     fUIRefresh: Boolean;
+
+    fColorBackground: Cardinal;
+    fColorWireframe: Cardinal;
 
     fOpenedFileMask: string;
     fOpenedFolder: string;
@@ -440,8 +443,6 @@ var
   Dummy,Pivot,BBox,BBoxW,Center,FlameSprite,Sprite1Side,Sprite2Side,SelectionSphere:glUint;
   MoxCall,MoxUVCall: array [1..16384]of Word;
   MoxTex: array [1..256]of glUint;
-  BGColor: array [1..3]of Byte;
-  WFColor: array [1..3]of Byte;
 
   // Viewport controls
   xMov, yMov: Single;
@@ -525,7 +526,7 @@ var
    MatClass: array [1..4]of Integer;     //Material class selector (by index)
    Color: array [1..20]of record
      Amb,Dif,Sp1,Sp2,Ref:record
-       R,G,B:Byte;
+       R,G,B,z:Byte;
      end;
    end;
    Transparency:Byte;
@@ -555,7 +556,7 @@ var
 
 implementation
 uses
-  ColorPicker, ColorPicker2, UnitRawInputHeaders,
+  ColorPicker2, UnitRawInputHeaders,
   MTKit2_Textures;
 
 {$R *.dfm}
@@ -643,15 +644,15 @@ begin
   meLog.Lines.Add('Reading options.ini ...');
   iniFile := TIniFile.Create(aFilename);
 
-  BGColor[1] := iniFile.ReadInteger('Background color', 'R', 128);
-  BGColor[2] := iniFile.ReadInteger('Background color', 'G', 128);
-  BGColor[3] := iniFile.ReadInteger('Background color', 'B', 128);
-  ShapeBG.Brush.Color := BGColor[1] + BGColor[2] shl 8 + BGColor[3] shl 16;
+  fColorBackground := iniFile.ReadInteger('Background color', 'R', 128) +
+                      iniFile.ReadInteger('Background color', 'G', 128) shl 8 +
+                      iniFile.ReadInteger('Background color', 'B', 128) shl 16;
+  ShapeBG.Brush.Color := fColorBackground;
 
-  WFColor[1] := iniFile.ReadInteger('Wireframe color', 'R', 255);
-  WFColor[2] := iniFile.ReadInteger('Wireframe color', 'G', 255);
-  WFColor[3] := iniFile.ReadInteger('Wireframe color', 'B', 255);
-  ShapeWF.Brush.Color := WFColor[1] + WFColor[2] shl 8 + WFColor[3] shl 16;
+  fColorWireframe :=  iniFile.ReadInteger('Wireframe color', 'R', 255) +
+                      iniFile.ReadInteger('Wireframe color', 'G', 255) shl 8 +
+                      iniFile.ReadInteger('Wireframe color', 'B', 255) shl 16;
+  ShapeWF.Brush.Color := fColorWireframe;
 
   FPSLimitEdit.Value  := iniFile.ReadInteger('FPS limit', 'Value', 33);
   FPSLag := abs(round(1/FPSLimitEdit.Value*1000));
@@ -671,13 +672,13 @@ begin
   meLog.Lines.Add('Writing options.ini ...');
   iniFile := TIniFile.Create(aFilename);
 
-  iniFile.WriteInteger('Background color', 'R', BGColor[1]);
-  iniFile.WriteInteger('Background color', 'G', BGColor[2]);
-  iniFile.WriteInteger('Background color', 'B', BGColor[3]);
+  iniFile.WriteInteger('Background color', 'R', fColorBackground and $FF);
+  iniFile.WriteInteger('Background color', 'G', fColorBackground shr 8 and $FF);
+  iniFile.WriteInteger('Background color', 'B', fColorBackground shr 16 and $FF);
 
-  iniFile.WriteInteger('Wireframe color', 'R', WFColor[1]);
-  iniFile.WriteInteger('Wireframe color', 'G', WFColor[2]);
-  iniFile.WriteInteger('Wireframe color', 'B', WFColor[3]);
+  iniFile.WriteInteger('Wireframe color', 'R', fColorWireframe and $FF);
+  iniFile.WriteInteger('Wireframe color', 'G', fColorWireframe shr 8 and $FF);
+  iniFile.WriteInteger('Wireframe color', 'B', fColorWireframe shr 16 and $FF);
 
   iniFile.WriteInteger('FPS limit', 'Value', round(1000/FPSLag));
 
@@ -695,7 +696,7 @@ procedure TForm1.OnIdle(Sender: TObject; var Done: Boolean);
 var
   frameTime: Cardinal;
 begin
-  if not Form1.Active and not Form_ColorPicker.Active then Exit;
+  if not Form1.Active then Exit;
   if fCameraAction <> caNone then Exit;
 
   Done := False;
@@ -909,7 +910,7 @@ end;
 
 procedure TForm1.Render;
 begin
-  glClearColor(BGColor[1]/255, BGColor[2]/255, BGColor[3]/255, 0); 	   // Grey Background
+  glClearColor(fColorBackground and $FF / 255, fColorBackground shr 8 and $FF / 255, fColorBackground shr 16 and $FF / 255, 0); 	   // Grey Background
   glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT);    // Clear The Screen And The Depth Buffer
   glLoadIdentity;                                       // Reset The View
   glLightfv(GL_LIGHT0, GL_POSITION, @LightPos);  //can make
@@ -973,7 +974,7 @@ begin
                            PivotPointActual.Value); //PivotPointActual & SRnage both have +1
         RenderDummy;
         glDisable(GL_LIGHTING);
-        if RenderOpts.Wire then RenderWireframe('Wire');
+        if RenderOpts.Wire then RenderWireframe(fColorWireframe);
         glEnable(GL_LIGHTING);
       end;
       glDisable(GL_DEPTH_TEST);
@@ -2619,50 +2620,67 @@ end;
 
 procedure TForm1.ShapeAMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
-  r,g,b: Integer;
+  tgtColor: PCardinal;
+  originalColor: Cardinal;
 begin
   if MatID = 0 then Exit;
+  if ColID = 0 then Exit;
 
-  r := (Sender as TShape).Brush.Color mod 256;
-  g := (Sender as TShape).Brush.Color mod 65536 div 256;
-  b := (Sender as TShape).Brush.Color mod 16777216 div 65536;
+  if Sender = ShapeA then tgtColor := @Material[MatID].Color[ColID].Amb;
+  if Sender = ShapeD then tgtColor := @Material[MatID].Color[ColID].Dif;
+  if Sender = ShapeS1 then tgtColor := @Material[MatID].Color[ColID].Sp1;
+  if Sender = ShapeS2 then tgtColor := @Material[MatID].Color[ColID].Sp2;
+  if Sender = ShapeR then tgtColor := @Material[MatID].Color[ColID].Ref;
 
-  DefineInputColor(r,g,b,Sender);
+  originalColor := tgtColor^;
+
+  TForm_ColorPicker2.Execute(
+    originalColor,
+    procedure(aColor: Cardinal)
+    begin
+      // Live preview
+      tgtColor^ := aColor;
+      TShape(Sender).Brush.Color := aColor;
+
+      Render;
+    end,
+    nil,
+    procedure
+    begin
+      // Cancel - restore original color
+      tgtColor^ := originalColor;
+      TShape(Sender).Brush.Color := originalColor;
+    end);
 end;
 
 
-// Event fired by the ColorPicker form
-procedure TForm1.ShapeADragDrop(Sender, Source: TObject; X, Y: Integer);
+procedure TForm1.ShapeBGMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  tgtColor: PCardinal;
+  originalColor: Cardinal;
 begin
-  if (MatID <> 0) and (ColID <> 0) then
-  with Material[MatID].Color[ColID] do
-  begin
-    Amb.R:=ShapeA.Brush.Color mod 256;
-    Amb.G:=ShapeA.Brush.Color div 256 mod 256;
-    Amb.B:=ShapeA.Brush.Color div 65536;
-    Dif.R:=ShapeD.Brush.Color mod 256;
-    Dif.G:=ShapeD.Brush.Color div 256 mod 256;
-    Dif.B:=ShapeD.Brush.Color div 65536;
-    Sp1.R:=ShapeS1.Brush.Color mod 256;
-    Sp1.G:=ShapeS1.Brush.Color div 256 mod 256;
-    Sp1.B:=ShapeS1.Brush.Color div 65536;
-    Sp2.R:=ShapeS2.Brush.Color mod 256;
-    Sp2.G:=ShapeS2.Brush.Color div 256 mod 256;
-    Sp2.B:=ShapeS2.Brush.Color div 65536;
-    Ref.R:=ShapeR.Brush.Color mod 256;
-    Ref.G:=ShapeR.Brush.Color div 256 mod 256;
-    Ref.B:=ShapeR.Brush.Color div 65536;
-  end;
+  if Sender = ShapeBG then tgtColor := @fColorBackground;
+  if Sender = ShapeWF then tgtColor := @fColorWireframe;
 
-  if ActivePage = apExtra then
-  begin
-    BGColor[1]:=ShapeBG.Brush.Color mod 256;
-    BGColor[2]:=ShapeBG.Brush.Color div 256 mod 256;
-    BGColor[3]:=ShapeBG.Brush.Color div 65536;
-    WFColor[1]:=ShapeWF.Brush.Color mod 256;
-    WFColor[2]:=ShapeWF.Brush.Color div 256 mod 256;
-    WFColor[3]:=ShapeWF.Brush.Color div 65536;
-  end;
+  originalColor := tgtColor^;
+
+  TForm_ColorPicker2.Execute(
+    originalColor,
+    procedure(aColor: Cardinal)
+    begin
+      // Live preview
+      tgtColor^ := aColor;
+      TShape(Sender).Brush.Color := aColor;
+
+      Render;
+    end,
+    nil,
+    procedure
+    begin
+      // Cancel - restore original color
+      tgtColor^ := originalColor;
+      TShape(Sender).Brush.Color := originalColor;
+    end);
 end;
 
 
