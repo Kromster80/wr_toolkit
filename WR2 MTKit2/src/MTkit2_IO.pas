@@ -1601,8 +1601,6 @@ begin
 
   if MOX.Header.PartCount>=1 then Dnode[1].Expand(False);
 
-  Form1.ExchangePartsOrdering;
-  Form1.RebuildPartsTree;
   Result:=True;
 end;
 

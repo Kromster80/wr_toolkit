@@ -312,8 +312,6 @@ type
     procedure SaveCOB1Click(Sender: TObject);
     procedure TVPartsDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
     procedure TVPartsDragDrop(Sender, Source: TObject; X, Y: Integer);
-    procedure RebuildPartsTree;
-    procedure ExchangePartsOrdering;
     procedure MatMonoColorClick(Sender: TObject);
     procedure ImportLWOCOB1Click(Sender: TObject);
     procedure CoBCopyClick(Sender: TObject);
@@ -420,6 +418,8 @@ type
     procedure RebuildCOBBounds;
     procedure SaveMOX(const aFilename: string);
     procedure DevScanMOXHeaders;
+    procedure RebuildPartsTree;
+    procedure ExchangePartsOrdering;
   end;
 
 const
@@ -2307,7 +2307,7 @@ end;
 
 procedure TForm1.RGPivotClick(Sender: TObject);
 begin
-  if SelectedTreeNode=0 then Exit;
+  if SelectedTreeNode = 0 then Exit;
   CustomPivotX.Enabled:=RGPivotX.ItemIndex=3;
   CustomPivotY.Enabled:=RGPivotY.ItemIndex=3;
   CustomPivotZ.Enabled:=RGPivotZ.ItemIndex=3;
@@ -2355,20 +2355,21 @@ end;
 
 procedure TForm1.SpeedButton2Click(Sender: TObject);
 var
-  ID:Integer;
+  idx: Integer;
 begin
-  if SelectedTreeNode=0 then Exit;
-  ID:=PivotPointActual.Value;
+  if SelectedTreeNode = 0 then Exit;
+  idx := PivotPointActual.Value;
+
   ForbidPivotChange := True;
   with PartModify[SelectedTreeNode] do
   begin
-    Custom[1]:=MOX.Vertice[ID+MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1].X;
-    Custom[2]:=MOX.Vertice[ID+MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1].Y;
-    Custom[3]:=MOX.Vertice[ID+MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1].Z;
+    Custom[1]:=MOX.Vertice[idx+MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1].X;
+    Custom[2]:=MOX.Vertice[idx+MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1].Y;
+    Custom[3]:=MOX.Vertice[idx+MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1].Z;
     CustomPivotX.Value:=Custom[1];
     CustomPivotY.Value:=Custom[2];
     CustomPivotZ.Value:=Custom[3];
-    ActualPoint:=ID;
+    ActualPoint:=idx;
   end;
   ForbidPivotChange := False;
   RGPivotClick(nil);//force update
@@ -2406,9 +2407,12 @@ end;
 
 procedure TForm1.PBFLoadClick(Sender: TObject);
 begin
-  if not RunOpenDialog(odOpen,'','','MTKit2 Part Behaviour Files (*.pbf)|*.pbf') then Exit;
+  if not RunOpenDialog(odOpen, '', '', 'MTKit2 Part Behaviour Files (*.pbf)|*.pbf') then Exit;
+
   meLog.Lines.Add('Reading PBF ...');
   LoadPBF(odOpen.FileName);
+  ExchangePartsOrdering;
+  RebuildPartsTree;
   meLog.Lines.Add('PBF file processed and closed');
 end;
 
@@ -3052,6 +3056,7 @@ var
 begin
   if not RunOpenDialog(odOpen,'',fOpenedFolder,'OBJ object files (*.obj)|*.obj') then Exit;
   if not LoadOBJ(odOpen.FileName,log) then Exit;
+
   meLog.Lines.Add(log);
   ConverseImp_MOX;
   UpdateOpenedFileInfo(odOpen.FileName)
@@ -3063,6 +3068,7 @@ var
 begin
   if not RunOpenDialog(odOpen,'',fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
   if not LoadLWO(odOpen.FileName,log) then Exit;
+
   meLog.Lines.Add(log);
   RebuildImpNormals;
   ConverseImp_MOX;
@@ -3081,6 +3087,8 @@ begin
 
   LoadPSF(fOpenedFileMask+'.psf');
   LoadPBF(fOpenedFileMask+'.pbf');
+  ExchangePartsOrdering;
+  RebuildPartsTree;
   LoadBlinkers(fOpenedFileMask+'.lsf');
 
   SendDataToUI(uiBlinkers);
