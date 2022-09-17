@@ -497,6 +497,7 @@ function LoadLWO(const aFilename: string; out Log:string):Boolean;
 var
   c: array [1..MAX_READ_BUFFER] of AnsiChar;
   f:file;
+  chname: AnsiString;
   h,i,j,k,m:Integer;
   xr:Single;
   chsize,xt:Integer;
@@ -1062,6 +1063,7 @@ end;
 
 procedure LoadMTL(const aFilename: string);
 var
+  chname: AnsiString;
   h,i,j,k: Integer;
   ft: textfile;
   NumMaterials: Integer; //for current MTL file
@@ -1090,21 +1092,25 @@ begin
 
       if CHname='COLSETINF' then else //DoNothing
 
-      if CHname='#' then begin
+      if CHname='#' then
+      begin
         Inc(j);
         Material[j].Mtag:=s[5]+s[6]+s[7]+s[8];
         for h:=10 to Length(s) do Material[j].Title:=Material[j].Title+s[h];
         Inc(NumMaterials);
       end else
 
-      if CHname='MATCLASS' then begin
+      if CHname='MATCLASS' then
+      begin
         Material[j].MatClass[1]:=strtoint(s[11]);
         Material[j].MatClass[2]:=strtoint(s[14]);
         Material[j].MatClass[3]:=strtoint(s[17]);
         Material[j].MatClass[4]:=strtoint(s[19]+s[20]);
       end else
 
-      if chname='DIFFUSE' then begin k:=1;
+      if chname='DIFFUSE' then
+      begin
+        k:=1;
         repeat
           h:=7+k*9; if Length(s)<h then h:=Length(s);
           Material[j].Color[k].Dif.R:=hextoint(s[h-5])*16+hextoint(s[h-4]); //11,20, ...
@@ -1114,7 +1120,9 @@ begin
         until(k=16)
       end else
 
-      if chname='AMBIENT' then begin k:=1;
+      if chname='AMBIENT' then
+      begin
+        k:=1;
         repeat
           h:=7+k*9; if Length(s)<h then h:=Length(s);
           Material[j].Color[k].Amb.R:=hextoint(s[h-5])*16+hextoint(s[h-4]); //11,20, ...
@@ -1124,7 +1132,9 @@ begin
         until(k=16)
       end else
 
-      if chname='SPECULAR' then begin k:=1;
+      if chname='SPECULAR' then
+      begin
+        k:=1;
         repeat
           h:=8+k*9; if Length(s)<h then h:=Length(s);
           Material[j].Color[k].Sp1.R:=hextoint(s[h-5])*16+hextoint(s[h-4]); //12,21, ...
@@ -1134,7 +1144,9 @@ begin
         until(k=16)
       end else
 
-      if chname='REFLECT' then begin k:=1;
+      if chname='REFLECT' then
+      begin
+        k:=1;
         repeat
           h:=7+k*9; if Length(s)<h then h:=Length(s);
           Material[j].Color[k].Ref.R:=hextoint(s[h-5])*16+hextoint(s[h-4]); //11,20, ...
@@ -1144,7 +1156,9 @@ begin
         until(k=16)
       end else
 
-      if chname='SPECULAR2' then begin k:=1;
+      if chname='SPECULAR2' then
+      begin
+        k:=1;
         repeat
           h:=9+k*9; if Length(s)<h then h:=Length(s);
           Material[j].Color[k].Sp2.R:=hextoint(s[h-5])*16+hextoint(s[h-4]); //12,21, ...
@@ -1161,30 +1175,37 @@ begin
         Material[j].Transparency:=EnsureRange(Round(GetNumberFromString(s,1)*100),0,100)
       else
 
-      if chname='TEX1NAME' then begin i:=10;
+      if chname='TEX1NAME' then
+      begin
+        i:=10;
         Material[j].TexName:='';
         repeat Inc(i);
           if s[i]<>'"' then Material[j].TexName:=Material[j].TexName+s[i];
         until((i=Length(s))or(s[i]='"')or(s[i]='.'));
-        if Material[j].TexName<>'' then Material[j].TexName:=Material[j].TexName+'tga';
+        if Material[j].TexName<>'' then
+          Material[j].TexName:=Material[j].TexName+'tga';
       end else
 
-      if chname='TEXFLAGS' then begin
+      if chname='TEXFLAGS' then
+      begin
         Material[j].TexEdge.U:=strtoint(s[12]);
         Material[j].TexEdge.V:=strtoint(s[13]);
       end else
 
-      if chname='TEXOFFSET' then begin
+      if chname='TEXOFFSET' then
+      begin
         Material[j].TexOffset.U:=GetNumberFromString(s,1);
         Material[j].TexOffset.V:=GetNumberFromString(s,2);
       end else
 
-      if chname='TEXSCALE' then begin
+      if chname='TEXSCALE' then
+      begin
         Material[j].TexScale.U:=GetNumberFromString(s,1);
         Material[j].TexScale.V:=GetNumberFromString(s,2);
       end else
 
-      if chname='TEXANGLE' then begin
+      if chname='TEXANGLE' then
+      begin
         Material[j].TexAngle:=strtofloat(s[10]+s[11]+s[12]+s[13]+s[14])*1000;
         if Material[j].TexAngle=1570 then Material[j].TexAngle:=90;
         if Material[j].TexAngle=-157 then Material[j].TexAngle:=-90;
@@ -1198,16 +1219,17 @@ begin
   end;
 
   begin //FileNotExists or append incomplete MTL
-
     for i:=NumMaterials+1 to MOX.Header.MatCount do
-    with Material[i] do begin
+    with Material[i] do
+    begin
       Mtag:=inttohex((i-1),4);
       Color[1].Amb.R:=0;  Color[1].Amb.G:=0;  Color[1].Amb.B:=0;
       Color[1].Dif.R:=96; Color[1].Dif.G:=96; Color[1].Dif.B:=80;
       Color[1].Sp1.R:=64; Color[1].Sp1.G:=64; Color[1].Sp1.B:=48;
       Color[1].Sp2.R:=32; Color[1].Sp2.G:=32; Color[1].Sp2.B:=24;
       Color[1].Ref.R:=50; Color[1].Ref.G:=50; Color[1].Ref.B:=50;
-      TexEdge.U:=1; TexEdge.V:=1;
+      TexEdge.U:=1;
+      TexEdge.V:=1;
     end;
 
     for i:=NumMaterials+1 to MOX.Header.MatCount do

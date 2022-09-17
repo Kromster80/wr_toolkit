@@ -399,6 +399,7 @@ type
     fLightCopyID: Integer;
     fColorCopyID: Integer;
     fCOBCopyItem: Integer;
+    fUseShaders: Boolean;
 
     fTree: TModelTree;
 
@@ -432,11 +433,10 @@ const
 
 var
   Form1: TForm1;
-  s,s2,chname: AnsiString;
+  s,s2: AnsiString;
 
   FPSLag: Word = 33;
   OldTimeLWO: Cardinal;
-  UseShaders: Boolean;
   EnvTexture,SpecTexture,Spec2Texture:glUint;
   DirtTex,ScratchTex:glUint;
   FlameTex,LensFlareTex,DummyTex,SelectionTex:glUint;
@@ -601,8 +601,8 @@ begin
   RenderInit;
   RenderResize(nil);
   CompileCommonObjects;
-  UseShaders := LoadFresnelShader;
-  if UseShaders then meLog.Lines.Add('Shaders loaded');
+  fUseShaders := LoadFresnelShader;
+  if fUseShaders then meLog.Lines.Add('Shaders loaded');
 
   PivotSetup.TabVisible := False;
   Application.OnIdle := OnIdle;
@@ -1323,18 +1323,22 @@ begin
   ForbidPartsChange := False;
   FlapParts.Enabled:=SelectedTreeNode<>0;
   Label30.Enabled:=SelectedTreeNode<>0;
+
   ForbidPivotChange := True;
-  PivotPointActual.MaxValue:=
-    MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1+MOX.Parts[SelectedTreeNode].NumMat-1].LastVtx -
-    MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx+1;
-  PivotPointActual.Value:=PartModify[SelectedTreeNode].ActualPoint;
-  RGPivotX.ItemIndex:=PartModify[SelectedTreeNode].AxisSetup[1];
-  RGPivotY.ItemIndex:=PartModify[SelectedTreeNode].AxisSetup[2];
-  RGPivotZ.ItemIndex:=PartModify[SelectedTreeNode].AxisSetup[3];
-  CustomPivotX.Value:=PartModify[SelectedTreeNode].Custom[1];
-  CustomPivotY.Value:=PartModify[SelectedTreeNode].Custom[2];
-  CustomPivotZ.Value:=PartModify[SelectedTreeNode].Custom[3];
-  ForbidPivotChange := False;
+  try
+    PivotPointActual.MaxValue:=
+      MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1+MOX.Parts[SelectedTreeNode].NumMat-1].LastVtx -
+      MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx+1;
+    PivotPointActual.Value:=PartModify[SelectedTreeNode].ActualPoint;
+    RGPivotX.ItemIndex:=PartModify[SelectedTreeNode].AxisSetup[1];
+    RGPivotY.ItemIndex:=PartModify[SelectedTreeNode].AxisSetup[2];
+    RGPivotZ.ItemIndex:=PartModify[SelectedTreeNode].AxisSetup[3];
+    CustomPivotX.Value:=PartModify[SelectedTreeNode].Custom[1];
+    CustomPivotY.Value:=PartModify[SelectedTreeNode].Custom[2];
+    CustomPivotZ.Value:=PartModify[SelectedTreeNode].Custom[3];
+  finally
+    ForbidPivotChange := False;
+  end;
 end;
 
 
@@ -2612,7 +2616,7 @@ end;
 
 procedure TForm1.CBRenderModeChange(Sender: TObject);
 begin
-  if not UseShaders then
+  if not fUseShaders then
     CBRenderMode.ItemIndex := 0;
 
   fRenderMode := TRenderMode(CBRenderMode.ItemIndex);
@@ -2792,7 +2796,7 @@ end;
 
 procedure TForm1.ReloadShadersCodeClick(Sender: TObject);
 begin
-  UseShaders := LoadFresnelShader;
+  fUseShaders := LoadFresnelShader;
 end;
 
 
