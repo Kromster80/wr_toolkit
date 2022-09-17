@@ -424,7 +424,7 @@ type
 
 const
   APP_TITLE = 'Mesh ToolKit';
-  VER_INFO = '2.3.9 (09 Mar 2022)';
+  VER_INFO = '2.4.0';
   FPS_INTERVAL: Cardinal = 1000;               // Calculate FPS every ---- ms
   MAX_MATERIALS = 255;
   MAX_COLORS = 15;
@@ -591,7 +591,7 @@ begin
   aFilename := ParamStr(1); //Get filename parameter
   ExeDir := ExtractFilePath(Application.ExeName);
   meLog.Lines.Add(aFilename);
-  Caption := APP_TITLE + '    ' + VER_INFO;
+  Caption := APP_TITLE + ' v' + VER_INFO;
 
   LoadSettingsFromIni(ExeDir + 'MTKit2 Data\options.ini');
   SetRenderFrame(RenderPanel.Handle, h_DC, h_RC);
