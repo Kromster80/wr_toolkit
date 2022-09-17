@@ -73,78 +73,82 @@ var
   s: AnsiString;
 begin
   Result := false;
+  try
+    s := PAnsiChar(glGetString(GL_VERSION));
 
-  s := PAnsiChar(glGetString(GL_VERSION));
+    if s < '2.0' then begin //return format is "Major.Minor.Minor - Misc", we check first two  numbers as version
+      if not fileexists('krom.dev') then
+        MessageBox(Form1.Handle,
+          PChar('You need at least OpenGL 2.0 to run MTKit2'+eol+
+          'Your OpenGL version is '+glGetString(GL_VERSION)+' by '+glGetString(GL_RENDERER)+eol+
+          eol+
+          'MTKit2 will now run in compatibility mode'), 'OpenGL', MB_OK);
+      exit;
+    end;
 
-  if s < '2.0' then begin //return format is "Major.Minor.Minor - Misc", we check first two  numbers as version
-    if not fileexists('krom.dev') then
-      MessageBox(Form1.Handle,
-        PChar('You need at least OpenGL 2.0 to run MTKit2'+eol+
-        'Your OpenGL version is '+glGetString(GL_VERSION)+' by '+glGetString(GL_RENDERER)+eol+
-        eol+
-        'MTKit2 will now run in compatibility mode'), 'OpenGL', MB_OK);
-    exit;
-  end;
+    Assert(Assigned(glCreateShaderObjectARB));
 
-  Assert(Assigned(glCreateShaderObjectARB));
+    for i:=0 to MAX_MAT_CLASS do for k:=0 to MAX_MAT_CLASS do
+    begin
+      po[i,k]:=glCreateProgramObjectARB;
+      fs[i,k]:=glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+    end;
 
-  for i:=0 to MAX_MAT_CLASS do for k:=0 to MAX_MAT_CLASS do
-  begin
-    po[i,k]:=glCreateProgramObjectARB;
-    fs[i,k]:=glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-  end;
+    vs:=glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB); //one for all
 
-  vs:=glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB); //one for all
+    if not fileexists(ExeDir+'MTKit2 Data\Common.vert')
+    or not fileexists(ExeDir+'MTKit2 Data\Common.frag') then
+    begin
+      MessageBox(Form1.Handle, 'Unable to locate "MTKit2 Data\Common.vert" or "MTKit2 Data\Common.frag"', 'Error', MB_OK or MB_ICONERROR);
+      exit;
+    end;
 
-  if not fileexists(ExeDir+'MTKit2 Data\Common.vert')
-  or not fileexists(ExeDir+'MTKit2 Data\Common.frag') then
-  begin
-    MessageBox(Form1.Handle, 'Unable to locate "MTKit2 Data\Common.vert" or "MTKit2 Data\Common.frag"', 'Error', MB_OK or MB_ICONERROR);
-    exit;
-  end;
-
-  assignfile(ff,ExeDir+'MTKit2 Data\Common.vert');
-  reset(ff,1);
-  blockread(ff,c,10000,NumRead);
-  closefile(ff);
-  c[NumRead+1]:=#0;
-  src := PAnsiChar(@c[1]);
-  glShaderSourceARB(vs, 1, @src, @NumRead);
-
-  for i:=0 to MAX_MAT_CLASS do for k:=0 to MAX_MAT_CLASS do
-  begin
-    fname:=int2fix(i,2)+' '+int2fix(k,2);
-    if fileexists(ExeDir+'MTKit2 Data\'+fname+'.frag') then
-      fname:='MTKit2 Data\'+fname+'.frag'
-    else
-      fname:='MTKit2 Data\Common.frag';
-
-    assignfile(ff,ExeDir+fname);
+    assignfile(ff,ExeDir+'MTKit2 Data\Common.vert');
     reset(ff,1);
     blockread(ff,c,10000,NumRead);
     closefile(ff);
     c[NumRead+1]:=#0;
     src := PAnsiChar(@c[1]);
-    glShaderSourceARB(fs[i,k], 1, @src, @NumRead);
+    glShaderSourceARB(vs, 1, @src, @NumRead);
+
+    for i:=0 to MAX_MAT_CLASS do for k:=0 to MAX_MAT_CLASS do
+    begin
+      fname:=int2fix(i,2)+' '+int2fix(k,2);
+      if fileexists(ExeDir+'MTKit2 Data\'+fname+'.frag') then
+        fname:='MTKit2 Data\'+fname+'.frag'
+      else
+        fname:='MTKit2 Data\Common.frag';
+
+      assignfile(ff,ExeDir+fname);
+      reset(ff,1);
+      blockread(ff,c,10000,NumRead);
+      closefile(ff);
+      c[NumRead+1]:=#0;
+      src := PAnsiChar(@c[1]);
+      glShaderSourceARB(fs[i,k], 1, @src, @NumRead);
+    end;
+
+    glCompileShaderARB(vs);
+    CheckGLSLError(vs, GL_OBJECT_COMPILE_STATUS_ARB, 'Compile VS');
+
+    for i:=0 to MAX_MAT_CLASS do
+    for k:=0 to MAX_MAT_CLASS do
+    begin
+      glCompileShaderARB(fs[i,k]);
+      CheckGLSLError(fs[i,k], GL_OBJECT_COMPILE_STATUS_ARB, Format('FS compile %2d %2d', [I,K]));
+
+      glAttachObjectARB(po[i,k],vs);
+      glAttachObjectARB(po[i,k],fs[i,k]);
+      glLinkProgramARB(po[i,k]);
+      CheckGLSLError(po[i,k],GL_OBJECT_LINK_STATUS_ARB, Format('PO link %2d %2d', [I,K]));
+      glValidateProgramARB(po[i,k]);
+      CheckGLSLError(po[i,k],GL_OBJECT_VALIDATE_STATUS_ARB, Format('PO validate %2d %2d', [I,K]));
+    end;
+
+    Result := true;
+  except
+    //
   end;
-
-  glCompileShaderARB(vs);
-  CheckGLSLError(vs, GL_OBJECT_COMPILE_STATUS_ARB, 'Compile VS');
-
-  for i:=0 to MAX_MAT_CLASS do for k:=0 to MAX_MAT_CLASS do
-  begin
-    glCompileShaderARB(fs[i,k]);
-    CheckGLSLError(fs[i,k], GL_OBJECT_COMPILE_STATUS_ARB, Format('FS compile %2d %2d', [I,K]));
-
-    glAttachObjectARB(po[i,k],vs);
-    glAttachObjectARB(po[i,k],fs[i,k]);
-    glLinkProgramARB(po[i,k]);
-    CheckGLSLError(po[i,k],GL_OBJECT_LINK_STATUS_ARB, Format('PO link %2d %2d', [I,K]));
-    glValidateProgramARB(po[i,k]);
-    CheckGLSLError(po[i,k],GL_OBJECT_VALIDATE_STATUS_ARB, Format('PO validate %2d %2d', [I,K]));
-  end;
-
-  Result := true;
 end;
 
 function RenderShaders: Boolean;

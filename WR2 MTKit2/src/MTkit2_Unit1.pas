@@ -2087,10 +2087,10 @@ begin
       i2:=(order[i]-1)*MOX.Header.MatCount+k;     //source
 
       aSRange[i1,1]:=kp;                                   //first poly
-      aSRange[i1,2]:=MOX.Chunks[i2].PolyCount;                         //poly count
-      inc(kp,MOX.Chunks[i2].PolyCount);
+      aSRange[i1,2]:=MOX.Chunks[i2].PolyCount;             //poly count
+      Inc(kp, MOX.Chunks[i2].PolyCount);
       aSRange[i1,3]:=kv+1;                                 //first point
-      inc(kv,MOX.Chunks[i2].LastVtx-MOX.Chunks[i2].FirstVtx+1);
+      Inc(kv, MOX.Chunks[i2].LastVtx - MOX.Chunks[i2].FirstVtx + 1);
       aSRange[i1,4]:=kv;                                   //last point
 
       for j:=aSRange[i1,3] to aSRange[i1,4] do

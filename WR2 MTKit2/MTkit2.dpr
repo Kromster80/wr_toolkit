@@ -1,5 +1,10 @@
 program MTkit2;
 uses
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   Forms,
   MTkit2_Unit1 in 'src\MTkit2_Unit1.pas' {Form1},
   MTkit2_Defaults in 'src\MTkit2_Defaults.pas',
