@@ -541,7 +541,7 @@ var
   VinylsList: array [1..128] of string;
 
   PartModify: array [1..MAX_PARTS] of record
-    ActualPoint:Integer;
+    ActualPoint: Integer;
     AxisSetup: array [1..3] of Byte;
     Low: array [1..3] of Single;
     High: array [1..3] of Single;
@@ -731,12 +731,13 @@ var
 begin
   if aMsg.message = WM_INPUT then
   begin
-    GetRawInputData(aMsg.lParam, RID_INPUT, nil, dwSize, SizeOf(RAWINPUTHEADER));
+    if GetRawInputData(HRAWINPUT(aMsg.lParam), RID_INPUT, nil, dwSize, SizeOf(RAWINPUTHEADER)) <> 0 then
+      ShowMessage('Error calling GetRawInputData');
 
     if dwSize = 0 then
       ShowMessage('Can not allocate memory');
 
-    if GetRawInputData(aMsg.lParam, RID_INPUT, @ri, dwSize, SizeOf(RAWINPUTHEADER)) <> dwSize then
+    if GetRawInputData(HRAWINPUT(aMsg.lParam), RID_INPUT, @ri, dwSize, SizeOf(RAWINPUTHEADER)) <> dwSize then
       ShowMessage('GetRawInputData doesn''t return correct size !');
 
     // https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-rawinputdevicelist
@@ -749,6 +750,8 @@ begin
         fLastInputMode := imAbsolute;
     end;
   end;
+
+  aHandled := False;
 end;
 
 
@@ -1293,16 +1296,17 @@ end;
 
 
 procedure TForm1.TVPartsChange(Sender: TObject; Node: TTreeNode);
-var ID:Integer;
+var
+  idx: Integer;
 begin
   ForbidPartsChange := True;
   Label63.Caption:='ID: '+IntToStr(TVParts.Selected.AbsoluteIndex);
   SelectedTreeNode := TVParts.Selected.AbsoluteIndex+1;
-  ID:=SelectedTreeNode;
-  Label23.Caption:='#'+IntToStr(ID)+' P'+IntToStr(MOX.Parts[ID].Parent+1)
-                                   +' C'+IntToStr(MOX.Parts[ID].Child+1)
-                                   +' P'+IntToStr(MOX.Parts[ID].PrevInLevel+1)
-                                   +' N'+IntToStr(MOX.Parts[ID].NextInLevel+1);
+  idx:=SelectedTreeNode;
+  Label23.Caption:='#'+IntToStr(idx)+' P'+IntToStr(MOX.Parts[idx].Parent+1)
+                                   +' C'+IntToStr(MOX.Parts[idx].Child+1)
+                                   +' P'+IntToStr(MOX.Parts[idx].PrevInLevel+1)
+                                   +' N'+IntToStr(MOX.Parts[idx].NextInLevel+1);
 
   EDetailName.Text:=MOX.Parts[SelectedTreeNode].Dname;
   CX.Value:=MOX.Parts[SelectedTreeNode].xMid;
@@ -2051,7 +2055,7 @@ end;
 
 procedure TForm1.ExchangePartsOrdering;
 var
-  i,j,k: Integer;
+  I,j,K: Integer;
   kp,kv: Integer;
   i1,i2: Integer;
   order: array [1..MAX_PARTS] of Integer;
@@ -2062,63 +2066,66 @@ var
   aVertex: array [1..65280] of record X,Y,Z,nX,nY,nZ,U,V,x1,x2: Single; end; //40Bytes
   av: array [1..65280,1..3] of Word;                                         //6Bytes
 begin
-  for i := 1 to MOX.Header.PartCount do
-    for k := 1 to MOX.Header.PartCount do
-      if MOX.Parts[i].Dname = TVParts.Items[k - 1].Text then
-        order[k] := i;
+  for I := 1 to MOX.Header.PartCount do
+    for K := 1 to MOX.Header.PartCount do
+      if MOX.Parts[I].Dname = TVParts.Items[K - 1].Text then
+        order[K] := I;
 
   kp:=0; kv:=0;
-  for i:=1 to MOX.Header.PartCount do
+  for I := 1 to MOX.Header.PartCount do
   begin
-    aDname[i]:=MOX.Parts[order[i]].Dname;
-    aParts[i].xMid:=MOX.Parts[order[i]].xMid;
-    aParts[i].yMid:=MOX.Parts[order[i]].yMid;
-    aParts[i].zMid:=MOX.Parts[order[i]].zMid;
-    aParts[i].fRadius:=MOX.Parts[order[i]].fRadius;
-    aParts[i].TypeID:=MOX.Parts[order[i]].TypeID;
-    aParts[i].x1:=MOX.Parts[order[i]].x1; aParts[i].x2:=MOX.Parts[order[i]].x2;
-    aParts[i].y1:=MOX.Parts[order[i]].y1; aParts[i].y2:=MOX.Parts[order[i]].y2;
-    aParts[i].z1:=MOX.Parts[order[i]].z1; aParts[i].z2:=MOX.Parts[order[i]].z2;
-    CopyMemory(@aPartModify[i],@PartModify[order[i]],56); //55+1 !
+    aDname[i] := MOX.Parts[order[i]].Dname;
+    aParts[i].xMid := MOX.Parts[order[i]].xMid;
+    aParts[i].yMid := MOX.Parts[order[i]].yMid;
+    aParts[i].zMid := MOX.Parts[order[i]].zMid;
+    aParts[i].fRadius := MOX.Parts[order[i]].fRadius;
+    aParts[i].TypeID := MOX.Parts[order[i]].TypeID;
+    aParts[i].x1 := MOX.Parts[order[i]].x1;
+    aParts[i].x2 := MOX.Parts[order[i]].x2;
+    aParts[i].y1 := MOX.Parts[order[i]].y1;
+    aParts[i].y2 := MOX.Parts[order[i]].y2;
+    aParts[i].z1 := MOX.Parts[order[i]].z1;
+    aParts[i].z2 := MOX.Parts[order[i]].z2;
+    CopyMemory(@aPartModify[I], @PartModify[order[I]], 56); //55+1 !
 
-    for k:=1 to MOX.Header.MatCount do
+    for K := 1 to MOX.Header.MatCount do
     begin
-      i1:=(i-1)*MOX.Header.MatCount+k;            //destination
-      i2:=(order[i]-1)*MOX.Header.MatCount+k;     //source
+      i1 := (I - 1) * MOX.header.MatCount + K; // destination
+      i2 := (order[I] - 1) * MOX.header.MatCount + K; // source
 
-      aSRange[i1,1]:=kp;                                   //first poly
-      aSRange[i1,2]:=MOX.Chunks[i2].PolyCount;             //poly count
+      aSRange[i1,1] := kp;                                   //first poly
+      aSRange[i1,2] := MOX.Chunks[i2].PolyCount;             //poly count
       Inc(kp, MOX.Chunks[i2].PolyCount);
-      aSRange[i1,3]:=kv+1;                                 //first point
+      aSRange[i1,3] := kv+1;                                 //first point
       Inc(kv, MOX.Chunks[i2].LastVtx - MOX.Chunks[i2].FirstVtx + 1);
-      aSRange[i1,4]:=kv;                                   //last point
+      aSRange[i1,4] := kv;                                   //last point
 
-      for j:=aSRange[i1,3] to aSRange[i1,4] do
-      CopyMemory(@aVertex[j],@MOX.Vertice[MOX.Chunks[i2].FirstVtx+(j-aSRange[i1,3])],40);
-      for j:=1 to aSRange[i1,2] do
+      for J:=aSRange[i1,3] to aSRange[i1,4] do
+      CopyMemory(@aVertex[J],@MOX.Vertice[MOX.Chunks[i2].FirstVtx+(J-aSRange[i1,3])],40);
+      for J:=1 to aSRange[i1,2] do
       begin
-        av[aSRange[i1,1]+j,1]:=MOX.Face[MOX.Chunks[i2].FirstPoly+j,1]+aSRange[i1,3]-MOX.Chunks[i2].FirstVtx;
-        av[aSRange[i1,1]+j,2]:=MOX.Face[MOX.Chunks[i2].FirstPoly+j,2]+aSRange[i1,3]-MOX.Chunks[i2].FirstVtx;
-        av[aSRange[i1,1]+j,3]:=MOX.Face[MOX.Chunks[i2].FirstPoly+j,3]+aSRange[i1,3]-MOX.Chunks[i2].FirstVtx;
+        av[aSRange[i1,1]+J,1]:=MOX.Face[MOX.Chunks[i2].FirstPoly+J,1]+aSRange[i1,3]-MOX.Chunks[i2].FirstVtx;
+        av[aSRange[i1,1]+J,2]:=MOX.Face[MOX.Chunks[i2].FirstPoly+J,2]+aSRange[i1,3]-MOX.Chunks[i2].FirstVtx;
+        av[aSRange[i1,1]+J,3]:=MOX.Face[MOX.Chunks[i2].FirstPoly+J,3]+aSRange[i1,3]-MOX.Chunks[i2].FirstVtx;
       end;
     end;
   end;
 
-  CopyMemory(@PartModify,@aPartModify,length(PartModify)*56); //55+1 !
-  CopyMemory(@MOX.Chunks,@aSRange,length(MOX.Chunks)*8); //1..4 of Word
-  CopyMemory(@MOX.Vertice,@aVertex,length(MOX.Vertice)*40);//XYZXYZUV00 of Single
-  CopyMemory(@MOX.Face,@av,length(MOX.Face)*6);                //1..3 of Word
-  for i:=1 to MOX.Header.PartCount do
+  CopyMemory(@PartModify, @aPartModify, Length(PartModify)*56); //55+1 !
+  CopyMemory(@MOX.Chunks, @aSRange, Length(MOX.Chunks)*8); //1..4 of Word
+  CopyMemory(@MOX.Vertice, @aVertex, Length(MOX.Vertice)*40);//XYZXYZUV00 of Single
+  CopyMemory(@MOX.Face, @av, Length(MOX.Face)*6);                //1..3 of Word
+  for I:=1 to MOX.Header.PartCount do
   begin
-    MOX.Parts[i].Dname:=aDname[i];
-    MOX.Parts[i].xMid:=aParts[i].xMid;
-    MOX.Parts[i].yMid:=aParts[i].yMid;
-    MOX.Parts[i].zMid:=aParts[i].zMid;
-    MOX.Parts[i].fRadius:=aParts[i].fRadius;
-    MOX.Parts[i].TypeID:=aParts[i].TypeID;
-    MOX.Parts[i].x1:=aParts[i].x1; MOX.Parts[i].x2:=aParts[i].x2;
-    MOX.Parts[i].y1:=aParts[i].y1; MOX.Parts[i].y2:=aParts[i].y2;
-    MOX.Parts[i].z1:=aParts[i].z1; MOX.Parts[i].z2:=aParts[i].z2;
+    MOX.Parts[I].Dname:=aDname[I];
+    MOX.Parts[I].xMid:=aParts[I].xMid;
+    MOX.Parts[I].yMid:=aParts[I].yMid;
+    MOX.Parts[I].zMid:=aParts[I].zMid;
+    MOX.Parts[I].fRadius:=aParts[I].fRadius;
+    MOX.Parts[I].TypeID:=aParts[I].TypeID;
+    MOX.Parts[I].x1:=aParts[I].x1; MOX.Parts[I].x2:=aParts[I].x2;
+    MOX.Parts[I].y1:=aParts[I].y1; MOX.Parts[I].y2:=aParts[I].y2;
+    MOX.Parts[I].z1:=aParts[I].z1; MOX.Parts[I].z2:=aParts[I].z2;
   end;
 
   CompileLoadedMOX;
