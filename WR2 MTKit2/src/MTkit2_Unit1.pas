@@ -425,7 +425,7 @@ type
 
 const
   APP_TITLE = 'Mesh ToolKit';
-  VER_INFO = '2.4.0';
+  VER_INFO = '2.4.1';
   FPS_INTERVAL: Cardinal = 1000;               // Calculate FPS every ---- ms
   MAX_MATERIALS = 255;
   MAX_COLORS = 15;
@@ -865,44 +865,44 @@ end;
 
 procedure TForm1.CompileLoadedMOX;
 var
-  h,i,k,LOD:Integer;
-  t:Single;
+  H,I,K: Integer;
+  t: Single;
 begin
-  for i:=1 to MOX.Header.ChunkCount do
+  for I:=1 to MOX.Header.ChunkCount do
   begin
-    if MoxCall[i]=0 then MoxCall[i]:=glGenLists(1);
-    glNewList(MoxCall[i], GL_COMPILE);
+    if MoxCall[I]=0 then MoxCall[I]:=glGenLists(1);
+    glNewList(MoxCall[I], GL_COMPILE);
     glBegin(GL_TRIANGLES);
-      for k:=1 to MOX.Chunks[i].PolyCount do  //1..number polys
-      for h:=3 downto 1 do
+      for K:=1 to MOX.Chunks[I].PolyCount do  //1..number polys
+      for H:=3 downto 1 do
       begin
-        glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].U);
-        glNormal3fv(@MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].nX);
-        glVertex3fv(@MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].X);
+        glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].U);
+        glNormal3fv(@MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].nX);
+        glVertex3fv(@MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].X);
       end;
     glEnd;
     glEndList;
 
-    if MoxUVCall[i]=0 then MoxUVCall[i]:=glGenLists(1);
-    glNewList(MoxUVCall[i], GL_COMPILE);
+    if MoxUVCall[I]=0 then MoxUVCall[I]:=glGenLists(1);
+    glNewList(MoxUVCall[I], GL_COMPILE);
     glbegin(GL_TRIANGLES);
-      for k:=1 to MOX.Chunks[i].PolyCount do
+      for K:=1 to MOX.Chunks[I].PolyCount do
       begin
-        Normal2Poly(MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,1]].U,MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,1]].V,
-                    MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,2]].U,MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,2]].V,
-                    MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,3]].U,MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,3]].V,t);
+        Normal2Poly(MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,1]].U,MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,1]].V,
+                    MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,2]].U,MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,2]].V,
+                    MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,3]].U,MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,3]].V, t);
         if t>=0 then
-          for h:=3 downto 1 do
+          for H:=3 downto 1 do
           begin
-            glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].U);
-            glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].U,-MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].V+1);
-            //glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].x1,-MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].x2+1);//AFC11CT
+            glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].U);
+            glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].U,-MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].V+1);
+            //glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[I,1]+K,H]].x1,-MOX.Vertice[MOX.Face[MOX.Chunk[I,1]+K,H]].x2+1);//AFC11CT
           end
         else
-          for h:=1 to 3 do begin
-            glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].U);
-            glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].U,-MOX.Vertice[MOX.Face[MOX.Chunks[i].FirstPoly+k,h]].V+1);
-            //glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].x1,-MOX.Vertice[MOX.Face[MOX.Chunk[i,1]+k,h]].x2+1);//AFC11CT
+          for H:=1 to 3 do begin
+            glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].U);
+            glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].U,-MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].V+1);
+            //glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[I,1]+K,H]].x1,-MOX.Vertice[MOX.Face[MOX.Chunk[I,1]+K,H]].x2+1);//AFC11CT
           end;
       end;
     glEnd;
@@ -2047,9 +2047,11 @@ end;
 
 procedure TForm1.TVPartsDragDrop(Sender, Source: TObject; X, Y: Integer);
 begin
-  TVParts.Selected.MoveTo(TVParts.GetNodeAt(X,Y),naAddChild); //First?
+  TVParts.Selected.MoveTo(TVParts.GetNodeAt(X,Y), naAddChild); // First?
+
   RebuildPartsTree;
   ExchangePartsOrdering;
+
   SelectedTreeNode := TVParts.Selected.AbsoluteIndex+1;
 end;
 
@@ -2057,22 +2059,27 @@ end;
 procedure TForm1.ExchangePartsOrdering;
 var
   I,j,K: Integer;
-  kp,kv: Integer;
-  i1,i2: Integer;
-  order: array [1..MAX_PARTS] of Integer;
-  aDname: array [1..MAX_PARTS]of string;
-  aPartModify: array [1..MAX_PARTS]of record ActualPoint:Integer; AxisSetup: array [1..3]of Byte; Low: array [1..3]of Single; High: array [1..3]of Single; Custom: array [1..3]of Single; Move: array [1..3]of Single; end;
-  aParts: array [1..MAX_PARTS]of record xMid,yMid,zMid,fRadius:Single; TypeID:smallint; x1,x2,y1,y2,z1,z2:Single; end;
-  aSRange: array [1..2048,1..4]of Word;
-  aVertex: array [1..65280] of record X,Y,Z,nX,nY,nZ,U,V,x1,x2: Single; end; //40Bytes
-  av: array [1..65280,1..3] of Word;                                         //6Bytes
+  accPoly, accVert: Integer;
+  iDest, iSrc: Integer;
+  order: array of Integer;
+  aDname: array [1..MAX_PARTS] of string;
+  aPartModify: array [1..MAX_PARTS] of record ActualPoint:Integer; AxisSetup: array [1..3]of Byte; Low: array [1..3]of Single; High: array [1..3]of Single; Custom: array [1..3]of Single; Move: array [1..3]of Single; end;
+  aParts: array [1..MAX_PARTS] of record xMid,yMid,zMid,fRadius:Single; TypeID:smallint; x1,x2,y1,y2,z1,z2:Single; end;
+  exChunk: array of TMOXChunk;
+  exVertice: array of record X,Y,Z,nX,nY,nZ,U,V,x1,x2: Single; end; //40Bytes
+  exPolys: array of array [1..3] of Integer;
 begin
+  SetLength(order, MOX.Header.PartCount + 1);
   for I := 1 to MOX.Header.PartCount do
     for K := 1 to MOX.Header.PartCount do
       if MOX.Parts[I].Dname = TVParts.Items[K - 1].Text then
         order[K] := I;
 
-  kp:=0; kv:=0;
+  SetLength(exVertice, MOX.Header.VerticeCount + 1);
+  SetLength(exPolys, MOX.Header.PolyCount + 1);
+  SetLength(exChunk, MOX.Header.MatCount * MOX.Header.PartCount + 1);
+
+  accPoly := 0; accVert := 0;
   for I := 1 to MOX.Header.PartCount do
   begin
     aDname[i] := MOX.Parts[order[i]].Dname;
@@ -2091,31 +2098,41 @@ begin
 
     for K := 1 to MOX.Header.MatCount do
     begin
-      i1 := (I - 1) * MOX.header.MatCount + K; // destination
-      i2 := (order[I] - 1) * MOX.header.MatCount + K; // source
+      iDest := (I - 1) * MOX.header.MatCount + K; // destination
+      iSrc := (order[I] - 1) * MOX.header.MatCount + K; // source
 
-      aSRange[i1,1] := kp;                                   //first poly
-      aSRange[i1,2] := MOX.Chunks[i2].PolyCount;             //poly count
-      Inc(kp, MOX.Chunks[i2].PolyCount);
-      aSRange[i1,3] := kv+1;                                 //first point
-      Inc(kv, MOX.Chunks[i2].LastVtx - MOX.Chunks[i2].FirstVtx + 1);
-      aSRange[i1,4] := kv;                                   //last point
+      exChunk[iDest].FirstPoly := accPoly;                                   //first poly
+      exChunk[iDest].PolyCount := MOX.Chunks[iSrc].PolyCount;             //poly count
+      Inc(accPoly, MOX.Chunks[iSrc].PolyCount);
+      exChunk[iDest].FirstVtx := accVert+1;                                 //first point
+      Inc(accVert, MOX.Chunks[iSrc].LastVtx - MOX.Chunks[iSrc].FirstVtx + 1);
+      exChunk[iDest].LastVtx := accVert;                                   //last point
 
-      for J:=aSRange[i1,3] to aSRange[i1,4] do
-      CopyMemory(@aVertex[J],@MOX.Vertice[MOX.Chunks[i2].FirstVtx+(J-aSRange[i1,3])],40);
-      for J:=1 to aSRange[i1,2] do
+      for J := exChunk[iDest].FirstVtx to exChunk[iDest].LastVtx do
+        CopyMemory(@exVertice[J], @MOX.Vertice[MOX.Chunks[iSrc].FirstVtx+(J-exChunk[iDest].FirstVtx)], 40);
+
+      for J:=1 to exChunk[iDest].PolyCount do
       begin
-        av[aSRange[i1,1]+J,1]:=MOX.Face[MOX.Chunks[i2].FirstPoly+J,1]+aSRange[i1,3]-MOX.Chunks[i2].FirstVtx;
-        av[aSRange[i1,1]+J,2]:=MOX.Face[MOX.Chunks[i2].FirstPoly+J,2]+aSRange[i1,3]-MOX.Chunks[i2].FirstVtx;
-        av[aSRange[i1,1]+J,3]:=MOX.Face[MOX.Chunks[i2].FirstPoly+J,3]+aSRange[i1,3]-MOX.Chunks[i2].FirstVtx;
+        exPolys[exChunk[iDest].FirstPoly+J,1]:=MOX.Face[MOX.Chunks[iSrc].FirstPoly+J,1]+exChunk[iDest].FirstVtx-MOX.Chunks[iSrc].FirstVtx;
+        exPolys[exChunk[iDest].FirstPoly+J,2]:=MOX.Face[MOX.Chunks[iSrc].FirstPoly+J,2]+exChunk[iDest].FirstVtx-MOX.Chunks[iSrc].FirstVtx;
+        exPolys[exChunk[iDest].FirstPoly+J,3]:=MOX.Face[MOX.Chunks[iSrc].FirstPoly+J,3]+exChunk[iDest].FirstVtx-MOX.Chunks[iSrc].FirstVtx;
       end;
     end;
   end;
 
-  CopyMemory(@PartModify, @aPartModify, Length(PartModify)*56); //55+1 !
-  CopyMemory(@MOX.Chunks, @aSRange, Length(MOX.Chunks)*8); //1..4 of Word
-  CopyMemory(@MOX.Vertice, @aVertex, Length(MOX.Vertice)*40);//XYZXYZUV00 of Single
-  CopyMemory(@MOX.Face, @av, Length(MOX.Face)*6);                //1..3 of Word
+
+  CopyMemory(@PartModify, @aPartModify, Length(PartModify) * 56); //55+1 !
+  CopyMemory(@MOX.Vertice[1], @exVertice[1], MOX.Header.VerticeCount * SizeOf(MOX.Vertice[1]));//XYZXYZUV00 of Single
+  CopyMemory(@MOX.Face[1], @exPolys[1], MOX.Header.PolyCount * SizeOf(MOX.Face[1]));                //1..3 of Word
+
+  for I:=1 to MOX.Header.ChunkCount do
+  begin
+    MOX.Chunks[I].FirstPoly := exChunk[I].FirstPoly;
+    MOX.Chunks[I].PolyCount := exChunk[I].PolyCount;
+    MOX.Chunks[I].FirstVtx := exChunk[I].FirstVtx;
+    MOX.Chunks[I].LastVtx := exChunk[I].LastVtx;
+  end;
+
   for I:=1 to MOX.Header.PartCount do
   begin
     MOX.Parts[I].Dname:=aDname[I];
@@ -2135,29 +2152,29 @@ end;
 
 procedure TForm1.RebuildPartsTree;
 var
-  i:Integer;
+  I: Integer;
 begin
-  for i:=0 to TVParts.Items.Count-1 do
+  for I:=0 to TVParts.Items.Count-1 do
   begin
-    if TVParts.Items[i].Level = 0 then
-      MOX.Parts[i + 1].Parent := -1
+    if TVParts.Items[I].Level = 0 then
+      MOX.Parts[I + 1].Parent := -1
     else // No parents
-      MOX.Parts[i + 1].Parent := TVParts.Items[i].Parent.AbsoluteIndex;
+      MOX.Parts[I + 1].Parent := TVParts.Items[I].Parent.AbsoluteIndex;
 
-    if not TVParts.Items[i].HasChildren then
-      MOX.Parts[i + 1].Child := -1
+    if not TVParts.Items[I].HasChildren then
+      MOX.Parts[I + 1].Child := -1
     else // No childs
-      MOX.Parts[i + 1].Child := TVParts.Items[i].AbsoluteIndex + 1;
+      MOX.Parts[I + 1].Child := TVParts.Items[I].AbsoluteIndex + 1;
 
-    if TVParts.Items[i].getPrevSibling <> nil then
-      MOX.Parts[i + 1].PrevInLevel := TVParts.Items[i].getPrevSibling.AbsoluteIndex
+    if TVParts.Items[I].getPrevSibling <> nil then
+      MOX.Parts[I + 1].PrevInLevel := TVParts.Items[I].getPrevSibling.AbsoluteIndex
     else
-      MOX.Parts[i + 1].PrevInLevel := -1;
+      MOX.Parts[I + 1].PrevInLevel := -1;
 
-    if TVParts.Items[i].getNextSibling <> nil then
-      MOX.Parts[i + 1].NextInLevel := TVParts.Items[i].getNextSibling.AbsoluteIndex
+    if TVParts.Items[I].getNextSibling <> nil then
+      MOX.Parts[I + 1].NextInLevel := TVParts.Items[I].getNextSibling.AbsoluteIndex
     else
-      MOX.Parts[i + 1].NextInLevel := -1;
+      MOX.Parts[I + 1].NextInLevel := -1;
   end;
 end;
 

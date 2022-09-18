@@ -1,5 +1,5 @@
 ------------------------------------------------------
-"World Racing 2" Mesh Tool-Kit v2.4.0
+"World Racing 2" Mesh Tool-Kit v2.4.1
 ------------------------------------------------------
 
 Description:
@@ -29,6 +29,8 @@ MTKit2 shows you preview of a car, WR2 will display it bit differently.
 AFC11/FVR support is limited.
 
 Version History:
+2.4.1   2022.09.18  Fixed several crashes due to code refactoring and 65k+ models support
+                    Added crash reporter module
 2.4.0   2022.09.17  Lots of code refactoring (hopefully that didnt brake anything)
                     Closing color picker with [X] will now revert the changes in color
                     Blinker color picker wont show up if no blinker is selected

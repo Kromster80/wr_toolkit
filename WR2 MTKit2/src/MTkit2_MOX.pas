@@ -55,11 +55,11 @@ type
   end;
 
   TMOXChunk32 = packed record
-    SidA, SidB, FirstPoly, PolyCount, FirstVtx, LastVtx: Cardinal;
+    SidA, SidB, FirstPoly, PolyCount, FirstVtx, LastVtx: Integer;
   end;
 
   TMOXChunk = packed record
-    SidA, SidB, FirstPoly, PolyCount, FirstVtx, LastVtx: Cardinal;
+    SidA, SidB, FirstPoly, PolyCount, FirstVtx, LastVtx: Integer;
   end;
 
 const
@@ -80,7 +80,7 @@ type
     end;
     Header: record VerticeCount, PolyCount, ChunkCount, MatCount, PartCount, BlinkerCount: Integer; end;
     Vertice: array [1..MAX_MOX_VTX] of TMOXVertice;
-    Face: array [1..MAX_MOX_IDX,1..3] of Integer;  // Polygon links
+    Face: array [1..MAX_MOX_IDX, 1..3] of Integer;  // Polygon links
     Chunks: array of TMOXChunk;
     MoxMat: array [1..MAX_MATERIALS] of record
       ID: Integer;
