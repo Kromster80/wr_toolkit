@@ -254,8 +254,9 @@ begin
 
   w := PAnsiChar(@s[0]);
 
-  if w <> '' then
-    MessageBox(0, PWideChar(aText + sLineBreak + w), 'GLSL Log', MB_OK);
+  //todo: Think about it .. Atm all the errors just pop up annoyingly. Should be just one and rest in log
+  //if w <> '' then
+  //  MessageBox(0, PWideChar(aText + sLineBreak + w), 'GLSL Log', MB_OK);
 end;
 
 

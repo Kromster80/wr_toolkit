@@ -59,7 +59,7 @@ type
     edMaterialCount: TEdit;
     Label41: TLabel;
     TexBrowse: TButton;
-    CBShowMat: TCheckBox;
+    cbShowMaterial: TCheckBox;
     cbTargetLight: TCheckBox;
     CB1: TCheckBox; CB2: TCheckBox; CB3: TCheckBox; CB4: TCheckBox;
     Label44: TLabel;
@@ -451,7 +451,7 @@ var
   YRot: Single=20;
   zoom: Single=0.3125;
 
-  RenderOpts:record
+  RenderOptions: record
     ShowPart: Boolean;
     ShowMaterial: Integer;
     ShowDamage: Boolean;
@@ -921,7 +921,7 @@ begin
   glLightfv(GL_LIGHT1, GL_POSITION, @LightPos2); //static lights
   glPointSize(8);
 
-  if RenderOpts.UVMap then
+  if RenderOptions.UVMap then
   begin
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //Set alpha mode
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -945,7 +945,7 @@ begin
     glRotatef(xRot, 0, 1, 0);
     glkScale(Sqr(zoom));
 
-    if RenderOpts.ShowPart and (ActivePage=apParts) and (SelectedTreeNode<>0) then
+    if RenderOptions.ShowPart and (ActivePage=apParts) and (SelectedTreeNode<>0) then
       glTranslatef(-MOX.Parts[SelectedTreeNode].Matrix[4,1]-PartModify[SelectedTreeNode].Move[1],
                    -MOX.Parts[SelectedTreeNode].Matrix[4,2]-PartModify[SelectedTreeNode].Move[2],
                    -MOX.Parts[SelectedTreeNode].Matrix[4,3]-PartModify[SelectedTreeNode].Move[3]);
@@ -954,7 +954,7 @@ begin
                    -MOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix[4,2],
                    -MOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix[4,3]);
 
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA); //Set alpha mode
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //Set alpha mode
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -978,27 +978,27 @@ begin
                            PivotPointActual.Value); //PivotPointActual & SRnage both have +1
         RenderDummy;
         glDisable(GL_LIGHTING);
-        if RenderOpts.Wire then RenderWireframe(fColorWireframe);
+        if RenderOptions.Wire then RenderWireframe(fColorWireframe);
         glEnable(GL_LIGHTING);
       end;
       glDisable(GL_DEPTH_TEST);
-      if (ActivePage = apLights) or RenderOpts.LightVec then
+      if (ActivePage = apLights) or RenderOptions.LightVec then
         RenderLights(LBBlinkers.ItemIndex+1, TBlinkerPreviewMode(rgBlinkerPreview.ItemIndex), ActivePage = apLights, Lightvectors1.Checked);
       glEnable(GL_DEPTH_TEST);
     end;
 
     if roTREE in RenderObject then
-      fTree.Render(Pivot, xRot, yRot, RenderOpts.Wire);
+      fTree.Render(Pivot, xRot, yRot, RenderOptions.Wire);
 
     if (roCOB in RenderObject) then
-      if (ActivePage=apCOB)or(RenderOpts.Colli)or
+      if (ActivePage=apCOB)or(RenderOptions.Colli)or
       (ActivePage=apBrowse)and not(roMOX in RenderObject) then
         RenderCOB(LBCOBPoints.ItemIndex+1);
 
 
 //      glDisable(GL_DEPTH_TEST);
     if (roCPO in RenderObject) then
-      if (ActivePage = apCPO) or (RenderOpts.Colli)
+      if (ActivePage = apCPO) or (RenderOptions.Colli)
       or (ActivePage = apBrowse) and not (roMOX in RenderObject) then
       begin
 //      glDisable(GL_DEPTH_FUNC);
@@ -1021,7 +1021,7 @@ begin
   glPointSize(8);
 
   //Do only 3D view yet
-  if not RenderOpts.UVMap then begin
+  if not RenderOptions.UVMap then begin
     glTranslate(0,0,-6);
     glTranslate(xMov,yMov,0);
     glRotatef(yRot, 1, 0, 0);
@@ -1050,7 +1050,7 @@ begin
   xo:=(RenderPanel.Width/minsize-1)/2;
   yo:=(RenderPanel.Height/minsize-1)/2;
 
-  if RenderOpts.UVMap then
+  if RenderOptions.UVMap then
     gluOrtho2D(0-xo,1+xo,0-yo,1+yo)
   else
     gluPerspective(60, -RenderPanel.Width/RenderPanel.Height, 0.1, 200.0);
@@ -1317,21 +1317,21 @@ begin
 
   RGDetailType.ItemIndex := MOX.Parts[SelectedTreeNode].TypeID;
   if RGDetailType.ItemIndex<>MOX.Parts[SelectedTreeNode].TypeID then
-    MessageBox(Handle, 'Unknown detail ID type', 'Discovery', MB_OK or MB_ICONSTOP);;
+    MessageBox(Handle, 'Unknown detail ID type', 'Discovery', MB_OK or MB_ICONSTOP);
 
-  LX1.Value:=MOX.Parts[SelectedTreeNode].x1/pi*180;//-YZ rotation
-  LX2.Value:=MOX.Parts[SelectedTreeNode].x2/pi*180;//+YZ rotation
-  LY1.Value:=MOX.Parts[SelectedTreeNode].y1/pi*180;//-XZ rotation
-  LY2.Value:=MOX.Parts[SelectedTreeNode].y2/pi*180;//+XZ rotation
-  LZ1.Value:=MOX.Parts[SelectedTreeNode].z1/pi*180;//-XY rotation
-  LZ2.Value:=MOX.Parts[SelectedTreeNode].z2/pi*180;//+XY rotation
+  LX1.Value:=MOX.Parts[SelectedTreeNode].x1/Pi*180;//-YZ rotation
+  LX2.Value:=MOX.Parts[SelectedTreeNode].x2/Pi*180;//+YZ rotation
+  LY1.Value:=MOX.Parts[SelectedTreeNode].y1/Pi*180;//-XZ rotation
+  LY2.Value:=MOX.Parts[SelectedTreeNode].y2/Pi*180;//+XZ rotation
+  LZ1.Value:=MOX.Parts[SelectedTreeNode].z1/Pi*180;//-XY rotation
+  LZ2.Value:=MOX.Parts[SelectedTreeNode].z2/Pi*180;//+XY rotation
   ForbidPartsChange := False;
   FlapParts.Enabled:=SelectedTreeNode<>0;
   Label30.Enabled:=SelectedTreeNode<>0;
 
   ForbidPivotChange := True;
   try
-    PivotPointActual.MaxValue:=
+    PivotPointActual.MaxValue :=
       MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1+MOX.Parts[SelectedTreeNode].NumMat-1].LastVtx -
       MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx+1;
     PivotPointActual.Value:=PartModify[SelectedTreeNode].ActualPoint;
@@ -2446,7 +2446,7 @@ procedure TForm1.CBActDamClick(Sender: TObject);
 begin
   FlapParts.Enabled:=CBActDam.Checked;
   Label30.Enabled:=CBActDam.Checked;
-  RenderOpts.ShowDamage:=CBActDam.Checked;
+  RenderOptions.ShowDamage:=CBActDam.Checked;
 end;
 
 
@@ -2858,13 +2858,13 @@ end;
 
 procedure TForm1.CBShowPartClick(Sender: TObject);
 begin
-  RenderOpts.ShowPart := CBShowPart.Checked;
+  RenderOptions.ShowPart := CBShowPart.Checked;
 end;
 
 
 procedure TForm1.FlapPartsChange(Sender: TObject);
 begin
-  RenderOpts.PartsFlapPos := 1 - FlapParts.Position / FlapParts.Max;
+  RenderOptions.PartsFlapPos := 1 - FlapParts.Position / FlapParts.Max;
 end;
 
 
@@ -2930,12 +2930,12 @@ end;
 
 procedure TForm1.SB_RenderOpts(Sender: TObject);
 begin
-  if Sender=SB_Light then RenderOpts.LightVec:=SB_Light.Down;
-  if Sender=SB_Colli then RenderOpts.Colli:=SB_Colli.Down;
-  if Sender=SB_Wire then RenderOpts.Wire:=SB_Wire.Down;
+  if Sender=SB_Light then RenderOptions.LightVec:=SB_Light.Down;
+  if Sender=SB_Colli then RenderOptions.Colli:=SB_Colli.Down;
+  if Sender=SB_Wire then RenderOptions.Wire:=SB_Wire.Down;
   if Sender=SB_UVmap then
   begin
-    RenderOpts.UVMap:=SB_UVmap.Down;
+    RenderOptions.UVMap:=SB_UVmap.Down;
     RenderResize(nil);
   end;
 end;
@@ -3165,10 +3165,10 @@ end;
 
 procedure TForm1.ClearUpClick(aClearup: TClearUp);
 begin
-  RenderOpts.LightVec := False;
-  RenderOpts.Colli := False;
-  RenderOpts.Wire := False;
-  RenderOpts.UVMap := False;
+  RenderOptions.LightVec := False;
+  RenderOptions.Colli := False;
+  RenderOptions.Wire := False;
+  RenderOptions.UVMap := False;
   RenderResize(nil);
 
   if aClearup in [cuMOX, cuALL] then

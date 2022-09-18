@@ -722,7 +722,7 @@ object Form1: TForm1
         TabOrder = 6
         OnClick = MatTexBrowseClick
       end
-      object CBShowMat: TCheckBox
+      object cbShowMaterial: TCheckBox
         Left = 134
         Top = 40
         Width = 89

@@ -164,11 +164,11 @@ begin
     glMultMatrixf(@MOX.Parts[i].Matrix);
 
     // Flap everything correctly
-    if RenderOpts.ShowDamage or (I = SelectedTreeNode) then
+    if RenderOptions.ShowDamage or (I = SelectedTreeNode) then
     begin
-      glRotatef(Mix(MOX.Parts[i].x1,MOX.Parts[i].x2,RenderOpts.PartsFlapPos)/pi*180,1,0,0);
-      glRotatef(Mix(MOX.Parts[i].y1,MOX.Parts[i].y2,RenderOpts.PartsFlapPos)/pi*180,0,1,0);
-      glRotatef(Mix(MOX.Parts[i].z1,MOX.Parts[i].z2,RenderOpts.PartsFlapPos)/pi*180,0,0,-1);
+      glRotatef(Mix(MOX.Parts[i].x1, MOX.Parts[i].x2, RenderOptions.PartsFlapPos)/Pi*180,1,0,0);
+      glRotatef(Mix(MOX.Parts[i].y1, MOX.Parts[i].y2, RenderOptions.PartsFlapPos)/Pi*180,0,1,0);
+      glRotatef(Mix(MOX.Parts[i].z1, MOX.Parts[i].z2, RenderOptions.PartsFlapPos)/Pi*180,0,0,-1);
     end;
 
     for k:=MOX.Parts[i].FirstMat+1 to MOX.Parts[i].FirstMat+MOX.Parts[i].NumMat do
