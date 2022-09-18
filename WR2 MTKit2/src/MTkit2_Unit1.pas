@@ -406,7 +406,7 @@ type
     procedure OnIdle(Sender: TObject; var Done: Boolean);
     procedure OnMessage(var aMsg: TMsg; var aHandled: Boolean);
     procedure Render;
-    function  LoadFile(const aFilename: string; lm: TLoadMode):Boolean;
+    procedure LoadFile(const aFilename: string; aMode: TLoadMode);
     procedure LoadTextures;
     procedure SendDataToUI(aSection: TUIDataSection);
     procedure SetActivePage(aPage: TActivePage);
@@ -2504,84 +2504,86 @@ begin
 end;
 
 
-function TForm1.LoadFile(const aFilename: string; lm: TLoadMode):Boolean;
+procedure TForm1.LoadFile(const aFilename: string; aMode: TLoadMode);
 begin
-  Result := False;
+  if not FileExists(aFilename) then
+  begin
+    MessageBox(Handle, 'File not found', 'Error', MB_OK or MB_ICONERROR);
+    Exit;
+  end;
+
   UpdateOpenedFileInfo(aFilename);
   ClearUpClick(cuALL);
 
-  if GetFileExt(aFilename)='MOX' then
+  if SameText(ExtractFileExt(aFilename), '.mox') then
   begin
-    if FileExists(aFilename) then
-    begin
-      meLog.Lines.Add('Loading MOX ...');
-      meLog.Lines.Add(aFilename);
+    meLog.Lines.Add('Loading MOX ...');
+    meLog.Lines.Add(aFilename);
 
-      TVParts.ReadOnly := True;
-      IsLightwave2MOX := False;
-      PivotSetup.TabVisible := False;
+    TVParts.ReadOnly := True;
+    IsLightwave2MOX := False;
+    PivotSetup.TabVisible := False;
 
-      try
-        LoadMOX(aFilename);
-      except
-        on E: Exception do
-          MessageBox(0, PChar(E.Message), 'Error', MB_OK or MB_ICONERROR);
-      end;
-
-      meLog.Lines.Add('MOX file closed');
-
-      ShowUpClick(cuMOX);
-
-      CompileLoadedMOX;
-
-      SaveMOX1.Enabled := True;
-      ExportMOX1.Enabled := True;
+    try
+      LoadMOX(aFilename);
+    except
+      on E: Exception do
+        MessageBox(0, PChar(E.Message), 'Error', MB_OK or MB_ICONERROR);
     end;
+
+    meLog.Lines.Add('MOX file closed');
+
+    ShowUpClick(cuMOX);
+
+    CompileLoadedMOX;
+
+    SaveMOX1.Enabled := True;
+    ExportMOX1.Enabled := True;
 
     StatusBar1.Panels[0].Text := MOX.MOXFormatInt + ' - ' + MOX.MOXFormatStr;
 
     ShowUpClick(cuMOX);
-    LoadMTL(decs(aFilename,4,0)+'.mtl');
+    LoadMTL(ChangeFileExt(aFilename, '.mtl'));
     LoadTextures;
     ScanVinyls(fOpenedFolder);
     ShowUpClick(cuMTL);
     SetRenderObject([roMOX]);
-    if LoadCOB(decs(aFilename,4,0)+'_colli.cob') then
+    if LoadCOB(ChangeFileExt(aFilename, '_colli.cob')) then
     begin
       ShowUpClick(cuCOB);
-      SetRenderObject([roMOX,roCOB]);
+      SetRenderObject([roMOX, roCOB]);
     end;
-    if LoadCPO(decs(aFilename,4,0)+'_colli.cpo') then
+    if LoadCPO(ChangeFileExt(aFilename, '_colli.cpo')) then
     begin
       ShowUpClick(cuCPO);
-      SetRenderObject([roMOX,roCPO]);
+      SetRenderObject([roMOX, roCPO]);
     end;
-    if LoadCPO(decs(aFilename,4,0)+'.cpo') then
+    if LoadCPO(ChangeFileExt(aFilename, '.cpo')) then
     begin
       ShowUpClick(cuCPO);
-      SetRenderObject([roMOX,roCPO]);
+      SetRenderObject([roMOX, roCPO]);
     end;
-    if lm = lmLoadAndShow then
+    if aMode = lmLoadAndShow then
       SetActivePage(apMTL);
   end;
 
-  if GetFileExt(aFilename)='COB' then
+  if SameText(ExtractFileExt(aFilename), '.cob') then
   begin
     if not LoadCOB(aFilename) then Exit;
     ShowUpClick(cuCOB);
     SetRenderObject([roCOB]);
-    if lm=lmLoadAndShow then SetActivePage(apCOB);
+    if aMode = lmLoadAndShow then SetActivePage(apCOB);
   end;
 
-  if GetFileExt(aFilename)='CPO' then
+  if SameText(ExtractFileExt(aFilename), '.cpo') then
     if LoadCPO(aFilename) then
     begin
       SetRenderObject([roCPO]);
       ShowUpClick(cuCPO);
-      if lm=lmLoadAndShow then SetActivePage(apCPO);
+      if aMode = lmLoadAndShow then SetActivePage(apCPO);
     end;
 
-  if GetFileExt(aFilename)='TREE' then
+  if SameText(ExtractFileExt(aFilename), '.tree') then
   begin
     fTree.LoadFromFile(aFilename);
     fTree.PrepareDisplayList;
@@ -2590,8 +2592,6 @@ begin
     meLog.Lines.Add('TREE Loaded ...');
     SetRenderObject([roTREE]);
   end;
-
-  Result := True;
 end;
 
 
@@ -2989,25 +2989,25 @@ end;
 procedure TForm1.LoadMOXClick(Sender: TObject);
 begin
   if not RunOpenDialog(odOpen,'',fOpenedFolder,'World Racing 2 object files (*.mox)|*.mox') then Exit;
-  LoadFile(odOpen.FileName,lmLoadAndShow);
+  LoadFile(odOpen.FileName, lmLoadAndShow);
 end;
 
 procedure TForm1.LoadCOBClick(Sender: TObject);
 begin
   if not RunOpenDialog(odOpen,'',fOpenedFolder,'World Racing 2 collision files (*.cob)|*.cob') then Exit;
-  LoadFile(odOpen.FileName,lmLoadAndShow);
+  LoadFile(odOpen.FileName, lmLoadAndShow);
 end;
 
 procedure TForm1.LoadCPOClick(Sender: TObject);
 begin
   if not RunOpenDialog(odOpen,'',fOpenedFolder,'Alarm for Cobra 11 Nitro collision files (*.cpo)|*.cpo') then Exit;
-  LoadFile(odOpen.FileName,lmLoadAndShow);
+  LoadFile(odOpen.FileName, lmLoadAndShow);
 end;
 
 procedure TForm1.LoadTREE1Click(Sender: TObject);
 begin
   if not RunOpenDialog(odOpen,'',fOpenedFolder,'World Racing 2 tree files (*.tree)|*.tree') then Exit;
-  LoadFile(odOpen.FileName,lmLoadAndShow);
+  LoadFile(odOpen.FileName, lmLoadAndShow);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
