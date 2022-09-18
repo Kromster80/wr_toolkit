@@ -415,6 +415,7 @@ type
     procedure BlinkerRemove(aIndex: Integer);
     procedure ConverseImp_MOX;
     procedure ConverseImp_COB;
+    procedure MaterialSetDefault;
     procedure RebuildCOBBounds;
     procedure SaveMOX(const aFilename: string);
     procedure DevScanMOXHeaders;
@@ -2433,27 +2434,35 @@ end;
 
 
 procedure TForm1.SpeedButton1Click(Sender: TObject);
+begin
+  MaterialSetDefault;
+end;
+
+
+procedure TForm1.MaterialSetDefault;
 var
   ii: Integer;
 begin
-  if MatID=0 then Exit;
+  if MatID = 0 then Exit;
+
   for ii:=1 to MAX_COLORS do
-    with Material[MatID].Color[ii] do begin
-      Dif.R:=DefaultColor[ii,1];
-      Dif.G:=DefaultColor[ii,2];
-      Dif.B:=DefaultColor[ii,3];
-      Sp1.R:=DefaultSpec[1];
-      Sp1.G:=DefaultSpec[2];
-      Sp1.B:=DefaultSpec[3];
-      Sp2.R:=DefaultSpec2[ii,1];
-      Sp2.G:=DefaultSpec2[ii,2];
-      Sp2.B:=DefaultSpec2[ii,3];
-      Amb.R:=0;
-      Amb.G:=0;
-      Amb.B:=0;
-      Ref.R:=DefaultReflect[ii,1];
-      Ref.G:=DefaultReflect[ii,2];
-      Ref.B:=DefaultReflect[ii,3];
+    with Material[MatID].Color[ii] do
+    begin
+      Dif.R := DEFAULT_COLORS[ii, 1];
+      Dif.G := DEFAULT_COLORS[ii, 2];
+      Dif.B := DEFAULT_COLORS[ii, 3];
+      Sp1.R := DEFAULT_SPEC[1];
+      Sp1.G := DEFAULT_SPEC[2];
+      Sp1.B := DEFAULT_SPEC[3];
+      Sp2.R := DEFAULT_SPEC2[ii, 1];
+      Sp2.G := DEFAULT_SPEC2[ii, 2];
+      Sp2.B := DEFAULT_SPEC2[ii, 3];
+      Amb.R := 0;
+      Amb.G := 0;
+      Amb.B := 0;
+      Ref.R := DEFAULT_REFLECT[ii, 1];
+      Ref.G := DEFAULT_REFLECT[ii, 2];
+      Ref.B := DEFAULT_REFLECT[ii, 3];
     end;
   CBColorChange(nil);
 end;
