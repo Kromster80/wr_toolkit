@@ -1,7 +1,7 @@
 unit MTkit2_Render;
 interface
 uses
-  OpenGL, dglOpenGL, kromOGLUtils, kromUtils, sysutils, Math, Windows,
+  OpenGL, dglOpenGL, KromOGLUtils, KromUtils, SysUtils, Math, Windows,
   TGATexture, PTXTexture;
 
 type

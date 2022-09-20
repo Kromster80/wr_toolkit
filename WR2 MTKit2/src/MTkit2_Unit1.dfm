@@ -208,7 +208,7 @@ object Form1: TForm1
     Top = 8
     Width = 242
     Height = 585
-    ActivePage = TabSheet1
+    ActivePage = tsCOB
     Anchors = [akLeft, akTop, akBottom]
     MultiLine = True
     Style = tsButtons
@@ -216,7 +216,7 @@ object Form1: TForm1
     TabOrder = 1
     TabWidth = 31
     OnChange = PageControl1Change
-    object TabSheet1: TTabSheet
+    object tsMaterials: TTabSheet
       Caption = 'MTL'
       object Label5: TLabel
         Left = 52
@@ -611,7 +611,7 @@ object Form1: TForm1
           'Grey'
           'Silver')
       end
-      object ETextureName: TEdit
+      object edMaterialTextureFile: TEdit
         Left = 0
         Top = 384
         Width = 113
@@ -634,7 +634,7 @@ object Form1: TForm1
           'Repeat'
           'Mirror')
       end
-      object TTransparency: TTrackBar
+      object tbMaterialTransparency: TTrackBar
         Left = -4
         Top = 328
         Width = 119
@@ -804,7 +804,7 @@ object Form1: TForm1
         TabOrder = 19
       end
     end
-    object TabSheet2: TTabSheet
+    object tsParts: TTabSheet
       Caption = 'Parts'
       ImageIndex = 1
       DesignSize = (
@@ -824,7 +824,7 @@ object Form1: TForm1
         Height = 13
         Caption = 'Label23'
       end
-      object TVParts: TTreeView
+      object tvParts: TTreeView
         Left = 0
         Top = 0
         Width = 129
@@ -836,9 +836,9 @@ object Form1: TForm1
         ReadOnly = True
         TabOrder = 0
         ToolTips = False
-        OnChange = TVPartsChange
-        OnDragDrop = TVPartsDragDrop
-        OnDragOver = TVPartsDragOver
+        OnChange = tvPartsChange
+        OnDragDrop = tvPartsDragDrop
+        OnDragOver = tvPartsDragOver
       end
       object RGDetailType: TRadioGroup
         Left = 134
@@ -1351,7 +1351,7 @@ object Form1: TForm1
         OnClick = CBShowPartClick
       end
     end
-    object TabSheet3: TTabSheet
+    object tsBlinkers: TTabSheet
       Caption = 'Lights'
       ImageIndex = 2
       DesignSize = (
@@ -1828,7 +1828,7 @@ object Form1: TForm1
         TabOrder = 17
       end
     end
-    object TabSheet4: TTabSheet
+    object tsCOB: TTabSheet
       Caption = 'COB'
       ImageIndex = 4
       object COBCopy: TSpeedButton
@@ -2156,7 +2156,7 @@ object Form1: TForm1
         ReadOnly = True
         TabOrder = 13
       end
-      object B_COBRecompute: TButton
+      object btnCOBRecompute: TButton
         Left = 0
         Top = 440
         Width = 177
@@ -2164,7 +2164,7 @@ object Form1: TForm1
         Caption = 'Recompute'
         Enabled = False
         TabOrder = 14
-        OnClick = B_COBRecomputeClick
+        OnClick = btnCOBRecomputeClick
       end
       object Panel4: TPanel
         Left = -2
@@ -2177,7 +2177,7 @@ object Form1: TForm1
         TabOrder = 15
       end
     end
-    object TabSheet7: TTabSheet
+    object tsCPO: TTabSheet
       Caption = 'CPO'
       ImageIndex = 6
       object Label53: TLabel
@@ -2551,7 +2551,7 @@ object Form1: TForm1
         OnClick = B_CPOExportClick
       end
     end
-    object TabSheet5: TTabSheet
+    object tsExtra: TTabSheet
       Caption = 'Extra'
       ImageIndex = 3
       DesignSize = (
@@ -2805,7 +2805,7 @@ object Form1: TForm1
         TabOrder = 12
       end
     end
-    object TabSheet6: TTabSheet
+    object tsBrowse: TTabSheet
       Caption = 'Browse'
       ImageIndex = 5
       DesignSize = (

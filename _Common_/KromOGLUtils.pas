@@ -232,10 +232,10 @@ begin
   glClearColor(0, 0, 0, 0); 	   //Background
   glClear (GL_COLOR_BUFFER_BIT);
   glShadeModel(GL_SMOOTH);                 //Enables Smooth Color Shading
-  glPolygonMode(GL_FRONT,GL_FILL);
+  glPolygonMode(GL_FRONT, GL_FILL);
   glEnable(GL_NORMALIZE);
   glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA); //Set alpha mode
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //Set alpha mode
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
   glEnable(GL_COLOR_MATERIAL);                 //Enable Materials
   glEnable(GL_TEXTURE_2D);                     // Enable Texture Mapping
@@ -245,18 +245,19 @@ end;
 procedure CheckGLSLError(aHandle: GLhandleARB; aParam: GLenum; aText:string);
 var
   l, glsl_ok: GLint;
-  s: array [0..999] of AnsiChar;
-  i: integer;
-  w: String;
+  buf: array [0..999] of AnsiChar;
+  errText: string;
 begin
+  // glGetObjectParameter is an poorly undocumented extension
+  // Might be better to disuse it in the future
   glGetObjectParameterivARB(aHandle, aParam, @glsl_ok);
-  glGetInfoLogARB(aHandle, Length(s), l, PGLcharARB(@s[0]));
+  glGetInfoLogARB(aHandle, Length(buf), l, PGLcharARB(@buf[0]));
 
-  w := PAnsiChar(@s[0]);
+  errText := PAnsiChar(@buf[0]);
 
   //todo: Think about it .. Atm all the errors just pop up annoyingly. Should be just one and rest in log
-  //if w <> '' then
-  //  MessageBox(0, PWideChar(aText + sLineBreak + w), 'GLSL Log', MB_OK);
+  //if errText <> '' then
+  //  MessageBox(0, PWideChar(aText + sLineBreak + errText), 'GLSL Log', MB_OK);
 end;
 
 

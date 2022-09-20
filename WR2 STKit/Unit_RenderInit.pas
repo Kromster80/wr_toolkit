@@ -126,16 +126,17 @@ begin
   Form1.MemoLWO.Lines.Add('Loaded GLSL files');
 
   glCompileShaderARB(vs);
-  CheckGLSLError(Form1.Handle, vs, GL_OBJECT_COMPILE_STATUS_ARB, ShowGLSLWarning,'VS ');
-  for i:=1 to ShadQty do begin
+  CheckGLSLError(Form1.Handle, vs, GL_OBJECT_COMPILE_STATUS_ARB, ShowGLSLWarning, 'VS ');
+  for i:=1 to ShadQty do
+  begin
     glCompileShaderARB(fs[i]);
-    CheckGLSLError(Form1.Handle, fs[i], GL_OBJECT_COMPILE_STATUS_ARB, ShowGLSLWarning,'FS '+inttostr(i)+' ');
+    CheckGLSLError(Form1.Handle, fs[i], GL_OBJECT_COMPILE_STATUS_ARB, ShowGLSLWarning, 'FS '+inttostr(i)+' ');
     glAttachObjectARB(po[i],vs);
     glAttachObjectARB(po[i],fs[i]);
     glLinkProgramARB(po[i]);
-    CheckGLSLError(Form1.Handle, po[i], GL_OBJECT_LINK_STATUS_ARB, ShowGLSLWarning,'PO '+inttostr(i)+' ');
+    CheckGLSLError(Form1.Handle, po[i], GL_OBJECT_LINK_STATUS_ARB, ShowGLSLWarning, 'PO '+inttostr(i)+' ');
     glValidateProgramARB(po[i]);
-    CheckGLSLError(Form1.Handle, po[i], GL_OBJECT_VALIDATE_STATUS_ARB, ShowGLSLWarning,'PO '+inttostr(i)+' ');
+    CheckGLSLError(Form1.Handle, po[i], GL_OBJECT_VALIDATE_STATUS_ARB, ShowGLSLWarning, 'PO '+inttostr(i)+' ');
    end;
   Form1.MemoLWO.Lines.Add('Compiled GLSL files');
 

@@ -20,9 +20,11 @@ type
     About1: TMenuItem;
     LoadMOX1: TMenuItem;
     PageControl1: TPageControl;
-    TabSheet1: TTabSheet; TabSheet2: TTabSheet; TabSheet3: TTabSheet;
-    TVParts: TTreeView;
-    TabSheet5: TTabSheet;
+    tsMaterials: TTabSheet;
+    tsParts: TTabSheet;
+    tsBlinkers: TTabSheet;
+    tvParts: TTreeView;
+    tsExtra: TTabSheet;
     Label1: TLabel; Label3: TLabel; Label4: TLabel; Label5: TLabel;
     Label6: TLabel; Label8: TLabel; Label9: TLabel; Label10: TLabel;
     Label11: TLabel; Label12: TLabel; Label13: TLabel; Label14: TLabel; Label17: TLabel; Label18: TLabel; Label19: TLabel; Label20: TLabel;
@@ -33,9 +35,9 @@ type
     edPolyCount: TEdit;
     edPartCount: TEdit;
     CBColor: TComboBox;
-    ETextureName: TEdit;
+    edMaterialTextureFile: TEdit;
     CBClipU: TComboBox;
-    TTransparency: TTrackBar;
+    tbMaterialTransparency: TTrackBar;
     CBClipV: TComboBox;
     CBMatClass2: TComboBox;
     CBMatClass3: TComboBox;
@@ -88,7 +90,7 @@ type
     CBActDam: TCheckBox;
     CBMonoColor: TCheckBox;
     ImportLWOCOB1: TMenuItem;
-    TabSheet4: TTabSheet;
+    tsCOB: TTabSheet;
     CBShowIDs: TCheckBox;
     LBCOBPoints: TListBox;
     COBCopy: TSpeedButton;
@@ -164,7 +166,7 @@ type
     Label67: TLabel;
     Label68: TLabel;
     Label69: TLabel;
-    B_COBRecompute: TButton;
+    btnCOBRecompute: TButton;
     edChunkCount: TEdit;
     edBlinkerCount: TEdit;
     Label71: TLabel;
@@ -175,7 +177,7 @@ type
     rgBlinkerPreview: TRadioGroup;
     LoadCPO1: TMenuItem;
     Label23: TLabel;
-    TabSheet6: TTabSheet;
+    tsBrowse: TTabSheet;
     FileListBox1: TFileListBox;
     DirectoryListBox1: TDirectoryListBox;
     DriveComboBox1: TDriveComboBox;
@@ -198,7 +200,7 @@ type
     Label40: TLabel;
     Label42: TLabel;
     Lightvectors1: TMenuItem;
-    TabSheet7: TTabSheet;
+    tsCPO: TTabSheet;
     LBCPOShapes: TListBox;
     CPOX: TFloatSpinEdit;
     CPOY: TFloatSpinEdit;
@@ -291,7 +293,7 @@ type
     procedure LBMaterialsClick(Sender: TObject);
     procedure MaterialPropertiesChange(Sender: TObject);
     procedure MatNameChange(Sender: TObject);
-    procedure TVPartsChange(Sender: TObject; Node: TTreeNode);
+    procedure tvPartsChange(Sender: TObject; Node: TTreeNode);
     procedure MatEdSetAllColorsToCurrent(Sender: TObject);
     procedure MatTexReloadClick(Sender: TObject);
     procedure CBChromeClick(Sender: TObject);
@@ -310,8 +312,8 @@ type
     procedure About1Click(Sender: TObject);
     procedure LoadCOBClick(Sender: TObject);
     procedure SaveCOB1Click(Sender: TObject);
-    procedure TVPartsDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
-    procedure TVPartsDragDrop(Sender, Source: TObject; X, Y: Integer);
+    procedure tvPartsDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+    procedure tvPartsDragDrop(Sender, Source: TObject; X, Y: Integer);
     procedure MatMonoColorClick(Sender: TObject);
     procedure ImportLWOCOB1Click(Sender: TObject);
     procedure CoBCopyClick(Sender: TObject);
@@ -334,7 +336,7 @@ type
     procedure ImportLWO2Click(Sender: TObject);
     procedure ResetMTLOrderClick(Sender: TObject);
     procedure SpeedButton3Click(Sender: TObject);
-    procedure B_COBRecomputeClick(Sender: TObject);
+    procedure btnCOBRecomputeClick(Sender: TObject);
     procedure LoadMOXClick(Sender: TObject);
     procedure LoadCPOClick(Sender: TObject);
     procedure FileListBox1Click(Sender: TObject);
@@ -587,11 +589,11 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 var
-  aFilename: string;
+  fname: string;
 begin
-  aFilename := ParamStr(1); //Get filename parameter
+  fname := ParamStr(1); //Get filename parameter
   ExeDir := ExtractFilePath(Application.ExeName);
-  meLog.Lines.Add(aFilename);
+  meLog.Lines.Add(fname);
   Caption := APP_TITLE + ' v' + VER_INFO;
 
   LoadSettingsFromIni(ExeDir + 'MTKit2 Data\options.ini');
@@ -620,17 +622,17 @@ begin
   Dev1.Visible := FileExists('krom.dev');
 
   if not FileExists('krom.dev') then SetActivePage(apMTL);
-  //aFilename:='E:\World Racing 2\AddOns\Autos\3000gt\3000gt.mox';
-  //aFilename:='alfa147.mox';
-  //aFilename:='E:\WR2 Demo Skoda\Autos\octavia_rs\octavia_rs.mox';
-  //aFilename:=ExeDir+'CPO Collection\Schirm_gelb.cpo';
-  //aFilename:='D:\a.tree';
-  //aFilename:='demo8.mox';
+  //fname:='E:\World Racing 2\AddOns\Autos\3000gt\3000gt.mox';
+  //fname:='alfa147.mox';
+  //fname:='E:\WR2 Demo Skoda\Autos\octavia_rs\octavia_rs.mox';
+  //fname:=ExeDir+'CPO Collection\Schirm_gelb.cpo';
+  //fname:='D:\a.tree';
+  //fname:='demo8.mox';
 
   //Open it through browser
-  if FileExists(aFilename) then
+  if FileExists(fname) then
   begin
-    FileListBox1.FileName := aFilename;
+    FileListBox1.FileName := fname;
     FileListBox1Click(nil);
   end else
     fOpenedFolder := ExeDir;
@@ -1247,8 +1249,8 @@ begin
 
   fUIRefresh := True;
   try
-    TTransparency.Position := Material[MatID].Transparency;
-    ETextureName.Text := Material[MatID].TexName;
+    tbMaterialTransparency.Position := Material[MatID].Transparency;
+    edMaterialTextureFile.Text := Material[MatID].TexName;
     CBMatClass2.ItemIndex := Material[MatID].MatClass[2];
     CBMatClass3.ItemIndex := Material[MatID].MatClass[3];
     CB1.Checked := (Material[MatID].MatClass[4] AND 1) = 1;
@@ -1270,13 +1272,13 @@ var
   t:Integer;
 begin
   if MatID = 0 then Exit;
-  Label13.Caption := IntToStr(TTransparency.Position) + '% Transparency';
+  Label13.Caption := IntToStr(tbMaterialTransparency.Position) + '% Transparency';
   if fUIRefresh then Exit;
 
-  Material[MatID].Transparency := TTransparency.Position;
-  Material[MatID].TexName:=ETextureName.Text;
-  Material[MatID].MatClass[2]:=CBMatClass2.ItemIndex;
-  Material[MatID].MatClass[3]:=CBMatClass3.ItemIndex;
+  Material[MatID].Transparency := tbMaterialTransparency.Position;
+  Material[MatID].TexName := edMaterialTextureFile.Text;
+  Material[MatID].MatClass[2] := CBMatClass2.ItemIndex;
+  Material[MatID].MatClass[3] := CBMatClass3.ItemIndex;
   t:=0;
   if CB1.Checked then inc(t,1);
   if CB2.Checked then inc(t,2);
@@ -1296,7 +1298,7 @@ begin
 end;
 
 
-procedure TForm1.TVPartsChange(Sender: TObject; Node: TTreeNode);
+procedure TForm1.tvPartsChange(Sender: TObject; Node: TTreeNode);
 var
   idx: Integer;
 begin
@@ -1884,8 +1886,9 @@ end;
 procedure TForm1.MatTexBrowseClick(Sender: TObject);
 begin
   if MatID = 0 then Exit;
-  if not RunOpenDialog(odOpen,'', fOpenedFolder,'Targa, PTX image files (*.ptx; *.tga)|*.tga;*.ptx') then Exit;
-  ETextureName.Text:=ExtractFileName(odOpen.FileName);
+  if not RunOpenDialog(odOpen, '', fOpenedFolder, 'Targa, PTX image files (*.ptx; *.tga)|*.tga;*.ptx') then Exit;
+
+  edMaterialTextureFile.Text := ExtractFileName(odOpen.FileName);
   MatTexReloadClick(nil);
 end;
 
@@ -2036,7 +2039,7 @@ begin
 end;
 
 
-procedure TForm1.TVPartsDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+procedure TForm1.tvPartsDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
 begin
   if (TVParts.GetNodeAt(X, Y) = TVParts.TopItem) and (TVParts.TopItem <> TVParts.Items[0]) then
     TVParts.TopItem := TVParts.Items[TVParts.GetNodeAt(X,Y).AbsoluteIndex-1];
@@ -2045,7 +2048,7 @@ begin
 end;
 
 
-procedure TForm1.TVPartsDragDrop(Sender, Source: TObject; X, Y: Integer);
+procedure TForm1.tvPartsDragDrop(Sender, Source: TObject; X, Y: Integer);
 begin
   TVParts.Selected.MoveTo(TVParts.GetNodeAt(X,Y), naAddChild); // First?
 
@@ -2227,30 +2230,31 @@ end;
 
 procedure TForm1.RebuildCOBBounds;
 var
-  i:Integer;
+  I: Integer;
 begin
-  COB.Head.Xmin:=0; COB.Head.Xmax:=0;
-  COB.Head.Ymin:=0; COB.Head.Ymax:=0;
-  COB.Head.Zmin:=0; COB.Head.Zmax:=0;
-  for i:=1 to COB.Head.PolyQty do  //computing normal to every polygon
+  // Compute normal to every polygon
+  for I := 1 to COB.Head.PolyQty do
   begin
-    Normal2Poly(COB.Vertices[COB.Faces[i,1]+1],COB.Vertices[COB.Faces[i,2]+1],COB.Vertices[COB.Faces[i,3]+1],@COB.NormalsP[i]);
-    Normalize(COB.NormalsP[i]);
+    Normal2Poly(COB.Vertices[COB.Faces[I,1]+1], COB.Vertices[COB.Faces[I,2]+1], COB.Vertices[COB.Faces[I,3]+1], @COB.NormalsP[I]);
+    Normalize(COB.NormalsP[I]);
   end;
 
-  for i:=1 to COB.Head.PointQty do
+  COB.Head.Xmin := 0; COB.Head.Xmax := 0;
+  COB.Head.Ymin := 0; COB.Head.Ymax := 0;
+  COB.Head.Zmin := 0; COB.Head.Zmax := 0;
+  for I := 1 to COB.Head.PointQty do
   begin
-    COB.Head.Xmax:=max(COB.Head.Xmax,COB.Vertices[i].X);
-    COB.Head.Ymax:=max(COB.Head.Ymax,COB.Vertices[i].Y);
-    COB.Head.Zmax:=max(COB.Head.Zmax,COB.Vertices[i].Z);
-    COB.Head.Xmin:=min(COB.Head.Xmin,COB.Vertices[i].X);
-    COB.Head.Ymin:=min(COB.Head.Ymin,COB.Vertices[i].Y);
-    COB.Head.Zmin:=min(COB.Head.Zmin,COB.Vertices[i].Z);
+    COB.Head.Xmax := Max(COB.Head.Xmax,COB.Vertices[I].X);
+    COB.Head.Ymax := Max(COB.Head.Ymax,COB.Vertices[I].Y);
+    COB.Head.Zmax := Max(COB.Head.Zmax,COB.Vertices[I].Z);
+    COB.Head.Xmin := Min(COB.Head.Xmin,COB.Vertices[I].X);
+    COB.Head.Ymin := Min(COB.Head.Ymin,COB.Vertices[I].Y);
+    COB.Head.Zmin := Min(COB.Head.Zmin,COB.Vertices[I].Z);
   end;
 
-  COB.Head.X:=0;//Cob.Xmax+Cob.Xmin;
-  COB.Head.Y:=0;//Cob.Ymax+Cob.Ymin;
-  COB.Head.Z:=0;//Cob.Zmax+Cob.Zmin;
+  COB.Head.X := 0;//Cob.Xmax+Cob.Xmin;
+  COB.Head.Y := 0;//Cob.Ymax+Cob.Ymin;
+  COB.Head.Z := 0;//Cob.Zmax+Cob.Zmin;
 
   SendDataToUI(uiCOB);
 end;
@@ -2514,7 +2518,7 @@ begin
 end;
 
 
-procedure TForm1.B_COBRecomputeClick(Sender: TObject);
+procedure TForm1.btnCOBRecomputeClick(Sender: TObject);
 begin
   RebuildCOBBounds;
 end;
