@@ -135,12 +135,12 @@ type
     RGPivotY: TRadioGroup;
     RGPivotZ: TRadioGroup;
     PivotPointActual: TSpinEdit;
-    SpeedButton2: TSpeedButton;
-    PSFLoad: TButton;
-    PSFSave: TButton;
+    btnPartPivotUse: TSpeedButton;
+    btnPSFLoad: TButton;
+    btnPSFSave: TButton;
     CBShowPart: TCheckBox;
-    PBFLoad: TButton;
-    PBFSave: TButton;
+    btnPBFLoad: TButton;
+    btnPBFSave: TButton;
     FlapParts: TTrackBar;
     Bevel17: TBevel;
     Label43: TLabel;
@@ -201,26 +201,26 @@ type
     Label42: TLabel;
     Lightvectors1: TMenuItem;
     tsCPO: TTabSheet;
-    LBCPOShapes: TListBox;
-    CPOX: TFloatSpinEdit;
-    CPOY: TFloatSpinEdit;
-    CPOZ: TFloatSpinEdit;
+    lbCPOShapes: TListBox;
+    seCPOX: TFloatSpinEdit;
+    seCPOY: TFloatSpinEdit;
+    seCPOZ: TFloatSpinEdit;
     Label53: TLabel;
     Label52: TLabel;
     Label50: TLabel;
-    CPOAdd: TButton;
-    CPORem: TButton;
-    CPOCopy: TSpeedButton;
-    CPOPaste: TSpeedButton;
-    CPOSX: TFloatSpinEdit;
+    btnCPOAdd: TButton;
+    btnCPORem: TButton;
+    btnCPOCopy: TSpeedButton;
+    btnCPOPaste: TSpeedButton;
+    seCPOSX: TFloatSpinEdit;
     Label54: TLabel;
-    CPOSY: TFloatSpinEdit;
+    seCPOSY: TFloatSpinEdit;
     Label77: TLabel;
     Label78: TLabel;
-    CPOSZ: TFloatSpinEdit;
-    CPORH: TFloatSpinEdit;
-    CPORP: TFloatSpinEdit;
-    CPORB: TFloatSpinEdit;
+    seCPOSZ: TFloatSpinEdit;
+    seCPORH: TFloatSpinEdit;
+    seCPORP: TFloatSpinEdit;
+    seCPORB: TFloatSpinEdit;
     Label79: TLabel;
     Label80: TLabel;
     Label81: TLabel;
@@ -241,9 +241,9 @@ type
     CBVinyl: TComboBox;
     Panel4: TPanel;
     CBShowGrid: TMenuItem;
-    SB_Light: TSpeedButton;
-    SB_Colli: TSpeedButton;
-    SB_Wire: TSpeedButton;
+    btnShowLights: TSpeedButton;
+    btnShowColli: TSpeedButton;
+    btnShowWireframe: TSpeedButton;
     Import1: TMenuItem;
     ImportOBJMOX1: TMenuItem;
     LoadTREE1: TMenuItem;
@@ -259,7 +259,7 @@ type
     Panel5: TPanel;
     StatusBar1: TStatusBar;
     N3: TMenuItem;
-    SB_UVmap: TSpeedButton;
+    btnShowUVMap: TSpeedButton;
     Panel6: TPanel;
     Panel7: TPanel;
     ImageM: TSpeedButton;
@@ -270,8 +270,8 @@ type
     Button1: TButton;
     Import3DSMOX1: TMenuItem;
     N4: TMenuItem;
-    B_CPOImport: TButton;
-    B_CPOExport: TButton;
+    btnCPOImport: TButton;
+    btnCPOExport: TButton;
     Label16: TLabel;
     Bevel1: TBevel;
     Bevel4: TBevel;
@@ -325,11 +325,11 @@ type
     procedure MatCopyClick(Sender: TObject);
     procedure MatPasteClick(Sender: TObject);
     procedure RGPivotClick(Sender: TObject);
-    procedure SpeedButton2Click(Sender: TObject);
-    procedure PSFSaveClick(Sender: TObject);
-    procedure PSFLoadClick(Sender: TObject);
-    procedure PBFSaveClick(Sender: TObject);
-    procedure PBFLoadClick(Sender: TObject);
+    procedure btnPartPivotUseClick(Sender: TObject);
+    procedure btnPSFSaveClick(Sender: TObject);
+    procedure btnPSFLoadClick(Sender: TObject);
+    procedure btnPBFSaveClick(Sender: TObject);
+    procedure btnPBFLoadClick(Sender: TObject);
     procedure CBActDamClick(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure SB_RenderOpts(Sender: TObject);
@@ -348,11 +348,11 @@ type
     procedure FPSLimitEditChange(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure LBCPOShapesClick(Sender: TObject);
+    procedure lbCPOShapesClick(Sender: TObject);
     procedure Lightvectors1Click(Sender: TObject);
     procedure CPOChange(Sender: TObject);
-    procedure CPOAddClick(Sender: TObject);
-    procedure CPORemClick(Sender: TObject);
+    procedure btnCPOAddClick(Sender: TObject);
+    procedure btnCPORemClick(Sender: TObject);
     procedure ReloadShadersCodeClick(Sender: TObject);
     procedure SaveCPO1Click(Sender: TObject);
     procedure CBShowGridClick(Sender: TObject);
@@ -370,8 +370,8 @@ type
     procedure FormMouseWheel(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
     procedure Button1Click(Sender: TObject);
     procedure KnowScale(Sender: TObject);
-    procedure B_CPOImportClick(Sender: TObject);
-    procedure B_CPOExportClick(Sender: TObject);
+    procedure btnCPOImportClick(Sender: TObject);
+    procedure btnCPOExportClick(Sender: TObject);
     procedure lbBlinkersDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
     procedure btnRegisterMOXClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -2385,7 +2385,7 @@ begin
   end;
 end;
 
-procedure TForm1.SpeedButton2Click(Sender: TObject);
+procedure TForm1.btnPartPivotUseClick(Sender: TObject);
 var
   idx: Integer;
 begin
@@ -2408,7 +2408,7 @@ begin
 end;
 
 
-procedure TForm1.PSFSaveClick(Sender: TObject);
+procedure TForm1.btnPSFSaveClick(Sender: TObject);
 begin
   if not RunSaveDialog(sdSave, fOpenedFileMask + '.psf', '', 'MTKit2 Pivot Setup Files (*.psf)|*.psf', 'psf') then Exit;
   meLog.Lines.Add('Assigning PSF file ...');
@@ -2417,7 +2417,7 @@ begin
 end;
 
 
-procedure TForm1.PSFLoadClick(Sender: TObject);
+procedure TForm1.btnPSFLoadClick(Sender: TObject);
 begin
   if TVParts.Items.Count<1 then Exit;
   //if Sender=PSFLoad then begin
@@ -2428,7 +2428,7 @@ begin
 end;
 
 
-procedure TForm1.PBFSaveClick(Sender: TObject);
+procedure TForm1.btnPBFSaveClick(Sender: TObject);
 begin
   if not RunSaveDialog(sdSave, fOpenedFileMask + '_colli.pbf', '', 'MTKit2 Part Behaviour Files (*.pbf)|*.pbf', 'pbf') then Exit;
   meLog.Lines.Add('Assigning PBF file ...');
@@ -2437,7 +2437,7 @@ begin
 end;
 
 
-procedure TForm1.PBFLoadClick(Sender: TObject);
+procedure TForm1.btnPBFLoadClick(Sender: TObject);
 begin
   if not RunOpenDialog(odOpen, '', '', 'MTKit2 Part Behaviour Files (*.pbf)|*.pbf') then Exit;
 
@@ -2743,7 +2743,7 @@ begin
   DefColor := ComboBox1.ItemIndex;
 end;
 
-procedure TForm1.LBCPOShapesClick(Sender: TObject);
+procedure TForm1.lbCPOShapesClick(Sender: TObject);
 var
   idx: Integer;
   ax, ay, az: Integer;
@@ -2753,23 +2753,23 @@ begin
 
   fUIRefresh := True;
   try
-    CPOX.Value := CPO[idx].PosX;
-    CPOY.Value := CPO[idx].PosY;
-    CPOZ.Value := CPO[idx].PosZ;
-    CPOSX.Enabled := CPO[idx].Format = 2;
-    CPOSY.Enabled := CPO[idx].Format = 2;
-    CPOSZ.Enabled := CPO[idx].Format = 2;
+    seCPOX.Value := CPO[idx].PosX;
+    seCPOY.Value := CPO[idx].PosY;
+    seCPOZ.Value := CPO[idx].PosZ;
+    seCPOSX.Enabled := CPO[idx].Format = 2;
+    seCPOSY.Enabled := CPO[idx].Format = 2;
+    seCPOSZ.Enabled := CPO[idx].Format = 2;
     if CPO[idx].Format = 2 then
     begin
-      CPOSX.Value := CPO[idx].ScaleX;
-      CPOSY.Value := CPO[idx].ScaleY;
-      CPOSZ.Value := CPO[idx].ScaleZ;
+      seCPOSX.Value := CPO[idx].ScaleX;
+      seCPOSY.Value := CPO[idx].ScaleY;
+      seCPOSZ.Value := CPO[idx].ScaleZ;
     end;
     Matrix2Angles(CPO[idx].Matrix9, 9, @ax, @ay, @az);
 
-    CPORH.Value := Round(ax);
-    CPORP.Value := Round(ay);
-    CPORB.Value := Round(az);
+    seCPORH.Value := Round(ax);
+    seCPORP.Value := Round(ay);
+    seCPORB.Value := Round(az);
   finally
     fUIRefresh := False;
   end;
@@ -2783,19 +2783,19 @@ begin
   if idx = 0 then Exit;
   if fUIRefresh then Exit;
 
-  CPO[idx].PosX := CPOX.Value;
-  CPO[idx].PosY := CPOY.Value;
-  CPO[idx].PosZ := CPOZ.Value;
-  CPO[idx].ScaleX := CPOSX.Value;
-  CPO[idx].ScaleY := CPOSY.Value;
-  CPO[idx].ScaleZ := CPOSZ.Value;
+  CPO[idx].PosX := seCPOX.Value;
+  CPO[idx].PosY := seCPOY.Value;
+  CPO[idx].PosZ := seCPOZ.Value;
+  CPO[idx].ScaleX := seCPOSX.Value;
+  CPO[idx].ScaleY := seCPOSY.Value;
+  CPO[idx].ScaleZ := seCPOSZ.Value;
 
-  Angles2Matrix(CPORH.Value,CPORP.Value,CPORB.Value, @CPO[idx].Matrix9, 9);
+  Angles2Matrix(seCPORH.Value, seCPORP.Value, seCPORB.Value, @CPO[idx].Matrix9, 9);
 end;
 
-procedure TForm1.CPOAddClick(Sender: TObject);
+procedure TForm1.btnCPOAddClick(Sender: TObject);
 var
-  ID,IDnew:Integer;
+  ID,IDnew: Integer;
 begin
   if CPOHead.Qty>=MAX_CPO_SHAPES then Exit;
   if CPOHead.Qty=0 then begin
@@ -2826,7 +2826,7 @@ begin
 end;
 
 
-procedure TForm1.CPORemClick(Sender: TObject);
+procedure TForm1.btnCPORemClick(Sender: TObject);
 var
   i,ID:Integer;
 begin
@@ -2937,12 +2937,12 @@ end;
 
 procedure TForm1.SB_RenderOpts(Sender: TObject);
 begin
-  if Sender=SB_Light then RenderOptions.LightVec:=SB_Light.Down;
-  if Sender=SB_Colli then RenderOptions.Colli:=SB_Colli.Down;
-  if Sender=SB_Wire then RenderOptions.Wire:=SB_Wire.Down;
-  if Sender=SB_UVmap then
+  if Sender = btnShowLights then RenderOptions.LightVec := btnShowLights.Down;
+  if Sender = btnShowColli then RenderOptions.Colli := btnShowColli.Down;
+  if Sender = btnShowWireframe then RenderOptions.Wire := btnShowWireframe.Down;
+  if Sender = btnShowUVMap then
   begin
-    RenderOptions.UVMap:=SB_UVmap.Down;
+    RenderOptions.UVMap := btnShowUVMap.Down;
     RenderResize(nil);
   end;
 end;
@@ -3187,14 +3187,14 @@ begin
     btnBlinkersSave.Enabled := False;
     btnBlinkerAdd.Enabled := False;
     btnBlinkerRem.Enabled := False;
-    PBFLoad.Enabled := False;
-    PBFSave.Enabled := False;
-    SB_Light.Down := False;
-    SB_Light.Enabled := False;
-    SB_UVMap.Down := False;
-    SB_UVMap.Enabled := False;
-    SB_Wire.Down := False;
-    SB_Wire.Enabled := False;
+    btnPBFLoad.Enabled := False;
+    btnPBFSave.Enabled := False;
+    btnShowLights.Down := False;
+    btnShowLights.Enabled := False;
+    btnShowUVMap.Down := False;
+    btnShowUVMap.Enabled := False;
+    btnShowWireframe.Down := False;
+    btnShowWireframe.Enabled := False;
     SendDataToUI(uiParts);
     SendDataToUI(uiBlinkers);
     SendDataToUI(uiMOX);
@@ -3216,8 +3216,8 @@ begin
   if aClearup in [cuCOB, cuALL] then
   begin
     FillChar(COB,SizeOf(COB),#0);
-    SB_Colli.Down := False;
-    SB_Colli.Enabled := False;
+    btnShowColli.Down := False;
+    btnShowColli.Enabled := False;
     SaveCOB1.Enabled := False;
     btnCOBVerticeCopy.Enabled := False;
     btnCOBVerticePaste.Enabled := False;
@@ -3229,8 +3229,8 @@ begin
   begin
     FillChar(CPO,SizeOf(CPO),#0);
     FillChar(CPOHead,SizeOf(CPOHead),#0);
-    SB_Colli.Down := False;
-    SB_Colli.Enabled := False;
+    btnShowColli.Down := False;
+    btnShowColli.Enabled := False;
     SaveCPO1.Enabled := False;
     SendDataToUI(uiCPO);
   end;
@@ -3238,8 +3238,8 @@ begin
   if aClearup in [cuTREE, cuALL] then
   begin
     fTree.Clear;
-    SB_Wire.Down := False;
-    SB_Wire.Enabled := False;
+    btnShowWireframe.Down := False;
+    btnShowWireframe.Enabled := False;
   end;
 end;
 
@@ -3257,11 +3257,11 @@ begin
     btnBlinkerRem.Enabled := True;
     btnBlinkersLoad.Enabled := True;
     btnBlinkersSave.Enabled := True;
-    PBFLoad.Enabled := True;
-    PBFSave.Enabled := True;
-    SB_Light.Enabled := True;
-    SB_Wire.Enabled := True;
-    SB_UVMap.Enabled := True;
+    btnPBFLoad.Enabled := True;
+    btnPBFSave.Enabled := True;
+    btnShowLights.Enabled := True;
+    btnShowWireframe.Enabled := True;
+    btnShowUVMap.Enabled := True;
   end;
 
   if aClearup = cuMTL then
@@ -3278,7 +3278,7 @@ begin
 
   if aClearup = cuCOB then
   begin
-    SB_Colli.Enabled := True;
+    btnShowColli.Enabled := True;
     SaveCOB1.Enabled := True;
     ExportCOB1.Enabled := True;
     btnCOBVerticeCopy.Enabled := True;
@@ -3286,15 +3286,15 @@ begin
     SendDataToUI(uiCOB);
   end;
 
-  if aClearup=cuCPO then
+  if aClearup = cuCPO then
   begin
-    SB_Colli.Enabled := True;
+    btnShowColli.Enabled := True;
     SaveCPO1.Enabled := True;
     SendDataToUI(uiCPO);
   end;
 
   if aClearup = cuTREE then
-    SB_Wire.Enabled := True;
+    btnShowWireframe.Enabled := True;
 end;
 
 
@@ -3389,7 +3389,7 @@ begin
 end;
 
 
-procedure TForm1.B_CPOImportClick(Sender: TObject);
+procedure TForm1.btnCPOImportClick(Sender: TObject);
 var
   log:string;
   i,h,IDnew:Integer;
@@ -3436,7 +3436,7 @@ begin
   LBCPOShapes.ItemIndex := LBCPOShapes.Count-1;
 end;
 
-procedure TForm1.B_CPOExportClick(Sender: TObject);
+procedure TForm1.btnCPOExportClick(Sender: TObject);
 var
   I: Integer;
 begin
