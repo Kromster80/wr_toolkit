@@ -15,10 +15,6 @@ procedure SaveMTL(const aFilename: string);
 function  LoadCPO(const aFilename: string): Boolean;
 procedure SaveCPO(const aFilename: string);
 
-function  LoadCOB(const aFilename: string): Boolean;
-procedure SaveCOB(const aFilename: string);
-
-procedure SaveCOB2LWO(const aFilename: string);
 procedure SaveCPO2LWO(const aFilename: string; ShapeID: Integer);
 
 procedure LoadBlinkers(const aFilename: string);
@@ -1352,88 +1348,6 @@ begin
 
   CloseFile(f);
 end;
-
-function LoadCOB(const aFilename: string): Boolean;
-var
-  i:Integer;
-  f:file;
-begin
-  Result := False;
-  if not FileExists(aFilename) then Exit;
-
-  AssignFile(f,aFilename);
-  FileMode:=0; Reset(f,1); FileMode:=2;
-  BlockRead(f,COB.Head.PointQty,44);
-  for i:=1 to COB.Head.PointQty do BlockRead(f,COB.Vertices[i].X,12);
-  BlockRead(f,COB.Faces[1],6*COB.Head.PolyQty);
-  for i:=1 to COB.Head.PolyQty do BlockRead(f,COB.NormalsP[i].X,12);
-  CloseFile(f);
-
-  Result := True;
-end;
-
-procedure SaveCOB(const aFilename: string);
-var
-  i: Integer;
-  f: file;
-begin
-  AssignFile(f,aFilename); Rewrite(f,1);
-  BlockWrite(f,COB.Head.PointQty,44);
-  for i:=1 to COB.Head.PointQty do BlockWrite(f,COB.Vertices[i].X,12);
-  for i:=1 to COB.Head.PolyQty do BlockWrite(f,COB.Faces[i,1],6);
-  for i:=1 to COB.Head.PolyQty do BlockWrite(f,COB.NormalsP[i].X,12);
-  CloseFile(f);
-end;
-
-procedure SaveCOB2LWO(const aFilename: string);
-var
-  i,m: Integer;
-  rs: string[4];
-  ft: textfile;
-begin
-  AssignFile(ft,aFilename); Rewrite(ft);
-  Write(ft,'FORM'); m:=0;
-  Inc(m,12);                                                     //+'LWO2TAGS   2'
-  Inc(m,8);                                                      //Default
-  Inc(m,8+18);                                                   //+LAYR_
-  Inc(m,8+COB.Head.PointQty*12);                                 //+PNTS+3D
-  Inc(m,12+COB.Head.PolyQty*8);                                  //+Face 3.x.x.x
-  Inc(m,12+COB.Head.PolyQty*4);                                  //+PTAG
-  //Inc(m,8+10);                                                 //+SURF Data
-
-  Write(ft,#0,#0,AnsiChar(m div 256),AnsiChar(m));
-  Write(ft,'LWO2','TAGS');
-  Write(ft,#0,#0,#0,#8,'Default',#0);
-  Write(ft,'LAYR',#0,#0,#0,#18,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0);
-
-  Write(ft,'PNTS');
-  m:=COB.Head.PointQty*12; Write(ft,#0,#0,AnsiChar(m div 256),AnsiChar(m));
-  for i:=1 to COB.Head.PointQty do
-  begin
-    rs:=unreal2(COB.Vertices[i].X/10); Write(ft,rs[4],rs[3],rs[2],rs[1]); //LWO uses
-    rs:=unreal2(COB.Vertices[i].Y/10); Write(ft,rs[4],rs[3],rs[2],rs[1]); //reverse
-    rs:=unreal2(COB.Vertices[i].Z/10); Write(ft,rs[4],rs[3],rs[2],rs[1]); //order
-  end;
-
-  Write(ft,'POLS');
-  m:=COB.Head.PolyQty*8+4; Write(ft,#0,#0,AnsiChar(m div 256),AnsiChar(m));
-  Write(ft,'FACE');
-  for i:=1 to COB.Head.PolyQty do
-  Write(ft,#0,#3
-  ,AnsiChar((COB.Faces[i,1]) div 256),AnsiChar(COB.Faces[i,1])
-  ,AnsiChar((COB.Faces[i,2]) div 256),AnsiChar(COB.Faces[i,2])
-  ,AnsiChar((COB.Faces[i,3]) div 256),AnsiChar(COB.Faces[i,3]));
-
-  Write(ft,'PTAG');
-  m:=COB.Head.PolyQty*4+4; Write(ft,#0,#0,AnsiChar(m div 256),AnsiChar(m));
-  Write(ft,'SURF');
-  for i:=0 to COB.Head.PolyQty-1 do Write(ft,AnsiChar(i div 256),AnsiChar(i),#0,#0);
-
-  Write(ft,'SURF',#0,#0,#0,#10,'Default',#0,#0,#0);
-
-  CloseFile(ft);
-end;
-
 
 procedure SaveCPO2LWO(const aFilename: string; ShapeID:Integer);
 var

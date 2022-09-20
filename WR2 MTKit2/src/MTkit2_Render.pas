@@ -2,7 +2,7 @@ unit MTkit2_Render;
 interface
 uses
   OpenGL, dglOpenGL, KromOGLUtils, KromUtils, SysUtils, Math, Windows,
-  TGATexture, PTXTexture;
+  TGATexture, PTXTexture, MTkit2_COB;
 
 type
   TBlinkerPreviewMode = (bmNone, bmHeadBreaks, bmBlinkers, bmReverse, bmNitro);
@@ -11,7 +11,7 @@ type
   function LoadFresnelShader: Boolean;
   function RenderShaders: Boolean;
   procedure RenderLights(aSelected: Integer; aMode: TBlinkerPreviewMode; aShowDummy, aVectors: Boolean);
-  procedure RenderCOB(ID: Integer; aShowIds: Boolean);
+  procedure RenderCOB(aCOB: TModelCOB; ID: Integer; aShowIds: Boolean);
   procedure RenderCPO(ID: Integer);
   procedure RenderGrid;
   procedure RenderUVGrid(ShowGrid: Boolean);
@@ -23,7 +23,7 @@ const
 
 implementation
 uses
-  MTkit2_Unit1, MTkit2_Defaults, MTkit2_COB, MTkit2_CPO, MTkit2_MOX, MTkit2_Tree;
+  MTkit2_Unit1, MTkit2_Defaults, MTkit2_CPO, MTkit2_MOX, MTkit2_Tree;
 
 var
   po, fs: array [0..MAX_MAT_CLASS, 0..MAX_MAT_CLASS] of Integer;
@@ -242,27 +242,27 @@ begin
 end;
 
 
-procedure RenderCOB(ID: Integer; aShowIds: Boolean);
+procedure RenderCOB(aCOB: TModelCOB; ID: Integer; aShowIds: Boolean);
 var
-  i,h:Integer;
+  i,h: Integer;
 begin
-  if COB.Head.PointQty = 0 then Exit;
+  if aCOB.Head.PointQty = 0 then Exit;
 
   glBindTexture(GL_TEXTURE_2D, 0); //UV map texture
 
   glPushMatrix;
-    glTranslate(COB.Head.X,COB.Head.Y,COB.Head.Z);
+    glTranslate(aCOB.Head.X,aCOB.Head.Y,aCOB.Head.Z);
     glCallList(Pivot);
   glPopMatrix;
 
   glColor4f(0.7, 0.6, 0.5, 0.6);
 
   glBegin(GL_TRIANGLES);
-    for i:=1 to COB.Head.PolyQty do
+    for i:=1 to aCOB.Head.PolyQty do
       for h:=3 downto 1 do
       begin
-        glNormal3fv(@COB.NormalsP[i].X);
-        glvertex3fv(@COB.Vertices[COB.Faces[i,h]+1].X);
+        glNormal3fv(@aCOB.NormalsP[i].X);
+        glvertex3fv(@aCOB.Vertices[aCOB.Faces[i,h]+1].X);
       end;
   glEnd;
 
@@ -271,11 +271,11 @@ begin
   glPolygonMode(GL_FRONT, GL_LINE);
 
   glBegin(GL_TRIANGLES);
-    for i:=1 to COB.Head.PolyQty do
+    for i:=1 to aCOB.Head.PolyQty do
     for h:=3 downto 1 do
     begin
-      glNormal3fv(@COB.NormalsP[i].X);
-      glvertex3fv(@COB.Vertices[COB.Faces[i,h]+1].X);
+      glNormal3fv(@aCOB.NormalsP[i].X);
+      glvertex3fv(@aCOB.Vertices[aCOB.Faces[i,h]+1].X);
     end;
   glEnd;
 
@@ -284,10 +284,10 @@ begin
   glDisable(GL_LIGHTING);
 
   if aShowIds then
-  for i:=1 to COB.Head.PointQty do
+  for i:=1 to aCOB.Head.PointQty do
   begin
     glColor4f(0.75, 0.75, 0.75, 1);
-    glRasterPos3f(COB.Vertices[i].X, COB.Vertices[i].Y, COB.Vertices[i].Z);
+    glRasterPos3f(aCOB.Vertices[i].X, aCOB.Vertices[i].Y, aCOB.Vertices[i].Z);
     glPrint(IntToStr(i));
   end;
 
@@ -297,10 +297,10 @@ begin
     glDepthFunc(GL_ALWAYS);
 
     glBegin(GL_POINTS);
-      glvertex3fv(@COB.Vertices[ID].X);
+      glvertex3fv(@aCOB.Vertices[ID].X);
     glEnd;
 
-    glRasterPos3f(COB.Vertices[ID].X, COB.Vertices[ID].Y, COB.Vertices[ID].Z);
+    glRasterPos3f(aCOB.Vertices[ID].X, aCOB.Vertices[ID].Y, aCOB.Vertices[ID].Z);
     glPrint(IntToStr(ID));
     glDepthFunc(GL_LEQUAL);
   end;

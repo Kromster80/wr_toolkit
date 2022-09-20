@@ -402,6 +402,7 @@ type
     fUseShaders: Boolean;
     fRenderObjects: TRenderObjectSet;
 
+    fCOB: TModelCOB;
     fTree: TModelTree;
 
     procedure LoadSettingsFromIni(const aFilename: string);
@@ -580,6 +581,7 @@ begin
   CBRenderModeChange(nil); //update RenderMode
   FormatSettings.DecimalSeparator := '.';
 
+  fCOB := TModelCOB.Create;
   fTree := TModelTree.Create;
 
   ClearUpClick(cuALL);
@@ -739,6 +741,7 @@ end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
+  FreeAndNil(fCOB);
   FreeAndNil(fTree);
 
   wglMakeCurrent(h_DC, 0);
@@ -804,12 +807,12 @@ begin
                   oldID1:=LBCOBPoints.ItemIndex;
                   LBCOBPoints.Clear;
                   LBCPOShapes.Clear;
-                  for ii:=1 to COB.Head.PointQty do LBCOBPoints.Items.Add(IntToStr(ii));
+                  for ii:=1 to fCOB.Head.PointQty do LBCOBPoints.Items.Add(IntToStr(ii));
                   LBCOBPoints.ItemIndex:=EnsureRange(oldID1,0,LBCOBPoints.Count-1);
                   fUIRefresh := False;
-                  COB_X.Value:=COB.Head.X; COB_Y.Value:=COB.Head.Y; COB_Z.Value:=COB.Head.Z;
-                  COB_X1.Value:=COB.Head.Xmin; COB_Y1.Value:=COB.Head.Ymin; COB_Z1.Value:=COB.Head.Zmin;
-                  COB_X2.Value:=COB.Head.Xmax; COB_Y2.Value:=COB.Head.Ymax; COB_Z2.Value:=COB.Head.Zmax;
+                  COB_X.Value:=fCOB.Head.X; COB_Y.Value:=fCOB.Head.Y; COB_Z.Value:=fCOB.Head.Z;
+                  COB_X1.Value:=fCOB.Head.Xmin; COB_Y1.Value:=fCOB.Head.Ymin; COB_Z1.Value:=fCOB.Head.Zmin;
+                  COB_X2.Value:=fCOB.Head.Xmax; COB_Y2.Value:=fCOB.Head.Ymax; COB_Z2.Value:=fCOB.Head.Zmax;
                 end;
     uiCPO:      begin
                   fUIRefresh := True;
@@ -961,8 +964,7 @@ begin
       if (ActivePage = apCOB)
       or RenderOptions.Colli
       or (ActivePage = apBrowse) and not (roMOX in fRenderObjects) then
-        RenderCOB(LBCOBPoints.ItemIndex+1, cbCOBShowIds.Checked);
-
+        RenderCOB(fCOB, LBCOBPoints.ItemIndex+1, cbCOBShowIds.Checked);
 
 //      glDisable(GL_DEPTH_TEST);
     if (roCPO in fRenderObjects) then
@@ -2172,24 +2174,24 @@ procedure TForm1.ConverseImp_COB;
 var
   i,h:Integer;
 begin
-  if (Imp.VerticeCount>255) or (Imp.PolyCount>255) then
+  if (Imp.VerticeCount > 255) or (Imp.PolyCount > 255) then
   begin
     MessageBox(Handle, 'Can''t import more than 255 vertices to COB', 'Error', MB_OK or MB_ICONERROR);
     Exit;
   end;
 
-  COB.Head.PointQty:=Imp.VerticeCount;
-  COB.Head.PolyQty:=Imp.PolyCount;
+  fCOB.Head.PointQty:=Imp.VerticeCount;
+  fCOB.Head.PolyQty:=Imp.PolyCount;
 
   for i:=1 to Imp.VerticeCount do
-    COB.Vertices[i]:=Imp.XYZ[i];
+    fCOB.Vertices[i]:=Imp.XYZ[i];
 
   for i:=1 to Imp.PolyCount do
-    COB.NormalsP[i]:=Imp.Np[i];
+    fCOB.NormalsP[i]:=Imp.Np[i];
 
   for i:=1 to Imp.PolyCount do
     for h:=1 to 3 do
-      COB.Faces[i,h]:=Imp.Faces[i,h]-1;
+      fCOB.Faces[i,h]:=Imp.Faces[i,h]-1;
 
   ShowUpClick(cuCOB);
   RebuildCOBBounds;
@@ -2201,28 +2203,28 @@ var
   I: Integer;
 begin
   // Compute normal to every polygon
-  for I := 1 to COB.Head.PolyQty do
+  for I := 1 to fCOB.Head.PolyQty do
   begin
-    Normal2Poly(COB.Vertices[COB.Faces[I,1]+1], COB.Vertices[COB.Faces[I,2]+1], COB.Vertices[COB.Faces[I,3]+1], @COB.NormalsP[I]);
-    Normalize(COB.NormalsP[I]);
+    Normal2Poly(fCOB.Vertices[fCOB.Faces[I,1]+1], fCOB.Vertices[fCOB.Faces[I,2]+1], fCOB.Vertices[fCOB.Faces[I,3]+1], @fCOB.NormalsP[I]);
+    Normalize(fCOB.NormalsP[I]);
   end;
 
-  COB.Head.Xmin := 0; COB.Head.Xmax := 0;
-  COB.Head.Ymin := 0; COB.Head.Ymax := 0;
-  COB.Head.Zmin := 0; COB.Head.Zmax := 0;
-  for I := 1 to COB.Head.PointQty do
+  fCOB.Head.Xmin := 0; fCOB.Head.Xmax := 0;
+  fCOB.Head.Ymin := 0; fCOB.Head.Ymax := 0;
+  fCOB.Head.Zmin := 0; fCOB.Head.Zmax := 0;
+  for I := 1 to fCOB.Head.PointQty do
   begin
-    COB.Head.Xmax := Max(COB.Head.Xmax,COB.Vertices[I].X);
-    COB.Head.Ymax := Max(COB.Head.Ymax,COB.Vertices[I].Y);
-    COB.Head.Zmax := Max(COB.Head.Zmax,COB.Vertices[I].Z);
-    COB.Head.Xmin := Min(COB.Head.Xmin,COB.Vertices[I].X);
-    COB.Head.Ymin := Min(COB.Head.Ymin,COB.Vertices[I].Y);
-    COB.Head.Zmin := Min(COB.Head.Zmin,COB.Vertices[I].Z);
+    fCOB.Head.Xmax := Max(fCOB.Head.Xmax,fCOB.Vertices[I].X);
+    fCOB.Head.Ymax := Max(fCOB.Head.Ymax,fCOB.Vertices[I].Y);
+    fCOB.Head.Zmax := Max(fCOB.Head.Zmax,fCOB.Vertices[I].Z);
+    fCOB.Head.Xmin := Min(fCOB.Head.Xmin,fCOB.Vertices[I].X);
+    fCOB.Head.Ymin := Min(fCOB.Head.Ymin,fCOB.Vertices[I].Y);
+    fCOB.Head.Zmin := Min(fCOB.Head.Zmin,fCOB.Vertices[I].Z);
   end;
 
-  COB.Head.X := 0;//Cob.Xmax+Cob.Xmin;
-  COB.Head.Y := 0;//Cob.Ymax+Cob.Ymin;
-  COB.Head.Z := 0;//Cob.Zmax+Cob.Zmin;
+  fCOB.Head.X := 0;//fCOB.Xmax+fCOB.Xmin;
+  fCOB.Head.Y := 0;//fCOB.Ymax+fCOB.Ymin;
+  fCOB.Head.Z := 0;//fCOB.Zmax+fCOB.Zmin;
 
   SendDataToUI(uiCOB);
 end;
@@ -2242,9 +2244,11 @@ begin
     btnCOBVerticePaste.Enabled := False;
     Exit;
   end;
-  COB.Vertices[LBCOBPoints.ItemIndex+1].X:=COB.Vertices[fCOBCopyItem].X;
-  COB.Vertices[LBCOBPoints.ItemIndex+1].Y:=COB.Vertices[fCOBCopyItem].Y;
-  COB.Vertices[LBCOBPoints.ItemIndex+1].Z:=COB.Vertices[fCOBCopyItem].Z;
+
+  fCOB.Vertices[LBCOBPoints.ItemIndex+1].X:=fCOB.Vertices[fCOBCopyItem].X;
+  fCOB.Vertices[LBCOBPoints.ItemIndex+1].Y:=fCOB.Vertices[fCOBCopyItem].Y;
+  fCOB.Vertices[LBCOBPoints.ItemIndex+1].Z:=fCOB.Vertices[fCOBCopyItem].Z;
+
   RebuildCOBBounds;
   SendDataToUI(uiCOB);
 end;
@@ -2258,9 +2262,9 @@ begin
   if idx = 0 then Exit;
 
   fUIRefresh := True;
-  seCOBX.Value := COB.Vertices[idx].X;
-  seCOBY.Value := COB.Vertices[idx].Y;
-  seCOBZ.Value := COB.Vertices[idx].Z;
+  seCOBX.Value := fCOB.Vertices[idx].X;
+  seCOBY.Value := fCOB.Vertices[idx].Y;
+  seCOBZ.Value := fCOB.Vertices[idx].Z;
   fUIRefresh := False;
 end;
 
@@ -2273,9 +2277,9 @@ begin
   if idx = 0 then Exit;
   if fUIRefresh then Exit;
 
-  COB.Vertices[idx].X := seCOBX.Value;
-  COB.Vertices[idx].Y := seCOBY.Value;
-  COB.Vertices[idx].Z := seCOBZ.Value;
+  fCOB.Vertices[idx].X := seCOBX.Value;
+  fCOB.Vertices[idx].Y := seCOBY.Value;
+  fCOB.Vertices[idx].Z := seCOBZ.Value;
   RebuildCOBBounds;
   SendDataToUI(uiCOB);
 end;
@@ -2497,7 +2501,7 @@ end;
 procedure TForm1.FileListBox1Click(Sender: TObject);
 begin
   FillChar(MOX.Header, SizeOf(MOX.Header), #0);
-  FillChar(COB, SizeOf(COB), #0);
+  fCOB.Clear;
   fTree.Clear;
   ResetView(nil);
   LoadFile(FileListBox1.FileName, lmJustLoad);
@@ -2548,7 +2552,7 @@ begin
     ScanVinyls(fOpenedFolder);
     ShowUpClick(cuMTL);
     SetRenderObject([roMOX]);
-    if LoadCOB(ChangeFileExt(aFilename, '_colli.cob')) then
+    if fCOB.LoadCOB(ChangeFileExt(aFilename, '_colli.cob')) then
     begin
       ShowUpClick(cuCOB);
       SetRenderObject([roMOX, roCOB]);
@@ -2569,7 +2573,7 @@ begin
 
   if SameText(ExtractFileExt(aFilename), '.cob') then
   begin
-    if not LoadCOB(aFilename) then Exit;
+    if not fCOB.LoadCOB(aFilename) then Exit;
     ShowUpClick(cuCOB);
     SetRenderObject([roCOB]);
     if aMode = lmLoadAndShow then SetActivePage(apCOB);
@@ -3036,7 +3040,7 @@ procedure TForm1.SaveCOB1Click(Sender: TObject);
 begin
   if not RunSaveDialog(sdSave, fOpenedFileMask+'_colli.cob','','World Racing 2 collision files (*.cob)|*.cob','cob') then Exit;
   RebuildCOBBounds; //Need to recompute BBOX and normals
-  SaveCOB(sdSave.FileName);
+  fCOB.SaveCOB(sdSave.FileName);
 end;
 
 procedure TForm1.SaveCPO1Click(Sender: TObject);
@@ -3134,7 +3138,7 @@ procedure TForm1.ExportCOB1Click(Sender: TObject);
 begin
   if not RunSaveDialog(sdSave, fOpenedFileMask+'_colli.lwo','','Lightwave 3D files (*.lwo)|*.lwo','lwo') then Exit;
   meLog.Lines.Add('Writing COB>LWO file');
-  SaveCOB2LWO(sdSave.FileName);
+  fCOB.SaveCOB2LWO(sdSave.FileName);
   meLog.Lines.Add('COB>LWO Save Complete');
 end;
 
@@ -3184,7 +3188,7 @@ begin
 
   if aClearup in [cuCOB, cuALL] then
   begin
-    FillChar(COB,SizeOf(COB),#0);
+    fCOB.Clear;
     btnShowColli.Down := False;
     btnShowColli.Enabled := False;
     SaveCOB1.Enabled := False;
