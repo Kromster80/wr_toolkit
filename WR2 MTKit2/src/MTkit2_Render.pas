@@ -11,7 +11,7 @@ type
   function LoadFresnelShader: Boolean;
   function RenderShaders: Boolean;
   procedure RenderLights(aSelected: Integer; aMode: TBlinkerPreviewMode; aShowDummy, aVectors: Boolean);
-  procedure RenderCOB(ID: Integer);
+  procedure RenderCOB(ID: Integer; aShowIds: Boolean);
   procedure RenderCPO(ID: Integer);
   procedure RenderGrid;
   procedure RenderUVGrid(ShowGrid: Boolean);
@@ -242,63 +242,66 @@ begin
 end;
 
 
-procedure RenderCOB(ID: Integer);
+procedure RenderCOB(ID: Integer; aShowIds: Boolean);
 var
   i,h:Integer;
 begin
-  if COB.Head.PointQty=0 then exit;
+  if COB.Head.PointQty = 0 then Exit;
+
   glBindTexture(GL_TEXTURE_2D, 0); //UV map texture
 
   glPushMatrix;
     glTranslate(COB.Head.X,COB.Head.Y,COB.Head.Z);
-    glCallList(Pivot); //Pivot
+    glCallList(Pivot);
   glPopMatrix;
 
-  glColor4f(0.7,0.6,0.5,0.6);
+  glColor4f(0.7, 0.6, 0.5, 0.6);
 
   glBegin(GL_TRIANGLES);
     for i:=1 to COB.Head.PolyQty do
-      for h:=3 downto 1 do begin
+      for h:=3 downto 1 do
+      begin
         glNormal3fv(@COB.NormalsP[i].X);
         glvertex3fv(@COB.Vertices[COB.Faces[i,h]+1].X);
       end;
   glEnd;
 
   glDepthFunc(GL_ALWAYS);
-  glColor4f(1,0.9,0.6,1);
-  glPolygonMode(GL_FRONT,GL_LINE);
+  glColor4f(1, 0.9, 0.6, 1);
+  glPolygonMode(GL_FRONT, GL_LINE);
 
   glBegin(GL_TRIANGLES);
     for i:=1 to COB.Head.PolyQty do
-    for h:=3 downto 1 do begin
+    for h:=3 downto 1 do
+    begin
       glNormal3fv(@COB.NormalsP[i].X);
       glvertex3fv(@COB.Vertices[COB.Faces[i,h]+1].X);
     end;
   glEnd;
 
-  glPolygonMode(GL_FRONT,GL_FILL);
+  glPolygonMode(GL_FRONT, GL_FILL);
   glDepthFunc(GL_LEQUAL);
   glDisable(GL_LIGHTING);
 
-  if Form1.CBShowIDs.Checked then
+  if aShowIds then
   for i:=1 to COB.Head.PointQty do
   begin
-    glColor4f(0.75,0.75,0.75,1);
-    glRasterPos3f(COB.Vertices[i].X,COB.Vertices[i].Y,COB.Vertices[i].Z);
-    glPrint(inttostr(i));
+    glColor4f(0.75, 0.75, 0.75, 1);
+    glRasterPos3f(COB.Vertices[i].X, COB.Vertices[i].Y, COB.Vertices[i].Z);
+    glPrint(IntToStr(i));
   end;
 
   if ID > 0 then
   begin
-    glColor4f(1,1,1,1);
+    glColor4f(1, 1, 1, 1);
     glDepthFunc(GL_ALWAYS);
 
     glBegin(GL_POINTS);
       glvertex3fv(@COB.Vertices[ID].X);
     glEnd;
 
-    glRasterPos3f(COB.Vertices[ID].X,COB.Vertices[ID].Y,COB.Vertices[ID].Z);
-    glPrint(inttostr(ID));
+    glRasterPos3f(COB.Vertices[ID].X, COB.Vertices[ID].Y, COB.Vertices[ID].Z);
+    glPrint(IntToStr(ID));
     glDepthFunc(GL_LEQUAL);
   end;
 end;

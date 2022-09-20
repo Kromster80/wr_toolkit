@@ -1831,7 +1831,7 @@ object Form1: TForm1
     object tsCOB: TTabSheet
       Caption = 'COB'
       ImageIndex = 4
-      object COBCopy: TSpeedButton
+      object btnCOBVerticeCopy: TSpeedButton
         Left = 182
         Top = 124
         Width = 25
@@ -1877,9 +1877,9 @@ object Form1: TForm1
           D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4
           C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0
           D4C8D0D4C8D0D4C8D0D4}
-        OnClick = COBCopyClick
+        OnClick = btnCOBVerticeCopyClick
       end
-      object COBPaste: TSpeedButton
+      object btnCOBVerticePaste: TSpeedButton
         Left = 206
         Top = 124
         Width = 25
@@ -1926,7 +1926,7 @@ object Form1: TForm1
           D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4
           C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0D4C8D0
           D4C8D0D4C8D0D4C8D0D4}
-        OnClick = COBPasteClick
+        OnClick = btnCOBVerticePasteClick
       end
       object Label57: TLabel
         Left = 196
@@ -2010,7 +2010,7 @@ object Form1: TForm1
         Height = 13
         Caption = 'Maximum'
       end
-      object CBShowIDs: TCheckBox
+      object cbCOBShowIds: TCheckBox
         Left = 134
         Top = -2
         Width = 97
@@ -2027,7 +2027,7 @@ object Form1: TForm1
         TabOrder = 1
         OnClick = LBCOBPointsClick
       end
-      object COBX: TFloatSpinEdit
+      object seCOBX: TFloatSpinEdit
         Left = 134
         Top = 50
         Width = 57
@@ -2035,9 +2035,9 @@ object Form1: TForm1
         Accuracy = 3
         Increment = 0.001000000000000000
         TabOrder = 2
-        OnChange = COBXChange
+        OnChange = seCOBXChange
       end
-      object COBY: TFloatSpinEdit
+      object seCOBY: TFloatSpinEdit
         Left = 134
         Top = 74
         Width = 57
@@ -2045,9 +2045,9 @@ object Form1: TForm1
         Accuracy = 3
         Increment = 0.001000000000000000
         TabOrder = 3
-        OnChange = COBXChange
+        OnChange = seCOBXChange
       end
-      object COBZ: TFloatSpinEdit
+      object seCOBZ: TFloatSpinEdit
         Left = 134
         Top = 98
         Width = 57
@@ -2055,7 +2055,7 @@ object Form1: TForm1
         Accuracy = 3
         Increment = 0.001000000000000000
         TabOrder = 4
-        OnChange = COBXChange
+        OnChange = seCOBXChange
       end
       object COB_X: TFloatSpinEdit
         Left = 0

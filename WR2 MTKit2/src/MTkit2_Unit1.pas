@@ -91,13 +91,13 @@ type
     CBMonoColor: TCheckBox;
     ImportLWOCOB1: TMenuItem;
     tsCOB: TTabSheet;
-    CBShowIDs: TCheckBox;
+    cbCOBShowIds: TCheckBox;
     LBCOBPoints: TListBox;
-    COBCopy: TSpeedButton;
-    COBPaste: TSpeedButton;
-    COBX: TFloatSpinEdit;
-    COBY: TFloatSpinEdit;
-    COBZ: TFloatSpinEdit;
+    btnCOBVerticeCopy: TSpeedButton;
+    btnCOBVerticePaste: TSpeedButton;
+    seCOBX: TFloatSpinEdit;
+    seCOBY: TFloatSpinEdit;
+    seCOBZ: TFloatSpinEdit;
     Label57: TLabel;
     Label58: TLabel;
     Label59: TLabel;
@@ -316,10 +316,10 @@ type
     procedure tvPartsDragDrop(Sender, Source: TObject; X, Y: Integer);
     procedure MatMonoColorClick(Sender: TObject);
     procedure ImportLWOCOB1Click(Sender: TObject);
-    procedure CoBCopyClick(Sender: TObject);
-    procedure COBPasteClick(Sender: TObject);
+    procedure btnCOBVerticeCopyClick(Sender: TObject);
+    procedure btnCOBVerticePasteClick(Sender: TObject);
     procedure LBCOBPointsClick(Sender: TObject);
-    procedure COBXChange(Sender: TObject);
+    procedure seCOBXChange(Sender: TObject);
     procedure ExportMOX1Click(Sender: TObject);
     procedure ExportCOB1Click(Sender: TObject);
     procedure MatCopyClick(Sender: TObject);
@@ -993,9 +993,10 @@ begin
       fTree.Render(Pivot, xRot, yRot, RenderOptions.Wire);
 
     if (roCOB in RenderObject) then
-      if (ActivePage=apCOB)or(RenderOptions.Colli)or
-      (ActivePage=apBrowse)and not(roMOX in RenderObject) then
-        RenderCOB(LBCOBPoints.ItemIndex+1);
+      if (ActivePage = apCOB)
+      or RenderOptions.Colli
+      or (ActivePage = apBrowse) and not (roMOX in RenderObject) then
+        RenderCOB(LBCOBPoints.ItemIndex+1, cbCOBShowIds.Checked);
 
 
 //      glDisable(GL_DEPTH_TEST);
@@ -2260,18 +2261,18 @@ begin
 end;
 
 
-procedure TForm1.CoBCopyClick(Sender: TObject);
+procedure TForm1.btnCOBVerticeCopyClick(Sender: TObject);
 begin
   fCOBCopyItem := LBCOBPoints.ItemIndex+1;
-  COBPaste.Enabled := InRange(fCOBCopyItem, 1, MOX.Header.BlinkerCount);
+  btnCOBVerticePaste.Enabled := InRange(fCOBCopyItem, 1, MOX.Header.BlinkerCount);
 end;
 
 
-procedure TForm1.COBPasteClick(Sender: TObject);
+procedure TForm1.btnCOBVerticePasteClick(Sender: TObject);
 begin
   if fCOBCopyItem<>EnsureRange(fCOBCopyItem, 1, MOX.Header.BlinkerCount) then
   begin
-    COBPaste.Enabled := False;
+    btnCOBVerticePaste.Enabled := False;
     Exit;
   end;
   COB.Vertices[LBCOBPoints.ItemIndex+1].X:=COB.Vertices[fCOBCopyItem].X;
@@ -2284,18 +2285,20 @@ end;
 
 procedure TForm1.LBCOBPointsClick(Sender: TObject);
 var
-  ID:Integer;
+  idx: Integer;
 begin
-  ID:=LBCOBPoints.ItemIndex+1; if ID=0 then Exit;
+  idx := LBCOBPoints.ItemIndex + 1;
+  if idx = 0 then Exit;
+
   fUIRefresh := True;
-  COBX.Value:=COB.Vertices[ID].X;
-  COBY.Value:=COB.Vertices[ID].Y;
-  COBZ.Value:=COB.Vertices[ID].Z;
+  seCOBX.Value := COB.Vertices[idx].X;
+  seCOBY.Value := COB.Vertices[idx].Y;
+  seCOBZ.Value := COB.Vertices[idx].Z;
   fUIRefresh := False;
 end;
 
 
-procedure TForm1.COBXChange(Sender: TObject);
+procedure TForm1.seCOBXChange(Sender: TObject);
 var
   idx: Integer;
 begin
@@ -2303,9 +2306,9 @@ begin
   if idx = 0 then Exit;
   if fUIRefresh then Exit;
 
-  COB.Vertices[idx].X:=COBX.Value;
-  COB.Vertices[idx].Y:=COBY.Value;
-  COB.Vertices[idx].Z:=COBZ.Value;
+  COB.Vertices[idx].X := seCOBX.Value;
+  COB.Vertices[idx].Y := seCOBY.Value;
+  COB.Vertices[idx].Z := seCOBZ.Value;
   RebuildCOBBounds;
   SendDataToUI(uiCOB);
 end;
@@ -3216,8 +3219,8 @@ begin
     SB_Colli.Down := False;
     SB_Colli.Enabled := False;
     SaveCOB1.Enabled := False;
-    COBCopy.Enabled := False;
-    COBPaste.Enabled := False;
+    btnCOBVerticeCopy.Enabled := False;
+    btnCOBVerticePaste.Enabled := False;
     ExportCOB1.Enabled := False;
     SendDataToUI(uiCOB);
   end;
@@ -3273,13 +3276,13 @@ begin
     SendDataToUI(uiVinyl);
   end;
 
-  if aClearup=cuCOB then
+  if aClearup = cuCOB then
   begin
     SB_Colli.Enabled := True;
     SaveCOB1.Enabled := True;
     ExportCOB1.Enabled := True;
-    COBCopy.Enabled := True;
-    COBPaste.Enabled := False;
+    btnCOBVerticeCopy.Enabled := True;
+    btnCOBVerticePaste.Enabled := False;
     SendDataToUI(uiCOB);
   end;
 
@@ -3290,7 +3293,7 @@ begin
     SendDataToUI(uiCPO);
   end;
 
-  if aClearup=cuTREE then
+  if aClearup = cuTREE then
     SB_Wire.Enabled := True;
 end;
 
