@@ -16,6 +16,14 @@ type
   TCameraAction = (caNone, caRotate, caMove, caZoom);
 
 const
+  APP_TITLE = 'Mesh ToolKit';
+  VER_INFO = '2.4.1';
+  FPS_INTERVAL: Cardinal = 1000;               // Calculate FPS every ---- ms
+  MAX_MATERIALS = 255;
+  MAX_COLORS = 15;
+  MAX_CPO_SHAPES = 12;
+  MAX_READ_BUFFER = 262144;
+
   BBoxV: array [1..8,1..3] of Single =(
   (-0.5,-0.5,-0.5),( 0.5,-0.5,-0.5),( 0.5, 0.5,-0.5),(-0.5, 0.5,-0.5),
   (-0.5,-0.5, 0.5),( 0.5,-0.5, 0.5),( 0.5, 0.5, 0.5),(-0.5, 0.5, 0.5));

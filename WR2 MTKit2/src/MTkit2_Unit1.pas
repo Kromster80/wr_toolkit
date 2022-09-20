@@ -400,6 +400,7 @@ type
     fColorCopyID: Integer;
     fCOBCopyItem: Integer;
     fUseShaders: Boolean;
+    fRenderObjects: TRenderObjectSet;
 
     fTree: TModelTree;
 
@@ -425,18 +426,8 @@ type
     procedure ExchangePartsOrdering;
   end;
 
-const
-  APP_TITLE = 'Mesh ToolKit';
-  VER_INFO = '2.4.1';
-  FPS_INTERVAL: Cardinal = 1000;               // Calculate FPS every ---- ms
-  MAX_MATERIALS = 255;
-  MAX_COLORS = 15;
-  MAX_CPO_SHAPES = 12;
-  MAX_READ_BUFFER = 262144;
-
 var
   Form1: TForm1;
-  s,s2: AnsiString;
 
   FPSLag: Word = 33;
   OldTimeLWO: Cardinal;
@@ -463,7 +454,6 @@ var
 
   ExeDir: string;
   ActivePage: TActivePage;
-  RenderObject: TRenderObjectSet;
 
   MatID,ColID:Integer;
   SelectedTreeNode:Integer;
@@ -964,7 +954,7 @@ begin
     if CBShowGrid.Checked then RenderGrid;
     glEnable(GL_LIGHTING);
 
-    if roMOX in RenderObject then
+    if roMOX in fRenderObjects then
     begin
       if fRenderMode = rmShaders then
         RenderShaders;
@@ -989,20 +979,20 @@ begin
       glEnable(GL_DEPTH_TEST);
     end;
 
-    if roTREE in RenderObject then
+    if roTREE in fRenderObjects then
       fTree.Render(Pivot, xRot, yRot, RenderOptions.Wire);
 
-    if (roCOB in RenderObject) then
+    if (roCOB in fRenderObjects) then
       if (ActivePage = apCOB)
       or RenderOptions.Colli
-      or (ActivePage = apBrowse) and not (roMOX in RenderObject) then
+      or (ActivePage = apBrowse) and not (roMOX in fRenderObjects) then
         RenderCOB(LBCOBPoints.ItemIndex+1, cbCOBShowIds.Checked);
 
 
 //      glDisable(GL_DEPTH_TEST);
-    if (roCPO in RenderObject) then
+    if (roCPO in fRenderObjects) then
       if (ActivePage = apCPO) or (RenderOptions.Colli)
-      or (ActivePage = apBrowse) and not (roMOX in RenderObject) then
+      or (ActivePage = apBrowse) and not (roMOX in fRenderObjects) then
       begin
 //      glDisable(GL_DEPTH_FUNC);
         glDepthFunc(GL_ALWAYS);
@@ -1037,6 +1027,7 @@ begin
 
   end;   }
 end;
+
 
 procedure TForm1.RenderResize(Sender: TObject);
 var
@@ -1364,6 +1355,7 @@ procedure TForm1.SaveMOX(const aFilename: string);
 const
   MOX_FORMAT_HEADER: AnsiString = '!XOM'#0#0#2#2;
 var
+  s: AnsiString;
   h,i,j,k,m:Integer;
   ii,kk:Integer;
   f:file;
@@ -2644,7 +2636,7 @@ end;
 
 procedure TForm1.SetRenderObject(aSet: TRenderObjectSet);
 begin
-  RenderObject := aSet;
+  fRenderObjects := aSet;
 end;
 
 
@@ -2822,7 +2814,7 @@ begin
 
   SendDataToUI(uiCPO);
 
-  SetRenderObject(RenderObject + [roCPO]);
+  SetRenderObject(fRenderObjects + [roCPO]);
 
   LBCPOShapes.ItemIndex:=LBCPOShapes.Count-1;
 end;
@@ -3433,27 +3425,28 @@ begin
 
   SendDataToUI(uiCPO);
 
-  SetRenderObject(RenderObject + [roCPO]);
+  SetRenderObject(fRenderObjects + [roCPO]);
 
   LBCPOShapes.ItemIndex := LBCPOShapes.Count-1;
 end;
 
+
 procedure TForm1.btnCPOExportClick(Sender: TObject);
 var
-  I: Integer;
+  idx: Integer;
 begin
-  I := LBCPOShapes.ItemIndex+1;
-  if (I=0)or(CPO[I].Format=2) then
+  idx := LBCPOShapes.ItemIndex + 1;
+  if (idx = 0) or (CPO[idx].Format = 2) then
   begin
     MessageBox(Handle, 'Select a freeform shape from list above', 'Error', MB_OK or MB_ICONERROR);
     Exit;
   end;
 
-  if not RunSaveDialog(sdSave, fOpenedFileMask+'.lwo','','Lightwave 3D files (*.lwo)|*.lwo','lwo') then
+  if not RunSaveDialog(sdSave, fOpenedFileMask+'.lwo', '', 'Lightwave 3D files (*.lwo)|*.lwo', 'lwo') then
     Exit;
 
   meLog.Lines.Add('Writing CPO>LWO file');
-  SaveCPO2LWO(sdSave.FileName,I);
+  SaveCPO2LWO(sdSave.FileName, idx);
   meLog.Lines.Add('CPO>LWO Save Complete');
 end;
 

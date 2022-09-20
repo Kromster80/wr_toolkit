@@ -43,6 +43,7 @@ const
   MAX_OBJ_VTX = 131072;
 var
   f:textfile;
+  s: AnsiString;
   h,i:Integer;
   VerticeCount,TexCoordCount,NormalCount:Integer;
   vID,tID,nID: array [1..3]of Integer;
@@ -497,6 +498,7 @@ function LoadLWO(const aFilename: string; out Log:string):Boolean;
 var
   c: array [1..MAX_READ_BUFFER] of AnsiChar;
   f:file;
+  s: AnsiString;
   chname: AnsiString;
   h,i,j,k,m:Integer;
   xr:Single;
@@ -1064,6 +1066,7 @@ end;
 procedure LoadMTL(const aFilename: string);
 var
   chname: AnsiString;
+  s: AnsiString;
   h,i,j,k: Integer;
   ft: textfile;
   NumMaterials: Integer; //for current MTL file
@@ -1241,6 +1244,7 @@ end;
 procedure SaveMTL(const aFilename: string);
 var
   i,k:Integer;
+  s: AnsiString;
   ft:textfile;
 begin
   AssignFile(ft,aFilename); Rewrite(ft);
@@ -1510,6 +1514,7 @@ end;
 
 function LoadPBF(const aFilename: string):Boolean;
 var
+  s: AnsiString;
   h,i,k:Integer;
   ft:textfile;
   DQty:Integer;
@@ -1527,10 +1532,10 @@ begin
   Readln(ft);
   Readln(ft,s);
   case Length(s) of
-  8: DQty:=strtoint(s[8]);
-  9: DQty:=strtoint(s[8]+s[9]);
-  10:DQty:=strtoint(s[8]+s[9]+s[10]);
-  else DQty:=0; //
+    8: DQty:=strtoint(s[8]);
+    9: DQty:=strtoint(s[8]+s[9]);
+    10:DQty:=strtoint(s[8]+s[9]+s[10]);
+    else DQty:=0; //
   end;
 
   Readln(ft);
@@ -1642,6 +1647,7 @@ end;
 
 function LoadPSF(const aFilename: string):Boolean;
 var
+  s: AnsiString;
   i,k:Integer;
   ft:textfile;
   tmp1,tmp2,tmp3: array [1..256]of Single;
