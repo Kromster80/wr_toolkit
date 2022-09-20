@@ -36,7 +36,7 @@ procedure ListFiles(const aPath, aExt: string; aRecurseSubFolders: Boolean; aFil
 
 implementation
 uses
-  MTkit2_Unit1, MTkit2_MOX, MTkit2_Tree, MTkit2_Vertex;
+  MTkit2_Unit1, MTkit2_COB, MTkit2_CPO, MTkit2_MOX, MTkit2_Tree, MTkit2_Vertex;
 
 function LoadOBJ(const aFilename: string; out Log:string):Boolean;
 const

@@ -23,7 +23,7 @@ const
 
 implementation
 uses
-  MTkit2_Unit1, MTkit2_Defaults, MTkit2_MOX, MTkit2_Tree;
+  MTkit2_Unit1, MTkit2_Defaults, MTkit2_COB, MTkit2_CPO, MTkit2_MOX, MTkit2_Tree;
 
 var
   po, fs: array [0..MAX_MAT_CLASS, 0..MAX_MAT_CLASS] of Integer;

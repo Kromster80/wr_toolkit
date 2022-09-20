@@ -7,6 +7,8 @@ uses
   madListModules,
   Forms,
   MTkit2_Unit1 in 'src\MTkit2_Unit1.pas' {Form1},
+  MTkit2_COB in 'src\MTkit2_COB.pas',
+  MTkit2_CPO in 'src\MTkit2_CPO.pas',
   MTkit2_Defaults in 'src\MTkit2_Defaults.pas',
   MTkit2_IO in 'src\MTkit2_IO.pas',
   MTkit2_MOX in 'src\MTkit2_MOX.pas',

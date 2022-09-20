@@ -7,7 +7,7 @@ uses
 
   dglOpenGL, FloatSpinEdit, KromOGLUtils, KromUtils, TGATexture, PTXTexture,
 
-  MTkit2_Defaults, MTkit2_Render, MTkit2_RenderLegacy, MTkit2_IO, MTkit2_MOX, MTkit2_Tree, MTkit2_Vertex;
+  MTkit2_Defaults, MTkit2_Render, MTkit2_RenderLegacy, MTkit2_IO, MTkit2_COB, MTkit2_CPO, MTkit2_MOX, MTkit2_Tree, MTkit2_Vertex;
 
 type
   TInputMode = (imRelative, imAbsolute);
@@ -458,31 +458,6 @@ var
   MatID,ColID:Integer;
   SelectedTreeNode:Integer;
   DefColor:Byte; //Yellow
-
-  COB: record
-    Head: record
-      PointQty, PolyQty: Integer;
-      X, Y, Z, Xmin, Xmax, Ymin, Ymax, Zmin, ZMax: Single;
-    end;
-    Vertices: array [1..256] of Vector3f;
-    NormalsP: array [1..256] of Vector3f;
-    Faces: array [1..256,1..3] of Word;   //Polygon links
-  end;
-
-  CPOHead: record
-    Head: array [1..4] of AnsiChar;
-    Qty,x1,x2,x3: Integer;
-  end;
-
-  CPO: array [1..MAX_CPO_SHAPES]of record
-    Format:Integer; //2 possible types 2-box 3-shape
-    PosX,PosY,PosZ:Single;
-    ScaleX,ScaleY,ScaleZ:Single;
-    Matrix9: array [1..9]of Single;
-    VerticeCount,PolyCount,IndiceSize,Clear1:Integer;
-    Vertices: array [1..256]of Vector3f;
-    Indices: array [1..512]of Word;
-  end;
 
 var
   // This should be universal exchange format in MTKit2

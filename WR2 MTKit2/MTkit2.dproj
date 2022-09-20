@@ -103,6 +103,8 @@
         <DCCReference Include="src\MTkit2_Unit1.pas">
             <Form>Form1</Form>
         </DCCReference>
+        <DCCReference Include="src\MTkit2_COB.pas"/>
+        <DCCReference Include="src\MTkit2_CPO.pas"/>
         <DCCReference Include="src\MTkit2_Defaults.pas"/>
         <DCCReference Include="src\MTkit2_IO.pas"/>
         <DCCReference Include="src\MTkit2_MOX.pas"/>
