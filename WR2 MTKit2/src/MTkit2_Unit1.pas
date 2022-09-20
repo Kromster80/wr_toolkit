@@ -420,7 +420,6 @@ type
     procedure ConverseImp_MOX;
     procedure ConverseImp_COB;
     procedure MaterialSetDefault;
-    procedure RebuildCOBBounds;
     procedure SaveMOX(const aFilename: string);
     procedure DevScanMOXHeaders;
     procedure RebuildPartsTree;
@@ -2194,39 +2193,9 @@ begin
       fCOB.Faces[i,h]:=Imp.Faces[i,h]-1;
 
   ShowUpClick(cuCOB);
-  RebuildCOBBounds;
-  SetRenderObject([roCOB]);
-end;
-
-procedure TForm1.RebuildCOBBounds;
-var
-  I: Integer;
-begin
-  // Compute normal to every polygon
-  for I := 1 to fCOB.Head.PolyQty do
-  begin
-    Normal2Poly(fCOB.Vertices[fCOB.Faces[I,1]+1], fCOB.Vertices[fCOB.Faces[I,2]+1], fCOB.Vertices[fCOB.Faces[I,3]+1], @fCOB.NormalsP[I]);
-    Normalize(fCOB.NormalsP[I]);
-  end;
-
-  fCOB.Head.Xmin := 0; fCOB.Head.Xmax := 0;
-  fCOB.Head.Ymin := 0; fCOB.Head.Ymax := 0;
-  fCOB.Head.Zmin := 0; fCOB.Head.Zmax := 0;
-  for I := 1 to fCOB.Head.PointQty do
-  begin
-    fCOB.Head.Xmax := Max(fCOB.Head.Xmax,fCOB.Vertices[I].X);
-    fCOB.Head.Ymax := Max(fCOB.Head.Ymax,fCOB.Vertices[I].Y);
-    fCOB.Head.Zmax := Max(fCOB.Head.Zmax,fCOB.Vertices[I].Z);
-    fCOB.Head.Xmin := Min(fCOB.Head.Xmin,fCOB.Vertices[I].X);
-    fCOB.Head.Ymin := Min(fCOB.Head.Ymin,fCOB.Vertices[I].Y);
-    fCOB.Head.Zmin := Min(fCOB.Head.Zmin,fCOB.Vertices[I].Z);
-  end;
-
-  fCOB.Head.X := 0;//fCOB.Xmax+fCOB.Xmin;
-  fCOB.Head.Y := 0;//fCOB.Ymax+fCOB.Ymin;
-  fCOB.Head.Z := 0;//fCOB.Zmax+fCOB.Zmin;
-
+  fCOB.RebuildBounds;
   SendDataToUI(uiCOB);
+  SetRenderObject([roCOB]);
 end;
 
 
@@ -2249,7 +2218,7 @@ begin
   fCOB.Vertices[LBCOBPoints.ItemIndex+1].Y:=fCOB.Vertices[fCOBCopyItem].Y;
   fCOB.Vertices[LBCOBPoints.ItemIndex+1].Z:=fCOB.Vertices[fCOBCopyItem].Z;
 
-  RebuildCOBBounds;
+  fCOB.RebuildBounds;
   SendDataToUI(uiCOB);
 end;
 
@@ -2280,7 +2249,8 @@ begin
   fCOB.Vertices[idx].X := seCOBX.Value;
   fCOB.Vertices[idx].Y := seCOBY.Value;
   fCOB.Vertices[idx].Z := seCOBZ.Value;
-  RebuildCOBBounds;
+
+  fCOB.RebuildBounds;
   SendDataToUI(uiCOB);
 end;
 
@@ -2494,7 +2464,8 @@ end;
 
 procedure TForm1.btnCOBRecomputeClick(Sender: TObject);
 begin
-  RebuildCOBBounds;
+  fCOB.RebuildBounds;
+  SendDataToUI(uiCOB);
 end;
 
 
@@ -2998,11 +2969,13 @@ begin
   LoadFile(odOpen.FileName, lmLoadAndShow);
 end;
 
+
 procedure TForm1.LoadCOBClick(Sender: TObject);
 begin
   if not RunOpenDialog(odOpen,'',fOpenedFolder,'World Racing 2 collision files (*.cob)|*.cob') then Exit;
   LoadFile(odOpen.FileName, lmLoadAndShow);
 end;
+
 
 procedure TForm1.LoadCPOClick(Sender: TObject);
 begin
@@ -3010,13 +2983,13 @@ begin
   LoadFile(odOpen.FileName, lmLoadAndShow);
 end;
 
+
 procedure TForm1.LoadTREE1Click(Sender: TObject);
 begin
   if not RunOpenDialog(odOpen,'',fOpenedFolder,'World Racing 2 tree files (*.tree)|*.tree') then Exit;
   LoadFile(odOpen.FileName, lmLoadAndShow);
 end;
 
-////////////////////////////////////////////////////////////////////////////////
 
 procedure TForm1.SaveMOXClick(Sender: TObject);
 begin
@@ -3027,6 +3000,7 @@ begin
   meLog.Lines.Add('MOX file written');
 end;
 
+
 procedure TForm1.SaveMTL1Click(Sender: TObject);
 begin
   if not RunSaveDialog(sdSave, fOpenedFileMask+'.mtl','','World Racing Material files (*.mtl)|*.mtl','mtl') then Exit;
@@ -3036,12 +3010,17 @@ begin
   meLog.Lines.Add('MTL file written');
 end;
 
+
 procedure TForm1.SaveCOB1Click(Sender: TObject);
 begin
-  if not RunSaveDialog(sdSave, fOpenedFileMask+'_colli.cob','','World Racing 2 collision files (*.cob)|*.cob','cob') then Exit;
-  RebuildCOBBounds; //Need to recompute BBOX and normals
+  if not RunSaveDialog(sdSave, fOpenedFileMask+'_colli.cob', '', 'World Racing 2 collision files (*.cob)|*.cob', 'cob') then Exit;
+
+  fCOB.RebuildBounds;
+  SendDataToUI(uiCOB);
+
   fCOB.SaveCOB(sdSave.FileName);
 end;
+
 
 procedure TForm1.SaveCPO1Click(Sender: TObject);
 begin

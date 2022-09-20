@@ -19,12 +19,13 @@ type
     function LoadCOB(const aFilename: string): Boolean;
     procedure SaveCOB(const aFilename: string);
     procedure SaveCOB2LWO(const aFilename: string);
+    procedure RebuildBounds;
   end;
 
 
 implementation
 uses
-  SysUtils;
+  Math, SysUtils;
 
 
 procedure TModelCOB.Clear;
@@ -132,6 +133,36 @@ begin
   Write(ft,'SURF',#0,#0,#0,#10,'Default',#0,#0,#0);
 
   CloseFile(ft);
+end;
+
+
+procedure TModelCOB.RebuildBounds;
+var
+  I: Integer;
+begin
+  // Compute normal to every polygon
+  for I := 1 to Head.PolyQty do
+  begin
+    Normal2Poly(Vertices[Faces[I,1]+1], Vertices[Faces[I,2]+1], Vertices[Faces[I,3]+1], @NormalsP[I]);
+    Normalize(NormalsP[I]);
+  end;
+
+  Head.Xmin := 0; Head.Xmax := 0;
+  Head.Ymin := 0; Head.Ymax := 0;
+  Head.Zmin := 0; Head.Zmax := 0;
+  for I := 1 to Head.PointQty do
+  begin
+    Head.Xmax := Max(Head.Xmax, Vertices[I].X);
+    Head.Ymax := Max(Head.Ymax, Vertices[I].Y);
+    Head.Zmax := Max(Head.Zmax, Vertices[I].Z);
+    Head.Xmin := Min(Head.Xmin, Vertices[I].X);
+    Head.Ymin := Min(Head.Ymin, Vertices[I].Y);
+    Head.Zmin := Min(Head.Zmin, Vertices[I].Z);
+  end;
+
+  Head.X := 0; // Xmax + Xmin;
+  Head.Y := 0; // Ymax + Ymin;
+  Head.Z := 0; // Zmax + Zmin;
 end;
 
 
