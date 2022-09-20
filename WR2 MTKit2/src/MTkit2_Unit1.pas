@@ -1049,14 +1049,14 @@ begin
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity;
 
-  minsize:=min(RenderPanel.Width, RenderPanel.Height);
-  xo:=(RenderPanel.Width/minsize-1)/2;
-  yo:=(RenderPanel.Height/minsize-1)/2;
+  minsize := min(RenderPanel.Width, RenderPanel.Height);
+  xo := (RenderPanel.Width / minsize - 1) / 2;
+  yo := (RenderPanel.Height / minsize - 1) / 2;
 
   if RenderOptions.UVMap then
-    gluOrtho2D(0-xo,1+xo,0-yo,1+yo)
+    gluOrtho2D(0 - xo, 1 + xo, 0 - yo, 1 + yo)
   else
-    gluPerspective(60, -RenderPanel.Width/RenderPanel.Height, 0.1, 200.0);
+    gluPerspective(60, -RenderPanel.Width / RenderPanel.Height, 0.1, 200.0);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity;
@@ -2797,16 +2797,18 @@ procedure TForm1.btnCPOAddClick(Sender: TObject);
 var
   ID,IDnew: Integer;
 begin
-  if CPOHead.Qty>=MAX_CPO_SHAPES then Exit;
-  if CPOHead.Qty=0 then begin
+  if CPOHead.Qty >= MAX_CPO_SHAPES then Exit;
+  if CPOHead.Qty = 0 then
+  begin
     ShowUpClick(cuCPO);
-    FillChar(CPOHead,SizeOf(CPOHead),#0);
+    FillChar(CPOHead, SizeOf(CPOHead), #0);
     CPOHead.Head:='!OPC';
   end;
   ID:=LBCPOShapes.ItemIndex+1;
   inc(CPOHead.Qty);
   IDnew:=CPOHead.Qty;
-  if (ID=0)or(CPO[ID].Format=3) then begin
+  if (ID=0) or (CPO[ID].Format=3) then
+  begin
     CPO[IDnew].Format:=2;
     CPO[IDnew].PosX:=0;
     CPO[IDnew].PosY:=0;
@@ -3345,12 +3347,12 @@ end;
 
 
 procedure TForm1.FormMouseWheel(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+var
+  loc: TPoint;
 begin
-  if ( MousePos.X >= ClientOrigin.X + RenderPanel.Left ) and
-     ( MousePos.X <  ClientOrigin.X + RenderPanel.Left + RenderPanel.Width ) and
-     ( MousePos.Y >= ClientOrigin.Y + RenderPanel.Top ) and
-     ( MousePos.Y <  ClientOrigin.Y + RenderPanel.Top + RenderPanel.Height )
-  then
+  loc := RenderPanel.ScreenToClient(MousePos);
+  if InRange(loc.X, 0, RenderPanel.Width)
+  and InRange(loc.Y, 0, RenderPanel.Height) then
   begin
     zoom := zoom + WheelDelta / 4000;
     Handled := True;
