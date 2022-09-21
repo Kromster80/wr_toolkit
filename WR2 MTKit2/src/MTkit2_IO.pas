@@ -829,7 +829,7 @@ var
   h,i,j,k,m:Integer;
   uu,vv,xr:Single;
   t,t2:Vector3f;
-  ID,ID2,CurrentLev,DepthLev:Integer;
+  idChunk, idPart, CurrentLev, DepthLev: Integer;
   mtx: TMatrix;
 begin
   SetLength(rs, 4);
@@ -907,7 +907,7 @@ begin
 
   Write(ft,'PNTS');
   m:=MOX.Header.VerticeCount*12; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
-  ID:=0; ID2:=0;
+  idChunk:=0; idPart:=0;
 
   for j:=1 to MOX.Header.VerticeCount do
   begin
@@ -915,14 +915,14 @@ begin
     t.y:=MOX.Vertice[j].Y;
     t.z:=MOX.Vertice[j].Z;
 
-    if j=MOX.Chunks[ID+1].FirstVtx then //current point matches first point of next chunk
-      Inc(ID); //This is ID of current chunk
-    if (ID = MOX.Parts[ID2+1].FirstMat+1) and (MOX.Parts[ID2+1].NumMat <> 0) then
-      Inc(ID2); //This is ID of current detail
+    if (idChunk < MOX.Header.ChunkCount) and (j = MOX.Chunks[idChunk+1].FirstVtx) then //current point matches first point of next chunk
+      Inc(idChunk); //This is idChunk of current chunk
+    if (idChunk = MOX.Parts[idPart+1].FirstMat+1) and (MOX.Parts[idPart+1].NumMat <> 0) then
+      Inc(idPart); //This is idChunk of current detail
 
     DepthLev := 8;
     repeat
-      CurrentLev := 1; k := ID2;
+      CurrentLev := 1; k := idPart;
       while (MOX.Parts[k].Parent > -1) and (CurrentLev <> DepthLev) do
       begin
         k := MOX.Parts[k].Parent+1;
@@ -939,7 +939,7 @@ begin
       t:=t2;
     until(DepthLev=0);
 
-    MOX.Vertice[j].X := t.x + ID2 * 25 * Ord(aSpreadOverX);
+    MOX.Vertice[j].X := t.x + idPart * 25 * Ord(aSpreadOverX);
     MOX.Vertice[j].Y := t.y;
     MOX.Vertice[j].Z := t.z;
     rs := unreal2(MOX.Vertice[j].X/10); Write(ft,rs[4],rs[3],rs[2],rs[1]); //LWO uses
@@ -951,17 +951,19 @@ begin
   m:=6+10+MOX.Header.VerticeCount*10; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
   Write(ft,'TXUV',#0,#2);
   Write(ft,'Texture01',#0);           //TextureMap name in LW
-  j:=0;
+  idChunk:=0;
   for k:=1 to MOX.Header.VerticeCount do
   begin
-    if k=MOX.Chunks[j+1].FirstVtx then Inc(j); //j=1 ...
+    if (idChunk < MOX.Header.ChunkCount) and (k = MOX.Chunks[idChunk+1].FirstVtx) then
+      Inc(idChunk); //idChunk=1 ...
+
     Write(ft,AnsiChar((k-1) div 256),AnsiChar(k-1));
-    if Material[j].TexScale.U=0 then Material[j].TexScale.U:=1;
-    if Material[j].TexScale.V=0 then Material[j].TexScale.V:=1;
-    uu:= MOX.Vertice[k].U*Material[j].TexScale.U+Material[j].TexOffset.U;             // not Reversed
-    vv:=-MOX.Vertice[k].V*Material[j].TexScale.V+Material[j].TexOffset.V+1;             // not Reversed
-    if Material[j].TexAngle=90 then begin xr:=uu; uu:=-vv; vv:=xr; end; //Rotate 90 CCW
-    if Material[j].TexAngle=-90 then begin xr:=uu; uu:=vv; vv:=-xr; end;//Rotate 90 CW
+    if Material[idChunk].TexScale.U=0 then Material[idChunk].TexScale.U:=1;
+    if Material[idChunk].TexScale.V=0 then Material[idChunk].TexScale.V:=1;
+    uu:= MOX.Vertice[k].U*Material[idChunk].TexScale.U+Material[idChunk].TexOffset.U;             // not Reversed
+    vv:=-MOX.Vertice[k].V*Material[idChunk].TexScale.V+Material[idChunk].TexOffset.V+1;             // not Reversed
+    if Material[idChunk].TexAngle=90 then begin xr:=uu; uu:=-vv; vv:=xr; end; //Rotate 90 CCW
+    if Material[idChunk].TexAngle=-90 then begin xr:=uu; uu:=vv; vv:=-xr; end;//Rotate 90 CW
     rs:=unreal2(uu); Write(ft,rs[4],rs[3],rs[2],rs[1]);
     rs:=unreal2(vv); Write(ft,rs[4],rs[3],rs[2],rs[1]);
   end;
@@ -979,11 +981,12 @@ begin
 
   Write(ft,'PTAG');
   m:=MOX.Header.PolyCount*4+4; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
-  Write(ft,'SURF'); ID:=0;
+  Write(ft,'SURF');
+  idChunk:=0;
   for i:=1 to MOX.Header.PolyCount do
   begin
-    if i-1=MOX.Chunks[ID+1].FirstPoly then Inc(ID);
-    Write(ft,AnsiChar((i-1) div 256),AnsiChar(i-1),AnsiChar((MOX.Chunks[ID].SidA) div 256),AnsiChar(MOX.Chunks[ID].SidA));
+    if (idChunk < MOX.Header.ChunkCount) and (i-1=MOX.Chunks[idChunk+1].FirstPoly) then Inc(idChunk);
+    Write(ft,AnsiChar((i-1) div 256),AnsiChar(i-1),AnsiChar((MOX.Chunks[idChunk].SidA) div 256),AnsiChar(MOX.Chunks[idChunk].SidA));
   end;
 
   for i:=1 to MOX.Header.MatCount do if Material[i].TexName<>'' then
