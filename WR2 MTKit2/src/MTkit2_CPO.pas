@@ -38,32 +38,35 @@ begin
   Result := False;
 
   if not FileExists(aFilename) then Exit;
-  AssignFile(f,aFilename); FileMode:=0; Reset(f,1); FileMode:=2;
+  AssignFile(f, aFilename);
+  FileMode := 0;
+  Reset(f, 1);
+  FileMode := 2;
   BlockRead(f, CPOHead, 16);
 
   for i:=1 to CPOHead.Qty do
   begin
-    BlockRead(f,CPO[i].Format,4);
+    BlockRead(f, CPO[i].Format, 4);
 
-    if CPO[i].Format=2 then
+    if CPO[i].Format = 2 then
     begin
-      BlockRead(f,CPO[i].ScaleX, 12);
-      BlockRead(f,CPO[i].PosX, 12);
-      BlockRead(f,CPO[i].Matrix9, 36);
+      BlockRead(f, CPO[i].ScaleX, 12);
+      BlockRead(f, CPO[i].PosX, 12);
+      BlockRead(f, CPO[i].Matrix9, 36);
     end;
 
-    if CPO[i].Format=3 then
+    if CPO[i].Format = 3 then
     begin
-      BlockRead(f,CPO[i].VerticeCount, 16);
-      BlockRead(f,CPO[i].Vertices[1], CPO[i].VerticeCount*12);
-      BlockRead(f,CPO[i].Indices[1], CPO[i].IndiceSize);
-      BlockRead(f,CPO[i].PosX, 12);
-      BlockRead(f,CPO[i].Matrix9, 36);
+      BlockRead(f, CPO[i].VerticeCount, 16);
+      BlockRead(f, CPO[i].Vertices[1], CPO[i].VerticeCount * 12);
+      BlockRead(f, CPO[i].Indices[1], CPO[i].IndiceSize);
+      BlockRead(f, CPO[i].PosX, 12);
+      BlockRead(f, CPO[i].Matrix9, 36);
     end;
   end;
 
   CloseFile(f);
-  Result:=True;
+  Result := True;
 end;
 
 
