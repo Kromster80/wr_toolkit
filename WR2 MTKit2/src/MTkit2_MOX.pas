@@ -317,11 +317,11 @@ end;
 
 procedure SaveMOX2LWO(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
 var
-  ft:textfile;
+  ft: textfile;
   rs: AnsiString;
-  h,i,j,k,m:Integer;
-  uu,vv,xr:Single;
-  t,t2:Vector3f;
+  h,i,j,k,m: Integer;
+  uu,vv,xr: Single;
+  t,t2: Vector3f;
   idChunk, idPart, CurrentLev, DepthLev: Integer;
   mtx: TMatrix;
 begin

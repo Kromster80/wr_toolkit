@@ -82,6 +82,7 @@ function Pow(const Base, Exponent: integer): integer;
   function Perpendecular2D(v1,v2,v3:Vector3f; Len:single):vector3f;
   procedure Normal2Poly(v1,v2,v3:array of single; nx,ny,nz:psingle); overload;
   procedure Normal2Poly(v1,v2,v3:Vector3f; n:PVector3f); overload;
+  procedure Normal2Poly(v1,v2,v3:PVector3f; n:PVector3f); overload;
   procedure Normal2Poly(u1,v1,u2,v2,u3,v3:single; out n:single); overload;
 
 procedure decs(var AText: AnsiString; const Len:integer=1); overload;
@@ -773,9 +774,16 @@ end;
 
 procedure Normal2Poly(v1,v2,v3:Vector3f; n:PVector3f);
 begin  //aka Cross product of 2 vectors
-n^.x:= ((v1.Y-v2.Y)*(v1.Z-v3.Z)-(v1.Z-v2.Z)*(v1.Y-v3.Y))/256;
-n^.y:=-((v1.X-v2.X)*(v1.Z-v3.Z)-(v1.Z-v2.Z)*(v1.X-v3.X))/256;
-n^.z:= ((v1.X-v2.X)*(v1.Y-v3.Y)-(v1.Y-v2.Y)*(v1.X-v3.X))/256;
+  n^.x:= ((v1.Y-v2.Y)*(v1.Z-v3.Z)-(v1.Z-v2.Z)*(v1.Y-v3.Y))/256;
+  n^.y:=-((v1.X-v2.X)*(v1.Z-v3.Z)-(v1.Z-v2.Z)*(v1.X-v3.X))/256;
+  n^.z:= ((v1.X-v2.X)*(v1.Y-v3.Y)-(v1.Y-v2.Y)*(v1.X-v3.X))/256;
+end;
+
+procedure Normal2Poly(v1,v2,v3:PVector3f; n:PVector3f);
+begin  //aka Cross product of 2 vectors
+  n^.x:= ((v1.Y-v2.Y)*(v1.Z-v3.Z)-(v1.Z-v2.Z)*(v1.Y-v3.Y))/256;
+  n^.y:=-((v1.X-v2.X)*(v1.Z-v3.Z)-(v1.Z-v2.Z)*(v1.X-v3.X))/256;
+  n^.z:= ((v1.X-v2.X)*(v1.Y-v3.Y)-(v1.Y-v2.Y)*(v1.X-v3.X))/256;
 end;
 
 procedure Normal2Poly(u1,v1,u2,v2,u3,v3:single; out n:single);

@@ -1,7 +1,7 @@
 unit MTkit2_COB;
 interface
 uses
-  KromUtils;
+  KromUtils, KM_Vertexes;
 
 
 type
@@ -11,8 +11,8 @@ type
       PointQty, PolyQty: Integer;
       X, Y, Z, Xmin, Xmax, Ymin, Ymax, Zmin, ZMax: Single;
     end;
-    Vertices: array [1..256] of Vector3f;
-    NormalsP: array [1..256] of Vector3f;
+    Vertices: array [1..256] of TKMVertex3;
+    NormalsP: array [1..256] of TKMVertex3;
     Faces: array [1..256, 1..3] of Word;
 
     procedure Clear;
@@ -59,6 +59,7 @@ begin
 
   for i := 1 to Head.PolyQty do
     BlockRead(f, NormalsP[i].X, 12);
+
   CloseFile(f);
 
   Result := True;
@@ -185,13 +186,14 @@ procedure TModelCOB.RebuildBounds;
 var
   I: Integer;
 begin
-  // Compute normal to every polygon
+  // Normal to every polygon
   for I := 1 to Head.PolyQty do
   begin
-    Normal2Poly(Vertices[Faces[I,1]+1], Vertices[Faces[I,2]+1], Vertices[Faces[I,3]+1], @NormalsP[I]);
-    Normalize(NormalsP[I]);
+    NormalsP[I] := VectorCrossProduct(@Vertices[Faces[I,1]+1], @Vertices[Faces[I,2]+1], @Vertices[Faces[I,3]+1]);
+    NormalsP[I] := NormalsP[I].GetNormalize;
   end;
 
+  // Bounding box
   Head.Xmin := 0; Head.Xmax := 0;
   Head.Ymin := 0; Head.Ymax := 0;
   Head.Zmin := 0; Head.Zmax := 0;

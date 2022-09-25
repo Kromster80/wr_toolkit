@@ -2168,10 +2168,18 @@ begin
   fCOB.Head.PolyQty:=Imp.PolyCount;
 
   for i:=1 to Imp.VerticeCount do
-    fCOB.Vertices[i]:=Imp.XYZ[i];
+  begin
+    fCOB.Vertices[i].X := Imp.XYZ[i].X;
+    fCOB.Vertices[i].Y := Imp.XYZ[i].Y;
+    fCOB.Vertices[i].Z := Imp.XYZ[i].Z;
+  end;
 
   for i:=1 to Imp.PolyCount do
-    fCOB.NormalsP[i]:=Imp.Np[i];
+  begin
+    fCOB.NormalsP[i].X := Imp.Np[i].X;
+    fCOB.NormalsP[i].Y := Imp.Np[i].Y;
+    fCOB.NormalsP[i].Z := Imp.Np[i].Z;
+  end;
 
   for i:=1 to Imp.PolyCount do
     for h:=1 to 3 do
