@@ -11,14 +11,13 @@ type
       PointQty, PolyQty: Integer;
       X, Y, Z, Xmin, Xmax, Ymin, Ymax, Zmin, ZMax: Single;
     end;
-    Vertices: array [1..256] of TKMVertex3;
-    Faces: array [1..256, 1..3] of Word;
-    Normals: array [1..256] of TKMVertex3;
+    Vertices: array of TKMVertex3;
+    Faces: array of array [1..3] of Word;
+    Normals: array of TKMVertex3;
 
     procedure Clear;
     function LoadCOB(const aFilename: string): Boolean;
     procedure SaveCOB(const aFilename: string);
-    //procedure SaveCOB2LWO(const aFilename: string);
     procedure SaveCOB2LWO(const aFilename: string);
     procedure ImportLWO2COB(const aFilename: string);
     procedure RebuildBounds;
@@ -33,15 +32,15 @@ uses
 procedure TModelCOB.Clear;
 begin
   FillChar(Head, SizeOf(Head), #0);
-  FillChar(Vertices, SizeOf(Vertices), #0);
-  FillChar(Normals, SizeOf(Normals), #0);
-  FillChar(Faces, SizeOf(Faces), #0);
+  SetLength(Vertices, 0);
+  SetLength(Faces, 0);
+  SetLength(Normals, 0);
 end;
 
 
 function TModelCOB.LoadCOB(const aFilename: string): Boolean;
 var
-  i: Integer;
+  I: Integer;
   f: file;
 begin
   Result := False;
@@ -53,13 +52,17 @@ begin
   FileMode := 2;
   BlockRead(f, Head.PointQty, 44);
 
-  for i := 1 to Head.PointQty do
-    BlockRead(f, Vertices[i].X, 12);
+  SetLength(Vertices, Head.PointQty);
+  SetLength(Faces, Head.PolyQty);
+  SetLength(Normals, Head.PolyQty);
 
-  BlockRead(f, Faces[1], 6 * Head.PolyQty);
+  for I := 0 to Head.PointQty - 1 do
+    BlockRead(f, Vertices[I].X, 12);
 
-  for i := 1 to Head.PolyQty do
-    BlockRead(f, Normals[i].X, 12);
+  BlockRead(f, Faces[0], 6 * Head.PolyQty);
+
+  for I := 0 to Head.PolyQty - 1 do
+    BlockRead(f, Normals[I].X, 12);
 
   CloseFile(f);
 
@@ -69,21 +72,21 @@ end;
 
 procedure TModelCOB.SaveCOB(const aFilename: string);
 var
-  i: Integer;
+  I: Integer;
   f: file;
 begin
   AssignFile(f, aFilename);
   Rewrite(f, 1);
   BlockWrite(f, Head.PointQty, 44);
 
-  for i := 1 to Head.PointQty do
-    BlockWrite(f, Vertices[i].X, 12);
+  for I := 0 to Head.PointQty - 1 do
+    BlockWrite(f, Vertices[I].X, 12);
 
-  for i := 1 to Head.PolyQty do
-    BlockWrite(f, Faces[i, 1], 6);
+  for I := 0 to Head.PolyQty - 1 do
+    BlockWrite(f, Faces[I, 1], 6);
 
-  for i := 1 to Head.PolyQty do
-    BlockWrite(f, Normals[i].X, 12);
+  for I := 0 to Head.PolyQty - 1 do
+    BlockWrite(f, Normals[I].X, 12);
 
   CloseFile(f);
 end;
@@ -103,25 +106,25 @@ begin
 
     // Vertices
     lay.SetVerticeCount(Head.PointQty);
-    for I := 1 to Head.PointQty do
+    for I := 0 to Head.PointQty - 1 do
     begin
-      lay.Vertices[I-1].X := Vertices[I].X * EXPORT_SCALE;
-      lay.Vertices[I-1].Y := Vertices[I].Y * EXPORT_SCALE;
-      lay.Vertices[I-1].Z := Vertices[I].Z * EXPORT_SCALE;
+      lay.Vertices[I].X := Vertices[I].X * EXPORT_SCALE;
+      lay.Vertices[I].Y := Vertices[I].Y * EXPORT_SCALE;
+      lay.Vertices[I].Z := Vertices[I].Z * EXPORT_SCALE;
     end;
 
     // Polys
     lay.SetPolyCount(Head.PolyQty);
-    for I := 1 to Head.PolyQty do
+    for I := 0 to Head.PolyQty - 1 do
     begin
-      lay.Polys[I-1].VertCount := 3;
-      SetLength(lay.Polys[I-1].Indices, 3);
+      lay.Polys[I].VertCount := 3;
+      SetLength(lay.Polys[I].Indices, 3);
 
-      lay.Polys[I-1].Indices[0] := Faces[I,1];
-      lay.Polys[I-1].Indices[1] := Faces[I,2];
-      lay.Polys[I-1].Indices[2] := Faces[I,3];
+      lay.Polys[I].Indices[0] := Faces[I,1];
+      lay.Polys[I].Indices[1] := Faces[I,2];
+      lay.Polys[I].Indices[2] := Faces[I,3];
 
-      lay.Polys[I-1].PolySurf := 0;
+      lay.Polys[I].PolySurf := 0;
     end;
 
     // COB is a simple shape, it does not need a surface or anything
@@ -138,9 +141,9 @@ var
   I: Integer;
 begin
   // Normal to every polygon
-  for I := 1 to Head.PolyQty do
+  for I := 0 to Head.PolyQty - 1 do
   begin
-    Normals[I] := VectorCrossProduct(@Vertices[Faces[I,1]+1], @Vertices[Faces[I,2]+1], @Vertices[Faces[I,3]+1]);
+    Normals[I] := VectorCrossProduct(@Vertices[Faces[I,1]], @Vertices[Faces[I,2]], @Vertices[Faces[I,3]]);
     Normals[I] := Normals[I].GetNormalize;
   end;
 
@@ -148,7 +151,7 @@ begin
   Head.Xmin := 0; Head.Xmax := 0;
   Head.Ymin := 0; Head.Ymax := 0;
   Head.Zmin := 0; Head.Zmax := 0;
-  for I := 1 to Head.PointQty do
+  for I := 0 to Head.PointQty - 1 do
   begin
     Head.Xmax := Max(Head.Xmax, Vertices[I].X);
     Head.Ymax := Max(Head.Ymax, Vertices[I].Y);
@@ -185,12 +188,16 @@ begin
     Head.PointQty := lay.VerticeCount;
     Head.PolyQty := lay.PolyCount;
 
-    for I:=1 to lay.VerticeCount do
-      Vertices[I] := lay.Vertices[I - 1] * 10;
+    SetLength(Vertices, Head.PointQty);
+    SetLength(Faces, Head.PolyQty);
+    SetLength(Normals, Head.PolyQty);
 
-    for I := 1 to lay.PolyCount do
+    for I := 0 to lay.VerticeCount - 1 do
+      Vertices[I] := lay.Vertices[I] * 10;
+
+    for I := 0 to lay.PolyCount - 1 do
       for K := 1 to 3 do
-        Faces[I, K] := lay.Polys[I - 1].Indices[K - 1];
+        Faces[I, K] := lay.Polys[I].Indices[K - 1];
 
     RebuildBounds;
   finally

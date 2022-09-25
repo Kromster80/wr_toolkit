@@ -794,15 +794,22 @@ begin
                 end;
     uiCOB:      begin
                   fUIRefresh := True;
-                  oldID1:=LBCOBPoints.ItemIndex;
+                  oldID1 := LBCOBPoints.ItemIndex;
                   LBCOBPoints.Clear;
-                  LBCPOShapes.Clear;
-                  for ii:=1 to fCOB.Head.PointQty do LBCOBPoints.Items.Add(IntToStr(ii));
-                  LBCOBPoints.ItemIndex:=EnsureRange(oldID1,0,LBCOBPoints.Count-1);
+                  for ii := 0 to fCOB.Head.PointQty - 1 do
+                    LBCOBPoints.Items.Add(IntToStr(ii + 1));
+                  LBCOBPoints.ItemIndex := EnsureRange(oldID1, 0, LBCOBPoints.Count - 1);
                   fUIRefresh := False;
-                  COB_X.Value:=fCOB.Head.X; COB_Y.Value:=fCOB.Head.Y; COB_Z.Value:=fCOB.Head.Z;
-                  COB_X1.Value:=fCOB.Head.Xmin; COB_Y1.Value:=fCOB.Head.Ymin; COB_Z1.Value:=fCOB.Head.Zmin;
-                  COB_X2.Value:=fCOB.Head.Xmax; COB_Y2.Value:=fCOB.Head.Ymax; COB_Z2.Value:=fCOB.Head.Zmax;
+
+                  COB_X.Value := fCOB.Head.X;
+                  COB_Y.Value := fCOB.Head.Y;
+                  COB_Z.Value := fCOB.Head.Z;
+                  COB_X1.Value := fCOB.Head.Xmin;
+                  COB_Y1.Value := fCOB.Head.Ymin;
+                  COB_Z1.Value := fCOB.Head.Zmin;
+                  COB_X2.Value := fCOB.Head.Xmax;
+                  COB_Y2.Value := fCOB.Head.Ymax;
+                  COB_Z2.Value := fCOB.Head.Zmax;
                 end;
     uiCPO:      begin
                   fUIRefresh := True;
@@ -954,7 +961,7 @@ begin
       if (ActivePage = apCOB)
       or RenderOptions.Colli
       or (ActivePage = apBrowse) and not (roMOX in fRenderObjects) then
-        RenderCOB(fCOB, LBCOBPoints.ItemIndex+1, cbCOBShowIds.Checked);
+        RenderCOB(fCOB, LBCOBPoints.ItemIndex, cbCOBShowIds.Checked);
 
 //      glDisable(GL_DEPTH_TEST);
     if (roCPO in fRenderObjects) then
@@ -2154,7 +2161,7 @@ begin
     NumColors:=MAX_COLORS;
   end;
 
-  CBColor.Enabled:=not CBMonoColor.Checked;
+  CBColor.Enabled := not CBMonoColor.Checked;
   SetColorsToCurrent.Enabled:=not CBMonoColor.Checked;
   CBColorChange(nil);
 end;
@@ -2162,22 +2169,25 @@ end;
 
 procedure TForm1.btnCOBVerticeCopyClick(Sender: TObject);
 begin
-  fCOBCopyItem := LBCOBPoints.ItemIndex+1;
-  btnCOBVerticePaste.Enabled := InRange(fCOBCopyItem, 1, MOX.Header.BlinkerCount);
+  fCOBCopyItem := LBCOBPoints.ItemIndex;
+  btnCOBVerticePaste.Enabled := InRange(fCOBCopyItem, 0, fCOB.Head.PointQty - 1);
 end;
 
 
 procedure TForm1.btnCOBVerticePasteClick(Sender: TObject);
+var
+  idx: Integer;
 begin
-  if fCOBCopyItem<>EnsureRange(fCOBCopyItem, 1, MOX.Header.BlinkerCount) then
+  idx := LBCOBPoints.ItemIndex;
+  if idx = -1 then Exit;
+
+  if fCOBCopyItem <> EnsureRange(fCOBCopyItem, 0, fCOB.Head.PointQty - 1) then
   begin
     btnCOBVerticePaste.Enabled := False;
     Exit;
   end;
 
-  fCOB.Vertices[LBCOBPoints.ItemIndex+1].X:=fCOB.Vertices[fCOBCopyItem].X;
-  fCOB.Vertices[LBCOBPoints.ItemIndex+1].Y:=fCOB.Vertices[fCOBCopyItem].Y;
-  fCOB.Vertices[LBCOBPoints.ItemIndex+1].Z:=fCOB.Vertices[fCOBCopyItem].Z;
+  fCOB.Vertices[idx] := fCOB.Vertices[fCOBCopyItem];
 
   fCOB.RebuildBounds;
   SendDataToUI(uiCOB);
@@ -2188,8 +2198,8 @@ procedure TForm1.LBCOBPointsClick(Sender: TObject);
 var
   idx: Integer;
 begin
-  idx := LBCOBPoints.ItemIndex + 1;
-  if idx = 0 then Exit;
+  idx := LBCOBPoints.ItemIndex;
+  if idx = -1 then Exit;
 
   fUIRefresh := True;
   seCOBX.Value := fCOB.Vertices[idx].X;
@@ -2203,8 +2213,8 @@ procedure TForm1.seCOBXChange(Sender: TObject);
 var
   idx: Integer;
 begin
-  idx := LBCOBPoints.ItemIndex+1;
-  if idx = 0 then Exit;
+  idx := LBCOBPoints.ItemIndex;
+  if idx = -1 then Exit;
   if fUIRefresh then Exit;
 
   fCOB.Vertices[idx].X := seCOBX.Value;
