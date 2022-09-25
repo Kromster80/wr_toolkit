@@ -424,6 +424,7 @@ type
     procedure DevScanMOXHeaders;
     procedure RebuildPartsTree;
     procedure ExchangePartsOrdering;
+    procedure ImportLWOCOB(const aFilename: string);
   end;
 
 var
@@ -2184,11 +2185,6 @@ begin
   for i:=1 to Imp.PolyCount do
     for h:=1 to 3 do
       fCOB.Faces[i,h]:=Imp.Faces[i,h]-1;
-
-  ShowUpClick(cuCOB);
-  fCOB.RebuildBounds;
-  SendDataToUI(uiCOB);
-  SetRenderObject([roCOB]);
 end;
 
 
@@ -3082,11 +3078,24 @@ end;
 
 
 procedure TForm1.ImportLWOCOB1Click(Sender: TObject);
-var Log: string;
 begin
-  if not RunOpenDialog(odOpen,'',fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
-  LoadLWO(odOpen.FileName, Log);
+  if not RunOpenDialog(odOpen, '', fOpenedFolder, 'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
+
+  ImportLWOCOB(odOpen.FileName);
+
+  ShowUpClick(cuCOB);
+  SendDataToUI(uiCOB);
+  SetRenderObject([roCOB]);
+end;
+
+
+procedure TForm1.ImportLWOCOB(const aFilename: string);
+var
+  s: string;
+begin
+  LoadLWO(aFileName, s);
   ConverseImp_COB;
+  fCOB.RebuildBounds;
 end;
 
 
