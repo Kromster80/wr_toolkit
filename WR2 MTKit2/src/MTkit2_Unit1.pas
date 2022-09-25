@@ -581,6 +581,13 @@ begin
   //fname:='D:\a.tree';
   //fname:='demo8.mox';
 
+  {ImportLWOCOB('Octavia_Race_colli_colli.lwo');
+  fCOB.SaveCOB('l2c_old.cob');
+  fCOB.Clear;
+  fCOB.ImportLWO2COB('Octavia_Race_colli_colli.lwo');
+  fCOB.SaveCOB('l2c_new.cob');
+  Halt;}
+
   //Open it through browser
   if FileExists(fname) then
   begin

@@ -1,5 +1,5 @@
 ------------------------------------------------------
-"World Racing 2" Mesh Tool-Kit v2.4.1
+"World Racing 2" Mesh Tool-Kit v2.4.2
 ------------------------------------------------------
 
 Description:
@@ -29,7 +29,7 @@ MTKit2 shows you preview of a car, WR2 will display it bit differently.
 AFC11/FVR support is limited.
 
 Version History:
-                    Replaced old clunky LWO export with a proper one (taken from KP) for COB>LWO export as a proof of concept
+2.4.2   2022.09.25  Replaced old clunky LWO import/export with a proper one (taken from KP) for LWO<->COB as a proof of concept
                     Fixed error in MOX>LWO export from 2.3.8
 2.4.1   2022.09.18  Fixed several crashes due to code refactoring and 65k+ models support
                     Added crash reporter module

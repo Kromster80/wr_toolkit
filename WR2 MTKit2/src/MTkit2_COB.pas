@@ -20,6 +20,7 @@ type
     procedure SaveCOB(const aFilename: string);
     //procedure SaveCOB2LWO(const aFilename: string);
     procedure SaveCOB2LWO(const aFilename: string);
+    procedure ImportLWO2COB(const aFilename: string);
     procedure RebuildBounds;
   end;
 
@@ -210,6 +211,41 @@ begin
   Head.X := 0; // Xmax + Xmin;
   Head.Y := 0; // Ymax + Ymin;
   Head.Z := 0; // Zmax + Zmin;
+end;
+
+
+procedure TModelCOB.ImportLWO2COB(const aFilename: string);
+var
+  lwm: TLWModel;
+  lay: TLWLayer;
+  I, K: Integer;
+begin
+  lwm := TLWModel.Create;
+  try
+    lwm.LoadFromFile(aFilename);
+
+    if lwm.LayerCount <> 1 then
+      raise Exception.Create('Imported LWO must have exactly one layer');
+
+    lay := lwm.Layers[0];
+
+    if (lay.VerticeCount > 255) or (lay.PolyCount > 255) then
+      raise Exception.Create('Can''t import more than 255 vertices to COB');
+
+    Head.PointQty := lay.VerticeCount;
+    Head.PolyQty := lay.PolyCount;
+
+    for I:=1 to lay.VerticeCount do
+      Vertices[I] := lay.Vertices[I - 1] * 10;
+
+    for I := 1 to lay.PolyCount do
+      for K := 1 to 3 do
+        Faces[I, K] := lay.Polys[I - 1].Indices[K - 1];
+
+    RebuildBounds;
+  finally
+    lwm.Free;
+  end;
 end;
 
 
