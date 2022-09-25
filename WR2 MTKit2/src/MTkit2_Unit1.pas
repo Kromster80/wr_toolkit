@@ -418,13 +418,11 @@ type
     procedure BlinkerAdd(aIndex: Integer);
     procedure BlinkerRemove(aIndex: Integer);
     procedure ConverseImp_MOX;
-    procedure ConverseImp_COB;
     procedure MaterialSetDefault;
     procedure SaveMOX(const aFilename: string);
     procedure DevScanMOXHeaders;
     procedure RebuildPartsTree;
     procedure ExchangePartsOrdering;
-    procedure ImportLWOCOB(const aFilename: string);
   end;
 
 var
@@ -2162,39 +2160,6 @@ begin
 end;
 
 
-procedure TForm1.ConverseImp_COB;
-var
-  i,h:Integer;
-begin
-  if (Imp.VerticeCount > 255) or (Imp.PolyCount > 255) then
-  begin
-    MessageBox(Handle, 'Can''t import more than 255 vertices to COB', 'Error', MB_OK or MB_ICONERROR);
-    Exit;
-  end;
-
-  fCOB.Head.PointQty:=Imp.VerticeCount;
-  fCOB.Head.PolyQty:=Imp.PolyCount;
-
-  for i:=1 to Imp.VerticeCount do
-  begin
-    fCOB.Vertices[i].X := Imp.XYZ[i].X;
-    fCOB.Vertices[i].Y := Imp.XYZ[i].Y;
-    fCOB.Vertices[i].Z := Imp.XYZ[i].Z;
-  end;
-
-  for i:=1 to Imp.PolyCount do
-  begin
-    fCOB.NormalsP[i].X := Imp.Np[i].X;
-    fCOB.NormalsP[i].Y := Imp.Np[i].Y;
-    fCOB.NormalsP[i].Z := Imp.Np[i].Z;
-  end;
-
-  for i:=1 to Imp.PolyCount do
-    for h:=1 to 3 do
-      fCOB.Faces[i,h]:=Imp.Faces[i,h]-1;
-end;
-
-
 procedure TForm1.btnCOBVerticeCopyClick(Sender: TObject);
 begin
   fCOBCopyItem := LBCOBPoints.ItemIndex+1;
@@ -3088,21 +3053,11 @@ procedure TForm1.ImportLWOCOB1Click(Sender: TObject);
 begin
   if not RunOpenDialog(odOpen, '', fOpenedFolder, 'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
 
-  ImportLWOCOB(odOpen.FileName);
+  fCOB.ImportLWO2COB(odOpen.Filename);
 
   ShowUpClick(cuCOB);
   SendDataToUI(uiCOB);
   SetRenderObject([roCOB]);
-end;
-
-
-procedure TForm1.ImportLWOCOB(const aFilename: string);
-var
-  s: string;
-begin
-  LoadLWO(aFileName, s);
-  ConverseImp_COB;
-  fCOB.RebuildBounds;
 end;
 
 
