@@ -261,7 +261,7 @@ begin
     for i:=1 to aCOB.Head.PolyQty do
       for h:=3 downto 1 do
       begin
-        glNormal3fv(@aCOB.NormalsP[i].X);
+        glNormal3fv(@aCOB.Normals[i].X);
         glvertex3fv(@aCOB.Vertices[aCOB.Faces[i,h]+1].X);
       end;
   glEnd;
@@ -274,7 +274,7 @@ begin
     for i:=1 to aCOB.Head.PolyQty do
     for h:=3 downto 1 do
     begin
-      glNormal3fv(@aCOB.NormalsP[i].X);
+      glNormal3fv(@aCOB.Normals[i].X);
       glvertex3fv(@aCOB.Vertices[aCOB.Faces[i,h]+1].X);
     end;
   glEnd;
