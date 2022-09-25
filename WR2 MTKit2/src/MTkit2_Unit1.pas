@@ -488,21 +488,6 @@ var
   Dnode: array [1..MAX_PARTS]of TTreeNode;
 
   NumColors: Byte; //Number of colors to use
-  Material: array [1..MAX_MATERIALS]of record
-   Mtag:string[4];//Material tag (#_0x----)
-   Title:string;
-   MatClass: array [1..4]of Integer;     //Material class selector (by index)
-   Color: array [1..20]of record
-     Amb,Dif,Sp1,Sp2,Ref:record
-       R,G,B,z:Byte;
-     end;
-   end;
-   Transparency:Byte;
-   TexName:string;
-   TexEdge:record U:Byte; V:Byte; end;
-   TexOffset,TexScale:record U:Single; V:Single; end;
-   TexAngle:Single;
-  end;
 
   VinylsCount:Integer;
   VinylsTex:GLUint;
@@ -3107,7 +3092,7 @@ begin
 
   doSpread := MessageBox(Handle, 'Do you want to spread parts over X axis?', 'Question', MB_YESNO or MB_ICONQUESTION) = ID_YES;
 
-  SaveMOX2LWO(sdSave.FileName, doSpread);
+  SaveMOX2LWO(sdSave.FileName, ColID, doSpread);
 
   meLog.Lines.Add('MOX>LWO Save Complete');
 end;

@@ -95,11 +95,30 @@ type
   end;
 
   procedure LoadMOX(const aFilename: string);
+  procedure SaveMOX2LWO(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
 
 var
   MOX: TMOX;
 
+  Material: array [1..MAX_MATERIALS]of record
+   Mtag:string[4];//Material tag (#_0x----)
+   Title:string;
+   MatClass: array [1..4]of Integer;     //Material class selector (by index)
+   Color: array [1..20]of record
+     Amb,Dif,Sp1,Sp2,Ref:record
+       R,G,B,z:Byte;
+     end;
+   end;
+   Transparency:Byte;
+   TexName:string;
+   TexEdge:record U:Byte; V:Byte; end;
+   TexOffset,TexScale:record U:Single; V:Single; end;
+   TexAngle:Single;
+  end;
+
 implementation
+uses
+  KromUtils;
 
 
 { TMOXBlinker }
@@ -293,6 +312,243 @@ begin
   finally
     closefile(f);
   end;
+end;
+
+
+procedure SaveMOX2LWO(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
+var
+  ft:textfile;
+  rs: AnsiString;
+  h,i,j,k,m:Integer;
+  uu,vv,xr:Single;
+  t,t2:Vector3f;
+  idChunk, idPart, CurrentLev, DepthLev: Integer;
+  mtx: TMatrix;
+begin
+  SetLength(rs, 4);
+  AssignFile(ft,aFilename);
+  Rewrite(ft);
+
+  Write(ft,'FORM');
+
+  m:=0;
+  m:=m+12;                                        //+'LWO2TAGS   2'
+
+  for i:=1 to MOX.Header.MatCount do
+    if Material[i].Title<>'' then
+      if (Length(Material[i].Title) mod 2)=1 then
+        Inc(m,Length(Material[i].Title)+1)
+      else
+        Inc(m,Length(Material[i].Title)+2)
+    else
+      if Material[i].Mtag<>'' then Inc(m,6); //4+2
+
+  m:=m+8+18;                                      //+LAYR_
+  m:=m+8+MOX.Header.VerticeCount*12;                      //+PNTS+3D
+  m:=m+14+10+MOX.Header.VerticeCount*10;                  //+UV
+  m:=m+12+MOX.Header.PolyCount*8;                         //+Face 3.x.x.x
+  m:=m+12+MOX.Header.PolyCount*4;                         //+Surface
+
+  for i:=1 to MOX.Header.MatCount do
+    if Material[i].TexName<>'' then begin
+      if (Length(Material[i].TexName) mod 2)=1 then
+        m:=m+Length(Material[i].TexName)+1
+      else
+        m:=m+Length(Material[i].TexName)+2;
+      m:=8+10+m+4;                                //+CLIP+STIL+name+path
+    end;
+
+  for i:=1 to MOX.Header.MatCount do
+    if Material[i].Title<>'' then
+      if (Length(Material[i].Title) mod 2)=1 then
+        Inc(m,Length(Material[i].Title)+1)
+      else
+        Inc(m,Length(Material[i].Title)+2)
+    else
+     if Material[i].Mtag<>'' then Inc(m,6);       //Writing tagID instead of name, 4+2
+
+  m:=m+(8+2+66+252)*MOX.Header.MatCount;                  //+SURF Data
+
+  //=========================Writing data
+
+  Write(ft, AnsiChar(m div 1677216), AnsiChar(m div 65536), AnsiChar(m div 256), AnsiChar(m));
+  Write(ft, 'LWO2', 'TAGS');
+
+  m:=0;
+  for i:=1 to MOX.Header.MatCount do
+    if Material[i].Title<>'' then
+      if (Length(Material[i].Title) mod 2)=1 then
+        Inc(m,Length(Material[i].Title)+1)
+      else
+       Inc(m,Length(Material[i].Title)+2)
+    else
+      if Material[i].Mtag<>'' then Inc(m,6); //4+2
+
+  Write(ft,#0,#0,AnsiChar(m div 256),AnsiChar(m));
+
+  for i:=1 to MOX.Header.MatCount do
+    if Material[i].Title<>'' then
+      if (Length(Material[i].Title) mod 2)=1 then
+        Write(ft,Material[i].Title,#0)
+      else
+        Write(ft,Material[i].Title,#0,#0)
+    else
+      if Material[i].Mtag<>'' then
+        Write(ft,Material[i].Mtag,#0,#0); //4+2
+
+  Write(ft,'LAYR',#0,#0,#0,#18,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0);
+
+  Write(ft,'PNTS');
+  m:=MOX.Header.VerticeCount*12; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
+  idChunk:=0; idPart:=0;
+
+  for j:=1 to MOX.Header.VerticeCount do
+  begin
+    t.x:=MOX.Vertice[j].X;
+    t.y:=MOX.Vertice[j].Y;
+    t.z:=MOX.Vertice[j].Z;
+
+    if (idChunk < MOX.Header.ChunkCount) and (j = MOX.Chunks[idChunk+1].FirstVtx) then //current point matches first point of next chunk
+      Inc(idChunk); //This is idChunk of current chunk
+    if (idChunk = MOX.Parts[idPart+1].FirstMat+1) and (MOX.Parts[idPart+1].NumMat <> 0) then
+      Inc(idPart); //This is idChunk of current detail
+
+    DepthLev := 8;
+    repeat
+      CurrentLev := 1; k := idPart;
+      while (MOX.Parts[k].Parent > -1) and (CurrentLev <> DepthLev) do
+      begin
+        k := MOX.Parts[k].Parent+1;
+        Inc(CurrentLev);
+      end;
+
+      DepthLev := CurrentLev; // set depth for first run
+      Dec(DepthLev);          // -1
+
+      mtx := MOX.Parts[k].Matrix;
+      t2.x:=t.x*mtx[1,1]+t.y*mtx[2,1]+t.z*mtx[3,1]+mtx[4,1];
+      t2.y:=t.x*mtx[1,2]+t.y*mtx[2,2]+t.z*mtx[3,2]+mtx[4,2];
+      t2.z:=t.x*mtx[1,3]+t.y*mtx[2,3]+t.z*mtx[3,3]+mtx[4,3];
+      t:=t2;
+    until(DepthLev=0);
+
+    MOX.Vertice[j].X := t.x + idPart * 25 * Ord(aSpreadOverX);
+    MOX.Vertice[j].Y := t.y;
+    MOX.Vertice[j].Z := t.z;
+    rs := unreal2(MOX.Vertice[j].X/10); Write(ft,rs[4],rs[3],rs[2],rs[1]); //LWO uses
+    rs := unreal2(MOX.Vertice[j].Y/10); Write(ft,rs[4],rs[3],rs[2],rs[1]); //reverse Byte
+    rs := unreal2(MOX.Vertice[j].Z/10); Write(ft,rs[4],rs[3],rs[2],rs[1]); //order
+  end;
+
+  Write(ft,'VMAP');
+  m:=6+10+MOX.Header.VerticeCount*10; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
+  Write(ft,'TXUV',#0,#2);
+  Write(ft,'Texture01',#0);           //TextureMap name in LW
+  idChunk:=0;
+  for k:=1 to MOX.Header.VerticeCount do
+  begin
+    if (idChunk < MOX.Header.ChunkCount) and (k = MOX.Chunks[idChunk+1].FirstVtx) then
+      Inc(idChunk); //idChunk=1 ...
+
+    Write(ft,AnsiChar((k-1) div 256),AnsiChar(k-1));
+    if Material[idChunk].TexScale.U=0 then Material[idChunk].TexScale.U:=1;
+    if Material[idChunk].TexScale.V=0 then Material[idChunk].TexScale.V:=1;
+    uu:= MOX.Vertice[k].U*Material[idChunk].TexScale.U+Material[idChunk].TexOffset.U;             // not Reversed
+    vv:=-MOX.Vertice[k].V*Material[idChunk].TexScale.V+Material[idChunk].TexOffset.V+1;             // not Reversed
+    if Material[idChunk].TexAngle=90 then begin xr:=uu; uu:=-vv; vv:=xr; end; //Rotate 90 CCW
+    if Material[idChunk].TexAngle=-90 then begin xr:=uu; uu:=vv; vv:=-xr; end;//Rotate 90 CW
+    rs:=unreal2(uu); Write(ft,rs[4],rs[3],rs[2],rs[1]);
+    rs:=unreal2(vv); Write(ft,rs[4],rs[3],rs[2],rs[1]);
+  end;
+
+  Write(ft,'POLS');
+  m:=MOX.Header.PolyCount*8+4; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
+  Write(ft,'FACE');
+  for j:=1 to MOX.Header.PolyCount do
+  begin
+    Write(ft,#0,#3 // 3 Points/Polygon
+    ,AnsiChar((MOX.Face[j,1]-1) div 256),AnsiChar(MOX.Face[j,1]-1)
+    ,AnsiChar((MOX.Face[j,2]-1) div 256),AnsiChar(MOX.Face[j,2]-1)
+    ,AnsiChar((MOX.Face[j,3]-1) div 256),AnsiChar(MOX.Face[j,3]-1));
+  end;
+
+  Write(ft,'PTAG');
+  m:=MOX.Header.PolyCount*4+4; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
+  Write(ft,'SURF');
+  idChunk:=0;
+  for i:=1 to MOX.Header.PolyCount do
+  begin
+    if (idChunk < MOX.Header.ChunkCount) and (i-1=MOX.Chunks[idChunk+1].FirstPoly) then Inc(idChunk);
+    Write(ft,AnsiChar((i-1) div 256),AnsiChar(i-1),AnsiChar((MOX.Chunks[idChunk].SidA) div 256),AnsiChar(MOX.Chunks[idChunk].SidA));
+  end;
+
+  for i:=1 to MOX.Header.MatCount do if Material[i].TexName<>'' then
+  begin
+    Write(ft,'CLIP');
+    if (Length(Material[i].TexName) mod 2)=1 then m:=Length(Material[i].TexName)+1 else m:=Length(Material[i].TexName)+2;
+    m:=10+m+4; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
+    Write(ft,#0,#0,#0,AnsiChar(i));
+    Write(ft,'STIL'); m:=m-10; Write(ft,AnsiChar(m div 256),AnsiChar(m));
+    Write(ft,'C:1/',Material[i].TexName);
+    if (Length(Material[i].TexName) mod 2)=1 then Write(ft,#0) else Write(ft,#0,#0);
+  end;
+
+  for i:=1 to MOX.Header.MatCount do
+  begin
+    Write(ft,'SURF');
+    m:=2+66+252;      ////Data Len
+    if Material[i].Title<>'' then
+     if (Length(Material[i].Title) mod 2)=1 then
+      Inc(m,Length(Material[i].Title)+1) else
+      Inc(m,Length(Material[i].Title)+2) else
+     if Material[i].Mtag<>'' then Inc(m,6); //4+2
+    Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
+
+    if Material[i].Title<>'' then
+     if (Length(Material[i].Title) mod 2)=1 then
+      Write(ft,Material[i].Title,#0) else
+      Write(ft,Material[i].Title,#0,#0) else
+     if Material[i].Mtag<>'' then Write(ft,Material[i].Mtag,#0,#0); //4+2
+
+    Write(ft,#0,#0);
+    Write(ft,'COLR',#0,#14);
+    rs:=unreal2(Material[i].Color[aColorId].Dif.R/255); Write(ft,rs[4],rs[3],rs[2],rs[1]);
+    rs:=unreal2(Material[i].Color[aColorId].Dif.G/255); Write(ft,rs[4],rs[3],rs[2],rs[1]);
+    rs:=unreal2(Material[i].Color[aColorId].Dif.B/255); Write(ft,rs[4],rs[3],rs[2],rs[1]);
+
+    Write(ft,#0,#0);
+    Write(ft,'SPEC',#0,#6);
+    rs:=unreal2((Material[i].Color[aColorId].Sp1.R+
+                 Material[i].Color[aColorId].Sp1.G+
+                 Material[i].Color[aColorId].Sp1.B)/300);
+    Write(ft,rs[4],rs[3],rs[2],rs[1]);
+    Write(ft,#0,#0);
+
+    Write(ft,'REFL',#0,#6);
+    rs:=unreal2(Material[i].Color[aColorId].Ref.R/255); Write(ft,rs[4],rs[3],rs[2],rs[1]);
+    Write(ft,#0,#0);
+
+    Write(ft,'TRAN',#0,#6);
+    rs:=unreal2(Material[i].Transparency/100); Write(ft,rs[4],rs[3],rs[2],rs[1]);
+    Write(ft,#0,#0);
+
+    Write(ft,'SMAN',#0,#4);
+    Write(ft,#63,#200,#3,#14);
+
+    Write(ft,'BLOK'); // 252-6
+    m:=246; Write(ft,AnsiChar(m div 256),AnsiChar(m));
+    Write(ft,'IMAP',#0,'*A',#0,'CHAN',#0,#4,'COLROPAC',#0,#8,#0,#0,#63,#128,#0,#0,#0,#0);
+    Write(ft,'ENAB',#0,#2,#0,#1,'NEGA',#0,#2,#0,#0,'TMAP',#0,#98,'CNTR',#0,#14); for j:=1 to 14 do Write(ft,#0);
+    Write(ft,'SIZE',#0,#14); for j:=1 to 3 do Write(ft,#63,#128,#0,#0); Write(ft,#0,#0);
+    Write(ft,'ROTA',#0,#14); for j:=1 to 14 do Write(ft,#0);
+    Write(ft,'FALL',#0,#16); for j:=1 to 16 do Write(ft,#0);
+    Write(ft,'OREF',#0,#2,#0,#0,'CSYS',#0,#2,#0,#0,'PROJ',#0,#2,#0,#5,'AXIS',#0,#2,#0,#2);
+    Write(ft,'IMAG',#0,#2,#0,AnsiChar(i),'WRAP',#0,#4,#0,#0,#0,#0,'WRPW',#0,#6,#63,#128,#0,#0,#0,#0);
+    Write(ft,'WRPH',#0,#6,#63,#128,#0,#0,#0,#0,'VMAP',#0,#10,'Texture01',#0);
+    Write(ft,'AAST',#0,#6,#0,#0,#63,#128,#0,#0,'PIXB',#0,#2,#0,#1);
+  end;
+
+  CloseFile(ft);
 end;
 
 
