@@ -3115,7 +3115,7 @@ end;
 
 procedure TForm1.ExportCOB1Click(Sender: TObject);
 begin
-  if not RunSaveDialog(sdSave, fOpenedFileMask+'_colli.lwo','','Lightwave 3D files (*.lwo)|*.lwo','lwo') then Exit;
+  if not RunSaveDialog(sdSave, fOpenedFileMask + '_colli.lwo', '', 'Lightwave 3D files (*.lwo)|*.lwo', 'lwo') then Exit;
   meLog.Lines.Add('Writing COB>LWO file');
   fCOB.SaveCOB2LWO(sdSave.FileName);
   meLog.Lines.Add('COB>LWO Save Complete');

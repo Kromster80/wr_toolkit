@@ -90,6 +90,9 @@ function  decs(AText: AnsiString; Len,RunAsFunction:integer): AnsiString; overlo
 function GetNumberFromString(AText:string; Position:integer):single;
 function RemoveQuotes(Input:string):string;
 function GetCharFromVirtualKey(Key:word):string;
+
+function Lerp(A,B: Single; aMixValue: Single): Single;
+
 procedure SwapStr(var A,B:string);
 procedure SwapInt(var A,B:byte); overload;
 procedure SwapInt(var A,B:word); overload;
@@ -874,6 +877,11 @@ begin
     2:    ;
     else  Result := '';
   end;
+end;
+
+function Lerp(A, B: Single; aMixValue: Single): Single;
+begin
+  Result := A + (B - A) * aMixValue;
 end;
 
 

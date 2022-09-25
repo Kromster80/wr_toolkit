@@ -18,6 +18,7 @@ type
     procedure Clear;
     function LoadCOB(const aFilename: string): Boolean;
     procedure SaveCOB(const aFilename: string);
+    //procedure SaveCOB2LWO(const aFilename: string);
     procedure SaveCOB2LWO(const aFilename: string);
     procedure RebuildBounds;
   end;
@@ -25,7 +26,7 @@ type
 
 implementation
 uses
-  Math, SysUtils;
+  Math, SysUtils, KM_IoModelLWO;
 
 
 procedure TModelCOB.Clear;
@@ -86,13 +87,13 @@ begin
 end;
 
 
-procedure TModelCOB.SaveCOB2LWO(const aFilename: string);
+{procedure TModelCOB.SaveCOB2LWO(const aFilename: string);
 var
   i,m: Integer;
   rs: string[4];
   ft: textfile;
 begin
-  AssignFile(ft,aFilename); Rewrite(ft);
+  AssignFile(ft, ChangeFileExt(aFilename, '.old.lwo')); Rewrite(ft);
   Write(ft,'FORM'); m:=0;
   Inc(m,12);                                                     //+'LWO2TAGS   2'
   Inc(m,8);                                                      //Default
@@ -120,10 +121,10 @@ begin
   m:=Head.PolyQty*8+4; Write(ft,#0,#0,AnsiChar(m div 256),AnsiChar(m));
   Write(ft,'FACE');
   for i:=1 to Head.PolyQty do
-  Write(ft,#0,#3
-  ,AnsiChar((Faces[i,1]) div 256),AnsiChar(Faces[i,1])
-  ,AnsiChar((Faces[i,2]) div 256),AnsiChar(Faces[i,2])
-  ,AnsiChar((Faces[i,3]) div 256),AnsiChar(Faces[i,3]));
+    Write(ft,#0,#3
+    ,AnsiChar((Faces[i,1]) div 256),AnsiChar(Faces[i,1])
+    ,AnsiChar((Faces[i,2]) div 256),AnsiChar(Faces[i,2])
+    ,AnsiChar((Faces[i,3]) div 256),AnsiChar(Faces[i,3]));
 
   Write(ft,'PTAG');
   m:=Head.PolyQty*4+4; Write(ft,#0,#0,AnsiChar(m div 256),AnsiChar(m));
@@ -133,6 +134,50 @@ begin
   Write(ft,'SURF',#0,#0,#0,#10,'Default',#0,#0,#0);
 
   CloseFile(ft);
+end;}
+
+
+procedure TModelCOB.SaveCOB2LWO(const aFilename: string);
+const
+  EXPORT_SCALE = 0.1;
+var
+  lwm: TLWModel;
+  lay: PLWLayer;
+  I: Integer;
+begin
+  lwm := TLWModel.Create;
+  try
+    lay := lwm.LayerAdd;
+
+    // Vertices
+    lay.SetVerticeCount(Head.PointQty);
+    for I := 1 to Head.PointQty do
+    begin
+      lay.Vertices[I-1].X := Vertices[I].X * EXPORT_SCALE;
+      lay.Vertices[I-1].Y := Vertices[I].Y * EXPORT_SCALE;
+      lay.Vertices[I-1].Z := Vertices[I].Z * EXPORT_SCALE;
+    end;
+
+    // Polys
+    lay.SetPolyCount(Head.PolyQty);
+    for I := 1 to Head.PolyQty do
+    begin
+      lay.Polys[I-1].VertCount := 3;
+      SetLength(lay.Polys[I-1].Indices, 3);
+
+      lay.Polys[I-1].Indices[0] := Faces[I,1];
+      lay.Polys[I-1].Indices[1] := Faces[I,2];
+      lay.Polys[I-1].Indices[2] := Faces[I,3];
+
+      lay.Polys[I-1].PolySurf := 0;
+    end;
+
+    // COB is a simple shape, it does not need a surface or anything
+
+    lwm.SaveToFile(aFilename);
+  finally
+    lwm.Free;
+  end;
 end;
 
 

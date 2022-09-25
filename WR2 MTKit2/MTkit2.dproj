@@ -114,6 +114,8 @@
         <DCCReference Include="src\MTkit2_Textures.pas"/>
         <DCCReference Include="src\MTkit2_Vertex.pas"/>
         <DCCReference Include="..\_Common_\KromUtils.pas"/>
+        <DCCReference Include="..\_Common_\KM_Colors.pas"/>
+        <DCCReference Include="..\_Common_\KM_Vertexes.pas"/>
         <DCCReference Include="..\_Common_\ColorPicker2.pas">
             <Form>Form2</Form>
         </DCCReference>
