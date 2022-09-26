@@ -1,16 +1,11 @@
 unit MTkit2_Textures;
 interface
 uses
-  Buttons, Classes, ComCtrls, Controls, Dialogs, ExtCtrls, FileCtrl, Forms,
-  Graphics, INIFiles, Math, Menus, ShellCtrls, Spin, StdCtrls, SysUtils, Windows,
-  Messages,
-
-  dglOpenGL, FloatSpinEdit, KromOGLUtils, KromUtils, TGATexture, PTXTexture,
-
-  MTkit2_Defaults, MTkit2_Render, MTkit2_RenderLegacy, MTkit2_IO, MTkit2_MOX, MTkit2_Tree, MTkit2_Vertex;
+  SysUtils,
+  TGATexture, PTXTexture;
 
 
-  function TryToLoadTexture(const aFolder, aFilename: string): cardinal;
+function TryToLoadTexture(const aFolder, aFilename: string): cardinal;
 
 
 implementation
