@@ -3401,12 +3401,12 @@ end;
 
 procedure TForm1.AddTextureClick(Sender: TObject);
 begin
-AddTextureToList(ts_AddTex,'');
+  AddTextureToList(ts_AddTex,'');
 end;
 
 procedure TForm1.RenTextureClick(Sender: TObject);
 begin
-AddTextureToList(ts_RenTex,'');
+  AddTextureToList(ts_RenTex,'');
 end;
 
 procedure TForm1.AddTextureToList(Sender:TTexSend; aText:string);
@@ -3415,90 +3415,98 @@ var i,k,ID:integer;
   gr: array [1..256]of byte;
   TexString:string;
 begin
-if Qty.TexturesFiles>=256 then begin
-MessageBox(Form1.Handle, 'WR2 can''t handle more than 256 textures in scenery.', 'Info', MB_OK or MB_ICONINFORMATION);
-exit; end;
+  if Qty.TexturesFiles>=256 then 
+  begin
+    MessageBox(Form1.Handle, 'WR2 can''t handle more than 256 textures in scenery.', 'Info', MB_OK or MB_ICONINFORMATION);
+    exit; 
+  end;
 
-ID:=ListTextures.ItemIndex+1;
-if Sender=ts_RenTex then if ID=0 then begin
-MessageBox(Form1.Handle, 'Please select texture to rename first.', 'Info', MB_OK or MB_ICONINFORMATION);
-exit; end;
+  ID:=ListTextures.ItemIndex+1;
+  if Sender=ts_RenTex then if ID=0 then 
+  begin
+    MessageBox(Form1.Handle, 'Please select texture to rename first.', 'Info', MB_OK or MB_ICONINFORMATION);
+    exit; 
+  end;
 
-if (Sender=ts_AddTex)and(aText='') then TexString:=InputBox('Add texture','Texture name:','');
-if (Sender=ts_AddTex)and(aText<>'') then TexString:=aText;
-if Sender=ts_RenTex then TexString:=InputBox('Rename texture','Texture name:',TexName[ID]);
-if Sender=ts_RenTex then ListTextures.Items[ID-1]:=TexString;
+  if (Sender=ts_AddTex)and(aText='') then TexString:=InputBox('Add texture','Texture name:','');
+  if (Sender=ts_AddTex)and(aText<>'') then TexString:=aText;
+  if Sender=ts_RenTex then TexString:=InputBox('Rename texture','Texture name:',TexName[ID]);
+  if Sender=ts_RenTex then ListTextures.Items[ID-1]:=TexString;
 
-if aText='' then
-for i:=1 to Qty.TexturesFiles do
-if (TexString='')or(TexName[i]=TexString) then begin
-MessageBox(Form1.Handle, PChar('Texture "'+TexString+'" already exists.'), 'Info', MB_OK or MB_ICONINFORMATION);
-exit; end;
+  if aText='' then
+  for i:=1 to Qty.TexturesFiles do
+  if (TexString='')or(TexName[i]=TexString) then 
+  begin
+    MessageBox(Form1.Handle, PChar('Texture "'+TexString+'" already exists.'), 'Info', MB_OK or MB_ICONINFORMATION);
+    exit; 
+  end;
 
-for i:=1 to Qty.TexturesFiles do st[i]:=TexName[i];
-for i:=1 to Qty.TexturesFiles do gr[i]:=Tex2Ground[i];
-if Sender=ts_RenTex then st[ID]:=TexString;
-ListTextures.Sorted:=true;
-if Sender=ts_AddTex then inc(Qty.TexturesFiles);
-if Sender=ts_AddTex then ListTextures.Items.Add(TexString);
-if Sender=ts_AddTex then st[Qty.TexturesFiles]:=TexString;
-if Sender=ts_AddTex then gr[Qty.TexturesFiles]:=0;
-ListTextures.Sorted:=false;
-for i:=1 to Qty.TexturesFiles do TexName[i]:=ListTextures.Items[i-1];
+  for i:=1 to Qty.TexturesFiles do st[i]:=TexName[i];
+  for i:=1 to Qty.TexturesFiles do gr[i]:=Tex2Ground[i];
+  if Sender=ts_RenTex then st[ID]:=TexString;
+  ListTextures.Sorted:=true;
+  if Sender=ts_AddTex then inc(Qty.TexturesFiles);
+  if Sender=ts_AddTex then ListTextures.Items.Add(TexString);
+  if Sender=ts_AddTex then st[Qty.TexturesFiles]:=TexString;
+  if Sender=ts_AddTex then gr[Qty.TexturesFiles]:=0;
+  ListTextures.Sorted:=false;
+  for i:=1 to Qty.TexturesFiles do TexName[i]:=ListTextures.Items[i-1];
 
-//reassign IDs used by Materials
-for i:=1 to Qty.Materials do begin
-t1:=true; t2:=true; t3:=true;
-    for k:=1 to Qty.TexturesFiles do begin
-    if (st[Material[i].Tex1+1]=TexName[k])and(t1) then begin
-    Material[i].Tex1:=k-1; t1:=false; end;
-    if (st[Material[i].Tex2+1]=TexName[k])and(t2) then begin
-    Material[i].Tex2:=k-1; t2:=false; end;
-    if (st[Material[i].Tex3+1]=TexName[k])and(t3) then begin
-    Material[i].Tex3:=k-1; t3:=false; end;
-    end; //1..Qty.TexturesFiles
-end; //1..Qty.Materials
+  //reassign IDs used by Materials
+  for i:=1 to Qty.Materials do begin
+  t1:=true; t2:=true; t3:=true;
+      for k:=1 to Qty.TexturesFiles do begin
+      if (st[Material[i].Tex1+1]=TexName[k])and(t1) then begin
+      Material[i].Tex1:=k-1; t1:=false; end;
+      if (st[Material[i].Tex2+1]=TexName[k])and(t2) then begin
+      Material[i].Tex2:=k-1; t2:=false; end;
+      if (st[Material[i].Tex3+1]=TexName[k])and(t3) then begin
+      Material[i].Tex3:=k-1; t3:=false; end;
+      end; //1..Qty.TexturesFiles
+  end; //1..Qty.Materials
 
-for i:=1 to Qty.TexturesFiles do
-for k:=1 to Qty.TexturesFiles do
-if TexName[i]=st[k] then Tex2Ground[i]:=gr[k];
+  for i:=1 to Qty.TexturesFiles do
+  for k:=1 to Qty.TexturesFiles do
+  if TexName[i]=st[k] then Tex2Ground[i]:=gr[k];
 
-list_tx:=0;
+  list_tx:=0;
 
-if aText='' then SendQADtoUI(apTextures);
-for i:=1 to Qty.TexturesFiles do if TexString=ListTextures.Items[i-1] then
-ListTextures.ItemIndex:=i-1;
-ListTexturesClick(nil);
-Changes.QAD:=true;
+  if aText='' then SendQADtoUI(apTextures);
+  for i:=1 to Qty.TexturesFiles do if TexString=ListTextures.Items[i-1] then
+  ListTextures.ItemIndex:=i-1;
+  ListTexturesClick(nil);
+  Changes.QAD:=true;
 end;
 
 procedure TForm1.RemTextureClick(Sender: TObject);
 var i,ID:integer;
 begin
-if Qty.TexturesFiles=1 then begin
-MessageBox(Form1.Handle, 'Can''t remove last texture. At least one should remain.', 'Info', MB_OK or MB_ICONINFORMATION);
-exit; end;
+  if Qty.TexturesFiles=1 then 
+  begin
+    MessageBox(Form1.Handle, 'Can''t remove last texture. At least one should remain.', 'Info', MB_OK or MB_ICONINFORMATION);
+    exit; 
+  end;
 
-ID:=ListTextures.ItemIndex+1;
-if ID=0 then exit;
-ListTextures.Items.Delete(ListTextures.ItemIndex);
-for i:=1 to Qty.Materials do begin
-if Material[i].Tex1+1=ID then Material[i].Tex1:=0;
-if Material[i].Tex2+1=ID then Material[i].Tex2:=0;
-if Material[i].Tex3+1=ID then Material[i].Tex3:=0;
-if Material[i].Tex1+1>ID then dec(Material[i].Tex1);
-if Material[i].Tex2+1>ID then dec(Material[i].Tex2);
-if Material[i].Tex3+1>ID then dec(Material[i].Tex3);
-end;
-dec(Qty.TexturesFiles);
-for i:=1 to Qty.TexturesFiles do TexName[i]:=ListTextures.Items[i-1];
+  ID:=ListTextures.ItemIndex+1;
+  if ID=0 then exit;
+  ListTextures.Items.Delete(ListTextures.ItemIndex);
+  for i:=1 to Qty.Materials do begin
+    if Material[i].Tex1+1=ID then Material[i].Tex1:=0;
+    if Material[i].Tex2+1=ID then Material[i].Tex2:=0;
+    if Material[i].Tex3+1=ID then Material[i].Tex3:=0;
+    if Material[i].Tex1+1>ID then dec(Material[i].Tex1);
+    if Material[i].Tex2+1>ID then dec(Material[i].Tex2);
+    if Material[i].Tex3+1>ID then dec(Material[i].Tex3);
+  end;
+  dec(Qty.TexturesFiles);
+  for i:=1 to Qty.TexturesFiles do TexName[i]:=ListTextures.Items[i-1];
 
-for i:=ID to Qty.TexturesFiles do Tex2Ground[i]:=Tex2Ground[i+1];
+  for i:=ID to Qty.TexturesFiles do Tex2Ground[i]:=Tex2Ground[i+1];
 
-list_tx:=ID;
-if Sender<>nil then SendQADtoUI(apTextures); //Internal senders should not repaint whole list
-ListTextures.ItemIndex:=EnsureRange(ID-1,0,Qty.TexturesFiles-1);
-Changes.QAD:=true;
+  list_tx:=ID;
+  if Sender<>nil then SendQADtoUI(apTextures); //Internal senders should not repaint whole list
+  ListTextures.ItemIndex:=EnsureRange(ID-1,0,Qty.TexturesFiles-1);
+  Changes.QAD:=true;
 end;
 
 procedure TForm1.ImportTexturesClick(Sender: TObject);
@@ -3517,10 +3525,10 @@ begin
   assignfile(ft,OpenDialog.FileName); reset(ft);
   ii:=0;
   repeat
-  inc(ii);
-  readln(ft,s);
-  readln(ft,ID);
-  for kk:=1 to Qty.TexturesFiles do if TexName[kk]=s then Tex2Ground[kk]:=ID;
+    inc(ii);
+    readln(ft,s);
+    readln(ft,ID);
+    for kk:=1 to Qty.TexturesFiles do if TexName[kk]=s then Tex2Ground[kk]:=ID;
   until((ii=256)or(eof(ft)));
   closefile(ft);
   //Qty.TexturesFiles:=ii;
@@ -7475,27 +7483,30 @@ begin
 end;
 
 procedure TForm1.LoadSCGTFolder(Sender: string);
-var ii,h:integer; SearchRec:TSearchRec;
+var
+  ii,h:integer; 
+  SearchRec:TSearchRec;
 begin
-FillChar(LWQty,SizeOf(LWQty),#0);
-FillChar(LW,SizeOf(LW),#0);
-ChDir(Sender);
+  FillChar(LWQty,SizeOf(LWQty),#0);
+  FillChar(LW, SizeOf(LW),#0);
+  ChDir(Sender);
 
-      FindFirst('*', faAnyFile - faDirectory, SearchRec);
-      ii:=0;
-          repeat
-          inc(ii);
-          if (SearchRec.Name<>'.')and(SearchRec.Name<>'..')
-          and(fileexists(Sender+SearchRec.Name)) then
-          if GetFileExt(SearchRec.Name)='VRL' then //Ignore the rest
-          LoadSCGTFile(SearchRec.Name);
-          until ((ii=800)or(FindNext(SearchRec)<>0));
-      FindClose(SearchRec);
+  FindFirst('*', faAnyFile - faDirectory, SearchRec);
+  ii:=0;
+  repeat
+    inc(ii);
+    if (SearchRec.Name<>'.')and(SearchRec.Name<>'..')
+    and(fileexists(Sender+SearchRec.Name)) then
+      if GetFileExt(SearchRec.Name)='VRL' then //Ignore the rest
+        LoadSCGTFile(SearchRec.Name);
+  until ((ii=800)or(FindNext(SearchRec)<>0));
+  FindClose(SearchRec);
 
-for ii:=1 to LWQty.Poly[0] do for h:=1 to 3 do
-LW.DUV[ii,h,2]:=1-LW.DUV[ii,h,2];
+  for ii:=1 to LWQty.Poly[0] do 
+    for h:=1 to 3 do
+      LW.DUV[ii,h,2]:=1-LW.DUV[ii,h,2];
 
-PrepareLWOData;
+  PrepareLWOData;
 end;
 
 procedure TForm1.LoadSCGTFile(Sender: string);
@@ -7515,8 +7526,7 @@ var
   end;
   IndicePerPoly,Indices: array [1..1024]of integer;
   SurfRemap: array [1..256]of integer;
-begin
-
+begin   
   if not fileexists(Sender) then exit;
   ElapsedTime(@OldTime);
   assignfile(f,Sender); reset(f,1);
@@ -7529,7 +7539,8 @@ begin
   setlength(LW.UV  ,LWQty.Vert[0]+Head.VertCount+1);
   setlength(LW.RGBA,LWQty.Vert[0]+Head.VertCount+1);
   setlength(LW.Nv  ,LWQty.Vert[0]+Head.VertCount+1);
-  for ii:=1 to Head.VertCount do begin
+  for ii:=1 to Head.VertCount do 
+  begin
     blockread(f,LW.XYZ[LWQty.Vert[0]+ii,1],12);
     blockread(f,c,4);
     LW.XYZ[LWQty.Vert[0]+ii,1]:=LW.XYZ[LWQty.Vert[0]+ii,1]*10;
@@ -7558,7 +7569,8 @@ begin
   setlength(LW.Poly, length(LW.Poly)+1000+1);
   reset(f,1); seek(f,Head.IndiceOffset);
   ci:=0;
-  for ii:=1 to Head.PolyCount do begin
+  for ii:=1 to Head.PolyCount do 
+  begin
     blockread(f,Indices,IndicePerPoly[ii]*4);
     for h:=3 to IndicePerPoly[ii] do begin
       inc(ci);
@@ -7574,7 +7586,8 @@ begin
   //Read used textures
   FillChar(SurfRemap,SizeOf(SurfRemap),#0);
   reset(f,1); seek(f,Head.TextureNames);
-  for ii:=1 to Head.TextureCount do begin
+  for ii:=1 to Head.TextureCount do 
+  begin
     blockread(f,c,12);
     s:=UpperCase(StrPas(PAnsiChar(@c[1])));
     for h:=1 to LWQty.Surf[0] do
@@ -7589,49 +7602,52 @@ begin
       LW.SName[LWQty.Surf[0]]:=s;
       setlength(LW.SText,LWQty.Surf[0]+1);
       LW.SText[LWQty.Surf[0]]:=s;
-    end;
-
+    end; 
   end;
 
   reset(f,1); seek(f,Head.TextureAssign);
   blockread(f,Indices,Head.PolyCount*4);
   setlength(LW.Surf,LWQty.Poly[0]+1);
   ci:=0;
-  for ii:=1 to Head.PolyCount do begin
-    for h:=3 to IndicePerPoly[ii] do begin
-    inc(ci);
-    LW.Surf[LWQty.Poly[0]-TriCount+ci]:=SurfRemap[Indices[ii]+1];
+  for ii:=1 to Head.PolyCount do 
+    for h:=3 to IndicePerPoly[ii] do 
+    begin
+      inc(ci);
+      LW.Surf[LWQty.Poly[0]-TriCount+ci]:=SurfRemap[Indices[ii]+1];
     end;
-  end;
 
   reset(f,1); seek(f,Head.UOffset);
   setlength(LW.DUV,LWQty.Poly[0]+1);
   ci:=LWQty.Poly[0]-TriCount;
-  for ii:=1 to Head.PolyCount do begin
+  for ii:=1 to Head.PolyCount do 
+  begin
     inc(ci);
     blockread(f,LW.DUV[ci,1,1],4);
     blockread(f,LW.DUV[ci,3,1],4);
     blockread(f,LW.DUV[ci,2,1],4);
-    for h:=4 to IndicePerPoly[ii] do begin
-    inc(ci);
-    LW.DUV[ci,1,1]:=LW.DUV[ci-1,1,1];
-    LW.DUV[ci,3,1]:=LW.DUV[ci-1,2,1];
-    blockread(f,LW.DUV[ci,2,1],4);
+    for h:=4 to IndicePerPoly[ii] do 
+    begin
+      inc(ci);
+      LW.DUV[ci,1,1]:=LW.DUV[ci-1,1,1];
+      LW.DUV[ci,3,1]:=LW.DUV[ci-1,2,1];
+      blockread(f,LW.DUV[ci,2,1],4);
     end;
   end;
   reset(f,1); seek(f,Head.VOffset);
   setlength(LW.DUV,LWQty.Poly[0]+1);
   ci:=LWQty.Poly[0]-TriCount;
-  for ii:=1 to Head.PolyCount do begin
+  for ii:=1 to Head.PolyCount do 
+  begin
     inc(ci);
     blockread(f,LW.DUV[ci,1,2],4);
     blockread(f,LW.DUV[ci,3,2],4);
     blockread(f,LW.DUV[ci,2,2],4);
-    for h:=4 to IndicePerPoly[ii] do begin
-    inc(ci);
-    LW.DUV[ci,1,2]:=LW.DUV[ci-1,1,2];
-    LW.DUV[ci,3,2]:=LW.DUV[ci-1,2,2];
-    blockread(f,LW.DUV[ci,2,2],4);
+    for h:=4 to IndicePerPoly[ii] do 
+    begin
+      inc(ci);
+      LW.DUV[ci,1,2]:=LW.DUV[ci-1,1,2];
+      LW.DUV[ci,3,2]:=LW.DUV[ci-1,2,2];
+      blockread(f,LW.DUV[ci,2,2],4);
     end;
   end;
 
@@ -7643,12 +7659,12 @@ end;
 
 procedure TForm1.Show2ndFrameClick(Sender: TObject);
 begin
-Show2ndFrame.Checked:=not Show2ndFrame.Checked;
-Panel11.Visible:=Show2ndFrame.Checked;
-Panel11.Width:=Panel1.Width div 2;
-Panel11.Height:=Panel1.Height div 2;
-wglMakeCurrent(h_DC, h_RC);
-RenderResize(nil);
+  Show2ndFrame.Checked:=not Show2ndFrame.Checked;
+  Panel11.Visible:=Show2ndFrame.Checked;
+  Panel11.Width:=Panel1.Width div 2;
+  Panel11.Height:=Panel1.Height div 2;
+  wglMakeCurrent(h_DC, h_RC);
+  RenderResize(nil);
 end;
 
 procedure TForm1.OptimizeVerticesClick(Sender: TObject);
