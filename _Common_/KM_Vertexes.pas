@@ -2139,7 +2139,6 @@ end;
 
 
 // Lerp angles with regard to loop over 0..2Pi range
-//todo -cOptimization: This solution is inefficient, but we'll need to refactor animations into quaternions anyway
 function AnglesLerp(const A, B: TKMVertex3; aFrac: Single): TKMVertex3;
 const
   Pi2 = Pi * 2;

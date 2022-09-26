@@ -3514,19 +3514,19 @@ begin
   if not RunOpenDialog(OpenDialog,'',SceneryPath,'Textures list (TexturesAssignList.dat)|*.dat') then exit;
   AutoImportTexturesList:='';
 
-assignfile(ft,OpenDialog.FileName); reset(ft);
-ii:=0;
-repeat
-inc(ii);
-readln(ft,s);
-readln(ft,ID);
-for kk:=1 to Qty.TexturesFiles do if TexName[kk]=s then Tex2Ground[kk]:=ID;
-until((ii=256)or(eof(ft)));
-closefile(ft);
-//Qty.TexturesFiles:=ii;
-SendQADtoUI(apTextures);
-//CompileLoaded('Textures',1,Qty.TexturesFiles);
-Changes.QAD:=true;
+  assignfile(ft,OpenDialog.FileName); reset(ft);
+  ii:=0;
+  repeat
+  inc(ii);
+  readln(ft,s);
+  readln(ft,ID);
+  for kk:=1 to Qty.TexturesFiles do if TexName[kk]=s then Tex2Ground[kk]:=ID;
+  until((ii=256)or(eof(ft)));
+  closefile(ft);
+  //Qty.TexturesFiles:=ii;
+  SendQADtoUI(apTextures);
+  //CompileLoaded('Textures',1,Qty.TexturesFiles);
+  Changes.QAD:=true;
 end;
 
 procedure TForm1.ExportTexturesListClick(Sender: TObject);
@@ -3534,96 +3534,100 @@ var
   ft:textfile;
   ii:integer;
 begin
-if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_TexturesAssignList.dat',
-       SceneryPath,'Textures list (TexturesAssignList.dat)|*.dat') then exit;
-assignfile(ft,SaveDialog.FileName); rewrite(ft);
-for ii:=1 to Qty.TexturesFiles do begin
-writeln(ft,TexName[ii]);
-writeln(ft,Tex2Ground[ii]);
-end;
-closefile(ft);
+  if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_TexturesAssignList.dat',
+         SceneryPath,'Textures list (TexturesAssignList.dat)|*.dat') then exit;
+  assignfile(ft,SaveDialog.FileName); rewrite(ft);
+  for ii:=1 to Qty.TexturesFiles do begin
+    writeln(ft,TexName[ii]);
+    writeln(ft,Tex2Ground[ii]);
+  end;
+  closefile(ft);
 end;
 
 procedure TForm1.SwitchMBWRVerticeColors1Click(Sender: TObject);
 var i:integer;
 begin
-for i:=1 to VTXQty[64] do VTX[i].BlendR:=VTX[i].BlendG; //123 223
-list_id:=0;
-Changes.VTX:=true;
+  for i:=1 to VTXQty[64] do VTX[i].BlendR:=VTX[i].BlendG; //123 223
+  list_id:=0;
+  Changes.VTX:=true;
 end;
 
 procedure TForm1.SwitchC11_VCol(Sender: TObject);
 var i:integer; //t: array [0..256,0..256]of integer;
 begin
-//for i:=0 to 256 do for k:=0 to 256 do t[i,k]:=0;
-for i:=1 to VTXQty[64] do begin //123 112
-//inc(t[0,VTX[i].Blend2]);
-//if VTX[i].Blend2=184 then dec(VTX[i].Blend2,71);
-VTX[i].BlendB:=VTX[i].BlendG;
-VTX[i].BlendG:=VTX[i].BlendR;
-end; //t[64,64]:=1;
-list_id:=0;
-Changes.VTX:=true;
+  //for i:=0 to 256 do for k:=0 to 256 do t[i,k]:=0;
+  for i:=1 to VTXQty[64] do begin //123 112
+    //inc(t[0,VTX[i].Blend2]);
+    //if VTX[i].Blend2=184 then dec(VTX[i].Blend2,71);
+    VTX[i].BlendB:=VTX[i].BlendG;
+    VTX[i].BlendG:=VTX[i].BlendR;
+  end; //t[64,64]:=1;
+  list_id:=0;
+  Changes.VTX:=true;
 end;
 
 procedure TForm1.SwitchVerticeColors2Click(Sender: TObject);
 var i,t:integer;
 begin
-for i:=1 to VTXQty[64] do begin
-t:=VTX[i].BlendB;
-VTX[i].BlendB:=VTX[i].BlendR;
-VTX[i].BlendR:=VTX[i].BlendG;
-VTX[i].BlendG:=t;
-end;
-list_id:=0;
-Changes.VTX:=true;
+  for i:=1 to VTXQty[64] do
+  begin
+    t:=VTX[i].BlendB;
+    VTX[i].BlendB:=VTX[i].BlendR;
+    VTX[i].BlendR:=VTX[i].BlendG;
+    VTX[i].BlendG:=t;
+  end;
+  list_id:=0;
+  Changes.VTX:=true;
 end;
 
 procedure TForm1.CBTraceMatClick(Sender: TObject);
 var ii,ID:integer;
 begin
-ID:=ListMaterials.ItemIndex+1;
-if ID=0 then exit;
-for ii:=1 to Qty.TexturesTotal do if (v07[ii].SurfaceID+1 =ID) then begin
-xPos:=VTX[v[v07[ii].FirstPoly+1,1]].X/1;
-yPos:=VTX[v[v07[ii].FirstPoly+1,1]].Y/1;
-zPos:=VTX[v[v07[ii].FirstPoly+1,1]].Z/1;
-exit;
-end;
+  ID:=ListMaterials.ItemIndex+1;
+  if ID=0 then exit;
+  for ii:=1 to Qty.TexturesTotal do if (v07[ii].SurfaceID+1 = ID) then
+  begin
+    xPos:=VTX[v[v07[ii].FirstPoly+1,1]].X/1;
+    yPos:=VTX[v[v07[ii].FirstPoly+1,1]].Y/1;
+    zPos:=VTX[v[v07[ii].FirstPoly+1,1]].Z/1;
+    exit;
+  end;
 end;
 
 procedure TForm1.ListSoundsClick(Sender: TObject);
 var ID:integer;
 begin
-SoundsRefresh:=true;
-ID:=ListSounds.ItemIndex;
-fOptions.TraceSurface:=(ID=0);
-if ID<>0 then begin
-EditSoundName.Text:=Sound[ID].Name;
-SoundPosX.Value:=Sound[ID].X;
-SoundPosY.Value:=Sound[ID].Y;
-SoundPosZ.Value:=Sound[ID].Z;
-SoundVolume.Value:=Sound[ID].Volume;
-SoundPlaySpeed.Value:=Sound[ID].PlaySpeed;
-SoundRadius.Value:=Sound[ID].Radius*10;
-SoundX4.ItemIndex:=Sound[ID].z4;
-SoundX5.Value:=Sound[ID].z5;
-SoundX6.Value:=Sound[ID].Delay/10;
-end else begin
-SoundPosX.Value:=0;
-SoundPosY.Value:=0;
-SoundPosZ.Value:=0;
-end;
-SoundsRefresh:=false;
+  SoundsRefresh:=true;
+  ID:=ListSounds.ItemIndex;
+  fOptions.TraceSurface:=(ID=0);
+  if ID<>0 then
+  begin
+    EditSoundName.Text:=Sound[ID].Name;
+    SoundPosX.Value:=Sound[ID].X;
+    SoundPosY.Value:=Sound[ID].Y;
+    SoundPosZ.Value:=Sound[ID].Z;
+    SoundVolume.Value:=Sound[ID].Volume;
+    SoundPlaySpeed.Value:=Sound[ID].PlaySpeed;
+    SoundRadius.Value:=Sound[ID].Radius*10;
+    SoundX4.ItemIndex:=Sound[ID].z4;
+    SoundX5.Value:=Sound[ID].z5;
+    SoundX6.Value:=Sound[ID].Delay/10;
+  end else
+  begin
+    SoundPosX.Value:=0;
+    SoundPosY.Value:=0;
+    SoundPosZ.Value:=0;
+  end;
+  SoundsRefresh:=false;
 end;
 
 procedure TForm1.ListSoundsDblClick(Sender: TObject);
 var ID:integer;
 begin
-ID:=ListSounds.ItemIndex;
-xPos:=Sound[ID].X;
-yPos:=Sound[ID].Y;
-zPos:=Sound[ID].Z;
+  ID:=ListSounds.ItemIndex;
+  xPos:=Sound[ID].X;
+  yPos:=Sound[ID].Y;
+  zPos:=Sound[ID].Z;
   //todo: sndPlaySound(@(WorkDir+'Sounds\'+Sound[ListSounds.ItemIndex].Name+'.wav')[1],SND_NODEFAULT or SND_ASYNC);
 end;
 
