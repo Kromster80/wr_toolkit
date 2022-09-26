@@ -20,8 +20,8 @@ type
     procedure Clear;
     function LoadCOB(const aFilename: string): Boolean;
     procedure SaveCOB(const aFilename: string);
-    procedure SaveCOB2LWO(const aFilename: string);
-    procedure ImportLWO2COB(const aFilename: string);
+    procedure ExportLWO(const aFilename: string);
+    procedure ImportLWO(const aFilename: string);
     procedure RebuildBounds;
   end;
 
@@ -87,7 +87,7 @@ begin
 end;
 
 
-procedure TModelCOB.SaveCOB2LWO(const aFilename: string);
+procedure TModelCOB.ExportLWO(const aFilename: string);
 const
   EXPORT_SCALE = 0.1;
 var
@@ -162,7 +162,7 @@ begin
 end;
 
 
-procedure TModelCOB.ImportLWO2COB(const aFilename: string);
+procedure TModelCOB.ImportLWO(const aFilename: string);
 var
   lwm: TLWModel;
   lay: TLWLayer;

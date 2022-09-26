@@ -3064,7 +3064,7 @@ begin
   if not RunOpenDialog(odOpen, '', fOpenedFolder, 'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
 
   try
-    fCOB.ImportLWO2COB(odOpen.Filename);
+    fCOB.ImportLWO(odOpen.Filename);
 
     ShowUpClick(cuCOB);
     SendDataToUI(uiCOB);
@@ -3096,7 +3096,7 @@ procedure TForm1.ExportCOB1Click(Sender: TObject);
 begin
   if not RunSaveDialog(sdSave, fOpenedFileMask + '_colli.lwo', '', 'Lightwave 3D files (*.lwo)|*.lwo', 'lwo') then Exit;
   meLog.Lines.Add('Writing COB>LWO file');
-  fCOB.SaveCOB2LWO(sdSave.FileName);
+  fCOB.ExportLWO(sdSave.FileName);
   meLog.Lines.Add('COB>LWO Save Complete');
 end;
 
