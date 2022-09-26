@@ -246,7 +246,7 @@ procedure RenderCOB(aCOB: TModelCOB; aVerticeId: Integer; aShowIds: Boolean);
 var
   i,h: Integer;
 begin
-  if aCOB.Head.PointQty = 0 then Exit;
+  if aCOB.Head.PolyCount = 0 then Exit;
 
   glBindTexture(GL_TEXTURE_2D, 0); //UV map texture
 
@@ -258,7 +258,7 @@ begin
   glColor4f(0.7, 0.6, 0.5, 0.6);
 
   glBegin(GL_TRIANGLES);
-    for i:= 0 to aCOB.Head.PolyQty - 1 do
+    for i:= 0 to aCOB.Head.PolyCount - 1 do
       for h:=3 downto 1 do
       begin
         glNormal3fv(@aCOB.Normals[i].X);
@@ -271,7 +271,7 @@ begin
   glPolygonMode(GL_FRONT, GL_LINE);
 
   glBegin(GL_TRIANGLES);
-    for i:=0 to aCOB.Head.PolyQty - 1 do
+    for i:=0 to aCOB.Head.PolyCount - 1 do
     for h:=3 downto 1 do
     begin
       glNormal3fv(@aCOB.Normals[i].X);
@@ -284,7 +284,7 @@ begin
   glDisable(GL_LIGHTING);
 
   if aShowIds then
-  for i:=0 to aCOB.Head.PointQty - 1 do
+  for i:=0 to aCOB.Head.PolyCount - 1 do
   begin
     glColor4f(0.75, 0.75, 0.75, 1);
     glRasterPos3fv(@aCOB.Vertices[i].X);

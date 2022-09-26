@@ -1,16 +1,18 @@
 unit MTkit2_COB;
 interface
 uses
-  KromUtils, KM_Vertexes;
+  KM_Vertexes;
 
 
 type
+  TCOBHead = record
+    VerticeCount, PolyCount: Integer;
+    X, Y, Z, Xmin, Xmax, Ymin, Ymax, Zmin, ZMax: Single;
+  end;
+
   TModelCOB = class
   public
-    Head: record
-      PointQty, PolyQty: Integer;
-      X, Y, Z, Xmin, Xmax, Ymin, Ymax, Zmin, ZMax: Single;
-    end;
+    Head: TCOBHead;
     Vertices: array of TKMVertex3;
     Faces: array of array [1..3] of Word;
     Normals: array of TKMVertex3;
@@ -26,7 +28,7 @@ type
 
 implementation
 uses
-  Math, SysUtils, KM_IoModelLWO;
+  Classes, Math, SysUtils, KM_IoModelLWO;
 
 
 procedure TModelCOB.Clear;
@@ -40,31 +42,27 @@ end;
 
 function TModelCOB.LoadCOB(const aFilename: string): Boolean;
 var
-  I: Integer;
-  f: file;
+  ms: TMemoryStream;
 begin
   Result := False;
   if not FileExists(aFilename) then Exit;
 
-  AssignFile(f, aFilename);
-  FileMode := 0;
-  Reset(f, 1);
-  FileMode := 2;
-  BlockRead(f, Head.PointQty, 44);
+  ms := TMemoryStream.Create;
+  try
+    ms.LoadFromFile(aFilename);
 
-  SetLength(Vertices, Head.PointQty);
-  SetLength(Faces, Head.PolyQty);
-  SetLength(Normals, Head.PolyQty);
+    ms.Read(Head, 44);
 
-  for I := 0 to Head.PointQty - 1 do
-    BlockRead(f, Vertices[I].X, 12);
+    SetLength(Vertices, Head.VerticeCount);
+    SetLength(Faces, Head.PolyCount);
+    SetLength(Normals, Head.PolyCount);
 
-  BlockRead(f, Faces[0], 6 * Head.PolyQty);
-
-  for I := 0 to Head.PolyQty - 1 do
-    BlockRead(f, Normals[I].X, 12);
-
-  CloseFile(f);
+    ms.Read(Vertices[0], SizeOf(Vertices[0]) * Head.VerticeCount);
+    ms.Read(Faces[0], SizeOf(Faces[0]) * Head.PolyCount);
+    ms.Read(Normals[0], SizeOf(Normals[0]) * Head.PolyCount);
+  finally
+    ms.Free;
+  end;
 
   Result := True;
 end;
@@ -72,23 +70,20 @@ end;
 
 procedure TModelCOB.SaveCOB(const aFilename: string);
 var
-  I: Integer;
-  f: file;
+  ms: TMemoryStream;
 begin
-  AssignFile(f, aFilename);
-  Rewrite(f, 1);
-  BlockWrite(f, Head.PointQty, 44);
+  ms := TMemoryStream.Create;
+  try
+    ms.Write(Head, 44);
 
-  for I := 0 to Head.PointQty - 1 do
-    BlockWrite(f, Vertices[I].X, 12);
+    ms.Write(Vertices[0], SizeOf(Vertices[0]) * Head.VerticeCount);
+    ms.Write(Faces[0], SizeOf(Faces[0]) * Head.PolyCount);
+    ms.Write(Normals[0], SizeOf(Normals[0]) * Head.PolyCount);
 
-  for I := 0 to Head.PolyQty - 1 do
-    BlockWrite(f, Faces[I, 1], 6);
-
-  for I := 0 to Head.PolyQty - 1 do
-    BlockWrite(f, Normals[I].X, 12);
-
-  CloseFile(f);
+    ms.SaveToFile(aFilename);
+  finally
+    ms.Free;
+  end;
 end;
 
 
@@ -105,8 +100,8 @@ begin
     lay := lwm.LayerAdd;
 
     // Vertices
-    lay.SetVerticeCount(Head.PointQty);
-    for I := 0 to Head.PointQty - 1 do
+    lay.SetVerticeCount(Head.VerticeCount);
+    for I := 0 to Head.VerticeCount - 1 do
     begin
       lay.Vertices[I].X := Vertices[I].X * EXPORT_SCALE;
       lay.Vertices[I].Y := Vertices[I].Y * EXPORT_SCALE;
@@ -114,8 +109,8 @@ begin
     end;
 
     // Polys
-    lay.SetPolyCount(Head.PolyQty);
-    for I := 0 to Head.PolyQty - 1 do
+    lay.SetPolyCount(Head.PolyCount);
+    for I := 0 to Head.PolyCount - 1 do
     begin
       lay.Polys[I].VertCount := 3;
       SetLength(lay.Polys[I].Indices, 3);
@@ -141,7 +136,7 @@ var
   I: Integer;
 begin
   // Normal to every polygon
-  for I := 0 to Head.PolyQty - 1 do
+  for I := 0 to Head.PolyCount - 1 do
   begin
     Normals[I] := VectorCrossProduct(@Vertices[Faces[I,1]], @Vertices[Faces[I,2]], @Vertices[Faces[I,3]]);
     Normals[I] := Normals[I].GetNormalize;
@@ -151,7 +146,7 @@ begin
   Head.Xmin := 0; Head.Xmax := 0;
   Head.Ymin := 0; Head.Ymax := 0;
   Head.Zmin := 0; Head.Zmax := 0;
-  for I := 0 to Head.PointQty - 1 do
+  for I := 0 to Head.VerticeCount - 1 do
   begin
     Head.Xmax := Max(Head.Xmax, Vertices[I].X);
     Head.Ymax := Max(Head.Ymax, Vertices[I].Y);
@@ -185,12 +180,12 @@ begin
     if (lay.VerticeCount > 255) or (lay.PolyCount > 255) then
       raise Exception.Create('Can''t import more than 255 vertices to COB');
 
-    Head.PointQty := lay.VerticeCount;
-    Head.PolyQty := lay.PolyCount;
+    Head.VerticeCount := lay.VerticeCount;
+    Head.PolyCount := lay.PolyCount;
 
-    SetLength(Vertices, Head.PointQty);
-    SetLength(Faces, Head.PolyQty);
-    SetLength(Normals, Head.PolyQty);
+    SetLength(Vertices, Head.VerticeCount);
+    SetLength(Faces, Head.PolyCount);
+    SetLength(Normals, Head.PolyCount);
 
     for I := 0 to lay.VerticeCount - 1 do
       Vertices[I] := lay.Vertices[I] * 10;

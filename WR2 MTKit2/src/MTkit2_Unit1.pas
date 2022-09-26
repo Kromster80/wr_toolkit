@@ -796,7 +796,7 @@ begin
                   fUIRefresh := True;
                   oldID1 := LBCOBPoints.ItemIndex;
                   LBCOBPoints.Clear;
-                  for ii := 0 to fCOB.Head.PointQty - 1 do
+                  for ii := 0 to fCOB.Head.PolyCount - 1 do
                     LBCOBPoints.Items.Add(IntToStr(ii + 1));
                   LBCOBPoints.ItemIndex := EnsureRange(oldID1, 0, LBCOBPoints.Count - 1);
                   fUIRefresh := False;
@@ -2170,7 +2170,7 @@ end;
 procedure TForm1.btnCOBVerticeCopyClick(Sender: TObject);
 begin
   fCOBCopyItem := LBCOBPoints.ItemIndex;
-  btnCOBVerticePaste.Enabled := InRange(fCOBCopyItem, 0, fCOB.Head.PointQty - 1);
+  btnCOBVerticePaste.Enabled := InRange(fCOBCopyItem, 0, fCOB.Head.PolyCount - 1);
 end;
 
 
@@ -2181,7 +2181,7 @@ begin
   idx := LBCOBPoints.ItemIndex;
   if idx = -1 then Exit;
 
-  if fCOBCopyItem <> EnsureRange(fCOBCopyItem, 0, fCOB.Head.PointQty - 1) then
+  if fCOBCopyItem <> EnsureRange(fCOBCopyItem, 0, fCOB.Head.PolyCount - 1) then
   begin
     btnCOBVerticePaste.Enabled := False;
     Exit;
@@ -3063,11 +3063,16 @@ procedure TForm1.ImportLWOCOB1Click(Sender: TObject);
 begin
   if not RunOpenDialog(odOpen, '', fOpenedFolder, 'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
 
-  fCOB.ImportLWO2COB(odOpen.Filename);
+  try
+    fCOB.ImportLWO2COB(odOpen.Filename);
 
-  ShowUpClick(cuCOB);
-  SendDataToUI(uiCOB);
-  SetRenderObject([roCOB]);
+    ShowUpClick(cuCOB);
+    SendDataToUI(uiCOB);
+    SetRenderObject([roCOB]);
+  except
+    on E: Exception do
+      MessageBox(Handle, PChar(E.Message), 'Error', MB_OK or MB_ICONERROR);
+  end;
 end;
 
 
