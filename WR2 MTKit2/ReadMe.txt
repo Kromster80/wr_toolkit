@@ -29,6 +29,7 @@ MTKit2 shows you preview of a car, WR2 will display it bit differently.
 AFC11/FVR support is limited.
 
 Version History:
+                    Fixed scroll to zoom the model after using new menus (they "caught" the scroll events)
 2.4.3   2022.09.28  New load/save/import/export menus
 2.4.2   2022.09.25  Replaced old clunky LWO import/export with a proper one (taken from KP) for LWO<->COB as a proof of concept
                     Fixed error in MOX>LWO export from 2.3.8

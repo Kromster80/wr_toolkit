@@ -266,7 +266,6 @@ object Form1: TForm1
     OnChange = PageControl1Change
     object tsMaterials: TTabSheet
       Caption = 'MTL'
-      ExplicitHeight = 551
       object Label5: TLabel
         Left = 52
         Top = 284
@@ -856,7 +855,6 @@ object Form1: TForm1
     object tsParts: TTabSheet
       Caption = 'Parts'
       ImageIndex = 1
-      ExplicitHeight = 551
       DesignSize = (
         234
         527)
@@ -889,7 +887,6 @@ object Form1: TForm1
         OnChange = tvPartsChange
         OnDragDrop = tvPartsDragDrop
         OnDragOver = tvPartsDragOver
-        ExplicitHeight = 316
       end
       object RGDetailType: TRadioGroup
         Left = 134
@@ -1136,6 +1133,10 @@ object Form1: TForm1
         object Behaviour: TTabSheet
           Caption = 'Behaviour'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object Label39: TLabel
             Left = 67
             Top = 150
@@ -1406,7 +1407,6 @@ object Form1: TForm1
     object tsBlinkers: TTabSheet
       Caption = 'Lights'
       ImageIndex = 2
-      ExplicitHeight = 551
       DesignSize = (
         234
         527)
@@ -1666,7 +1666,6 @@ object Form1: TForm1
         TabOrder = 0
         OnClick = lbBlinkersClick
         OnDrawItem = lbBlinkersDrawItem
-        ExplicitHeight = 300
       end
       object rgBlinkerType: TRadioGroup
         Left = 0
@@ -1888,7 +1887,6 @@ object Form1: TForm1
     object tsCOB: TTabSheet
       Caption = 'COB'
       ImageIndex = 4
-      ExplicitHeight = 551
       object btnCOBVerticeCopy: TSpeedButton
         Left = 182
         Top = 124
@@ -2238,7 +2236,6 @@ object Form1: TForm1
     object tsCPO: TTabSheet
       Caption = 'CPO'
       ImageIndex = 6
-      ExplicitHeight = 551
       object Label53: TLabel
         Left = 196
         Top = 123
@@ -2613,7 +2610,6 @@ object Form1: TForm1
     object tsExtra: TTabSheet
       Caption = 'Extra'
       ImageIndex = 3
-      ExplicitHeight = 551
       DesignSize = (
         234
         527)
@@ -2869,7 +2865,6 @@ object Form1: TForm1
     object tsBrowse: TTabSheet
       Caption = 'Browse'
       ImageIndex = 5
-      ExplicitHeight = 551
       DesignSize = (
         234
         527)
@@ -2962,7 +2957,6 @@ object Form1: TForm1
         Text = '<<<LEER>>>'
         Width = 50
       end>
-    ExplicitTop = 603
   end
   object Button1: TButton
     Left = 250
@@ -3000,6 +2994,7 @@ object Form1: TForm1
     ParentDoubleBuffered = False
     TabOrder = 8
     OnButtonClicked = bgLoadButtonClicked
+    OnMouseWheel = FormMouseWheel
   end
   object bgImport: TButtonGroup
     Left = 160
@@ -3029,6 +3024,7 @@ object Form1: TForm1
     ParentDoubleBuffered = False
     TabOrder = 9
     OnButtonClicked = bgImportButtonClicked
+    OnMouseWheel = FormMouseWheel
   end
   object bgSaveAs: TButtonGroup
     Left = 80
@@ -3055,6 +3051,7 @@ object Form1: TForm1
     ParentDoubleBuffered = False
     TabOrder = 10
     OnButtonClicked = bgSaveAsButtonClicked
+    OnMouseWheel = FormMouseWheel
   end
   object bgExport: TButtonGroup
     Left = 320
@@ -3075,6 +3072,7 @@ object Form1: TForm1
     ParentDoubleBuffered = False
     TabOrder = 11
     OnButtonClicked = bgExportButtonClicked
+    OnMouseWheel = FormMouseWheel
   end
   object odOpen: TOpenDialog
     InitialDir = '.'
