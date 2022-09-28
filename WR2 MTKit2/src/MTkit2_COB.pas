@@ -178,7 +178,7 @@ begin
     lay := lwm.Layers[0];
 
     if (lay.VerticeCount > 255) or (lay.PolyCount > 255) then
-      raise Exception.Create('Can''t import more than 255 vertices to COB');
+      raise Exception.Create('Can''t import more than 255 vertices or polys to COB');
 
     Head.VerticeCount := lay.VerticeCount;
     Head.PolyCount := lay.PolyCount;
