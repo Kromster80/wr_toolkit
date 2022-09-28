@@ -7,10 +7,26 @@ uses
 
   dglOpenGL, FloatSpinEdit, KromOGLUtils, KromUtils, TGATexture, PTXTexture,
 
-  MTkit2_Defaults, MTkit2_Render, MTkit2_RenderLegacy, MTkit2_IO, MTkit2_COB, MTkit2_CPO, MTkit2_MOX, MTkit2_Tree, MTkit2_Vertex;
+  MTkit2_Defaults, MTkit2_Render, MTkit2_RenderLegacy, MTkit2_IO, MTkit2_COB, MTkit2_CPO, MTkit2_MOX, MTkit2_Tree, MTkit2_Vertex,
+  Vcl.ButtonGroup, Vcl.CategoryButtons;
 
 type
   TInputMode = (imRelative, imAbsolute);
+
+//todo: Split into own unit
+  TButtonGroup = class(Vcl.ButtonGroup.TButtonGroup)
+  private
+    fButtonEnabled: array of Boolean;
+    procedure SetButtonEnabled(aIndex: Integer; aValue: Boolean);
+    function GetButtonEnabled(aIndex: Integer): Boolean;
+  protected
+    procedure DrawButton(Index: Integer; Canvas: TCanvas; Rect: TRect; State: TButtonDrawState); override;
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure Resize; override;
+  public
+    property ButtonEnabled[aIndex: Integer]: Boolean read GetButtonEnabled write SetButtonEnabled;
+  end;
+
 
   TForm1 = class(TForm)
     odOpen: TOpenDialog;
@@ -18,7 +34,7 @@ type
     MainMenu1: TMainMenu;
     File1: TMenuItem;
     About1: TMenuItem;
-    LoadMOX1: TMenuItem;
+    mnuLoadMOX: TMenuItem;
     PageControl1: TPageControl;
     tsMaterials: TTabSheet;
     tsParts: TTabSheet;
@@ -29,7 +45,7 @@ type
     Label6: TLabel; Label8: TLabel; Label9: TLabel; Label10: TLabel;
     Label11: TLabel; Label12: TLabel; Label13: TLabel; Label14: TLabel; Label17: TLabel; Label18: TLabel; Label19: TLabel; Label20: TLabel;
     Label21: TLabel; Label22: TLabel; Label24: TLabel; Label25: TLabel;
-    Label26: TLabel; Label27: TLabel; Label28: TLabel; Label29: TLabel; Label30: TLabel; Label32: TLabel; Label33: TLabel; Label35: TLabel;
+    Label26: TLabel; Label27: TLabel; Label28: TLabel; Label29: TLabel; Label30: TLabel; Label32: TLabel; Label33: TLabel;
     Label36: TLabel; Label37: TLabel; Label38: TLabel; Label39: TLabel;
     edVerticeCount: TEdit;
     edPolyCount: TEdit;
@@ -53,11 +69,10 @@ type
     fsBlinkerY: TFloatSpinEdit;
     fsBlinkerZ: TFloatSpinEdit;
     MatName: TEdit;
-    SaveMOX1: TMenuItem;
+    mnuSaveMOX: TMenuItem;
     sdSave: TSaveDialog;
-    ImportLWO1: TMenuItem;
-    Shape1: TShape;
-    SaveMTL1: TMenuItem;
+    mnuImportLWO1: TMenuItem;
+    mnuSaveMTL: TMenuItem;
     edMaterialCount: TEdit;
     Label41: TLabel;
     TexBrowse: TButton;
@@ -82,14 +97,13 @@ type
     btnBlinkersSave: TButton;
     btnBlinkerCopy: TSpeedButton;
     btnBlinkerPaste: TSpeedButton;
-    Shape2: TShape;
-    LoadCOB1: TMenuItem;
-    SaveCOB1: TMenuItem;
+    mnuLoadCOB: TMenuItem;
+    mnuSaveCOB: TMenuItem;
     RGDetailType: TRadioGroup;
     EDetailName: TEdit;
     CBActDam: TCheckBox;
     CBMonoColor: TCheckBox;
-    ImportLWOCOB1: TMenuItem;
+    mnuImportLWOCOB1: TMenuItem;
     tsCOB: TTabSheet;
     cbCOBShowIds: TCheckBox;
     LBCOBPoints: TListBox;
@@ -104,9 +118,8 @@ type
     Label60: TLabel;
     Bevel6: TBevel;
     Bevel13: TBevel;
-    ExportMOX1: TMenuItem;
-    ExportCOB1: TMenuItem;
-    Label61: TLabel;
+    mnuExportMOX1: TMenuItem;
+    mnuExportCOB1: TMenuItem;
     MatCopy: TSpeedButton;
     MatPaste: TSpeedButton;
     SpeedButton1: TSpeedButton;
@@ -145,10 +158,9 @@ type
     Bevel17: TBevel;
     Label43: TLabel;
     Bevel18: TBevel;
-    Panel8: TPanel;
     Panel10: TPanel;
     TexReload2: TSpeedButton;
-    ImportLWO2: TMenuItem;
+    mnuImportLWO2: TMenuItem;
     Label63: TLabel;
     SpeedButton3: TSpeedButton;
     COB_X: TFloatSpinEdit;
@@ -175,7 +187,7 @@ type
     Label74: TLabel;
     Label76: TLabel;
     rgBlinkerPreview: TRadioGroup;
-    LoadCPO1: TMenuItem;
+    mnuLoadCPO: TMenuItem;
     Label23: TLabel;
     tsBrowse: TTabSheet;
     FileListBox1: TFileListBox;
@@ -235,7 +247,7 @@ type
     Label85: TLabel;
     Bevel21: TBevel;
     ReloadShadersCode: TSpeedButton;
-    SaveCPO1: TMenuItem;
+    mnuSaveCPO: TMenuItem;
     TBDirt: TTrackBar;
     ResetMTLOrder: TMenuItem;
     CBVinyl: TComboBox;
@@ -245,8 +257,8 @@ type
     btnShowColli: TSpeedButton;
     btnShowWireframe: TSpeedButton;
     Import1: TMenuItem;
-    ImportOBJMOX1: TMenuItem;
-    LoadTREE1: TMenuItem;
+    mnuImportOBJMOX1: TMenuItem;
+    mnuLoadTREE: TMenuItem;
     Load1: TMenuItem;
     Save2: TMenuItem;
     Export1: TMenuItem;
@@ -268,7 +280,7 @@ type
     ShapeWF: TShape;
     Label15: TLabel;
     Button1: TButton;
-    Import3DSMOX1: TMenuItem;
+    mnuImport3DSMOX1: TMenuItem;
     N4: TMenuItem;
     btnCPOImport: TButton;
     btnCPOExport: TButton;
@@ -279,6 +291,14 @@ type
     cbAskOnClose: TCheckBox;
     Dev1: TMenuItem;
     ScanMOXheaders1: TMenuItem;
+    bgLoad: TButtonGroup;
+    Label2: TLabel;
+    bgImport: TButtonGroup;
+    Label34: TLabel;
+    bgSaveAs: TButtonGroup;
+    Label49: TLabel;
+    Label35: TLabel;
+    bgExport: TButtonGroup;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -298,9 +318,9 @@ type
     procedure MatTexReloadClick(Sender: TObject);
     procedure CBChromeClick(Sender: TObject);
     procedure PartTypeChange(Sender: TObject);
-    procedure ImportLWO1Click(Sender: TObject);
+    procedure mnuImportLWO1Click(Sender: TObject);
     procedure UpdateOpenedFileInfo(const aFilename: string);
-    procedure SaveMTL1Click(Sender: TObject);
+    procedure mnuSaveMTLClick(Sender: TObject);
     procedure MatTexBrowseClick(Sender: TObject);
     procedure BlinkPositionChange(Sender: TObject);
     procedure btnBlinkerAddClick(Sender: TObject);
@@ -311,17 +331,17 @@ type
     procedure btnBlinkersLoadClick(Sender: TObject);
     procedure About1Click(Sender: TObject);
     procedure LoadCOBClick(Sender: TObject);
-    procedure SaveCOB1Click(Sender: TObject);
+    procedure mnuSaveCOBClick(Sender: TObject);
     procedure tvPartsDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
     procedure tvPartsDragDrop(Sender, Source: TObject; X, Y: Integer);
     procedure MatMonoColorClick(Sender: TObject);
-    procedure ImportLWOCOB1Click(Sender: TObject);
+    procedure mnuImportLWOCOB1Click(Sender: TObject);
     procedure btnCOBVerticeCopyClick(Sender: TObject);
     procedure btnCOBVerticePasteClick(Sender: TObject);
     procedure LBCOBPointsClick(Sender: TObject);
     procedure seCOBXChange(Sender: TObject);
-    procedure ExportMOX1Click(Sender: TObject);
-    procedure ExportCOB1Click(Sender: TObject);
+    procedure mnuExportMOX1Click(Sender: TObject);
+    procedure mnuExportCOB1Click(Sender: TObject);
     procedure MatCopyClick(Sender: TObject);
     procedure MatPasteClick(Sender: TObject);
     procedure RGPivotClick(Sender: TObject);
@@ -333,7 +353,7 @@ type
     procedure CBActDamClick(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure SB_RenderOpts(Sender: TObject);
-    procedure ImportLWO2Click(Sender: TObject);
+    procedure mnuImportLWO2Click(Sender: TObject);
     procedure ResetMTLOrderClick(Sender: TObject);
     procedure SpeedButton3Click(Sender: TObject);
     procedure btnCOBRecomputeClick(Sender: TObject);
@@ -354,18 +374,16 @@ type
     procedure btnCPOAddClick(Sender: TObject);
     procedure btnCPORemClick(Sender: TObject);
     procedure ReloadShadersCodeClick(Sender: TObject);
-    procedure SaveCPO1Click(Sender: TObject);
+    procedure mnuSaveCPOClick(Sender: TObject);
     procedure CBShowGridClick(Sender: TObject);
     procedure CBShowPartClick(Sender: TObject);
     procedure FlapPartsChange(Sender: TObject);
     procedure RebuildImpNormals;
-    procedure Import3DSMOX1Click(Sender: TObject);
-    procedure ImportOBJMOX1Click(Sender: TObject);
-    procedure LoadTREE1Click(Sender: TObject);
+    procedure mnuImport3DSMOX1Click(Sender: TObject);
+    procedure mnuImportOBJMOX1Click(Sender: TObject);
+    procedure mnuLoadTREEClick(Sender: TObject);
     procedure Exit1Click(Sender: TObject);
     procedure SaveMOXClick(Sender: TObject);
-    procedure ClearUpClick(aClearup: TClearUp);
-    procedure ShowUpClick(aClearup: TClearUp);
     procedure CBVinylChange(Sender: TObject);
     procedure FormMouseWheel(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
     procedure Button1Click(Sender: TObject);
@@ -378,6 +396,10 @@ type
     procedure ScanMOXheaders1Click(Sender: TObject);
     procedure shpBlinkerColorMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure ShapeBGMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure bgLoadButtonClicked(Sender: TObject; Index: Integer);
+    procedure bgSaveAsButtonClicked(Sender: TObject; Index: Integer);
+    procedure bgImportButtonClicked(Sender: TObject; Index: Integer);
+    procedure bgExportButtonClicked(Sender: TObject; Index: Integer);
   private
     h_DC: HDC;
     h_RC: HGLRC;
@@ -423,6 +445,8 @@ type
     procedure DevScanMOXHeaders;
     procedure RebuildPartsTree;
     procedure ExchangePartsOrdering;
+    procedure ActionsDisable(aActions: TEditingActions);
+    procedure ActionsEnable(aActions: TEditingActions);
   end;
 
 var
@@ -508,10 +532,154 @@ var
 
 implementation
 uses
-  ColorPicker2, UnitRawInputHeaders,
+  GraphUtil, ColorPicker2, UnitRawInputHeaders,
   MTKit2_Textures;
 
 {$R *.dfm}
+
+const
+  BG_LOAD_MOXMTL = 0;
+  BG_LOAD_COB    = 1;
+  BG_LOAD_CPO    = 2;
+  BG_LOAD_TREE   = 3;
+  BG_SAVE_AS_MOX = 0;
+  BG_SAVE_AS_MTL = 1;
+  BG_SAVE_AS_COB = 2;
+  BG_SAVE_AS_CPO = 3;
+  BG_IMPORT_3DS_MOX = 0;
+  BG_IMPORT_OBJ_MOX = 1;
+  BG_IMPORT_LWO_MOX = 2;
+  BG_IMPORT_LWO_MOX2 = 3;
+  BG_IMPORT_LWO_COB = 4;
+  BG_EXPORT_MOX_LWO = 0;
+  BG_EXPORT_COB_LWO = 1;
+
+
+{ TButtonGroup }
+function TButtonGroup.GetButtonEnabled(aIndex: Integer): Boolean;
+begin
+  Result := fButtonEnabled[aIndex];
+end;
+
+procedure TButtonGroup.SetButtonEnabled(aIndex: Integer; aValue: Boolean);
+begin
+  fButtonEnabled[aIndex] := aValue;
+  Invalidate;
+end;
+
+procedure TButtonGroup.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  btnIdx: Integer;
+begin
+  // Ignore mouse events for disabled buttons
+  btnIdx := IndexOfButtonAt(X, Y);
+  if (btnIdx <> -1) and ButtonEnabled[btnIdx] then
+    inherited;
+end;
+
+procedure TButtonGroup.Resize;
+var
+  I: Integer;
+  oldCount: Integer;
+begin
+  // Sync enabled buttons count every so often
+  oldCount := Length(fButtonEnabled);
+  if Items.Count <> oldCount then
+  begin
+    SetLength(fButtonEnabled, Items.Count);
+    for I := oldCount to High(fButtonEnabled) do
+      fButtonEnabled[I] := True;
+  end;
+end;
+
+procedure TButtonGroup.DrawButton(Index: Integer; Canvas: TCanvas; Rect: TRect; State: TButtonDrawState);
+var
+  TextLeft, TextTop: Integer;
+  RectHeight: Integer;
+  ImgTop: Integer;
+  TextOffset: Integer;
+  ButtonItem: TGrpButtonItem;
+  FillColor: TColor;
+  EdgeColor: TColor;
+  TextRect: TRect;
+  OrgRect: TRect;
+  Text: string;
+begin
+  begin
+    OrgRect := Rect;
+    Canvas.Font := Font;
+
+    begin
+      if not ButtonEnabled[Index] then
+      begin
+        // Grey on grey
+        Canvas.Brush.Color := GetShadowColor(clBtnFace, -15);
+        Canvas.Font.Color := $B0B0B0;
+      end else
+      if bdsSelected in State then
+      begin
+        Canvas.Brush.Color := GetShadowColor(clBtnFace, -25);
+        Canvas.Font.Color := clBtnText;
+      end
+      else if bdsDown in State then
+      begin
+        Canvas.Brush.Color := clBtnShadow;
+        Canvas.Font.Color := clBtnFace;
+      end
+      else
+        Canvas.Brush.Color := clBtnFace;
+    end;
+
+    FillColor := Canvas.Brush.Color;
+    EdgeColor := GetShadowColor(FillColor, -25);
+
+    { Back }
+    begin
+      InflateRect(Rect, -2, -1);
+      Canvas.FillRect(Rect);
+    end;
+
+    if ButtonEnabled[Index] then
+    if (bdsHot in State) and not (bdsDown in State) then
+      EdgeColor := GetShadowColor(EdgeColor, -50);
+
+    { Draw the edge outline }
+    begin
+      Canvas.Brush.Color := EdgeColor;
+      Canvas.FrameRect(Rect);
+      Canvas.Brush.Color := FillColor;
+    end;
+
+    { Compute the text location }
+    TextLeft := Rect.Left + 4;
+    RectHeight := Rect.Bottom - Rect.Top;
+    TextTop := Rect.Top + (RectHeight - Canvas.TextHeight('Wg')) div 2; { Do not localize }
+    if TextTop < Rect.Top then
+      TextTop := Rect.Top;
+    if bdsDown in State then
+    begin
+      Inc(TextTop);
+      Inc(TextLeft);
+    end;
+
+    ButtonItem := Items[Index];
+    TextOffset := 0;
+
+    if gboShowCaptions in ButtonOptions then
+    begin
+      { Avoid clipping the image }
+      Inc(TextLeft, TextOffset);
+      TextRect.Left := TextLeft;
+      TextRect.Right := Rect.Right - 1;
+      TextRect.Top := TextTop;
+      TextRect.Bottom := Rect.Bottom -1;
+      Text := ButtonItem.Caption;
+      Canvas.TextRect(TextRect, Text, [tfEndEllipsis]);
+    end;
+  end;
+  Canvas.Brush.Color := Color; { Restore the original color }
+end;
+
 
 procedure RegisterListener;
 const
@@ -567,7 +735,7 @@ begin
   fCOB := TModelCOB.Create;
   fTree := TModelTree.Create;
 
-  ClearUpClick(cuALL);
+  ActionsDisable(cuALL);
 
   Dev1.Visible := FileExists('krom.dev');
 
@@ -740,6 +908,117 @@ end;
 
 
 procedure TForm1.Button4Click(Sender: TObject); begin {Placeholder} end;
+
+
+procedure TForm1.bgLoadButtonClicked(Sender: TObject; Index: Integer);
+begin
+  case Index of
+    BG_LOAD_MOXMTL: if RunOpenDialog(odOpen, '', fOpenedFolder, 'World Racing 2 object files (*.mox)|*.mox') then
+                      LoadFile(odOpen.FileName, lmLoadAndShow);
+    BG_LOAD_COB:    if RunOpenDialog(odOpen, '', fOpenedFolder, 'World Racing 2 collision files (*.cob)|*.cob') then
+                      LoadFile(odOpen.FileName, lmLoadAndShow);
+    BG_LOAD_CPO:    if RunOpenDialog(odOpen, '', fOpenedFolder, 'Alarm for Cobra 11 Nitro collision files (*.cpo)|*.cpo') then
+                      LoadFile(odOpen.FileName, lmLoadAndShow);
+    BG_LOAD_TREE:   if RunOpenDialog(odOpen, '', fOpenedFolder, 'World Racing 2 tree files (*.tree)|*.tree') then
+                      LoadFile(odOpen.FileName, lmLoadAndShow);
+  end;
+end;
+
+
+procedure TForm1.bgSaveAsButtonClicked(Sender: TObject; Index: Integer);
+begin
+  case Index of
+    BG_SAVE_AS_MOX: if RunSaveDialog(sdSave, fOpenedFileMask + '.mox', '', 'World Racing 2 object files (*.mox)|*.mox', 'mox') then
+                      SaveMOX(sdSave.FileName);
+    BG_SAVE_AS_MTL: if RunSaveDialog(sdSave, fOpenedFileMask + '.mtl', '', 'World Racing Material files (*.mtl)|*.mtl', 'mtl') then
+                      SaveMTL(sdSave.FileName);
+    BG_SAVE_AS_COB: if RunSaveDialog(sdSave, fOpenedFileMask + '_colli.cob', '', 'World Racing 2 collision files (*.cob)|*.cob', 'cob') then
+                      begin
+                        fCOB.RebuildBounds;
+                        SendDataToUI(uiCOB);
+                        fCOB.SaveCOB(sdSave.FileName);
+                      end;
+    BG_SAVE_AS_CPO: if RunSaveDialog(sdSave, fOpenedFileMask + '.cpo', '', 'World Racing 2 collision files (*.cpo)|*.cpo', 'cpo') then
+                      SaveCPO(sdSave.FileName);
+  end;
+end;
+
+
+procedure TForm1.bgImportButtonClicked(Sender: TObject; Index: Integer);
+begin
+  try
+    case Index of
+      BG_IMPORT_3DS_MOX:  if RunOpenDialog(odOpen, '', fOpenedFolder, '3DMax object files (*.3ds)|*.3ds') then
+                          begin
+                            Load3DS(odOpen.FileName);
+                            RebuildImpNormals;
+                            ConverseImp_MOX;
+                            UpdateOpenedFileInfo(odOpen.FileName);
+                          end;
+      BG_IMPORT_OBJ_MOX:  if RunOpenDialog(odOpen,'',fOpenedFolder,'OBJ object files (*.obj)|*.obj') then
+                          begin
+                            LoadOBJ(odOpen.FileName);
+                            ConverseImp_MOX;
+                            UpdateOpenedFileInfo(odOpen.FileName)
+                          end;
+      BG_IMPORT_LWO_MOX:  if RunOpenDialog(odOpen,'',fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then
+                          begin
+                            LoadLWO(odOpen.FileName);
+                            RebuildImpNormals;
+                            ConverseImp_MOX;
+                            UpdateOpenedFileInfo(odOpen.FileName);
+                          end;
+      BG_IMPORT_LWO_MOX2: begin
+                            bgImportButtonClicked(nil, BG_IMPORT_LWO_MOX);
+
+                            LoadMTL(fOpenedFileMask+'.mtl');
+                            LoadTextures;
+                            ScanVinyls(fOpenedFolder);
+                            ActionsEnable(cuMTL);
+
+                            LoadPSF(fOpenedFileMask+'.psf');
+                            LoadPBF(fOpenedFileMask+'.pbf');
+                            ExchangePartsOrdering;
+                            RebuildPartsTree;
+                            LoadBlinkers(fOpenedFileMask+'.lsf');
+
+                            SendDataToUI(uiBlinkers);
+                            btnBlinkerPaste.Enabled := False;
+                          end;
+      BG_IMPORT_LWO_COB:  if RunOpenDialog(odOpen, '', fOpenedFolder, 'Lightwave 3D files (*.lwo)|*.lwo') then
+                          begin
+                            fCOB.ImportLWO(odOpen.Filename);
+                            ActionsEnable(cuCOB);
+                            SendDataToUI(uiCOB);
+                            SetRenderObject([roCOB]);
+                          end;
+    end;
+  except
+    on E: Exception do
+      MessageBox(Handle, PChar(E.Message), 'Error', MB_OK or MB_ICONERROR);
+  end;
+end;
+
+procedure TForm1.bgExportButtonClicked(Sender: TObject; Index: Integer);
+var
+  doSpread: Boolean;
+begin
+  case Index of
+    BG_EXPORT_MOX_LWO:  if RunSaveDialog(sdSave, fOpenedFileMask+'.lwo','','Lightwave 3D files (*.lwo)|*.lwo','lwo') then
+                        begin
+                          meLog.Lines.Add('Writing MOX>LWO file');
+                          doSpread := MessageBox(Handle, 'Do you want to spread parts over X axis?', 'Question', MB_YESNO or MB_ICONQUESTION) = ID_YES;
+                          SaveMOX2LWO(sdSave.FileName, ColID, doSpread);
+                          meLog.Lines.Add('MOX>LWO Save Complete');
+                        end;
+    BG_EXPORT_COB_LWO:  if RunSaveDialog(sdSave, fOpenedFileMask + '_colli.lwo', '', 'Lightwave 3D files (*.lwo)|*.lwo', 'lwo') then
+                        begin
+                          meLog.Lines.Add('Writing COB>LWO file');
+                          fCOB.ExportLWO(sdSave.FileName);
+                          meLog.Lines.Add('COB>LWO Save Complete');
+                        end;
+  end;
+end;
 
 
 procedure TForm1.SendDataToUI(aSection: TUIDataSection);
@@ -1330,10 +1609,9 @@ const
   MOX_FORMAT_HEADER: AnsiString = '!XOM'#0#0#2#2;
 var
   s: AnsiString;
-  h,i,j,k,m:Integer;
-  ii,kk:Integer;
+  i,j,k,m:Integer;
+  ii:Integer;
   f:file;
-  vv: array [1..65280,1..3]of longWord;
   tx,ty,tz: array [1..256]of real;
   Lev:Integer;
   lazyqty: array of Integer;
@@ -1540,7 +1818,7 @@ var
   MakeDefaultPart: Boolean;
   sprite: array [1..MAX_MOX_VTX]of Boolean;
 begin
-  Shape2.Width:=32;
+  //Shape2.Width:=32;
 
   FillChar(MOX,SizeOf(MOX),#0);
 
@@ -1629,9 +1907,9 @@ begin
     begin
       if i mod 1000 = 0 then
       begin
-        Shape2.Width:=round((i/Imp.PolyCount)*100);
-        Label35.Caption:=IntToStr(round((i/Imp.PolyCount)*100))+' %';
-        Label35.Repaint;
+        //Shape2.Width:=round((i/Imp.PolyCount)*100);
+//        Label35.Caption:=IntToStr(round((i/Imp.PolyCount)*100))+' %';
+//        Label35.Repaint;
       end;
 
       for h:=1 to 3 do  //point-by-point
@@ -1679,7 +1957,7 @@ begin
         end;
       end;
     end;
-  Shape2.Width:=100;
+//  Shape2.Width:=100;
 
   h:=1;
   for m:=1 to MOX.Header.PartCount do
@@ -1836,14 +2114,15 @@ begin
 
   CompileLoadedMOX;
 
-  Label35.Caption := Floattostr(round((GetTickCount-OldTimeLWO)/100)/10)+' s';
+//  Label35.Caption := Floattostr(round((GetTickCount-OldTimeLWO)/100)/10)+' s';
 
-  ShowUpClick(cuMOX);
-  ShowUpClick(cuMTL);
+  ActionsEnable(cuMOX);
+  ActionsEnable(cuMTL);
   SetRenderObject([roMOX]);
   SetActivePage(apMTL);
 
-  SaveMOX1.Enabled := True;
+  mnuSaveMOX.Enabled := True;
+  bgSaveAs.ButtonEnabled[BG_SAVE_AS_MOX] := True;
 
   IsLightwave2MOX := True;
   PivotSetup.TabVisible := True;
@@ -2459,7 +2738,7 @@ begin
   end;
 
   UpdateOpenedFileInfo(aFilename);
-  ClearUpClick(cuALL);
+  ActionsDisable(cuALL);
 
   if SameText(ExtractFileExt(aFilename), '.mox') then
   begin
@@ -2479,34 +2758,36 @@ begin
 
     meLog.Lines.Add('MOX file closed');
 
-    ShowUpClick(cuMOX);
+    ActionsEnable(cuMOX);
 
     CompileLoadedMOX;
 
-    SaveMOX1.Enabled := True;
-    ExportMOX1.Enabled := True;
+    mnuSaveMOX.Enabled := True;
+    bgSaveAs.ButtonEnabled[BG_SAVE_AS_MOX] := True;
+    mnuExportMOX1.Enabled := True;
+    bgExport.ButtonEnabled[BG_EXPORT_MOX_LWO] := True;
 
     StatusBar1.Panels[0].Text := MOX.MOXFormatInt + ' - ' + MOX.MOXFormatStr;
 
-    ShowUpClick(cuMOX);
+    ActionsEnable(cuMOX);
     LoadMTL(ChangeFileExt(aFilename, '.mtl'));
     LoadTextures;
     ScanVinyls(fOpenedFolder);
-    ShowUpClick(cuMTL);
+    ActionsEnable(cuMTL);
     SetRenderObject([roMOX]);
     if fCOB.LoadCOB(ChangeFileExt(aFilename, '_colli.cob')) then
     begin
-      ShowUpClick(cuCOB);
+      ActionsEnable(cuCOB);
       SetRenderObject([roMOX, roCOB]);
     end;
     if LoadCPO(ChangeFileExt(aFilename, '_colli.cpo')) then
     begin
-      ShowUpClick(cuCPO);
+      ActionsEnable(cuCPO);
       SetRenderObject([roMOX, roCPO]);
     end;
     if LoadCPO(ChangeFileExt(aFilename, '.cpo')) then
     begin
-      ShowUpClick(cuCPO);
+      ActionsEnable(cuCPO);
       SetRenderObject([roMOX, roCPO]);
     end;
     if aMode = lmLoadAndShow then
@@ -2516,7 +2797,7 @@ begin
   if SameText(ExtractFileExt(aFilename), '.cob') then
   begin
     if not fCOB.LoadCOB(aFilename) then Exit;
-    ShowUpClick(cuCOB);
+    ActionsEnable(cuCOB);
     SetRenderObject([roCOB]);
     if aMode = lmLoadAndShow then SetActivePage(apCOB);
   end;
@@ -2525,7 +2806,7 @@ begin
     if LoadCPO(aFilename) then
     begin
       SetRenderObject([roCPO]);
-      ShowUpClick(cuCPO);
+      ActionsEnable(cuCPO);
       if aMode = lmLoadAndShow then SetActivePage(apCPO);
     end;
 
@@ -2534,7 +2815,7 @@ begin
     fTree.LoadFromFile(aFilename);
     fTree.PrepareDisplayList;
     fTree.PrepareTextures(fOpenedFolder);
-    ShowUpClick(cuTREE);
+    ActionsEnable(cuTREE);
     meLog.Lines.Add('TREE Loaded ...');
     SetRenderObject([roTREE]);
   end;
@@ -2713,7 +2994,7 @@ begin
   if CPOHead.Qty >= MAX_CPO_SHAPES then Exit;
   if CPOHead.Qty = 0 then
   begin
-    ShowUpClick(cuCPO);
+    ActionsEnable(cuCPO);
     FillChar(CPOHead, SizeOf(CPOHead), #0);
     CPOHead.Head:='!OPC';
   end;
@@ -2955,7 +3236,7 @@ begin
 end;
 
 
-procedure TForm1.LoadTREE1Click(Sender: TObject);
+procedure TForm1.mnuLoadTREEClick(Sender: TObject);
 begin
   if not RunOpenDialog(odOpen,'',fOpenedFolder,'World Racing 2 tree files (*.tree)|*.tree') then Exit;
   LoadFile(odOpen.FileName, lmLoadAndShow);
@@ -2972,7 +3253,7 @@ begin
 end;
 
 
-procedure TForm1.SaveMTL1Click(Sender: TObject);
+procedure TForm1.mnuSaveMTLClick(Sender: TObject);
 begin
   if not RunSaveDialog(sdSave, fOpenedFileMask+'.mtl','','World Racing Material files (*.mtl)|*.mtl','mtl') then Exit;
   //sdSave.FileName:=AssureFileExt(sdSave.FileName,'mtl');
@@ -2982,7 +3263,7 @@ begin
 end;
 
 
-procedure TForm1.SaveCOB1Click(Sender: TObject);
+procedure TForm1.mnuSaveCOBClick(Sender: TObject);
 begin
   if not RunSaveDialog(sdSave, fOpenedFileMask+'_colli.cob', '', 'World Racing 2 collision files (*.cob)|*.cob', 'cob') then Exit;
 
@@ -2993,7 +3274,7 @@ begin
 end;
 
 
-procedure TForm1.SaveCPO1Click(Sender: TObject);
+procedure TForm1.mnuSaveCPOClick(Sender: TObject);
 begin
   if not RunSaveDialog(sdSave, fOpenedFileMask+'.cpo','','World Racing 2 collision files (*.cpo)|*.cpo','cpo') then Exit;
   SaveCPO(sdSave.FileName);
@@ -3001,52 +3282,44 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TForm1.Import3DSMOX1Click(Sender: TObject);
-var
-  log: string;
+procedure TForm1.mnuImport3DSMOX1Click(Sender: TObject);
 begin
   if not RunOpenDialog(odOpen,'',fOpenedFolder,'3DMax object files (*.3ds)|*.3ds') then Exit;
-  if not Load3DS(odOpen.FileName,log) then Exit;
-  meLog.Lines.Add(log);
+  if not Load3DS(odOpen.FileName) then Exit;
+
   RebuildImpNormals;
   ConverseImp_MOX;
   UpdateOpenedFileInfo(odOpen.FileName)
 end;
 
-procedure TForm1.ImportOBJMOX1Click(Sender: TObject);
-var
-  log: string;
+procedure TForm1.mnuImportOBJMOX1Click(Sender: TObject);
 begin
   if not RunOpenDialog(odOpen,'',fOpenedFolder,'OBJ object files (*.obj)|*.obj') then Exit;
-  if not LoadOBJ(odOpen.FileName,log) then Exit;
+  if not LoadOBJ(odOpen.FileName) then Exit;
 
-  meLog.Lines.Add(log);
   ConverseImp_MOX;
   UpdateOpenedFileInfo(odOpen.FileName)
 end;
 
-procedure TForm1.ImportLWO1Click(Sender: TObject);
-var
-  log: string;
+procedure TForm1.mnuImportLWO1Click(Sender: TObject);
 begin
   if not RunOpenDialog(odOpen,'',fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
-  if not LoadLWO(odOpen.FileName,log) then Exit;
+  if not LoadLWO(odOpen.FileName) then Exit;
 
-  meLog.Lines.Add(log);
   RebuildImpNormals;
   ConverseImp_MOX;
   UpdateOpenedFileInfo(odOpen.FileName);
 end;
 
 
-procedure TForm1.ImportLWO2Click(Sender: TObject);
+procedure TForm1.mnuImportLWO2Click(Sender: TObject);
 begin
-  ImportLWO1Click(nil);
+  mnuImportLWO1Click(nil);
 
   LoadMTL(fOpenedFileMask+'.mtl');
   LoadTextures;
   ScanVinyls(fOpenedFolder);
-  ShowUpClick(cuMTL);
+  ActionsEnable(cuMTL);
 
   LoadPSF(fOpenedFileMask+'.psf');
   LoadPBF(fOpenedFileMask+'.pbf');
@@ -3059,14 +3332,14 @@ begin
 end;
 
 
-procedure TForm1.ImportLWOCOB1Click(Sender: TObject);
+procedure TForm1.mnuImportLWOCOB1Click(Sender: TObject);
 begin
   if not RunOpenDialog(odOpen, '', fOpenedFolder, 'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
 
   try
     fCOB.ImportLWO(odOpen.Filename);
 
-    ShowUpClick(cuCOB);
+    ActionsEnable(cuCOB);
     SendDataToUI(uiCOB);
     SetRenderObject([roCOB]);
   except
@@ -3076,7 +3349,7 @@ begin
 end;
 
 
-procedure TForm1.ExportMOX1Click(Sender: TObject);
+procedure TForm1.mnuExportMOX1Click(Sender: TObject);
 var
   doSpread: Boolean;
 begin
@@ -3092,7 +3365,7 @@ begin
 end;
 
 
-procedure TForm1.ExportCOB1Click(Sender: TObject);
+procedure TForm1.mnuExportCOB1Click(Sender: TObject);
 begin
   if not RunSaveDialog(sdSave, fOpenedFileMask + '_colli.lwo', '', 'Lightwave 3D files (*.lwo)|*.lwo', 'lwo') then Exit;
   meLog.Lines.Add('Writing COB>LWO file');
@@ -3101,7 +3374,7 @@ begin
 end;
 
 
-procedure TForm1.ClearUpClick(aClearup: TClearUp);
+procedure TForm1.ActionsDisable(aActions: TEditingActions);
 begin
   RenderOptions.LightVec := False;
   RenderOptions.Colli := False;
@@ -3109,9 +3382,11 @@ begin
   RenderOptions.UVMap := False;
   RenderResize(nil);
 
-  if aClearup in [cuMOX, cuALL] then
+  if aActions in [cuMOX, cuALL] then
   begin
-    FillChar(MOX,SizeOf(MOX),#0);
+    FillChar(MOX, SizeOf(MOX), #0);
+    bgSaveAs.ButtonEnabled[BG_SAVE_AS_MOX] := False;
+    bgExport.ButtonEnabled[BG_EXPORT_MOX_LWO] := False;
     btnBlinkerCopy.Enabled := False;
     btnBlinkerPaste.Enabled := False;
     btnBlinkersLoad.Enabled := False;
@@ -3131,11 +3406,12 @@ begin
     SendDataToUI(uiMOX);
   end;
 
-  if aClearup in [cuMTL, cuALL] then
+  if aActions in [cuMTL, cuALL] then
   begin
     FillChar(Material,SizeOf(Material),#0);
     NumColors:=0;
-    SaveMTL1.Enabled := False;
+    mnuSaveMTL.Enabled := False;
+    bgSaveAs.ButtonEnabled[BG_SAVE_AS_MTL] := False;
     MatCopy.Enabled := False;
     MatPaste.Enabled := False;
     ResetMTLOrder.Enabled := False;
@@ -3144,29 +3420,32 @@ begin
     SendDataToUI(uiVinyl);
   end;
 
-  if aClearup in [cuCOB, cuALL] then
+  if aActions in [cuCOB, cuALL] then
   begin
     fCOB.Clear;
     btnShowColli.Down := False;
     btnShowColli.Enabled := False;
-    SaveCOB1.Enabled := False;
+    mnuSaveCOB.Enabled := False;
+    bgSaveAs.ButtonEnabled[BG_SAVE_AS_COB] := False;
     btnCOBVerticeCopy.Enabled := False;
     btnCOBVerticePaste.Enabled := False;
-    ExportCOB1.Enabled := False;
+    mnuExportCOB1.Enabled := False;
+    bgExport.ButtonEnabled[BG_EXPORT_COB_LWO] := False;
     SendDataToUI(uiCOB);
   end;
 
-  if aClearup in [cuCPO, cuALL] then
+  if aActions in [cuCPO, cuALL] then
   begin
     FillChar(CPO,SizeOf(CPO),#0);
     FillChar(CPOHead,SizeOf(CPOHead),#0);
     btnShowColli.Down := False;
     btnShowColli.Enabled := False;
-    SaveCPO1.Enabled := False;
+    mnuSaveCPO.Enabled := False;
+    bgSaveAs.ButtonEnabled[BG_SAVE_AS_CPO] := False;
     SendDataToUI(uiCPO);
   end;
 
-  if aClearup in [cuTREE, cuALL] then
+  if aActions in [cuTREE, cuALL] then
   begin
     fTree.Clear;
     btnShowWireframe.Down := False;
@@ -3174,9 +3453,9 @@ begin
   end;
 end;
 
-procedure TForm1.ShowUpClick(aClearup: TClearUp);
+procedure TForm1.ActionsEnable(aActions: TEditingActions);
 begin
-  if aClearup = cuMOX then
+  if aActions = cuMOX then
   begin
     SendDataToUI(uiParts);
     SendDataToUI(uiBlinkers);
@@ -3195,9 +3474,10 @@ begin
     btnShowUVMap.Enabled := True;
   end;
 
-  if aClearup = cuMTL then
+  if aActions = cuMTL then
   begin
-    SaveMTL1.Enabled := True;
+    mnuSaveMTL.Enabled := True;
+    bgSaveAs.ButtonEnabled[BG_SAVE_AS_MTL] := True;
     MatCopy.Enabled := True;
     MatPaste.Enabled := False;
     ResetMTLOrder.Enabled := True;
@@ -3207,24 +3487,27 @@ begin
     SendDataToUI(uiVinyl);
   end;
 
-  if aClearup = cuCOB then
+  if aActions = cuCOB then
   begin
     btnShowColli.Enabled := True;
-    SaveCOB1.Enabled := True;
-    ExportCOB1.Enabled := True;
+    mnuSaveCOB.Enabled := True;
+    bgSaveAs.ButtonEnabled[BG_SAVE_AS_COB] := True;
+    mnuExportCOB1.Enabled := True;
+    bgExport.ButtonEnabled[BG_EXPORT_COB_LWO] := True;
     btnCOBVerticeCopy.Enabled := True;
     btnCOBVerticePaste.Enabled := False;
     SendDataToUI(uiCOB);
   end;
 
-  if aClearup = cuCPO then
+  if aActions = cuCPO then
   begin
     btnShowColli.Enabled := True;
-    SaveCPO1.Enabled := True;
+    mnuSaveCPO.Enabled := True;
+    bgSaveAs.ButtonEnabled[BG_SAVE_AS_CPO] := True;
     SendDataToUI(uiCPO);
   end;
 
-  if aClearup = cuTREE then
+  if aActions = cuTREE then
     btnShowWireframe.Enabled := True;
 end;
 
@@ -3290,13 +3573,12 @@ end;
 
 procedure TForm1.Button1Click(Sender: TObject);
 var
-  log: string;
   filename: string;
 begin
   filename := ExeDir + 'LoadOBJ\clkdtm.obj';
   //filename:=ExeDir+'LoadOBJ\oacwr2.obj';
-  if not LoadOBJ(filename, log) then Exit;
-  meLog.Lines.Add(log);
+  if not LoadOBJ(filename) then Exit;
+
   ConverseImp_MOX;
   UpdateOpenedFileInfo(filename);
 end;
@@ -3322,18 +3604,16 @@ end;
 
 procedure TForm1.btnCPOImportClick(Sender: TObject);
 var
-  log:string;
   i,h,IDnew:Integer;
 begin
   if not RunOpenDialog(odOpen,'',fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
-  if not LoadLWO(odOpen.FileName,log) then Exit;
-  meLog.Lines.Add(log);
+  if not LoadLWO(odOpen.FileName) then Exit;
 
   if CPOHead.Qty >= MAX_CPO_SHAPES then Exit;
 
   if CPOHead.Qty = 0 then
   begin
-    ShowUpClick(cuCPO);
+    ActionsEnable(cuCPO);
     FillChar(CPOHead,SizeOf(CPOHead),#0);
     CPOHead.Head:='!OPC';
   end;

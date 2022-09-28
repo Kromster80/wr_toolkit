@@ -3,7 +3,7 @@ object Form1: TForm1
   Top = 214
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   Caption = 'MTKit2'
-  ClientHeight = 622
+  ClientHeight = 694
   ClientWidth = 889
   Color = clBtnFace
   Constraints.MinHeight = 680
@@ -25,40 +25,11 @@ object Form1: TForm1
   OnResize = RenderResize
   DesignSize = (
     889
-    622)
+    694)
   PixelsPerInch = 96
   TextHeight = 13
-  object Shape1: TShape
-    Left = 432
-    Top = 8
-    Width = 102
-    Height = 17
-  end
-  object Shape2: TShape
-    Left = 433
-    Top = 9
-    Width = 32
-    Height = 16
-    Brush.Color = clSilver
-    Pen.Style = psClear
-  end
-  object Label35: TLabel
-    Left = 440
-    Top = 10
-    Width = 17
-    Height = 13
-    Caption = '0 %'
-    Transparent = True
-  end
-  object Label61: TLabel
-    Left = 540
-    Top = 10
-    Width = 41
-    Height = 13
-    Caption = 'Progress'
-  end
   object ReloadShadersCode: TSpeedButton
-    Left = 368
+    Left = 528
     Top = 8
     Width = 21
     Height = 21
@@ -96,7 +67,7 @@ object Form1: TForm1
     OnClick = ReloadShadersCodeClick
   end
   object btnShowLights: TSpeedButton
-    Left = 256
+    Left = 416
     Top = 32
     Width = 23
     Height = 22
@@ -106,7 +77,7 @@ object Form1: TForm1
     OnClick = SB_RenderOpts
   end
   object btnShowColli: TSpeedButton
-    Left = 280
+    Left = 440
     Top = 32
     Width = 23
     Height = 22
@@ -116,7 +87,7 @@ object Form1: TForm1
     OnClick = SB_RenderOpts
   end
   object btnShowWireframe: TSpeedButton
-    Left = 304
+    Left = 464
     Top = 32
     Width = 23
     Height = 22
@@ -126,7 +97,7 @@ object Form1: TForm1
     OnClick = SB_RenderOpts
   end
   object btnShowUVMap: TSpeedButton
-    Left = 336
+    Left = 496
     Top = 32
     Width = 23
     Height = 22
@@ -189,15 +160,92 @@ object Form1: TForm1
     OnMouseMove = Panel1MouseMove
     OnMouseUp = Panel1MouseUp
   end
+  object Label2: TLabel
+    Left = 0
+    Top = 0
+    Width = 81
+    Height = 17
+    Alignment = taCenter
+    AutoSize = False
+    Caption = 'Load'
+    Color = 11579568
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+    Transparent = False
+    Layout = tlCenter
+  end
+  object Label34: TLabel
+    Left = 160
+    Top = 0
+    Width = 161
+    Height = 17
+    Alignment = taCenter
+    AutoSize = False
+    Caption = 'Import'
+    Color = 11579568
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+    Transparent = False
+    Layout = tlCenter
+  end
+  object Label49: TLabel
+    Left = 80
+    Top = 0
+    Width = 81
+    Height = 17
+    Alignment = taCenter
+    AutoSize = False
+    Caption = 'Save as'
+    Color = 11579568
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+    Transparent = False
+    Layout = tlCenter
+  end
+  object Label35: TLabel
+    Left = 320
+    Top = 0
+    Width = 81
+    Height = 17
+    Alignment = taCenter
+    AutoSize = False
+    Caption = 'Export'
+    Color = 11579568
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+    Transparent = False
+    Layout = tlCenter
+  end
   object RenderPanel: TPanel
     Left = 246
-    Top = 56
-    Width = 649
-    Height = 537
+    Top = 104
+    Width = 635
+    Height = 561
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
     Caption = 'RenderPanel'
-    Color = clBlack
+    Color = clSkyBlue
+    ParentBackground = False
     TabOrder = 0
     OnMouseDown = Panel1MouseDown
     OnMouseMove = Panel1MouseMove
@@ -205,10 +253,10 @@ object Form1: TForm1
   end
   object PageControl1: TPageControl
     Left = 2
-    Top = 8
+    Top = 104
     Width = 242
-    Height = 585
-    ActivePage = tsBlinkers
+    Height = 561
+    ActivePage = tsMaterials
     Anchors = [akLeft, akTop, akBottom]
     MultiLine = True
     Style = tsButtons
@@ -218,6 +266,7 @@ object Form1: TForm1
     OnChange = PageControl1Change
     object tsMaterials: TTabSheet
       Caption = 'MTL'
+      ExplicitHeight = 551
       object Label5: TLabel
         Left = 52
         Top = 284
@@ -807,9 +856,10 @@ object Form1: TForm1
     object tsParts: TTabSheet
       Caption = 'Parts'
       ImageIndex = 1
+      ExplicitHeight = 551
       DesignSize = (
         234
-        551)
+        527)
       object Label63: TLabel
         Left = 136
         Top = 27
@@ -828,7 +878,7 @@ object Form1: TForm1
         Left = 0
         Top = 0
         Width = 129
-        Height = 316
+        Height = 292
         Anchors = [akLeft, akTop, akBottom]
         DragMode = dmAutomatic
         HideSelection = False
@@ -839,6 +889,7 @@ object Form1: TForm1
         OnChange = tvPartsChange
         OnDragDrop = tvPartsDragDrop
         OnDragOver = tvPartsDragOver
+        ExplicitHeight = 316
       end
       object RGDetailType: TRadioGroup
         Left = 134
@@ -877,14 +928,19 @@ object Form1: TForm1
       end
       object PageControl2: TPageControl
         Left = 0
-        Top = 321
+        Top = 297
         Width = 234
         Height = 230
         ActivePage = Behaviour
         Anchors = [akLeft, akBottom]
         TabOrder = 4
+        ExplicitTop = 289
         object PivotSetup: TTabSheet
           Caption = 'Pivot point setup'
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object Label51: TLabel
             Left = 166
             Top = 162
@@ -1350,9 +1406,10 @@ object Form1: TForm1
     object tsBlinkers: TTabSheet
       Caption = 'Lights'
       ImageIndex = 2
+      ExplicitHeight = 551
       DesignSize = (
         234
-        551)
+        527)
       object Label17: TLabel
         Left = 196
         Top = 158
@@ -1596,7 +1653,7 @@ object Form1: TForm1
         Left = 0
         Top = 0
         Width = 129
-        Height = 300
+        Height = 276
         Style = lbOwnerDrawFixed
         Anchors = [akLeft, akTop, akBottom]
         Font.Charset = DEFAULT_CHARSET
@@ -1609,10 +1666,11 @@ object Form1: TForm1
         TabOrder = 0
         OnClick = lbBlinkersClick
         OnDrawItem = lbBlinkersDrawItem
+        ExplicitHeight = 300
       end
       object rgBlinkerType: TRadioGroup
         Left = 0
-        Top = 302
+        Top = 278
         Width = 129
         Height = 215
         Anchors = [akLeft, akBottom]
@@ -1634,6 +1692,7 @@ object Form1: TForm1
           'Nozzle Flash')
         TabOrder = 1
         OnClick = BlinkChange
+        ExplicitTop = 302
       end
       object fsBlinkerSizeMin: TFloatSpinEdit
         Left = 134
@@ -1761,7 +1820,7 @@ object Form1: TForm1
       end
       object btnBlinkersLoad: TButton
         Left = 0
-        Top = 523
+        Top = 499
         Width = 65
         Height = 25
         Anchors = [akLeft, akBottom]
@@ -1775,10 +1834,11 @@ object Form1: TForm1
         ParentFont = False
         TabOrder = 2
         OnClick = btnBlinkersLoadClick
+        ExplicitTop = 523
       end
       object btnBlinkersSave: TButton
         Left = 64
-        Top = 523
+        Top = 499
         Width = 65
         Height = 25
         Anchors = [akLeft, akBottom]
@@ -1792,6 +1852,7 @@ object Form1: TForm1
         ParentFont = False
         TabOrder = 3
         OnClick = btnBlinkersSaveClick
+        ExplicitTop = 523
       end
       object btnBlinkerRem: TButton
         Left = 158
@@ -1827,6 +1888,7 @@ object Form1: TForm1
     object tsCOB: TTabSheet
       Caption = 'COB'
       ImageIndex = 4
+      ExplicitHeight = 551
       object btnCOBVerticeCopy: TSpeedButton
         Left = 182
         Top = 124
@@ -2176,6 +2238,7 @@ object Form1: TForm1
     object tsCPO: TTabSheet
       Caption = 'CPO'
       ImageIndex = 6
+      ExplicitHeight = 551
       object Label53: TLabel
         Left = 196
         Top = 123
@@ -2550,9 +2613,10 @@ object Form1: TForm1
     object tsExtra: TTabSheet
       Caption = 'Extra'
       ImageIndex = 3
+      ExplicitHeight = 551
       DesignSize = (
         234
-        551)
+        527)
       object Label1: TLabel
         Left = 56
         Top = 187
@@ -2711,10 +2775,11 @@ object Form1: TForm1
         Left = 0
         Top = 312
         Width = 233
-        Height = 237
+        Height = 213
         Anchors = [akLeft, akTop, akBottom]
         ScrollBars = ssVertical
         TabOrder = 4
+        ExplicitHeight = 205
       end
       object edMaterialCount: TEdit
         Left = 0
@@ -2804,19 +2869,21 @@ object Form1: TForm1
     object tsBrowse: TTabSheet
       Caption = 'Browse'
       ImageIndex = 5
+      ExplicitHeight = 551
       DesignSize = (
         234
-        551)
+        527)
       object FileListBox1: TFileListBox
         Left = 0
         Top = 248
         Width = 233
-        Height = 301
+        Height = 277
         Anchors = [akLeft, akTop, akBottom]
         ItemHeight = 13
         Mask = '*.mox;*.cob;*.cpo;*.tree'
         TabOrder = 0
         OnClick = FileListBox1Click
+        ExplicitHeight = 269
       end
       object DirectoryListBox1: TDirectoryListBox
         Left = 0
@@ -2836,23 +2903,14 @@ object Form1: TForm1
       end
     end
   end
-  object Panel8: TPanel
-    Left = 424
+  object Panel10: TPanel
+    Left = 408
     Top = 0
     Width = 2
     Height = 53
     BevelOuter = bvLowered
     Caption = 'Panel8'
     TabOrder = 2
-  end
-  object Panel10: TPanel
-    Left = 248
-    Top = 0
-    Width = 2
-    Height = 53
-    BevelOuter = bvLowered
-    Caption = 'Panel8'
-    TabOrder = 3
   end
   object ViewReset: TButton
     Left = 808
@@ -2861,16 +2919,16 @@ object Form1: TForm1
     Height = 17
     Anchors = [akTop, akRight]
     Caption = 'reset'
-    TabOrder = 4
+    TabOrder = 3
     OnClick = ResetView
   end
   object CBRenderMode: TComboBox
-    Left = 256
+    Left = 416
     Top = 8
     Width = 105
     Height = 21
     ItemIndex = 0
-    TabOrder = 5
+    TabOrder = 4
     Text = 'OpenGL'
     OnChange = CBRenderModeChange
     Items.Strings = (
@@ -2879,18 +2937,18 @@ object Form1: TForm1
   end
   object Button4: TButton
     Left = 250
-    Top = 60
+    Top = 116
     Width = 89
     Height = 17
     Caption = 'SendDataToUI'
     Enabled = False
-    TabOrder = 6
+    TabOrder = 5
     Visible = False
     OnClick = Button4Click
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 603
+    Top = 675
     Width = 889
     Height = 19
     Panels = <
@@ -2904,28 +2962,130 @@ object Form1: TForm1
         Text = '<<<LEER>>>'
         Width = 50
       end>
+    ExplicitTop = 603
   end
   object Button1: TButton
     Left = 250
-    Top = 112
+    Top = 168
     Width = 75
     Height = 25
     Caption = 'Button1'
     Enabled = False
-    TabOrder = 8
+    TabOrder = 7
     Visible = False
     OnClick = Button1Click
+  end
+  object bgLoad: TButtonGroup
+    Left = 0
+    Top = 16
+    Width = 81
+    Height = 81
+    BorderStyle = bsNone
+    ButtonHeight = 20
+    ButtonOptions = [gboFullSize, gboShowCaptions]
+    DoubleBuffered = False
+    Items = <
+      item
+        Caption = 'MOX\MTL ...'
+      end
+      item
+        Caption = 'COB ...'
+      end
+      item
+        Caption = 'CPO ...'
+      end
+      item
+        Caption = 'Tree ...'
+      end>
+    ParentDoubleBuffered = False
+    TabOrder = 8
+    OnButtonClicked = bgLoadButtonClicked
+  end
+  object bgImport: TButtonGroup
+    Left = 160
+    Top = 16
+    Width = 161
+    Height = 81
+    BorderStyle = bsNone
+    ButtonHeight = 20
+    ButtonWidth = 80
+    DoubleBuffered = False
+    Items = <
+      item
+        Caption = '3DS > MOX'
+      end
+      item
+        Caption = 'OBJ > MOX'
+      end
+      item
+        Caption = 'LWO > MOX'
+      end
+      item
+        Caption = 'LWO > MOX+'
+      end
+      item
+        Caption = 'LWO > COB'
+      end>
+    ParentDoubleBuffered = False
+    TabOrder = 9
+    OnButtonClicked = bgImportButtonClicked
+  end
+  object bgSaveAs: TButtonGroup
+    Left = 80
+    Top = 16
+    Width = 81
+    Height = 81
+    BorderStyle = bsNone
+    ButtonHeight = 20
+    ButtonOptions = [gboFullSize, gboShowCaptions]
+    DoubleBuffered = False
+    Items = <
+      item
+        Caption = 'MOX ...'
+      end
+      item
+        Caption = 'MTL ...'
+      end
+      item
+        Caption = 'COB ...'
+      end
+      item
+        Caption = 'CPO ...'
+      end>
+    ParentDoubleBuffered = False
+    TabOrder = 10
+    OnButtonClicked = bgSaveAsButtonClicked
+  end
+  object bgExport: TButtonGroup
+    Left = 320
+    Top = 16
+    Width = 81
+    Height = 81
+    BorderStyle = bsNone
+    ButtonHeight = 20
+    ButtonOptions = [gboFullSize, gboShowCaptions]
+    DoubleBuffered = False
+    Items = <
+      item
+        Caption = 'MOX > LWO'
+      end
+      item
+        Caption = 'COB > LWO'
+      end>
+    ParentDoubleBuffered = False
+    TabOrder = 11
+    OnButtonClicked = bgExportButtonClicked
   end
   object odOpen: TOpenDialog
     InitialDir = '.'
     Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
     Title = 'Open file'
     Left = 250
-    Top = 80
+    Top = 136
   end
   object MainMenu1: TMainMenu
     Left = 280
-    Top = 80
+    Top = 136
     object N3: TMenuItem
       Enabled = False
     end
@@ -2938,49 +3098,49 @@ object Form1: TForm1
       object Load1: TMenuItem
         Caption = 'Load'
         GroupIndex = 1
-        object LoadMOX1: TMenuItem
+        object mnuLoadMOX: TMenuItem
           Caption = 'Load MOX/MTL ...'
           GroupIndex = 1
           OnClick = LoadMOXClick
         end
-        object LoadCOB1: TMenuItem
+        object mnuLoadCOB: TMenuItem
           Caption = 'Load COB ...'
           GroupIndex = 1
           OnClick = LoadCOBClick
         end
-        object LoadCPO1: TMenuItem
+        object mnuLoadCPO: TMenuItem
           Caption = 'Load CPO ...'
           GroupIndex = 1
           OnClick = LoadCPOClick
         end
-        object LoadTREE1: TMenuItem
+        object mnuLoadTREE: TMenuItem
           Caption = 'Load TREE ...'
           GroupIndex = 1
-          OnClick = LoadTREE1Click
+          OnClick = mnuLoadTREEClick
         end
       end
       object Save2: TMenuItem
         Caption = 'Save'
         GroupIndex = 1
-        object SaveMOX1: TMenuItem
+        object mnuSaveMOX: TMenuItem
           Caption = 'Save MOX ...'
           Enabled = False
           OnClick = SaveMOXClick
         end
-        object SaveMTL1: TMenuItem
+        object mnuSaveMTL: TMenuItem
           Caption = 'Save MTL ...'
           Enabled = False
-          OnClick = SaveMTL1Click
+          OnClick = mnuSaveMTLClick
         end
-        object SaveCOB1: TMenuItem
+        object mnuSaveCOB: TMenuItem
           Caption = 'Save COB ...'
           Enabled = False
-          OnClick = SaveCOB1Click
+          OnClick = mnuSaveCOBClick
         end
-        object SaveCPO1: TMenuItem
+        object mnuSaveCPO: TMenuItem
           Caption = 'Save CPO ...'
           Enabled = False
-          OnClick = SaveCPO1Click
+          OnClick = mnuSaveCPOClick
         end
       end
       object N1: TMenuItem
@@ -2990,41 +3150,41 @@ object Form1: TForm1
       object Import1: TMenuItem
         Caption = 'Import'
         GroupIndex = 1
-        object Import3DSMOX1: TMenuItem
+        object mnuImport3DSMOX1: TMenuItem
           Caption = 'Import 3DS > MOX ...'
-          OnClick = Import3DSMOX1Click
+          OnClick = mnuImport3DSMOX1Click
         end
-        object ImportOBJMOX1: TMenuItem
+        object mnuImportOBJMOX1: TMenuItem
           Caption = 'Import OBJ > MOX ...'
-          OnClick = ImportOBJMOX1Click
+          OnClick = mnuImportOBJMOX1Click
         end
-        object ImportLWO1: TMenuItem
+        object mnuImportLWO1: TMenuItem
           Caption = 'Import LWO > MOX ...'
-          OnClick = ImportLWO1Click
+          OnClick = mnuImportLWO1Click
         end
-        object ImportLWO2: TMenuItem
+        object mnuImportLWO2: TMenuItem
           Caption = 'Import LWO > MOX+ ...'
-          OnClick = ImportLWO2Click
+          OnClick = mnuImportLWO2Click
         end
-        object ImportLWOCOB1: TMenuItem
+        object mnuImportLWOCOB1: TMenuItem
           Caption = 'Import LWO > COB ...'
-          OnClick = ImportLWOCOB1Click
+          OnClick = mnuImportLWOCOB1Click
         end
       end
       object Export1: TMenuItem
         Caption = 'Export'
         GroupIndex = 1
-        object ExportMOX1: TMenuItem
+        object mnuExportMOX1: TMenuItem
           Caption = 'Export MOX > LWO ...'
           Enabled = False
           GroupIndex = 1
-          OnClick = ExportMOX1Click
+          OnClick = mnuExportMOX1Click
         end
-        object ExportCOB1: TMenuItem
+        object mnuExportCOB1: TMenuItem
           Caption = 'Export COB > LWO ...'
           Enabled = False
           GroupIndex = 1
-          OnClick = ExportCOB1Click
+          OnClick = mnuExportCOB1Click
         end
       end
       object N4: TMenuItem
@@ -3071,6 +3231,6 @@ object Form1: TForm1
   object sdSave: TSaveDialog
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Left = 310
-    Top = 80
+    Top = 136
   end
 end

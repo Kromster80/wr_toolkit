@@ -3,9 +3,9 @@ interface
 uses
   Windows, Classes, SysUtils, MTkit2_Defaults, KromUtils, Math, Dialogs;
 
-function  LoadOBJ(const aFilename: string; out Log: string): Boolean;
-function  Load3DS(const aFilename: string; out Log: string): Boolean;
-function  LoadLWO(const aFilename: string; out Log: string): Boolean;
+function  LoadOBJ(const aFilename: string): Boolean;
+function  Load3DS(const aFilename: string): Boolean;
+function  LoadLWO(const aFilename: string): Boolean;
 
 procedure LoadMTL(const aFilename: string);
 procedure SaveMTL(const aFilename: string);
@@ -28,7 +28,7 @@ uses
   MTkit2_Unit1, MTkit2_COB, MTkit2_CPO, MTkit2_MOX, MTkit2_Tree, MTkit2_Vertex;
 
 
-function LoadOBJ(const aFilename: string; out Log: string): Boolean;
+function LoadOBJ(const aFilename: string): Boolean;
 const
   MAX_OBJ_VTX = 131072;
 var
@@ -45,7 +45,6 @@ var
   SmoothGroupID:array of Integer;
 begin
   Result:=False;
-  Log:='';
 
   OldTimeLWO:=GetTickCount;
 
@@ -224,12 +223,11 @@ begin
     CloseFile(f);
   end;
 
-  Log:=Log+'OBJ readed';
   Result:=True;
 end;
 
 
-function Load3DS(const aFilename: string; out Log:string):Boolean;
+function Load3DS(const aFilename: string):Boolean;
 var
   f:file;
   c: array [1..MAX_READ_BUFFER] of AnsiChar;
@@ -248,7 +246,6 @@ var
   VCount,PCount: array [1..256]of Word; //That is 3ds layers/blocks
 begin
   Result:=False;
-  Log:='';
 
   OldTimeLWO:=GetTickCount;
 
@@ -268,223 +265,220 @@ begin
   ObjLay:=0;
 
   AssignFile(f,aFilename); FileMode:=0; Reset(f,1); FileMode:=2;
-
-  BlockRead(f,Chunk,6);
-  ChunkLen[1]:=Chunk.Len-6;
-  if Chunk.ID<>$4D4D then begin
-    MessageDlg('This is unsupported 3DS format',mtError,[mbOK],0);
-    CloseFile(f); exit;
-  end;
-
-  repeat
+  try
     BlockRead(f,Chunk,6);
-    ChunkLen[2]:=Chunk.Len-6;
-    Dec(ChunkLen[1],Chunk.Len);
+    ChunkLen[1]:=Chunk.Len-6;
+    if Chunk.ID<>$4D4D then
+      raise Exception.Create('This is unsupported 3DS format');
 
-    if Chunk.ID = $3D3D then
-    begin
+    repeat
+      BlockRead(f,Chunk,6);
+      ChunkLen[2]:=Chunk.Len-6;
+      Dec(ChunkLen[1],Chunk.Len);
 
-      repeat
-        BlockRead(f,Chunk,6);
-        ChunkLen[3]:=Chunk.Len-6;
-        Dec(ChunkLen[2],Chunk.Len);
+      if Chunk.ID = $3D3D then
+      begin
 
-//        if Chunk.ID=$3D3E then begin //??
-//          BlockRead(f,c,Chunk.Len-6);
-//        end else
+        repeat
+          BlockRead(f,Chunk,6);
+          ChunkLen[3]:=Chunk.Len-6;
+          Dec(ChunkLen[2],Chunk.Len);
 
-//        if Chunk.ID=$0010 then begin //??
-//          BlockRead(f,c,Chunk.Len-6);
-//        end else
+  //        if Chunk.ID=$3D3E then begin //??
+  //          BlockRead(f,c,Chunk.Len-6);
+  //        end else
 
-        if Chunk.ID=$B000 then begin //Keyframer chunk
-          repeat
-            BlockRead(f,Chunk,6);
-            ChunkLen[4]:=Chunk.Len-6;
-            Dec(ChunkLen[3],Chunk.Len);
+  //        if Chunk.ID=$0010 then begin //??
+  //          BlockRead(f,c,Chunk.Len-6);
+  //        end else
 
-            begin
-              //Log:=Log+'B000 chunk skipped ='+inttohex(Chunk.ID,4)+' ('+inttostr(Chunk.Len)+'Bytes)'+eol;
-              BlockRead(f,c,Chunk.Len-6);
-            end;
-          until((ChunkLen[3]=0)or(Eof(f)));
-        end else
+          if Chunk.ID=$B000 then begin //Keyframer chunk
+            repeat
+              BlockRead(f,Chunk,6);
+              ChunkLen[4]:=Chunk.Len-6;
+              Dec(ChunkLen[3],Chunk.Len);
 
-        if Chunk.ID=$AFFF then begin //Material_Chunk
-          Inc(MatLay);
-          repeat
-            BlockRead(f,Chunk,6);
-            ChunkLen[4]:=Chunk.Len-6;
-            Dec(ChunkLen[3],Chunk.Len);
+              begin
+                //Log:=Log+'B000 chunk skipped ='+inttohex(Chunk.ID,4)+' ('+inttostr(Chunk.Len)+'Bytes)'+eol;
+                BlockRead(f,c,Chunk.Len-6);
+              end;
+            until((ChunkLen[3]=0)or(Eof(f)));
+          end else
 
-            if Chunk.ID=$A000 then begin //?
-              BlockRead(f,c,Chunk.Len-6);
-              Imp.Mtl[MatLay].Title:=PAnsiChar(@c[1]);
-            end else
+          if Chunk.ID=$AFFF then begin //Material_Chunk
+            Inc(MatLay);
+            repeat
+              BlockRead(f,Chunk,6);
+              ChunkLen[4]:=Chunk.Len-6;
+              Dec(ChunkLen[3],Chunk.Len);
 
-            if Chunk.ID=$A010 then begin //AmbientColor
-              BlockRead(f,c,Chunk.Len-6);
-            end else
+              if Chunk.ID=$A000 then begin //?
+                BlockRead(f,c,Chunk.Len-6);
+                Imp.Mtl[MatLay].Title:=PAnsiChar(@c[1]);
+              end else
 
-            if Chunk.ID=$A020 then begin //DiffuseColor
-              BlockRead(f,c,Chunk.Len-6);
-              Imp.Mtl[MatLay].Dif.R:=ord(c[7]);
-              Imp.Mtl[MatLay].Dif.G:=ord(c[8]);
-              Imp.Mtl[MatLay].Dif.B:=ord(c[9]);
-            end else
+              if Chunk.ID=$A010 then begin //AmbientColor
+                BlockRead(f,c,Chunk.Len-6);
+              end else
 
-            begin
-              //Log:=Log+'AFFF chunk skipped ='+inttohex(Chunk.ID,4)+' ('+inttostr(Chunk.Len)+'Bytes)'+eol;
-              BlockRead(f,c,Chunk.Len-6);
-            end;
-          until((ChunkLen[3]=0)or(Eof(f)));
-        end else
+              if Chunk.ID=$A020 then begin //DiffuseColor
+                BlockRead(f,c,Chunk.Len-6);
+                Imp.Mtl[MatLay].Dif.R:=ord(c[7]);
+                Imp.Mtl[MatLay].Dif.G:=ord(c[8]);
+                Imp.Mtl[MatLay].Dif.B:=ord(c[9]);
+              end else
 
-        if Chunk.ID=$4000 then begin //Object_Chunk
-          Inc(ObjLay);
-          ObjName:='';
-          repeat
-            BlockRead(f,c,1);
-            if c[1]<>#0 then ObjName:=ObjName+c[1];
-          until((c[1]=#0)or(Length(ObjName)=19));
-          Dec(ChunkLen[3],Length(ObjName)+1);
+              begin
+                //Log:=Log+'AFFF chunk skipped ='+inttohex(Chunk.ID,4)+' ('+inttostr(Chunk.Len)+'Bytes)'+eol;
+                BlockRead(f,c,Chunk.Len-6);
+              end;
+            until((ChunkLen[3]=0)or(Eof(f)));
+          end else
 
-          repeat
-            BlockRead(f,Chunk,6);
-            ChunkLen[4]:=Chunk.Len-6;
-            Dec(ChunkLen[3],Chunk.Len);
+          if Chunk.ID=$4000 then begin //Object_Chunk
+            Inc(ObjLay);
+            ObjName:='';
+            repeat
+              BlockRead(f,c,1);
+              if c[1]<>#0 then ObjName:=ObjName+c[1];
+            until((c[1]=#0)or(Length(ObjName)=19));
+            Dec(ChunkLen[3],Length(ObjName)+1);
 
-            if Chunk.ID=$4100 then begin //Triangular_Mesh
+            repeat
+              BlockRead(f,Chunk,6);
+              ChunkLen[4]:=Chunk.Len-6;
+              Dec(ChunkLen[3],Chunk.Len);
 
-              repeat
-                BlockRead(f,Chunk,6);
-                ChunkLen[5]:=Chunk.Len-6;
-                Dec(ChunkLen[4],Chunk.Len);
+              if Chunk.ID=$4100 then begin //Triangular_Mesh
 
-                if Chunk.ID=$4110 then begin //Vertices_List
-                  BlockRead(f,VCount[ObjLay],2);
-                  for i:=1 to VCount[ObjLay] do
-                    BlockRead(f,Imp.XYZ[Imp.VerticeCount+i],12);
-                end else
+                repeat
+                  BlockRead(f,Chunk,6);
+                  ChunkLen[5]:=Chunk.Len-6;
+                  Dec(ChunkLen[4],Chunk.Len);
 
-                if Chunk.ID=$4140 then begin //UVMap_List
-                  BlockRead(f,Len,2);
-                  for i:=1 to Len do
-                    BlockRead(f,Imp.UV[Imp.VerticeCount+i],8);
-                end else
+                  if Chunk.ID=$4110 then begin //Vertices_List
+                    BlockRead(f,VCount[ObjLay],2);
+                    for i:=1 to VCount[ObjLay] do
+                      BlockRead(f,Imp.XYZ[Imp.VerticeCount+i],12);
+                  end else
 
-                if Chunk.ID=$4160 then begin //Pivot RotationMatrix and Offset
-                  BlockRead(f,PivotMtx,48);
-                end else
+                  if Chunk.ID=$4140 then begin //UVMap_List
+                    BlockRead(f,Len,2);
+                    for i:=1 to Len do
+                      BlockRead(f,Imp.UV[Imp.VerticeCount+i],8);
+                  end else
 
-                if Chunk.ID=$4120 then begin //Faces_List
-                  BlockRead(f,PCount[ObjLay],2);
-                  Dec(ChunkLen[5],PCount[ObjLay]*8+2);
+                  if Chunk.ID=$4160 then begin //Pivot RotationMatrix and Offset
+                    BlockRead(f,PivotMtx,48);
+                  end else
 
-                  if Imp.PolyCount+PCount[ObjLay]>65280 then begin
-                    MessageDlg('Point quantity exceeds 65`280 limit',mtError,[mbOK],0);
-                    CloseFile(f);
-                    exit;
-                  end;
+                  if Chunk.ID=$4120 then begin //Faces_List
+                    BlockRead(f,PCount[ObjLay],2);
+                    Dec(ChunkLen[5],PCount[ObjLay]*8+2);
 
-                  for i:=1 to PCount[ObjLay] do begin
-                    for h:=1 to 3 do begin
-                      BlockRead(f,Imp.Faces[Imp.PolyCount+i,h],2);
-                      Inc(Imp.Faces[Imp.PolyCount+i,h],Imp.VerticeCount+1);
+                    if Imp.PolyCount+PCount[ObjLay]>65280 then begin
+                      MessageDlg('Point quantity exceeds 65`280 limit',mtError,[mbOK],0);
+                      CloseFile(f);
+                      exit;
                     end;
-                    BlockRead(f,c,2);
-                  end;
 
-                  repeat
-                    BlockRead(f,Chunk,6);
-                    Dec(ChunkLen[5],Chunk.Len);
-
-                    if Chunk.ID=$4130 then begin //Faces_Material
-                      ObjName:='';
-                      repeat
-                        BlockRead(f,c,1);
-                        if c[1]<>#0 then ObjName:=ObjName+c[1];
-                      until((c[1]=#0)or(Length(ObjName)=20));
-
-                      MatLayUse:=9999; //if names doesn't match invoke RangeError later on
-                      for i:=1 to MatLay do
-                        if Imp.Mtl[i].Title=ObjName then MatLayUse:=i;
-
-                      BlockRead(f,Len,2);
-                      for i:=1 to Len do begin
-                        BlockRead(f,Tmp,2);
-                        Imp.Surf[Tmp+Imp.PolyCount+1]:=MatLayUse;
+                    for i:=1 to PCount[ObjLay] do begin
+                      for h:=1 to 3 do begin
+                        BlockRead(f,Imp.Faces[Imp.PolyCount+i,h],2);
+                        Inc(Imp.Faces[Imp.PolyCount+i,h],Imp.VerticeCount+1);
                       end;
-                    end else
-
-                    if Chunk.ID=$4150 then begin //Smoothing_Group_List
-                      for i:=1 to PCount[ObjLay] do begin
-                        BlockRead(f,c,4);
-                      end;
-                      Log:=Log+'Smoothing groups readed'+eol;
-                    end else
-
-                    begin
-                      Log:=Log+'4120 chunk skipped ='+inttohex(Chunk.ID,4)+' ('+inttostr(Chunk.Len)+'Bytes)'+eol;
-                      BlockRead(f,c,Chunk.Len-6);
+                      BlockRead(f,c,2);
                     end;
-                  until((ChunkLen[5]=0)or(Eof(f)));
-                end else
 
-                begin
-                  Log:=Log+'4100 chunk skipped ='+inttohex(Chunk.ID,4)+' ('+inttostr(Chunk.Len)+'Bytes)'+eol;
-                  BlockRead(f,c,Chunk.Len-6);
-                end;
-              until((ChunkLen[4]=0)or(Eof(f)));
+                    repeat
+                      BlockRead(f,Chunk,6);
+                      Dec(ChunkLen[5],Chunk.Len);
 
-              Inc(Imp.VerticeCount,VCount[ObjLay]);
-              Inc(Imp.PolyCount,PCount[ObjLay]);
-              //Inc(Imp.SurfCount);
-            end else
+                      if Chunk.ID=$4130 then begin //Faces_Material
+                        ObjName:='';
+                        repeat
+                          BlockRead(f,c,1);
+                          if c[1]<>#0 then ObjName:=ObjName+c[1];
+                        until((c[1]=#0)or(Length(ObjName)=20));
 
-            begin
-              Log:=Log+'4000 chunk skipped ='+inttohex(Chunk.ID,4)+' ('+inttostr(Chunk.Len)+'Bytes)'+eol;
-              BlockRead(f,c,Chunk.Len-6);
-            end;
-          until((ChunkLen[3]=0)or(Eof(f)));
-        end else
+                        MatLayUse:=9999; //if names doesn't match invoke RangeError later on
+                        for i:=1 to MatLay do
+                          if Imp.Mtl[i].Title=ObjName then MatLayUse:=i;
 
-        begin
-          Log:=Log+'3D3D chunk skipped ='+inttohex(Chunk.ID,4)+' ('+inttostr(Chunk.Len)+'Bytes)'+eol;
-          BlockRead(f,c,Chunk.Len-6);
-        end;
-      until(Eof(f));
-    end else
+                        BlockRead(f,Len,2);
+                        for i:=1 to Len do begin
+                          BlockRead(f,Tmp,2);
+                          Imp.Surf[Tmp+Imp.PolyCount+1]:=MatLayUse;
+                        end;
+                      end else
 
-    begin
-      Log:=Log+'4D4D chunk skipped ='+inttohex(Chunk.ID,4)+' ('+inttostr(Chunk.Len)+'Bytes)'+eol;
-      BlockRead(f,c,Chunk.Len-6);
-    end;
-  until(Eof(f));
+                      if Chunk.ID=$4150 then begin //Smoothing_Group_List
+                        for i:=1 to PCount[ObjLay] do begin
+                          BlockRead(f,c,4);
+                        end;
+                        //Log:=Log+'Smoothing groups readed'+eol;
+                      end else
 
-CloseFile(f);
+                      begin
+                        //Log:=Log+'4120 chunk skipped ='+inttohex(Chunk.ID,4)+' ('+inttostr(Chunk.Len)+'Bytes)'+eol;
+                        BlockRead(f,c,Chunk.Len-6);
+                      end;
+                    until((ChunkLen[5]=0)or(Eof(f)));
+                  end else
 
-////////////////////////////////////////////////////////////////////////////////
+                  begin
+                    //Log:=Log+'4100 chunk skipped ='+inttohex(Chunk.ID,4)+' ('+inttostr(Chunk.Len)+'Bytes)'+eol;
+                    BlockRead(f,c,Chunk.Len-6);
+                  end;
+                until((ChunkLen[4]=0)or(Eof(f)));
+
+                Inc(Imp.VerticeCount,VCount[ObjLay]);
+                Inc(Imp.PolyCount,PCount[ObjLay]);
+                //Inc(Imp.SurfCount);
+              end else
+
+              begin
+                //Log:=Log+'4000 chunk skipped ='+inttohex(Chunk.ID,4)+' ('+inttostr(Chunk.Len)+'Bytes)'+eol;
+                BlockRead(f,c,Chunk.Len-6);
+              end;
+            until((ChunkLen[3]=0)or(Eof(f)));
+          end else
+
+          begin
+            //Log:=Log+'3D3D chunk skipped ='+inttohex(Chunk.ID,4)+' ('+inttostr(Chunk.Len)+'Bytes)'+eol;
+            BlockRead(f,c,Chunk.Len-6);
+          end;
+        until(Eof(f));
+      end else
+
+      begin
+        //Log:=Log+'4D4D chunk skipped ='+inttohex(Chunk.ID,4)+' ('+inttostr(Chunk.Len)+'Bytes)'+eol;
+        BlockRead(f,c,Chunk.Len-6);
+      end;
+    until(Eof(f));
+  finally
+    CloseFile(f);
+  end;
 
   //Scale 3DMax coords
-  for i:=1 to Imp.VerticeCount do begin
-  Imp.XYZ[i].X:=-Imp.XYZ[i].X*10;
-  Imp.XYZ[i].Y:=Imp.XYZ[i].Y*10;
-  Imp.XYZ[i].Z:=Imp.XYZ[i].Z*10;
-  SwapFloat(Imp.XYZ[i].X,Imp.XYZ[i].Z); //Swap X and Z axis
+  for i:=1 to Imp.VerticeCount do
+  begin
+    Imp.XYZ[i].X:=-Imp.XYZ[i].X*10;
+    Imp.XYZ[i].Y:=Imp.XYZ[i].Y*10;
+    Imp.XYZ[i].Z:=Imp.XYZ[i].Z*10;
+    SwapFloat(Imp.XYZ[i].X,Imp.XYZ[i].Z); //Swap X and Z axis
   end;
 
-  for i:=1 to Imp.PolyCount do begin
-  if Imp.Surf[i]=0 then Imp.Surf[i]:=1;
-  end;
+  for i:=1 to Imp.PolyCount do
+    if Imp.Surf[i]=0 then
+      Imp.Surf[i]:=1;
 
   Imp.SurfCount:=MatLay;
-  Log:=Log+'3DS readed';
   Result:=True;
 end;
 
 
-function LoadLWO(const aFilename: string; out Log:string):Boolean;
+function LoadLWO(const aFilename: string):Boolean;
 var
   c: array [1..MAX_READ_BUFFER] of AnsiChar;
   f:file;
@@ -500,7 +494,6 @@ var
   cliptex: array [1..512]of string;
 begin
   Result:=False;
-  Log:='';
   OldTimeLWO:=GetTickCount;
 
   FillChar(Imp,SizeOf(Imp),#0);
@@ -583,7 +576,7 @@ begin
       BlockRead(f,c,6);    //TXUV_2
       if (c[1]+c[2]+c[3]+c[4])<>'TXUV' then
       begin
-        Log:=Log+'VMAP '+c[1]+c[2]+c[3]+c[4]+' skipped'+eol;
+        //Log:=Log+'VMAP '+c[1]+c[2]+c[3]+c[4]+' skipped'+eol;
         BlockRead(f,c,chsize-6);
       end else
       begin
@@ -661,7 +654,7 @@ begin
         end;
       end else
       begin
-        Log:=Log+'PTAG '+c[1]+c[2]+c[3]+c[4]+' skipped'+eol;
+        //Log:=Log+'PTAG '+c[1]+c[2]+c[3]+c[4]+' skipped'+eol;
         BlockRead(f,c,chsize-4)
       end;
     end else
@@ -671,7 +664,7 @@ begin
       BlockRead(f,c,6);    //TXUV_2
       if (c[1]+c[2]+c[3]+c[4])<>'TXUV' then
       begin
-        Log:=Log+'VMAD '+c[1]+c[2]+c[3]+c[4]+' skipped'+eol;
+        //Log:=Log+'VMAD '+c[1]+c[2]+c[3]+c[4]+' skipped'+eol;
         BlockRead(f,c,chsize-6);
       end
       else
@@ -776,7 +769,7 @@ begin
       Inc(stag);          //finaly stag = surf qty+1
     end else
     begin
-      Log:=Log+chname+' skipped'+eol;
+      //Log:=Log+chname+' skipped'+eol;
       for i:=1 to (chsize div MAX_READ_BUFFER) do BlockRead(f,c,MAX_READ_BUFFER);
       BlockRead(f,c,chsize mod MAX_READ_BUFFER);
     end;
@@ -816,7 +809,6 @@ begin
 
   Imp.SurfCount:=MatCount;
   Imp.PartCount:=PartCount;
-  Log:=Log+'LWO readed';
   Result:=True;
 end;
 

@@ -12,12 +12,12 @@ type
     lmLoadAndShow // When importing from menu or converting
     );
   TRenderObjectSet = set of (roMOX, roMOX_COB, roCOB, roCPO, roTREE);
-  TClearUp = (cuMOX, cuMTL, cuCOB, cuCPO, cuTREE, cuALL);
+  TEditingActions = (cuMOX, cuMTL, cuCOB, cuCPO, cuTREE, cuALL);
   TCameraAction = (caNone, caRotate, caMove, caZoom);
 
 const
   APP_TITLE = 'Mesh ToolKit';
-  VER_INFO = '2.4.2';
+  VER_INFO = '2.4.3';
   FPS_INTERVAL: Cardinal = 1000;               // Calculate FPS every ---- ms
   MAX_MATERIALS = 255;
   MAX_COLORS = 15;
