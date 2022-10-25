@@ -33,8 +33,8 @@ type
     constructor Create;
     procedure LoadFromStream(aStream: TStream);
     procedure SaveToStream(aStream: TStream);
-    procedure ValuesCopy(aHandle: THandle);
-    procedure ValuesPaste(aHandle: THandle);
+    procedure ValuesCopyToClipboard(aHandle: THandle);
+    procedure ValuesPasteFromClipboard(aHandle: THandle);
   end;
 
   // DataS?
@@ -48,6 +48,7 @@ type
     procedure LoadFromFile(const aFilename: string);
     procedure SaveToFile(const aFilename: string);
   end;
+
 
 implementation
 uses
@@ -350,7 +351,7 @@ begin
 end;
 
 
-procedure TTB.ValuesCopy(aHandle: THandle);
+procedure TTB.ValuesCopyToClipboard(aHandle: THandle);
 var
   I, K: Integer;
   sl: TStringList;
@@ -426,7 +427,7 @@ begin
 end;
 
 
-procedure TTB.ValuesPaste(aHandle: THandle);
+procedure TTB.ValuesPasteFromClipboard(aHandle: THandle);
 var
   I, K: Integer;
   sl: TStringList;

@@ -317,7 +317,7 @@ begin
 
   tb := lvTBs.ItemFocused.Data;
 
-  tb.ValuesCopy(Handle);
+  tb.ValuesCopyToClipboard(Handle);
 end;
 
 
@@ -333,7 +333,7 @@ begin
 
   tb := lvTBs.ItemFocused.Data;
 
-  tb.ValuesPaste(Handle);
+  tb.ValuesPasteFromClipboard(Handle);
 end;
 
 
