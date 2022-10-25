@@ -1,9 +1,8 @@
 program DSExplorer;
-
 uses
   Vcl.Forms,
+  Unit_DS in 'Unit_DS.pas',
   Unit_DSCommon in 'Unit_DSCommon.pas',
-  Unit_DSExplorer in 'Unit_DSExplorer.pas',
   UnitMainForm in 'UnitMainForm.pas' {Form7};
 
 {$R *.res}

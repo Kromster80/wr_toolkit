@@ -1,10 +1,11 @@
 unit UnitMainForm;
 interface
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, System.IOUtils, Types, Math, Generics.Collections,
+  Winapi.Windows, Winapi.Messages, Types, Math, System.SysUtils, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, System.IOUtils, Vcl.ComCtrls, Vcl.Clipbrd,
+  Generics.Collections,
 
-  Unit_DSExplorer, Vcl.ComCtrls, Vcl.Clipbrd;
+  Unit_DS;
 
 type
   TForm7 = class(TForm)

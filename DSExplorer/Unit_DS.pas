@@ -1,4 +1,4 @@
-unit Unit_DSExplorer;
+unit Unit_DS;
 interface
 uses
   Classes, Generics.Collections,
