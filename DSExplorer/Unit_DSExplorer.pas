@@ -257,11 +257,17 @@ begin
   aStream.Read(chunk, SizeOf(chunk));
   Assert(chunk.GetTagString = 'VAEn');
   aStream.Read(vaen, SizeOf(vaen));
+
   aStream.Read(chunk, SizeOf(chunk));
+  Assert(chunk.GetTagString = 'VAId');
   aStream.Read(fVAId, SizeOf(fVAId));
+
   aStream.Read(chunk, SizeOf(chunk));
+  Assert(chunk.GetTagString = 'VAiC');
   aStream.Read(fVAiC, 1);
+
   aStream.Read(chunk, SizeOf(chunk));
+  Assert(chunk.GetTagString = 'VALb');
   fVALb.LoadFromStream(aStream);
 
   // No entries and we are at the end - don't bother checking for "Cond"
