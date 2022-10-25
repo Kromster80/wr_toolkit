@@ -34,6 +34,7 @@ type
     procedure LoadFromStream(aStream: TStream);
     procedure SaveToStream(aStream: TStream);
     procedure ValuesCopy(aHandle: THandle);
+    procedure ValuesPaste(aHandle: THandle);
   end;
 
   // DataS?
@@ -50,7 +51,7 @@ type
 
 implementation
 uses
-  StrUtils, SysUtils;
+  Types, StrUtils, SysUtils;
 
 
 { TDS }
@@ -418,6 +419,96 @@ begin
     Clipboard.AsText := sl.Text;
 
     info := Format('Copied %d+1 lines', [sl.Count]);
+    MessageBox(aHandle, PWideChar(info), 'Info', MB_OK + MB_ICONINFORMATION);
+  finally
+    sl.Free;
+  end;
+end;
+
+
+procedure TTB.ValuesPaste(aHandle: THandle);
+var
+  I, K: Integer;
+  sl: TStringList;
+  info: string;
+  sa: TStringDynArray;
+  su: string;
+begin
+  sl := TStringList.Create;
+  try
+    sl.Text := Clipboard.AsText;
+
+    // Verify line count
+    if sl.Count <> fCOs[0].fValues.Count + 1 then
+    begin
+      info := Format('Line count in clipboard %d does not match TB %d+1',
+        [sl.Count, fCOs[0].fValues.Count]);
+      MessageBox(aHandle, PWideChar(info), 'Error', MB_OK + MB_ICONERROR);
+      Exit;
+    end;
+
+    // First line is header
+    sa := SplitString(sl[0], #9);
+
+    // Verify column count
+    if Length(sa) <> fCOs.Count then
+    begin
+      info := Format('Column count in clipboard %d does not match TB %d',
+        [Length(sa), fCOs.Count]);
+      MessageBox(aHandle, PWideChar(info), 'Error', MB_OK + MB_ICONERROR);
+      Exit;
+    end;
+
+    // Verify column names
+    for I := 0 to fCOs.Count - 1 do
+    if fCOs[I].fVALb.Lb <> sa[I] then
+    begin
+      info := Format('Column name in clipboard "%s" does not match TB "%s"',
+        [sa[I], fCOs[I].fVALb.Lb]);
+      MessageBox(aHandle, PWideChar(info), 'Error', MB_OK + MB_ICONERROR);
+      Exit;
+    end;
+
+    for I := 0 to fCOs[0].fValues.Count - 1 do
+    begin
+      sa := SplitString(sl[I + 1], #9);
+
+      for K := 0 to fCOs.Count - 1 do
+      if I < fCOs[K].fValues.Count then
+      begin
+        if High(sa) >= K then
+          su := sa[K]
+        else
+          su := '';
+
+        // Restore line breaks
+        su := StringReplace(su, '\n', #10, [rfReplaceAll]);
+        su := StringReplace(su, '\r', #13, [rfReplaceAll]);
+
+        fCOs[K].fValues[I].FromString(su);
+
+        // Special treatment for localizations texts (DS uses ANSI, but stores no codepages)
+        if fVALb.Lb = 'Texte' then
+          if fCOs[K].fVALb.Lb = 'Deutsch' then
+            fCOs[K].fValues[I].FromUnicodeString(su, 1250)
+          else
+          if fCOs[K].fVALb.Lb = 'French' then
+            fCOs[K].fValues[I].FromUnicodeString(su, 1252)
+          else
+          if fCOs[K].fVALb.Lb = 'Spanish' then
+            fCOs[K].fValues[I].FromUnicodeString(su, 1252)
+          else
+          if fCOs[K].fVALb.Lb = 'Italian' then
+            fCOs[K].fValues[I].FromUnicodeString(su, 1252)
+          else
+          if fCOs[K].fVALb.Lb = 'Russian' then
+            fCOs[K].fValues[I].FromUnicodeString(su, 1251)
+          else
+            fCOs[K].fValues[I].FromUnicodeString(su, 1252);
+      end;
+    end;
+
+    info := Format('Replaced %d-1 lines', [sl.Count]);
     MessageBox(aHandle, PWideChar(info), 'Info', MB_OK + MB_ICONINFORMATION);
   finally
     sl.Free;
