@@ -8,7 +8,7 @@ type
   private
     fTag: array [0..3] of AnsiChar;
   public
-    function TagString: AnsiString;
+    function GetTagString: AnsiString;
     procedure SetTagString(aValue: AnsiString);
   end;
 
@@ -46,7 +46,7 @@ implementation
 
 
 { TChunkHead }
-function TChunkHead.TagString: AnsiString;
+function TChunkHead.GetTagString: AnsiString;
 begin
   Result := fTag[0] + fTag[1] + fTag[2] + fTag[3];
 end;

@@ -75,30 +75,30 @@ begin
       ms.LoadFromFile(aFilename);
 
       ms.Read(chunk, SizeOf(chunk));
-      Assert(chunk.TagString = 'NDDS');
+      Assert(chunk.GetTagString = 'NDDS');
       ms.Read(chunk, SizeOf(chunk));
-      Assert(chunk.TagString = 'VAEn');
+      Assert(chunk.GetTagString = 'VAEn');
       ms.Read(vaen, SizeOf(vaen));
 
       ms.Read(chunk, SizeOf(chunk));
-      Assert(chunk.TagString = 'VAst');
+      Assert(chunk.GetTagString = 'VAst');
       fVAst.LoadFromStream(ms);
 
       ms.Read(chunk, SizeOf(chunk));
-      Assert(chunk.TagString = 'VAau');
+      Assert(chunk.GetTagString = 'VAau');
       ms.Read(fVAau, SizeOf(fVAau));
 
       for I := 0 to vaen - 1 do
       begin
         ms.Read(chunk, SizeOf(chunk));
 
-        if chunk.TagString = 'NDTB' then
+        if chunk.GetTagString = 'NDTB' then
         begin
           tb := TTB.Create;
           tb.LoadFromStream(ms);
           fTBs.Add(tb);
         end else
-          Assert(False);
+          Assert(False, 'Unexpected chunk ' + chunk.GetTagString);
       end;
 
       Assert(ms.Position = ms.Size);
@@ -255,7 +255,7 @@ var
   ss: TDSString;
 begin
   aStream.Read(chunk, SizeOf(chunk));
-  Assert(chunk.TagString = 'VAEn');
+  Assert(chunk.GetTagString = 'VAEn');
   aStream.Read(vaen, SizeOf(vaen));
   aStream.Read(chunk, SizeOf(chunk));
   aStream.Read(fVAId, SizeOf(fVAId));
@@ -272,7 +272,7 @@ begin
   // So we read it and see if it is "Cond"
 
   aStream.Read(chunk, SizeOf(chunk));
-  if chunk.TagString = 'Cond' then
+  if chunk.GetTagString = 'Cond' then
   begin
     aStream.Read(condCount, 4);
     for K := 0 to condCount - 1 do
@@ -287,13 +287,13 @@ begin
   for I := 0 to vaen - 1 do
   begin
     aStream.Read(chunk, SizeOf(chunk));
-    if chunk.TagString = 'NDCO' then
+    if chunk.GetTagString = 'NDCO' then
     begin
       co := TCO.Create;
       co.LoadFromStream(aStream);
       fCOs.Add(co);
     end else
-      Assert(False, chunk.TagString);
+      Assert(False, 'Unexpected chunk ' + chunk.GetTagString);
   end;
 end;
 
