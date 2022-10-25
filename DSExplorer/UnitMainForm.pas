@@ -40,11 +40,11 @@ type
     fSortDirCO: Integer;
     fSortColCO: Integer;
 
-    fDSs: TObjectList<TDSExplorer>;
+    fDSs: TObjectList<TDS>;
 
     procedure LoadDS;
     procedure DisplayDS;
-    procedure DisplayTB(aDS: TDSExplorer; aClear: Boolean);
+    procedure DisplayTB(aDS: TDS; aClear: Boolean);
     procedure DisplayCO(aTB: TTB; aClear: Boolean);
     procedure DisplayValues(aCO: TCO; aClear: Boolean);
     procedure ValuesCopy(aTB: TTB);
@@ -82,7 +82,7 @@ begin
 end;
 
 
-procedure TForm7.DisplayTB(aDS: TDSExplorer; aClear: Boolean);
+procedure TForm7.DisplayTB(aDS: TDS; aClear: Boolean);
 var
   I: Integer;
   li: TListItem;
@@ -185,7 +185,7 @@ end;
 
 procedure TForm7.FormCreate(Sender: TObject);
 begin
-  fDSs := TObjectList<TDSExplorer>.Create;
+  fDSs := TObjectList<TDS>.Create;
 
   btnFindAndDisplayDSs.Click;
 
@@ -199,7 +199,7 @@ procedure TForm7.LoadDS;
 var
   allFiles: TStringDynArray;
   I: Integer;
-  ds: TDSExplorer;
+  ds: TDS;
 begin
   fDSs.Clear;
 
@@ -217,7 +217,7 @@ begin
 
   for I := 0 to High(allFiles) do
   begin
-    ds := TDSExplorer.Create;
+    ds := TDS.Create;
     ds.LoadFromFile(allFiles[I]);
     fDSs.Add(ds);
   end;
@@ -226,7 +226,7 @@ end;
 
 procedure TForm7.lvDSsChange(Sender: TObject; Item: TListItem; Change: TItemChange);
 begin
-  DisplayTB(TDSExplorer(Item.Data), True);
+  DisplayTB(TDS(Item.Data), True);
 end;
 
 
@@ -340,7 +340,7 @@ end;
 
 procedure TForm7.btnSaveDSClick(Sender: TObject);
 var
-  ds: TDSExplorer;
+  ds: TDS;
   fname: string;
   s: string;
 begin

@@ -72,7 +72,7 @@ type
   end;
 
   // DataS?
-  TDSExplorer = class
+  TDS = class
   public
     Filename: string;
     fVAst: TChunkVAst;
@@ -102,8 +102,8 @@ begin
 end;
 
 
-{ TDSExplorer }
-constructor TDSExplorer.Create;
+{ TDS }
+constructor TDS.Create;
 begin
   inherited;
 
@@ -111,7 +111,7 @@ begin
 end;
 
 
-procedure TDSExplorer.LoadFromFile(const aFilename: string);
+procedure TDS.LoadFromFile(const aFilename: string);
 var
   ms: TMemoryStream;
   chunk: TChunkHead;
@@ -163,7 +163,7 @@ begin
 end;
 
 
-procedure TDSExplorer.SaveToFile(const aFilename: string);
+procedure TDS.SaveToFile(const aFilename: string);
 var
   ms: TMemoryStream;
   chunk: TChunkHead;
