@@ -2,8 +2,8 @@ object Form7: TForm7
   Left = 0
   Top = 0
   Caption = 'DS Explorer'
-  ClientHeight = 881
-  ClientWidth = 1401
+  ClientHeight = 865
+  ClientWidth = 1185
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,24 +15,52 @@ object Form7: TForm7
   OnCreate = FormCreate
   PixelsPerInch = 120
   TextHeight = 17
+  object Label2: TLabel
+    Left = 704
+    Top = 8
+    Width = 22
+    Height = 17
+    Caption = 'TBs'
+  end
+  object Label1: TLabel
+    Left = 8
+    Top = 8
+    Width = 24
+    Height = 17
+    Caption = 'DSs'
+  end
+  object Label3: TLabel
+    Left = 8
+    Top = 416
+    Width = 25
+    Height = 17
+    Caption = 'COs'
+  end
+  object Label4: TLabel
+    Left = 968
+    Top = 416
+    Width = 38
+    Height = 17
+    Caption = 'Values'
+  end
   object btnFindAndDisplayDSs: TButton
     Left = 8
-    Top = 840
+    Top = 376
     Width = 177
     Height = 33
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
     Margins.Bottom = 4
-    Caption = 'Find and display all DSs'
+    Caption = 'Scan folder for DSs'
     TabOrder = 0
     OnClick = btnFindAndDisplayDSsClick
   end
   object lvTBs: TListView
-    Left = 792
-    Top = 8
+    Left = 704
+    Top = 32
     Width = 473
-    Height = 361
+    Height = 337
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -48,7 +76,7 @@ object Form7: TForm7
       end
       item
         Caption = 'iC'
-        Width = 63
+        Width = 40
       end
       item
         Caption = 'CondCount'
@@ -56,7 +84,7 @@ object Form7: TForm7
       end
       item
         Caption = 'En'
-        Width = 63
+        Width = 60
       end>
     TabOrder = 1
     ViewStyle = vsReport
@@ -66,9 +94,9 @@ object Form7: TForm7
   end
   object lvDSs: TListView
     Left = 8
-    Top = 8
-    Width = 777
-    Height = 361
+    Top = 32
+    Width = 689
+    Height = 337
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -76,7 +104,7 @@ object Form7: TForm7
     Columns = <
       item
         Caption = 'Filename'
-        Width = 200
+        Width = 300
       end
       item
         Caption = 'st'
@@ -84,11 +112,11 @@ object Form7: TForm7
       end
       item
         Caption = 'au'
-        Width = 63
+        Width = 40
       end
       item
         Caption = 'En'
-        Width = 64
+        Width = 60
       end>
     TabOrder = 2
     ViewStyle = vsReport
@@ -96,9 +124,9 @@ object Form7: TForm7
   end
   object lvCOs: TListView
     Left = 8
-    Top = 376
-    Width = 1171
-    Height = 457
+    Top = 440
+    Width = 953
+    Height = 417
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -114,7 +142,7 @@ object Form7: TForm7
       end
       item
         Caption = 'iU'
-        Width = 63
+        Width = 40
       end
       item
         Caption = 'SM'
@@ -122,11 +150,11 @@ object Form7: TForm7
       end
       item
         Caption = 'ST'
-        Width = 188
+        Width = 110
       end
       item
         Caption = 'IC'
-        Width = 188
+        Width = 90
       end
       item
         Caption = 'SC'
@@ -134,7 +162,7 @@ object Form7: TForm7
       end
       item
         Caption = 'En'
-        Width = 63
+        Width = 60
       end>
     TabOrder = 3
     ViewStyle = vsReport
@@ -143,8 +171,8 @@ object Form7: TForm7
     OnCompare = lvCOsCompare
   end
   object btnDisplayAll: TButton
-    Left = 192
-    Top = 840
+    Left = 704
+    Top = 376
     Width = 137
     Height = 34
     Margins.Left = 4
@@ -156,10 +184,10 @@ object Form7: TForm7
     OnClick = btnDisplayAllClick
   end
   object lvValues: TListView
-    Left = 1184
-    Top = 376
+    Left = 968
+    Top = 440
     Width = 211
-    Height = 457
+    Height = 417
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
@@ -176,41 +204,41 @@ object Form7: TForm7
     ViewStyle = vsReport
   end
   object btnCopyAll: TButton
-    Left = 976
-    Top = 840
-    Width = 99
+    Left = 848
+    Top = 376
+    Width = 131
     Height = 34
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
     Margins.Bottom = 4
-    Caption = 'Copy all'
+    Caption = 'Copy all values'
     TabOrder = 6
     OnClick = btnCopyAllClick
   end
   object btnPasteAll: TButton
-    Left = 1080
-    Top = 839
-    Width = 99
+    Left = 984
+    Top = 376
+    Width = 131
     Height = 34
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
     Margins.Bottom = 4
-    Caption = 'Paste all'
+    Caption = 'Paste all values'
     TabOrder = 7
     OnClick = btnPasteAllClick
   end
   object btnSaveDS: TButton
-    Left = 416
-    Top = 839
-    Width = 99
+    Left = 192
+    Top = 375
+    Width = 171
     Height = 34
     Margins.Left = 4
     Margins.Top = 4
     Margins.Right = 4
     Margins.Bottom = 4
-    Caption = 'Save DS'
+    Caption = 'Save current DS'
     TabOrder = 8
     OnClick = btnSaveDSClick
   end

@@ -17,6 +17,10 @@ type
     btnCopyAll: TButton;
     btnPasteAll: TButton;
     btnSaveDS: TButton;
+    Label2: TLabel;
+    Label1: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
     procedure btnFindAndDisplayDSsClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure lvTBsColumnClick(Sender: TObject; Column: TListColumn);
@@ -182,6 +186,7 @@ end;
 procedure TForm7.FormCreate(Sender: TObject);
 begin
   fDSs := TObjectList<TDSExplorer>.Create;
+
   btnFindAndDisplayDSs.Click;
 
   //lvDSs.ItemIndex := 1;
@@ -198,7 +203,17 @@ var
 begin
   fDSs.Clear;
 
-  allFiles := TDirectory.GetFiles('samples\');
+  allFiles := TDirectory.GetFiles('.\', TSearchOption.soAllDirectories,
+    function(const Path: string; const SearchRec: TSearchRec): Boolean
+    begin
+      Result := SameText(ExtractFileExt(SearchRec.Name), '.ds')
+             or SameText(ExtractFileExt(SearchRec.Name), '.car')
+             or SameText(ExtractFileExt(SearchRec.Name), '.mpl')
+             or SameText(ExtractFileExt(SearchRec.Name), '.scn')
+             or SameText(ExtractFileExt(SearchRec.Name), '.wr2')
+             or SameText(ExtractFileExt(SearchRec.Name), '.wrc')
+             or SameText(ExtractFileExt(SearchRec.Name), '.wrp');
+    end);
 
   for I := 0 to High(allFiles) do
   begin
@@ -295,6 +310,12 @@ procedure TForm7.btnCopyAllClick(Sender: TObject);
 var
   tb: TTB;
 begin
+  if lvTBs.ItemIndex = -1 then
+  begin
+    MessageBox(Handle, 'TB not selected', 'Error', MB_OK + MB_ICONERROR);
+    Exit;
+  end;
+
   tb := lvTBs.ItemFocused.Data;
 
   ValuesCopy(tb);
@@ -305,6 +326,12 @@ procedure TForm7.btnPasteAllClick(Sender: TObject);
 var
   tb: TTB;
 begin
+  if lvTBs.ItemIndex = -1 then
+  begin
+    MessageBox(Handle, 'TB not selected', 'Error', MB_OK + MB_ICONERROR);
+    Exit;
+  end;
+
   tb := lvTBs.ItemFocused.Data;
 
   ValuesPaste(tb);
@@ -315,12 +342,23 @@ procedure TForm7.btnSaveDSClick(Sender: TObject);
 var
   ds: TDSExplorer;
   fname: string;
+  s: string;
 begin
+  if lvDSs.ItemIndex = -1 then
+  begin
+    MessageBox(Handle, 'DS not selected', 'Error', MB_OK + MB_ICONERROR);
+    Exit;
+  end;
+
   ds := lvDSs.ItemFocused.Data;
 
   fname := lvDSs.ItemFocused.Caption;
 
-  ds.SaveToFile(fname + '.new');
+  fname := ChangeFileExt(fname, '.new' + ExtractFileExt(fname));
+  ds.SaveToFile(fname);
+
+  s := Format('DS saved to "%s"', [fname]);
+  MessageBox(Handle, PWideChar(s), 'Info', MB_OK + MB_ICONINFORMATION);
 end;
 
 
