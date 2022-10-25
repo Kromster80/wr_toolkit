@@ -168,7 +168,6 @@ var
   ms: TMemoryStream;
   chunk: TChunkHead;
   vaen: Integer;
-  tb: TTB;
   I: Integer;
 begin
   Filename := aFilename;
@@ -356,9 +355,6 @@ var
   chunk: TChunkHead;
   vaen: Integer;
   I, K: Integer;
-  co: TCO;
-  condCount: Integer;
-  ss: TDSString;
 begin
   chunk.SetTagString('VAEn');
   aStream.Write(chunk, SizeOf(chunk));
@@ -524,8 +520,6 @@ end;
 
 procedure TValue.FromUnicodeString(const aString: string; aAnsiCodepage: Integer);
 var
-  sa: AnsiString;
-  sb: TBytes;
   strLen: Integer;
   su: RawByteString;
 begin
