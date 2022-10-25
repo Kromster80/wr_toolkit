@@ -16,7 +16,7 @@ type
     fVAIC: TDSString;
     fVASC: TDSString;
 
-    fValues: TList<TValue>;
+    fValues: TObjectList<TValue>;
     constructor Create;
     procedure LoadFromStream(aStream: TStream);
     procedure SaveToStream(aStream: TStream);
@@ -24,6 +24,8 @@ type
 
   // Table?
   TTB = class
+  private
+    function GetMaxValuesCount: Integer;
   public
     fVAId: Integer;
     fVAiC: Byte;
@@ -52,7 +54,7 @@ type
 
 implementation
 uses
-  Types, StrUtils, SysUtils;
+  Math, Types, StrUtils, SysUtils;
 
 
 { TDS }
@@ -163,7 +165,7 @@ constructor TCO.Create;
 begin
   inherited;
 
-  fValues := TList<TValue>.Create;
+  fValues := TObjectList<TValue>.Create;
 end;
 
 
@@ -191,7 +193,7 @@ begin
   fVASC.LoadFromStream(aStream);
 
   for I := 0 to vaen - 1 do
-    fValues.Add(TValue.NewFromStream(aStream));
+    fValues.Add(TValue.CreateFromStream(aStream));
 end;
 
 
@@ -247,6 +249,16 @@ begin
 
   fCOs := TObjectList<TCO>.Create;
   fConds := TList<TDSString>.Create;
+end;
+
+
+function TTB.GetMaxValuesCount: Integer;
+var
+  I: Integer;
+begin
+  Result := 0;
+  for I := 0 to fCOs.Count - 1 do
+    Result := Max(Result, fCOs[I].fValues.Count);
 end;
 
 
@@ -360,6 +372,7 @@ var
   su, s: string;
   sb: TBytes;
   s1250: string;
+  valuesCount: Integer;
 begin
   sl := TStringList.Create;
   try
@@ -369,15 +382,17 @@ begin
       s := s + IfThen(I > 0, #9) + fCOs[I].fVALb.Lb;
     sl.Append(s);
 
+    valuesCount := GetMaxValuesCount;
+
     // Values
-    for K := 0 to fCOs[0].fValues.Count - 1 do
+    for K := 0 to valuesCount - 1 do
     begin
       s := '';
 
       for I := 0 to fCOs.Count - 1 do
       begin
         // Get the Unicode string
-        if fCOs[I].fValues.Count >= fCOs[0].fValues.Count then
+        if K < fCOs[I].fValues.Count then
         begin
           // By default strings come in English (no codepage needed)
           su := fCOs[I].fValues[K].ToString;
@@ -395,6 +410,15 @@ begin
             else
             if fCOs[I].fVALb.Lb = 'Italian' then
               su := fCOs[I].fValues[K].ToUnicodeString(1252)
+            else
+            if fCOs[I].fVALb.Lb = 'Polish' then
+              su := fCOs[I].fValues[K].ToUnicodeString(1250)
+            else
+            if fCOs[I].fVALb.Lb = 'Hungarian' then
+              su := fCOs[I].fValues[K].ToUnicodeString(1250)
+            else
+            if fCOs[I].fVALb.Lb = 'Czech' then
+              su := fCOs[I].fValues[K].ToUnicodeString(1250)
             else
             if fCOs[I].fVALb.Lb = 'Russian' then
               su := fCOs[I].fValues[K].ToUnicodeString(1251)
@@ -434,16 +458,19 @@ var
   info: string;
   sa: TStringDynArray;
   su: string;
+  valuesCount: Integer;
 begin
   sl := TStringList.Create;
   try
     sl.Text := Clipboard.AsText;
 
+    valuesCount := GetMaxValuesCount;
+
     // Verify line count
-    if sl.Count <> fCOs[0].fValues.Count + 1 then
+    if sl.Count <> valuesCount + 1 then
     begin
       info := Format('Line count in clipboard %d does not match TB %d+1',
-        [sl.Count, fCOs[0].fValues.Count]);
+        [sl.Count, valuesCount]);
       MessageBox(aHandle, PWideChar(info), 'Error', MB_OK + MB_ICONERROR);
       Exit;
     end;
@@ -470,7 +497,7 @@ begin
       Exit;
     end;
 
-    for I := 0 to fCOs[0].fValues.Count - 1 do
+    for I := 0 to valuesCount - 1 do
     begin
       sa := SplitString(sl[I + 1], #9);
 
@@ -504,6 +531,15 @@ begin
           else
           if fCOs[K].fVALb.Lb = 'Russian' then
             fCOs[K].fValues[I].FromUnicodeString(su, 1251)
+          else
+          if fCOs[K].fVALb.Lb = 'Polish' then
+            fCOs[K].fValues[I].FromUnicodeString(su, 1250)
+          else
+          if fCOs[K].fVALb.Lb = 'Hungarian' then
+            fCOs[K].fValues[I].FromUnicodeString(su, 1250)
+          else
+          if fCOs[K].fVALb.Lb = 'Czech' then
+            fCOs[K].fValues[I].FromUnicodeString(su, 1250)
           else
             fCOs[K].fValues[I].FromUnicodeString(su, 1252);
       end;

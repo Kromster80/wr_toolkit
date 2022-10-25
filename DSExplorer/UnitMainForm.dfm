@@ -1,7 +1,6 @@
 object Form7: TForm7
   Left = 0
   Top = 0
-  Caption = 'DS Explorer'
   ClientHeight = 865
   ClientWidth = 1185
   Color = clBtnFace

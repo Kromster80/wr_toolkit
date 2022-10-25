@@ -1,11 +1,14 @@
 ------------------------------------------------------
-Synetic DataSet explorer v0.1
+Synetic DataSet explorer v0.3
 ------------------------------------------------------
 
 Description:
-Tool for exploring Synetic satasets (*.ds, *.car, *.wrc and otherr)
+Tool for exploring Synetic satasets (*.ds, *.car, *.wrc and other)
 
 Version History:
+0.3     2022.10.25  Fixed export issues with uneven entry count in COs
+                    Added codepage for Polish, Hungarian, Czech
+0.2     2022.10.25  Fixed updated data not being written on paste from clipboard
                     Added .scn files support (it is the same DS inside)
 0.1     2022.10.25  Initial release
                     Browse all supported DS files in this and sub-folders

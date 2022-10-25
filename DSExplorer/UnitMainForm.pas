@@ -184,6 +184,8 @@ end;
 
 procedure TForm7.FormCreate(Sender: TObject);
 begin
+  Caption := 'DS Explorer v0.3';
+
   fDSs := TObjectList<TDS>.Create;
 
   btnFindAndDisplayDSs.Click;

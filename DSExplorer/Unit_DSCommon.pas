@@ -27,13 +27,14 @@ type
     procedure SaveToStream(aStream: TStream);
   end;
 
-  TValue = record
+  TValue = class
   public
     Typ: Byte;
     I: Integer;
     F: Single;
     S: TDSString;
-    class function NewFromStream(aStream: TStream): TValue; static;
+    constructor CreateFromStream(aStream: TStream);
+
     procedure SaveToStream(aStream: TStream);
     function ToString: AnsiString;
     function ToUnicodeString(aAnsiCodepage: Integer): string;
@@ -116,16 +117,16 @@ end;
 
 
 { TValue }
-class function TValue.NewFromStream(aStream: TStream): TValue;
+constructor TValue.CreateFromStream(aStream: TStream);
 begin
-  Result := default(TValue);
+  inherited Create;
 
-  aStream.Read(Result.Typ, 1);
-  case Result.Typ of
+  aStream.Read(Typ, 1);
+  case Typ of
     0: Exit; // Rarely nothing
-    1: aStream.Read(Result.I, 4);
-    2: aStream.Read(Result.F, 4);
-    16: Result.S.LoadFromStream(aStream);
+    1: aStream.Read(I, 4);
+    2: aStream.Read(F, 4);
+    16: S.LoadFromStream(aStream);
   else
     Assert(False);
   end;
