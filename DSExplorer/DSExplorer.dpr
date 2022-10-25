@@ -2,6 +2,7 @@ program DSExplorer;
 
 uses
   Vcl.Forms,
+  Unit_DSCommon in 'Unit_DSCommon.pas',
   Unit_DSExplorer in 'Unit_DSExplorer.pas',
   UnitMainForm in 'UnitMainForm.pas' {Form7};
 
