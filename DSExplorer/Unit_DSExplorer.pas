@@ -5,13 +5,17 @@ uses
 
 type
   TChunkHead = record
-    tag: array [0..3] of AnsiChar;
+  private
+    fTag: array [0..3] of AnsiChar;
+  public
     function TagString: AnsiString;
     procedure SetTagString(aValue: AnsiString);
   end;
 
   TChunkVAst = record
-    Bytes: array [0..11] of Byte;
+  private
+    fBytes: array [0..11] of Byte;
+  public
     procedure LoadFromStream(aStream: TStream);
     procedure SaveToStream(aStream: TStream);
     function ToString: AnsiString;
@@ -37,8 +41,8 @@ type
     procedure FromUnicodeString(const aString: string; aAnsiCodepage: Integer);
   end;
 
+  // Column?
   TCO = class
-  private
   public
     fVAId: Integer;
     fVALb: TDSString;
@@ -54,8 +58,8 @@ type
     procedure SaveToStream(aStream: TStream);
   end;
 
+  // Table?
   TTB = class
-  private
   public
     fVAId: Integer;
     fVAiC: Byte;
@@ -67,8 +71,8 @@ type
     procedure SaveToStream(aStream: TStream);
   end;
 
+  // DataS?
   TDSExplorer = class
-  private
   public
     Filename: string;
     fVAst: TChunkVAst;
@@ -81,19 +85,20 @@ type
 
 implementation
 
+
 { TChunkHead }
 function TChunkHead.TagString: AnsiString;
 begin
-  Result := tag[0] + tag[1] + tag[2] + tag[3];
+  Result := fTag[0] + fTag[1] + fTag[2] + fTag[3];
 end;
 
 
 procedure TChunkHead.SetTagString(aValue: AnsiString);
 begin
-  tag[0] := aValue[1];
-  tag[1] := aValue[2];
-  tag[2] := aValue[3];
-  tag[3] := aValue[4];
+  fTag[0] := aValue[1];
+  fTag[1] := aValue[2];
+  fTag[2] := aValue[3];
+  fTag[3] := aValue[4];
 end;
 
 
@@ -121,23 +126,23 @@ begin
     try
       ms.LoadFromFile(aFilename);
 
-      ms.Read(chunk, 4);
+      ms.Read(chunk, SizeOf(chunk));
       Assert(chunk.TagString = 'NDDS');
-      ms.Read(chunk, 4);
+      ms.Read(chunk, SizeOf(chunk));
       Assert(chunk.TagString = 'VAEn');
       ms.Read(vaen, SizeOf(vaen));
 
-      ms.Read(chunk, 4);
+      ms.Read(chunk, SizeOf(chunk));
       Assert(chunk.TagString = 'VAst');
       fVAst.LoadFromStream(ms);
 
-      ms.Read(chunk, 4);
+      ms.Read(chunk, SizeOf(chunk));
       Assert(chunk.TagString = 'VAau');
       ms.Read(fVAau, SizeOf(fVAau));
 
       for I := 0 to vaen - 1 do
       begin
-        ms.Read(chunk, 4);
+        ms.Read(chunk, SizeOf(chunk));
 
         if chunk.TagString = 'NDTB' then
         begin
@@ -171,26 +176,26 @@ begin
   ms := TMemoryStream.Create;
 
   chunk.SetTagString('NDDS');
-  ms.Write(chunk, 4);
+  ms.Write(chunk, SizeOf(chunk));
 
   chunk.SetTagString('VAEn');
-  ms.Write(chunk, 4);
+  ms.Write(chunk, SizeOf(chunk));
 
   vaen := fTBs.Count;
   ms.Write(vaen, SizeOf(vaen));
 
   chunk.SetTagString('VAst');
-  ms.Write(chunk, 4);
+  ms.Write(chunk, SizeOf(chunk));
   fVAst.SaveToStream(ms);
 
   chunk.SetTagString('VAau');
-  ms.Write(chunk, 4);
+  ms.Write(chunk, SizeOf(chunk));
   ms.Write(fVAau, SizeOf(fVAau));
 
   for I := 0 to vaen - 1 do
   begin
     chunk.SetTagString('NDTB');
-    ms.Write(chunk, 4);
+    ms.Write(chunk, SizeOf(chunk));
 
     fTBs[I].SaveToStream(ms);
   end;
@@ -216,21 +221,21 @@ var
   vaen: Integer;
   I: Integer;
 begin
-  aStream.Read(chunk, 4);
+  aStream.Read(chunk, SizeOf(chunk));
   aStream.Read(vaen, SizeOf(vaen));
-  aStream.Read(chunk, 4);
+  aStream.Read(chunk, SizeOf(chunk));
   aStream.Read(fVAId, SizeOf(fVAId));
-  aStream.Read(chunk, 4);
+  aStream.Read(chunk, SizeOf(chunk));
   fVALb.LoadFromStream(aStream);
-  aStream.Read(chunk, 4);
+  aStream.Read(chunk, SizeOf(chunk));
   aStream.Read(fVAiU, SizeOf(fVAiU));
-  aStream.Read(chunk, 4);
+  aStream.Read(chunk, SizeOf(chunk));
   fVASM.LoadFromStream(aStream);
-  aStream.Read(chunk, 4);
+  aStream.Read(chunk, SizeOf(chunk));
   fVAST.LoadFromStream(aStream);
-  aStream.Read(chunk, 4);
+  aStream.Read(chunk, SizeOf(chunk));
   fVAIC.LoadFromStream(aStream);
-  aStream.Read(chunk, 4);
+  aStream.Read(chunk, SizeOf(chunk));
   fVASC.LoadFromStream(aStream);
 
   for I := 0 to vaen - 1 do
@@ -245,37 +250,37 @@ var
   I: Integer;
 begin
   chunk.SetTagString('VAEn');
-  aStream.Write(chunk, 4);
+  aStream.Write(chunk, SizeOf(chunk));
 
   vaen := fValues.Count;
   aStream.Write(vaen, SizeOf(vaen));
 
   chunk.SetTagString('VAId');
-  aStream.Write(chunk, 4);
+  aStream.Write(chunk, SizeOf(chunk));
   aStream.Write(fVAId, SizeOf(fVAId));
 
   chunk.SetTagString('VALb');
-  aStream.Write(chunk, 4);
+  aStream.Write(chunk, SizeOf(chunk));
   fVALb.SaveToStream(aStream);
 
   chunk.SetTagString('VAiU');
-  aStream.Write(chunk, 4);
+  aStream.Write(chunk, SizeOf(chunk));
   aStream.Write(fVAiU, SizeOf(fVAiU));
 
   chunk.SetTagString('VASM');
-  aStream.Write(chunk, 4);
+  aStream.Write(chunk, SizeOf(chunk));
   fVASM.SaveToStream(aStream);
 
   chunk.SetTagString('VAST');
-  aStream.Write(chunk, 4);
+  aStream.Write(chunk, SizeOf(chunk));
   fVAST.SaveToStream(aStream);
 
   chunk.SetTagString('VAIC');
-  aStream.Write(chunk, 4);
+  aStream.Write(chunk, SizeOf(chunk));
   fVAIC.SaveToStream(aStream);
 
   chunk.SetTagString('VASC');
-  aStream.Write(chunk, 4);
+  aStream.Write(chunk, SizeOf(chunk));
   fVASC.SaveToStream(aStream);
 
   for I := 0 to vaen - 1 do
@@ -302,14 +307,14 @@ var
   condCount: Integer;
   ss: TDSString;
 begin
-  aStream.Read(chunk, 4);
+  aStream.Read(chunk, SizeOf(chunk));
   Assert(chunk.TagString = 'VAEn');
   aStream.Read(vaen, SizeOf(vaen));
-  aStream.Read(chunk, 4);
+  aStream.Read(chunk, SizeOf(chunk));
   aStream.Read(fVAId, SizeOf(fVAId));
-  aStream.Read(chunk, 4);
+  aStream.Read(chunk, SizeOf(chunk));
   aStream.Read(fVAiC, 1);
-  aStream.Read(chunk, 4);
+  aStream.Read(chunk, SizeOf(chunk));
   fVALb.LoadFromStream(aStream);
 
   // No entries and we are at the end - don't bother checking for "Cond"
@@ -319,7 +324,7 @@ begin
   // VAiC is not a good marker it seems
   // So we read it and see if it is "Cond"
 
-  aStream.Read(chunk, 4);
+  aStream.Read(chunk, SizeOf(chunk));
   if chunk.TagString = 'Cond' then
   begin
     aStream.Read(condCount, 4);
@@ -334,7 +339,7 @@ begin
 
   for I := 0 to vaen - 1 do
   begin
-    aStream.Read(chunk, 4);
+    aStream.Read(chunk, SizeOf(chunk));
     if chunk.TagString = 'NDCO' then
     begin
       co := TCO.Create;
@@ -356,27 +361,27 @@ var
   ss: TDSString;
 begin
   chunk.SetTagString('VAEn');
-  aStream.Write(chunk, 4);
+  aStream.Write(chunk, SizeOf(chunk));
 
   vaen := fCOs.Count;
   aStream.Write(vaen, SizeOf(vaen));
 
   chunk.SetTagString('VAId');
-  aStream.Write(chunk, 4);
+  aStream.Write(chunk, SizeOf(chunk));
   aStream.Write(fVAId, SizeOf(fVAId));
 
   chunk.SetTagString('VAiC');
-  aStream.Write(chunk, 4);
-  aStream.Write(fVAiC, 1);
+  aStream.Write(chunk, SizeOf(chunk));
+  aStream.Write(fVAiC, SizeOf(fVAiC));
 
   chunk.SetTagString('VALb');
-  aStream.Write(chunk, 4);
+  aStream.Write(chunk, SizeOf(chunk));
   fVALb.SaveToStream(aStream);
 
   if fConds.Count > 0 then
   begin
     chunk.SetTagString('Cond');
-    aStream.Write(chunk, 4);
+    aStream.Write(chunk, SizeOf(chunk));
     aStream.Write(fConds.Count, 4);
     for K := 0 to fConds.Count - 1 do
       fConds[K].SaveToStream(aStream);
@@ -385,7 +390,7 @@ begin
   for I := 0 to vaen - 1 do
   begin
     chunk.SetTagString('NDCO');
-    aStream.Write(chunk, 4);
+    aStream.Write(chunk, SizeOf(chunk));
     fCOs[I].SaveToStream(aStream);
   end;
 end;
@@ -425,13 +430,13 @@ end;
 { TChunkVAst }
 procedure TChunkVAst.LoadFromStream(aStream: TStream);
 begin
-  aStream.Read(Bytes[0], 12);
+  aStream.Read(fBytes[0], 12);
 end;
 
 
 procedure TChunkVAst.SaveToStream(aStream: TStream);
 begin
-  aStream.Write(Bytes[0], 12);
+  aStream.Write(fBytes[0], 12);
 end;
 
 
@@ -440,8 +445,8 @@ var
   I: Integer;
 begin
   Result := '';
-  for I := 0 to High(Bytes) do
-    Result := Result + IntToHex(Bytes[I], 1);
+  for I := 0 to High(fBytes) do
+    Result := Result + IntToHex(fBytes[I], 1);
 end;
 
 

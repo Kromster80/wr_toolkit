@@ -207,9 +207,9 @@ begin
     function(const Path: string; const SearchRec: TSearchRec): Boolean
     begin
       Result := SameText(ExtractFileExt(SearchRec.Name), '.ds')
-             or SameText(ExtractFileExt(SearchRec.Name), '.car')
+             or SameText(ExtractFileExt(SearchRec.Name), '.car') // Addon cars
              or SameText(ExtractFileExt(SearchRec.Name), '.mpl')
-             or SameText(ExtractFileExt(SearchRec.Name), '.scn')
+             or SameText(ExtractFileExt(SearchRec.Name), '.scn') // WR2 addon sceneries by Silent
              or SameText(ExtractFileExt(SearchRec.Name), '.wr2')
              or SameText(ExtractFileExt(SearchRec.Name), '.wrc')
              or SameText(ExtractFileExt(SearchRec.Name), '.wrp');
