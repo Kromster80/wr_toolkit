@@ -201,4 +201,17 @@ object Form7: TForm7
     TabOrder = 7
     OnClick = btnPasteAllClick
   end
+  object btnSaveDS: TButton
+    Left = 416
+    Top = 839
+    Width = 99
+    Height = 34
+    Margins.Left = 4
+    Margins.Top = 4
+    Margins.Right = 4
+    Margins.Bottom = 4
+    Caption = 'Save DS'
+    TabOrder = 8
+    OnClick = btnSaveDSClick
+  end
 end

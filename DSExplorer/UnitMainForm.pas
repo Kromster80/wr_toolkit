@@ -16,6 +16,7 @@ type
     lvValues: TListView;
     btnCopyAll: TButton;
     btnPasteAll: TButton;
+    btnSaveDS: TButton;
     procedure btnFindAndDisplayDSsClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure lvTBsColumnClick(Sender: TObject; Column: TListColumn);
@@ -28,6 +29,7 @@ type
     procedure lvCOsChange(Sender: TObject; Item: TListItem; Change: TItemChange);
     procedure btnCopyAllClick(Sender: TObject);
     procedure btnPasteAllClick(Sender: TObject);
+    procedure btnSaveDSClick(Sender: TObject);
   private
     fSortDirTB: Integer;
     fSortColTB: Integer;
@@ -181,6 +183,10 @@ procedure TForm7.FormCreate(Sender: TObject);
 begin
   fDSs := TObjectList<TDSExplorer>.Create;
   btnFindAndDisplayDSs.Click;
+
+  //lvDSs.ItemIndex := 1;
+  //btnSaveDSClick(nil);
+  //Halt;
 end;
 
 
@@ -305,6 +311,19 @@ begin
 end;
 
 
+procedure TForm7.btnSaveDSClick(Sender: TObject);
+var
+  ds: TDSExplorer;
+  fname: string;
+begin
+  ds := lvDSs.ItemFocused.Data;
+
+  fname := lvDSs.ItemFocused.Caption;
+
+  ds.SaveToFile(fname + '.new');
+end;
+
+
 procedure TForm7.btnFindAndDisplayDSsClick(Sender: TObject);
 begin
   LoadDS;
@@ -386,7 +405,7 @@ begin
 
     Clipboard.AsText := sl.Text;
 
-    info := Format('Copied %d lines', [sl.Count]);
+    info := Format('Copied %d+1 lines', [sl.Count]);
     MessageBox(Handle, PWideChar(info), 'Info', MB_OK + MB_ICONINFORMATION);
   finally
     sl.Free;
@@ -481,20 +500,8 @@ begin
             aTB.fCOs[K].fValues[I].FromUnicodeString(su, 1252);
       end;
     end;
-    {
-    if sl.Count <> aCO.fValues.Count then
-    begin
-      info := Format('Can not paste.' + sLineBreak +
-                     'Clipboard line count %d mismatches CO Values count %d',
-                     [sl.Count, aCO.fValues.Count]);
-      MessageBox(Handle, PWideChar(info), 'Error', MB_OK + MB_ICONERROR);
-      Exit;
-    end;
 
-    for I := 0 to sl.Count - 1 do
-      aCO.fValues[I].FromString(sl[I]);
-     }
-    info := Format('Replaced %d lines', [sl.Count]);
+    info := Format('Replaced %d-1 lines', [sl.Count]);
     MessageBox(Handle, PWideChar(info), 'Info', MB_OK + MB_ICONINFORMATION);
   finally
     sl.Free;
