@@ -48,7 +48,6 @@ type
     procedure DisplayTB(aDS: TDS; aClear: Boolean);
     procedure DisplayCO(aTB: TTB; aClear: Boolean);
     procedure DisplayValues(aCO: TCO; aClear: Boolean);
-    procedure ValuesCopy(aTB: TTB);
     procedure ValuesPaste(aTB: TTB);
   end;
 
@@ -319,7 +318,7 @@ begin
 
   tb := lvTBs.ItemFocused.Data;
 
-  ValuesCopy(tb);
+  tb.ValuesCopy(Handle);
 end;
 
 
@@ -367,88 +366,6 @@ procedure TForm7.btnFindAndDisplayDSsClick(Sender: TObject);
 begin
   LoadDS;
   DisplayDS;
-end;
-
-
-procedure TForm7.ValuesCopy(aTB: TTB);
-var
-  I, K: Integer;
-  sl: TStringList;
-  info: string;
-  sa: AnsiString;
-  su, s: string;
-  sb: TBytes;
-  s1250: string;
-begin
-  if aTB = nil then
-  begin
-    MessageBox(Handle, 'TB not selected', 'Error', MB_OK + MB_ICONERROR);
-    Exit;
-  end;
-
-  sl := TStringList.Create;
-  try
-    // Header
-    s := '';
-    for I := 0 to aTB.fCOs.Count - 1 do
-      s := s + IfThen(I > 0, #9) + aTB.fCOs[I].fVALb.Lb;
-    sl.Append(s);
-
-    // Values
-    for K := 0 to aTB.fCOs[0].fValues.Count - 1 do
-    begin
-      s := '';
-
-      for I := 0 to aTB.fCOs.Count - 1 do
-      begin
-        // Get the Unicode string
-        if aTB.fCOs[I].fValues.Count >= aTB.fCOs[0].fValues.Count then
-        begin
-          // By default strings come in English (no codepage needed)
-          su := aTB.fCOs[I].fValues[K].ToString;
-
-          // Special treatment for localizations texts (DS uses ANSI, but stores no codepages)
-          if aTB.fVALb.Lb = 'Texte' then
-            if aTB.fCOs[I].fVALb.Lb = 'Deutsch' then
-              su := aTB.fCOs[I].fValues[K].ToUnicodeString(1250)
-            else
-            if aTB.fCOs[I].fVALb.Lb = 'French' then
-              su := aTB.fCOs[I].fValues[K].ToUnicodeString(1252)
-            else
-            if aTB.fCOs[I].fVALb.Lb = 'Spanish' then
-              su := aTB.fCOs[I].fValues[K].ToUnicodeString(1252)
-            else
-            if aTB.fCOs[I].fVALb.Lb = 'Italian' then
-              su := aTB.fCOs[I].fValues[K].ToUnicodeString(1252)
-            else
-            if aTB.fCOs[I].fVALb.Lb = 'Russian' then
-              su := aTB.fCOs[I].fValues[K].ToUnicodeString(1251)
-            else
-              su := aTB.fCOs[I].fValues[K].ToUnicodeString(1252);
-        end else
-          su := '';
-
-        s := s + IfThen(I > 0, #9) + su;
-      end;
-
-      // Make sure there are no such things in text already
-      Assert(Pos('\n', s) = 0); // LF - #10
-      Assert(Pos('\r', s) = 0); // CR - #13
-
-      // We have to replace both separately, since DS uses LF and CRLF at will
-      s := StringReplace(s, #10, '\n', [rfReplaceAll]);
-      s := StringReplace(s, #13, '\r', [rfReplaceAll]);
-
-      sl.Append(s);
-    end;
-
-    Clipboard.AsText := sl.Text;
-
-    info := Format('Copied %d+1 lines', [sl.Count]);
-    MessageBox(Handle, PWideChar(info), 'Info', MB_OK + MB_ICONINFORMATION);
-  finally
-    sl.Free;
-  end;
 end;
 
 

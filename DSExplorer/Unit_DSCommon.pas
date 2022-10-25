@@ -18,7 +18,7 @@ type
   public
     procedure LoadFromStream(aStream: TStream);
     procedure SaveToStream(aStream: TStream);
-    function ToString: AnsiString;
+    function ToString: string;
   end;
 
   TDSString = record
@@ -105,7 +105,7 @@ begin
 end;
 
 
-function TChunkVAst.ToString: AnsiString;
+function TChunkVAst.ToString: string;
 var
   I: Integer;
 begin

@@ -1,7 +1,7 @@
 unit Unit_DS;
 interface
 uses
-  Classes, Generics.Collections,
+  Classes, Vcl.Clipbrd, Windows, Generics.Collections,
   Unit_DSCommon;
 
 type
@@ -33,6 +33,7 @@ type
     constructor Create;
     procedure LoadFromStream(aStream: TStream);
     procedure SaveToStream(aStream: TStream);
+    procedure ValuesCopy(aHandle: THandle);
   end;
 
   // DataS?
@@ -48,6 +49,8 @@ type
   end;
 
 implementation
+uses
+  StrUtils, SysUtils;
 
 
 { TDS }
@@ -342,6 +345,82 @@ begin
     chunk.SetTagString('NDCO');
     aStream.Write(chunk, SizeOf(chunk));
     fCOs[I].SaveToStream(aStream);
+  end;
+end;
+
+
+procedure TTB.ValuesCopy(aHandle: THandle);
+var
+  I, K: Integer;
+  sl: TStringList;
+  info: string;
+  sa: AnsiString;
+  su, s: string;
+  sb: TBytes;
+  s1250: string;
+begin
+  sl := TStringList.Create;
+  try
+    // Header
+    s := '';
+    for I := 0 to fCOs.Count - 1 do
+      s := s + IfThen(I > 0, #9) + fCOs[I].fVALb.Lb;
+    sl.Append(s);
+
+    // Values
+    for K := 0 to fCOs[0].fValues.Count - 1 do
+    begin
+      s := '';
+
+      for I := 0 to fCOs.Count - 1 do
+      begin
+        // Get the Unicode string
+        if fCOs[I].fValues.Count >= fCOs[0].fValues.Count then
+        begin
+          // By default strings come in English (no codepage needed)
+          su := fCOs[I].fValues[K].ToString;
+
+          // Special treatment for localizations texts (DS uses ANSI, but stores no codepages)
+          if fVALb.Lb = 'Texte' then
+            if fCOs[I].fVALb.Lb = 'Deutsch' then
+              su := fCOs[I].fValues[K].ToUnicodeString(1250)
+            else
+            if fCOs[I].fVALb.Lb = 'French' then
+              su := fCOs[I].fValues[K].ToUnicodeString(1252)
+            else
+            if fCOs[I].fVALb.Lb = 'Spanish' then
+              su := fCOs[I].fValues[K].ToUnicodeString(1252)
+            else
+            if fCOs[I].fVALb.Lb = 'Italian' then
+              su := fCOs[I].fValues[K].ToUnicodeString(1252)
+            else
+            if fCOs[I].fVALb.Lb = 'Russian' then
+              su := fCOs[I].fValues[K].ToUnicodeString(1251)
+            else
+              su := fCOs[I].fValues[K].ToUnicodeString(1252);
+        end else
+          su := '';
+
+        s := s + IfThen(I > 0, #9) + su;
+      end;
+
+      // Make sure there are no such things in text already
+      Assert(Pos('\n', s) = 0); // LF - #10
+      Assert(Pos('\r', s) = 0); // CR - #13
+
+      // We have to replace both separately, since DS uses LF and CRLF at will
+      s := StringReplace(s, #10, '\n', [rfReplaceAll]);
+      s := StringReplace(s, #13, '\r', [rfReplaceAll]);
+
+      sl.Append(s);
+    end;
+
+    Clipboard.AsText := sl.Text;
+
+    info := Format('Copied %d+1 lines', [sl.Count]);
+    MessageBox(aHandle, PWideChar(info), 'Info', MB_OK + MB_ICONINFORMATION);
+  finally
+    sl.Free;
   end;
 end;
 
