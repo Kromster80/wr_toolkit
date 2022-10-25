@@ -41,14 +41,16 @@ type
     procedure DisplayTB(aDS: TDSExplorer; aClear: Boolean);
     procedure DisplayCO(aTB: TTB; aClear: Boolean);
     procedure DisplayValues(aCO: TCO; aClear: Boolean);
-    procedure ValuesCopy(aCO: TCO);
-    procedure ValuesPaste(aCO: TCO);
+    procedure ValuesCopy(aTB: TTB);
+    procedure ValuesPaste(aTB: TTB);
   end;
 
 var
   Form7: TForm7;
 
 implementation
+uses
+  StrUtils;
 
 {$R *.dfm}
 
@@ -285,21 +287,21 @@ end;
 
 procedure TForm7.btnCopyAllClick(Sender: TObject);
 var
-  co: TCO;
+  tb: TTB;
 begin
-  co := lvCOs.ItemFocused.Data;
+  tb := lvTBs.ItemFocused.Data;
 
-  ValuesCopy(co);
+  ValuesCopy(tb);
 end;
 
 
 procedure TForm7.btnPasteAllClick(Sender: TObject);
 var
-  co: TCO;
+  tb: TTB;
 begin
-  co := lvCOs.ItemFocused.Data;
+  tb := lvTBs.ItemFocused.Data;
 
-  ValuesPaste(co);
+  ValuesPaste(tb);
 end;
 
 
@@ -310,25 +312,66 @@ begin
 end;
 
 
-procedure TForm7.ValuesCopy(aCO: TCO);
+procedure TForm7.ValuesCopy(aTB: TTB);
 var
-  I: Integer;
+  I, K: Integer;
   sl: TStringList;
   info: string;
-  s: AnsiString;
+  sa: AnsiString;
+  su, s: string;
+  sb: TBytes;
+  s1250: string;
 begin
-  if aCO = nil then
+  if aTB = nil then
   begin
-    MessageBox(Handle, 'CO not selected', 'Error', MB_OK + MB_ICONERROR);
+    MessageBox(Handle, 'TB not selected', 'Error', MB_OK + MB_ICONERROR);
     Exit;
   end;
 
   sl := TStringList.Create;
   try
-    for I := 0 to aCO.fValues.Count - 1 do
-    begin
+    // Header
+    s := '';
+    for I := 0 to aTB.fCOs.Count - 1 do
+      s := s + IfThen(I > 0, #9) + aTB.fCOs[I].fVALb.Lb;
+    sl.Append(s);
 
-      s := aCO.fValues[I].ToString;
+    // Values
+    for K := 0 to aTB.fCOs[0].fValues.Count - 1 do
+    begin
+      s := '';
+
+      for I := 0 to aTB.fCOs.Count - 1 do
+      begin
+        // Get the Unicode string
+        if aTB.fCOs[I].fValues.Count >= aTB.fCOs[0].fValues.Count then
+        begin
+          // By default strings come in English (no codepage needed)
+          su := aTB.fCOs[I].fValues[K].ToString;
+
+          // Special treatment for localizations texts (DS uses ANSI, but stores no codepages)
+          if aTB.fVALb.Lb = 'Texte' then
+            if aTB.fCOs[I].fVALb.Lb = 'Deutsch' then
+              su := aTB.fCOs[I].fValues[K].ToUnicodeString(1250)
+            else
+            if aTB.fCOs[I].fVALb.Lb = 'French' then
+              su := aTB.fCOs[I].fValues[K].ToUnicodeString(1252)
+            else
+            if aTB.fCOs[I].fVALb.Lb = 'Spanish' then
+              su := aTB.fCOs[I].fValues[K].ToUnicodeString(1252)
+            else
+            if aTB.fCOs[I].fVALb.Lb = 'Italian' then
+              su := aTB.fCOs[I].fValues[K].ToUnicodeString(1252)
+            else
+            if aTB.fCOs[I].fVALb.Lb = 'Russian' then
+              su := aTB.fCOs[I].fValues[K].ToUnicodeString(1251)
+            else
+              su := aTB.fCOs[I].fValues[K].ToUnicodeString(1252);
+        end else
+          su := '';
+
+        s := s + IfThen(I > 0, #9) + su;
+      end;
 
       // Make sure there are no such things in text already
       Assert(Pos('\n', s) = 0); // LF - #10
@@ -338,14 +381,12 @@ begin
       s := StringReplace(s, #10, '\n', [rfReplaceAll]);
       s := StringReplace(s, #13, '\r', [rfReplaceAll]);
 
-      sl.Append(IntToStr(I+1) + ':' + s);
+      sl.Append(s);
     end;
-
-    sl.Text := sl.Text;
 
     Clipboard.AsText := sl.Text;
 
-    info := Format('Copied %d lines from %d values', [sl.Count, aCO.fValues.Count]);
+    info := Format('Copied %d lines', [sl.Count]);
     MessageBox(Handle, PWideChar(info), 'Info', MB_OK + MB_ICONINFORMATION);
   finally
     sl.Free;
@@ -353,15 +394,17 @@ begin
 end;
 
 
-procedure TForm7.ValuesPaste(aCO: TCO);
+procedure TForm7.ValuesPaste(aTB: TTB);
 var
-  I: Integer;
+  I, K: Integer;
   sl: TStringList;
   info: string;
+  sa: TStringDynArray;
+  su: string;
 begin
-  if aCO = nil then
+  if aTB = nil then
   begin
-    MessageBox(Handle, 'CO not selected', 'Error', MB_OK + MB_ICONERROR);
+    MessageBox(Handle, 'TB not selected', 'Error', MB_OK + MB_ICONERROR);
     Exit;
   end;
 
@@ -369,6 +412,76 @@ begin
   try
     sl.Text := Clipboard.AsText;
 
+    // Verify line count
+    if sl.Count <> aTB.fCOs[0].fValues.Count + 1 then
+    begin
+      info := Format('Line count in clipboard %d does not match TB %d+1',
+        [sl.Count, aTB.fCOs[0].fValues.Count]);
+      MessageBox(Handle, PWideChar(info), 'Error', MB_OK + MB_ICONERROR);
+      Exit;
+    end;
+
+    // First line is header
+    sa := SplitString(sl[0], #9);
+
+    // Verify column count
+    if Length(sa) <> aTB.fCOs.Count then
+    begin
+      info := Format('Column count in clipboard %d does not match TB %d',
+        [Length(sa), aTB.fCOs.Count]);
+      MessageBox(Handle, PWideChar(info), 'Error', MB_OK + MB_ICONERROR);
+      Exit;
+    end;
+
+    // Verify column names
+    for I := 0 to aTB.fCOs.Count - 1 do
+    if aTB.fCOs[I].fVALb.Lb <> sa[I] then
+    begin
+      info := Format('Column name in clipboard "%s" does not match TB "%s"',
+        [sa[I], aTB.fCOs[I].fVALb.Lb]);
+      MessageBox(Handle, PWideChar(info), 'Error', MB_OK + MB_ICONERROR);
+      Exit;
+    end;
+
+    for I := 0 to aTB.fCOs[0].fValues.Count - 1 do
+    begin
+      sa := SplitString(sl[I + 1], #9);
+
+      for K := 0 to aTB.fCOs.Count - 1 do
+      if I < aTB.fCOs[K].fValues.Count then
+      begin
+        if High(sa) >= K then
+          su := sa[K]
+        else
+          su := '';
+
+        // Restore line breaks
+        su := StringReplace(su, '\n', #10, [rfReplaceAll]);
+        su := StringReplace(su, '\r', #13, [rfReplaceAll]);
+
+        aTB.fCOs[K].fValues[I].FromString(su);
+
+        // Special treatment for localizations texts (DS uses ANSI, but stores no codepages)
+        if aTB.fVALb.Lb = 'Texte' then
+          if aTB.fCOs[K].fVALb.Lb = 'Deutsch' then
+            aTB.fCOs[K].fValues[I].FromUnicodeString(su, 1250)
+          else
+          if aTB.fCOs[K].fVALb.Lb = 'French' then
+            aTB.fCOs[K].fValues[I].FromUnicodeString(su, 1252)
+          else
+          if aTB.fCOs[K].fVALb.Lb = 'Spanish' then
+            aTB.fCOs[K].fValues[I].FromUnicodeString(su, 1252)
+          else
+          if aTB.fCOs[K].fVALb.Lb = 'Italian' then
+            aTB.fCOs[K].fValues[I].FromUnicodeString(su, 1252)
+          else
+          if aTB.fCOs[K].fVALb.Lb = 'Russian' then
+            aTB.fCOs[K].fValues[I].FromUnicodeString(su, 1251)
+          else
+            aTB.fCOs[K].fValues[I].FromUnicodeString(su, 1252);
+      end;
+    end;
+    {
     if sl.Count <> aCO.fValues.Count then
     begin
       info := Format('Can not paste.' + sLineBreak +
@@ -380,7 +493,7 @@ begin
 
     for I := 0 to sl.Count - 1 do
       aCO.fValues[I].FromString(sl[I]);
-
+     }
     info := Format('Replaced %d lines', [sl.Count]);
     MessageBox(Handle, PWideChar(info), 'Info', MB_OK + MB_ICONINFORMATION);
   finally

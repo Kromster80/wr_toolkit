@@ -28,7 +28,9 @@ type
     S: TDSString;
     class function NewFromStream(aStream: TStream): TValue; static;
     function ToString: AnsiString;
+    function ToUnicodeString(aAnsiCodepage: Integer): string;
     procedure FromString(aValue: AnsiString);
+    procedure FromUnicodeString(const aString: string; aAnsiCodepage: Integer);
   end;
 
   TCO = class
@@ -294,6 +296,21 @@ begin
 end;
 
 
+function TValue.ToUnicodeString(aAnsiCodepage: Integer): string;
+var
+  sa: AnsiString;
+  sb: TBytes;
+begin
+  sa := ToString;
+
+  SetLength(sb, Length(sa));
+  if Length(sa) > 0 then
+    Move(sa[1], sb[0], Length(sa));
+
+  Result := TEncoding.GetEncoding(aAnsiCodepage).GetString(sb);
+end;
+
+
 procedure TValue.FromString(aValue: AnsiString);
 begin
   case Typ of
@@ -304,6 +321,27 @@ begin
   else
     Assert(False);
   end;
+end;
+
+
+procedure TValue.FromUnicodeString(const aString: string; aAnsiCodepage: Integer);
+var
+  sa: AnsiString;
+  sb: TBytes;
+  strLen: Integer;
+  su: RawByteString;
+begin
+  Assert(Typ = 16);
+
+  strLen := LocaleCharsFromUnicode(aAnsiCodepage, 0, PWideChar(aString), Length(aString), nil, 0, nil, nil);
+  if strLen > 0 then
+  begin
+    SetLength(su, strLen);
+    LocaleCharsFromUnicode(aAnsiCodepage, 0, PWideChar(aString), Length(aString), PAnsiChar(su), strLen, nil, nil);
+    SetCodePage(su, aAnsiCodepage, False);
+  end;
+
+  S.Lb := su;
 end;
 
 

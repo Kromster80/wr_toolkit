@@ -176,7 +176,7 @@ object Form7: TForm7
     ViewStyle = vsReport
   end
   object btnCopyAll: TButton
-    Left = 1184
+    Left = 976
     Top = 840
     Width = 99
     Height = 34
@@ -189,7 +189,7 @@ object Form7: TForm7
     OnClick = btnCopyAllClick
   end
   object btnPasteAll: TButton
-    Left = 1288
+    Left = 1080
     Top = 839
     Width = 99
     Height = 34
