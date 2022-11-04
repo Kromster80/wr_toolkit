@@ -4,7 +4,7 @@ object Form1: TForm1
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   Caption = 'MTKit2'
   ClientHeight = 694
-  ClientWidth = 889
+  ClientWidth = 890
   Color = clBtnFace
   Constraints.MinHeight = 680
   Constraints.MinWidth = 905
@@ -24,7 +24,7 @@ object Form1: TForm1
   OnMouseWheel = FormMouseWheel
   OnResize = RenderResize
   DesignSize = (
-    889
+    890
     694)
   PixelsPerInch = 96
   TextHeight = 13
@@ -107,7 +107,7 @@ object Form1: TForm1
     OnClick = SB_RenderOpts
   end
   object ImageM: TSpeedButton
-    Left = 808
+    Left = 810
     Top = 24
     Width = 23
     Height = 22
@@ -125,7 +125,7 @@ object Form1: TForm1
     OnMouseUp = Panel1MouseUp
   end
   object ImageR: TSpeedButton
-    Left = 832
+    Left = 834
     Top = 24
     Width = 23
     Height = 22
@@ -143,7 +143,7 @@ object Form1: TForm1
     OnMouseUp = Panel1MouseUp
   end
   object ImageZ: TSpeedButton
-    Left = 856
+    Left = 858
     Top = 24
     Width = 23
     Height = 22
@@ -239,7 +239,7 @@ object Form1: TForm1
   object RenderPanel: TPanel
     Left = 246
     Top = 104
-    Width = 635
+    Width = 636
     Height = 561
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
@@ -855,6 +855,10 @@ object Form1: TForm1
     object tsParts: TTabSheet
       Caption = 'Parts'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         234
         527)
@@ -931,7 +935,6 @@ object Form1: TForm1
         ActivePage = Behaviour
         Anchors = [akLeft, akBottom]
         TabOrder = 4
-        ExplicitTop = 289
         object PivotSetup: TTabSheet
           Caption = 'Pivot point setup'
           ExplicitLeft = 0
@@ -1407,6 +1410,10 @@ object Form1: TForm1
     object tsBlinkers: TTabSheet
       Caption = 'Lights'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         234
         527)
@@ -1691,7 +1698,6 @@ object Form1: TForm1
           'Nozzle Flash')
         TabOrder = 1
         OnClick = BlinkChange
-        ExplicitTop = 302
       end
       object fsBlinkerSizeMin: TFloatSpinEdit
         Left = 134
@@ -1833,7 +1839,6 @@ object Form1: TForm1
         ParentFont = False
         TabOrder = 2
         OnClick = btnBlinkersLoadClick
-        ExplicitTop = 523
       end
       object btnBlinkersSave: TButton
         Left = 64
@@ -1851,7 +1856,6 @@ object Form1: TForm1
         ParentFont = False
         TabOrder = 3
         OnClick = btnBlinkersSaveClick
-        ExplicitTop = 523
       end
       object btnBlinkerRem: TButton
         Left = 158
@@ -1887,6 +1891,10 @@ object Form1: TForm1
     object tsCOB: TTabSheet
       Caption = 'COB'
       ImageIndex = 4
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object btnCOBVerticeCopy: TSpeedButton
         Left = 182
         Top = 124
@@ -2236,6 +2244,10 @@ object Form1: TForm1
     object tsCPO: TTabSheet
       Caption = 'CPO'
       ImageIndex = 6
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label53: TLabel
         Left = 196
         Top = 123
@@ -2610,6 +2622,10 @@ object Form1: TForm1
     object tsExtra: TTabSheet
       Caption = 'Extra'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         234
         527)
@@ -2775,7 +2791,6 @@ object Form1: TForm1
         Anchors = [akLeft, akTop, akBottom]
         ScrollBars = ssVertical
         TabOrder = 4
-        ExplicitHeight = 205
       end
       object edMaterialCount: TEdit
         Left = 0
@@ -2865,6 +2880,10 @@ object Form1: TForm1
     object tsBrowse: TTabSheet
       Caption = 'Browse'
       ImageIndex = 5
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         234
         527)
@@ -2878,7 +2897,6 @@ object Form1: TForm1
         Mask = '*.mox;*.cob;*.cpo;*.tree'
         TabOrder = 0
         OnClick = FileListBox1Click
-        ExplicitHeight = 269
       end
       object DirectoryListBox1: TDirectoryListBox
         Left = 0
@@ -2908,9 +2926,9 @@ object Form1: TForm1
     TabOrder = 2
   end
   object ViewReset: TButton
-    Left = 808
+    Left = 810
     Top = 4
-    Width = 65
+    Width = 64
     Height = 17
     Anchors = [akTop, akRight]
     Caption = 'reset'
@@ -2944,7 +2962,7 @@ object Form1: TForm1
   object StatusBar1: TStatusBar
     Left = 0
     Top = 675
-    Width = 889
+    Width = 890
     Height = 19
     Panels = <
       item
