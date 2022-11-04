@@ -393,7 +393,7 @@ end;
 procedure TForm1.WriteINI(Sender: TObject);
 var ft:textfile; i:integer;
 begin
-  assignfile(ft,WorkDir+'HNMan.ini'); rewrite(ft);
+  AssignFile(ft,WorkDir+'HNMan.ini'); rewrite(ft);
   writeln(ft,'AFC11HN Manager INI file');
 
   writeln(ft);
@@ -410,7 +410,7 @@ procedure TForm1.ReadINI(Sender: TObject);
 var i:integer; s,st:string; ft:textfile;
 begin
   if not fileexists(WorkDir+'HNMan.ini') then exit;
-  assignfile(ft, WorkDir+'HNMan.ini'); reset(ft);
+  AssignFile(ft, WorkDir+'HNMan.ini'); reset(ft);
   readln(ft); readln(ft);
 
   repeat

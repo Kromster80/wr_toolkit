@@ -172,7 +172,7 @@ end;
 
 procedure TForm1.OpenDS(Sender: TObject; filename:string);
 begin
-assignfile(f,filename); FileMode:=0; reset(f,1); FileMode:=2;
+AssignFile(f,filename); FileMode:=0; reset(f,1); FileMode:=2;
 blockread(f,Header,33);
 DSqty:=ord(Header[9]);
 setlength(TB,DSqty+1);
@@ -264,7 +264,7 @@ procedure TForm1.SaveDS(Sender: TObject);
 begin
 AddTracksToDS(nil);
 ChDir(RootDir);
-assignfile(f,'FrontEnd\C11vol5.ds'); rewrite(f,1); c[1]:=#0;
+AssignFile(f,'FrontEnd\C11vol5.ds'); rewrite(f,1); c[1]:=#0;
 
 blockwrite(f,Header,33); //assume DSQty didn't changed
 for i:=1 to DSqty do begin
@@ -343,7 +343,7 @@ for ID:=1 to ProfileQty do if Profile[ID].Install then begin
   P_[ID].Value[15,15,h].Str:='';
   end;      
 
-assignfile(f,RootDir+'\C11-Saves\'+profile[ID].Folder+'\Career.new'); rewrite(f,1);
+AssignFile(f,RootDir+'\C11-Saves\'+profile[ID].Folder+'\Career.new'); rewrite(f,1);
 c[1]:=#0;
 blockwrite(f,P_[ID].Header,33); //assume DSQty didn't changed
 for i:=1 to P_[ID].DSqty do begin
@@ -658,7 +658,7 @@ end;
 procedure TForm1.GetProfileInfo(s1:string;i1:integer);
 var NumRead,Pos:integer;
 begin
-assignfile(f,RootDir+'\C11-Saves\'+s1+'\career.wrc'); FileMode:=0; reset(f,1); FileMode:=2;
+AssignFile(f,RootDir+'\C11-Saves\'+s1+'\career.wrc'); FileMode:=0; reset(f,1); FileMode:=2;
 blockread(f,P_[i1].Header,33);
 P_[i1].DSqty:=ord(P_[i1].Header[9]);
 for i:=1 to P_[i1].DSqty do begin
@@ -774,7 +774,7 @@ procedure TForm1.GetAutoInfo(s1:string;i1:integer);
 var NumRead,Pos:integer;
 begin
 Pos:=0; //reset to 0
-assignfile(f,RootDir+'\Autos\'+s1+'\EditCar.car'); FileMode:=0; reset(f,128); FileMode:=2;
+AssignFile(f,RootDir+'\Autos\'+s1+'\EditCar.car'); FileMode:=0; reset(f,128); FileMode:=2;
 blockread(f,c,1000,NumRead); closefile(f); //reading 128kbytes should be enough (usually ~30kb)
 EC_DSqty[i1]:=ord(c[Pos+9]);
 inc(Pos,33);
@@ -849,7 +849,7 @@ end;
 procedure TForm1.WriteINI(Sender: TObject);
 begin
 chdir(RootDir);
-assignfile(ft,'CTMan.ini'); rewrite(ft);
+AssignFile(ft,'CTMan.ini'); rewrite(ft);
 writeln(ft,'AFC11CT Manager INI file');
 
 writeln(ft);
@@ -889,7 +889,7 @@ var i,col:integer; st:string;
 begin
 chdir(RootDir);
 if not fileexists('CTMan.ini') then exit;
-assignfile(ft,'CTMan.ini'); reset(ft);
+AssignFile(ft,'CTMan.ini'); reset(ft);
 readln(ft); readln(ft);
 
 repeat

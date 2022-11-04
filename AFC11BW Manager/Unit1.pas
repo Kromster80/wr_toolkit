@@ -122,7 +122,7 @@ end;
 
 procedure TForm1.OpenDS(Sender: TObject; filename:string);
 begin
-assignfile(f,filename); FileMode:=0; reset(f,1); FileMode:=2;
+AssignFile(f,filename); FileMode:=0; reset(f,1); FileMode:=2;
 blockread(f,Header,33);
 DSqty:=ord(Header[9]);
 setlength(TB,DSqty+1);
@@ -214,7 +214,7 @@ procedure TForm1.SaveDS(Sender: TObject);
 begin
 AddTracksToDS(nil);
 ChDir(RootDir);
-assignfile(f,'FrontEnd2\FrontEnd.ds'); rewrite(f,1); c[1]:=#0;
+AssignFile(f,'FrontEnd2\FrontEnd.ds'); rewrite(f,1); c[1]:=#0;
 
 blockwrite(f,Header,33); //assume DSQty didn't changed
 for i:=1 to DSqty do begin
@@ -553,7 +553,7 @@ procedure TForm1.GetAutoInfo(s1:string;i1:integer);
 var NumRead,Pos:integer;
 begin
 Pos:=0; //reset to 0
-assignfile(f,RootDir+'\Autos\'+s1+'\EditCar.car'); FileMode:=0; reset(f,128); FileMode:=2;
+AssignFile(f,RootDir+'\Autos\'+s1+'\EditCar.car'); FileMode:=0; reset(f,128); FileMode:=2;
 blockread(f,c,1000,NumRead); closefile(f); //reading 128kbytes should be enough (usually ~30kb)
 EC_DSqty[i1]:=ord(c[Pos+9]);
 inc(Pos,33);
@@ -616,7 +616,7 @@ end;
 procedure TForm1.WriteINI(Sender: TObject);
 begin
 chdir(RootDir);
-assignfile(ft,'BWMan.ini'); rewrite(ft);
+AssignFile(ft,'BWMan.ini'); rewrite(ft);
 writeln(ft,'AFC11BW Manager INI file');
 
 writeln(ft);
@@ -650,7 +650,7 @@ var i,col:integer; st:string;
 begin
 chdir(RootDir);
 if not fileexists('BWMan.ini') then exit;
-assignfile(ft,'BWMan.ini'); reset(ft);
+AssignFile(ft,'BWMan.ini'); reset(ft);
 readln(ft); readln(ft);
 
 repeat

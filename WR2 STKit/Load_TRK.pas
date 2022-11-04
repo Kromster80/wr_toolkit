@@ -22,7 +22,7 @@ var
 begin
 Result:=false;
 ElapsedTime(@OldTime);
-assignfile(f,Input); reset(f,1);
+AssignFile(f,Input); reset(f,1);
 
 LWT.Vqty:=0;
 LWT.Aqty:=0;

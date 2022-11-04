@@ -25,7 +25,7 @@ begin
   if not fileexists(Input) then exit;
 
   ElapsedTime(@OldTime);
-  assignfile(f,Input); reset(f,1);
+  AssignFile(f,Input); reset(f,1);
 
   Lay:=0;
   for ii:=1 to length(LW.ClipTex) do LW.ClipTex[ii]:='';

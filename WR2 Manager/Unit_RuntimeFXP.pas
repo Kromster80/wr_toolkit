@@ -14,7 +14,7 @@ const BaseLength = 20542; //20542- is default for WR2
 var i:integer; ft:textfile;
 begin
   chdir(RootDir);
-  assignfile(ft,'FrontEnd\Runtime.fxp'); reset(ft);
+  AssignFile(ft,'FrontEnd\Runtime.fxp'); reset(ft);
   setlength(Runtime, BaseLength); 
   i:=0;
   repeat
@@ -39,7 +39,7 @@ var
   end;
 begin
   chdir(RootDir);
-  assignfile(ft,'FrontEnd\Runtime.fxp'); rewrite(ft);
+  AssignFile(ft,'FrontEnd\Runtime.fxp'); rewrite(ft);
   ir:=0;
   iw:=0;
   repeat

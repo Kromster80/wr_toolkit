@@ -15,7 +15,7 @@ var
 begin
   chdir(RootDir);
   if not fileexists('WR2Man.ini') then exit;
-  assignfile(ft,'WR2Man.ini'); reset(ft);
+  AssignFile(ft,'WR2Man.ini'); reset(ft);
   readln(ft); //writeln(ft,'WR2 Manager INI file');
   readln(ft); //writeln(ft);
 
@@ -72,7 +72,7 @@ var
   ft:textfile;
 begin
   chdir(RootDir);
-  assignfile(ft,'WR2Man.ini'); rewrite(ft);
+  AssignFile(ft,'WR2Man.ini'); rewrite(ft);
   writeln(ft,'WR2 Manager INI file');
 
   writeln(ft);

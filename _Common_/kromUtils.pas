@@ -975,7 +975,7 @@ end;
 procedure WriteLangFile(Sender:TForm; FileName:string; EraseWritten:boolean);
 var ft:textfile; i,k:integer; capt:string;
 begin
-assignfile(ft,FileName); rewrite(ft);
+AssignFile(ft,FileName); rewrite(ft);
 
 for i:=0 to Sender.ComponentCount-1 do begin
 
@@ -1011,7 +1011,7 @@ begin
     exit;
   end;
 
-  assignfile(ft,FileName); reset(ft);
+  AssignFile(ft,FileName); reset(ft);
   IsList:=false;
   row:=0;
 

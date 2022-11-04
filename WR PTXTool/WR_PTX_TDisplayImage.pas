@@ -386,7 +386,7 @@ var
   DXTOut: array [1 .. 48] of Byte;
 begin
   ResetAllData;
-  assignfile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
+  AssignFile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
   SetLength(c,24+1);
   blockread(f,c[1],24);
 
@@ -534,7 +534,7 @@ var
   DXTOut: array [1 .. 48] of Byte;
 begin
   ResetAllData;
-  assignfile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
+  AssignFile(f,aFileName); FileMode:=0; reset(f,1); FileMode:=2;
   blockread(f,c,128);
 
   if not Verify(int2(c[17],c[18]), int2(c[13],c[14])) then

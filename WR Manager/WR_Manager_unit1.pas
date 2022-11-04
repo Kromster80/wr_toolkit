@@ -168,7 +168,7 @@ BChoose3.Hint:='>';
 BChoose4.Hint:='>';
 BChoose5.Hint:='>';
 if fileexists('carman.ini') then begin
-assignfile(ft,'carman.ini'); FileMode:=0; reset(ft); FileMode:=2;
+AssignFile(ft,'carman.ini'); FileMode:=0; reset(ft); FileMode:=2;
 i:=1; k:=1;
 repeat
  repeat
@@ -321,7 +321,7 @@ end;
 
 procedure TForm1.ScanCAR(carfile:string);
 begin
-assignfile(f,carfile); FileMode:=0; reset(f,1); FileMode:=2; //read-only
+AssignFile(f,carfile); FileMode:=0; reset(f,1); FileMode:=2; //read-only
 
 blockread(f,c,33); s:='';
 DSqty:=ord(c[9]);
@@ -507,7 +507,7 @@ exit;
 end;
 ChDir(RootDir+'\FrontEnd');
 
-assignfile(f,'WR.ds'); FileMode:=0; reset(f,1); FileMode:=2; //read-only
+AssignFile(f,'WR.ds'); FileMode:=0; reset(f,1); FileMode:=2; //read-only
 blockread(f,c,33); s:='';
 DSqty:=ord(c[9]);
 for i:=1 to DSqty do begin
@@ -569,7 +569,7 @@ end;
 procedure TForm1.LoadInfos(Sender: TObject; IDX:integer);
 var nodeqty,siz:integer;
 begin
-assignfile(f,scndir[idx]+'\EditTrack.sci'); FileMode:=0; reset(f,1); FileMode:=2; //read-only
+AssignFile(f,scndir[idx]+'\EditTrack.sci'); FileMode:=0; reset(f,1); FileMode:=2; //read-only
 blockread(f,c,8); s:=c[1]+c[2]+c[3]+c[4]+c[5]+c[6]+c[7];
 if s<>'WRTRKV1' then begin closefile(f); exit; end; //Not compatible format
 blockread(f,c,4); nodeqty:=ord(c[4])+ord(c[3])*256;
@@ -782,9 +782,9 @@ inc(Checkedqty_S,TrackQty[i]); //use different only here
 end;
 
 for id:=1 to pqty do if CLBox2.Checked[id-1] then begin
-assignfile(f,RootDir+'\WR-SavesSinglePM\'+profile[id]+'\Career.wrc');
+AssignFile(f,RootDir+'\WR-SavesSinglePM\'+profile[id]+'\Career.wrc');
 FileMode:=0; reset(f,1); FileMode:=2;
-assignfile(g,RootDir+'\WR-SavesSinglePM\'+profile[id]+'\Career.new'); rewrite(g,1);
+AssignFile(g,RootDir+'\WR-SavesSinglePM\'+profile[id]+'\Career.new'); rewrite(g,1);
 
 blockread(f,c,33);
 blockwrite(g,c,33);
@@ -886,9 +886,9 @@ end;//1..CLBox2
 
 
 for id:=1 to pqty do if CLBox2.Checked[id-1] then begin
-assignfile(f,RootDir+'\WR-SavesSinglePM\'+profile[id]+'\Profile.wrp');
+AssignFile(f,RootDir+'\WR-SavesSinglePM\'+profile[id]+'\Profile.wrp');
 FileMode:=0; reset(f,1); FileMode:=2;
-assignfile(g,RootDir+'\WR-SavesSinglePM\'+profile[id]+'\Profile.new'); rewrite(g,1);
+AssignFile(g,RootDir+'\WR-SavesSinglePM\'+profile[id]+'\Profile.new'); rewrite(g,1);
 
 blockread(f,c,33);
 blockwrite(g,c,33);
@@ -987,8 +987,8 @@ if not FileExists('runtime.orig') then CopyFile('runtime.fxp','runtime.orig',tru
 
 CheckedQty_S:=0;
 for ii:=1 to ScnQty do if installed_S[ii] then inc(CheckedQty_S);
-assignfile(ft,'runtime.orig'); FileMode:=0; reset(ft); FileMode:=2; //read-only
-assignfile(gt,RootDir+'\FrontEnd\runtime.fxp.fxp');
+AssignFile(ft,'runtime.orig'); FileMode:=0; reset(ft); FileMode:=2; //read-only
+AssignFile(gt,RootDir+'\FrontEnd\runtime.fxp.fxp');
 rewrite(gt);
 repeat
 readln(ft,s);
@@ -1036,8 +1036,8 @@ until(eof(ft));
 closefile(ft);
 closefile(gt);
 
-assignfile(f,'WR.orig'); FileMode:=0; reset(f,1); FileMode:=2; //read-only
-assignfile(g,'WR.ds.ds'); rewrite(g,1);
+AssignFile(f,'WR.orig'); FileMode:=0; reset(f,1); FileMode:=2; //read-only
+AssignFile(g,'WR.ds.ds'); rewrite(g,1);
 blockread(f,c,33);
 blockwrite(g,c,33);
 DSqty:=ord(c[9]);
@@ -1226,7 +1226,7 @@ end;
 procedure TForm1.SaveINIFile();
 begin
 ChDir(RootDir);
-assignfile(ft,'carman.ini'); rewrite(ft);
+AssignFile(ft,'carman.ini'); rewrite(ft);
 writeln(ft,'//CarManOptions');
 writeln(ft,'[Options]');
 if Form1.WindowState<>wsMaximized then writeln(ft,'Width=',inttostr(fw))

@@ -3522,7 +3522,7 @@ begin
   if not RunOpenDialog(OpenDialog,'',SceneryPath,'Textures list (TexturesAssignList.dat)|*.dat') then exit;
   AutoImportTexturesList:='';
 
-  assignfile(ft,OpenDialog.FileName); reset(ft);
+  AssignFile(ft,OpenDialog.FileName); reset(ft);
   ii:=0;
   repeat
     inc(ii);
@@ -3544,7 +3544,7 @@ var
 begin
   if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_TexturesAssignList.dat',
          SceneryPath,'Textures list (TexturesAssignList.dat)|*.dat') then exit;
-  assignfile(ft,SaveDialog.FileName); rewrite(ft);
+  AssignFile(ft,SaveDialog.FileName); rewrite(ft);
   for ii:=1 to Qty.TexturesFiles do begin
     writeln(ft,TexName[ii]);
     writeln(ft,Tex2Ground[ii]);
@@ -3821,7 +3821,7 @@ var
 begin
 if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_SoundsList.dat',
        SceneryPath,'Sounds list (SoundsList.dat)|*.dat') then exit;
-assignfile(f,SaveDialog.FileName); rewrite(f,1);
+AssignFile(f,SaveDialog.FileName); rewrite(f,1);
 blockwrite(f,'STKit2'+#0+#0,8);    //Name
 blockwrite(f,Qty.Sounds,4);    //Name
 for ii:=1 to Qty.Sounds do begin
@@ -3838,7 +3838,7 @@ var
   ii:integer; ss:string;
 begin
 if not RunOpenDialog(OpenDialog,'',SceneryPath,'Sounds list (SoundsList.dat)|*.dat') then exit;
-assignfile(f,OpenDialog.FileName); reset(f,1);
+AssignFile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,8); ss:=c[1]+c[2]+c[3]+c[4]+c[5]+c[6]+c[7]+c[8];
 if ss<>'STKit2'+#0+#0 then begin
@@ -4394,7 +4394,7 @@ begin
 if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_InstancesList.dat',
        SceneryPath,'Objects list (InstancesList.dat)|*.dat') then exit;
 
-assignfile(f,SaveDialog.FileName); rewrite(f,1);
+AssignFile(f,SaveDialog.FileName); rewrite(f,1);
 blockwrite(f,'STKit2'+#0+#0,8);    //Name
 blockwrite(f,Qty.ObjectsTotal,4);
 for ii:=1 to Qty.ObjectsTotal do begin
@@ -4411,7 +4411,7 @@ var
   ss:string;
 begin
 if not RunOpenDialog(OpenDialog,'',SceneryPath,'Objects list (ObjectsList.dat)|*.dat') then exit;
-assignfile(f,OpenDialog.FileName); reset(f,1);
+AssignFile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,8); ss:=c[1]+c[2]+c[3]+c[4]+c[5]+c[6]+c[7]+c[8];
 if ss<>('STKit2'+#0+#0) then begin
@@ -4450,7 +4450,7 @@ begin
 if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_GroundsList.dat',
        SceneryPath,'Grounds list (GroundsList.dat)|*.dat') then exit;
 
-assignfile(f,SaveDialog.FileName); rewrite(f,1);
+AssignFile(f,SaveDialog.FileName); rewrite(f,1);
 blockwrite(f,'STKit2'+#0+#0,8);
 blockwrite(f,Qty.GroundTypes,4);
 for ii:=1 to Qty.GroundTypes do begin
@@ -4472,7 +4472,7 @@ begin
 if not RunOpenDialog(OpenDialog,'',SceneryPath,'Grounds list (GroundsList.dat)|*.dat') then exit;
 //AutoImportGroundsList:='';
 
-assignfile(f,OpenDialog.FileName); reset(f,1);
+AssignFile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,8); ss:=c[1]+c[2]+c[3]+c[4]+c[5]+c[6]+c[7]+c[8];
 if ss<>'STKit2'+#0+#0 then begin
@@ -4567,7 +4567,7 @@ begin
 if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_ObjectsList.dat',
        SceneryPath,'Objects list (ObjectsList.dat)|*.dat') then exit;
 
-assignfile(f,SaveDialog.FileName); rewrite(f,1);
+AssignFile(f,SaveDialog.FileName); rewrite(f,1);
 blockwrite(f,'STKit2'+#0+#0,8);    //Name
 blockwrite(f,Qty.ObjectFiles,4);
 for ii:=1 to Qty.ObjectFiles do begin
@@ -4586,7 +4586,7 @@ var
   ss:string;
 begin
 if not RunOpenDialog(OpenDialog,'',SceneryPath,'Objects list (ObjectsList.dat)|*.dat') then exit;
-assignfile(f,OpenDialog.FileName); reset(f,1);
+AssignFile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,8); ss:=c[1]+c[2]+c[3]+c[4]+c[5]+c[6]+c[7]+c[8];
 if ss<>('STKit2'+#0+#0) then begin
@@ -5260,7 +5260,7 @@ end;}
 
 for i:=1 to length(remap) do remap[i]:=0;
 
-assignfile(f,OpenDialog.FileName); reset(f,1);
+AssignFile(f,OpenDialog.FileName); reset(f,1);
 repeat
 blockread(f,c,8,NumRead);
 if NumRead=0 then break;
@@ -5310,7 +5310,7 @@ begin
 if not RunSaveDialog(SaveDialog,Scenery+'_'+SceneryVersion+'_MaterialsList.dat',
        SceneryPath,'Materials list (MaterialsList.dat)|*.dat') then exit;
 
-assignfile(f,SaveDialog.FileName); rewrite(f,1);
+AssignFile(f,SaveDialog.FileName); rewrite(f,1);
 blockwrite(f,'STKit2'+#0+#1,8);
 blockwrite(f,Qty.Materials,4);
 for i:=1 to Qty.Materials do begin
@@ -5518,7 +5518,7 @@ var
   chname:string[4];
 begin
   if not RunOpenDialog(OpenDialog,'',SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
-  assignfile(f,OpenDialog.FileName); reset(f,1);
+  AssignFile(f,OpenDialog.FileName); reset(f,1);
 
   blockread(f,c,12);
   if (c[1]+c[2]+c[3]+c[4]+c[9]+c[10]+c[11]+c[12])<>'FORMLWO2' then begin
@@ -5632,7 +5632,7 @@ begin
   if not RunSaveDialog(SaveDialog, Scenery + '_' + SceneryVersion + '_LightsList.dat', SceneryPath, DIALOG_FILTER_LIGHTS) then
     Exit;
 
-  assignfile(f,SaveDialog.FileName); rewrite(f,1);
+  AssignFile(f,SaveDialog.FileName); rewrite(f,1);
   blockwrite(f,'STKit2'+#0+#0,8);    //Name
   blockwrite(f,Qty.Lights,4);    //Name
   blockwrite(f,Light[1].Mode,Qty.Lights*88);
@@ -5651,7 +5651,7 @@ begin
 if not RunOpenDialog(OpenDialog,'',SceneryPath, DIALOG_FILTER_LIGHTS) then exit;
 //AutoImportLightsList:='';
 
-assignfile(f,OpenDialog.FileName); reset(f,1);
+AssignFile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,8); ss:=c[1]+c[2]+c[3]+c[4]+c[5]+c[6]+c[7]+c[8];
 if ss<>'STKit2'+#0+#0 then begin
@@ -6087,7 +6087,7 @@ var
   chname:string[4];
 begin
 if not RunOpenDialog(OpenDialog,'',SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
-assignfile(f,OpenDialog.FileName); reset(f,1);
+AssignFile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,12);
 if (c[1]+c[2]+c[3]+c[4]+c[9]+c[10]+c[11]+c[12])<>'FORMLWO2' then begin
@@ -7529,7 +7529,7 @@ var
 begin   
   if not fileexists(Sender) then exit;
   ElapsedTime(@OldTime);
-  assignfile(f,Sender); reset(f,1);
+  AssignFile(f,Sender); reset(f,1);
 
   blockread(f,Head,60);
   blockread(f,Head,108);

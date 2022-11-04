@@ -70,7 +70,7 @@ Memo1.Lines.Clear;
 Memo1.Lines.Add('Converting OIF >>> LWO');
 OpenDialog1.Execute;
 if FileExists(OpenDialog1.FileName) then begin
-assignfile(f,OpenDialog1.FileName); reset(f,1);
+AssignFile(f,OpenDialog1.FileName); reset(f,1);
 s:=OpenDialog1.FileName;
 setlength(s,length(s)-4);
 oifname:=s;

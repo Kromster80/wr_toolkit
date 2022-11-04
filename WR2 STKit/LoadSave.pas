@@ -43,7 +43,7 @@ if not CheckFileExists(Input+'.qad') then begin
   FillChar(Qty,sizeof(Qty),#0);
   exit;
 end;
-assignfile(f,Input+'.qad'); reset(f,1);
+AssignFile(f,Input+'.qad'); reset(f,1);
 
 blockread(f,c,8);
 if StrPas(PAnsiChar(@c[1]))='DAUQ' then begin
@@ -183,7 +183,7 @@ if not CheckFileExists(Input+'.qad') then begin
   FillChar(Qty,sizeof(Qty),#0);
   exit;
 end;
-assignfile(f,Input+'.qad'); reset(f,1);
+AssignFile(f,Input+'.qad'); reset(f,1);
 
 EditingFormat:=ef_BW;
 
@@ -303,7 +303,7 @@ if not fileexists(Input+'.vtx') then begin
   exit;
 end;
 
-assignfile(f,Input+'.vtx'); reset(f,1);
+AssignFile(f,Input+'.vtx'); reset(f,1);
 blockread(f,VTXQty[1],256); VTXQty[64]:=0;
 for i:=1 to 63 do inc(VTXQty[64],VTXQty[i]);
 setlength(VTX,VTXQty[64]+1);
@@ -324,7 +324,7 @@ if not fileexists(Input+'.idx') then begin
   exit;
 end;
 
-assignfile(f,Input+'.idx'); reset(f,1);
+AssignFile(f,Input+'.idx'); reset(f,1);
 blockread(f,c,length(c),Pos); //16mb should me more than enough
 if Pos>=length(c) then MessageBox(Form1.Handle,'16mb IDX file couldn''t be loaded fully.','Loading error',MB_OK or MB_ICONWARNING);
 closefile(f);
@@ -370,7 +370,7 @@ begin
     IDXQty:=0;
     exit;
   end;
-  assignfile(f,Input+'.geo'); reset(f,1);
+  AssignFile(f,Input+'.geo'); reset(f,1);
   blockread(f,Head,32);
   blockread(f,VTXQty[1],256); VTXQty[64]:=0;
   for i:=1 to 63 do inc(VTXQty[64],VTXQty[i]);
@@ -418,7 +418,7 @@ begin
     SNIHead.Obj:=0; SNIHead.Node:=0;
     Result:=false; exit;
   end;
-  assignfile(f,Input+'.sni'); reset(f,1);
+  AssignFile(f,Input+'.sni'); reset(f,1);
   blockread(f,SNIHead,16);
   blockread(f,SNIObj,SNIHead.Obj*48);
   blockread(f,SNINode,SNIHead.Node*20);
@@ -439,7 +439,7 @@ if not fileexists(Input+'.lvl') then begin
   Changes.LVL:=true;
   exit;
 end;
-assignfile(f,Input+'.lvl'); reset(f,1);
+AssignFile(f,Input+'.lvl'); reset(f,1);
 blockread(f,LVL,64);
 closefile(f);
 end;
@@ -452,7 +452,7 @@ Result:=false;
     if not fileexists(Input) then begin
     SMPHead.A:=0; SMPHead.B:=0;
     exit; end;
-assignfile(f,Input); reset(f,1);
+AssignFile(f,Input); reset(f,1);
 blockread(f,SMPHead,68);
     if (SMPHead.A=0)or(SMPHead.B=0) then begin
     closefile(f);
@@ -476,7 +476,7 @@ NETHead.Num3:=0;
 NETHead.Num4:=0;
 NETHead.Num5:=0;
 exit; end;
-assignfile(f,Input); FileMode:=0; reset(f,1); FileMode:=2;
+AssignFile(f,Input); FileMode:=0; reset(f,1); FileMode:=2;
 blockread(f,NETHead,28); //NRTS
 blockread(f,c,20);
 
@@ -508,7 +508,7 @@ if not fileexists(Input+'.sky') then begin
 SkyQty:=0; exit;
 end;
 
-assignfile(ft,Input+'.sky'); reset(ft);
+AssignFile(ft,Input+'.sky'); reset(ft);
 SkyQty:=0; ii:=1;
 repeat
 readln(ft,s);
@@ -573,7 +573,7 @@ begin
   for i:=1 to MAX_TRACKS do
   if fileexists(Input+Input2+'_'+int2fix(i,2)+'.trk') then
   begin
-    assignfile(f,Input+Input2+'_'+int2fix(i,2)+'.trk'); reset(f,1);
+    AssignFile(f,Input+Input2+'_'+int2fix(i,2)+'.trk'); reset(f,1);
     blockread(f,TRKQty[i],16);
     setlength(TRK[i].Route,TRKQty[i].Nodes+1);
 
@@ -621,7 +621,7 @@ var
 begin
 for i:=1 to MAX_TRACKS do
 if fileexists(Input+Input2+'_'+int2fix(i,2)+'.tob') then begin
-  assignfile(f,Input+Input2+'_'+int2fix(i,2)+'.tob'); reset(f,1);
+  AssignFile(f,Input+Input2+'_'+int2fix(i,2)+'.tob'); reset(f,1);
   blockread(f,TOBHead[i],16);
   setlength(TOB[i],TOBHead[i].Qty+1);
   for ii:=1 to TOBHead[i].Qty do begin
@@ -647,7 +647,7 @@ begin
 TracksQtyWP:=0;
 for i:=1 to MAX_WP_TRACKS do
 if fileexists(Input+Input2+'_'+int2fix(i,2)+'.wtr') then begin
-assignfile(f,Input+Input2+'_'+int2fix(i,2)+'.wtr'); reset(f,1);
+AssignFile(f,Input+Input2+'_'+int2fix(i,2)+'.wtr'); reset(f,1);
 blockread(f,WTR[i].NodeQty,16);
 setlength(WTR[i].Node,WTR[i].NodeQty+1);
 blockread(f,WTR[i].Node[1],52*WTR[i].NodeQty);
@@ -675,7 +675,7 @@ for k:=1 to Qty.Materials do MaterialW[k].Enlite:=0;
 for k:=1 to Qty.TexturesFiles do TextureW[k].GrowGrass:=0;
 exit;
 end;
-assignfile(f,Input); reset(f,1);
+AssignFile(f,Input); reset(f,1);
 repeat
 blockread(f,c,6); c[7]:=#0;
 
@@ -761,7 +761,7 @@ begin
 Form1.SortMaterialModes(nil);
 Form1.RemakeQADTable(nil);
 
-assignfile(f,Input); rewrite(f,1);
+AssignFile(f,Input); rewrite(f,1);
 
 blockwrite(f,Qty,64);
 
@@ -825,7 +825,7 @@ var
   i,k,h,Chunk65k,x,z:integer;
   idx: array [1..3]of word;
 begin
-assignfile(f,Input); rewrite(f,1);
+AssignFile(f,Input); rewrite(f,1);
 blockwrite(f,IDXQty,4); //8mb
 Chunk65k:=0; h:=1;
 for i:=1 to Qty.BlocksX*Qty.BlocksZ do begin
@@ -852,7 +852,7 @@ procedure SaveVTX(Input:string);
 var
   f:file;
 begin
-assignfile(f,Input); rewrite(f,1);
+AssignFile(f,Input); rewrite(f,1);
 blockwrite(f,VTXQty[1],252);
 blockwrite(f,#0+#0+#0+#0,4);
 blockwrite(f,VTX[1],VTXQty[64]*32);
@@ -864,7 +864,7 @@ procedure SaveSNI(Input:string);
 var
   f:file;
 begin
-assignfile(f,Input); rewrite(f,1);
+AssignFile(f,Input); rewrite(f,1);
 blockwrite(f,SNIHead,16);
 blockwrite(f,SNIObj,SNIHead.Obj*48);
 blockwrite(f,SNINode,SNIHead.Node*20);
@@ -894,7 +894,7 @@ TRKQty[ID].Arrows:=0; //total number of arrows
 for ii:=1 to TRKQty[ID].Turns do
 inc(TRKQty[ID].Arrows,TRK[ID].Turns[order[ii]].ArrowNum);
 
-assignfile(f,Input); rewrite(f,1);
+AssignFile(f,Input); rewrite(f,1);
 blockwrite(f,TRKQty[ID],16);
 blockwrite(f,TRK[ID].Route[1],76*TRKQty[ID].Nodes);
 blockwrite(f,TRKQty[ID].a1,16);
@@ -918,7 +918,7 @@ var
   ii:integer;
 begin
 ElapsedTime(@OldTime);
-assignfile(f,Input); rewrite(f,1);
+AssignFile(f,Input); rewrite(f,1);
 blockwrite(f,TOBHead[ID],16);
 for ii:=1 to TOBHead[ID].Qty do begin
 blockwrite(f,chr2(TOB[ID,ii].Name,32)[1],32);
@@ -933,7 +933,7 @@ procedure SaveWTR(Input:string; ID:integer);
 var
   f:file;
 begin
-assignfile(f,Input); rewrite(f,1);
+AssignFile(f,Input); rewrite(f,1);
 blockwrite(f,WTR[ID].NodeQty,16);
 blockwrite(f,WTR[ID].Node[1],52*WTR[ID].NodeQty);
 closefile(f);
@@ -944,7 +944,7 @@ procedure SaveTRK_DAT(Input:string);
 var
   f:file;
 begin
-assignfile(f,Input); rewrite(f,1);
+AssignFile(f,Input); rewrite(f,1);
 blockwrite(f,TracksQty,4);
 fillchar(c[1],60,#0);
 blockwrite(f,c,60);
@@ -955,7 +955,7 @@ procedure SaveLVL(Input:string);
 var
   f:file;
 begin
-assignfile(f,Input); rewrite(f,1);
+AssignFile(f,Input); rewrite(f,1);
 blockwrite(f,LVL,64);
 closefile(f);
 Changes.LVL:=false;
@@ -966,7 +966,7 @@ var
   f:file;
 begin
 if SMPHead.A=0 then exit;
-assignfile(f,Input); rewrite(f,1);
+AssignFile(f,Input); rewrite(f,1);
 blockwrite(f,SMPHead,68);
 blockwrite(f,SMPData[1],SMPHead.A*SMPHead.B*4);
 closefile(f);
@@ -978,7 +978,7 @@ var
   ft:textfile;
   i:integer;
 begin
-assignfile(ft,Input); rewrite(ft);
+AssignFile(ft,Input); rewrite(ft);
 for i:=1 to SKYQty do begin
 writeln(ft,'# '+inttostr(i));
 writeln(ft,'SkyTex '+SKY[i].SkyTex);
@@ -1001,7 +1001,7 @@ var
   f:file;
   i,k:integer;
 begin
-assignfile(f,Input); rewrite(f,1);
+AssignFile(f,Input); rewrite(f,1);
 
 blockwrite(f,'MATNAM',6);
 blockwrite(f,Qty.Materials,4); //integer

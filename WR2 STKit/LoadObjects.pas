@@ -34,7 +34,7 @@ begin
 result:=false;
 if not FileExists(FileName+'.MOX') then exit;
 
-assignfile(f,FileName+'.mox');
+AssignFile(f,FileName+'.mox');
 FileMode:=0; reset(f,1); FileMode:=2;
 blockread(f,MOXHead,32);
 
@@ -56,7 +56,7 @@ end;
 
 
 if not FileExists(FileName+'.MTL') then exit; 
-assignfile(ft,FileName+'.MTL');
+AssignFile(ft,FileName+'.MTL');
 FileMode:=0; reset(ft); FileMode:=2;
 MatID:=0;
 repeat
@@ -149,7 +149,7 @@ begin
 result:=false;
 if not FileExists(FileName+'.TREE') then exit;
 
-assignfile(f,FileName+'.tree');
+AssignFile(f,FileName+'.tree');
 FileMode:=0; reset(f,1); FileMode:=2;
 
 blockread(f,Tree,16);

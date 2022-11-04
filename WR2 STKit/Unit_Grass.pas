@@ -254,7 +254,7 @@ var
   r1,g1,b1,a1:integer;
   LOD:integer;
 begin
-  assignfile(f,aTGAFile); reset(f,1);
+  AssignFile(f,aTGAFile); reset(f,1);
   blockread(f,c,12);
   blockread(f,sx,2);
   blockread(f,sz,2);
@@ -389,7 +389,7 @@ begin
       RO[LOD].Grass[i].Size:=EnsureRange(round(RO[LOD].Grass[i].Size/2)*2,0,15);
     end;
 
-    assignfile(f,aFile+'.ro'+inttostr(LOD)); rewrite(f,1);
+    AssignFile(f,aFile+'.ro'+inttostr(LOD)); rewrite(f,1);
     blockwrite(f,RO[LOD].Head,32);
     blockwrite(f,chr2(RO[LOD].Tex,32)[1],32);
     blockwrite(f,RO[LOD].UV,128);

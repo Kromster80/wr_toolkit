@@ -143,7 +143,7 @@ var
   k,h:integer;
 begin
 WriteCommonDataToSC2();
-assignfile(f,InFile); rewrite(f,1);
+AssignFile(f,InFile); rewrite(f,1);
 blockwrite(f,'WR2'+#1,4);
 blockwrite(f,#0+#0,2);
 with AddonScenery do begin
@@ -182,7 +182,7 @@ var
   k,h:word;
 begin Result:=false;
 if not fileexists(InFile) then exit;
-assignfile(f,InFile); FileMode:=0; reset(f,1); FileMode:=2; //read-only
+AssignFile(f,InFile); FileMode:=0; reset(f,1); FileMode:=2; //read-only
 blockread(f,c,4); if c[1]+c[2]+c[3]+c[4]<>'WR2'+#1 then exit;
 blockread(f,c,2); //Chapters
 with AddonScenery do begin

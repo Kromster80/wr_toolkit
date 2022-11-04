@@ -14,7 +14,7 @@ implementation
 procedure OpenDS(filename:string);
 var i,k,h,j,m:integer; s:string; f:file;
 begin
-assignfile(f,filename); FileMode:=0; reset(f,1); FileMode:=2;
+AssignFile(f,filename); FileMode:=0; reset(f,1); FileMode:=2;
 blockread(f,Header,33);
 DSqty:=ord(Header[9]);
 setlength(TB,DSqty+1);
@@ -123,7 +123,7 @@ end;
 procedure SaveDS(filename:string);
 var i,k,j:integer; s:AnsiString; f:file;
 begin
-assignfile(f,filename); rewrite(f,1);
+AssignFile(f,filename); rewrite(f,1);
 c[1]:=#0;
 blockwrite(f,Header,33); //assume DSQty didn't changed
 for i:=1 to DSqty do begin
@@ -398,7 +398,7 @@ for k:=1 to P_[ID].CO[8,1].Entries do P_[ID].Value[8,1,k].Int:=1;   //TrackRelea
 for k:=1 to P_[ID].CO[13,1].Entries do P_[ID].Value[13,1,k].Int:=1; //CarReleaseFlag
 end;
 
-assignfile(f,RootDir+'\WR2-Saves\'+profile[ID].Folder+'\Career.new'); rewrite(f,1);
+AssignFile(f,RootDir+'\WR2-Saves\'+profile[ID].Folder+'\Career.new'); rewrite(f,1);
 c[1]:=#0;
 blockwrite(f,P_[ID].Header,33); //assume DSQty didn't changed
 for i:=1 to P_[ID].DSqty do begin

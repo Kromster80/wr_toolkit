@@ -105,7 +105,7 @@ begin
   s := fOptions.ExeDir+STKit2_Data_Path+'\Shaders\Mat_GLSL.vert';
   if fileexists(s) then
   begin
-    assignfile(ff,s);
+    AssignFile(ff,s);
     reset(ff,1);
     blockread(ff,c,16384,NumRead);
     closefile(ff);
@@ -122,7 +122,7 @@ begin
     s:=fOptions.ExeDir+STKit2_Data_Path+'\Shaders\'+MatModeF[i]+'.frag';
     if fileexists(s) then
     begin
-      assignfile(ff,s);
+      AssignFile(ff,s);
       reset(ff,1);
       blockread(ff,c,16384,NumRead);
       closefile(ff);
@@ -151,7 +151,7 @@ begin
 
   ovs:=glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
   s:=fOptions.ExeDir+STKit2_Data_Path+'\Shaders\Obj_GLSL.vert';
-  assignfile(ff,s); reset(ff,1);
+  AssignFile(ff,s); reset(ff,1);
   blockread(ff,c,16384,NumRead); closefile(ff);
   c[NumRead+1]:=#0; src:=PAnsiChar(@c[1]);
   glShaderSourceARB(ovs, 1, @src, @NumRead);
@@ -162,7 +162,7 @@ begin
     ofs[i]:=glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
     s:=fOptions.ExeDir+STKit2_Data_Path+'\Shaders\Obj'+int2fix(i,2)+'00.frag';
     if not fileexists(s) then s:=fOptions.ExeDir+STKit2_Data_Path+'\Shaders\Obj_GLSL.frag';
-    assignfile(ff,s); reset(ff,1);
+    AssignFile(ff,s); reset(ff,1);
     blockread(ff,c,16384,NumRead); closefile(ff);
     c[NumRead+1]:=#0; src:=PAnsiChar(@c[1]);
     glShaderSourceARB(ofs[i], 1, @src, @NumRead);

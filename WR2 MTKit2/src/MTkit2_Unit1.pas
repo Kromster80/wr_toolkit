@@ -1617,7 +1617,7 @@ var
   lazyqty: array of Integer;
   face6: array [1..3] of Word;
 begin
-  assignfile(f,aFilename); rewrite(f,1);
+  AssignFile(f,aFilename); rewrite(f,1);
 
   if PivotSetup.TabVisible then  //LWO>MOX only !
   begin  //Set MoxMat/Sid order continous

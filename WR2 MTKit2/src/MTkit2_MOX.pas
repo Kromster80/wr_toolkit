@@ -169,7 +169,7 @@ var
   face6: array [1..3] of Word;
   face12: array [1..3] of Cardinal;
 begin
-  assignfile(f,aFilename); FileMode:=0; reset(f,1); FileMode:=2;
+  AssignFile(f,aFilename); FileMode:=0; reset(f,1); FileMode:=2;
   try
     FillChar(MOX, SizeOf(MOX), #0);
 

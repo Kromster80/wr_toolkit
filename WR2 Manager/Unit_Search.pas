@@ -72,7 +72,7 @@ var
   k:integer;
   f:file;
 begin
-  assignfile(f,s1+'\EditScenery.sc2'); FileMode:=0; reset(f,1); FileMode:=2; //read-only
+  AssignFile(f,s1+'\EditScenery.sc2'); FileMode:=0; reset(f,1); FileMode:=2; //read-only
   blockread(f,c,4); if c[1]+c[2]+c[3]+c[4]<>'WR2'+#1 then exit;
   blockread(f,c,2); //Chapters
   with AddonScenery[i1] do
@@ -139,7 +139,7 @@ end;
 procedure GetProfileInfo(s1:string;i1:integer);
 var i,j,m,k,h:integer; s:string; f:file;
 begin
-assignfile(f,RootDir+'\WR2-Saves\'+s1+'\career.wrc'); FileMode:=0; reset(f,1); FileMode:=2;
+AssignFile(f,RootDir+'\WR2-Saves\'+s1+'\career.wrc'); FileMode:=0; reset(f,1); FileMode:=2;
 blockread(f,P_[i1].Header,33);
 P_[i1].DSqty:=ord(P_[i1].Header[9]);
 for i:=1 to P_[i1].DSqty do begin
@@ -327,7 +327,7 @@ procedure GetAutoInfo(s1:string;i1:integer);
 var NumRead,Pos,i,k,j,h,m:integer; f:file;
 begin
   Pos:=0; //reset to 0
-  assignfile(f,RootDir+'\AddOns\autos\'+s1+'\EditCar.car'); FileMode:=0; reset(f,128); FileMode:=2;
+  AssignFile(f,RootDir+'\AddOns\autos\'+s1+'\EditCar.car'); FileMode:=0; reset(f,128); FileMode:=2;
   blockread(f,c,1000,NumRead); closefile(f); //reading 128kbytes should be enough (usually ~30kb)
 
   EC_DSqty:=ord(c[Pos+9]);
@@ -449,7 +449,7 @@ var
   w: Word;
   k:integer;
 begin
-assignfile(f,s1); FileMode:=0; reset(f,1); FileMode:=2; //read-only
+AssignFile(f,s1); FileMode:=0; reset(f,1); FileMode:=2; //read-only
 blockread(f,c,4);
 if (c[1]+c[2]+c[3]<>'WR2') then exit;
 Version:=ord(c[4]);

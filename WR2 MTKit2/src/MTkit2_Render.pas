@@ -103,7 +103,7 @@ begin
       exit;
     end;
 
-    assignfile(ff,ExeDir+'MTKit2 Data\Common.vert');
+    AssignFile(ff,ExeDir+'MTKit2 Data\Common.vert');
     reset(ff,1);
     blockread(ff,c,10000,NumRead);
     closefile(ff);
@@ -119,7 +119,7 @@ begin
       else
         fname:='MTKit2 Data\Common.frag';
 
-      assignfile(ff,ExeDir+fname);
+      AssignFile(ff,ExeDir+fname);
       reset(ff,1);
       blockread(ff,c,10000,NumRead);
       closefile(ff);

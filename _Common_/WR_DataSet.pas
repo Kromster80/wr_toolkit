@@ -148,7 +148,7 @@ begin
   Result:=false;
   IgnoreTyp:=false;
 
-  assignfile(f,FileName); FileMode:=0; reset(f,1); FileMode:=2;
+  AssignFile(f,FileName); FileMode:=0; reset(f,1); FileMode:=2;
 
   blockread(f,Header,33);
   DSqty:=ord(Header[9]);
@@ -236,7 +236,7 @@ var
   iDS,iTB,iCO:integer;
   i:integer;
 begin
-  assignfile(f,FileName); rewrite(f,1);
+  AssignFile(f,FileName); rewrite(f,1);
 
   blockwrite(f,Header,33); //assume DSQty didn't changed
 

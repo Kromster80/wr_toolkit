@@ -482,7 +482,7 @@ var
   w: Word;
   q: Integer;
 begin
-  assignfile(f,filename); FileMode:=0; reset(f,1); FileMode:=2;
+  AssignFile(f,filename); FileMode:=0; reset(f,1); FileMode:=2;
   blockread(f,Header,33);
   DSqty:=ord(Header[9]);
   setlength(TB,DSqty+1);
@@ -672,7 +672,7 @@ procedure TForm1.GetSceneryInfo(s1:string; i1:integer);
 var
   w: Word;
 begin
-assignfile(f,s1+'\EditScenery.sc2'); FileMode:=0; reset(f,1); FileMode:=2; //read-only
+AssignFile(f,s1+'\EditScenery.sc2'); FileMode:=0; reset(f,1); FileMode:=2; //read-only
 blockread(f,c,4); if c[1]+c[2]+c[3]+c[4]<>'WR2'+#1 then exit;
 blockread(f,c,2); //Chapters
 with AddonScenery[i1] do begin
@@ -831,7 +831,7 @@ var
   NumRead,Pos,h:integer;
 begin
 Pos:=0; //reset to 0
-assignfile(f,RootDir+'\AddOns\autos\'+s1+'\EditCar.car'); FileMode:=0; reset(f,128); FileMode:=2;
+AssignFile(f,RootDir+'\AddOns\autos\'+s1+'\EditCar.car'); FileMode:=0; reset(f,128); FileMode:=2;
 blockread(f,c,1000,NumRead); closefile(f); //reading 128kbytes should be enough (usually ~30kb)
 EC_DSqty:=ord(c[Pos+9]);
 inc(Pos,33);
@@ -965,7 +965,7 @@ var
   version:byte;
   w: Word;
 begin
-assignfile(f,s1); FileMode:=0; reset(f,1); FileMode:=2; //read-only
+AssignFile(f,s1); FileMode:=0; reset(f,1); FileMode:=2; //read-only
 blockread(f,c,4);
 version:=ord(c[4]);
 if (c[1]+c[2]+c[3]<>'WR2') then exit;
@@ -1350,7 +1350,7 @@ SaveDialog1.InitialDir:=RootDir+'\AddOns\Missions\';
 if not DirectoryExists(RootDir+'\AddOns\Missions\') then CreateDir(RootDir+'\AddOns\Missions\');
 if not SaveDialog1.Execute then exit;
 if GetFileExt(SaveDialog1.FileName)<>'MIS' then SaveDialog1.FileName:=SaveDialog1.FileName+'.mis';
-assignfile(f,SaveDialog1.FileName); rewrite(f,1);
+AssignFile(f,SaveDialog1.FileName); rewrite(f,1);
 blockwrite(f,'WR2'+#2,4);//byte4 means file version
 blockwrite(f,#1+#0,2);//meaning number of missions in file
 
