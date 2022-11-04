@@ -671,59 +671,78 @@ end;
 
 
 procedure TDisplayImage.OpenTGA(const aFilename: string);
+type
+  TTGADataType = (
+    tdtNoData = 0,    // No image data included.
+    tdtPaletted = 1,  // Uncompressed, color-mapped images.
+    tdtRGB = 2,       // Uncompressed, RGB images.
+    tdtBW = 3,        // Uncompressed, black and white images.
+    tdtRLEPal = 9,    // Runlength encoded color-mapped images.
+    tdtRLERGB = 10,   // Runlength encoded RGB images.
+    tdtComBW = 11,    // Compressed, black and white images.
+    tdtComRGB = 32,   // Compressed color-mapped data, using Huffman, Delta, and runlength encoding.
+    tdtComRGB4 = 33   // Compressed color-mapped data, using Huffman, Delta, and runlength encoding.  4-pass quadtree-type process.
+  );
 var
   I, K: Integer;
   f: file;
   c: array of AnsiChar;
-  tSizeH, tSizeV: Integer;
-  InBit: Byte;
+  tgaDataType: TTGADataType;
+  tgaWidth, tgaHeight: Integer;
+  tgaBitDepth: Byte;
 begin
   ResetAllData;
 
   AssignFile(f,aFileName); FileMode:=0; Reset(f,1); FileMode:=2;
-  setlength(c,18+1);
-  BlockRead(f,c[1],18);
-  tSizeH:=int2(c[13],c[14]);
-  tSizeV:=int2(c[15],c[16]);
-  InBit:=ord(c[17]);
+  try
+    setlength(c,18+1);
+    BlockRead(f,c[1],18);
+    tgaDataType := TTGADataType(c[3]);
+    tgaWidth := int2(c[13],c[14]);
+    tgaHeight := int2(c[15],c[16]);
+    tgaBitDepth := Ord(c[17]);
 
-  if (InBit <> 24) and (InBit <> 32) then
-  begin
-    MessageBox(0, 'Image size must be 24/32 bit', 'Error', MB_OK);
+    if tgaDataType <> tdtRGB then
+    begin
+      MessageBox(0, 'TGA format needs to be a simple uncompressed RGB/RGBA', 'Error', MB_OK);
+      Exit;
+    end;
+
+    if (tgaBitDepth <> 24) and (tgaBitDepth <> 32) then
+    begin
+      MessageBox(0, 'Image bit depth must be 24 or 32 bit', 'Error', MB_OK);
+      Exit;
+    end;
+
+    if not Verify(tgaWidth, tgaHeight) then
+      Exit;
+
+    SetAllPropsAtOnce(ChangeFileExt(ExtractFileName(aFileName), ''), tgaWidth, tgaHeight, 1, tgaBitDepth = 32, 'TGA');
+
+    SetLength(c, fSource.Width * 4 + 1);
+
+    for i:=fSource.Height downto 1 do
+    begin
+      if tgaBitDepth = 24 then BlockRead(f,c[1],fSource.Width*3);
+      if tgaBitDepth = 32 then BlockRead(f,c[1],fSource.Width*4);
+      for k:=1 to fSource.Width do
+        if tgaBitDepth = 24 then
+        begin
+          fRGBA[i,k,1]:=ord(c[k*3-0]);
+          fRGBA[i,k,2]:=ord(c[k*3-1]);
+          fRGBA[i,k,3]:=ord(c[k*3-2]);
+        end else
+        if tgaBitDepth = 32 then
+        begin
+          fRGBA[i,k,1]:=ord(c[k*4-1]);
+          fRGBA[i,k,2]:=ord(c[k*4-2]);
+          fRGBA[i,k,3]:=ord(c[k*4-3]);
+          fRGBA[i,k,4]:=ord(c[k*4-0]);
+        end;
+    end;
+  finally
     closefile(f);
-    Exit;
   end;
-
-  if not Verify(tSizeH, tSizeV) then
-  begin
-    closefile(f);
-    Exit;
-  end;
-
-  SetAllPropsAtOnce(ChangeFileExt(ExtractFileName(aFileName), ''), tSizeH, tSizeV, 1, InBit = 32, 'TGA');
-
-  setlength(c,fSource.Width*4+1);
-
-  for i:=fSource.Height downto 1 do
-  begin
-    if InBit=24 then BlockRead(f,c[1],fSource.Width*3);
-    if InBit=32 then BlockRead(f,c[1],fSource.Width*4);
-    for k:=1 to fSource.Width do
-      if InBit=24 then
-      begin
-        fRGBA[i,k,1]:=ord(c[k*3-0]);
-        fRGBA[i,k,2]:=ord(c[k*3-1]);
-        fRGBA[i,k,3]:=ord(c[k*3-2]);
-      end else
-      if InBit=32 then
-      begin
-        fRGBA[i,k,1]:=ord(c[k*4-1]);
-        fRGBA[i,k,2]:=ord(c[k*4-2]);
-        fRGBA[i,k,3]:=ord(c[k*4-3]);
-        fRGBA[i,k,4]:=ord(c[k*4-0]);
-      end;
-  end;
-  closefile(f);
 
   UpdateFog;
   fRmsRGB := 0;
