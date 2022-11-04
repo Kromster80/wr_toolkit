@@ -100,20 +100,20 @@ type
 var
   MOX: TMOX;
 
-  Material: array [1..MAX_MATERIALS]of record
-   Mtag:string[4];//Material tag (#_0x----)
-   Title:string;
-   MatClass: array [1..4]of Integer;     //Material class selector (by index)
-   Color: array [1..20]of record
-     Amb,Dif,Sp1,Sp2,Ref:record
-       R,G,B,z:Byte;
-     end;
-   end;
-   Transparency:Byte;
-   TexName:string;
-   TexEdge:record U:Byte; V:Byte; end;
-   TexOffset,TexScale:record U:Single; V:Single; end;
-   TexAngle:Single;
+  Material: array [1..MAX_MATERIALS] of record
+    Mtag: string[4];//Material tag (#_0x----)
+    Title: string;
+    MatClass: array [1..4] of Integer;     //Material class selector (by index)
+    Color: array [1..20] of record
+      Amb,Dif,Sp1,Sp2,Ref:record
+        R,G,B,z: Byte;
+      end;
+    end;
+    Transparency: Byte;
+    TexName: string;
+    TexEdge: record U, V: Byte; end;
+    TexOffset, TexScale: record U, V: Single; end;
+    TexAngle: Single;
   end;
 
 implementation
