@@ -961,7 +961,7 @@ begin
                             ConverseImp_MOX;
                             UpdateOpenedFileInfo(odOpen.FileName)
                           end;
-      BG_IMPORT_LWO_MOX:  if RunOpenDialog2(odOpen,fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then
+      BG_IMPORT_LWO_MOX:  if RunOpenDialog2(odOpen,fOpenedFolder, FILE_TYPE_INFO[kftLwo].Filter) then
                           begin
                             LoadLWO(odOpen.FileName);
                             RebuildImpNormals;
@@ -985,7 +985,7 @@ begin
                             SendDataToUI(uiBlinkers);
                             btnBlinkerPaste.Enabled := False;
                           end;
-      BG_IMPORT_LWO_COB:  if RunOpenDialog2(odOpen, fOpenedFolder, 'Lightwave 3D files (*.lwo)|*.lwo') then
+      BG_IMPORT_LWO_COB:  if RunOpenDialog2(odOpen, fOpenedFolder, FILE_TYPE_INFO[kftLwo].Filter) then
                           begin
                             fCOB.ImportLWO(odOpen.Filename);
                             ActionsEnable(cuCOB);
@@ -1004,14 +1004,14 @@ var
   doSpread: Boolean;
 begin
   case Index of
-    BG_EXPORT_MOX_LWO:  if RunSaveDialog(sdSave, fOpenedFileMask+'.lwo','','Lightwave 3D files (*.lwo)|*.lwo','lwo') then
+    BG_EXPORT_MOX_LWO:  if RunSaveDialog2(sdSave, fOpenedFileMask + '.lwo', FILE_TYPE_INFO[kftLwo].Filter) then
                         begin
                           meLog.Lines.Add('Writing MOX>LWO file');
                           doSpread := MessageBox(Handle, 'Do you want to spread parts over X axis?', 'Question', MB_YESNO or MB_ICONQUESTION) = ID_YES;
                           SaveMOX2LWO(sdSave.FileName, ColID, doSpread);
                           meLog.Lines.Add('MOX>LWO Save Complete');
                         end;
-    BG_EXPORT_COB_LWO:  if RunSaveDialog(sdSave, fOpenedFileMask + '_colli.lwo', '', 'Lightwave 3D files (*.lwo)|*.lwo', 'lwo') then
+    BG_EXPORT_COB_LWO:  if RunSaveDialog2(sdSave, fOpenedFileMask + '_colli.lwo', FILE_TYPE_INFO[kftLwo].Filter) then
                         begin
                           meLog.Lines.Add('Writing COB>LWO file');
                           fCOB.ExportLWO(sdSave.FileName);
@@ -3302,7 +3302,7 @@ end;
 
 procedure TForm1.mnuImportLWO1Click(Sender: TObject);
 begin
-  if not RunOpenDialog2(odOpen,fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
+  if not RunOpenDialog2(odOpen,fOpenedFolder, FILE_TYPE_INFO[kftLwo].Filter) then Exit;
   if not LoadLWO(odOpen.FileName) then Exit;
 
   RebuildImpNormals;
@@ -3333,7 +3333,7 @@ end;
 
 procedure TForm1.mnuImportLWOCOB1Click(Sender: TObject);
 begin
-  if not RunOpenDialog2(odOpen, fOpenedFolder, 'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
+  if not RunOpenDialog2(odOpen, fOpenedFolder, FILE_TYPE_INFO[kftLwo].Filter) then Exit;
 
   try
     fCOB.ImportLWO(odOpen.Filename);
@@ -3352,7 +3352,7 @@ procedure TForm1.mnuExportMOX1Click(Sender: TObject);
 var
   doSpread: Boolean;
 begin
-  if not RunSaveDialog(sdSave, fOpenedFileMask+'.lwo','','Lightwave 3D files (*.lwo)|*.lwo','lwo') then Exit;
+  if not RunSaveDialog2(sdSave, fOpenedFileMask+'.lwo', FILE_TYPE_INFO[kftLwo].Filter) then Exit;
 
   meLog.Lines.Add('Writing MOX>LWO file');
 
@@ -3366,7 +3366,7 @@ end;
 
 procedure TForm1.mnuExportCOB1Click(Sender: TObject);
 begin
-  if not RunSaveDialog(sdSave, fOpenedFileMask + '_colli.lwo', '', 'Lightwave 3D files (*.lwo)|*.lwo', 'lwo') then Exit;
+  if not RunSaveDialog2(sdSave, fOpenedFileMask + '_colli.lwo', FILE_TYPE_INFO[kftLwo].Filter) then Exit;
   meLog.Lines.Add('Writing COB>LWO file');
   fCOB.ExportLWO(sdSave.FileName);
   meLog.Lines.Add('COB>LWO Save Complete');
@@ -3605,7 +3605,7 @@ procedure TForm1.btnCPOImportClick(Sender: TObject);
 var
   i,h,IDnew:Integer;
 begin
-  if not RunOpenDialog2(odOpen,fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
+  if not RunOpenDialog2(odOpen, fOpenedFolder, FILE_TYPE_INFO[kftLwo].Filter) then Exit;
   if not LoadLWO(odOpen.FileName) then Exit;
 
   if CPOHead.Qty >= MAX_CPO_SHAPES then Exit;
@@ -3658,7 +3658,7 @@ begin
     Exit;
   end;
 
-  if not RunSaveDialog(sdSave, fOpenedFileMask+'.lwo', '', 'Lightwave 3D files (*.lwo)|*.lwo', 'lwo') then
+  if not RunSaveDialog2(sdSave, fOpenedFileMask + '.lwo', FILE_TYPE_INFO[kftLwo].Filter) then
     Exit;
 
   meLog.Lines.Add('Writing CPO>LWO file');

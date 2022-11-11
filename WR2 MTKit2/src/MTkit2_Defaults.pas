@@ -16,6 +16,7 @@ type
   TCameraAction = (caNone, caRotate, caMove, caZoom);
 
   TKnownFileType = (
+    kftLwo,
     kftMox,
     kftTree
   );
@@ -35,6 +36,7 @@ const
   MAX_READ_BUFFER = 262144;
 
   FILE_TYPE_INFO: array [TKnownFileType] of TKnownFileTypeInfo = (
+    (Filter: 'Lightwave 3D files (*.lwo)|*.lwo'; Ext: '.lwo'),
     (Filter: 'World Racing 2 object files (*.mox)|*.mox'; Ext: '.mox'),
     (Filter: 'World Racing 2 tree files (*.tree)|*.tree'; Ext: '.tree')
   );
