@@ -15,6 +15,16 @@ type
   TEditingActions = (cuMOX, cuMTL, cuCOB, cuCPO, cuTREE, cuALL);
   TCameraAction = (caNone, caRotate, caMove, caZoom);
 
+  TKnownFileType = (
+    kftMox,
+    kftTree
+  );
+
+  TKnownFileTypeInfo = record
+    Filter: string;
+    Ext: string;
+  end;
+
 const
   APP_TITLE = 'Mesh ToolKit';
   VER_INFO = '2.4.3';
@@ -23,6 +33,11 @@ const
   MAX_COLORS = 15;
   MAX_CPO_SHAPES = 12;
   MAX_READ_BUFFER = 262144;
+
+  FILE_TYPE_INFO: array [TKnownFileType] of TKnownFileTypeInfo = (
+    (Filter: 'World Racing 2 object files (*.mox)|*.mox'; Ext: '.mox'),
+    (Filter: 'World Racing 2 tree files (*.tree)|*.tree'; Ext: '.tree')
+  );
 
   BBoxV: array [1..8,1..3] of Single =(
   (-0.5,-0.5,-0.5),( 0.5,-0.5,-0.5),( 0.5, 0.5,-0.5),(-0.5, 0.5,-0.5),

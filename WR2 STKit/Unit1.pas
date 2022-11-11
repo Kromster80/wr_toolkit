@@ -2550,7 +2550,7 @@ end;
 procedure TForm1.BrowseLWO(Sender: TObject);
 begin
   //ChDir(WorkDir+'Scenarios\'+Scenery+'\');
-  if not RunOpenDialog(OpenDialog,'',SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
+  if not RunOpenDialog2(OpenDialog, SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
   LWOSceneryFile:=OpenDialog.FileName;
   //LWOSceneryFile:='C:\Documents and Settings\Krom\Desktop\Normandie\Normandie80_v008.lwo';
   //LWOSceneryFile:='C:\H\Sources\Atlantica\Atlantica_v002.lwo';
@@ -3519,7 +3519,7 @@ begin
   if AutoImportTexturesList<>'' then
     OpenDialog.FileName:=AutoImportTexturesList
   else
-  if not RunOpenDialog(OpenDialog,'',SceneryPath,'Textures list (TexturesAssignList.dat)|*.dat') then exit;
+  if not RunOpenDialog2(OpenDialog,SceneryPath,'Textures list (TexturesAssignList.dat)|*.dat') then exit;
   AutoImportTexturesList:='';
 
   AssignFile(ft,OpenDialog.FileName); reset(ft);
@@ -3837,7 +3837,7 @@ var
   f:file;
   ii:integer; ss:string;
 begin
-if not RunOpenDialog(OpenDialog,'',SceneryPath,'Sounds list (SoundsList.dat)|*.dat') then exit;
+if not RunOpenDialog2(OpenDialog,SceneryPath,'Sounds list (SoundsList.dat)|*.dat') then exit;
 AssignFile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,8); ss:=c[1]+c[2]+c[3]+c[4]+c[5]+c[6]+c[7]+c[8];
@@ -4410,7 +4410,7 @@ var
   ii,kk:integer;
   ss:string;
 begin
-if not RunOpenDialog(OpenDialog,'',SceneryPath,'Objects list (ObjectsList.dat)|*.dat') then exit;
+if not RunOpenDialog2(OpenDialog,SceneryPath,'Objects list (ObjectsList.dat)|*.dat') then exit;
 AssignFile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,8); ss:=c[1]+c[2]+c[3]+c[4]+c[5]+c[6]+c[7]+c[8];
@@ -4469,7 +4469,7 @@ begin
 //if AutoImportGroundsList<>'' then
 //OpenDialog.FileName:=AutoImportGroundsList
 //else
-if not RunOpenDialog(OpenDialog,'',SceneryPath,'Grounds list (GroundsList.dat)|*.dat') then exit;
+if not RunOpenDialog2(OpenDialog,SceneryPath,'Grounds list (GroundsList.dat)|*.dat') then exit;
 //AutoImportGroundsList:='';
 
 AssignFile(f,OpenDialog.FileName); reset(f,1);
@@ -4585,7 +4585,7 @@ var
   ii:integer;
   ss:string;
 begin
-if not RunOpenDialog(OpenDialog,'',SceneryPath,'Objects list (ObjectsList.dat)|*.dat') then exit;
+if not RunOpenDialog2(OpenDialog,SceneryPath,'Objects list (ObjectsList.dat)|*.dat') then exit;
 AssignFile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,8); ss:=c[1]+c[2]+c[3]+c[4]+c[5]+c[6]+c[7]+c[8];
@@ -5216,7 +5216,7 @@ end;
 procedure TForm1.ImportLWOTrackClick(Sender: TObject);
 var s:string;
 begin
-  if not RunOpenDialog(OpenDialog,'',SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
+  if not RunOpenDialog2(OpenDialog,SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
   s := OpenDialog.FileName;
   //s:='E:\World Racing 2\Scenarios\Industrial\V1\route.lwo';
   //s:='E:\World Racing 2\Scenarios\Test\V1\Test_trk.lwo';
@@ -5248,7 +5248,7 @@ begin
 if AutoImportMaterialsList<>'' then
 OpenDialog.FileName:=AutoImportMaterialsList
 else
-if not RunOpenDialog(OpenDialog,'',SceneryPath,'Materials list (MaterialsList.dat)|*.dat') then exit;
+if not RunOpenDialog2(OpenDialog,SceneryPath,'Materials list (MaterialsList.dat)|*.dat') then exit;
 AutoImportMaterialsList:='';
 
 {for i:=1 to Qty.Materials do begin
@@ -5348,7 +5348,7 @@ var
   ii,i1,i2:integer;
   i3,i4:single;
 begin
-  if not RunOpenDialog(OpenDialog,'',SceneryPath,'NFS-PU sounds list (*_aud.scn)|*.scn') then exit;
+  if not RunOpenDialog2(OpenDialog,SceneryPath,'NFS-PU sounds list (*_aud.scn)|*.scn') then exit;
 
   AssignFile(ft,OpenDialog.FileName);
   Reset(ft);
@@ -5517,7 +5517,7 @@ var
   m,ii,chsize:integer;
   chname:string[4];
 begin
-  if not RunOpenDialog(OpenDialog,'',SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
+  if not RunOpenDialog2(OpenDialog,SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
   AssignFile(f,OpenDialog.FileName); reset(f,1);
 
   blockread(f,c,12);
@@ -5648,7 +5648,7 @@ begin
 //if AutoImportLightsList<>'' then
 //OpenDialog.FileName:=AutoImportLightsList
 //else
-if not RunOpenDialog(OpenDialog,'',SceneryPath, DIALOG_FILTER_LIGHTS) then exit;
+if not RunOpenDialog2(OpenDialog,SceneryPath, DIALOG_FILTER_LIGHTS) then exit;
 //AutoImportLightsList:='';
 
 AssignFile(f,OpenDialog.FileName); reset(f,1);
@@ -6086,7 +6086,7 @@ var
   m,ii,chsize:integer;
   chname:string[4];
 begin
-if not RunOpenDialog(OpenDialog,'',SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
+if not RunOpenDialog2(OpenDialog,SceneryPath,'Lightwave 3D Models (*.lwo)|*.lwo') then exit;
 AssignFile(f,OpenDialog.FileName); reset(f,1);
 
 blockread(f,c,12);
@@ -6201,7 +6201,7 @@ end;
 
 procedure TForm1.GrassTGAColorClick(Sender: TObject);
 begin
-  if not RunOpenDialog(OpenDialog,'',SceneryPath,'TGA image (*.tga)|*.tga') then exit;
+  if not RunOpenDialog2(OpenDialog,SceneryPath,'TGA image (*.tga)|*.tga') then exit;
   fGrass.LoadColorFromTGA(OpenDialog.FileName);
 end;
 

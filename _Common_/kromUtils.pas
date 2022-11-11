@@ -22,7 +22,6 @@ type
 function ElapsedTime(i1: pcardinal): string;
 function ExtractOpenedFileName(in_s: string):string;
 function GetFileExt (const FileName: string): string; deprecated;
-function AssureFileExt(FileName, Ext: string): string; deprecated;
 function TruncateExt(FileName: string): string; deprecated;
 function GetFileSize(const FileName: string): LongInt;
 function CheckFileExists(const FileName: string; const IsSilent:boolean = false):boolean;
@@ -112,8 +111,11 @@ function RandomS(Range_Both_Directions:integer):integer; overload;
 function RandomS(Range_Both_Directions:single):single; overload;
 procedure WriteLangFile(Sender:TForm; FileName:string; EraseWritten:boolean);
 procedure ReadLangFile(Sender:TForm; FileName:string; EraseWritten:boolean);
-function RunOpenDialog(Sender:TOpenDialog; Name,Path,Filter:string):boolean;
-function RunSaveDialog(Sender:TSaveDialog; FileName, FilePath, Filter:string; const FileExt:string = ''):boolean;
+function RunOpenDialog(aOpenDialog: TOpenDialog; Name,Path,Filter:string):boolean; deprecated 'Use 2';
+function RunSaveDialog(aSaveDialog: TSaveDialog; aFileName, FilePath, Filter: string; const FileExt:string = ''):boolean; deprecated 'Use 2';
+
+function RunOpenDialog2(aOpenDialog: TOpenDialog; aPath, aFilter: string): Boolean;
+function RunSaveDialog2(aSaveDialog: TSaveDialog; aFileName, aFilter: string): Boolean;
 
 procedure Triangulate(VerticeCount:integer; Vertice:array of vector3f; out PolyCount:integer; out Polys:array of word; out Result:boolean);
 
@@ -238,15 +240,6 @@ begin
     Result := UpperCase(Copy(Result, 2, length(Result)-1))
   else
     Result := '';
-end;
-
-
-function AssureFileExt(FileName,Ext:string): string;
-begin
-if (Ext='')or(GetFileExt(FileName)=UpperCase(Ext)) then
-  Result:=FileName
-else
-  Result:=FileName+'.'+Ext;
 end;
 
 
@@ -1053,31 +1046,47 @@ begin
         if capt=eng then TRadioGroup(Sender.Components[i]).Items[k]:=rus;
         end;
       end;
-
     end;
-
   until(eof(ft));
   closefile(ft);
 end;
 
 
-function RunOpenDialog(Sender:TOpenDialog; Name,Path,Filter:string):boolean;
+function RunOpenDialog(aOpenDialog: TOpenDialog; Name, Path, Filter: string): Boolean;
 begin
-Sender.FileName:=Name;
-Sender.InitialDir:=Path;
-Sender.Filter:=Filter;
-Result:=Sender.Execute; //Returns "false" if user pressed "Cancel"
-//Result:=Result and FileExists(Sender.FileName); //Already should be enabled in OpenDialog options
+  aOpenDialog.FileName := Name;
+  aOpenDialog.InitialDir := Path;
+  aOpenDialog.Filter := Filter;
+  Result := aOpenDialog.Execute; // Returns "false" if user pressed "Cancel"
+  // Result:=Result and FileExists(aOpenDialog.FileName); //Already should be enabled in OpenDialog options
 end;
 
-function RunSaveDialog(Sender:TSaveDialog; FileName, FilePath, Filter:string; const FileExt:string = ''):boolean;
+function RunSaveDialog(aSaveDialog: TSaveDialog; aFileName, FilePath, Filter: string; const FileExt: string = ''): Boolean;
 begin
-Sender.FileName:=FileName;
-Sender.InitialDir:=FilePath;
-Sender.Filter:=Filter;
-Result:=Sender.Execute; //Returns "false" if user pressed "Cancel"
-  if not Result then exit;
-Sender.FileName:=AssureFileExt(Sender.FileName,FileExt);
+  aSaveDialog.FileName := ExtractFileName(FilePath + aFileName);
+  aSaveDialog.InitialDir := ExtractFilePath(FilePath + aFileName);
+  aSaveDialog.Filter := Filter;
+  aSaveDialog.DefaultExt := FileExt;
+
+  Result := aSaveDialog.Execute; // Returns "false" if user pressed "Cancel"
+end;
+
+function RunOpenDialog2(aOpenDialog: TOpenDialog; aPath, aFilter: string): Boolean;
+begin
+  aOpenDialog.FileName := '';
+  aOpenDialog.InitialDir := aPath;
+  aOpenDialog.Filter := aFilter;
+  Result := aOpenDialog.Execute;
+end;
+
+function RunSaveDialog2(aSaveDialog: TSaveDialog; aFileName, aFilter: string): Boolean;
+begin
+  aSaveDialog.Filter := aFilter;
+  aSaveDialog.FileName := ExtractFileName(aFileName);
+  aSaveDialog.InitialDir := ExtractFilePath(aFileName);
+  aSaveDialog.DefaultExt := ExtractFileExt(aFileName);
+
+  Result := aSaveDialog.Execute; // Returns "false" if user pressed "Cancel"
 end;
 
 procedure Triangulate(VerticeCount:integer; Vertice:array of vector3f; out PolyCount:integer; out Polys:array of word; out Result:boolean);

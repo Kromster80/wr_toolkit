@@ -913,13 +913,13 @@ procedure TForm1.Button4Click(Sender: TObject); begin {Placeholder} end;
 procedure TForm1.bgLoadButtonClicked(Sender: TObject; Index: Integer);
 begin
   case Index of
-    BG_LOAD_MOXMTL: if RunOpenDialog(odOpen, '', fOpenedFolder, 'World Racing 2 object files (*.mox)|*.mox') then
+    BG_LOAD_MOXMTL: if RunOpenDialog2(odOpen, fOpenedFolder, FILE_TYPE_INFO[kftMox].Filter) then
                       LoadFile(odOpen.FileName, lmLoadAndShow);
-    BG_LOAD_COB:    if RunOpenDialog(odOpen, '', fOpenedFolder, 'World Racing 2 collision files (*.cob)|*.cob') then
+    BG_LOAD_COB:    if RunOpenDialog2(odOpen, fOpenedFolder, 'World Racing 2 collision files (*.cob)|*.cob') then
                       LoadFile(odOpen.FileName, lmLoadAndShow);
-    BG_LOAD_CPO:    if RunOpenDialog(odOpen, '', fOpenedFolder, 'Alarm for Cobra 11 Nitro collision files (*.cpo)|*.cpo') then
+    BG_LOAD_CPO:    if RunOpenDialog2(odOpen, fOpenedFolder, 'Alarm for Cobra 11 Nitro collision files (*.cpo)|*.cpo') then
                       LoadFile(odOpen.FileName, lmLoadAndShow);
-    BG_LOAD_TREE:   if RunOpenDialog(odOpen, '', fOpenedFolder, 'World Racing 2 tree files (*.tree)|*.tree') then
+    BG_LOAD_TREE:   if RunOpenDialog2(odOpen, fOpenedFolder, FILE_TYPE_INFO[kftTree].Filter) then
                       LoadFile(odOpen.FileName, lmLoadAndShow);
   end;
 end;
@@ -928,16 +928,16 @@ end;
 procedure TForm1.bgSaveAsButtonClicked(Sender: TObject; Index: Integer);
 begin
   case Index of
-    BG_SAVE_AS_MOX: if RunSaveDialog(sdSave, fOpenedFileMask + '.mox', '', 'World Racing 2 object files (*.mox)|*.mox', 'mox') then
+    BG_SAVE_AS_MOX: if RunSaveDialog2(sdSave, fOpenedFileMask + '.mox', FILE_TYPE_INFO[kftMox].Filter) then
                       SaveMOX(sdSave.FileName);
     BG_SAVE_AS_MTL: if RunSaveDialog(sdSave, fOpenedFileMask + '.mtl', '', 'World Racing Material files (*.mtl)|*.mtl', 'mtl') then
                       SaveMTL(sdSave.FileName);
     BG_SAVE_AS_COB: if RunSaveDialog(sdSave, fOpenedFileMask + '_colli.cob', '', 'World Racing 2 collision files (*.cob)|*.cob', 'cob') then
-                      begin
-                        fCOB.RebuildBounds;
-                        SendDataToUI(uiCOB);
-                        fCOB.SaveCOB(sdSave.FileName);
-                      end;
+                    begin
+                      fCOB.RebuildBounds;
+                      SendDataToUI(uiCOB);
+                      fCOB.SaveCOB(sdSave.FileName);
+                    end;
     BG_SAVE_AS_CPO: if RunSaveDialog(sdSave, fOpenedFileMask + '.cpo', '', 'World Racing 2 collision files (*.cpo)|*.cpo', 'cpo') then
                       SaveCPO(sdSave.FileName);
   end;
@@ -948,20 +948,20 @@ procedure TForm1.bgImportButtonClicked(Sender: TObject; Index: Integer);
 begin
   try
     case Index of
-      BG_IMPORT_3DS_MOX:  if RunOpenDialog(odOpen, '', fOpenedFolder, '3DMax object files (*.3ds)|*.3ds') then
+      BG_IMPORT_3DS_MOX:  if RunOpenDialog2(odOpen, fOpenedFolder, '3DMax object files (*.3ds)|*.3ds') then
                           begin
                             Load3DS(odOpen.FileName);
                             RebuildImpNormals;
                             ConverseImp_MOX;
                             UpdateOpenedFileInfo(odOpen.FileName);
                           end;
-      BG_IMPORT_OBJ_MOX:  if RunOpenDialog(odOpen,'',fOpenedFolder,'OBJ object files (*.obj)|*.obj') then
+      BG_IMPORT_OBJ_MOX:  if RunOpenDialog2(odOpen,fOpenedFolder,'OBJ object files (*.obj)|*.obj') then
                           begin
                             LoadOBJ(odOpen.FileName);
                             ConverseImp_MOX;
                             UpdateOpenedFileInfo(odOpen.FileName)
                           end;
-      BG_IMPORT_LWO_MOX:  if RunOpenDialog(odOpen,'',fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then
+      BG_IMPORT_LWO_MOX:  if RunOpenDialog2(odOpen,fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then
                           begin
                             LoadLWO(odOpen.FileName);
                             RebuildImpNormals;
@@ -985,7 +985,7 @@ begin
                             SendDataToUI(uiBlinkers);
                             btnBlinkerPaste.Enabled := False;
                           end;
-      BG_IMPORT_LWO_COB:  if RunOpenDialog(odOpen, '', fOpenedFolder, 'Lightwave 3D files (*.lwo)|*.lwo') then
+      BG_IMPORT_LWO_COB:  if RunOpenDialog2(odOpen, fOpenedFolder, 'Lightwave 3D files (*.lwo)|*.lwo') then
                           begin
                             fCOB.ImportLWO(odOpen.Filename);
                             ActionsEnable(cuCOB);
@@ -2132,7 +2132,7 @@ end;
 procedure TForm1.MatTexBrowseClick(Sender: TObject);
 begin
   if MatID = 0 then Exit;
-  if not RunOpenDialog(odOpen, '', fOpenedFolder, 'Targa, PTX image files (*.ptx; *.tga)|*.tga;*.ptx') then Exit;
+  if not RunOpenDialog2(odOpen, fOpenedFolder, 'Targa, PTX image files (*.ptx; *.tga)|*.tga;*.ptx') then Exit;
 
   edMaterialTextureFile.Text := ExtractFileName(odOpen.FileName);
   MatTexReloadClick(nil);
@@ -2247,7 +2247,7 @@ end;
 
 procedure TForm1.btnBlinkersLoadClick(Sender: TObject);
 begin
-  if not RunOpenDialog(odOpen, '', '', 'MTKit2 Lights Setup Files (*.lsf)|*.lsf') then Exit;
+  if not RunOpenDialog2(odOpen, '', 'MTKit2 Lights Setup Files (*.lsf)|*.lsf') then Exit;
 
   LoadBlinkers(odOpen.FileName);
   SendDataToUI(uiBlinkers);
@@ -2612,7 +2612,7 @@ procedure TForm1.btnPSFLoadClick(Sender: TObject);
 begin
   if TVParts.Items.Count<1 then Exit;
   //if Sender=PSFLoad then begin
-  if not RunOpenDialog(odOpen,'','','MTKit2 Pivot Setup Files (*.psf)|*.psf') then Exit;
+  if not RunOpenDialog2(odOpen,'','MTKit2 Pivot Setup Files (*.psf)|*.psf') then Exit;
   meLog.Lines.Add('Reading PSF ...');
   if not LoadPSF(odOpen.FileName) then Exit;
   meLog.Lines.Add('PSF file closed');
@@ -2630,7 +2630,7 @@ end;
 
 procedure TForm1.btnPBFLoadClick(Sender: TObject);
 begin
-  if not RunOpenDialog(odOpen, '', '', 'MTKit2 Part Behaviour Files (*.pbf)|*.pbf') then Exit;
+  if not RunOpenDialog2(odOpen, '', 'MTKit2 Part Behaviour Files (*.pbf)|*.pbf') then Exit;
 
   meLog.Lines.Add('Reading PBF ...');
   LoadPBF(odOpen.FileName);
@@ -3217,35 +3217,35 @@ end;
 
 procedure TForm1.LoadMOXClick(Sender: TObject);
 begin
-  if not RunOpenDialog(odOpen,'',fOpenedFolder,'World Racing 2 object files (*.mox)|*.mox') then Exit;
+  if not RunOpenDialog2(odOpen, fOpenedFolder, FILE_TYPE_INFO[kftMox].Filter) then Exit;
   LoadFile(odOpen.FileName, lmLoadAndShow);
 end;
 
 
 procedure TForm1.LoadCOBClick(Sender: TObject);
 begin
-  if not RunOpenDialog(odOpen,'',fOpenedFolder,'World Racing 2 collision files (*.cob)|*.cob') then Exit;
+  if not RunOpenDialog2(odOpen,fOpenedFolder,'World Racing 2 collision files (*.cob)|*.cob') then Exit;
   LoadFile(odOpen.FileName, lmLoadAndShow);
 end;
 
 
 procedure TForm1.LoadCPOClick(Sender: TObject);
 begin
-  if not RunOpenDialog(odOpen,'',fOpenedFolder,'Alarm for Cobra 11 Nitro collision files (*.cpo)|*.cpo') then Exit;
+  if not RunOpenDialog2(odOpen,fOpenedFolder,'Alarm for Cobra 11 Nitro collision files (*.cpo)|*.cpo') then Exit;
   LoadFile(odOpen.FileName, lmLoadAndShow);
 end;
 
 
 procedure TForm1.mnuLoadTREEClick(Sender: TObject);
 begin
-  if not RunOpenDialog(odOpen,'',fOpenedFolder,'World Racing 2 tree files (*.tree)|*.tree') then Exit;
+  if not RunOpenDialog2(odOpen, fOpenedFolder, FILE_TYPE_INFO[kftTree].Filter) then Exit;
   LoadFile(odOpen.FileName, lmLoadAndShow);
 end;
 
 
 procedure TForm1.SaveMOXClick(Sender: TObject);
 begin
-  if not RunSaveDialog(sdSave, fOpenedFileMask + '.mox', '', 'World Racing 2 object files (*.mox)|*.mox', 'mox') then Exit;
+  if not RunSaveDialog2(sdSave, fOpenedFileMask + FILE_TYPE_INFO[kftMox].Ext, FILE_TYPE_INFO[kftMox].Filter) then Exit;
 
   meLog.Lines.Add('Saving MOX file ...');
   SaveMOX(sdSave.FileName);
@@ -3256,7 +3256,6 @@ end;
 procedure TForm1.mnuSaveMTLClick(Sender: TObject);
 begin
   if not RunSaveDialog(sdSave, fOpenedFileMask+'.mtl','','World Racing Material files (*.mtl)|*.mtl','mtl') then Exit;
-  //sdSave.FileName:=AssureFileExt(sdSave.FileName,'mtl');
   meLog.Lines.Add('Saving MTL file ...');
   SaveMTL(sdSave.FileName);
   meLog.Lines.Add('MTL file written');
@@ -3284,7 +3283,7 @@ end;
 
 procedure TForm1.mnuImport3DSMOX1Click(Sender: TObject);
 begin
-  if not RunOpenDialog(odOpen,'',fOpenedFolder,'3DMax object files (*.3ds)|*.3ds') then Exit;
+  if not RunOpenDialog2(odOpen,fOpenedFolder,'3DMax object files (*.3ds)|*.3ds') then Exit;
   if not Load3DS(odOpen.FileName) then Exit;
 
   RebuildImpNormals;
@@ -3294,7 +3293,7 @@ end;
 
 procedure TForm1.mnuImportOBJMOX1Click(Sender: TObject);
 begin
-  if not RunOpenDialog(odOpen,'',fOpenedFolder,'OBJ object files (*.obj)|*.obj') then Exit;
+  if not RunOpenDialog2(odOpen,fOpenedFolder,'OBJ object files (*.obj)|*.obj') then Exit;
   if not LoadOBJ(odOpen.FileName) then Exit;
 
   ConverseImp_MOX;
@@ -3303,7 +3302,7 @@ end;
 
 procedure TForm1.mnuImportLWO1Click(Sender: TObject);
 begin
-  if not RunOpenDialog(odOpen,'',fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
+  if not RunOpenDialog2(odOpen,fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
   if not LoadLWO(odOpen.FileName) then Exit;
 
   RebuildImpNormals;
@@ -3334,7 +3333,7 @@ end;
 
 procedure TForm1.mnuImportLWOCOB1Click(Sender: TObject);
 begin
-  if not RunOpenDialog(odOpen, '', fOpenedFolder, 'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
+  if not RunOpenDialog2(odOpen, fOpenedFolder, 'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
 
   try
     fCOB.ImportLWO(odOpen.Filename);
@@ -3606,7 +3605,7 @@ procedure TForm1.btnCPOImportClick(Sender: TObject);
 var
   i,h,IDnew:Integer;
 begin
-  if not RunOpenDialog(odOpen,'',fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
+  if not RunOpenDialog2(odOpen,fOpenedFolder,'Lightwave 3D files (*.lwo)|*.lwo') then Exit;
   if not LoadLWO(odOpen.FileName) then Exit;
 
   if CPOHead.Qty >= MAX_CPO_SHAPES then Exit;
