@@ -35,6 +35,7 @@ const
   MAX_CPO_SHAPES = 12;
   MAX_READ_BUFFER = 262144;
 
+  // Fill in and use other known types
   FILE_TYPE_INFO: array [TKnownFileType] of TKnownFileTypeInfo = (
     (Filter: 'Lightwave 3D files (*.lwo)|*.lwo'; Ext: '.lwo'),
     (Filter: 'World Racing 2 object files (*.mox)|*.mox'; Ext: '.mox'),

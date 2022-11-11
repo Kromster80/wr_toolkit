@@ -425,6 +425,7 @@ type
     fRenderObjects: TRenderObjectSet;
 
     fCOB: TModelCOB;
+    fMOX: TMOX2;
     fTree: TModelTree;
 
     procedure LoadSettingsFromIni(const aFilename: string);
@@ -733,6 +734,7 @@ begin
   FormatSettings.DecimalSeparator := '.';
 
   fCOB := TModelCOB.Create;
+  fMOX := TMOX2.Create;
   fTree := TModelTree.Create;
 
   ActionsDisable(cuALL);
@@ -931,7 +933,7 @@ begin
     BG_SAVE_AS_MOX: if RunSaveDialog2(sdSave, fOpenedFileMask + '.mox', FILE_TYPE_INFO[kftMox].Filter) then
                       SaveMOX(sdSave.FileName);
     BG_SAVE_AS_MTL: if RunSaveDialog(sdSave, fOpenedFileMask + '.mtl', '', 'World Racing Material files (*.mtl)|*.mtl', 'mtl') then
-                      SaveMTL(sdSave.FileName);
+                      SaveMTL(sdSave.FileName, fMOX.Header.MatCount);
     BG_SAVE_AS_COB: if RunSaveDialog(sdSave, fOpenedFileMask + '_colli.cob', '', 'World Racing 2 collision files (*.cob)|*.cob', 'cob') then
                     begin
                       fCOB.RebuildBounds;
@@ -971,16 +973,16 @@ begin
       BG_IMPORT_LWO_MOX2: begin
                             bgImportButtonClicked(nil, BG_IMPORT_LWO_MOX);
 
-                            LoadMTL(fOpenedFileMask+'.mtl');
+                            LoadMTL(fOpenedFileMask+'.mtl', fMOX.Header.MatCount);
                             LoadTextures;
                             ScanVinyls(fOpenedFolder);
                             ActionsEnable(cuMTL);
 
-                            LoadPSF(fOpenedFileMask+'.psf');
-                            LoadPBF(fOpenedFileMask+'.pbf');
+                            LoadPSF(fMOX, fOpenedFileMask+'.psf');
+                            LoadPBF(fMOX, fOpenedFileMask+'.pbf');
                             ExchangePartsOrdering;
                             RebuildPartsTree;
-                            LoadBlinkers(fOpenedFileMask+'.lsf');
+                            LoadBlinkers(fMOX, fOpenedFileMask+'.lsf');
 
                             SendDataToUI(uiBlinkers);
                             btnBlinkerPaste.Enabled := False;
@@ -1008,7 +1010,7 @@ begin
                         begin
                           meLog.Lines.Add('Writing MOX>LWO file');
                           doSpread := MessageBox(Handle, 'Do you want to spread parts over X axis?', 'Question', MB_YESNO or MB_ICONQUESTION) = ID_YES;
-                          SaveMOX2LWO(sdSave.FileName, ColID, doSpread);
+                          SaveMOX2LWO(fMOX, sdSave.FileName, ColID, doSpread);
                           meLog.Lines.Add('MOX>LWO Save Complete');
                         end;
     BG_EXPORT_COB_LWO:  if RunSaveDialog2(sdSave, fOpenedFileMask + '_colli.lwo', FILE_TYPE_INFO[kftLwo].Filter) then
@@ -1028,16 +1030,16 @@ var
 begin
   case aSection of
     uiMOX:      begin
-                  edVerticeCount.Text := IntToStr(MOX.Header.VerticeCount);
-                  edPolyCount.Text := IntToStr(MOX.Header.PolyCount);
-                  edPartCount.Text := IntToStr(MOX.Header.PartCount);
-                  edMaterialCount.Text := IntToStr(MOX.Header.MatCount);
-                  edChunkCount.Text := IntToStr(MOX.Header.ChunkCount);
-                  edBlinkerCount.Text := IntToStr(MOX.Header.BlinkerCount);
+                  edVerticeCount.Text := IntToStr(fMOX.Header.VerticeCount);
+                  edPolyCount.Text := IntToStr(fMOX.Header.PolyCount);
+                  edPartCount.Text := IntToStr(fMOX.Header.PartCount);
+                  edMaterialCount.Text := IntToStr(fMOX.Header.MatCount);
+                  edChunkCount.Text := IntToStr(fMOX.Header.ChunkCount);
+                  edBlinkerCount.Text := IntToStr(fMOX.Header.BlinkerCount);
                 end;
     uiMTL:      begin
                   LBMaterials.Clear;
-                  for ii:=1 to MOX.Header.MatCount do
+                  for ii:=1 to fMOX.Header.MatCount do
                     LBMaterials.AddItem(Material[ii].Mtag+' '+Material[ii].Title,nil);
                   LBMaterials.ItemIndex:=0;
                   if NumColors=1 then
@@ -1057,19 +1059,19 @@ begin
                   fUIRefresh := True;
                   oldID1:=LBBlinkers.ItemIndex;
                   LBBlinkers.Clear;
-                  for ii:=1 to MOX.Header.BlinkerCount do
-                    LBBlinkers.Items.Add(IntToStr(ii)+'. '+ MOX.Blinkers[ii].GetStr);
+                  for ii:=1 to fMOX.Header.BlinkerCount do
+                    LBBlinkers.Items.Add(IntToStr(ii)+'. '+ fMOX.Blinkers[ii].GetStr);
                   if oldID1<LBBlinkers.Count then LBBlinkers.ItemIndex:=oldID1;
                   fUIRefresh := False;
                 end;
     uiParts:    begin
                   TVParts.Items.Clear;
-                  for ii:=1 to MOX.Header.PartCount do
+                  for ii:=1 to fMOX.Header.PartCount do
                   begin
-                    if MOX.Parts[ii].Parent=-1 then Dnode[ii] := TVParts.Items.Add(nil,MOX.Parts[ii].Dname) else //make Root
-                    Dnode[ii] := TVParts.Items.AddChild(Dnode[MOX.Parts[ii].Parent+1],MOX.Parts[ii].Dname);      //child
+                    if fMOX.Parts[ii].Parent=-1 then Dnode[ii] := TVParts.Items.Add(nil,fMOX.Parts[ii].Dname) else //make Root
+                    Dnode[ii] := TVParts.Items.AddChild(Dnode[fMOX.Parts[ii].Parent+1],fMOX.Parts[ii].Dname);      //child
                   end;
-                  if MOX.Header.PartCount>=1 then Dnode[1].Expand(False);
+                  if fMOX.Header.PartCount>=1 then Dnode[1].Expand(False);
                 end;
     uiCOB:      begin
                   fUIRefresh := True;
@@ -1114,17 +1116,17 @@ var
   H,I,K: Integer;
   t: Single;
 begin
-  for I:=1 to MOX.Header.ChunkCount do
+  for I:=1 to fMOX.Header.ChunkCount do
   begin
     if MoxCall[I]=0 then MoxCall[I]:=glGenLists(1);
     glNewList(MoxCall[I], GL_COMPILE);
     glBegin(GL_TRIANGLES);
-      for K:=1 to MOX.Chunks[I].PolyCount do  //1..number polys
+      for K:=1 to fMOX.Chunks[I].PolyCount do  //1..number polys
       for H:=3 downto 1 do
       begin
-        glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].U);
-        glNormal3fv(@MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].nX);
-        glVertex3fv(@MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].X);
+        glTexCoord2fv(@fMOX.Vertice[fMOX.Face[fMOX.Chunks[I].FirstPoly+K,H]].U);
+        glNormal3fv(@fMOX.Vertice[fMOX.Face[fMOX.Chunks[I].FirstPoly+K,H]].nX);
+        glVertex3fv(@fMOX.Vertice[fMOX.Face[fMOX.Chunks[I].FirstPoly+K,H]].X);
       end;
     glEnd;
     glEndList;
@@ -1132,23 +1134,23 @@ begin
     if MoxUVCall[I]=0 then MoxUVCall[I]:=glGenLists(1);
     glNewList(MoxUVCall[I], GL_COMPILE);
     glbegin(GL_TRIANGLES);
-      for K:=1 to MOX.Chunks[I].PolyCount do
+      for K:=1 to fMOX.Chunks[I].PolyCount do
       begin
-        Normal2Poly(MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,1]].U,MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,1]].V,
-                    MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,2]].U,MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,2]].V,
-                    MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,3]].U,MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,3]].V, t);
+        Normal2Poly(fMOX.Vertice[fMOX.Face[fMOX.Chunks[I].FirstPoly+K,1]].U,fMOX.Vertice[fMOX.Face[fMOX.Chunks[I].FirstPoly+K,1]].V,
+                    fMOX.Vertice[fMOX.Face[fMOX.Chunks[I].FirstPoly+K,2]].U,fMOX.Vertice[fMOX.Face[fMOX.Chunks[I].FirstPoly+K,2]].V,
+                    fMOX.Vertice[fMOX.Face[fMOX.Chunks[I].FirstPoly+K,3]].U,fMOX.Vertice[fMOX.Face[fMOX.Chunks[I].FirstPoly+K,3]].V, t);
         if t>=0 then
           for H:=3 downto 1 do
           begin
-            glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].U);
-            glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].U,-MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].V+1);
-            //glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[I,1]+K,H]].x1,-MOX.Vertice[MOX.Face[MOX.Chunk[I,1]+K,H]].x2+1);//AFC11CT
+            glTexCoord2fv(@fMOX.Vertice[fMOX.Face[fMOX.Chunks[I].FirstPoly+K,H]].U);
+            glVertex2f(fMOX.Vertice[fMOX.Face[fMOX.Chunks[I].FirstPoly+K,H]].U,-fMOX.Vertice[fMOX.Face[fMOX.Chunks[I].FirstPoly+K,H]].V+1);
+            //glVertex2f(fMOX.Vertice[fMOX.Face[fMOX.Chunk[I,1]+K,H]].x1,-fMOX.Vertice[fMOX.Face[fMOX.Chunk[I,1]+K,H]].x2+1);//AFC11CT
           end
         else
           for H:=1 to 3 do begin
-            glTexCoord2fv(@MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].U);
-            glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].U,-MOX.Vertice[MOX.Face[MOX.Chunks[I].FirstPoly+K,H]].V+1);
-            //glVertex2f(MOX.Vertice[MOX.Face[MOX.Chunk[I,1]+K,H]].x1,-MOX.Vertice[MOX.Face[MOX.Chunk[I,1]+K,H]].x2+1);//AFC11CT
+            glTexCoord2fv(@fMOX.Vertice[fMOX.Face[fMOX.Chunks[I].FirstPoly+K,H]].U);
+            glVertex2f(fMOX.Vertice[fMOX.Face[fMOX.Chunks[I].FirstPoly+K,H]].U,-fMOX.Vertice[fMOX.Face[fMOX.Chunks[I].FirstPoly+K,H]].V+1);
+            //glVertex2f(fMOX.Vertice[fMOX.Face[fMOX.Chunk[I,1]+K,H]].x1,-fMOX.Vertice[fMOX.Face[fMOX.Chunk[I,1]+K,H]].x2+1);//AFC11CT
           end;
       end;
     glEnd;
@@ -1180,9 +1182,9 @@ begin
     glTranslatef(-0.5,-0.5,0);
 
     RenderUVGrid(CBShowGrid.Checked);
-    RenderOpenGL;
+    RenderOpenGL(fMOX);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    RenderDirt('', TBDirt.Position);
+    RenderDirt(fMOX, '', TBDirt.Position);
   end else
   begin
     glTranslatef(0, 0, -6);
@@ -1192,13 +1194,13 @@ begin
     glkScale(Sqr(zoom));
 
     if RenderOptions.ShowPart and (ActivePage=apParts) and (SelectedTreeNode<>0) then
-      glTranslatef(-MOX.Parts[SelectedTreeNode].Matrix[4,1]-PartModify[SelectedTreeNode].Move[1],
-                   -MOX.Parts[SelectedTreeNode].Matrix[4,2]-PartModify[SelectedTreeNode].Move[2],
-                   -MOX.Parts[SelectedTreeNode].Matrix[4,3]-PartModify[SelectedTreeNode].Move[3]);
+      glTranslatef(-fMOX.Parts[SelectedTreeNode].Matrix[4,1]-PartModify[SelectedTreeNode].Move[1],
+                   -fMOX.Parts[SelectedTreeNode].Matrix[4,2]-PartModify[SelectedTreeNode].Move[2],
+                   -fMOX.Parts[SelectedTreeNode].Matrix[4,3]-PartModify[SelectedTreeNode].Move[3]);
     if cbTargetLight.Checked and (ActivePage=apLights) and (LBBlinkers.ItemIndex<>-1) then
-      glTranslatef(-MOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix[4,1],
-                   -MOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix[4,2],
-                   -MOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix[4,3]);
+      glTranslatef(-fMOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix[4,1],
+                   -fMOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix[4,2],
+                   -fMOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix[4,3]);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //Set alpha mode
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -1211,25 +1213,25 @@ begin
     if roMOX in fRenderObjects then
     begin
       if fRenderMode = rmShaders then
-        RenderShaders;
+        RenderShaders(fMOX);
 
       if fRenderMode = rmOpenGL then
       begin
-        RenderOpenGL;
+        RenderOpenGL(fMOX);
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-        RenderDirt('', TBDirt.Position);
+        RenderDirt(fMOX, '', TBDirt.Position);
         if SelectedTreeNode<>0 then
-          RenderPivotSetup(PivotPointActual.Value+MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1,
+          RenderPivotSetup(fMOX, PivotPointActual.Value+fMOX.Chunks[fMOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1,
                            PivotPointActual.MaxValue,
                            PivotPointActual.Value); //PivotPointActual & SRnage both have +1
-        RenderDummy;
+        RenderDummy(fMOX);
         glDisable(GL_LIGHTING);
-        if RenderOptions.Wire then RenderWireframe(fColorWireframe);
+        if RenderOptions.Wire then RenderWireframe(fMOX, fColorWireframe);
         glEnable(GL_LIGHTING);
       end;
       glDisable(GL_DEPTH_TEST);
       if (ActivePage = apLights) or RenderOptions.LightVec then
-        RenderLights(LBBlinkers.ItemIndex+1, TBlinkerPreviewMode(rgBlinkerPreview.ItemIndex), ActivePage = apLights, Lightvectors1.Checked);
+        RenderLights(fMOX, LBBlinkers.ItemIndex+1, TBlinkerPreviewMode(rgBlinkerPreview.ItemIndex), ActivePage = apLights, Lightvectors1.Checked);
       glEnable(GL_DEPTH_TEST);
     end;
 
@@ -1369,7 +1371,7 @@ var
   i,k: Integer;
 begin
   // Clear RAM used by textures
-  for i:=1 to MOX.Header.MatCount do
+  for i:=1 to fMOX.Header.MatCount do
     if MoxTex[i] <> 0 then
     begin
       glDeleteTextures(1, @MoxTex[i]);
@@ -1379,7 +1381,7 @@ begin
   glDeleteTextures(1, @ScratchTex);
 
   // Load new textures
-  for i:=1 to MOX.Header.MatCount do
+  for i:=1 to fMOX.Header.MatCount do
   begin
     for k:=1 to i-1 do
       if Material[k].TexName = Material[i].TexName then
@@ -1406,7 +1408,7 @@ begin
 
   fUIRefresh := True;
   try
-    blinkerType := MOX.Blinkers[idx].BlinkerType;
+    blinkerType := fMOX.Blinkers[idx].BlinkerType;
     case blinkerType of //Fit 0..24 IDs in RG range of 0..12
       16: blinkerType := 10;
       20: blinkerType := 11;
@@ -1416,17 +1418,17 @@ begin
 
     rgBlinkerType.ItemIndex := blinkerType;
 
-    fsBlinkerSizeMin.Value := MOX.Blinkers[idx].sMin;
-    fsBlinkerSizeMax.Value := MOX.Blinkers[idx].sMax;
-    fsBlinkerFreq.Value := MOX.Blinkers[idx].Freq;
-    //S1.Value:=MOX.Blinkers[LBBlinkers.ItemIndex+1].z1;
-    seBlinkerParent.Value:=MOX.Blinkers[idx].Parent;
-    fsBlinkerX.Value:=MOX.Blinkers[idx].Matrix[4,1]/10;
-    fsBlinkerY.Value:=MOX.Blinkers[idx].Matrix[4,2]/10;
-    fsBlinkerZ.Value:=MOX.Blinkers[idx].Matrix[4,3]/10;
-    shpBlinkerColor.Brush.Color := MOX.Blinkers[idx].R+MOX.Blinkers[idx].G*256+MOX.Blinkers[idx].B*65536;
+    fsBlinkerSizeMin.Value := fMOX.Blinkers[idx].sMin;
+    fsBlinkerSizeMax.Value := fMOX.Blinkers[idx].sMax;
+    fsBlinkerFreq.Value := fMOX.Blinkers[idx].Freq;
+    //S1.Value:=fMOX.Blinkers[LBBlinkers.ItemIndex+1].z1;
+    seBlinkerParent.Value:=fMOX.Blinkers[idx].Parent;
+    fsBlinkerX.Value:=fMOX.Blinkers[idx].Matrix[4,1]/10;
+    fsBlinkerY.Value:=fMOX.Blinkers[idx].Matrix[4,2]/10;
+    fsBlinkerZ.Value:=fMOX.Blinkers[idx].Matrix[4,3]/10;
+    shpBlinkerColor.Brush.Color := fMOX.Blinkers[idx].R+fMOX.Blinkers[idx].G*256+fMOX.Blinkers[idx].B*65536;
 
-    with MOX.Blinkers[idx] do
+    with fMOX.Blinkers[idx] do
     begin
       m[1]:=Matrix[1,1]; m[2]:=Matrix[1,2]; m[3]:=Matrix[1,3];
       m[4]:=Matrix[2,1]; m[5]:=Matrix[2,2]; m[6]:=Matrix[2,3];
@@ -1453,18 +1455,18 @@ begin
   if fUIRefresh then Exit;
 
   case rgBlinkerType.ItemIndex of
-    0..9: MOX.Blinkers[idx].BlinkerType := rgBlinkerType.ItemIndex;
-    10:   MOX.Blinkers[idx].BlinkerType := 16;
-    11:   MOX.Blinkers[idx].BlinkerType := 20;
-    12:   MOX.Blinkers[idx].BlinkerType := 24;
-    13:   MOX.Blinkers[idx].BlinkerType := 33;
+    0..9: fMOX.Blinkers[idx].BlinkerType := rgBlinkerType.ItemIndex;
+    10:   fMOX.Blinkers[idx].BlinkerType := 16;
+    11:   fMOX.Blinkers[idx].BlinkerType := 20;
+    12:   fMOX.Blinkers[idx].BlinkerType := 24;
+    13:   fMOX.Blinkers[idx].BlinkerType := 33;
   end;
 
-  MOX.Blinkers[idx].sMin := fsBlinkerSizeMin.Value;
-  MOX.Blinkers[idx].sMax := fsBlinkerSizeMax.Value;
-  MOX.Blinkers[idx].Freq := fsBlinkerFreq.Value;
-  MOX.Blinkers[idx].Unused := 0;
-  MOX.Blinkers[idx].Parent := seBlinkerParent.Value;
+  fMOX.Blinkers[idx].sMin := fsBlinkerSizeMin.Value;
+  fMOX.Blinkers[idx].sMax := fsBlinkerSizeMax.Value;
+  fMOX.Blinkers[idx].Freq := fsBlinkerFreq.Value;
+  fMOX.Blinkers[idx].Unused := 0;
+  fMOX.Blinkers[idx].Parent := seBlinkerParent.Value;
   SendDataToUI(uiBlinkers);
 end;
 
@@ -1551,27 +1553,27 @@ begin
   Label63.Caption:='ID: '+IntToStr(TVParts.Selected.AbsoluteIndex);
   SelectedTreeNode := TVParts.Selected.AbsoluteIndex+1;
   idx:=SelectedTreeNode;
-  Label23.Caption:='#'+IntToStr(idx)+' P'+IntToStr(MOX.Parts[idx].Parent+1)
-                                   +' C'+IntToStr(MOX.Parts[idx].Child+1)
-                                   +' P'+IntToStr(MOX.Parts[idx].PrevInLevel+1)
-                                   +' N'+IntToStr(MOX.Parts[idx].NextInLevel+1);
+  Label23.Caption:='#'+IntToStr(idx)+' P'+IntToStr(fMOX.Parts[idx].Parent+1)
+                                   +' C'+IntToStr(fMOX.Parts[idx].Child+1)
+                                   +' P'+IntToStr(fMOX.Parts[idx].PrevInLevel+1)
+                                   +' N'+IntToStr(fMOX.Parts[idx].NextInLevel+1);
 
-  EDetailName.Text:=MOX.Parts[SelectedTreeNode].Dname;
-  CX.Value:=MOX.Parts[SelectedTreeNode].xMid;
-  CY.Value:=MOX.Parts[SelectedTreeNode].yMid;
-  CZ.Value:=MOX.Parts[SelectedTreeNode].zMid;
-  CRad.Value:=MOX.Parts[SelectedTreeNode].fRadius;
+  EDetailName.Text:=fMOX.Parts[SelectedTreeNode].Dname;
+  CX.Value:=fMOX.Parts[SelectedTreeNode].xMid;
+  CY.Value:=fMOX.Parts[SelectedTreeNode].yMid;
+  CZ.Value:=fMOX.Parts[SelectedTreeNode].zMid;
+  CRad.Value:=fMOX.Parts[SelectedTreeNode].fRadius;
 
-  RGDetailType.ItemIndex := MOX.Parts[SelectedTreeNode].TypeID;
-  if RGDetailType.ItemIndex<>MOX.Parts[SelectedTreeNode].TypeID then
+  RGDetailType.ItemIndex := fMOX.Parts[SelectedTreeNode].TypeID;
+  if RGDetailType.ItemIndex<>fMOX.Parts[SelectedTreeNode].TypeID then
     MessageBox(Handle, 'Unknown detail ID type', 'Discovery', MB_OK or MB_ICONSTOP);
 
-  LX1.Value:=MOX.Parts[SelectedTreeNode].x1/Pi*180;//-YZ rotation
-  LX2.Value:=MOX.Parts[SelectedTreeNode].x2/Pi*180;//+YZ rotation
-  LY1.Value:=MOX.Parts[SelectedTreeNode].y1/Pi*180;//-XZ rotation
-  LY2.Value:=MOX.Parts[SelectedTreeNode].y2/Pi*180;//+XZ rotation
-  LZ1.Value:=MOX.Parts[SelectedTreeNode].z1/Pi*180;//-XY rotation
-  LZ2.Value:=MOX.Parts[SelectedTreeNode].z2/Pi*180;//+XY rotation
+  LX1.Value:=fMOX.Parts[SelectedTreeNode].x1/Pi*180;//-YZ rotation
+  LX2.Value:=fMOX.Parts[SelectedTreeNode].x2/Pi*180;//+YZ rotation
+  LY1.Value:=fMOX.Parts[SelectedTreeNode].y1/Pi*180;//-XZ rotation
+  LY2.Value:=fMOX.Parts[SelectedTreeNode].y2/Pi*180;//+XZ rotation
+  LZ1.Value:=fMOX.Parts[SelectedTreeNode].z1/Pi*180;//-XY rotation
+  LZ2.Value:=fMOX.Parts[SelectedTreeNode].z2/Pi*180;//+XY rotation
   ForbidPartsChange := False;
   FlapParts.Enabled:=SelectedTreeNode<>0;
   Label30.Enabled:=SelectedTreeNode<>0;
@@ -1579,8 +1581,8 @@ begin
   ForbidPivotChange := True;
   try
     PivotPointActual.MaxValue :=
-      MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1+MOX.Parts[SelectedTreeNode].NumMat-1].LastVtx -
-      MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx+1;
+      fMOX.Chunks[fMOX.Parts[SelectedTreeNode].FirstMat+1+fMOX.Parts[SelectedTreeNode].NumMat-1].LastVtx -
+      fMOX.Chunks[fMOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx+1;
     PivotPointActual.Value:=PartModify[SelectedTreeNode].ActualPoint;
     RGPivotX.ItemIndex:=PartModify[SelectedTreeNode].AxisSetup[1];
     RGPivotY.ItemIndex:=PartModify[SelectedTreeNode].AxisSetup[2];
@@ -1623,21 +1625,21 @@ begin
   begin  //Set MoxMat/Sid order continous
     //kinda lazy to re-do SRange stuff, so just sort it out here :-)
 
-    setlength(lazyqty,MOX.Header.PartCount+1);
+    setlength(lazyqty,fMOX.Header.PartCount+1);
     lazyqty[0]:=0;
 
-    for i:=1 to MOX.Header.PartCount do
+    for i:=1 to fMOX.Header.PartCount do
     begin
-      lazyqty[i]:=1;                  //number of MOX.Parts
-      for j:=MOX.Parts[i].FirstMat+1 to MOX.Parts[i].FirstMat+MOX.Parts[i].NumMat do
-        if (MOX.Chunks[j].PolyCount>0) then
+      lazyqty[i]:=1;                  //number of fMOX.Parts
+      for j:=fMOX.Parts[i].FirstMat+1 to fMOX.Parts[i].FirstMat+fMOX.Parts[i].NumMat do
+        if (fMOX.Chunks[j].PolyCount>0) then
         begin  //if polycount for part >1
-          MOX.Chunks[lazyqty[0]+lazyqty[i]].FirstPoly:=MOX.Chunks[j].FirstPoly;
-          MOX.Chunks[lazyqty[0]+lazyqty[i]].PolyCount:=MOX.Chunks[j].PolyCount;
-          MOX.Chunks[lazyqty[0]+lazyqty[i]].FirstVtx:=MOX.Chunks[j].FirstVtx;
-          MOX.Chunks[lazyqty[0]+lazyqty[i]].LastVtx:=MOX.Chunks[j].LastVtx;
-          MOX.Chunks[lazyqty[0]+lazyqty[i]].SidA:=MOX.Chunks   [j].SidA;
-          MOX.Chunks[lazyqty[0]+lazyqty[i]].SidB:=MOX.Chunks   [j].SidB;
+          fMOX.Chunks[lazyqty[0]+lazyqty[i]].FirstPoly:=fMOX.Chunks[j].FirstPoly;
+          fMOX.Chunks[lazyqty[0]+lazyqty[i]].PolyCount:=fMOX.Chunks[j].PolyCount;
+          fMOX.Chunks[lazyqty[0]+lazyqty[i]].FirstVtx:=fMOX.Chunks[j].FirstVtx;
+          fMOX.Chunks[lazyqty[0]+lazyqty[i]].LastVtx:=fMOX.Chunks[j].LastVtx;
+          fMOX.Chunks[lazyqty[0]+lazyqty[i]].SidA:=fMOX.Chunks   [j].SidA;
+          fMOX.Chunks[lazyqty[0]+lazyqty[i]].SidB:=fMOX.Chunks   [j].SidB;
           //MoxMat[lazyqty[0]+lazyqty[i]].ID:=MoxMat[j].ID;
           inc(lazyqty[i]);
         end;
@@ -1645,55 +1647,55 @@ begin
       inc(lazyqty[0],lazyqty[i]);
     end;
 
-    MOX.Header.ChunkCount:=0;
-    MOX.Parts[1].FirstMat:=0;
+    fMOX.Header.ChunkCount:=0;
+    fMOX.Parts[1].FirstMat:=0;
 
-    for i:=1 to MOX.Header.PartCount do
+    for i:=1 to fMOX.Header.PartCount do
     begin
-      inc(MOX.Header.ChunkCount, lazyqty[i]);
-      MOX.Parts[i].NumMat:=lazyqty[i];
-      MOX.Parts[i+1].FirstMat:=MOX.Parts[i].FirstMat+MOX.Parts[i].NumMat;
+      inc(fMOX.Header.ChunkCount, lazyqty[i]);
+      fMOX.Parts[i].NumMat:=lazyqty[i];
+      fMOX.Parts[i+1].FirstMat:=fMOX.Parts[i].FirstMat+fMOX.Parts[i].NumMat;
     end;
     //re-Sorting ends here}
 
     k:=1; m:=0;
-    for i:=1 to MOX.Header.VerticeCount do
+    for i:=1 to fMOX.Header.VerticeCount do
     begin
-      if i=MOX.Chunks[k].LastVtx+1 then
+      if i=fMOX.Chunks[k].LastVtx+1 then
         inc(k);//3-point From  //4-point Till //k-partID
 
-      if MOX.Parts[m+1].FirstMat+1=k then
+      if fMOX.Parts[m+1].FirstMat+1=k then
       begin
         inc(m); //m-detailID
         tx[m]:=0; ty[m]:=0; tz[m]:=0;
         Lev:=m;
         //repeat
-          if (MOX.Parts[Lev].Parent<>-1) then
+          if (fMOX.Parts[Lev].Parent<>-1) then
           begin
-            Lev:=MOX.Parts[Lev].Parent+1; //parentID
+            Lev:=fMOX.Parts[Lev].Parent+1; //parentID
             tx[m] := Tx[m]-PartModify[Lev].Move[1];
             ty[m] := Ty[m]-PartModify[Lev].Move[2];
             tz[m] := Tz[m]-PartModify[Lev].Move[3];
           end;
-        //until(MOX.Parts[Lev].Parent=-1);
+        //until(fMOX.Parts[Lev].Parent=-1);
         tx[m] := Tx[m]+PartModify[m].Move[1];
         ty[m] := Ty[m]+PartModify[m].Move[2];
         tz[m] := Tz[m]+PartModify[m].Move[3];
       end;
 
-      MOX.Vertice[i].X:=MOX.Vertice[i].X-PartModify[m].Move[1];
-      MOX.Vertice[i].Y:=MOX.Vertice[i].Y-PartModify[m].Move[2];
-      MOX.Vertice[i].Z:=MOX.Vertice[i].Z-PartModify[m].Move[3];
+      fMOX.Vertice[i].X:=fMOX.Vertice[i].X-PartModify[m].Move[1];
+      fMOX.Vertice[i].Y:=fMOX.Vertice[i].Y-PartModify[m].Move[2];
+      fMOX.Vertice[i].Z:=fMOX.Vertice[i].Z-PartModify[m].Move[3];
     end;
 
-    for i:=1 to MOX.Header.PartCount do
+    for i:=1 to fMOX.Header.PartCount do
     begin
-      MOX.Parts[i].Matrix[4,1] := Tx[i];//PartModify[i].Move[1];
-      MOX.Parts[i].Matrix[4,2] := Ty[i];//PartModify[i].Move[2];
-      MOX.Parts[i].Matrix[4,3] := Tz[i];//PartModify[i].Move[3];
-      MOX.Parts[i].xMid:=MOX.Parts[i].xMid-PartModify[i].Move[1];
-      MOX.Parts[i].yMid:=MOX.Parts[i].yMid-PartModify[i].Move[2];
-      MOX.Parts[i].zMid:=MOX.Parts[i].zMid-PartModify[i].Move[3];
+      fMOX.Parts[i].Matrix[4,1] := Tx[i];//PartModify[i].Move[1];
+      fMOX.Parts[i].Matrix[4,2] := Ty[i];//PartModify[i].Move[2];
+      fMOX.Parts[i].Matrix[4,3] := Tz[i];//PartModify[i].Move[3];
+      fMOX.Parts[i].xMid:=fMOX.Parts[i].xMid-PartModify[i].Move[1];
+      fMOX.Parts[i].yMid:=fMOX.Parts[i].yMid-PartModify[i].Move[2];
+      fMOX.Parts[i].zMid:=fMOX.Parts[i].zMid-PartModify[i].Move[3];
     end;
   end;
 
@@ -1702,47 +1704,47 @@ begin
   // Make sure we write Ansi chars
   BlockWrite(f, PAnsiChar(MOX_FORMAT_HEADER)^, 8);
 
-  BlockWrite(f, MOX.Header, 24);
-  BlockWrite(f, MOX.Vertice, MOX.Header.VerticeCount*40);
-  for ii:=1 to MOX.Header.PolyCount do
+  BlockWrite(f, fMOX.Header, 24);
+  BlockWrite(f, fMOX.Vertice, fMOX.Header.VerticeCount*40);
+  for ii:=1 to fMOX.Header.PolyCount do
   begin
-    face6[1] := MOX.Face[ii,1] - 1;
-    face6[2] := MOX.Face[ii,2] - 1;
-    face6[3] := MOX.Face[ii,3] - 1;
+    face6[1] := fMOX.Face[ii,1] - 1;
+    face6[2] := fMOX.Face[ii,2] - 1;
+    face6[3] := fMOX.Face[ii,3] - 1;
 
     BlockWrite(f, face6, 6);
   end;
 
-  for ii:=1 to MOX.Header.ChunkCount do
+  for ii:=1 to fMOX.Header.ChunkCount do
   begin
-    BlockWrite(f,MOX.Chunks[ii].SidA,2); BlockWrite(f,#0+#0,2);
-    BlockWrite(f,MOX.Chunks[ii].SidB,2); BlockWrite(f,#0+#0,2);
+    BlockWrite(f,fMOX.Chunks[ii].SidA,2); BlockWrite(f,#0+#0,2);
+    BlockWrite(f,fMOX.Chunks[ii].SidB,2); BlockWrite(f,#0+#0,2);
 
-    dec(MOX.Chunks[ii].FirstVtx); dec(MOX.Chunks[ii].LastVtx);
-    BlockWrite(f,MOX.Chunks[ii].FirstPoly,2); BlockWrite(f,#0+#0,2);
-    BlockWrite(f,MOX.Chunks[ii].PolyCount,2); BlockWrite(f,#0+#0,2);
-    BlockWrite(f,MOX.Chunks[ii].FirstVtx,2); BlockWrite(f,#0+#0,2);
-    BlockWrite(f,MOX.Chunks[ii].LastVtx,2); BlockWrite(f,#0+#0,2);
-    inc(MOX.Chunks[ii].FirstVtx); inc(MOX.Chunks[ii].LastVtx);
+    dec(fMOX.Chunks[ii].FirstVtx); dec(fMOX.Chunks[ii].LastVtx);
+    BlockWrite(f,fMOX.Chunks[ii].FirstPoly,2); BlockWrite(f,#0+#0,2);
+    BlockWrite(f,fMOX.Chunks[ii].PolyCount,2); BlockWrite(f,#0+#0,2);
+    BlockWrite(f,fMOX.Chunks[ii].FirstVtx,2); BlockWrite(f,#0+#0,2);
+    BlockWrite(f,fMOX.Chunks[ii].LastVtx,2); BlockWrite(f,#0+#0,2);
+    inc(fMOX.Chunks[ii].FirstVtx); inc(fMOX.Chunks[ii].LastVtx);
   end;
 
-  BlockWrite(f, MOX.MoxMat, 336*MOX.Header.MatCount);   //4+332
+  BlockWrite(f, fMOX.MoxMat, 336*fMOX.Header.MatCount);   //4+332
 
-  for ii:=1 to MOX.Header.PartCount do
+  for ii:=1 to fMOX.Header.PartCount do
   begin
-    s:=chr2(MOX.Parts[ii].Dname,64);
+    s:=chr2(fMOX.Parts[ii].Dname,64);
     BlockWrite(f,s[1],64);
-    BlockWrite(f,MOX.Parts[ii].Matrix,132);
+    BlockWrite(f,fMOX.Parts[ii].Matrix,132);
   end;
 
   //todo: It is worth writing more important blinkers first (deprioritize LED decoys),
   // since the game has a limit on how many blinkers it can show at once (384)
-  for ii:=1 to MOX.Header.BlinkerCount do //Write blinkers in order
-   BlockWrite(f, MOX.Blinkers[ii], 88);
+  for ii:=1 to fMOX.Header.BlinkerCount do //Write blinkers in order
+   BlockWrite(f, fMOX.Blinkers[ii], 88);
 
   closefile(f);
   meLog.Lines.Add('MOX file closed');
-  for i:=1 to MOX.Header.PartCount do
+  for i:=1 to fMOX.Header.PartCount do
   begin
     PartModify[i].Custom[1]:=0;
     PartModify[i].Custom[2]:=0;
@@ -1774,24 +1776,24 @@ begin
   if LZ1.Value>LZ2.Value then
   if Sender=LZ1 then LZ2.Value:=LZ1.Value else LZ1.Value:=LZ2.Value;
   SelectedTreeNode := TVParts.Selected.AbsoluteIndex+1;
-  MOX.Parts[SelectedTreeNode].Dname:=EDetailName.Text;
-  MOX.Parts[SelectedTreeNode].xMid:=CX.Value;
-  MOX.Parts[SelectedTreeNode].yMid:=CY.Value;
-  MOX.Parts[SelectedTreeNode].zMid:=CZ.Value;
-  MOX.Parts[SelectedTreeNode].fRadius:=CRad.Value;
-  MOX.Parts[SelectedTreeNode].w1:=0;//SpinEdit5.Value;
-  MOX.Parts[SelectedTreeNode].w2:=0;//SpinEdit6.Value;
-  MOX.Parts[SelectedTreeNode].w3:=0;//SpinEdit7.Value;
-  MOX.Parts[SelectedTreeNode].w4:=0;//SpinEdit8.Value;
-  MOX.Parts[SelectedTreeNode].w5:=0;//SpinEdit9.Value;
-  MOX.Parts[SelectedTreeNode].TypeID := RGDetailType.ItemIndex;
-  MOX.Parts[SelectedTreeNode].x1:=LX1.Value/180*pi;//-YZ rotation
-  MOX.Parts[SelectedTreeNode].x2:=LX2.Value/180*pi;//-YZ rotation
-  MOX.Parts[SelectedTreeNode].y1:=LY1.Value/180*pi;//-YZ rotation
-  MOX.Parts[SelectedTreeNode].y2:=LY2.Value/180*pi;//-YZ rotation
-  MOX.Parts[SelectedTreeNode].z1:=LZ1.Value/180*pi;//-YZ rotation
-  MOX.Parts[SelectedTreeNode].z2:=LZ2.Value/180*pi;//-YZ rotation
-  TVParts.Items[SelectedTreeNode-1].Text:=MOX.Parts[SelectedTreeNode].Dname;
+  fMOX.Parts[SelectedTreeNode].Dname:=EDetailName.Text;
+  fMOX.Parts[SelectedTreeNode].xMid:=CX.Value;
+  fMOX.Parts[SelectedTreeNode].yMid:=CY.Value;
+  fMOX.Parts[SelectedTreeNode].zMid:=CZ.Value;
+  fMOX.Parts[SelectedTreeNode].fRadius:=CRad.Value;
+  fMOX.Parts[SelectedTreeNode].w1:=0;//SpinEdit5.Value;
+  fMOX.Parts[SelectedTreeNode].w2:=0;//SpinEdit6.Value;
+  fMOX.Parts[SelectedTreeNode].w3:=0;//SpinEdit7.Value;
+  fMOX.Parts[SelectedTreeNode].w4:=0;//SpinEdit8.Value;
+  fMOX.Parts[SelectedTreeNode].w5:=0;//SpinEdit9.Value;
+  fMOX.Parts[SelectedTreeNode].TypeID := RGDetailType.ItemIndex;
+  fMOX.Parts[SelectedTreeNode].x1:=LX1.Value/180*pi;//-YZ rotation
+  fMOX.Parts[SelectedTreeNode].x2:=LX2.Value/180*pi;//-YZ rotation
+  fMOX.Parts[SelectedTreeNode].y1:=LY1.Value/180*pi;//-YZ rotation
+  fMOX.Parts[SelectedTreeNode].y2:=LY2.Value/180*pi;//-YZ rotation
+  fMOX.Parts[SelectedTreeNode].z1:=LZ1.Value/180*pi;//-YZ rotation
+  fMOX.Parts[SelectedTreeNode].z2:=LZ2.Value/180*pi;//-YZ rotation
+  TVParts.Items[SelectedTreeNode-1].Text:=fMOX.Parts[SelectedTreeNode].Dname;
 end;
 
 
@@ -1820,10 +1822,10 @@ var
 begin
   //Shape2.Width:=32;
 
-  FillChar(MOX,SizeOf(MOX),#0);
+  fMOX.Clear;
 
-  MOX.Header.PartCount:=Imp.PartCount;
-  MOX.Header.MatCount:=Imp.SurfCount;
+  fMOX.Header.PartCount:=Imp.PartCount;
+  fMOX.Header.MatCount:=Imp.SurfCount;
 
   TVParts.ReadOnly := False;
   FillChar(PartModify,SizeOf(PartModify),#0);
@@ -1832,7 +1834,8 @@ begin
 
   //Convert all unused vertices into blinkers later
   for i:=1 to Imp.VerticeCount do sprite[i] := True;
-  for i:=1 to Imp.PolyCount do begin
+  for i:=1 to Imp.PolyCount do
+  begin
     sprite[Imp.Faces[i,1]] := False;
     sprite[Imp.Faces[i,2]] := False;
     sprite[Imp.Faces[i,3]] := False;
@@ -1846,15 +1849,15 @@ begin
     for i:=MAX_PARTS-1 downto 1 do Imp.PartName[i+1]:=Imp.PartName[i];
     Imp.PartName[1]:='Default(Body)';
     for i:=1 to Imp.PolyCount do inc(Imp.Part[i]); //set part #1
-    inc(MOX.Header.PartCount);
+    inc(fMOX.Header.PartCount);
   end;
 
-  MOX.Header.BlinkerCount := 0;
+  fMOX.Header.BlinkerCount := 0;
   for i:=1 to Imp.VerticeCount do
-    if sprite[i] and (MOX.Header.BlinkerCount < MAX_BLINKERS) then
+    if sprite[i] and (fMOX.Header.BlinkerCount < MAX_BLINKERS) then
     begin
-      Inc(MOX.Header.BlinkerCount);                                 //63+1=64
-      with MOX.Blinkers[MOX.Header.BlinkerCount] do
+      Inc(fMOX.Header.BlinkerCount);                                 //63+1=64
+      with fMOX.Blinkers[fMOX.Header.BlinkerCount] do
       begin //0..63
         BlinkerType := 2;
         Matrix[1,1]:=1; Matrix[1,2]:=0; Matrix[1,3]:=0; Matrix[1,4]:=0;
@@ -1887,21 +1890,21 @@ begin
   //Splitting                                                                   //
   ////////////////////////////////////////////////////////////////////////////////
 
-  setlength(altpoint,MOX.Header.PartCount+1);
-  setlength(altpoly,MOX.Header.PartCount+1);
-  setlength(VqtyAtSurf,MOX.Header.PartCount+1);
-  setlength(PqtyAtSurf,MOX.Header.PartCount+1);
-  setlength(v2,MOX.Header.PartCount+1);
-  for i:=1 to MOX.Header.PartCount do
+  setlength(altpoint,fMOX.Header.PartCount+1);
+  setlength(altpoly,fMOX.Header.PartCount+1);
+  setlength(VqtyAtSurf,fMOX.Header.PartCount+1);
+  setlength(PqtyAtSurf,fMOX.Header.PartCount+1);
+  setlength(v2,fMOX.Header.PartCount+1);
+  for i:=1 to fMOX.Header.PartCount do
   begin
-    setlength(altpoint[i],MOX.Header.MatCount+1);
-    setlength(altpoly[i],MOX.Header.MatCount+1);
-    setlength(VqtyAtSurf[i],MOX.Header.MatCount+1);
-    setlength(PqtyAtSurf[i],MOX.Header.MatCount+1);
-    setlength(v2[i],MOX.Header.MatCount+1);
+    setlength(altpoint[i],fMOX.Header.MatCount+1);
+    setlength(altpoly[i],fMOX.Header.MatCount+1);
+    setlength(VqtyAtSurf[i],fMOX.Header.MatCount+1);
+    setlength(PqtyAtSurf[i],fMOX.Header.MatCount+1);
+    setlength(v2[i],fMOX.Header.MatCount+1);
   end;
 
-  for m:=1 to MOX.Header.PartCount do
+  for m:=1 to fMOX.Header.PartCount do
   for i:=1 to Imp.PolyCount do
     if Imp.Part[i]=m then //for all polys belong to current part
     begin
@@ -1960,89 +1963,86 @@ begin
 //  Shape2.Width:=100;
 
   h:=1;
-  for m:=1 to MOX.Header.PartCount do
+  for m:=1 to fMOX.Header.PartCount do
   begin
     t:=1;
-    for i:=1 to MOX.Header.MatCount do
+    for i:=1 to fMOX.Header.MatCount do
       for k:=1 to VqtyAtSurf[m,i] do
       begin
-        MOX.Vertice[h].X:=Imp.XYZ[altpoint[m,i,k,1]].X;
-        MOX.Vertice[h].Y:=Imp.XYZ[altpoint[m,i,k,1]].Y;
-        MOX.Vertice[h].Z:=Imp.XYZ[altpoint[m,i,k,1]].Z;
-        MOX.Vertice[h].nX:=Imp.Nv[altpoint[m,i,k,1]].X;
-        MOX.Vertice[h].nY:=Imp.Nv[altpoint[m,i,k,1]].Y;
-        MOX.Vertice[h].nZ:=Imp.Nv[altpoint[m,i,k,1]].Z;
-        MOX.Vertice[h].U:=Imp.DUV[altpoint[m,i,k,3],altpoint[m,i,k,2]].U;
-        MOX.Vertice[h].V:=1-Imp.DUV[altpoint[m,i,k,3],altpoint[m,i,k,2]].V;
-        MOX.Header.VerticeCount:=h;
+        fMOX.Vertice[h].X:=Imp.XYZ[altpoint[m,i,k,1]].X;
+        fMOX.Vertice[h].Y:=Imp.XYZ[altpoint[m,i,k,1]].Y;
+        fMOX.Vertice[h].Z:=Imp.XYZ[altpoint[m,i,k,1]].Z;
+        fMOX.Vertice[h].nX:=Imp.Nv[altpoint[m,i,k,1]].X;
+        fMOX.Vertice[h].nY:=Imp.Nv[altpoint[m,i,k,1]].Y;
+        fMOX.Vertice[h].nZ:=Imp.Nv[altpoint[m,i,k,1]].Z;
+        fMOX.Vertice[h].U:=Imp.DUV[altpoint[m,i,k,3],altpoint[m,i,k,2]].U;
+        fMOX.Vertice[h].V:=1-Imp.DUV[altpoint[m,i,k,3],altpoint[m,i,k,2]].V;
+        fMOX.Header.VerticeCount:=h;
 
           if (t=1) then begin //Take 1st point of material as beginning for bounds checking
           t:=0;
-          PartModify[m].Low[1]:=MOX.Vertice[h].X;
-          PartModify[m].Low[2]:=MOX.Vertice[h].Y;
-          PartModify[m].Low[3]:=MOX.Vertice[h].Z;
-          PartModify[m].High[1]:=MOX.Vertice[h].X;
-          PartModify[m].High[2]:=MOX.Vertice[h].Y;
-          PartModify[m].High[3]:=MOX.Vertice[h].Z;
+          PartModify[m].Low[1]:=fMOX.Vertice[h].X;
+          PartModify[m].Low[2]:=fMOX.Vertice[h].Y;
+          PartModify[m].Low[3]:=fMOX.Vertice[h].Z;
+          PartModify[m].High[1]:=fMOX.Vertice[h].X;
+          PartModify[m].High[2]:=fMOX.Vertice[h].Y;
+          PartModify[m].High[3]:=fMOX.Vertice[h].Z;
           end;
 
-        PartModify[m].Low[1]:=min(PartModify[m].Low[1],MOX.Vertice[h].X);
-        PartModify[m].Low[2]:=min(PartModify[m].Low[2],MOX.Vertice[h].Y);
-        PartModify[m].Low[3]:=min(PartModify[m].Low[3],MOX.Vertice[h].Z);
-        PartModify[m].High[1]:=max(PartModify[m].High[1],MOX.Vertice[h].X);
-        PartModify[m].High[2]:=max(PartModify[m].High[2],MOX.Vertice[h].Y);
-        PartModify[m].High[3]:=max(PartModify[m].High[3],MOX.Vertice[h].Z);
+        PartModify[m].Low[1]:=min(PartModify[m].Low[1],fMOX.Vertice[h].X);
+        PartModify[m].Low[2]:=min(PartModify[m].Low[2],fMOX.Vertice[h].Y);
+        PartModify[m].Low[3]:=min(PartModify[m].Low[3],fMOX.Vertice[h].Z);
+        PartModify[m].High[1]:=max(PartModify[m].High[1],fMOX.Vertice[h].X);
+        PartModify[m].High[2]:=max(PartModify[m].High[2],fMOX.Vertice[h].Y);
+        PartModify[m].High[3]:=max(PartModify[m].High[3],fMOX.Vertice[h].Z);
 
         inc(h);
       end;
   end;
 
-  FillChar(MOX.Chunks,SizeOf(MOX.Chunks),#0);
-  FillChar(MOX.Parts,SizeOf(MOX.Parts),#0);
-
-  SetLength(MOX.Chunks, MOX.Header.PartCount * MOX.Header.MatCount + 1);
+  SetLength(fMOX.Chunks, fMOX.Header.PartCount * fMOX.Header.MatCount + 1);
   h:=1;
-  for m:=1 to MOX.Header.PartCount do
-  for i:=1 to MOX.Header.MatCount do
+  for m:=1 to fMOX.Header.PartCount do
+  for i:=1 to fMOX.Header.MatCount do
   begin
     if h > 1 then
-      MOX.Chunks[h].FirstVtx := MOX.Chunks[h-1].LastVtx+1
+      fMOX.Chunks[h].FirstVtx := fMOX.Chunks[h-1].LastVtx+1
     else
-      MOX.Chunks[h].FirstVtx := 1;
+      fMOX.Chunks[h].FirstVtx := 1;
 
-    MOX.Chunks[h].LastVtx:=MOX.Chunks[h].FirstVtx+VqtyAtSurf[m,i]-1;
-    MOX.Header.ChunkCount := h;
+    fMOX.Chunks[h].LastVtx:=fMOX.Chunks[h].FirstVtx+VqtyAtSurf[m,i]-1;
+    fMOX.Header.ChunkCount := h;
     inc(h);
   end;
-  SetLength(MOX.Chunks, MOX.Header.ChunkCount + 1);
+  SetLength(fMOX.Chunks, fMOX.Header.ChunkCount + 1);
 
   j:=1; t:=1;
-  for m:=1 to MOX.Header.PartCount do
-    for i:=1 to MOX.Header.MatCount do
+  for m:=1 to fMOX.Header.PartCount do
+    for i:=1 to fMOX.Header.MatCount do
     begin
       for k:=1 to PqtyAtSurf[m,i] do
       begin
-        for h:=1 to 3 do MOX.Face[j,h]:=v2[m,i,k,h]+MOX.Chunks[t].FirstVtx-1;
+        for h:=1 to 3 do fMOX.Face[j,h]:=v2[m,i,k,h]+fMOX.Chunks[t].FirstVtx-1;
         inc(j);
       end;
     inc(t);
     end;
 
   h:=1;
-  for m:=1 to MOX.Header.PartCount do
+  for m:=1 to fMOX.Header.PartCount do
   begin
-    MOX.Parts[m].NumMat:=0;
-    for i:=1 to MOX.Header.MatCount do
+    fMOX.Parts[m].NumMat:=0;
+    for i:=1 to fMOX.Header.MatCount do
     begin
-      MOX.Chunks[h].PolyCount:=PqtyAtSurf[m,i];
-      if h>1 then MOX.Chunks[h].FirstPoly:=MOX.Chunks[h-1].FirstPoly+MOX.Chunks[h-1].PolyCount else MOX.Chunks[h].FirstPoly:=0;
-      MOX.Header.PolyCount := MOX.Chunks[h].FirstPoly+MOX.Chunks[h].PolyCount;
-      inc(MOX.Parts[m].NumMat);
+      fMOX.Chunks[h].PolyCount:=PqtyAtSurf[m,i];
+      if h>1 then fMOX.Chunks[h].FirstPoly:=fMOX.Chunks[h-1].FirstPoly+fMOX.Chunks[h-1].PolyCount else fMOX.Chunks[h].FirstPoly:=0;
+      fMOX.Header.PolyCount := fMOX.Chunks[h].FirstPoly+fMOX.Chunks[h].PolyCount;
+      inc(fMOX.Parts[m].NumMat);
       inc(h);
     end;
   end;
 
-  for i:=1 to MOX.Header.MatCount do
+  for i:=1 to fMOX.Header.MatCount do
   begin
     Material[i].Mtag:=inttohex((i-1),4);
     Material[i].Title:=Imp.Mtl[i].Title;
@@ -2067,43 +2067,43 @@ begin
 
   NumColors:=MAX_COLORS;
 
-  for i:=1 to MOX.Header.MatCount do for k:=2 to MAX_COLORS do
+  for i:=1 to fMOX.Header.MatCount do for k:=2 to MAX_COLORS do
   Material[i].Color[k]:=Material[i].Color[1]; //Set all colors same
   LoadTextures;
 
   h:=1;
-  for m:=1 to MOX.Header.PartCount do
-    for i:=1 to MOX.Header.MatCount do
+  for m:=1 to fMOX.Header.PartCount do
+    for i:=1 to fMOX.Header.MatCount do
     begin
-      MOX.Chunks[h].SidA:=i-1;
-      MOX.Chunks[h].SidB:=i-1;
+      fMOX.Chunks[h].SidA:=i-1;
+      fMOX.Chunks[h].SidB:=i-1;
       inc(h);
     end;
 
-  for i:=1 to MOX.Header.MatCount do
+  for i:=1 to fMOX.Header.MatCount do
   begin
-    MOX.MoxMat[i].ID:=i-1;
-    for k:=1 to 332 do MOX.MoxMat[i].xxx[k]:=#0;
+    fMOX.MoxMat[i].ID:=i-1;
+    for k:=1 to 332 do fMOX.MoxMat[i].xxx[k]:=#0;
   end;
 
-  for i:=1 to MOX.Header.PartCount do
+  for i:=1 to fMOX.Header.PartCount do
   begin
-    MOX.Parts[i].Dname:=Imp.PartName[i];
-    MOX.Parts[i].Matrix[1,1]:=1;
-    MOX.Parts[i].Matrix[2,2]:=1;
-    MOX.Parts[i].Matrix[3,3]:=1;
-    MOX.Parts[i].Matrix[4,4]:=1;
-    MOX.Parts[i].Parent:=-1;
-    MOX.Parts[i].Child:=-1;
-    MOX.Parts[i].PrevInLevel:=-1;
-    MOX.Parts[i].NextInLevel:=-1;
-    //MOX.Parts[i].NumMat:=
-    MOX.Parts[i+1].FirstMat:=MOX.Parts[i].FirstMat+MOX.Parts[i].NumMat;
+    fMOX.Parts[i].Dname:=Imp.PartName[i];
+    fMOX.Parts[i].Matrix[1,1]:=1;
+    fMOX.Parts[i].Matrix[2,2]:=1;
+    fMOX.Parts[i].Matrix[3,3]:=1;
+    fMOX.Parts[i].Matrix[4,4]:=1;
+    fMOX.Parts[i].Parent:=-1;
+    fMOX.Parts[i].Child:=-1;
+    fMOX.Parts[i].PrevInLevel:=-1;
+    fMOX.Parts[i].NextInLevel:=-1;
+    //fMOX.Parts[i].NumMat:=
+    fMOX.Parts[i+1].FirstMat:=fMOX.Parts[i].FirstMat+fMOX.Parts[i].NumMat;
 
-    MOX.Parts[i].xMid:=PartModify[i].Low[1]+(PartModify[i].High[1]-PartModify[i].Low[1])/2;
-    MOX.Parts[i].yMid:=PartModify[i].Low[2]+(PartModify[i].High[2]-PartModify[i].Low[2])/2;
-    MOX.Parts[i].zMid:=PartModify[i].Low[3]+(PartModify[i].High[3]-PartModify[i].Low[3])/2;
-    MOX.Parts[i].fRadius:=(PartModify[i].High[1]-PartModify[i].Low[1])/3+
+    fMOX.Parts[i].xMid:=PartModify[i].Low[1]+(PartModify[i].High[1]-PartModify[i].Low[1])/2;
+    fMOX.Parts[i].yMid:=PartModify[i].Low[2]+(PartModify[i].High[2]-PartModify[i].Low[2])/2;
+    fMOX.Parts[i].zMid:=PartModify[i].Low[3]+(PartModify[i].High[3]-PartModify[i].Low[3])/2;
+    fMOX.Parts[i].fRadius:=(PartModify[i].High[1]-PartModify[i].Low[1])/3+
                         (PartModify[i].High[2]-PartModify[i].Low[2])/3+
                         (PartModify[i].High[3]-PartModify[i].Low[3])/3;
   end;
@@ -2147,10 +2147,10 @@ begin
   if idx = 0 then Exit;
   if fUIRefresh then Exit;
 
-  MOX.Blinkers[idx].Matrix[4,1] := fsBlinkerX.Value*10;
-  MOX.Blinkers[idx].Matrix[4,2] := fsBlinkerY.Value*10;
-  MOX.Blinkers[idx].Matrix[4,3] := fsBlinkerZ.Value*10;
-  Angles2Matrix(fsBlinkerH.Value, fsBlinkerP.Value, fsBlinkerB.Value, @MOX.Blinkers[idx].Matrix, 16);
+  fMOX.Blinkers[idx].Matrix[4,1] := fsBlinkerX.Value*10;
+  fMOX.Blinkers[idx].Matrix[4,2] := fsBlinkerY.Value*10;
+  fMOX.Blinkers[idx].Matrix[4,3] := fsBlinkerZ.Value*10;
+  Angles2Matrix(fsBlinkerH.Value, fsBlinkerP.Value, fsBlinkerB.Value, @fMOX.Blinkers[idx].Matrix, 16);
 end;
 
 
@@ -2164,31 +2164,31 @@ end;
 
 procedure TForm1.BlinkerAdd(aIndex: Integer);
 begin
-  if MOX.Header.BlinkerCount >= MAX_BLINKERS then Exit;
+  if fMOX.Header.BlinkerCount >= MAX_BLINKERS then Exit;
 
-  Inc(MOX.Header.BlinkerCount);
+  Inc(fMOX.Header.BlinkerCount);
 
-  if InRange(aIndex, 1, MOX.Header.BlinkerCount) then
+  if InRange(aIndex, 1, fMOX.Header.BlinkerCount) then
     // Duplicate existing
-    MOX.Blinkers[MOX.Header.BlinkerCount] := MOX.Blinkers[aIndex]
+    fMOX.Blinkers[fMOX.Header.BlinkerCount] := fMOX.Blinkers[aIndex]
   else
   begin
     // Create new
-    MOX.Blinkers[MOX.Header.BlinkerCount].BlinkerType := 0;
-    MOX.Blinkers[MOX.Header.BlinkerCount].sMin := 0;
-    MOX.Blinkers[MOX.Header.BlinkerCount].sMax := 1;
-    MOX.Blinkers[MOX.Header.BlinkerCount].Freq := 0;
-    MOX.Blinkers[MOX.Header.BlinkerCount].B := 255;
-    MOX.Blinkers[MOX.Header.BlinkerCount].G := 64;
-    MOX.Blinkers[MOX.Header.BlinkerCount].R := 0;
-    MOX.Blinkers[MOX.Header.BlinkerCount].A := 255;
-    MOX.Blinkers[MOX.Header.BlinkerCount].Unused := 0;
-    MOX.Blinkers[MOX.Header.BlinkerCount].Parent := 0;
-    FillChar(MOX.Blinkers[MOX.Header.BlinkerCount].Matrix, SizeOf(MOX.Blinkers[MOX.Header.BlinkerCount].Matrix), #0);
-    MOX.Blinkers[MOX.Header.BlinkerCount].Matrix[1, 1] := 1;
-    MOX.Blinkers[MOX.Header.BlinkerCount].Matrix[2, 2] := 1;
-    MOX.Blinkers[MOX.Header.BlinkerCount].Matrix[3, 3] := 1;
-    MOX.Blinkers[MOX.Header.BlinkerCount].Matrix[4, 4] := 1;
+    fMOX.Blinkers[fMOX.Header.BlinkerCount].BlinkerType := 0;
+    fMOX.Blinkers[fMOX.Header.BlinkerCount].sMin := 0;
+    fMOX.Blinkers[fMOX.Header.BlinkerCount].sMax := 1;
+    fMOX.Blinkers[fMOX.Header.BlinkerCount].Freq := 0;
+    fMOX.Blinkers[fMOX.Header.BlinkerCount].B := 255;
+    fMOX.Blinkers[fMOX.Header.BlinkerCount].G := 64;
+    fMOX.Blinkers[fMOX.Header.BlinkerCount].R := 0;
+    fMOX.Blinkers[fMOX.Header.BlinkerCount].A := 255;
+    fMOX.Blinkers[fMOX.Header.BlinkerCount].Unused := 0;
+    fMOX.Blinkers[fMOX.Header.BlinkerCount].Parent := 0;
+    FillChar(fMOX.Blinkers[fMOX.Header.BlinkerCount].Matrix, SizeOf(fMOX.Blinkers[fMOX.Header.BlinkerCount].Matrix), #0);
+    fMOX.Blinkers[fMOX.Header.BlinkerCount].Matrix[1, 1] := 1;
+    fMOX.Blinkers[fMOX.Header.BlinkerCount].Matrix[2, 2] := 1;
+    fMOX.Blinkers[fMOX.Header.BlinkerCount].Matrix[3, 3] := 1;
+    fMOX.Blinkers[fMOX.Header.BlinkerCount].Matrix[4, 4] := 1;
   end;
 end;
 
@@ -2211,17 +2211,17 @@ procedure TForm1.BlinkerRemove(aIndex: Integer);
 var
   I: Integer;
 begin
-  for I := aIndex to MOX.Header.BlinkerCount - 1 do
-    MOX.Blinkers[I] := MOX.Blinkers[I + 1];
+  for I := aIndex to fMOX.Header.BlinkerCount - 1 do
+    fMOX.Blinkers[I] := fMOX.Blinkers[I + 1];
 
-  Dec(MOX.Header.BlinkerCount);
+  Dec(fMOX.Header.BlinkerCount);
 end;
 
 
 procedure TForm1.BlinkCopyClick(Sender: TObject);
 begin
   fLightCopyID := LBBlinkers.ItemIndex + 1;
-  btnBlinkerPaste.Enabled := InRange(fLightCopyID, 1, MOX.Header.BlinkerCount);
+  btnBlinkerPaste.Enabled := InRange(fLightCopyID, 1, fMOX.Header.BlinkerCount);
 end;
 
 
@@ -2232,13 +2232,13 @@ begin
   idx := LBBlinkers.ItemIndex+1;
   if idx = 0 then Exit;
 
-  if not InRange(fLightCopyID, 1, MOX.Header.BlinkerCount) then
+  if not InRange(fLightCopyID, 1, fMOX.Header.BlinkerCount) then
   begin
     btnBlinkerPaste.Enabled := False;
     Exit;
   end;
 
-  MOX.Blinkers[idx] := MOX.Blinkers[fLightCopyID];
+  fMOX.Blinkers[idx] := fMOX.Blinkers[fLightCopyID];
 
   SendDataToUI(uiBlinkers);
   LBBlinkersClick(nil);
@@ -2249,7 +2249,7 @@ procedure TForm1.btnBlinkersLoadClick(Sender: TObject);
 begin
   if not RunOpenDialog2(odOpen, '', 'MTKit2 Lights Setup Files (*.lsf)|*.lsf') then Exit;
 
-  LoadBlinkers(odOpen.FileName);
+  LoadBlinkers(fMOX, odOpen.FileName);
   SendDataToUI(uiBlinkers);
   btnBlinkerPaste.Enabled := False;
 end;
@@ -2259,7 +2259,7 @@ procedure TForm1.btnBlinkersSaveClick(Sender: TObject);
 begin
   if not RunSaveDialog(sdSave, fOpenedFileMask + '.lsf', '', 'MTKit2 Lights Setup Files (*.lsf)|*.lsf', 'lsf') then Exit;
 
-  SaveBlinkers(sdSave.FileName);
+  SaveBlinkers(fMOX, sdSave.FileName);
 end;
 
 
@@ -2318,81 +2318,81 @@ var
   exVertice: array of record X,Y,Z,nX,nY,nZ,U,V,x1,x2: Single; end; //40Bytes
   exPolys: array of array [1..3] of Integer;
 begin
-  SetLength(order, MOX.Header.PartCount + 1);
-  for I := 1 to MOX.Header.PartCount do
-    for K := 1 to MOX.Header.PartCount do
-      if MOX.Parts[I].Dname = TVParts.Items[K - 1].Text then
+  SetLength(order, fMOX.Header.PartCount + 1);
+  for I := 1 to fMOX.Header.PartCount do
+    for K := 1 to fMOX.Header.PartCount do
+      if fMOX.Parts[I].Dname = TVParts.Items[K - 1].Text then
         order[K] := I;
 
-  SetLength(exVertice, MOX.Header.VerticeCount + 1);
-  SetLength(exPolys, MOX.Header.PolyCount + 1);
-  SetLength(exChunk, MOX.Header.MatCount * MOX.Header.PartCount + 1);
+  SetLength(exVertice, fMOX.Header.VerticeCount + 1);
+  SetLength(exPolys, fMOX.Header.PolyCount + 1);
+  SetLength(exChunk, fMOX.Header.MatCount * fMOX.Header.PartCount + 1);
 
   accPoly := 0; accVert := 0;
-  for I := 1 to MOX.Header.PartCount do
+  for I := 1 to fMOX.Header.PartCount do
   begin
-    aDname[i] := MOX.Parts[order[i]].Dname;
-    aParts[i].xMid := MOX.Parts[order[i]].xMid;
-    aParts[i].yMid := MOX.Parts[order[i]].yMid;
-    aParts[i].zMid := MOX.Parts[order[i]].zMid;
-    aParts[i].fRadius := MOX.Parts[order[i]].fRadius;
-    aParts[i].TypeID := MOX.Parts[order[i]].TypeID;
-    aParts[i].x1 := MOX.Parts[order[i]].x1;
-    aParts[i].x2 := MOX.Parts[order[i]].x2;
-    aParts[i].y1 := MOX.Parts[order[i]].y1;
-    aParts[i].y2 := MOX.Parts[order[i]].y2;
-    aParts[i].z1 := MOX.Parts[order[i]].z1;
-    aParts[i].z2 := MOX.Parts[order[i]].z2;
+    aDname[i] := fMOX.Parts[order[i]].Dname;
+    aParts[i].xMid := fMOX.Parts[order[i]].xMid;
+    aParts[i].yMid := fMOX.Parts[order[i]].yMid;
+    aParts[i].zMid := fMOX.Parts[order[i]].zMid;
+    aParts[i].fRadius := fMOX.Parts[order[i]].fRadius;
+    aParts[i].TypeID := fMOX.Parts[order[i]].TypeID;
+    aParts[i].x1 := fMOX.Parts[order[i]].x1;
+    aParts[i].x2 := fMOX.Parts[order[i]].x2;
+    aParts[i].y1 := fMOX.Parts[order[i]].y1;
+    aParts[i].y2 := fMOX.Parts[order[i]].y2;
+    aParts[i].z1 := fMOX.Parts[order[i]].z1;
+    aParts[i].z2 := fMOX.Parts[order[i]].z2;
     CopyMemory(@aPartModify[I], @PartModify[order[I]], 56); //55+1 !
 
-    for K := 1 to MOX.Header.MatCount do
+    for K := 1 to fMOX.Header.MatCount do
     begin
-      iDest := (I - 1) * MOX.header.MatCount + K; // destination
-      iSrc := (order[I] - 1) * MOX.header.MatCount + K; // source
+      iDest := (I - 1) * fMOX.header.MatCount + K; // destination
+      iSrc := (order[I] - 1) * fMOX.header.MatCount + K; // source
 
       exChunk[iDest].FirstPoly := accPoly;                                   //first poly
-      exChunk[iDest].PolyCount := MOX.Chunks[iSrc].PolyCount;             //poly count
-      Inc(accPoly, MOX.Chunks[iSrc].PolyCount);
+      exChunk[iDest].PolyCount := fMOX.Chunks[iSrc].PolyCount;             //poly count
+      Inc(accPoly, fMOX.Chunks[iSrc].PolyCount);
       exChunk[iDest].FirstVtx := accVert+1;                                 //first point
-      Inc(accVert, MOX.Chunks[iSrc].LastVtx - MOX.Chunks[iSrc].FirstVtx + 1);
+      Inc(accVert, fMOX.Chunks[iSrc].LastVtx - fMOX.Chunks[iSrc].FirstVtx + 1);
       exChunk[iDest].LastVtx := accVert;                                   //last point
 
       for J := exChunk[iDest].FirstVtx to exChunk[iDest].LastVtx do
-        CopyMemory(@exVertice[J], @MOX.Vertice[MOX.Chunks[iSrc].FirstVtx+(J-exChunk[iDest].FirstVtx)], 40);
+        CopyMemory(@exVertice[J], @fMOX.Vertice[fMOX.Chunks[iSrc].FirstVtx+(J-exChunk[iDest].FirstVtx)], 40);
 
       for J:=1 to exChunk[iDest].PolyCount do
       begin
-        exPolys[exChunk[iDest].FirstPoly+J,1]:=MOX.Face[MOX.Chunks[iSrc].FirstPoly+J,1]+exChunk[iDest].FirstVtx-MOX.Chunks[iSrc].FirstVtx;
-        exPolys[exChunk[iDest].FirstPoly+J,2]:=MOX.Face[MOX.Chunks[iSrc].FirstPoly+J,2]+exChunk[iDest].FirstVtx-MOX.Chunks[iSrc].FirstVtx;
-        exPolys[exChunk[iDest].FirstPoly+J,3]:=MOX.Face[MOX.Chunks[iSrc].FirstPoly+J,3]+exChunk[iDest].FirstVtx-MOX.Chunks[iSrc].FirstVtx;
+        exPolys[exChunk[iDest].FirstPoly+J,1]:=fMOX.Face[fMOX.Chunks[iSrc].FirstPoly+J,1]+exChunk[iDest].FirstVtx-fMOX.Chunks[iSrc].FirstVtx;
+        exPolys[exChunk[iDest].FirstPoly+J,2]:=fMOX.Face[fMOX.Chunks[iSrc].FirstPoly+J,2]+exChunk[iDest].FirstVtx-fMOX.Chunks[iSrc].FirstVtx;
+        exPolys[exChunk[iDest].FirstPoly+J,3]:=fMOX.Face[fMOX.Chunks[iSrc].FirstPoly+J,3]+exChunk[iDest].FirstVtx-fMOX.Chunks[iSrc].FirstVtx;
       end;
     end;
   end;
 
 
   CopyMemory(@PartModify, @aPartModify, Length(PartModify) * 56); //55+1 !
-  CopyMemory(@MOX.Vertice[1], @exVertice[1], MOX.Header.VerticeCount * SizeOf(MOX.Vertice[1]));//XYZXYZUV00 of Single
-  CopyMemory(@MOX.Face[1], @exPolys[1], MOX.Header.PolyCount * SizeOf(MOX.Face[1]));                //1..3 of Word
+  CopyMemory(@fMOX.Vertice[1], @exVertice[1], fMOX.Header.VerticeCount * SizeOf(fMOX.Vertice[1]));//XYZXYZUV00 of Single
+  CopyMemory(@fMOX.Face[1], @exPolys[1], fMOX.Header.PolyCount * SizeOf(fMOX.Face[1]));                //1..3 of Word
 
-  for I:=1 to MOX.Header.ChunkCount do
+  for I:=1 to fMOX.Header.ChunkCount do
   begin
-    MOX.Chunks[I].FirstPoly := exChunk[I].FirstPoly;
-    MOX.Chunks[I].PolyCount := exChunk[I].PolyCount;
-    MOX.Chunks[I].FirstVtx := exChunk[I].FirstVtx;
-    MOX.Chunks[I].LastVtx := exChunk[I].LastVtx;
+    fMOX.Chunks[I].FirstPoly := exChunk[I].FirstPoly;
+    fMOX.Chunks[I].PolyCount := exChunk[I].PolyCount;
+    fMOX.Chunks[I].FirstVtx := exChunk[I].FirstVtx;
+    fMOX.Chunks[I].LastVtx := exChunk[I].LastVtx;
   end;
 
-  for I:=1 to MOX.Header.PartCount do
+  for I:=1 to fMOX.Header.PartCount do
   begin
-    MOX.Parts[I].Dname:=aDname[I];
-    MOX.Parts[I].xMid:=aParts[I].xMid;
-    MOX.Parts[I].yMid:=aParts[I].yMid;
-    MOX.Parts[I].zMid:=aParts[I].zMid;
-    MOX.Parts[I].fRadius:=aParts[I].fRadius;
-    MOX.Parts[I].TypeID:=aParts[I].TypeID;
-    MOX.Parts[I].x1:=aParts[I].x1; MOX.Parts[I].x2:=aParts[I].x2;
-    MOX.Parts[I].y1:=aParts[I].y1; MOX.Parts[I].y2:=aParts[I].y2;
-    MOX.Parts[I].z1:=aParts[I].z1; MOX.Parts[I].z2:=aParts[I].z2;
+    fMOX.Parts[I].Dname:=aDname[I];
+    fMOX.Parts[I].xMid:=aParts[I].xMid;
+    fMOX.Parts[I].yMid:=aParts[I].yMid;
+    fMOX.Parts[I].zMid:=aParts[I].zMid;
+    fMOX.Parts[I].fRadius:=aParts[I].fRadius;
+    fMOX.Parts[I].TypeID:=aParts[I].TypeID;
+    fMOX.Parts[I].x1:=aParts[I].x1; fMOX.Parts[I].x2:=aParts[I].x2;
+    fMOX.Parts[I].y1:=aParts[I].y1; fMOX.Parts[I].y2:=aParts[I].y2;
+    fMOX.Parts[I].z1:=aParts[I].z1; fMOX.Parts[I].z2:=aParts[I].z2;
   end;
 
   CompileLoadedMOX;
@@ -2406,24 +2406,24 @@ begin
   for I:=0 to TVParts.Items.Count-1 do
   begin
     if TVParts.Items[I].Level = 0 then
-      MOX.Parts[I + 1].Parent := -1
+      fMOX.Parts[I + 1].Parent := -1
     else // No parents
-      MOX.Parts[I + 1].Parent := TVParts.Items[I].Parent.AbsoluteIndex;
+      fMOX.Parts[I + 1].Parent := TVParts.Items[I].Parent.AbsoluteIndex;
 
     if not TVParts.Items[I].HasChildren then
-      MOX.Parts[I + 1].Child := -1
+      fMOX.Parts[I + 1].Child := -1
     else // No childs
-      MOX.Parts[I + 1].Child := TVParts.Items[I].AbsoluteIndex + 1;
+      fMOX.Parts[I + 1].Child := TVParts.Items[I].AbsoluteIndex + 1;
 
     if TVParts.Items[I].getPrevSibling <> nil then
-      MOX.Parts[I + 1].PrevInLevel := TVParts.Items[I].getPrevSibling.AbsoluteIndex
+      fMOX.Parts[I + 1].PrevInLevel := TVParts.Items[I].getPrevSibling.AbsoluteIndex
     else
-      MOX.Parts[I + 1].PrevInLevel := -1;
+      fMOX.Parts[I + 1].PrevInLevel := -1;
 
     if TVParts.Items[I].getNextSibling <> nil then
-      MOX.Parts[I + 1].NextInLevel := TVParts.Items[I].getNextSibling.AbsoluteIndex
+      fMOX.Parts[I + 1].NextInLevel := TVParts.Items[I].getNextSibling.AbsoluteIndex
     else
-      MOX.Parts[I + 1].NextInLevel := -1;
+      fMOX.Parts[I + 1].NextInLevel := -1;
   end;
 end;
 
@@ -2517,7 +2517,7 @@ procedure TForm1.MatPasteClick(Sender: TObject);
 var
   i:Integer;
 begin
-  if fColorCopyID <> EnsureRange(fColorCopyID, 1, MOX.Header.MatCount) then
+  if fColorCopyID <> EnsureRange(fColorCopyID, 1, fMOX.Header.MatCount) then
   begin
     MatPaste.Enabled := False;
     Exit;
@@ -2586,9 +2586,9 @@ begin
   ForbidPivotChange := True;
   with PartModify[SelectedTreeNode] do
   begin
-    Custom[1]:=MOX.Vertice[idx+MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1].X;
-    Custom[2]:=MOX.Vertice[idx+MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1].Y;
-    Custom[3]:=MOX.Vertice[idx+MOX.Chunks[MOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1].Z;
+    Custom[1]:=fMOX.Vertice[idx+fMOX.Chunks[fMOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1].X;
+    Custom[2]:=fMOX.Vertice[idx+fMOX.Chunks[fMOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1].Y;
+    Custom[3]:=fMOX.Vertice[idx+fMOX.Chunks[fMOX.Parts[SelectedTreeNode].FirstMat+1].FirstVtx-1].Z;
     CustomPivotX.Value:=Custom[1];
     CustomPivotY.Value:=Custom[2];
     CustomPivotZ.Value:=Custom[3];
@@ -2603,7 +2603,7 @@ procedure TForm1.btnPSFSaveClick(Sender: TObject);
 begin
   if not RunSaveDialog(sdSave, fOpenedFileMask + '.psf', '', 'MTKit2 Pivot Setup Files (*.psf)|*.psf', 'psf') then Exit;
   meLog.Lines.Add('Assigning PSF file ...');
-  SavePSF(sdSave.FileName);
+  SavePSF(fMOX, sdSave.FileName);
   meLog.Lines.Add('PSF file closed');
 end;
 
@@ -2614,7 +2614,7 @@ begin
   //if Sender=PSFLoad then begin
   if not RunOpenDialog2(odOpen,'','MTKit2 Pivot Setup Files (*.psf)|*.psf') then Exit;
   meLog.Lines.Add('Reading PSF ...');
-  if not LoadPSF(odOpen.FileName) then Exit;
+  if not LoadPSF(fMOX, odOpen.FileName) then Exit;
   meLog.Lines.Add('PSF file closed');
 end;
 
@@ -2623,7 +2623,7 @@ procedure TForm1.btnPBFSaveClick(Sender: TObject);
 begin
   if not RunSaveDialog(sdSave, fOpenedFileMask + '_colli.pbf', '', 'MTKit2 Part Behaviour Files (*.pbf)|*.pbf', 'pbf') then Exit;
   meLog.Lines.Add('Assigning PBF file ...');
-  SavePBF(sdSave.FileName);
+  SavePBF(fMOX, sdSave.FileName);
   meLog.Lines.Add('PBF file closed');
 end;
 
@@ -2633,7 +2633,7 @@ begin
   if not RunOpenDialog2(odOpen, '', 'MTKit2 Part Behaviour Files (*.pbf)|*.pbf') then Exit;
 
   meLog.Lines.Add('Reading PBF ...');
-  LoadPBF(odOpen.FileName);
+  LoadPBF(fMOX, odOpen.FileName);
   ExchangePartsOrdering;
   RebuildPartsTree;
   meLog.Lines.Add('PBF file processed and closed');
@@ -2687,7 +2687,7 @@ procedure TForm1.ResetMTLOrderClick(Sender: TObject);
 var
   i:Integer;
 begin
-  for i:=1 to MOX.Header.MatCount do
+  for i:=1 to fMOX.Header.MatCount do
     Material[i].Mtag:=IntToHex((i-1),4);
   SendDataToUI(uiMTL);
 end;
@@ -2700,15 +2700,15 @@ begin
   SelectedTreeNode := TVParts.Selected.AbsoluteIndex + 1;
   with PartModify[SelectedTreeNode] do
   begin
-    MOX.Parts[SelectedTreeNode].xMid := (High[1] + Low[1]) / 2;
-    MOX.Parts[SelectedTreeNode].yMid := (High[2] + Low[2]) / 2;
-    MOX.Parts[SelectedTreeNode].zMid := (High[3] + Low[3]) / 2;
-    MOX.Parts[SelectedTreeNode].fRadius := (High[1] - Low[1]) / 3 + (High[2] - Low[2]) / 3 + (High[3] - Low[3]) / 3;
+    fMOX.Parts[SelectedTreeNode].xMid := (High[1] + Low[1]) / 2;
+    fMOX.Parts[SelectedTreeNode].yMid := (High[2] + Low[2]) / 2;
+    fMOX.Parts[SelectedTreeNode].zMid := (High[3] + Low[3]) / 2;
+    fMOX.Parts[SelectedTreeNode].fRadius := (High[1] - Low[1]) / 3 + (High[2] - Low[2]) / 3 + (High[3] - Low[3]) / 3;
   end;
-  CX.Value := MOX.Parts[SelectedTreeNode].xMid;
-  CY.Value := MOX.Parts[SelectedTreeNode].yMid;
-  CZ.Value := MOX.Parts[SelectedTreeNode].zMid;
-  CRad.Value := MOX.Parts[SelectedTreeNode].fRadius;
+  CX.Value := fMOX.Parts[SelectedTreeNode].xMid;
+  CY.Value := fMOX.Parts[SelectedTreeNode].yMid;
+  CZ.Value := fMOX.Parts[SelectedTreeNode].zMid;
+  CRad.Value := fMOX.Parts[SelectedTreeNode].fRadius;
 end;
 
 
@@ -2721,7 +2721,7 @@ end;
 
 procedure TForm1.FileListBox1Click(Sender: TObject);
 begin
-  FillChar(MOX.Header, SizeOf(MOX.Header), #0);
+  fMOX.Clear;
   fCOB.Clear;
   fTree.Clear;
   ResetView(nil);
@@ -2750,7 +2750,7 @@ begin
     PivotSetup.TabVisible := False;
 
     try
-      LoadMOX(aFilename);
+      LoadMOX(fMOX, aFilename);
     except
       on E: Exception do
         MessageBox(0, PChar(E.Message), 'Error', MB_OK or MB_ICONERROR);
@@ -2767,10 +2767,10 @@ begin
     mnuExportMOX1.Enabled := True;
     bgExport.ButtonEnabled[BG_EXPORT_MOX_LWO] := True;
 
-    StatusBar1.Panels[0].Text := MOX.MOXFormatInt + ' - ' + MOX.MOXFormatStr;
+    StatusBar1.Panels[0].Text := fMOX.MOXFormatInt + ' - ' + fMOX.MOXFormatStr;
 
     ActionsEnable(cuMOX);
-    LoadMTL(ChangeFileExt(aFilename, '.mtl'));
+    LoadMTL(ChangeFileExt(aFilename, '.mtl'), fMOX.Header.MatCount);
     LoadTextures;
     ScanVinyls(fOpenedFolder);
     ActionsEnable(cuMTL);
@@ -3176,17 +3176,17 @@ begin
         if I mod 100 = 0 then
           StatusBar1.Panels[2].Text := Format('Loading %d/%d - \%s', [I, slFiles.Count, slFiles[I]]);
 
-        LoadMOX(slFiles[I]);
+        LoadMOX(fMOX, slFiles[I]);
         slLog.Append(Format('%s'#9'%s'#9'%s'#9'%s'#9'%d'#9'%d'#9'%d'#9'%d'#9'%d'#9'%d',
-          [MOX.MOXFormatInt, MOX.MOXFormatStr, 'OK  ', slFiles[i],
-            MOX.header.VerticeCount, MOX.header.PolyCount,
-            MOX.header.ChunkCount, MOX.header.MatCount,
-            MOX.header.PartCount, MOX.header.BlinkerCount]));
+          [fMOX.MOXFormatInt, fMOX.MOXFormatStr, 'OK  ', slFiles[i],
+            fMOX.header.VerticeCount, fMOX.header.PolyCount,
+            fMOX.header.ChunkCount, fMOX.header.MatCount,
+            fMOX.header.PartCount, fMOX.header.BlinkerCount]));
       except
         on E: EExceptionTooNew do
           { We dont support newer formats yet };
         on E: Exception do
-          slLog.Append(MOX.MOXFormatInt + #9 + MOX.MOXFormatStr + #9 + 'FAIL' + #9 + slFiles[I] + #9 + E.Message);
+          slLog.Append(fMOX.MOXFormatInt + #9 + fMOX.MOXFormatStr + #9 + 'FAIL' + #9 + slFiles[I] + #9 + E.Message);
       end;
 
       slLog.Append(Format('%d files', [slFiles.Count]));
@@ -3257,7 +3257,7 @@ procedure TForm1.mnuSaveMTLClick(Sender: TObject);
 begin
   if not RunSaveDialog(sdSave, fOpenedFileMask+'.mtl','','World Racing Material files (*.mtl)|*.mtl','mtl') then Exit;
   meLog.Lines.Add('Saving MTL file ...');
-  SaveMTL(sdSave.FileName);
+  SaveMTL(sdSave.FileName, fMOX.Header.MatCount);
   meLog.Lines.Add('MTL file written');
 end;
 
@@ -3315,16 +3315,16 @@ procedure TForm1.mnuImportLWO2Click(Sender: TObject);
 begin
   mnuImportLWO1Click(nil);
 
-  LoadMTL(fOpenedFileMask+'.mtl');
+  LoadMTL(fOpenedFileMask+'.mtl', fMOX.Header.MatCount);
   LoadTextures;
   ScanVinyls(fOpenedFolder);
   ActionsEnable(cuMTL);
 
-  LoadPSF(fOpenedFileMask+'.psf');
-  LoadPBF(fOpenedFileMask+'.pbf');
+  LoadPSF(fMOX, fOpenedFileMask+'.psf');
+  LoadPBF(fMOX, fOpenedFileMask+'.pbf');
   ExchangePartsOrdering;
   RebuildPartsTree;
-  LoadBlinkers(fOpenedFileMask+'.lsf');
+  LoadBlinkers(fMOX, fOpenedFileMask+'.lsf');
 
   SendDataToUI(uiBlinkers);
   btnBlinkerPaste.Enabled := False;
@@ -3358,7 +3358,7 @@ begin
 
   doSpread := MessageBox(Handle, 'Do you want to spread parts over X axis?', 'Question', MB_YESNO or MB_ICONQUESTION) = ID_YES;
 
-  SaveMOX2LWO(sdSave.FileName, ColID, doSpread);
+  SaveMOX2LWO(fMOX, sdSave.FileName, ColID, doSpread);
 
   meLog.Lines.Add('MOX>LWO Save Complete');
 end;
@@ -3383,7 +3383,7 @@ begin
 
   if aActions in [cuMOX, cuALL] then
   begin
-    FillChar(MOX, SizeOf(MOX), #0);
+    fMOX.Clear;
     bgSaveAs.ButtonEnabled[BG_SAVE_AS_MOX] := False;
     bgExport.ButtonEnabled[BG_EXPORT_MOX_LWO] := False;
     btnBlinkerCopy.Enabled := False;
@@ -3520,7 +3520,7 @@ begin
   if idx = 0 then Exit;
 
   // Copy
-  blinker := MOX.Blinkers[idx];
+  blinker := fMOX.Blinkers[idx];
 
   TForm_ColorPicker2.Execute(
     blinker.R + blinker.G shl 8 + blinker.B shl 16,
@@ -3529,10 +3529,10 @@ begin
       // Live preview
       shpBlinkerColor.Brush.Color := aColor;
 
-      MOX.Blinkers[idx].R := aColor mod 256;
-      MOX.Blinkers[idx].G := aColor div 256 mod 256;
-      MOX.Blinkers[idx].B := aColor div 65536;
-      MOX.Blinkers[idx].A := 255;
+      fMOX.Blinkers[idx].R := aColor mod 256;
+      fMOX.Blinkers[idx].G := aColor div 256 mod 256;
+      fMOX.Blinkers[idx].B := aColor div 65536;
+      fMOX.Blinkers[idx].A := 255;
 
       Render;
     end,
@@ -3540,7 +3540,7 @@ begin
     procedure
     begin
       // Cancel - restore original color
-      MOX.Blinkers[idx] := blinker;
+      fMOX.Blinkers[idx] := blinker;
       shpBlinkerColor.Brush.Color := blinker.R + blinker.G shl 8 + blinker.B shl 16;
     end);
 end;
@@ -3589,12 +3589,12 @@ var
 begin
   AbsMin := MaxSingle;
   AbsMax := -MaxSingle;
-  for i := 1 to MOX.Header.VerticeCount do
+  for i := 1 to fMOX.Header.VerticeCount do
   begin
-    AbsMin := min(AbsMin, MOX.Vertice[i].X, MOX.Vertice[i].Y);
-    AbsMin := min(AbsMin, MOX.Vertice[i].Z);
-    AbsMax := max(AbsMax, MOX.Vertice[i].X, MOX.Vertice[i].Y);
-    AbsMax := max(AbsMax, MOX.Vertice[i].Z);
+    AbsMin := min(AbsMin, fMOX.Vertice[i].X, fMOX.Vertice[i].Y);
+    AbsMin := min(AbsMin, fMOX.Vertice[i].Z);
+    AbsMax := max(AbsMax, fMOX.Vertice[i].X, fMOX.Vertice[i].Y);
+    AbsMax := max(AbsMax, fMOX.Vertice[i].Z);
   end;
 
   zoom := Sqrt(5.5 / (AbsMax - AbsMin)); // 5.5 looks about right
@@ -3690,7 +3690,7 @@ begin
 
   if Control = lbBlinkers then
   begin
-    lbCanvas.Brush.Color := MOX.Blinkers[idx].R + MOX.Blinkers[idx].G shl 8 + MOX.Blinkers[idx].B shl 16;
+    lbCanvas.Brush.Color := fMOX.Blinkers[idx].R + fMOX.Blinkers[idx].G shl 8 + fMOX.Blinkers[idx].B shl 16;
     lbCanvas.FillRect(myRect);
   end;
 

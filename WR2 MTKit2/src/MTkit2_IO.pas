@@ -1,23 +1,25 @@
 unit MTkit2_IO;
 interface
 uses
-  Windows, Classes, SysUtils, MTkit2_Defaults, KromUtils, Math, Dialogs;
+  Windows, Classes, SysUtils, Math, Dialogs,
+  KromUtils,
+  MTkit2_Defaults, MTkit2_MOX;
 
 function  LoadOBJ(const aFilename: string): Boolean;
 function  Load3DS(const aFilename: string): Boolean;
 function  LoadLWO(const aFilename: string): Boolean;
 
-procedure LoadMTL(const aFilename: string);
-procedure SaveMTL(const aFilename: string);
+procedure LoadMTL(const aFilename: string; aMOXMaterialCount: Integer);
+procedure SaveMTL(const aFilename: string; aMOXMaterialCount: Integer);
 
-procedure LoadBlinkers(const aFilename: string);
-procedure SaveBlinkers(const aFilename: string);
+procedure LoadBlinkers(aMOX: TMOX2; const aFilename: string);
+procedure SaveBlinkers(aMOX: TMOX2; const aFilename: string);
 
-function  LoadPBF(const aFilename: string): Boolean;
-procedure SavePBF(const aFilename: string);
+function  LoadPBF(aMOX: TMOX2; const aFilename: string): Boolean;
+procedure SavePBF(aMOX: TMOX2; const aFilename: string);
 
-function  LoadPSF(const aFilename: string): Boolean;
-procedure SavePSF(const aFilename: string);
+function  LoadPSF(aMOX: TMOX2; const aFilename: string): Boolean;
+procedure SavePSF(aMOX: TMOX2; const aFilename: string);
 
 function  ScanVinyls(aPath: string): Boolean;
 
@@ -25,7 +27,7 @@ procedure ListFiles(const aPath, aExt: string; aRecurseSubFolders: Boolean; aFil
 
 implementation
 uses
-  MTkit2_Unit1, MTkit2_COB, MTkit2_CPO, MTkit2_MOX, MTkit2_Tree, MTkit2_Vertex;
+  MTkit2_Unit1, MTkit2_COB, MTkit2_CPO, MTkit2_Tree, MTkit2_Vertex;
 
 
 function LoadOBJ(const aFilename: string): Boolean;
@@ -812,7 +814,7 @@ begin
   Result:=True;
 end;
 
-procedure LoadMTL(const aFilename: string);
+procedure LoadMTL(const aFilename: string; aMOXMaterialCount: Integer);
 var
   chname: AnsiString;
   s: AnsiString;
@@ -971,7 +973,7 @@ begin
   end;
 
   begin //FileNotExists or append incomplete MTL
-    for i:=NumMaterials+1 to MOX.Header.MatCount do
+    for i:=NumMaterials+1 to aMOXMaterialCount do
     with Material[i] do
     begin
       Mtag:=inttohex((i-1),4);
@@ -984,13 +986,13 @@ begin
       TexEdge.V:=1;
     end;
 
-    for i:=NumMaterials+1 to MOX.Header.MatCount do
+    for i:=NumMaterials+1 to aMOXMaterialCount do
     for k:=1 to MAX_COLORS do
       Material[i].Color[k]:=Material[i].Color[1]; //Set all colors same
   end;
 end;
 
-procedure SaveMTL(const aFilename: string);
+procedure SaveMTL(const aFilename: string; aMOXMaterialCount: Integer);
 var
   i,k:Integer;
   s: AnsiString;
@@ -1003,7 +1005,7 @@ begin
   else
     writeln(ft,'ColSetInf "Default"');
 
-  for i:=1 to MOX.Header.MatCount do
+  for i:=1 to aMOXMaterialCount do
   with Material[i] do
   begin
     writeln(ft,'');
@@ -1035,7 +1037,8 @@ begin
 end;
 
 
-procedure LoadBlinkers(const aFilename: string);
+//todo: Move into TMOX
+procedure LoadBlinkers(aMOX: TMOX2; const aFilename: string);
 var
   f:file;
 begin
@@ -1045,26 +1048,27 @@ begin
   FileMode := 0;
   Reset(f, 1);
   FileMode := 2;
-  BlockRead(f, MOX.Header.BlinkerCount, 4);
-  if MOX.Header.BlinkerCount > MAX_BLINKERS then
-    MOX.Header.BlinkerCount := MAX_BLINKERS;
-  BlockRead(f, MOX.Blinkers, 88 * MOX.Header.BlinkerCount);
+  BlockRead(f, aMOX.Header.BlinkerCount, 4);
+  if aMOX.Header.BlinkerCount > MAX_BLINKERS then
+    aMOX.Header.BlinkerCount := MAX_BLINKERS;
+  BlockRead(f, aMOX.Blinkers, 88 * aMOX.Header.BlinkerCount);
   CloseFile(f);
 end;
 
 
-procedure SaveBlinkers(const aFilename: string);
+//todo: Move into TMOX
+procedure SaveBlinkers(aMOX: TMOX2; const aFilename: string);
 var
   f:file;
 begin
   AssignFile(f,aFilename); Rewrite(f,1);
-  BlockWrite(f,MOX.Header.BlinkerCount,4);
-  BlockWrite(f,MOX.Blinkers,88*MOX.Header.BlinkerCount);
+  BlockWrite(f,aMOX.Header.BlinkerCount,4);
+  BlockWrite(f,aMOX.Blinkers,88*aMOX.Header.BlinkerCount);
   CloseFile(f);
 end;
 
 
-function LoadPBF(const aFilename: string):Boolean;
+function LoadPBF(aMOX: TMOX2; const aFilename: string):Boolean;
 var
   s: AnsiString;
   h,i,k:Integer;
@@ -1112,29 +1116,29 @@ begin
   end;
   CloseFile(ft);
 
-  for i:=1 to MOX.Header.PartCount do
-    for k:=1 to MOX.Header.PartCount do
-      if MOX.Parts[i].Dname=name[k] then
+  for i:=1 to aMOX.Header.PartCount do
+    for k:=1 to aMOX.Header.PartCount do
+      if aMOX.Parts[i].Dname=name[k] then
       begin
-        MOX.Parts[i].TypeID:=TmpID[k];
-        MOX.Parts[i].xMid:=TmpX[k];
-        MOX.Parts[i].yMid:=TmpY[k];
-        MOX.Parts[i].zMid:=TmpZ[k];
-        MOX.Parts[i].fRadius:=TmpR[k];
-        MOX.Parts[i].x1:=TmpX1[k];
-        MOX.Parts[i].x2:=TmpX2[k];
-        MOX.Parts[i].y1:=TmpY1[k];
-        MOX.Parts[i].y2:=TmpY2[k];
-        MOX.Parts[i].z1:=TmpZ1[k];
-        MOX.Parts[i].z2:=TmpZ2[k];
+        aMOX.Parts[i].TypeID:=TmpID[k];
+        aMOX.Parts[i].xMid:=TmpX[k];
+        aMOX.Parts[i].yMid:=TmpY[k];
+        aMOX.Parts[i].zMid:=TmpZ[k];
+        aMOX.Parts[i].fRadius:=TmpR[k];
+        aMOX.Parts[i].x1:=TmpX1[k];
+        aMOX.Parts[i].x2:=TmpX2[k];
+        aMOX.Parts[i].y1:=TmpY1[k];
+        aMOX.Parts[i].y2:=TmpY2[k];
+        aMOX.Parts[i].z1:=TmpZ1[k];
+        aMOX.Parts[i].z2:=TmpZ2[k];
       end;
 
   Form1.TVParts.Items.Clear; h:=1;
-  for i:=1 to MOX.Header.PartCount do
+  for i:=1 to aMOX.Header.PartCount do
   begin //Add matching nodes
     DetailMet:=False;
-    for k:=1 to MOX.Header.PartCount do
-      if name[i]=MOX.Parts[k].Dname then
+    for k:=1 to aMOX.Header.PartCount do
+      if name[i]=aMOX.Parts[k].Dname then
         DetailMet:=True;
 
     if DetailMet then
@@ -1146,23 +1150,23 @@ begin
     end;
   end;
 
-  for i:=1 to MOX.Header.PartCount do
+  for i:=1 to aMOX.Header.PartCount do
   begin //Add non-matching nodes from LWO
     DetailMet:=False;
-    for k:=1 to MOX.Header.PartCount do if MOX.Parts[k].Dname=name[k] then DetailMet:=True;
+    for k:=1 to aMOX.Header.PartCount do if aMOX.Parts[k].Dname=name[k] then DetailMet:=True;
     if not DetailMet then begin
-      Dnode[h]:=Form1.TVParts.Items.Add(nil,MOX.Parts[i].Dname);
+      Dnode[h]:=Form1.TVParts.Items.Add(nil,aMOX.Parts[i].Dname);
       Inc(h);
     end;
   end;
 
-  if MOX.Header.PartCount>=1 then Dnode[1].Expand(False);
+  if aMOX.Header.PartCount>=1 then Dnode[1].Expand(False);
 
   Result:=True;
 end;
 
 
-procedure SavePBF(const aFilename: string);
+procedure SavePBF(aMOX: TMOX2; const aFilename: string);
 var
   i:Integer;
   ft:textfile;
@@ -1170,26 +1174,26 @@ begin
   AssignFile(ft,aFilename); Rewrite(ft);
 
   writeln(ft,'Part Behaviour File by MTKit2');
-  writeln(ft,'Parts#=',MOX.Header.PartCount);
+  writeln(ft,'Parts#=',aMOX.Header.PartCount);
   writeln(ft);
-  for i:=1 to MOX.Header.PartCount do
+  for i:=1 to aMOX.Header.PartCount do
   begin
-    writeln(ft,MOX.Parts[i].Dname);
-    writeln(ft,floattostr(MOX.Parts[i].TypeID));
-    writeln(ft,floattostr(MOX.Parts[i].Parent));
-    writeln(ft,floattostr(MOX.Parts[i].Child));
-    writeln(ft,floattostr(MOX.Parts[i].PrevInLevel));
-    writeln(ft,floattostr(MOX.Parts[i].NextInLevel));
-    writeln(ft,floattostr(MOX.Parts[i].xMid));
-    writeln(ft,floattostr(MOX.Parts[i].yMid));
-    writeln(ft,floattostr(MOX.Parts[i].zMid));
-    writeln(ft,floattostr(MOX.Parts[i].fRadius));
-    writeln(ft,floattostr(MOX.Parts[i].x1));
-    writeln(ft,floattostr(MOX.Parts[i].x2));
-    writeln(ft,floattostr(MOX.Parts[i].y1));
-    writeln(ft,floattostr(MOX.Parts[i].y2));
-    writeln(ft,floattostr(MOX.Parts[i].z1));
-    writeln(ft,floattostr(MOX.Parts[i].z2));
+    writeln(ft,aMOX.Parts[i].Dname);
+    writeln(ft,floattostr(aMOX.Parts[i].TypeID));
+    writeln(ft,floattostr(aMOX.Parts[i].Parent));
+    writeln(ft,floattostr(aMOX.Parts[i].Child));
+    writeln(ft,floattostr(aMOX.Parts[i].PrevInLevel));
+    writeln(ft,floattostr(aMOX.Parts[i].NextInLevel));
+    writeln(ft,floattostr(aMOX.Parts[i].xMid));
+    writeln(ft,floattostr(aMOX.Parts[i].yMid));
+    writeln(ft,floattostr(aMOX.Parts[i].zMid));
+    writeln(ft,floattostr(aMOX.Parts[i].fRadius));
+    writeln(ft,floattostr(aMOX.Parts[i].x1));
+    writeln(ft,floattostr(aMOX.Parts[i].x2));
+    writeln(ft,floattostr(aMOX.Parts[i].y1));
+    writeln(ft,floattostr(aMOX.Parts[i].y2));
+    writeln(ft,floattostr(aMOX.Parts[i].z1));
+    writeln(ft,floattostr(aMOX.Parts[i].z2));
     writeln(ft);
   end;
   writeln(ft,'//end');
@@ -1197,7 +1201,7 @@ begin
 end;
 
 
-function LoadPSF(const aFilename: string):Boolean;
+function LoadPSF(aMOX: TMOX2; const aFilename: string):Boolean;
 var
   s: AnsiString;
   i,k:Integer;
@@ -1230,9 +1234,9 @@ begin
     Readln(ft);
   end;
 
-  for i:=1 to MOX.Header.PartCount do
+  for i:=1 to aMOX.Header.PartCount do
     for k:=1 to DQty do
-      if MOX.Parts[i].Dname=name[k] then
+      if aMOX.Parts[i].Dname=name[k] then
       begin
         PartModify[i].Custom[1]:=tmp1[k];
         PartModify[i].Move[1]:=tmp1[k];
@@ -1249,7 +1253,7 @@ begin
   Result:=True;
 end;
 
-procedure SavePSF(const aFilename: string);
+procedure SavePSF(aMOX: TMOX2; const aFilename: string);
 var
   i:Integer;
   ft:textfile;
@@ -1257,12 +1261,12 @@ begin
   AssignFile(ft,aFilename); Rewrite(ft);
 
   writeln(ft,'PivotSetupFile by MTKit2');
-  writeln(ft,'Parts#=', MOX.Header.PartCount);
+  writeln(ft,'Parts#=', aMOX.Header.PartCount);
   writeln(ft);
 
-  for i:=1 to MOX.Header.PartCount do
+  for i:=1 to aMOX.Header.PartCount do
   begin
-    writeln(ft,MOX.Parts[i].Dname);
+    writeln(ft,aMOX.Parts[i].Dname);
     writeln(ft,floattostr(PartModify[i].Move[1]));
     writeln(ft,floattostr(PartModify[i].Move[2]));
     writeln(ft,floattostr(PartModify[i].Move[3]));
