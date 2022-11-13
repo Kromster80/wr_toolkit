@@ -438,8 +438,6 @@ type
     procedure SendDataToUI(aSection: TUIDataSection);
     procedure SetActivePage(aPage: TActivePage);
     procedure SetRenderObject(aSet: TRenderObjectSet);
-    procedure BlinkerAdd(aIndex: Integer);
-    procedure BlinkerRemove(aIndex: Integer);
     procedure ConverseImp_MOX;
     procedure MaterialSetDefault;
     procedure SaveMOX(const aFilename: string);
@@ -1010,7 +1008,7 @@ begin
                         begin
                           meLog.Lines.Add('Writing MOX>LWO file');
                           doSpread := MessageBox(Handle, 'Do you want to spread parts over X axis?', 'Question', MB_YESNO or MB_ICONQUESTION) = ID_YES;
-                          SaveMOX2LWO(fMOX, sdSave.FileName, ColID, doSpread);
+                          fMOX.SaveMOX2LWO(sdSave.FileName, ColID, doSpread);
                           meLog.Lines.Add('MOX>LWO Save Complete');
                         end;
     BG_EXPORT_COB_LWO:  if RunSaveDialog2(sdSave, fOpenedFileMask + '_colli.lwo', FILE_TYPE_INFO[kftLwo].Filter) then
@@ -2156,40 +2154,9 @@ end;
 
 procedure TForm1.btnBlinkerAddClick(Sender: TObject);
 begin
-  BlinkerAdd(LBBlinkers.ItemIndex+1);
+  fMOX.BlinkerAdd(LBBlinkers.ItemIndex+1);
 
   SendDataToUI(uiBlinkers);
-end;
-
-
-procedure TForm1.BlinkerAdd(aIndex: Integer);
-begin
-  if fMOX.Header.BlinkerCount >= MAX_BLINKERS then Exit;
-
-  Inc(fMOX.Header.BlinkerCount);
-
-  if InRange(aIndex, 1, fMOX.Header.BlinkerCount) then
-    // Duplicate existing
-    fMOX.Blinkers[fMOX.Header.BlinkerCount] := fMOX.Blinkers[aIndex]
-  else
-  begin
-    // Create new
-    fMOX.Blinkers[fMOX.Header.BlinkerCount].BlinkerType := 0;
-    fMOX.Blinkers[fMOX.Header.BlinkerCount].sMin := 0;
-    fMOX.Blinkers[fMOX.Header.BlinkerCount].sMax := 1;
-    fMOX.Blinkers[fMOX.Header.BlinkerCount].Freq := 0;
-    fMOX.Blinkers[fMOX.Header.BlinkerCount].B := 255;
-    fMOX.Blinkers[fMOX.Header.BlinkerCount].G := 64;
-    fMOX.Blinkers[fMOX.Header.BlinkerCount].R := 0;
-    fMOX.Blinkers[fMOX.Header.BlinkerCount].A := 255;
-    fMOX.Blinkers[fMOX.Header.BlinkerCount].Unused := 0;
-    fMOX.Blinkers[fMOX.Header.BlinkerCount].Parent := 0;
-    FillChar(fMOX.Blinkers[fMOX.Header.BlinkerCount].Matrix, SizeOf(fMOX.Blinkers[fMOX.Header.BlinkerCount].Matrix), #0);
-    fMOX.Blinkers[fMOX.Header.BlinkerCount].Matrix[1, 1] := 1;
-    fMOX.Blinkers[fMOX.Header.BlinkerCount].Matrix[2, 2] := 1;
-    fMOX.Blinkers[fMOX.Header.BlinkerCount].Matrix[3, 3] := 1;
-    fMOX.Blinkers[fMOX.Header.BlinkerCount].Matrix[4, 4] := 1;
-  end;
 end;
 
 
@@ -2197,24 +2164,13 @@ procedure TForm1.btnBlinkerRemClick(Sender: TObject);
 begin
   if LBBlinkers.ItemIndex = -1 then Exit;
 
-  BlinkerRemove(LBBlinkers.ItemIndex + 1);
+  fMOX.BlinkerRemove(LBBlinkers.ItemIndex + 1);
 
   if LBBlinkers.ItemIndex = -1 then
     LBBlinkers.ItemIndex := LBBlinkers.Count - 1;
 
   SendDataToUI(uiBlinkers);
   LBBlinkersClick(nil);
-end;
-
-
-procedure TForm1.BlinkerRemove(aIndex: Integer);
-var
-  I: Integer;
-begin
-  for I := aIndex to fMOX.Header.BlinkerCount - 1 do
-    fMOX.Blinkers[I] := fMOX.Blinkers[I + 1];
-
-  Dec(fMOX.Header.BlinkerCount);
 end;
 
 
@@ -2750,7 +2706,7 @@ begin
     PivotSetup.TabVisible := False;
 
     try
-      LoadMOX(fMOX, aFilename);
+      fMOX.LoadMOX(aFilename);
     except
       on E: Exception do
         MessageBox(0, PChar(E.Message), 'Error', MB_OK or MB_ICONERROR);
@@ -3176,7 +3132,7 @@ begin
         if I mod 100 = 0 then
           StatusBar1.Panels[2].Text := Format('Loading %d/%d - \%s', [I, slFiles.Count, slFiles[I]]);
 
-        LoadMOX(fMOX, slFiles[I]);
+        fMOX.LoadMOX(slFiles[I]);
         slLog.Append(Format('%s'#9'%s'#9'%s'#9'%s'#9'%d'#9'%d'#9'%d'#9'%d'#9'%d'#9'%d',
           [fMOX.MOXFormatInt, fMOX.MOXFormatStr, 'OK  ', slFiles[i],
             fMOX.header.VerticeCount, fMOX.header.PolyCount,
@@ -3358,7 +3314,7 @@ begin
 
   doSpread := MessageBox(Handle, 'Do you want to spread parts over X axis?', 'Question', MB_YESNO or MB_ICONQUESTION) = ID_YES;
 
-  SaveMOX2LWO(fMOX, sdSave.FileName, ColID, doSpread);
+  fMOX.SaveMOX2LWO(sdSave.FileName, ColID, doSpread);
 
   meLog.Lines.Add('MOX>LWO Save Complete');
 end;

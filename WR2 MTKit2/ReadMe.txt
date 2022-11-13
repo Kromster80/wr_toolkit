@@ -1,5 +1,5 @@
 ------------------------------------------------------
-"World Racing 2" Mesh Tool-Kit v2.4.3
+"World Racing 2" Mesh Tool-Kit v2.4.3+
 ------------------------------------------------------
 
 Description:
@@ -30,6 +30,7 @@ AFC11/FVR support is limited.
 
 Version History:
                     Fixed scroll to zoom the model after using new menus (they "caught" the scroll events)
+                    Refactoring
 2.4.3   2022.09.28  New load/save/import/export menus
 2.4.2   2022.09.25  Replaced old clunky LWO import/export with a proper one (taken from KP) for LWO<->COB as a proof of concept
                     Fixed error in MOX>LWO export from 2.3.8

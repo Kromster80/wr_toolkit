@@ -94,10 +94,13 @@ type
     function MOXFormat: TMOXFormat;
     function MOXFormatInt: string;
     function MOXFormatStr: string;
+
+    procedure LoadMOX(const aFilename: string);
+    procedure SaveMOX2LWO(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
+    procedure BlinkerAdd(aIndex: Integer);
+    procedure BlinkerRemove(aIndex: Integer);
   end;
 
-  procedure LoadMOX(aMox: TMOX2; const aFilename: string);
-  procedure SaveMOX2LWO(aMox: TMOX2; const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
 
 var
   Material: array [1..MAX_MATERIALS] of record
@@ -171,7 +174,49 @@ begin
 end;
 
 
-procedure LoadMOX(aMox: TMOX2; const aFilename: string);
+procedure TMOX2.BlinkerAdd(aIndex: Integer);
+begin
+  if Header.BlinkerCount >= MAX_BLINKERS then Exit;
+
+  Inc(Header.BlinkerCount);
+
+  if InRange(aIndex, 1, Header.BlinkerCount) then
+    // Duplicate existing
+    Blinkers[Header.BlinkerCount] := Blinkers[aIndex]
+  else
+  begin
+    // Create new
+    Blinkers[Header.BlinkerCount].BlinkerType := 0;
+    Blinkers[Header.BlinkerCount].sMin := 0;
+    Blinkers[Header.BlinkerCount].sMax := 1;
+    Blinkers[Header.BlinkerCount].Freq := 0;
+    Blinkers[Header.BlinkerCount].B := 255;
+    Blinkers[Header.BlinkerCount].G := 64;
+    Blinkers[Header.BlinkerCount].R := 0;
+    Blinkers[Header.BlinkerCount].A := 255;
+    Blinkers[Header.BlinkerCount].Unused := 0;
+    Blinkers[Header.BlinkerCount].Parent := 0;
+    FillChar(Blinkers[Header.BlinkerCount].Matrix, SizeOf(Blinkers[Header.BlinkerCount].Matrix), #0);
+    Blinkers[Header.BlinkerCount].Matrix[1, 1] := 1;
+    Blinkers[Header.BlinkerCount].Matrix[2, 2] := 1;
+    Blinkers[Header.BlinkerCount].Matrix[3, 3] := 1;
+    Blinkers[Header.BlinkerCount].Matrix[4, 4] := 1;
+  end;
+end;
+
+
+procedure TMOX2.BlinkerRemove(aIndex: Integer);
+var
+  I: Integer;
+begin
+  for I := aIndex to Header.BlinkerCount - 1 do
+    Blinkers[I] := Blinkers[I + 1];
+
+  Dec(Header.BlinkerCount);
+end;
+
+
+procedure TMOX2.LoadMOX(const aFilename: string);
 var
   c4: array [1..4] of AnsiChar;
   chunk16: TMOXChunk16;
@@ -185,148 +230,148 @@ begin
   AssignFile(f,aFilename); FileMode:=0; reset(f,1); FileMode:=2;
   try
     blockread(f,c4,4);
-    aMOX.Header1.Fmt := c4[1]+c4[2]+c4[3]+c4[4];
-    if aMOX.Header1.Fmt <> ('!XOM') then
-      raise Exception.Create('Unsupported MOX format - ' + aMOX.Header1.Fmt);
+    Header1.Fmt := c4[1]+c4[2]+c4[3]+c4[4];
+    if Header1.Fmt <> ('!XOM') then
+      raise Exception.Create('Unsupported MOX format - ' + Header1.Fmt);
 
-    blockread(f, aMOX.Header1.A, 4);
+    blockread(f, Header1.A, 4);
 
-    Assert(aMOX.Header1.B = 0);
+    Assert(Header1.B = 0);
 
-    if aMOX.Header1.A > 1 then
-      raise EExceptionTooNew.Create('Unsupported MOX version - ' + aMOX.MOXFormatInt);
-    if aMOX.Header1.C > 2 then
-      raise EExceptionTooNew.Create('Unsupported MOX version - ' + aMOX.MOXFormatInt);
+    if Header1.A > 1 then
+      raise EExceptionTooNew.Create('Unsupported MOX version - ' + MOXFormatInt);
+    if Header1.C > 2 then
+      raise EExceptionTooNew.Create('Unsupported MOX version - ' + MOXFormatInt);
 
-    if aMOX.MOXFormat = mfUnknown then
-      raise Exception.Create('Unknown MOX version - ' + aMOX.MOXFormatInt);
+    if MOXFormat = mfUnknown then
+      raise Exception.Create('Unknown MOX version - ' + MOXFormatInt);
 
-    blockread(f, aMOX.Header, 24);
+    blockread(f, Header, 24);
 
-    blockread(f, aMOX.Vertice, aMOX.Header.VerticeCount*40);
+    blockread(f, Vertice, Header.VerticeCount*40);
 
     // Faces
-    for i:=1 to aMOX.Header.PolyCount do
-    if aMOX.Header1.A = 1 then
+    for i:=1 to Header.PolyCount do
+    if Header1.A = 1 then
     begin
       blockread(f, face12, 12);
-      aMOX.Face[i, 1] := face12[1] + 1;
-      aMOX.Face[i, 2] := face12[2] + 1;
-      aMOX.Face[i, 3] := face12[3] + 1
+      Face[i, 1] := face12[1] + 1;
+      Face[i, 2] := face12[2] + 1;
+      Face[i, 3] := face12[3] + 1
     end else
     begin
       blockread(f, face6, 6);
-      aMOX.Face[i, 1] := face6[1] + 1;
-      aMOX.Face[i, 2] := face6[2] + 1;
-      aMOX.Face[i, 3] := face6[3] + 1
+      Face[i, 1] := face6[1] + 1;
+      Face[i, 2] := face6[2] + 1;
+      Face[i, 3] := face6[3] + 1
     end;
 
-    SetLength(aMOX.Chunks, aMOX.Header.ChunkCount + 1);
+    SetLength(Chunks, Header.ChunkCount + 1);
 
-    if aMOX.MOXFormat = mf10MBWR then
-    for j:=1 to aMOX.Header.ChunkCount do
+    if MOXFormat = mf10MBWR then
+    for j:=1 to Header.ChunkCount do
     begin
       blockread(f, chunk16, 12);
-      aMOX.Chunks[j].SidA := chunk16.SidA;
-      aMOX.Chunks[j].SidB := chunk16.SidB;
-      aMOX.Chunks[j].FirstPoly := chunk16.FirstPoly;
-      aMOX.Chunks[j].PolyCount := chunk16.PolyCount;
-      aMOX.Chunks[j].FirstVtx := chunk16.FirstVtx + 1;
-      aMOX.Chunks[j].LastVtx := chunk16.LastVtx + 1;
+      Chunks[j].SidA := chunk16.SidA;
+      Chunks[j].SidB := chunk16.SidB;
+      Chunks[j].FirstPoly := chunk16.FirstPoly;
+      Chunks[j].PolyCount := chunk16.PolyCount;
+      Chunks[j].FirstVtx := chunk16.FirstVtx + 1;
+      Chunks[j].LastVtx := chunk16.LastVtx + 1;
     end;
 
-    if aMOX.MOXFormat in [mf02WR2, mf22WR2] then
-    for j:=1 to aMOX.Header.ChunkCount do
+    if MOXFormat in [mf02WR2, mf22WR2] then
+    for j:=1 to Header.ChunkCount do
     begin
       blockread(f, chunk32, 24);
-      aMOX.Chunks[j].SidA := chunk32.SidA;
-      aMOX.Chunks[j].SidB := chunk32.SidB;
-      aMOX.Chunks[j].FirstPoly := chunk32.FirstPoly;
-      aMOX.Chunks[j].PolyCount := chunk32.PolyCount;
-      aMOX.Chunks[j].FirstVtx := chunk32.FirstVtx + 1;
-      aMOX.Chunks[j].LastVtx := chunk32.LastVtx + 1;
+      Chunks[j].SidA := chunk32.SidA;
+      Chunks[j].SidB := chunk32.SidB;
+      Chunks[j].FirstPoly := chunk32.FirstPoly;
+      Chunks[j].PolyCount := chunk32.PolyCount;
+      Chunks[j].FirstVtx := chunk32.FirstVtx + 1;
+      Chunks[j].LastVtx := chunk32.LastVtx + 1;
     end;
 
     // Verify faces
-    for I := 1 to aMOX.Header.PolyCount do
+    for I := 1 to Header.PolyCount do
     begin
-      Assert(aMOX.Face[I,1] <= aMOX.Header.VerticeCount);
-      Assert(aMOX.Face[I,2] <= aMOX.Header.VerticeCount);
-      Assert(aMOX.Face[I,3] <= aMOX.Header.VerticeCount);
+      Assert(Face[I,1] <= Header.VerticeCount);
+      Assert(Face[I,2] <= Header.VerticeCount);
+      Assert(Face[I,3] <= Header.VerticeCount);
     end;
 
     // Verify vertex ranges
     // Some models can be empty - 0 vertices, 0 polys, etc. They are still "valid"
-    if aMOX.Header.ChunkCount > 0 then
-      Assert(aMOX.Chunks[1].FirstVtx = 1);
+    if Header.ChunkCount > 0 then
+      Assert(Chunks[1].FirstVtx = 1);
     // This is actually violated in some Synetic models
-    {for j:=2 to aMOX.Header.ChunkCount do
-      if aMOX.Chunks[j].FirstVtx <> aMOX.Chunks[j-1].LastVtx + 1 then
+    {for j:=2 to Header.ChunkCount do
+      if Chunks[j].FirstVtx <> Chunks[j-1].LastVtx + 1 then
         Assert(False);}
     // This is actually violated in some Synetic models
-    //Assert(aMOX.Chunks[aMOX.Header.ChunkCount].LastVtx = aMOX.Header.VerticeCount);
+    //Assert(Chunks[Header.ChunkCount].LastVtx = Header.VerticeCount);
 
     // Verify poly ranges
-    if aMOX.Header.ChunkCount > 0 then
-      Assert(aMOX.Chunks[1].FirstPoly = 0);
-    for j:=2 to aMOX.Header.ChunkCount do
-      Assert(aMOX.Chunks[j].FirstPoly = aMOX.Chunks[j-1].FirstPoly + aMOX.Chunks[j-1].PolyCount);
-    //Assert(aMOX.Chunks[aMOX.Header.ChunkCount].FirstPoly + aMOX.Chunks[aMOX.Header.ChunkCount].PolyCount = aMOX.Header.PolyCount);
+    if Header.ChunkCount > 0 then
+      Assert(Chunks[1].FirstPoly = 0);
+    for j:=2 to Header.ChunkCount do
+      Assert(Chunks[j].FirstPoly = Chunks[j-1].FirstPoly + Chunks[j-1].PolyCount);
+    //Assert(Chunks[Header.ChunkCount].FirstPoly + Chunks[Header.ChunkCount].PolyCount = Header.PolyCount);
 
-    blockread(f, aMOX.MoxMat, (80+256)*aMOX.Header.MatCount);
+    blockread(f, MoxMat, (80+256)*Header.MatCount);
 
-    if aMOX.MOXFormat = mf22WR2 then
-      for j:=1 to aMOX.Header.PartCount do
+    if MOXFormat = mf22WR2 then
+      for j:=1 to Header.PartCount do
       begin
         blockread(f, cPart64, 64);
-        aMOX.Parts[j].Dname := PAnsiChar(@cPart64[1]);
-        blockread(f, aMOX.Parts[j].Matrix, 132);
+        Parts[j].Dname := PAnsiChar(@cPart64[1]);
+        blockread(f, Parts[j].Matrix, 132);
       end;
 
     // Verify damage parts
-    for j:=1 to aMOX.Header.PartCount do
-      Assert(aMOX.Parts[j].TypeID in [0..6]);
+    for j:=1 to Header.PartCount do
+      Assert(Parts[j].TypeID in [0..6]);
 
     // Add fake damage part
-    if aMOX.MOXFormat in [mf10MBWR, mf02WR2] then
+    if MOXFormat in [mf10MBWR, mf02WR2] then
     begin
-      aMOX.Header.PartCount := 1;
+      Header.PartCount := 1;
 
-      FillChar(aMOX.Parts[1], SizeOf(aMOX.Parts[1]), #0);
-      aMOX.Parts[1].Dname := 'Default';
-      aMOX.Parts[1].Matrix[1, 1] := 1;
-      aMOX.Parts[1].Matrix[2, 2] := 1;
-      aMOX.Parts[1].Matrix[3, 3] := 1;
-      aMOX.Parts[1].Matrix[4, 4] := 1;
-      aMOX.Parts[1].Parent := -1;
-      aMOX.Parts[1].Child := -1;
-      aMOX.Parts[1].PrevInLevel := -1;
-      aMOX.Parts[1].NextInLevel := -1;
-      aMOX.Parts[1].FirstMat := 0;
-      aMOX.Parts[1].NumMat := aMOX.header.MatCount;
-      aMOX.Parts[1].fRadius := 10;
+      FillChar(Parts[1], SizeOf(Parts[1]), #0);
+      Parts[1].Dname := 'Default';
+      Parts[1].Matrix[1, 1] := 1;
+      Parts[1].Matrix[2, 2] := 1;
+      Parts[1].Matrix[3, 3] := 1;
+      Parts[1].Matrix[4, 4] := 1;
+      Parts[1].Parent := -1;
+      Parts[1].Child := -1;
+      Parts[1].PrevInLevel := -1;
+      Parts[1].NextInLevel := -1;
+      Parts[1].FirstMat := 0;
+      Parts[1].NumMat := header.MatCount;
+      Parts[1].fRadius := 10;
     end;
 
-    if aMOX.Header.BlinkerCount > MAX_BLINKERS then
+    if Header.BlinkerCount > MAX_BLINKERS then
     begin
-      aMOX.Header.BlinkerCount := MAX_BLINKERS;
+      Header.BlinkerCount := MAX_BLINKERS;
       MessageBox(0, PChar('Blinker quantity limited to ' + IntToStr(MAX_BLINKERS)
         + ' due to compatibility issues.'), 'Warning', MB_OK or MB_ICONWARNING);
     end;
 
-    if aMOX.MOXFormat = mf22WR2 then
-      blockread(f, aMOX.Blinkers, 88*aMOX.Header.BlinkerCount);
+    if MOXFormat = mf22WR2 then
+      blockread(f, Blinkers, 88*Header.BlinkerCount);
 
     // Verify blinkers
-    for j:=1 to aMOX.Header.BlinkerCount do
-      Assert(aMOX.Blinkers[j].BlinkerType in [0..9,16,17,20,24,28,32,33,34,255], Format('Unsupported blinker type %d', [aMOX.Blinkers[j].BlinkerType]));
+    for j:=1 to Header.BlinkerCount do
+      Assert(Blinkers[j].BlinkerType in [0..9,16,17,20,24,28,32,33,34,255], Format('Unsupported blinker type %d', [Blinkers[j].BlinkerType]));
   finally
     closefile(f);
   end;
 end;
 
 
-procedure SaveMOX2LWO(aMox: TMOX2; const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
+procedure TMOX2.SaveMOX2LWO(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
 var
   ft: textfile;
   rs: AnsiString;
@@ -345,7 +390,7 @@ begin
   m:=0;
   m:=m+12;                                        //+'LWO2TAGS   2'
 
-  for i:=1 to aMOX.Header.MatCount do
+  for i:=1 to Header.MatCount do
     if Material[i].Title<>'' then
       if (Length(Material[i].Title) mod 2)=1 then
         Inc(m,Length(Material[i].Title)+1)
@@ -355,12 +400,12 @@ begin
       if Material[i].Mtag<>'' then Inc(m,6); //4+2
 
   m:=m+8+18;                                      //+LAYR_
-  m:=m+8+aMOX.Header.VerticeCount*12;                      //+PNTS+3D
-  m:=m+14+10+aMOX.Header.VerticeCount*10;                  //+UV
-  m:=m+12+aMOX.Header.PolyCount*8;                         //+Face 3.x.x.x
-  m:=m+12+aMOX.Header.PolyCount*4;                         //+Surface
+  m:=m+8+Header.VerticeCount*12;                      //+PNTS+3D
+  m:=m+14+10+Header.VerticeCount*10;                  //+UV
+  m:=m+12+Header.PolyCount*8;                         //+Face 3.x.x.x
+  m:=m+12+Header.PolyCount*4;                         //+Surface
 
-  for i:=1 to aMOX.Header.MatCount do
+  for i:=1 to Header.MatCount do
     if Material[i].TexName<>'' then
     begin
       if (Length(Material[i].TexName) mod 2)=1 then
@@ -370,7 +415,7 @@ begin
       m:=8+10+m+4;                                //+CLIP+STIL+name+path
     end;
 
-  for i:=1 to aMOX.Header.MatCount do
+  for i:=1 to Header.MatCount do
     if Material[i].Title<>'' then
       if (Length(Material[i].Title) mod 2)=1 then
         Inc(m,Length(Material[i].Title)+1)
@@ -379,7 +424,7 @@ begin
     else
      if Material[i].Mtag<>'' then Inc(m,6);       //Writing tagID instead of name, 4+2
 
-  m:=m+(8+2+66+252)*aMOX.Header.MatCount;                  //+SURF Data
+  m:=m+(8+2+66+252)*Header.MatCount;                  //+SURF Data
 
   //=========================Writing data
 
@@ -387,7 +432,7 @@ begin
   Write(ft, 'LWO2', 'TAGS');
 
   m:=0;
-  for i:=1 to aMOX.Header.MatCount do
+  for i:=1 to Header.MatCount do
     if Material[i].Title<>'' then
       if (Length(Material[i].Title) mod 2)=1 then
         Inc(m,Length(Material[i].Title)+1)
@@ -398,7 +443,7 @@ begin
 
   Write(ft,#0,#0,AnsiChar(m div 256),AnsiChar(m));
 
-  for i:=1 to aMOX.Header.MatCount do
+  for i:=1 to Header.MatCount do
     if Material[i].Title<>'' then
       if (Length(Material[i].Title) mod 2)=1 then
         Write(ft,Material[i].Title,#0)
@@ -411,62 +456,62 @@ begin
   Write(ft,'LAYR',#0,#0,#0,#18,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0);
 
   Write(ft,'PNTS');
-  m:=aMOX.Header.VerticeCount*12; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
+  m:=Header.VerticeCount*12; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
   idChunk:=0; idPart:=0;
 
-  for j:=1 to aMOX.Header.VerticeCount do
+  for j:=1 to Header.VerticeCount do
   begin
-    t.x:=aMOX.Vertice[j].X;
-    t.y:=aMOX.Vertice[j].Y;
-    t.z:=aMOX.Vertice[j].Z;
+    t.x:=Vertice[j].X;
+    t.y:=Vertice[j].Y;
+    t.z:=Vertice[j].Z;
 
-    if (idChunk < aMOX.Header.ChunkCount) and (j = aMOX.Chunks[idChunk+1].FirstVtx) then //current point matches first point of next chunk
+    if (idChunk < Header.ChunkCount) and (j = Chunks[idChunk+1].FirstVtx) then //current point matches first point of next chunk
       Inc(idChunk); //This is idChunk of current chunk
-    if (idChunk = aMOX.Parts[idPart+1].FirstMat+1) and (aMOX.Parts[idPart+1].NumMat <> 0) then
+    if (idChunk = Parts[idPart+1].FirstMat+1) and (Parts[idPart+1].NumMat <> 0) then
       Inc(idPart); //This is idChunk of current detail
 
     DepthLev := 8;
     repeat
       CurrentLev := 1; k := idPart;
-      while (aMOX.Parts[k].Parent > -1) and (CurrentLev <> DepthLev) do
+      while (Parts[k].Parent > -1) and (CurrentLev <> DepthLev) do
       begin
-        k := aMOX.Parts[k].Parent+1;
+        k := Parts[k].Parent+1;
         Inc(CurrentLev);
       end;
 
       DepthLev := CurrentLev; // set depth for first run
       Dec(DepthLev);          // -1
 
-      mtx := aMOX.Parts[k].Matrix;
+      mtx := Parts[k].Matrix;
       t2.x:=t.x*mtx[1,1]+t.y*mtx[2,1]+t.z*mtx[3,1]+mtx[4,1];
       t2.y:=t.x*mtx[1,2]+t.y*mtx[2,2]+t.z*mtx[3,2]+mtx[4,2];
       t2.z:=t.x*mtx[1,3]+t.y*mtx[2,3]+t.z*mtx[3,3]+mtx[4,3];
       t:=t2;
     until(DepthLev=0);
 
-    aMOX.Vertice[j].X := t.x + idPart * 25 * Ord(aSpreadOverX);
-    aMOX.Vertice[j].Y := t.y;
-    aMOX.Vertice[j].Z := t.z;
-    rs := unreal2(aMOX.Vertice[j].X/10); Write(ft,rs[4],rs[3],rs[2],rs[1]); //LWO uses
-    rs := unreal2(aMOX.Vertice[j].Y/10); Write(ft,rs[4],rs[3],rs[2],rs[1]); //reverse Byte
-    rs := unreal2(aMOX.Vertice[j].Z/10); Write(ft,rs[4],rs[3],rs[2],rs[1]); //order
+    Vertice[j].X := t.x + idPart * 25 * Ord(aSpreadOverX);
+    Vertice[j].Y := t.y;
+    Vertice[j].Z := t.z;
+    rs := unreal2(Vertice[j].X/10); Write(ft,rs[4],rs[3],rs[2],rs[1]); //LWO uses
+    rs := unreal2(Vertice[j].Y/10); Write(ft,rs[4],rs[3],rs[2],rs[1]); //reverse Byte
+    rs := unreal2(Vertice[j].Z/10); Write(ft,rs[4],rs[3],rs[2],rs[1]); //order
   end;
 
   Write(ft,'VMAP');
-  m:=6+10+aMOX.Header.VerticeCount*10; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
+  m:=6+10+Header.VerticeCount*10; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
   Write(ft,'TXUV',#0,#2);
   Write(ft,'Texture01',#0);           //TextureMap name in LW
   idChunk:=0;
-  for k:=1 to aMOX.Header.VerticeCount do
+  for k:=1 to Header.VerticeCount do
   begin
-    if (idChunk < aMOX.Header.ChunkCount) and (k = aMOX.Chunks[idChunk+1].FirstVtx) then
+    if (idChunk < Header.ChunkCount) and (k = Chunks[idChunk+1].FirstVtx) then
       Inc(idChunk); //idChunk=1 ...
 
     Write(ft,AnsiChar((k-1) div 256),AnsiChar(k-1));
     if Material[idChunk].TexScale.U=0 then Material[idChunk].TexScale.U:=1;
     if Material[idChunk].TexScale.V=0 then Material[idChunk].TexScale.V:=1;
-    uu:= aMOX.Vertice[k].U*Material[idChunk].TexScale.U+Material[idChunk].TexOffset.U;             // not Reversed
-    vv:=-aMOX.Vertice[k].V*Material[idChunk].TexScale.V+Material[idChunk].TexOffset.V+1;             // not Reversed
+    uu:= Vertice[k].U*Material[idChunk].TexScale.U+Material[idChunk].TexOffset.U;             // not Reversed
+    vv:=-Vertice[k].V*Material[idChunk].TexScale.V+Material[idChunk].TexOffset.V+1;             // not Reversed
     if Material[idChunk].TexAngle=90 then begin xr:=uu; uu:=-vv; vv:=xr; end; //Rotate 90 CCW
     if Material[idChunk].TexAngle=-90 then begin xr:=uu; uu:=vv; vv:=-xr; end;//Rotate 90 CW
     rs:=unreal2(uu); Write(ft,rs[4],rs[3],rs[2],rs[1]);
@@ -474,27 +519,27 @@ begin
   end;
 
   Write(ft,'POLS');
-  m:=aMOX.Header.PolyCount*8+4; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
+  m:=Header.PolyCount*8+4; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
   Write(ft,'FACE');
-  for j:=1 to aMOX.Header.PolyCount do
+  for j:=1 to Header.PolyCount do
   begin
     Write(ft,#0,#3 // 3 Points/Polygon
-    ,AnsiChar((aMOX.Face[j,1]-1) div 256),AnsiChar(aMOX.Face[j,1]-1)
-    ,AnsiChar((aMOX.Face[j,2]-1) div 256),AnsiChar(aMOX.Face[j,2]-1)
-    ,AnsiChar((aMOX.Face[j,3]-1) div 256),AnsiChar(aMOX.Face[j,3]-1));
+    ,AnsiChar((Face[j,1]-1) div 256),AnsiChar(Face[j,1]-1)
+    ,AnsiChar((Face[j,2]-1) div 256),AnsiChar(Face[j,2]-1)
+    ,AnsiChar((Face[j,3]-1) div 256),AnsiChar(Face[j,3]-1));
   end;
 
   Write(ft,'PTAG');
-  m:=aMOX.Header.PolyCount*4+4; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
+  m:=Header.PolyCount*4+4; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
   Write(ft,'SURF');
   idChunk:=0;
-  for i:=1 to aMOX.Header.PolyCount do
+  for i:=1 to Header.PolyCount do
   begin
-    if (idChunk < aMOX.Header.ChunkCount) and (i-1=aMOX.Chunks[idChunk+1].FirstPoly) then Inc(idChunk);
-    Write(ft,AnsiChar((i-1) div 256),AnsiChar(i-1),AnsiChar((aMOX.Chunks[idChunk].SidA) div 256),AnsiChar(aMOX.Chunks[idChunk].SidA));
+    if (idChunk < Header.ChunkCount) and (i-1=Chunks[idChunk+1].FirstPoly) then Inc(idChunk);
+    Write(ft,AnsiChar((i-1) div 256),AnsiChar(i-1),AnsiChar((Chunks[idChunk].SidA) div 256),AnsiChar(Chunks[idChunk].SidA));
   end;
 
-  for i:=1 to aMOX.Header.MatCount do if Material[i].TexName<>'' then
+  for i:=1 to Header.MatCount do if Material[i].TexName<>'' then
   begin
     Write(ft,'CLIP');
     if (Length(Material[i].TexName) mod 2)=1 then m:=Length(Material[i].TexName)+1 else m:=Length(Material[i].TexName)+2;
@@ -505,7 +550,7 @@ begin
     if (Length(Material[i].TexName) mod 2)=1 then Write(ft,#0) else Write(ft,#0,#0);
   end;
 
-  for i:=1 to aMOX.Header.MatCount do
+  for i:=1 to Header.MatCount do
   begin
     Write(ft,'SURF');
     m:=2+66+252;      ////Data Len
