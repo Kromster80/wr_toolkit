@@ -99,6 +99,8 @@ type
     procedure SaveMOX2LWO(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
     procedure BlinkerAdd(aIndex: Integer);
     procedure BlinkerRemove(aIndex: Integer);
+    procedure BlinkersLoad(const aFilename: string);
+    procedure BlinkersSave(const aFilename: string);
   end;
 
 
@@ -213,6 +215,36 @@ begin
     Blinkers[I] := Blinkers[I + 1];
 
   Dec(Header.BlinkerCount);
+end;
+
+
+procedure TMOX2.BlinkersLoad(const aFilename: string);
+var
+  f: file;
+begin
+  if not FileExists(aFilename) then exit;
+
+  AssignFile(f, aFilename);
+  FileMode := 0;
+  Reset(f, 1);
+  FileMode := 2;
+  BlockRead(f, Header.BlinkerCount, 4);
+  if Header.BlinkerCount > MAX_BLINKERS then
+    Header.BlinkerCount := MAX_BLINKERS;
+  BlockRead(f, Blinkers, 88 * Header.BlinkerCount);
+  CloseFile(f);
+end;
+
+
+procedure TMOX2.BlinkersSave(const aFilename: string);
+var
+  f: file;
+begin
+  AssignFile(f, aFilename);
+  Rewrite(f, 1);
+  BlockWrite(f, Header.BlinkerCount, 4);
+  BlockWrite(f, Blinkers, 88 * Header.BlinkerCount);
+  CloseFile(f);
 end;
 
 

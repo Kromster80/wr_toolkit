@@ -855,10 +855,6 @@ object Form1: TForm1
     object tsParts: TTabSheet
       Caption = 'Parts'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         234
         527)
@@ -937,10 +933,6 @@ object Form1: TForm1
         TabOrder = 4
         object PivotSetup: TTabSheet
           Caption = 'Pivot point setup'
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object Label51: TLabel
             Left = 166
             Top = 162
@@ -1136,10 +1128,6 @@ object Form1: TForm1
         object Behaviour: TTabSheet
           Caption = 'Behaviour'
           ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object Label39: TLabel
             Left = 67
             Top = 150
@@ -1410,10 +1398,6 @@ object Form1: TForm1
     object tsBlinkers: TTabSheet
       Caption = 'Lights'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         234
         527)
@@ -1891,10 +1875,6 @@ object Form1: TForm1
     object tsCOB: TTabSheet
       Caption = 'COB'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object btnCOBVerticeCopy: TSpeedButton
         Left = 182
         Top = 124
@@ -2244,10 +2224,6 @@ object Form1: TForm1
     object tsCPO: TTabSheet
       Caption = 'CPO'
       ImageIndex = 6
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label53: TLabel
         Left = 196
         Top = 123
@@ -2622,10 +2598,6 @@ object Form1: TForm1
     object tsExtra: TTabSheet
       Caption = 'Extra'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         234
         527)
@@ -2880,10 +2852,6 @@ object Form1: TForm1
     object tsBrowse: TTabSheet
       Caption = 'Browse'
       ImageIndex = 5
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         234
         527)

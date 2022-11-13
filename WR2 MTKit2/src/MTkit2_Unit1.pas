@@ -907,7 +907,10 @@ begin
 end;
 
 
-procedure TForm1.Button4Click(Sender: TObject); begin {Placeholder} end;
+procedure TForm1.Button4Click(Sender: TObject);
+begin
+  {Placeholder}
+end;
 
 
 procedure TForm1.bgLoadButtonClicked(Sender: TObject; Index: Integer);
@@ -980,7 +983,7 @@ begin
                             LoadPBF(fMOX, fOpenedFileMask+'.pbf');
                             ExchangePartsOrdering;
                             RebuildPartsTree;
-                            LoadBlinkers(fMOX, fOpenedFileMask+'.lsf');
+                            fMOX.BlinkersLoad(fOpenedFileMask+'.lsf');
 
                             SendDataToUI(uiBlinkers);
                             btnBlinkerPaste.Enabled := False;
@@ -1765,33 +1768,36 @@ end;
 
 procedure TForm1.PartTypeChange(Sender: TObject);
 begin
-  if (TVParts.Selected=nil)or(ForbidPartsChange) then Exit;
-  if LX1.Value>LX2.Value then
-  if Sender=LX1 then LX2.Value:=LX1.Value else LX1.Value:=LX2.Value;
+  if (TVParts.Selected = nil) or ForbidPartsChange then Exit;
 
-  if LY1.Value>LY2.Value then
-  if Sender=LY1 then LY2.Value:=LY1.Value else LY1.Value:=LY2.Value;
-  if LZ1.Value>LZ2.Value then
-  if Sender=LZ1 then LZ2.Value:=LZ1.Value else LZ1.Value:=LZ2.Value;
-  SelectedTreeNode := TVParts.Selected.AbsoluteIndex+1;
-  fMOX.Parts[SelectedTreeNode].Dname:=EDetailName.Text;
-  fMOX.Parts[SelectedTreeNode].xMid:=CX.Value;
-  fMOX.Parts[SelectedTreeNode].yMid:=CY.Value;
-  fMOX.Parts[SelectedTreeNode].zMid:=CZ.Value;
-  fMOX.Parts[SelectedTreeNode].fRadius:=CRad.Value;
-  fMOX.Parts[SelectedTreeNode].w1:=0;//SpinEdit5.Value;
-  fMOX.Parts[SelectedTreeNode].w2:=0;//SpinEdit6.Value;
-  fMOX.Parts[SelectedTreeNode].w3:=0;//SpinEdit7.Value;
-  fMOX.Parts[SelectedTreeNode].w4:=0;//SpinEdit8.Value;
-  fMOX.Parts[SelectedTreeNode].w5:=0;//SpinEdit9.Value;
+  if LX1.Value > LX2.Value then
+  if Sender = LX1 then LX2.Value := LX1.Value else LX1.Value := LX2.Value;
+
+  if LY1.Value > LY2.Value then
+  if Sender = LY1 then LY2.Value := LY1.Value else LY1.Value := LY2.Value;
+
+  if LZ1.Value > LZ2.Value then
+  if Sender = LZ1 then LZ2.Value := LZ1.Value else LZ1.Value := LZ2.Value;
+
+  SelectedTreeNode := tvParts.Selected.AbsoluteIndex + 1;
+  fMOX.Parts[SelectedTreeNode].Dname := EDetailName.Text;
+  fMOX.Parts[SelectedTreeNode].xMid := CX.Value;
+  fMOX.Parts[SelectedTreeNode].yMid := CY.Value;
+  fMOX.Parts[SelectedTreeNode].zMid := CZ.Value;
+  fMOX.Parts[SelectedTreeNode].fRadius := CRad.Value;
+  fMOX.Parts[SelectedTreeNode].w1 := 0; // SpinEdit5.Value;
+  fMOX.Parts[SelectedTreeNode].w2 := 0; // SpinEdit6.Value;
+  fMOX.Parts[SelectedTreeNode].w3 := 0; // SpinEdit7.Value;
+  fMOX.Parts[SelectedTreeNode].w4 := 0; // SpinEdit8.Value;
+  fMOX.Parts[SelectedTreeNode].w5 := 0; // SpinEdit9.Value;
   fMOX.Parts[SelectedTreeNode].TypeID := RGDetailType.ItemIndex;
-  fMOX.Parts[SelectedTreeNode].x1:=LX1.Value/180*pi;//-YZ rotation
-  fMOX.Parts[SelectedTreeNode].x2:=LX2.Value/180*pi;//-YZ rotation
-  fMOX.Parts[SelectedTreeNode].y1:=LY1.Value/180*pi;//-YZ rotation
-  fMOX.Parts[SelectedTreeNode].y2:=LY2.Value/180*pi;//-YZ rotation
-  fMOX.Parts[SelectedTreeNode].z1:=LZ1.Value/180*pi;//-YZ rotation
-  fMOX.Parts[SelectedTreeNode].z2:=LZ2.Value/180*pi;//-YZ rotation
-  TVParts.Items[SelectedTreeNode-1].Text:=fMOX.Parts[SelectedTreeNode].Dname;
+  fMOX.Parts[SelectedTreeNode].x1 := LX1.Value / 180 * Pi; // -YZ rotation
+  fMOX.Parts[SelectedTreeNode].x2 := LX2.Value / 180 * Pi; // -YZ rotation
+  fMOX.Parts[SelectedTreeNode].y1 := LY1.Value / 180 * Pi; // -YZ rotation
+  fMOX.Parts[SelectedTreeNode].y2 := LY2.Value / 180 * Pi; // -YZ rotation
+  fMOX.Parts[SelectedTreeNode].z1 := LZ1.Value / 180 * Pi; // -YZ rotation
+  fMOX.Parts[SelectedTreeNode].z2 := LZ2.Value / 180 * Pi; // -YZ rotation
+  tvParts.Items[SelectedTreeNode - 1].Text := fMOX.Parts[SelectedTreeNode].Dname;
 end;
 
 
@@ -1977,7 +1983,9 @@ begin
         fMOX.Vertice[h].V:=1-Imp.DUV[altpoint[m,i,k,3],altpoint[m,i,k,2]].V;
         fMOX.Header.VerticeCount:=h;
 
-          if (t=1) then begin //Take 1st point of material as beginning for bounds checking
+        //Take 1st point of material as beginning for bounds checking
+        if (t=1) then
+        begin
           t:=0;
           PartModify[m].Low[1]:=fMOX.Vertice[h].X;
           PartModify[m].Low[2]:=fMOX.Vertice[h].Y;
@@ -1985,7 +1993,7 @@ begin
           PartModify[m].High[1]:=fMOX.Vertice[h].X;
           PartModify[m].High[2]:=fMOX.Vertice[h].Y;
           PartModify[m].High[3]:=fMOX.Vertice[h].Z;
-          end;
+        end;
 
         PartModify[m].Low[1]:=min(PartModify[m].Low[1],fMOX.Vertice[h].X);
         PartModify[m].Low[2]:=min(PartModify[m].Low[2],fMOX.Vertice[h].Y);
@@ -2205,7 +2213,7 @@ procedure TForm1.btnBlinkersLoadClick(Sender: TObject);
 begin
   if not RunOpenDialog2(odOpen, '', 'MTKit2 Lights Setup Files (*.lsf)|*.lsf') then Exit;
 
-  LoadBlinkers(fMOX, odOpen.FileName);
+  fMOX.BlinkersLoad(odOpen.FileName);
   SendDataToUI(uiBlinkers);
   btnBlinkerPaste.Enabled := False;
 end;
@@ -2215,7 +2223,7 @@ procedure TForm1.btnBlinkersSaveClick(Sender: TObject);
 begin
   if not RunSaveDialog(sdSave, fOpenedFileMask + '.lsf', '', 'MTKit2 Lights Setup Files (*.lsf)|*.lsf', 'lsf') then Exit;
 
-  SaveBlinkers(fMOX, sdSave.FileName);
+  fMOX.BlinkersSave(sdSave.FileName);
 end;
 
 
@@ -3280,7 +3288,7 @@ begin
   LoadPBF(fMOX, fOpenedFileMask+'.pbf');
   ExchangePartsOrdering;
   RebuildPartsTree;
-  LoadBlinkers(fMOX, fOpenedFileMask+'.lsf');
+  fMOX.BlinkersLoad(fOpenedFileMask + '.lsf');
 
   SendDataToUI(uiBlinkers);
   btnBlinkerPaste.Enabled := False;
@@ -3408,6 +3416,7 @@ begin
   end;
 end;
 
+
 procedure TForm1.ActionsEnable(aActions: TEditingActions);
 begin
   if aActions = cuMOX then
@@ -3501,6 +3510,7 @@ begin
     end);
 end;
 
+
 procedure TForm1.CBVinylChange(Sender: TObject);
 var
   I: Integer;
@@ -3526,6 +3536,7 @@ begin
   end;
 end;
 
+
 procedure TForm1.Button1Click(Sender: TObject);
 var
   filename: string;
@@ -3538,22 +3549,23 @@ begin
   UpdateOpenedFileInfo(filename);
 end;
 
+
 procedure TForm1.KnowScale(Sender: TObject);
 var
-  i:Integer;
-  AbsMin,AbsMax:Single;
+  i: Integer;
+  boundMin, boundMax: Single;
 begin
-  AbsMin := MaxSingle;
-  AbsMax := -MaxSingle;
+  boundMin := MaxSingle;
+  boundMax := -MaxSingle;
   for i := 1 to fMOX.Header.VerticeCount do
   begin
-    AbsMin := min(AbsMin, fMOX.Vertice[i].X, fMOX.Vertice[i].Y);
-    AbsMin := min(AbsMin, fMOX.Vertice[i].Z);
-    AbsMax := max(AbsMax, fMOX.Vertice[i].X, fMOX.Vertice[i].Y);
-    AbsMax := max(AbsMax, fMOX.Vertice[i].Z);
+    boundMin := Min(boundMin, fMOX.Vertice[i].X, fMOX.Vertice[i].Y);
+    boundMin := Min(boundMin, fMOX.Vertice[i].Z);
+    boundMax := Max(boundMax, fMOX.Vertice[i].X, fMOX.Vertice[i].Y);
+    boundMax := Max(boundMax, fMOX.Vertice[i].Z);
   end;
 
-  zoom := Sqrt(5.5 / (AbsMax - AbsMin)); // 5.5 looks about right
+  zoom := Sqrt(5.5 / (boundMax - boundMin)); // 5.5 looks about right
 end;
 
 

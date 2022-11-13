@@ -12,9 +12,6 @@ function  LoadLWO(const aFilename: string): Boolean;
 procedure LoadMTL(const aFilename: string; aMOXMaterialCount: Integer);
 procedure SaveMTL(const aFilename: string; aMOXMaterialCount: Integer);
 
-procedure LoadBlinkers(aMOX: TMOX2; const aFilename: string);
-procedure SaveBlinkers(aMOX: TMOX2; const aFilename: string);
-
 function  LoadPBF(aMOX: TMOX2; const aFilename: string): Boolean;
 procedure SavePBF(aMOX: TMOX2; const aFilename: string);
 
@@ -1034,37 +1031,6 @@ begin
     end;
   writeln(ft,'');
   CloseFile(ft);
-end;
-
-
-//todo: Move into TMOX
-procedure LoadBlinkers(aMOX: TMOX2; const aFilename: string);
-var
-  f:file;
-begin
-  if not FileExists(aFilename) then exit;
-
-  AssignFile(f,aFilename);
-  FileMode := 0;
-  Reset(f, 1);
-  FileMode := 2;
-  BlockRead(f, aMOX.Header.BlinkerCount, 4);
-  if aMOX.Header.BlinkerCount > MAX_BLINKERS then
-    aMOX.Header.BlinkerCount := MAX_BLINKERS;
-  BlockRead(f, aMOX.Blinkers, 88 * aMOX.Header.BlinkerCount);
-  CloseFile(f);
-end;
-
-
-//todo: Move into TMOX
-procedure SaveBlinkers(aMOX: TMOX2; const aFilename: string);
-var
-  f:file;
-begin
-  AssignFile(f,aFilename); Rewrite(f,1);
-  BlockWrite(f,aMOX.Header.BlinkerCount,4);
-  BlockWrite(f,aMOX.Blinkers,88*aMOX.Header.BlinkerCount);
-  CloseFile(f);
 end;
 
 
