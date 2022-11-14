@@ -97,6 +97,8 @@ type
 
     procedure LoadMOX(const aFilename: string);
     procedure ExportLWO(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
+    procedure ExportLWO2(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
+
     procedure BlinkerAdd(aIndex: Integer);
     procedure BlinkerRemove(aIndex: Integer);
     procedure BlinkersLoad(const aFilename: string);
@@ -123,7 +125,7 @@ var
 
 implementation
 uses
-  KromUtils;
+  StrUtils, KromUtils, KM_IoModelLWO;
 
 
 { TMOXBlinker }
@@ -404,9 +406,12 @@ end;
 
 
 procedure TMOX2.ExportLWO(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
+const
+  DEFAULT_PATH = './textures_PC/';
 var
   ft: textfile;
   rs: AnsiString;
+  s: string;
   h,i,j,k,m: Integer;
   uu,vv,xr: Single;
   t,t2: Vector3f;
@@ -444,7 +449,7 @@ begin
         m:=m+Length(Material[i].TexName)+1
       else
         m:=m+Length(Material[i].TexName)+2;
-      m:=8+10+m+4;                                //+CLIP+STIL+name+path
+      m:=8+10+Length(DEFAULT_PATH)+m;                                //+CLIP+STIL+name+path
     end;
 
   for i:=1 to Header.MatCount do
@@ -456,7 +461,7 @@ begin
     else
      if Material[i].Mtag<>'' then Inc(m,6);       //Writing tagID instead of name, 4+2
 
-  m:=m+(8+2+66+252)*Header.MatCount;                  //+SURF Data
+  m:=m+(8+2+66+252-8-8-20-42-16) * Header.MatCount;                  //+SURF Data
 
   //=========================Writing data
 
@@ -571,33 +576,47 @@ begin
     Write(ft,AnsiChar((i-1) div 256),AnsiChar(i-1),AnsiChar((Chunks[idChunk].SidA) div 256),AnsiChar(Chunks[idChunk].SidA));
   end;
 
-  for i:=1 to Header.MatCount do if Material[i].TexName<>'' then
+  for i:=1 to Header.MatCount do
+  if Material[i].TexName<>'' then
   begin
+    s := DEFAULT_PATH + Material[i].TexName;
+
+    if (Length(s) mod 2) = 1 then m := Length(s) + 1 else m := Length(s) + 2;
+    m := 10 + m;
+
     Write(ft,'CLIP');
-    if (Length(Material[i].TexName) mod 2)=1 then m:=Length(Material[i].TexName)+1 else m:=Length(Material[i].TexName)+2;
-    m:=10+m+4; Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
-    Write(ft,#0,#0,#0,AnsiChar(i));
-    Write(ft,'STIL'); m:=m-10; Write(ft,AnsiChar(m div 256),AnsiChar(m));
-    Write(ft,'C:1/',Material[i].TexName);
-    if (Length(Material[i].TexName) mod 2)=1 then Write(ft,#0) else Write(ft,#0,#0);
+    Write(ft, AnsiChar(m div 1677216), AnsiChar(m div 65536), AnsiChar(m div 256), AnsiChar(m));
+
+    Write(ft, #0,#0,#0, AnsiChar(i));
+    Write(ft, 'STIL');
+    m:=m-4-4-2;
+    Write(ft, AnsiChar(m div 256), AnsiChar(m));
+    Write(ft, s);
+    if (Length(s) mod 2) = 1 then Write(ft, #0) else Write(ft, #0,#0);
   end;
 
   for i:=1 to Header.MatCount do
   begin
     Write(ft,'SURF');
-    m:=2+66+252;      ////Data Len
-    if Material[i].Title<>'' then
-     if (Length(Material[i].Title) mod 2)=1 then
-      Inc(m,Length(Material[i].Title)+1) else
-      Inc(m,Length(Material[i].Title)+2) else
-     if Material[i].Mtag<>'' then Inc(m,6); //4+2
+    m:=2+66+252-8-8-20-42-16;      ////Data Len
+    if Material[i].Title <> '' then
+      if (Length(Material[i].Title) mod 2) = 1 then
+        Inc(m, Length(Material[i].Title)+1)
+      else
+        Inc(m, Length(Material[i].Title)+2)
+    else
+      if Material[i].Mtag <> '' then
+        Inc(m,6); //4+2
     Write(ft,AnsiChar(m div 1677216),AnsiChar(m div 65536),AnsiChar(m div 256),AnsiChar(m));
 
-    if Material[i].Title<>'' then
-     if (Length(Material[i].Title) mod 2)=1 then
-      Write(ft,Material[i].Title,#0) else
-      Write(ft,Material[i].Title,#0,#0) else
-     if Material[i].Mtag<>'' then Write(ft,Material[i].Mtag,#0,#0); //4+2
+    if Material[i].Title <> '' then
+      if (Length(Material[i].Title) mod 2) = 1 then
+        Write(ft, Material[i].Title, #0)
+      else
+        Write(ft, Material[i].Title, #0, #0)
+    else
+    if Material[i].Mtag <> '' then
+      Write(ft, Material[i].Mtag, #0, #0); //4+2
 
     Write(ft,#0,#0);
     Write(ft,'COLR',#0,#14);
@@ -625,19 +644,112 @@ begin
     Write(ft,#63,#200,#3,#14);
 
     Write(ft,'BLOK'); // 252-6
-    m:=246; Write(ft,AnsiChar(m div 256),AnsiChar(m));
-    Write(ft,'IMAP',#0,'*A',#0,'CHAN',#0,#4,'COLROPAC',#0,#8,#0,#0,#63,#128,#0,#0,#0,#0);
-    Write(ft,'ENAB',#0,#2,#0,#1,'NEGA',#0,#2,#0,#0,'TMAP',#0,#98,'CNTR',#0,#14); for j:=1 to 14 do Write(ft,#0);
+    m:=246-8-20-42-16;
+    Write(ft,AnsiChar(m div 256),AnsiChar(m));
+    Write(ft,'IMAP',#0,#42,#128,#0,'CHAN',#0,#4,'COLROPAC',#0,#8,#0,#0,#63,#128,#0,#0,#0,#0);
+
+    Write(ft,'TMAP',#0,Chr(98-20-42-16));
     Write(ft,'SIZE',#0,#14); for j:=1 to 3 do Write(ft,#63,#128,#0,#0); Write(ft,#0,#0);
-    Write(ft,'ROTA',#0,#14); for j:=1 to 14 do Write(ft,#0);
-    Write(ft,'FALL',#0,#16); for j:=1 to 16 do Write(ft,#0);
-    Write(ft,'OREF',#0,#2,#0,#0,'CSYS',#0,#2,#0,#0,'PROJ',#0,#2,#0,#5,'AXIS',#0,#2,#0,#2);
+
+    Write(ft,'PROJ',#0,#2,#0,#5,'AXIS',#0,#2,#0,#2);
     Write(ft,'IMAG',#0,#2,#0,AnsiChar(i),'WRAP',#0,#4,#0,#0,#0,#0,'WRPW',#0,#6,#63,#128,#0,#0,#0,#0);
     Write(ft,'WRPH',#0,#6,#63,#128,#0,#0,#0,#0,'VMAP',#0,#10,'Texture01',#0);
     Write(ft,'AAST',#0,#6,#0,#0,#63,#128,#0,#0,'PIXB',#0,#2,#0,#1);
   end;
 
   CloseFile(ft);
+end;
+
+
+procedure TMOX2.ExportLWO2(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
+const
+  EXPORT_SCALE = 0.1;
+var
+  lwm: TLWModel;
+  lay: PLWLayer;
+  I: Integer;
+  currentChunk: Integer;
+  lwt: PLWTag;
+  lwc: PLWClip;
+begin
+  lwm := TLWModel.Create;
+  try
+    lay := lwm.LayerAdd;
+
+    // Vertices
+    lay.SetVerticeCount(Header.VerticeCount);
+    for I := 0 to Header.VerticeCount - 1 do
+    begin
+      lay.Vertices[I].X := Vertice[I+1].X * EXPORT_SCALE;
+      lay.Vertices[I].Y := Vertice[I+1].Y * EXPORT_SCALE;
+      lay.Vertices[I].Z := Vertice[I+1].Z * EXPORT_SCALE;
+    end;
+
+    // UVs
+    lay.SetUVCount(1);
+    lay.UVs[0].Name := 'Texture01';
+    SetLength(lay.UVs[0].UV, Header.VerticeCount);
+    for I := 0 to Header.VerticeCount - 1 do
+    begin
+      lay.UVs[0].UV[I].X := Vertice[I+1].U;
+      lay.UVs[0].UV[I].Y := 1 - Vertice[I+1].V;
+
+      //todo: Other MTL transformations
+    end;
+
+    // Polys
+    currentChunk := 0;
+    lay.SetPolyCount(Header.PolyCount);
+    for I := 0 to Header.PolyCount - 1 do
+    begin
+      lay.Polys[I].VertCount := 3;
+      SetLength(lay.Polys[I].Indices, 3);
+
+      lay.Polys[I].Indices[0] := Face[I+1,1] - 1;
+      lay.Polys[I].Indices[1] := Face[I+1,2] - 1;
+      lay.Polys[I].Indices[2] := Face[I+1,3] - 1;
+
+      if I > Chunks[currentChunk].FirstPoly + Chunks[currentChunk].PolyCount - 1 then
+        Inc(currentChunk);
+
+      lay.Polys[I].PolySurf := Chunks[currentChunk].SidA;
+    end;
+
+    // Clips
+    for I := 0 to Header.MatCount - 1 do
+    if Material[I+1].TexName <> '' then
+    begin
+      lwc := lwm.ClipAdd;
+      lwc.Id := I + 1;
+      lwc.Filename := './textures_PC/' + Material[I+1].TexName;
+    end;
+
+    // Tags
+    for I := 0 to Header.MatCount - 1 do
+    begin
+      lwt := lwm.TagAdd;
+      lwt.TagName := IfThen(Material[I+1].Title <> '', Material[I+1].Title, Material[I+1].Mtag);
+      lwt.TagType := ttSurf;
+      lwt.UVName := 'Texture01';
+      lwt.TextureId := I + 1;
+      lwt.Color.R := Material[I+1].Color[aColorId].Dif.R / 255;
+      lwt.Color.G := Material[I+1].Color[aColorId].Dif.G / 255;
+      lwt.Color.B := Material[I+1].Color[aColorId].Dif.B / 255;
+
+      lwt.Specularity := (Material[I+1].Color[aColorId].Sp1.R +
+                          Material[I+1].Color[aColorId].Sp1.G +
+                          Material[I+1].Color[aColorId].Sp1.B) / 300;
+
+      lwt.Reflection := Material[I+1].Color[aColorId].Ref.R / 255;
+      lwt.Transparency := Material[I+1].Transparency / 100;
+      lwt.SmoothingDeg := 89.53;
+    end;
+
+
+    lwm.SaveToFile(aFilename);
+  finally
+    lwm.Free;
+  end;
 end;
 
 

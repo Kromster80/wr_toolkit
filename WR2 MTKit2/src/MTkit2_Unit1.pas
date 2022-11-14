@@ -747,12 +747,11 @@ begin
   //fname:='D:\a.tree';
   //fname:='demo8.mox';
 
-  {ImportLWOCOB('Octavia_Race_colli_colli.lwo');
-  fCOB.SaveCOB('l2c_old.cob');
-  fCOB.Clear;
-  fCOB.ImportLWO2COB('Octavia_Race_colli_colli.lwo');
-  fCOB.SaveCOB('l2c_new.cob');
-  Halt;}
+  fMOX.LoadMOX('Octavia_Race.mox');
+  LoadMTL('Octavia_Race.mtl', fMOX.Header.MatCount);
+  fMOX.ExportLWO('Octavia_Race.old.lwo', 3, False);
+  fMOX.ExportLWO2('Octavia_Race.new.lwo', 3, False);
+  Halt;
 
   //Open it through browser
   if FileExists(fname) then
