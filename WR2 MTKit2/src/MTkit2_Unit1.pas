@@ -1011,7 +1011,7 @@ begin
                         begin
                           meLog.Lines.Add('Writing MOX>LWO file');
                           doSpread := MessageBox(Handle, 'Do you want to spread parts over X axis?', 'Question', MB_YESNO or MB_ICONQUESTION) = ID_YES;
-                          fMOX.SaveMOX2LWO(sdSave.FileName, ColID, doSpread);
+                          fMOX.ExportLWO(sdSave.FileName, ColID, doSpread);
                           meLog.Lines.Add('MOX>LWO Save Complete');
                         end;
     BG_EXPORT_COB_LWO:  if RunSaveDialog2(sdSave, fOpenedFileMask + '_colli.lwo', FILE_TYPE_INFO[kftLwo].Filter) then
@@ -3322,7 +3322,7 @@ begin
 
   doSpread := MessageBox(Handle, 'Do you want to spread parts over X axis?', 'Question', MB_YESNO or MB_ICONQUESTION) = ID_YES;
 
-  fMOX.SaveMOX2LWO(sdSave.FileName, ColID, doSpread);
+  fMOX.ExportLWO(sdSave.FileName, ColID, doSpread);
 
   meLog.Lines.Add('MOX>LWO Save Complete');
 end;

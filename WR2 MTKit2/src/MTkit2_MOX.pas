@@ -96,7 +96,7 @@ type
     function MOXFormatStr: string;
 
     procedure LoadMOX(const aFilename: string);
-    procedure SaveMOX2LWO(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
+    procedure ExportLWO(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
     procedure BlinkerAdd(aIndex: Integer);
     procedure BlinkerRemove(aIndex: Integer);
     procedure BlinkersLoad(const aFilename: string);
@@ -403,7 +403,7 @@ begin
 end;
 
 
-procedure TMOX2.SaveMOX2LWO(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
+procedure TMOX2.ExportLWO(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
 var
   ft: textfile;
   rs: AnsiString;
