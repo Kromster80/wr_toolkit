@@ -757,8 +757,7 @@ begin
     S.WriteSwap(lay.Polys[I].VertCount, 2);
 
     for K := 0 to lay.Polys[I].VertCount - 1 do
-      //todo: Will need to write 65k+ indices
-      S.WriteSwap(lay.Polys[I].Indices4[K], 2);
+      S.WriteVX(lay.Polys[I].Indices4[K]);
   end;
   aStream.WriteChunk4('POLS', S);
 
@@ -861,7 +860,7 @@ begin
   S.Write('COLR');
   for I := 0 to lay.PolyCount - 1 do
   begin
-    S.WriteSwap(I, 2);
+    S.WriteVX(I);
     S.WriteSwap(DEFAULT_COLR, 2);
   end;
 
@@ -884,7 +883,7 @@ begin
   S.Write('SURF');
   for I := 0 to lay.PolyCount - 1 do
   begin
-    S.WriteSwap(I, 2);
+    S.WriteVX(I);
     S.WriteSwap(lay.Polys[I].PolySurf, 2);
   end;
 
@@ -1388,7 +1387,7 @@ begin
   for I := 0 to High(aMap.UV) do
   if not aMap.UV[I].IsNaN then // Skip unmapped
   begin
-    S.WriteSwap(I, 2);
+    S.WriteVX(I);
     S.WriteSwap(aMap.UV[I].X, 4);
     S.WriteSwap(aMap.UV[I].Y, 4);
   end;
@@ -1415,7 +1414,7 @@ begin
   for I := 0 to High(aMap.Weights) do
   if aMap.Weights[I] <> 0 then // Safe to skip, LW will fill any missing values with 0
   begin
-    S.WriteSwap(I, 2);
+    S.WriteVX(I);
     S.WriteSwap(aMap.Weights[I], 4);
   end;
 

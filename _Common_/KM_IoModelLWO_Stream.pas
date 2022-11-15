@@ -23,6 +23,7 @@ type
     procedure WriteStringPad(const aString: AnsiString); // Write string, padded to next even length
     procedure WriteStringPadLen(const aString: AnsiString); // Write string, padded to next even length, and length
     procedure WriteSwap(const aBuffer; Count: LongInt);
+    procedure WriteVX(aValue: Cardinal);
   end;
 
 
@@ -127,6 +128,21 @@ var
 begin
   for I := Count - 1 downto 0 do
     Write((PByte(@aBuffer) + I)^, 1);
+end;
+
+
+procedure TSwappedStream.WriteVX(aValue: Cardinal);
+var
+  I: Integer;
+  v: Cardinal;
+begin
+  if aValue < 65280 then
+    WriteSwap(aValue, 2)
+  else
+  begin
+    v := $FF000000 or aValue;
+    WriteSwap(v, 4);
+  end;
 end;
 
 

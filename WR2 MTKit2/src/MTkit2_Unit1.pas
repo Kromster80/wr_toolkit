@@ -747,17 +747,17 @@ begin
   //fname:='D:\a.tree';
   //fname:='demo8.mox';
 
-  fMOX.LoadMOX('Octavia_Race.mox');
+  {fMOX.LoadMOX('Octavia_Race.mox');
   LoadMTL('Octavia_Race.mtl', fMOX.Header.MatCount);
   fMOX.ExportLWO('Octavia_Race.old.lwo', 3, False);
 
   fMOX.LoadMOX('Octavia_Race.mox');
   LoadMTL('Octavia_Race.mtl', fMOX.Header.MatCount);
-  fMOX.ExportLWO2('Octavia_Race.new.lwo', 3, False);
+  fMOX.ExportLWO2('Octavia_Race.new.lwo', 3, False);}
 
-//  fMOX.LoadMOX('Spielziel.mox');
-//  LoadMTL('Spielziel.mtl', fMOX.Header.MatCount);
-//  fMOX.ExportLWO2('Spielziel.new.lwo', 3, False);
+  fMOX.LoadMOX('Spielziel.mox');
+  LoadMTL('Spielziel.mtl', fMOX.Header.MatCount);
+  fMOX.ExportLWO2('Spielziel.new.lwo', 3, False);
 //  fMOX.ExportLWO('Spielziel.old.lwo', 3, False);
   Halt;
 
