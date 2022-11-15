@@ -64,7 +64,7 @@ type
     PolyCount: Integer;
     Polys: array of record
       VertCount: Word;
-      Indices: array of Word;
+      Indices4: array of Integer;
       PolySurf: Word;
       PolyBone: Word;
     end;
@@ -100,13 +100,26 @@ const
   TAG_TYPE_NAME: array [TLWTagType] of string = ('????', 'Bnup', 'Bone', 'Colr', 'Part', 'Surf');
 
 type
+  TLWClip = record
+  public
+    Id: Integer;
+    Filename: string;
+  end;
+  PLWClip = ^TLWClip;
+
   TLWTag = record
+  public
     TagName: string;
     TagType: TLWTagType;
     SmoothingDeg: Single; // Stored in degrees (typicaly 0..180)
     Color: TKMColor3f;
+    Diffuse: Single;
+    Specularity: Single;
+    Reflection: Single;
+    Transparency: Single;
     UVName: string;
     TextureId: Word;
+    class function New: TLWTag; static;
   end;
   PLWTag = ^TLWTag;
 
@@ -162,7 +175,7 @@ type
     LayerCount: Integer;
     Layers: array of TLWLayer;
     ClipCount: Integer;
-    Clips: array of string;
+    Clips: array of TLWClip;
 
     // Aux data for processing
     Surfaces: TStringList;
@@ -188,6 +201,7 @@ type
     function LayerAdd: PLWLayer;
     function TagAdd: PLWTag;
     function TagExists(const aName: string; aType: TLWTagType): Boolean;
+    function ClipAdd: PLWClip;
   end;
 
 
@@ -311,11 +325,11 @@ begin
   // We know that adjacent polys have opposite windings
   for I := 0 to 2 do
     for K := 0 to 2 do
-      if (Polys[aTo].Indices[I] = Polys[aFrom].Indices[K])
-      and (Polys[aTo].Indices[(I+1) mod 3] = Polys[aFrom].Indices[(K+2) mod 3]) then
+      if (Polys[aTo].Indices4[I] = Polys[aFrom].Indices4[K])
+      and (Polys[aTo].Indices4[(I+1) mod 3] = Polys[aFrom].Indices4[(K+2) mod 3]) then
       begin
         insertAfter := I;
-        newInd := Polys[aFrom].Indices[(K+1) mod 3];
+        newInd := Polys[aFrom].Indices4[(K+1) mod 3];
       end;
 
   Assert(insertAfter <> -1, 'Can not merge polys without common edge');
@@ -323,16 +337,16 @@ begin
 
   // Grow
   Inc(Polys[aTo].VertCount);
-  SetLength(Polys[aTo].Indices, Polys[aTo].VertCount);
+  SetLength(Polys[aTo].Indices4, Polys[aTo].VertCount);
 
   // Insert new indice between existing ones
   for I := 3 downto insertAfter + 2 do
-    Polys[aTo].Indices[I] := Polys[aTo].Indices[I-1];
-  Polys[aTo].Indices[insertAfter + 1] := newInd;
+    Polys[aTo].Indices4[I] := Polys[aTo].Indices4[I-1];
+  Polys[aTo].Indices4[insertAfter + 1] := newInd;
 
   // Erase aFrom
   Polys[aFrom].VertCount := 0;
-  SetLength(Polys[aFrom].Indices, Polys[aFrom].VertCount);
+  SetLength(Polys[aFrom].Indices4, Polys[aFrom].VertCount);
 end;
 
 
@@ -345,9 +359,9 @@ begin
   Polys[aTo].PolyBone := Polys[aFrom].PolyBone;
 
   // VertCount could be different, since on export we merge some tris into quads
-  SetLength(Polys[aTo].Indices, Polys[aFrom].VertCount);
+  SetLength(Polys[aTo].Indices4, Polys[aFrom].VertCount);
   for I := 0 to Polys[aFrom].VertCount - 1 do
-    Polys[aTo].Indices[I] := Polys[aFrom].Indices[I];
+    Polys[aTo].Indices4[I] := Polys[aFrom].Indices4[I];
 end;
 
 
@@ -427,7 +441,7 @@ end;
 procedure TLWLayer.Post_RegenerateUVs;
 var
   I, K, H: Integer;
-  nc, v, nv, p: Word;
+  nc, v, nv, p: Integer;
   found: Byte;
 begin
   for I := 0 to DUVCount - 1 do
@@ -468,9 +482,9 @@ begin
       found := 0;
       p := DUVs[I].DUV[K].Poly;
       for H := 0 to Polys[p].VertCount - 1 do
-        if Polys[p].Indices[H] = v then
+        if Polys[p].Indices4[H] = v then
         begin
-          Polys[p].Indices[H] := nv;
+          Polys[p].Indices4[H] := nv;
           Inc(found);
         end;
 
@@ -481,6 +495,17 @@ begin
     // Vertice count increased
     VerticeCount := nc;
   end;
+end;
+
+
+{ TLWTag }
+class function TLWTag.New: TLWTag;
+begin
+  Result := default(TLWTag);
+  Result.Color.R := 0.75;
+  Result.Color.G := 0.75;
+  Result.Color.B := 0.75;
+  Result.Diffuse := 1.0;
 end;
 
 
@@ -561,7 +586,7 @@ begin
         if buf[1] <> 0 then s := s + Char(buf[1]);
       until (buf[1] = 0);
 
-      Clips[High(Clips)] := s;
+      Clips[High(Clips)].Filename := s;
     end else
     if subHead.TitleString = 'FLAG' then
     begin
@@ -584,8 +609,6 @@ end;
 
 
 procedure TLWModel.WriteChunkCLIP(aStream: TSwappedStream);
-const
-  FLAG_: AnsiString = #0#4 + #0#0#0#128;
 var
   S: TSwappedStream;
   I: Integer;
@@ -594,16 +617,17 @@ begin
 
   S := TSwappedStream.Create;
 
-  S.Write(ClipCount);
   for I := 0 to ClipCount - 1 do
   begin
-    S.Write('STIL');
-    S.WriteStringPadLen(Clips[I]);
-    S.Write('FLAG');
-    S.Write(FLAG_);
-  end;
+    S.Clear;
 
-  aStream.WriteChunk4('CLIP', S);
+    S.Write(Clips[I].Id);
+
+    S.Write('STIL');
+    S.WriteStringPadLen(Clips[I].Filename);
+
+    aStream.WriteChunk4('CLIP', S);
+  end;
 
   S.Free;
 end;
@@ -702,10 +726,11 @@ begin
     SetLength(lay.Polys, I + 1);
 
     aStream.ReadSwap(lay.Polys[I].VertCount, 2);
-    SetLength(lay.Polys[I].Indices, lay.Polys[I].VertCount);
+    SetLength(lay.Polys[I].Indices4, lay.Polys[I].VertCount);
 
     for K := 0 to lay.Polys[I].VertCount - 1 do
-      aStream.ReadSwap(lay.Polys[I].Indices[K], 2);
+      //todo: Here we need to be able to read 65k+ indices
+      aStream.ReadSwap(lay.Polys[I].Indices4[K], 2);
 
     Inc(I);
   until (aStream.Position >= endPos);
@@ -732,7 +757,8 @@ begin
     S.WriteSwap(lay.Polys[I].VertCount, 2);
 
     for K := 0 to lay.Polys[I].VertCount - 1 do
-      S.WriteSwap(lay.Polys[I].Indices[K], 2);
+      //todo: Will need to write 65k+ indices
+      S.WriteSwap(lay.Polys[I].Indices4[K], 2);
   end;
   aStream.WriteChunk4('POLS', S);
 
@@ -936,9 +962,6 @@ end;
 
 
 procedure TLWModel.WriteChunkSURF(aStream: TSwappedStream);
-const
-  SMAN_DEFAULT: Single = Pi;
-  DIFF_DEFAULT: Single = 1.0;
 var
   S: TSwappedStream;
   I: Integer;
@@ -961,9 +984,27 @@ begin
     S.WriteSwap(Tags[I].Color.B, 4);
     S.Write(#0#0);
 
-    S.Write('DIFF');
+    if Tags[I].Diffuse <> 1.0 then
+    begin
+      S.Write('DIFF');
+      S.Write(#0#6);
+      S.WriteSwap(Tags[I].Diffuse, 4);
+      S.Write(#0#0);
+    end;
+
+    S.Write('SPEC');
     S.Write(#0#6);
-    S.WriteSwap(DIFF_DEFAULT, 4);
+    S.WriteSwap(Tags[I].Specularity, 4);
+    S.Write(#0#0);
+
+    S.Write('REFL');
+    S.Write(#0#6);
+    S.WriteSwap(Tags[I].Reflection, 4);
+    S.Write(#0#0);
+
+    S.Write('TRAN');
+    S.Write(#0#6);
+    S.WriteSwap(Tags[I].Transparency, 4);
     S.Write(#0#0);
 
     sd := Tags[I].SmoothingDeg / 180 * Pi;
@@ -971,8 +1012,12 @@ begin
     S.Write(#0#4);
     S.WriteSwap(sd, 4);
 
-    S.Write('SIDE');
-    S.WriteStringLen(#0#1);
+    // Can add double-sided flag
+    {if Side <> 1 then
+    begin
+      S.Write('SIDE');
+      S.WriteStringLen(#0#1); // 1 - fron only, 3 - front and back
+    end;}
 
     WriteChunkSURF_BLOK(S, @Tags[I]);
 
@@ -985,37 +1030,54 @@ end;
 
 procedure TLWModel.WriteChunkSURF_BLOK(aStream: TSwappedStream; aTag: PLWTag);
 const
-  IMAP_DEFAULT: AnsiString = #0#42#128#0;
-  CHAN_DEFAULT: AnsiString = 'COLR';
   OPAC_DEFAULT1: Single = 1.0;
   OPAC_DEFAULT2: Single = 0.0;
-  PROJ_DEFAULT: AnsiString = #0#5;
-  WRAP_DEFAULT: AnsiString = #0#1#0#1;
+  TMAP_SIZE_DEFAULT: Single = 1.0;
 var
   S: TSwappedStream;
 begin
   S := TSwappedStream.Create;
 
   S.Write('IMAP');
-  S.Write(IMAP_DEFAULT);
 
+  // Docs say "The ordinal string defines the sorting order of the block relative to other blocks."
+  // Since we dont use layers we just hardcode what LW uses - 00 2A 80 00
+  S.Write(#0#42#128#0);
+
+  // For which channel this block is
   S.Write('CHAN');
-  S.WriteStringLen(CHAN_DEFAULT);
+  S.Write(#0#4);
+  S.Write('COLR'); // COLR - texture assignment for the color channel
 
+  // LW wants to see opacity set (otherwise it resets the mapping)
   S.Write('OPAC');
   S.Write(#0#8);
   S.WriteSwap(OPAC_DEFAULT1, 4);
   S.WriteSwap(OPAC_DEFAULT2, 4);
 
-  S.Write('PROJ');
-  S.WriteStringLen(PROJ_DEFAULT);
+  // It is important to specify TextureMapping properties (size)
+  // Even if it does not see to make sense for UVs, LW still wants to see Size = 1.0
+  S.Write('TMAP');
+  S.Write(#0#20);
+  S.Write('SIZE');
+  S.Write(#0#14);
+  S.WriteSwap(TMAP_SIZE_DEFAULT, 4);
+  S.WriteSwap(TMAP_SIZE_DEFAULT, 4);
+  S.WriteSwap(TMAP_SIZE_DEFAULT, 4);
+  S.Write(#0#0); // LW uses this padding
 
+  S.Write('PROJ');
+  S.Write(#0#2);
+  S.Write(#0#5); // 5 - UV
+
+  // The CLIP index of the mapped image
   S.Write('IMAG');
   S.Write(#0#2);
   S.WriteSwap(aTag.TextureId, 2);
 
   S.Write('WRAP');
-  S.WriteStringLen(WRAP_DEFAULT);
+  S.Write(#0#4);
+  S.Write(#0#0#0#0); // 0-Reset, 1-Repeat
 
   S.Write('VMAP');
   S.WriteStringPadLen(aTag.UVName);
@@ -1446,7 +1508,7 @@ begin
 
   // Looking at first vertice is enough
   // since we don't expect polys to span across different UV maps
-  vtx := aLay.Polys[aPoly].Indices[0];
+  vtx := aLay.Polys[aPoly].Indices4[0];
 
   for I := 0 to aLay.UVCount - 1 do
   if (aLay.UVs[I].Name <> aSkip) and not aLay.UVs[I].UV[vtx].IsNaN then
@@ -1487,7 +1549,7 @@ begin
     for K := 0 to lay.PolyCount - 1 do
       for J := 0 to lay.Polys[K].VertCount - 1 do
       begin
-        idVert := lay.Polys[K].Indices[J];
+        idVert := lay.Polys[K].Indices4[J];
         SetLength(polysInVertice[idVert], Length(polysInVertice[idVert]) + 1);
         polysInVertice[idVert, High(polysInVertice[idVert])] := K;
       end;
@@ -1498,9 +1560,9 @@ begin
       // Split to triangles and compute average polygon normal
       for J := 2 to lay.Polys[K].VertCount - 1 do
       begin
-        norm := VectorCrossProduct(@lay.Vertices[lay.Polys[K].Indices[0]],
-                                   @lay.Vertices[lay.Polys[K].Indices[J-1]],
-                                   @lay.Vertices[lay.Polys[K].Indices[J]]);
+        norm := VectorCrossProduct(@lay.Vertices[lay.Polys[K].Indices4[0]],
+                                   @lay.Vertices[lay.Polys[K].Indices4[J-1]],
+                                   @lay.Vertices[lay.Polys[K].Indices4[J]]);
         polyNormals[K] := polyNormals[K] + norm;
       end;
 
@@ -1516,7 +1578,7 @@ begin
 
       for J := 0 to lay.Polys[K].VertCount - 1 do
       begin
-        idVert := lay.Polys[K].Indices[J];
+        idVert := lay.Polys[K].Indices4[J];
 
         norm := TKMVertex3.New(0, 0, 0);
         for H := 0 to High(polysInVertice[idVert]) do
@@ -1542,7 +1604,7 @@ begin
           lay.DUVUpdateVtx(K, idVert, lay.VerticeCount - 1);
 
           // Update poly
-          lay.Polys[K].Indices[J] := lay.VerticeCount - 1;
+          lay.Polys[K].Indices4[J] := lay.VerticeCount - 1;
         end;
       end;
     end;
@@ -1648,16 +1710,16 @@ begin
 
         // Copy poly properties
         lay.Polys[newPol].VertCount := 3;
-        SetLength(lay.Polys[newPol].Indices, 3);
-        lay.Polys[newPol].Indices[0] := lay.Polys[K].Indices[0];
-        lay.Polys[newPol].Indices[1] := lay.Polys[K].Indices[lay.Polys[K].VertCount - 2];
-        lay.Polys[newPol].Indices[2] := lay.Polys[K].Indices[lay.Polys[K].VertCount - 1];
+        SetLength(lay.Polys[newPol].Indices4, 3);
+        lay.Polys[newPol].Indices4[0] := lay.Polys[K].Indices4[0];
+        lay.Polys[newPol].Indices4[1] := lay.Polys[K].Indices4[lay.Polys[K].VertCount - 2];
+        lay.Polys[newPol].Indices4[2] := lay.Polys[K].Indices4[lay.Polys[K].VertCount - 1];
         lay.Polys[newPol].PolySurf := lay.Polys[K].PolySurf;
         lay.Polys[newPol].PolyBone := lay.Polys[K].PolyBone;
 
         // Clip indice from original poly
         Dec(lay.Polys[K].VertCount);
-        SetLength(lay.Polys[K].Indices, lay.Polys[K].VertCount);
+        SetLength(lay.Polys[K].Indices4, lay.Polys[K].VertCount);
       end;
   end;
 end;
@@ -1675,6 +1737,9 @@ function TLWModel.TagAdd: PLWTag;
 begin
   Inc(TagCount);
   SetLength(Tags, TagCount);
+
+  Tags[TagCount - 1] := TLWTag.New; // Initialize
+
   Result := @Tags[TagCount - 1];
 end;
 
@@ -1687,6 +1752,15 @@ begin
   for I := 0 to TagCount - 1 do
   if (Tags[I].TagName = aName) and (Tags[I].TagType = aType) then
     Exit(True);
+end;
+
+
+function TLWModel.ClipAdd: PLWClip;
+begin
+  Inc(ClipCount);
+  SetLength(Clips, ClipCount);
+
+  Result := @Clips[ClipCount - 1];
 end;
 
 
@@ -1952,7 +2026,7 @@ begin
 
     for K := 0 to lay.PolyCount - 1 do
       for J := 0 to lay.Polys[K].VertCount - 1 do
-        lay.Polys[K].Indices[J] := remap[lay.Polys[K].Indices[J]];
+        lay.Polys[K].Indices4[J] := remap[lay.Polys[K].Indices4[J]];
   end;
 
   DbgLog(Format('  Vertices after - %d', [GetVerticeCount]));
@@ -1998,22 +2072,22 @@ begin
       if lay.Polys[K].VertCount <> 3 then Continue;
 
       // Find longer side
-      aVertA := lay.Vertices[lay.Polys[K].Indices[0]];
-      aVertB := lay.Vertices[lay.Polys[K].Indices[1]];
-      aVertC := lay.Vertices[lay.Polys[K].Indices[2]];
+      aVertA := lay.Vertices[lay.Polys[K].Indices4[0]];
+      aVertB := lay.Vertices[lay.Polys[K].Indices4[1]];
+      aVertC := lay.Vertices[lay.Polys[K].Indices4[2]];
 
       aLenAB := (aVertA - aVertB).GetLengthSqr;
       aLenBC := (aVertB - aVertC).GetLengthSqr;
       aLenCA := (aVertC - aVertA).GetLengthSqr;
 
       if (aLenAB >= aLenBC) and (aLenAB >= aLenCA) then
-        pair := TIntPair.New(lay.Polys[K].Indices[0], lay.Polys[K].Indices[1])
+        pair := TIntPair.New(lay.Polys[K].Indices4[0], lay.Polys[K].Indices4[1])
       else
       if (aLenBC >= aLenAB) and (aLenBC >= aLenCA) then
-        pair := TIntPair.New(lay.Polys[K].Indices[1], lay.Polys[K].Indices[2])
+        pair := TIntPair.New(lay.Polys[K].Indices4[1], lay.Polys[K].Indices4[2])
       else
       if (aLenCA >= aLenAB) and (aLenCA >= aLenBC) then
-        pair := TIntPair.New(lay.Polys[K].Indices[2], lay.Polys[K].Indices[0])
+        pair := TIntPair.New(lay.Polys[K].Indices4[2], lay.Polys[K].Indices4[0])
       else
         raise Exception.Create('Cant find longest side');
 
@@ -2028,19 +2102,19 @@ begin
         adjacentSide := -1;
 
         // We know that adjacent polys will have same winding direction (and inverted indice order)
-        if (pair.A = lay.Polys[J].Indices[1]) and (pair.B = lay.Polys[J].Indices[0]) then
+        if (pair.A = lay.Polys[J].Indices4[1]) and (pair.B = lay.Polys[J].Indices4[0]) then
           adjacentSide := 0;
-        if (pair.A = lay.Polys[J].Indices[2]) and (pair.B = lay.Polys[J].Indices[1]) then
+        if (pair.A = lay.Polys[J].Indices4[2]) and (pair.B = lay.Polys[J].Indices4[1]) then
           adjacentSide := 1;
-        if (pair.A = lay.Polys[J].Indices[0]) and (pair.B = lay.Polys[J].Indices[2]) then
+        if (pair.A = lay.Polys[J].Indices4[0]) and (pair.B = lay.Polys[J].Indices4[2]) then
           adjacentSide := 2;
 
         if adjacentSide = -1 then Continue;
 
         // Check that this side is longer for them too
-        bVertA := lay.Vertices[lay.Polys[J].Indices[0]];
-        bVertB := lay.Vertices[lay.Polys[J].Indices[1]];
-        bVertC := lay.Vertices[lay.Polys[J].Indices[2]];
+        bVertA := lay.Vertices[lay.Polys[J].Indices4[0]];
+        bVertB := lay.Vertices[lay.Polys[J].Indices4[1]];
+        bVertC := lay.Vertices[lay.Polys[J].Indices4[2]];
 
         bLenAB := (bVertA - bVertB).GetLengthSqr;
         bLenBC := (bVertB - bVertC).GetLengthSqr;
