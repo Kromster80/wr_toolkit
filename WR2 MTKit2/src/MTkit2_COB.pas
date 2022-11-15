@@ -113,11 +113,11 @@ begin
     for I := 0 to Head.PolyCount - 1 do
     begin
       lay.Polys[I].VertCount := 3;
-      SetLength(lay.Polys[I].Indices, 3);
+      SetLength(lay.Polys[I].Indices4, 3);
 
-      lay.Polys[I].Indices[0] := Faces[I,1];
-      lay.Polys[I].Indices[1] := Faces[I,2];
-      lay.Polys[I].Indices[2] := Faces[I,3];
+      lay.Polys[I].Indices4[0] := Faces[I,1];
+      lay.Polys[I].Indices4[1] := Faces[I,2];
+      lay.Polys[I].Indices4[2] := Faces[I,3];
 
       lay.Polys[I].PolySurf := 0;
     end;
@@ -192,7 +192,7 @@ begin
 
     for I := 0 to lay.PolyCount - 1 do
       for K := 1 to 3 do
-        Faces[I, K] := lay.Polys[I].Indices[K - 1];
+        Faces[I, K] := lay.Polys[I].Indices4[K - 1];
 
     RebuildBounds;
   finally

@@ -2,7 +2,7 @@ unit MTkit2_MOX;
 interface
 uses
   Math, SysUtils, Windows,
-  MTkit2_Vertex;
+  MTkit2_Vertex, KM_Vertexes;
 
 type
   EExceptionTooNew = class(Exception);
@@ -95,6 +95,8 @@ type
     function MOXFormatInt: string;
     function MOXFormatStr: string;
 
+    function GetTransformMatrix(aPart: Integer): TMatrix4;
+
     procedure LoadMOX(const aFilename: string);
     procedure ExportLWO(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
     procedure ExportLWO2(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
@@ -175,6 +177,37 @@ const
   S: array [TMOXFormat] of string = ('Unknown', 'MBWR', 'WR02', 'WR22');
 begin
   Result := S[MOXFormat];
+end;
+
+
+function TMOX2.GetTransformMatrix(aPart: Integer): TMatrix4;
+begin
+  Result := TMatrix4.Identity;
+
+  // Copy matrix to our representation
+  Result.m11 := Parts[aPart].Matrix[1,1];
+  Result.m12 := Parts[aPart].Matrix[1,2];
+  Result.m13 := Parts[aPart].Matrix[1,3];
+  Result.m14 := Parts[aPart].Matrix[1,4];
+
+  Result.m21 := Parts[aPart].Matrix[2,1];
+  Result.m22 := Parts[aPart].Matrix[2,2];
+  Result.m23 := Parts[aPart].Matrix[2,3];
+  Result.m24 := Parts[aPart].Matrix[2,4];
+
+  Result.m31 := Parts[aPart].Matrix[3,1];
+  Result.m32 := Parts[aPart].Matrix[3,2];
+  Result.m33 := Parts[aPart].Matrix[3,3];
+  Result.m34 := Parts[aPart].Matrix[3,4];
+
+  Result.m41 := Parts[aPart].Matrix[4,1];
+  Result.m42 := Parts[aPart].Matrix[4,2];
+  Result.m43 := Parts[aPart].Matrix[4,3];
+  Result.m44 := Parts[aPart].Matrix[4,4];
+
+  // Apply parent transforms
+  if Parts[aPart].Parent <> -1 then
+    Result := Result * GetTransformMatrix(Parts[aPart].Parent+1);
 end;
 
 
@@ -671,18 +704,33 @@ var
   currentChunk: Integer;
   lwt: PLWTag;
   lwc: PLWClip;
+  idChunk, idPart: Integer;
+  t: TKMVertex3;
 begin
   lwm := TLWModel.Create;
   try
     lay := lwm.LayerAdd;
 
+    idChunk := 0;
+    idPart := 0;
+
     // Vertices
     lay.SetVerticeCount(Header.VerticeCount);
     for I := 0 to Header.VerticeCount - 1 do
     begin
-      lay.Vertices[I].X := Vertice[I+1].X * EXPORT_SCALE;
-      lay.Vertices[I].Y := Vertice[I+1].Y * EXPORT_SCALE;
-      lay.Vertices[I].Z := Vertice[I+1].Z * EXPORT_SCALE;
+      if (idChunk < Header.ChunkCount) and (I = Chunks[idChunk+1].FirstVtx - 1) then
+        Inc(idChunk);
+      if (idChunk = Parts[idPart+1].FirstMat+1) and (Parts[idPart+1].NumMat <> 0) then
+        Inc(idPart);
+
+      // Transform
+      t.X := Vertice[I+1].X;
+      t.Y := Vertice[I+1].Y;
+      t.Z := Vertice[I+1].Z;
+
+      t := t * GetTransformMatrix(idPart) * EXPORT_SCALE;
+
+      lay.Vertices[I] := t;
     end;
 
     // UVs
@@ -703,11 +751,11 @@ begin
     for I := 0 to Header.PolyCount - 1 do
     begin
       lay.Polys[I].VertCount := 3;
-      SetLength(lay.Polys[I].Indices, 3);
+      SetLength(lay.Polys[I].Indices4, 3);
 
-      lay.Polys[I].Indices[0] := Face[I+1,1] - 1;
-      lay.Polys[I].Indices[1] := Face[I+1,2] - 1;
-      lay.Polys[I].Indices[2] := Face[I+1,3] - 1;
+      lay.Polys[I].Indices4[0] := Face[I+1,1] - 1;
+      lay.Polys[I].Indices4[1] := Face[I+1,2] - 1;
+      lay.Polys[I].Indices4[2] := Face[I+1,3] - 1;
 
       if I > Chunks[currentChunk].FirstPoly + Chunks[currentChunk].PolyCount - 1 then
         Inc(currentChunk);
