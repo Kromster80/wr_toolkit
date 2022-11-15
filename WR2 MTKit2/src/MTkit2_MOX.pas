@@ -459,7 +459,7 @@ begin
     end;
 
   for i:=1 to Header.MatCount do
-    if Material[i].Title<>'' then
+    if Material[i].Title <> '' then
       if (Length(Material[i].Title) mod 2)=1 then
         Inc(m,Length(Material[i].Title)+1)
       else
@@ -467,7 +467,7 @@ begin
     else
      if Material[i].Mtag<>'' then Inc(m,6);       //Writing tagID instead of name, 4+2
 
-  m:=m+(8+2+66+252-8-8-20-42-16) * Header.MatCount;                  //+SURF Data
+  m:=m+(8+2+66+106) * Header.MatCount;                  //+SURF Data
 
   //=========================Writing data
 
@@ -513,24 +513,11 @@ begin
     if (idChunk = Parts[idPart+1].FirstMat+1) and (Parts[idPart+1].NumMat <> 0) then
       Inc(idPart); //This is idChunk of current detail
 
-    DepthLev := 8;
-    repeat
-      CurrentLev := 1; k := idPart;
-      while (Parts[k].Parent > -1) and (CurrentLev <> DepthLev) do
-      begin
-        k := Parts[k].Parent+1;
-        Inc(CurrentLev);
-      end;
-
-      DepthLev := CurrentLev; // set depth for first run
-      Dec(DepthLev);          // -1
-
-      mtx := Parts[k].Matrix;
-      t2.x:=t.x*mtx.m11+t.y*mtx.m21+t.z*mtx.m31+mtx.m41;
-      t2.y:=t.x*mtx.m12+t.y*mtx.m22+t.z*mtx.m32+mtx.m42;
-      t2.z:=t.x*mtx.m13+t.y*mtx.m23+t.z*mtx.m33+mtx.m43;
-      t := t2;
-    until(DepthLev=0);
+    mtx := GetTransformMatrix(idPart);
+    t2.X := t.X * mtx.m11 + t.Y * mtx.m21 + t.Z * mtx.m31 + mtx.m41;
+    t2.Y := t.X * mtx.m12 + t.Y * mtx.m22 + t.Z * mtx.m32 + mtx.m42;
+    t2.Z := t.X * mtx.m13 + t.Y * mtx.m23 + t.Z * mtx.m33 + mtx.m43;
+    t := t2;
 
     Vertice[j].X := t.x + idPart * 25 * Ord(aSpreadOverX);
     Vertice[j].Y := t.y;
@@ -604,7 +591,7 @@ begin
   for i:=1 to Header.MatCount do
   begin
     Write(ft,'SURF');
-    m:=2+66+252-8-8-20-42-16;      ////Data Len
+    m:=2+66+106;      ////Data Len
     if Material[i].Title <> '' then
       if (Length(Material[i].Title) mod 2) = 1 then
         Inc(m, Length(Material[i].Title)+1)
@@ -649,18 +636,17 @@ begin
     Write(ft,'SMAN',#0,#4);
     Write(ft,#63,#200,#3,#14);
 
-    Write(ft,'BLOK'); // 252-6
-    m:=246-8-20-42-16;
+    Write(ft,'BLOK');
+    m:=108;
     Write(ft,AnsiChar(m div 256),AnsiChar(m));
     Write(ft,'IMAP',#0,#42,#128,#0,'CHAN',#0,#4,'COLROPAC',#0,#8,#0,#0,#63,#128,#0,#0,#0,#0);
 
     Write(ft,'TMAP',#0,Chr(98-20-42-16));
     Write(ft,'SIZE',#0,#14); for j:=1 to 3 do Write(ft,#63,#128,#0,#0); Write(ft,#0,#0);
 
-    Write(ft,'PROJ',#0,#2,#0,#5,'AXIS',#0,#2,#0,#2);
-    Write(ft,'IMAG',#0,#2,#0,AnsiChar(i),'WRAP',#0,#4,#0,#0,#0,#0,'WRPW',#0,#6,#63,#128,#0,#0,#0,#0);
-    Write(ft,'WRPH',#0,#6,#63,#128,#0,#0,#0,#0,'VMAP',#0,#10,'Texture01',#0);
-    Write(ft,'AAST',#0,#6,#0,#0,#63,#128,#0,#0,'PIXB',#0,#2,#0,#1);
+    Write(ft,'PROJ',#0,#2,#0,#5);
+    Write(ft,'IMAG',#0,#2,#0,AnsiChar(i),'WRAP',#0,#4,#0,#0,#0,#0);
+    Write(ft,'VMAP',#0,#10,'Texture01',#0);
   end;
 
   CloseFile(ft);

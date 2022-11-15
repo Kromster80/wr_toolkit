@@ -759,7 +759,7 @@ begin
 //  LoadMTL('Spielziel.mtl', fMOX.Header.MatCount);
 //  fMOX.ExportLWO2('Spielziel.new.lwo', 3, False);
 //  fMOX.ExportLWO('Spielziel.old.lwo', 3, False);
-  //Halt;
+  Halt;
 
   //Open it through browser
   if FileExists(fname) then
