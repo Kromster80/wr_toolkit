@@ -35,7 +35,8 @@ begin
   SurfaceID := 1;
 
   blockread(f,c,12);
-  if (c[1]+c[2]+c[3]+c[4]+c[9]+c[10]+c[11]+c[12])<>'FORMLWO2' then begin
+  if (c[1]+c[2]+c[3]+c[4]+c[9]+c[10]+c[11]+c[12])<>'FORMLWO2' then
+  begin
     MessageBox(Form1.Handle,'Old or unknown LWO format','Error',MB_OK or MB_ICONERROR);
     closefile(f);
     exit;
@@ -48,7 +49,8 @@ begin
     ChapSize := int2(c[8],c[7],c[6],c[5]);
     FileSize := FileSize - ChapSize - 8;
 
-    if ChapName='TAGS' then begin
+    if ChapName='TAGS' then
+    begin
       blockread(f,c,ChapSize);
       ii:=0;
       repeat
@@ -57,24 +59,28 @@ begin
       until(ii=ChapSize);
     end else
 
-    if ChapName='LAYR' then begin
+    if ChapName='LAYR' then
+    begin
       blockread(f,c,ChapSize);
       inc(Lay); //Layers come not sorted
-      if Lay > MAX_LWO_LAYERS then begin
+      if Lay > MAX_LWO_LAYERS then
+      begin
         MessageBox(Form1.Handle,'Too many layers in file','Error',MB_OK or MB_ICONERROR);
         closefile(f);
         exit;
       end;
     end else
 
-    if ChapName='PNTS' then begin
+    if ChapName='PNTS' then
+    begin
       LWQty.Vert[lay]:=ChapSize div 12;
       setlength(LW.XYZ ,LWQty.Vert[0]+LWQty.Vert[lay]+1);
       setlength(LW.UV  ,LWQty.Vert[0]+LWQty.Vert[lay]+1);
       setlength(LW.RGBA,LWQty.Vert[0]+LWQty.Vert[lay]+1);
       setlength(LW.Nv  ,LWQty.Vert[0]+LWQty.Vert[lay]+1);
       blockread(f,c,ChapSize);
-      for ii:=1 to LWQty.Vert[lay] do begin
+      for ii:=1 to LWQty.Vert[lay] do
+      begin
         LW.XYZ[LWQty.Vert[0]+ii,1]:=real2(c[ii*12-8],c[ii*12-9],c[ii*12-10],c[ii*12-11])*10;
         LW.XYZ[LWQty.Vert[0]+ii,2]:=real2(c[ii*12-4],c[ii*12-5],c[ii*12-6],c[ii*12-7])*10;
         LW.XYZ[LWQty.Vert[0]+ii,3]:=real2(c[ii*12-0],c[ii*12-1],c[ii*12-2],c[ii*12-3])*10;
@@ -82,11 +88,13 @@ begin
       inc(LWQty.Vert[0],LWQty.Vert[lay]);
     end else
 
-    if ChapName='VMAP' then begin
+    if ChapName='VMAP' then
+    begin
     blockread(f,c,6);    //TXUV_2
     ChapName:=c[1]+c[2]+c[3]+c[4];
     dec(ChapSize,6);
-    if ChapName='TXUV' then begin
+    if ChapName='TXUV' then
+    begin
       repeat
         blockread(f,c,2);
         dec(ChapSize,2); //UV-map name
@@ -96,12 +104,14 @@ begin
       repeat
         inc(ii,10);
         inc(LWQty.UV[lay]);
-        if c[ii-9]=#255 then begin
-          kk:=ord(c[ii-8])*65536+1;
-          inc(ii,2);
-          inc(kk,ord(c[ii-8])+ord(c[ii-9])*256);
+        if c[ii-9] = #255 then
+        begin
+          kk := ord(c[ii-8]) * 65536 + 1;
+          inc(ii, 2);
+          inc(kk, ord(c[ii-8])+ord(c[ii-9])*256);
         end else
-          kk:=ord(c[ii-8])+ord(c[ii-9])*256+1;
+          kk:=ord(c[ii-8])+ord(c[ii-9])*256 + 1;
+
         LW.UV[LWQty.Vert[0]-LWQty.Vert[lay]+kk,1]:=real2(c[ii-4],c[ii-5],c[ii-6],c[ii-7]);
         LW.UV[LWQty.Vert[0]-LWQty.Vert[lay]+kk,2]:=real2(c[ii-0],c[ii-1],c[ii-2],c[ii-3]);
       until(ii>=ChapSize);
@@ -131,106 +141,123 @@ begin
       end else  }
 
       begin
-      Form1.MemoLWO.Lines.Add(c[1]+c[2]+c[3]+c[4]+' vertex map skipped');
-      blockread(f,c,ChapSize); end;
+        Form1.MemoLWO.Lines.Add(c[1]+c[2]+c[3]+c[4]+' vertex map skipped');
+        blockread(f,c,ChapSize);
+      end;
 
-    for ii:=1 to LWQty.Poly[lay] do for kk:=1 to 3 do begin //lqty[0]-lqty[lay] >> lqty[0]
-    LW.DUV[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk,1]:=LW.UV[LW.Poly[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk],1];
-    LW.DUV[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk,2]:=LW.UV[LW.Poly[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk],2];
-    end;
+      for ii:=1 to LWQty.Poly[lay] do for kk:=1 to 3 do  //lqty[0]-lqty[lay] >> lqty[0]
+      begin
+        LW.DUV[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk,1]:=LW.UV[LW.Poly[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk],1];
+        LW.DUV[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk,2]:=LW.UV[LW.Poly[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk],2];
+      end;
     end else
 
-    if ChapName='POLS' then begin
+    if ChapName='POLS' then
+    begin
     blockread(f,c,4);
     dec(ChapSize,4);
-      if (c[1]+c[2]+c[3]+c[4])<>'FACE' then begin
+      if (c[1]+c[2]+c[3]+c[4])<>'FACE' then
+      begin
       Form1.MemoLWO.Lines.Add(c[1]+c[2]+c[3]+c[4]+' POLS skipped');
       blockread(f,c,ChapSize);
       LWQty.Poly[lay]:=0
-      end else begin
+      end else
+      begin
     LWQty.Poly[lay]:=0;
         repeat inc(LWQty.Poly[lay]);
-        if length(LW.Poly)-2<=LWQty.Poly[0]+LWQty.Poly[lay] then setlength(LW.Poly,length(LW.Poly)+1000); //keep (+1) free ahead for multi-point polys
-        blockread(f,c,2); dec(ChapSize,2);
-        kk:=ord(c[1])*256+ord(c[2]); //# of Vertices (3 or 4)
+          if length(LW.Poly)-2<=LWQty.Poly[0]+LWQty.Poly[lay] then setlength(LW.Poly,length(LW.Poly)+1000); //keep (+1) free ahead for multi-point polys
+          blockread(f,c,2); dec(ChapSize,2);
+          kk:=ord(c[1])*256+ord(c[2]); //# of Vertices (3 or 4)
 
-        if (kk<>3)and(kk<>4) then begin
-        MessageBox(Form1.Handle,'Non-triangle/quadrangle polygon encountered','Error',MB_OK or MB_ICONERROR);
-        closefile(f); exit; end;
+          if (kk<>3)and(kk<>4) then begin
+          MessageBox(Form1.Handle,'Non-triangle/quadrangle polygon encountered','Error',MB_OK or MB_ICONERROR);
+          closefile(f); exit; end;
 
-        LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],0]:=kk;
-        for ii:=1 to 3 do begin
-        blockread(f,c,2); dec(ChapSize,2);
-            if c[1]=#255 then begin
-            LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],ii]:=ord(c[2])*65536+LWQty.Vert[0]-LWQty.Vert[lay]+1;   //0.1.2
+          LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],0]:=kk;
+          for ii:=1 to 3 do
+          begin
             blockread(f,c,2); dec(ChapSize,2);
-            inc(LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],ii],int2(c[2],c[1]));
+            if c[1]=#255 then
+            begin
+              LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],ii]:=ord(c[2])*65536+LWQty.Vert[0]-LWQty.Vert[lay]+1;   //0.1.2
+              blockread(f,c,2); dec(ChapSize,2);
+              inc(LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],ii],int2(c[2],c[1]));
             end else
-        LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],ii]:=int2(c[2],c[1])+LWQty.Vert[0]-LWQty.Vert[lay]+1;   //0.1.2
-        end;
+              LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],ii]:=int2(c[2],c[1])+LWQty.Vert[0]-LWQty.Vert[lay]+1;   //0.1.2
+          end;
 
-        if kk=4 then begin
-        inc(LWQty.AddPoly[0]);
-        //if length(LW.PolyAdd)-2<=LWQty.AddPoly[0] then setlength(LW.PolyAdd,LWQty.AddPoly[0]+100);
-        if length(LW.PolyAdd)<length(LW.Poly)+100 then setlength(LW.PolyAdd,length(LW.Poly)+100); //Needs to be the same
-        LW.PolyAdd[LWQty.AddPoly[0]].id:=LWQty.Poly[0]+LWQty.Poly[lay]; //replicating real polyID
+          if kk=4 then
+          begin
+            inc(LWQty.AddPoly[0]);
+            //if length(LW.PolyAdd)-2<=LWQty.AddPoly[0] then setlength(LW.PolyAdd,LWQty.AddPoly[0]+100);
+            if length(LW.PolyAdd)<length(LW.Poly)+100 then setlength(LW.PolyAdd,length(LW.Poly)+100); //Needs to be the same
+            LW.PolyAdd[LWQty.AddPoly[0]].id:=LWQty.Poly[0]+LWQty.Poly[lay]; //replicating real polyID
 
-        LW.PolyAdd[LWQty.Poly[0]+LWQty.Poly[lay]].InvID:=LWQty.AddPoly[0]; //replicating real polyID, inverse for VMAD
+            LW.PolyAdd[LWQty.Poly[0]+LWQty.Poly[lay]].InvID:=LWQty.AddPoly[0]; //replicating real polyID, inverse for VMAD
 
-        LW.PolyAdd[LWQty.AddPoly[0]].v1:=LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],1];
-        LW.PolyAdd[LWQty.AddPoly[0]].v2:=LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],3];
-        blockread(f,c,2); dec(ChapSize,2);
-            if c[1]=#255 then begin
-            LW.PolyAdd[LWQty.AddPoly[0]].v3:=ord(c[2])*65536+LWQty.Vert[0]-LWQty.Vert[lay]+1;
+            LW.PolyAdd[LWQty.AddPoly[0]].v1:=LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],1];
+            LW.PolyAdd[LWQty.AddPoly[0]].v2:=LW.Poly[LWQty.Poly[0]+LWQty.Poly[lay],3];
             blockread(f,c,2); dec(ChapSize,2);
-            inc(LW.PolyAdd[LWQty.AddPoly[0]].v3,int2(c[2],c[1]));
+            if c[1]=#255 then
+            begin
+              LW.PolyAdd[LWQty.AddPoly[0]].v3:=ord(c[2])*65536+LWQty.Vert[0]-LWQty.Vert[lay]+1;
+              blockread(f,c,2); dec(ChapSize,2);
+              inc(LW.PolyAdd[LWQty.AddPoly[0]].v3,int2(c[2],c[1]));
             end else
-        LW.PolyAdd[LWQty.AddPoly[0]].v3:=int2(c[2],c[1])+LWQty.Vert[0]-LWQty.Vert[lay]+1;
-        end;
+              LW.PolyAdd[LWQty.AddPoly[0]].v3:=int2(c[2],c[1])+LWQty.Vert[0]-LWQty.Vert[lay]+1;
+          end;
         until(ChapSize<=0);
     inc(LWQty.Poly[0],LWQty.Poly[lay]);
 
     setlength(LW.DUV,LWQty.Poly[0]+1);
     //Mirroring UVs to discontinous UVs, since DUV may not exist, while PTAG exists always :P
-    for ii:=1 to LWQty.Poly[lay] do for kk:=1 to 3 do begin //lqty[0]-lqty[lay] >> lqty[0]
-    LW.DUV[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk,1]:=LW.UV[LW.Poly[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk],1];
-    LW.DUV[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk,2]:=LW.UV[LW.Poly[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk],2];
+    for ii:=1 to LWQty.Poly[lay] do for kk:=1 to 3 do  //lqty[0]-lqty[lay] >> lqty[0]
+    begin
+      LW.DUV[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk,1]:=LW.UV[LW.Poly[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk],1];
+      LW.DUV[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk,2]:=LW.UV[LW.Poly[ii+LWQty.Poly[0]-LWQty.Poly[lay],kk],2];
     end;
 
     end; //'FACE'
     end else
 
-    if ChapName='PTAG' then begin
+    if ChapName='PTAG' then
+    begin
       blockread(f,c,4);
       dec(ChapSize,4);
-      if (c[1]+c[2]+c[3]+c[4])<>'SURF' then begin
+      if (c[1]+c[2]+c[3]+c[4])<>'SURF' then
+      begin
         Form1.MemoLWO.Lines.Add(c[1]+c[2]+c[3]+c[4]+' PTAG skipped');
         blockread(f,c,ChapSize);
-      end else begin
+      end else
+      begin
         setlength(LW.Surf,LWQty.Poly[0]+100);
         blockread(f,c,ChapSize);
         ii:=0;
         repeat
           inc(ii,4);
-          if c[ii-3]=#255 then begin
-          kk:=ord(c[ii-2])*65536;           //polygon
-          inc(ii,2);
-          inc(kk,int2(c[ii-2],c[ii-3])+1);
-        end else
-          kk:=int2(c[ii-2],c[ii-3])+1;           //polygon
+          if c[ii-3]=#255 then
+          begin
+            kk:=ord(c[ii-2])*65536;           //polygon
+            inc(ii,2);
+            inc(kk,int2(c[ii-2],c[ii-3])+1);
+          end else
+            kk:=int2(c[ii-2],c[ii-3])+1;           //polygon
           LW.Surf[kk+LWQty.Poly[0]-LWQty.Poly[lay]]:=int2(c[ii-0],c[ii-1])+1;    //surface assignment
         until(ii>=ChapSize);
       end;
     end else
 
-    if ChapName='VMAD' then begin
+    if ChapName='VMAD' then
+    begin
       blockread(f,c,6);    //TXUV_2
       dec(ChapSize,6);
 
-      if (c[1]+c[2]+c[3]+c[4])<>'TXUV' then begin
+      if (c[1]+c[2]+c[3]+c[4])<>'TXUV' then
+      begin
         Form1.MemoLWO.Lines.Add(c[1]+c[2]+c[3]+c[4]+' VMAD skipped');
         blockread(f,c,ChapSize);
-      end else begin
+      end else
+      begin
 
         repeat
           blockread(f,c,2);
@@ -241,7 +268,8 @@ begin
 
           //point ; poly ; new coord
           blockread(f,c,2); dec(ChapSize,2);
-          if c[1]=#255 then begin
+          if c[1]=#255 then
+          begin
             vmad.Vert:=ord(c[2])*65536+1; //vertex ID
             blockread(f,c,2);
             dec(ChapSize,2);
@@ -251,7 +279,8 @@ begin
 
           blockread(f,c,2);
           dec(ChapSize,2);
-          if c[1]=#255 then begin
+          if c[1]=#255 then
+          begin
             vmad.Poly:=ord(c[2])*65536+1; //poly ID
             blockread(f,c,2); dec(ChapSize,2);
             inc(vmad.Poly,int2(c[2],c[1])); //poly ID
@@ -262,8 +291,10 @@ begin
           sz:=vmad.Poly+LWQty.Poly[0]-LWQty.Poly[lay];
 
           blockread(f,c,8); dec(ChapSize,8);
-          for j:=1 to LW.Poly[sz,0] do begin
-            if (j<4)and(LW.Poly[sz,j]=vmad.Vert+LWQty.Vert[0]-LWQty.Vert[lay]) then begin
+          for j:=1 to LW.Poly[sz,0] do
+          begin
+            if (j<4)and(LW.Poly[sz,j]=vmad.Vert+LWQty.Vert[0]-LWQty.Vert[lay]) then
+            begin
               LW.DUV[sz,j,1]:=real2(c[4],c[3],c[2],c[1]);
               LW.DUV[sz,j,2]:=real2(c[8],c[7],c[6],c[5]);
             end;
@@ -918,10 +949,12 @@ end;
 //Using own vertices for each Block adds only ~1% overuse, we can live with that
 FillChar(VTXQty,SizeOf(VTXQty),#0);
 c65k:=1;
-for i:=1 to Qty.BlocksX*Qty.BlocksZ do begin
+for i:=1 to Qty.BlocksX*Qty.BlocksZ do
+begin
   x:=(i-1) mod Qty.BlocksX+1;
   z:=(i-1) div Qty.BlocksX+1;
-  if VTXQty[c65k]+VCount[i]>65535 then begin
+  if VTXQty[c65k]+VCount[i]>65535 then
+  begin
     inc(c65k);
     VTXQty[c65k]:=0;
   end;
@@ -935,14 +968,17 @@ setlength(VTX,VTXQty[64]*2+1); //Use second half to build new array to save effo
 
 //Now comes boring part - remap polys
 Ref:=1;
-for i:=1 to Qty.BlocksX*Qty.BlocksZ do begin
+for i:=1 to Qty.BlocksX*Qty.BlocksZ do
+begin
   x:=(i-1) mod Qty.BlocksX+1;
   z:=(i-1) div Qty.BlocksX+1;
   setlength(UniqV,0); //Clearup for each new Block
   setlength(UniqV,VTXQty[64]+1);
   for k:=Block[z,x].FirstPoly+1 to Block[z,x].FirstPoly+Block[z,x].NumPoly do
-    for h:=1 to 3 do begin
-      if UniqV[v[k,h]]=0 then begin
+    for h:=1 to 3 do
+    begin
+      if UniqV[v[k,h]]=0 then
+      begin
         UniqV[v[k,h]]:=Ref;
         VTX[VTXQty[64]+Ref]:=VTX[v[k,h]];
         inc(Ref);
