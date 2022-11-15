@@ -118,7 +118,6 @@
         <DCCReference Include="src\MTkit2_Render.pas"/>
         <DCCReference Include="src\MTkit2_RenderLegacy.pas"/>
         <DCCReference Include="src\MTkit2_Textures.pas"/>
-        <DCCReference Include="src\MTkit2_Vertex.pas"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

@@ -5,26 +5,28 @@ uses
   KromUtils,
   MTkit2_Defaults, MTkit2_MOX;
 
-function  LoadOBJ(const aFilename: string): Boolean;
-function  Load3DS(const aFilename: string): Boolean;
-function  LoadLWO(const aFilename: string): Boolean;
+
+function LoadOBJ(const aFilename: string): Boolean;
+function Load3DS(const aFilename: string): Boolean;
+function LoadLWO(const aFilename: string): Boolean;
 
 procedure LoadMTL(const aFilename: string; aMOXMaterialCount: Integer);
 procedure SaveMTL(const aFilename: string; aMOXMaterialCount: Integer);
 
-function  LoadPBF(aMOX: TMOX2; const aFilename: string): Boolean;
+function LoadPBF(aMOX: TMOX2; const aFilename: string): Boolean;
 procedure SavePBF(aMOX: TMOX2; const aFilename: string);
 
-function  LoadPSF(aMOX: TMOX2; const aFilename: string): Boolean;
+function LoadPSF(aMOX: TMOX2; const aFilename: string): Boolean;
 procedure SavePSF(aMOX: TMOX2; const aFilename: string);
 
-function  ScanVinyls(aPath: string): Boolean;
+function ScanVinyls(aPath: string): Boolean;
 
 procedure ListFiles(const aPath, aExt: string; aRecurseSubFolders: Boolean; aFiles: TStringList; aOnProgress: TProc<string>);
 
+
 implementation
 uses
-  MTkit2_Unit1, MTkit2_COB, MTkit2_CPO, MTkit2_Tree, MTkit2_Vertex;
+  MTkit2_Unit1, MTkit2_COB, MTkit2_CPO, MTkit2_Tree;
 
 
 function LoadOBJ(const aFilename: string): Boolean;

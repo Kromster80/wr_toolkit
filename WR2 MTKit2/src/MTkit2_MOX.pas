@@ -2,7 +2,7 @@ unit MTkit2_MOX;
 interface
 uses
   Math, SysUtils, Windows,
-  MTkit2_Vertex, KM_Vertexes;
+  KM_Vertexes;
 
 type
   EExceptionTooNew = class(Exception);

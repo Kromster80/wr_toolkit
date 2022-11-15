@@ -7,13 +7,13 @@ uses
 
   dglOpenGL, FloatSpinEdit, KromOGLUtils, KromUtils, TGATexture, PTXTexture,
 
-  MTkit2_Defaults, MTkit2_Render, MTkit2_RenderLegacy, MTkit2_IO, MTkit2_COB, MTkit2_CPO, MTkit2_MOX, MTkit2_Tree, MTkit2_Vertex,
+  MTkit2_Defaults, MTkit2_Render, MTkit2_RenderLegacy, MTkit2_IO, MTkit2_COB, MTkit2_CPO, MTkit2_MOX, MTkit2_Tree,
   Vcl.ButtonGroup, Vcl.CategoryButtons;
 
 type
   TInputMode = (imRelative, imAbsolute);
 
-//todo: Split into own unit
+  //todo: Split into own unit
   TButtonGroup = class(Vcl.ButtonGroup.TButtonGroup)
   private
     fButtonEnabled: array of Boolean;

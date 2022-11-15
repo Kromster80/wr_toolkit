@@ -21,8 +21,7 @@ uses
   MTkit2_Tree in 'src\MTkit2_Tree.pas',
   MTkit2_Render in 'src\MTkit2_Render.pas',
   MTkit2_RenderLegacy in 'src\MTkit2_RenderLegacy.pas',
-  MTkit2_Textures in 'src\MTkit2_Textures.pas',
-  MTkit2_Vertex in 'src\MTkit2_Vertex.pas';
+  MTkit2_Textures in 'src\MTkit2_Textures.pas';
 
 {$R *.RES}
 
