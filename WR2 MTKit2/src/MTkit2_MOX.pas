@@ -18,7 +18,7 @@ type
 
   TMOXPart = packed record
     Dname: string[64];
-    Matrix: TMatrix;
+    Matrix: TMatrix4;
     Parent, Child, PrevInLevel, NextInLevel: SmallInt;
     FirstMat, NumMat: Word;
     xMid, yMid, zMid, fRadius: Single;
@@ -34,7 +34,7 @@ type
     sMin, sMax, Freq: Single; // Min, Max
     B,G,R,A: Byte;            // 20
     Unused, Parent: SmallInt; // 24
-    Matrix: TMatrix;          // 88
+    Matrix: TMatrix4;          // 88
 
     function GetStr: string;
   end;
@@ -182,28 +182,7 @@ end;
 
 function TMOX2.GetTransformMatrix(aPart: Integer): TMatrix4;
 begin
-  Result := TMatrix4.Identity;
-
-  // Copy matrix to our representation
-  Result.m11 := Parts[aPart].Matrix[1,1];
-  Result.m12 := Parts[aPart].Matrix[1,2];
-  Result.m13 := Parts[aPart].Matrix[1,3];
-  Result.m14 := Parts[aPart].Matrix[1,4];
-
-  Result.m21 := Parts[aPart].Matrix[2,1];
-  Result.m22 := Parts[aPart].Matrix[2,2];
-  Result.m23 := Parts[aPart].Matrix[2,3];
-  Result.m24 := Parts[aPart].Matrix[2,4];
-
-  Result.m31 := Parts[aPart].Matrix[3,1];
-  Result.m32 := Parts[aPart].Matrix[3,2];
-  Result.m33 := Parts[aPart].Matrix[3,3];
-  Result.m34 := Parts[aPart].Matrix[3,4];
-
-  Result.m41 := Parts[aPart].Matrix[4,1];
-  Result.m42 := Parts[aPart].Matrix[4,2];
-  Result.m43 := Parts[aPart].Matrix[4,3];
-  Result.m44 := Parts[aPart].Matrix[4,4];
+  Result := Parts[aPart].Matrix;
 
   // Apply parent transforms
   if Parts[aPart].Parent <> -1 then
@@ -234,10 +213,7 @@ begin
     Blinkers[Header.BlinkerCount].Unused := 0;
     Blinkers[Header.BlinkerCount].Parent := 0;
     FillChar(Blinkers[Header.BlinkerCount].Matrix, SizeOf(Blinkers[Header.BlinkerCount].Matrix), #0);
-    Blinkers[Header.BlinkerCount].Matrix[1, 1] := 1;
-    Blinkers[Header.BlinkerCount].Matrix[2, 2] := 1;
-    Blinkers[Header.BlinkerCount].Matrix[3, 3] := 1;
-    Blinkers[Header.BlinkerCount].Matrix[4, 4] := 1;
+    Blinkers[Header.BlinkerCount].Matrix := TMatrix4.Identity;
   end;
 end;
 
@@ -406,10 +382,7 @@ begin
 
       FillChar(Parts[1], SizeOf(Parts[1]), #0);
       Parts[1].Dname := 'Default';
-      Parts[1].Matrix[1, 1] := 1;
-      Parts[1].Matrix[2, 2] := 1;
-      Parts[1].Matrix[3, 3] := 1;
-      Parts[1].Matrix[4, 4] := 1;
+      Parts[1].Matrix := TMatrix4.Identity;
       Parts[1].Parent := -1;
       Parts[1].Child := -1;
       Parts[1].PrevInLevel := -1;
@@ -449,7 +422,7 @@ var
   uu,vv,xr: Single;
   t,t2: Vector3f;
   idChunk, idPart, CurrentLev, DepthLev: Integer;
-  mtx: TMatrix;
+  mtx: TMatrix4;
 begin
   SetLength(rs, 4);
   AssignFile(ft,aFilename);
@@ -553,10 +526,10 @@ begin
       Dec(DepthLev);          // -1
 
       mtx := Parts[k].Matrix;
-      t2.x:=t.x*mtx[1,1]+t.y*mtx[2,1]+t.z*mtx[3,1]+mtx[4,1];
-      t2.y:=t.x*mtx[1,2]+t.y*mtx[2,2]+t.z*mtx[3,2]+mtx[4,2];
-      t2.z:=t.x*mtx[1,3]+t.y*mtx[2,3]+t.z*mtx[3,3]+mtx[4,3];
-      t:=t2;
+      t2.x:=t.x*mtx.m11+t.y*mtx.m21+t.z*mtx.m31+mtx.m41;
+      t2.y:=t.x*mtx.m12+t.y*mtx.m22+t.z*mtx.m32+mtx.m42;
+      t2.z:=t.x*mtx.m13+t.y*mtx.m23+t.z*mtx.m33+mtx.m43;
+      t := t2;
     until(DepthLev=0);
 
     Vertice[j].X := t.x + idPart * 25 * Ord(aSpreadOverX);

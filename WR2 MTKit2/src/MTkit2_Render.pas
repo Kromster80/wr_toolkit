@@ -396,11 +396,11 @@ begin
     begin
       glBindTexture(GL_TEXTURE_2D, 0);
       glPushMatrix;
-        glTranslate(aMOX.Blinkers[I].Matrix[4,1],aMOX.Blinkers[I].Matrix[4,2],aMOX.Blinkers[I].Matrix[4,3]);
+        glTranslate(aMOX.Blinkers[I].Matrix.m41, aMOX.Blinkers[I].Matrix.m42, aMOX.Blinkers[I].Matrix.m43);
         //glMultMatrixf(@aMOX.Blinkers[I].Matrix);
         glBegin(GL_LINES);
         glColor4ub(aMOX.Blinkers[I].R,aMOX.Blinkers[I].G,aMOX.Blinkers[I].B,0);
-        glVertex3f(aMOX.Blinkers[I].Matrix[3,1]*10,aMOX.Blinkers[I].Matrix[3,2]*10,aMOX.Blinkers[I].Matrix[3,3]*10);
+        glVertex3f(aMOX.Blinkers[I].Matrix.m31*10,aMOX.Blinkers[I].Matrix.m32*10,aMOX.Blinkers[I].Matrix.m33*10);
         glColor4ub(aMOX.Blinkers[I].R,aMOX.Blinkers[I].G,aMOX.Blinkers[I].B,255);
         glVertex3f(0,0,0);
         glEnd;
@@ -418,14 +418,14 @@ begin
               end;
       2..9:   begin
                 glBindTexture(GL_TEXTURE_2D, LensFlareTex);
-                glTranslate(aMOX.Blinkers[I].Matrix[4,1],aMOX.Blinkers[I].Matrix[4,2],aMOX.Blinkers[I].Matrix[4,3]);
+                glTranslate(aMOX.Blinkers[I].Matrix.m41,aMOX.Blinkers[I].Matrix.m42,aMOX.Blinkers[I].Matrix.m43);
                 glRotatef(xRot, 0,-1, 0);
                 glRotatef(yRot,-1, 0, 0);
                 //find DOT between view and blinker vector
                 c := Round(
-                (DotProduct(aMOX.Blinkers[I].Matrix[3,1],
-                            aMOX.Blinkers[I].Matrix[3,2],
-                            aMOX.Blinkers[I].Matrix[3,3],
+                (DotProduct(aMOX.Blinkers[I].Matrix.m31,
+                            aMOX.Blinkers[I].Matrix.m32,
+                            aMOX.Blinkers[I].Matrix.m33,
                             cam[1], cam[2], cam[3]
                             )-0.325)*255*(1/(1-0.325))); //use 0.325 .. 1.0 as 0..1
                 c := EnsureRange(c, 0, 255);

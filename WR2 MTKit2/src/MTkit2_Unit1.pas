@@ -532,7 +532,7 @@ var
 implementation
 uses
   GraphUtil, ColorPicker2, UnitRawInputHeaders,
-  MTKit2_Textures;
+  MTKit2_Textures, KM_Vertexes;
 
 {$R *.dfm}
 
@@ -747,19 +747,19 @@ begin
   //fname:='D:\a.tree';
   //fname:='demo8.mox';
 
-  {fMOX.LoadMOX('Octavia_Race.mox');
+  fMOX.LoadMOX('Octavia_Race.mox');
   LoadMTL('Octavia_Race.mtl', fMOX.Header.MatCount);
   fMOX.ExportLWO('Octavia_Race.old.lwo', 3, False);
 
   fMOX.LoadMOX('Octavia_Race.mox');
   LoadMTL('Octavia_Race.mtl', fMOX.Header.MatCount);
-  fMOX.ExportLWO2('Octavia_Race.new.lwo', 3, False);}
+  fMOX.ExportLWO2('Octavia_Race.new.lwo', 3, False);
 
-  fMOX.LoadMOX('Spielziel.mox');
-  LoadMTL('Spielziel.mtl', fMOX.Header.MatCount);
-  fMOX.ExportLWO2('Spielziel.new.lwo', 3, False);
+//  fMOX.LoadMOX('Spielziel.mox');
+//  LoadMTL('Spielziel.mtl', fMOX.Header.MatCount);
+//  fMOX.ExportLWO2('Spielziel.new.lwo', 3, False);
 //  fMOX.ExportLWO('Spielziel.old.lwo', 3, False);
-  Halt;
+  //Halt;
 
   //Open it through browser
   if FileExists(fname) then
@@ -1202,13 +1202,13 @@ begin
     glkScale(Sqr(zoom));
 
     if RenderOptions.ShowPart and (ActivePage=apParts) and (SelectedTreeNode<>0) then
-      glTranslatef(-fMOX.Parts[SelectedTreeNode].Matrix[4,1]-PartModify[SelectedTreeNode].Move[1],
-                   -fMOX.Parts[SelectedTreeNode].Matrix[4,2]-PartModify[SelectedTreeNode].Move[2],
-                   -fMOX.Parts[SelectedTreeNode].Matrix[4,3]-PartModify[SelectedTreeNode].Move[3]);
+      glTranslatef(-fMOX.Parts[SelectedTreeNode].Matrix.m41-PartModify[SelectedTreeNode].Move[1],
+                   -fMOX.Parts[SelectedTreeNode].Matrix.m42-PartModify[SelectedTreeNode].Move[2],
+                   -fMOX.Parts[SelectedTreeNode].Matrix.m43-PartModify[SelectedTreeNode].Move[3]);
     if cbTargetLight.Checked and (ActivePage=apLights) and (LBBlinkers.ItemIndex<>-1) then
-      glTranslatef(-fMOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix[4,1],
-                   -fMOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix[4,2],
-                   -fMOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix[4,3]);
+      glTranslatef(-fMOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix.m41,
+                   -fMOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix.m42,
+                   -fMOX.Blinkers[LBBlinkers.ItemIndex+1].Matrix.m43);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //Set alpha mode
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -1431,16 +1431,16 @@ begin
     fsBlinkerFreq.Value := fMOX.Blinkers[idx].Freq;
     //S1.Value:=fMOX.Blinkers[LBBlinkers.ItemIndex+1].z1;
     seBlinkerParent.Value:=fMOX.Blinkers[idx].Parent;
-    fsBlinkerX.Value:=fMOX.Blinkers[idx].Matrix[4,1]/10;
-    fsBlinkerY.Value:=fMOX.Blinkers[idx].Matrix[4,2]/10;
-    fsBlinkerZ.Value:=fMOX.Blinkers[idx].Matrix[4,3]/10;
+    fsBlinkerX.Value:=fMOX.Blinkers[idx].Matrix.m41 / 10;
+    fsBlinkerY.Value:=fMOX.Blinkers[idx].Matrix.m42 / 10;
+    fsBlinkerZ.Value:=fMOX.Blinkers[idx].Matrix.m43 / 10;
     shpBlinkerColor.Brush.Color := fMOX.Blinkers[idx].R+fMOX.Blinkers[idx].G*256+fMOX.Blinkers[idx].B*65536;
 
     with fMOX.Blinkers[idx] do
     begin
-      m[1]:=Matrix[1,1]; m[2]:=Matrix[1,2]; m[3]:=Matrix[1,3];
-      m[4]:=Matrix[2,1]; m[5]:=Matrix[2,2]; m[6]:=Matrix[2,3];
-      m[7]:=Matrix[3,1]; m[8]:=Matrix[3,2]; m[9]:=Matrix[3,3];
+      m[1]:=Matrix.m11; m[2]:=Matrix.m12; m[3]:=Matrix.m13;
+      m[4]:=Matrix.m21; m[5]:=Matrix.m22; m[6]:=Matrix.m23;
+      m[7]:=Matrix.m31; m[8]:=Matrix.m32; m[9]:=Matrix.m33;
     end;
 
     Matrix2Angles(m, 9, @ax, @ay, @az);
@@ -1698,9 +1698,9 @@ begin
 
     for i:=1 to fMOX.Header.PartCount do
     begin
-      fMOX.Parts[i].Matrix[4,1] := Tx[i];//PartModify[i].Move[1];
-      fMOX.Parts[i].Matrix[4,2] := Ty[i];//PartModify[i].Move[2];
-      fMOX.Parts[i].Matrix[4,3] := Tz[i];//PartModify[i].Move[3];
+      fMOX.Parts[i].Matrix.m41 := Tx[i];//PartModify[i].Move[1];
+      fMOX.Parts[i].Matrix.m42 := Ty[i];//PartModify[i].Move[2];
+      fMOX.Parts[i].Matrix.m43 := Tz[i];//PartModify[i].Move[3];
       fMOX.Parts[i].xMid:=fMOX.Parts[i].xMid-PartModify[i].Move[1];
       fMOX.Parts[i].yMid:=fMOX.Parts[i].yMid-PartModify[i].Move[2];
       fMOX.Parts[i].zMid:=fMOX.Parts[i].zMid-PartModify[i].Move[3];
@@ -1871,13 +1871,7 @@ begin
       with fMOX.Blinkers[fMOX.Header.BlinkerCount] do
       begin //0..63
         BlinkerType := 2;
-        Matrix[1,1]:=1; Matrix[1,2]:=0; Matrix[1,3]:=0; Matrix[1,4]:=0;
-        Matrix[2,1]:=0; Matrix[2,2]:=1; Matrix[2,3]:=0; Matrix[2,4]:=0;
-        Matrix[3,1]:=0; Matrix[3,2]:=0; Matrix[3,3]:=1; Matrix[3,4]:=0;
-        Matrix[4,1]:=Imp.XYZ[i].X;
-        Matrix[4,2]:=Imp.XYZ[i].Y;
-        Matrix[4,3]:=Imp.XYZ[i].Z;
-        Matrix[4,4]:=1;
+        Matrix:= TMatrix4.NewTranslate(Imp.XYZ[i].X, Imp.XYZ[i].Y, Imp.XYZ[i].Z);
         sMin:=1;
         sMax:=1;
         Freq:=0;
@@ -2102,10 +2096,7 @@ begin
   for i:=1 to fMOX.Header.PartCount do
   begin
     fMOX.Parts[i].Dname:=Imp.PartName[i];
-    fMOX.Parts[i].Matrix[1,1]:=1;
-    fMOX.Parts[i].Matrix[2,2]:=1;
-    fMOX.Parts[i].Matrix[3,3]:=1;
-    fMOX.Parts[i].Matrix[4,4]:=1;
+    fMOX.Parts[i].Matrix := TMatrix4.Identity;
     fMOX.Parts[i].Parent:=-1;
     fMOX.Parts[i].Child:=-1;
     fMOX.Parts[i].PrevInLevel:=-1;
@@ -2160,9 +2151,9 @@ begin
   if idx = 0 then Exit;
   if fUIRefresh then Exit;
 
-  fMOX.Blinkers[idx].Matrix[4,1] := fsBlinkerX.Value*10;
-  fMOX.Blinkers[idx].Matrix[4,2] := fsBlinkerY.Value*10;
-  fMOX.Blinkers[idx].Matrix[4,3] := fsBlinkerZ.Value*10;
+  fMOX.Blinkers[idx].Matrix.m41 := fsBlinkerX.Value * 10;
+  fMOX.Blinkers[idx].Matrix.m42 := fsBlinkerY.Value * 10;
+  fMOX.Blinkers[idx].Matrix.m43 := fsBlinkerZ.Value * 10;
   Angles2Matrix(fsBlinkerH.Value, fsBlinkerP.Value, fsBlinkerB.Value, @fMOX.Blinkers[idx].Matrix, 16);
 end;
 
