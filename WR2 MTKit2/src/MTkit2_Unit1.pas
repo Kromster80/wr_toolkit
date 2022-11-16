@@ -747,7 +747,7 @@ begin
   //fname:='D:\a.tree';
   //fname:='demo8.mox';
 
-  fMOX.LoadMOX('Octavia_Race.mox');
+{  fMOX.LoadMOX('Octavia_Race.mox');
   LoadMTL('Octavia_Race.mtl', fMOX.Header.MatCount);
   fMOX.ExportLWO('Octavia_Race.old.lwo', 3, False);
 
@@ -759,7 +759,7 @@ begin
 //  LoadMTL('Spielziel.mtl', fMOX.Header.MatCount);
 //  fMOX.ExportLWO2('Spielziel.new.lwo', 3, False);
 //  fMOX.ExportLWO('Spielziel.old.lwo', 3, False);
-  Halt;
+  Halt;}
 
   //Open it through browser
   if FileExists(fname) then

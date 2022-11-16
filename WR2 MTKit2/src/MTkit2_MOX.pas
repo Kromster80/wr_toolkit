@@ -98,8 +98,8 @@ type
     function GetTransformMatrix(aPart: Integer): TMatrix4;
 
     procedure LoadMOX(const aFilename: string);
+    procedure ExportLWO_old(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean); deprecated;
     procedure ExportLWO(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
-    procedure ExportLWO2(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
 
     procedure BlinkerAdd(aIndex: Integer);
     procedure BlinkerRemove(aIndex: Integer);
@@ -411,7 +411,7 @@ begin
 end;
 
 
-procedure TMOX2.ExportLWO(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
+procedure TMOX2.ExportLWO_old(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
 const
   DEFAULT_PATH = './textures_PC/';
 var
@@ -653,7 +653,7 @@ begin
 end;
 
 
-procedure TMOX2.ExportLWO2(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
+procedure TMOX2.ExportLWO(const aFilename: string; aColorId: Integer; aSpreadOverX: Boolean);
 const
   EXPORT_SCALE = 0.1;
 var
@@ -687,7 +687,7 @@ begin
       t.Y := Vertice[I+1].Y;
       t.Z := Vertice[I+1].Z;
 
-      t := t * GetTransformMatrix(idPart) * EXPORT_SCALE;
+      t := (t * GetTransformMatrix(idPart) * EXPORT_SCALE).GetOffset(2.0 * (idPart - 1) * Ord(aSpreadOverX), 0, 0);
 
       lay.Vertices[I] := t;
     end;

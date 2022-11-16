@@ -1,5 +1,5 @@
 ------------------------------------------------------
-"World Racing 2" Mesh Tool-Kit v2.4.3+
+"World Racing 2" Mesh Tool-Kit v2.4.4
 ------------------------------------------------------
 
 Description:
@@ -29,7 +29,8 @@ MTKit2 shows you preview of a car, WR2 will display it bit differently.
 AFC11/FVR support is limited.
 
 Version History:
-                    Fixed MOX>LWO export of models with 65k+ polys
+2.4.4   2022.11.16  New MOX>LWO export library that correctly exports models with 65k+ polys
+                    Fixed parts placement in exported MOX>LWO files
                     Fixed scroll to zoom the model after using new menus (they "caught" the scroll events)
                     Refactoring
 2.4.3   2022.09.28  New load/save/import/export menus

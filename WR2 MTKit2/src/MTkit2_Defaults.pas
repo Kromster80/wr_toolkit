@@ -28,7 +28,7 @@ type
 
 const
   APP_TITLE = 'Mesh ToolKit';
-  VER_INFO = '2.4.3+';
+  VER_INFO = '2.4.4';
   FPS_INTERVAL: Cardinal = 1000;               // Calculate FPS every ---- ms
   MAX_MATERIALS = 255;
   MAX_COLORS = 15;
