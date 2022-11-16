@@ -1902,7 +1902,7 @@ begin
       fCurrLayer := I;
       WriteChunkLAYR(sLwo2);
       WriteChunkPNTS(sLwo2);
-      WriteChunkBBOX(sLwo2);
+      //WriteChunkBBOX(sLwo2); the chunk is optional
       WriteChunkVMAP(sLwo2);
       WriteChunkPOLS(sLwo2);
       WriteChunkPTAG(sLwo2);
