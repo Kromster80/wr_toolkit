@@ -1,11 +1,12 @@
 ------------------------------------------------------
-Synetic DataSet explorer v0.3
+Synetic DataSet explorer v0.4
 ------------------------------------------------------
 
 Description:
 Tool for exploring Synetic satasets (*.ds, *.car, *.wrc and other)
 
 Version History:
+0.4     2022.11.25  Fixed quotes export for Google Sheets
 0.3     2022.10.25  Fixed export issues with uneven entry count in COs
                     Added codepage for Polish, Hungarian, Czech
 0.2     2022.10.25  Fixed updated data not being written on paste from clipboard

@@ -54,7 +54,7 @@ type
 
 implementation
 uses
-  Math, Types, StrUtils, SysUtils;
+  Math, Types, StrUtils, SysUtils, KromStringUtils;
 
 
 { TDS }
@@ -426,6 +426,8 @@ begin
               su := fCOs[I].fValues[K].ToUnicodeString(1252);
         end else
           su := '';
+
+        su := EscapeTextForGoogleSheets(su);
 
         s := s + IfThen(I > 0, #9) + su;
       end;
