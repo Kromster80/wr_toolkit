@@ -11,8 +11,9 @@ object Form7: TForm7
   Font.Style = []
   OldCreateOrder = False
   Position = poDesktopCenter
+  Scaled = False
   OnCreate = FormCreate
-  PixelsPerInch = 120
+  PixelsPerInch = 96
   TextHeight = 17
   object Label2: TLabel
     Left = 704
