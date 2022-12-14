@@ -184,7 +184,7 @@ end;
 
 procedure TForm7.FormCreate(Sender: TObject);
 begin
-  Caption := 'DS Explorer v0.4';
+  Caption := 'DS Explorer v0.5';
 
   fDSs := TObjectList<TDS>.Create;
 

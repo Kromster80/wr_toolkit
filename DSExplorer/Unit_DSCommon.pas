@@ -118,6 +118,8 @@ end;
 
 { TValue }
 constructor TValue.CreateFromStream(aStream: TStream);
+var
+  t: Integer;
 begin
   inherited Create;
 
@@ -126,6 +128,7 @@ begin
     0: Exit; // Rarely nothing
     1: aStream.Read(I, 4);
     2: aStream.Read(F, 4);
+    4: aStream.Read(t, 4) {AFC11Man (and others) place this fake type to throw EditCar off track};
     16: S.LoadFromStream(aStream);
   else
     Assert(False);
