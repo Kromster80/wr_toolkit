@@ -3,6 +3,9 @@
         <ProjectGuid>{13222362-CFF8-43DD-989D-8B539352E64F}</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
+        <Projects Include="DSExplorer\DSExplorer.dproj">
+            <Dependencies/>
+        </Projects>
         <Projects Include="AFC11N Manager\AFC11NMan.dproj">
             <Dependencies/>
         </Projects>
@@ -32,6 +35,15 @@
             <Default.Personality/>
         </BorlandProject>
     </ProjectExtensions>
+    <Target Name="DSExplorer">
+        <MSBuild Projects="DSExplorer\DSExplorer.dproj"/>
+    </Target>
+    <Target Name="DSExplorer:Clean">
+        <MSBuild Projects="DSExplorer\DSExplorer.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="DSExplorer:Make">
+        <MSBuild Projects="DSExplorer\DSExplorer.dproj" Targets="Make"/>
+    </Target>
     <Target Name="AFC11NMan">
         <MSBuild Projects="AFC11N Manager\AFC11NMan.dproj"/>
     </Target>
@@ -96,13 +108,13 @@
         <MSBuild Projects="WR2 MissionMaker\WR2MissionMaker.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="AFC11NMan;WR_PTXTool;MTkit2;STKit2;WR_EditCar;WR2Man;WR2MissionMaker"/>
+        <CallTarget Targets="DSExplorer;AFC11NMan;WR_PTXTool;MTkit2;STKit2;WR_EditCar;WR2Man;WR2MissionMaker"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="AFC11NMan:Clean;WR_PTXTool:Clean;MTkit2:Clean;STKit2:Clean;WR_EditCar:Clean;WR2Man:Clean;WR2MissionMaker:Clean"/>
+        <CallTarget Targets="DSExplorer:Clean;AFC11NMan:Clean;WR_PTXTool:Clean;MTkit2:Clean;STKit2:Clean;WR_EditCar:Clean;WR2Man:Clean;WR2MissionMaker:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="AFC11NMan:Make;WR_PTXTool:Make;MTkit2:Make;STKit2:Make;WR_EditCar:Make;WR2Man:Make;WR2MissionMaker:Make"/>
+        <CallTarget Targets="DSExplorer:Make;AFC11NMan:Make;WR_PTXTool:Make;MTkit2:Make;STKit2:Make;WR_EditCar:Make;WR2Man:Make;WR2MissionMaker:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
