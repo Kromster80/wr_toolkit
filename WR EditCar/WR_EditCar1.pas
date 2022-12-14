@@ -238,8 +238,6 @@ type
     GroupGears: TGroupBox;
     FSGearF: TFloatSpinEdit;
     FSGearR: TFloatSpinEdit;
-    FSGear9: TFloatSpinEdit;
-    FSGear8: TFloatSpinEdit;
     FSGear7: TFloatSpinEdit;
     FSGear6: TFloatSpinEdit;
     FSGear5: TFloatSpinEdit;
@@ -249,8 +247,6 @@ type
     FSGear1: TFloatSpinEdit;
     SGearQty: TSpinEdit;
     Label150: TLabel;
-    Label201: TLabel;
-    Label200: TLabel;
     Label149: TLabel;
     Label148: TLabel;
     Label147: TLabel;
@@ -364,13 +360,17 @@ type
     procedure UpdateValueList;
     procedure UpdateDataSet;
     procedure ImportDSCarClick(Sender: TObject);
+  private
+    fVersionInfo: string;
   end;
 
 
 type TEditingFormat = (fmtMBWR, fmtWR2, fmtAFC11N, fmtAFC11CT, fmtAFC11BW, fmtFVR, fmtAFC11HN);
 
 const
-  VersionInfo = 'EditCar 2 Beta       (02 Aug 2010)';
+  TOOL_NAME = 'EditCar';
+  TOOL_VERSION = 'Version 2 Beta';
+
   MaxFieldsCarsDB = 105; //EditCar.car capacity
   MaxFields3DCarsDB = 80; //EditCar.car capacity
 
@@ -395,12 +395,14 @@ implementation
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+  fVersionInfo := TOOL_VERSION + ' (' + FormatDateTime('YYY/MM/DD HH:MM', GetExeBuildTime) + ')';
+
+  Caption := TOOL_NAME + ' ' + fVersionInfo;
+
   DoClientAreaResize(Self);
-  DecimalSeparator := '.';
+  FormatSettings.DecimalSeparator := '.';
   CarName := ExtractOpenedFileName(CMDLine);
   ExeDir := ExtractFilePath(Application.ExeName);
-
-  Caption := VersionInfo;
 
   InitChart();
   fDataSet := TDataSet.Create;
@@ -505,10 +507,10 @@ end;
 
 procedure TForm1.AboutClick(Sender: TObject);
 begin
-  AboutForm.Show(VersionInfo,'Edit cars perfomance in "EditCar.car" files.'+eol+eol+
+  AboutForm.Show(TOOL_NAME, fVersionInfo, 'Edit cars perfomance in "EditCar.car" files.'+eol+eol+
                              'German translation by Jonas Wolf'+eol+
                              'Hungarian translation by Nagyidai Andor'+eol+
-                             'Russian translation by Krom (incomplete)','EDITCAR');
+                             'Russian translation by Krom (incomplete)', TOOL_NAME);
 end;
 
 
@@ -538,8 +540,6 @@ begin
     if FSGear5.Value<>0 then Label147.Caption := Format('(%.1f) km/h', [z/FSGear5.Value]) else Label147.Caption:='';
     if FSGear6.Value<>0 then Label148.Caption := Format('(%.1f) km/h', [z/FSGear6.Value]) else Label148.Caption:='';
     if FSGear7.Value<>0 then Label149.Caption := Format('(%.1f) km/h', [z/FSGear7.Value]) else Label149.Caption:='';
-    if FSGear8.Value<>0 then Label200.Caption := Format('(%.1f) km/h', [z/FSGear8.Value]) else Label200.Caption:='';
-    if FSGear9.Value<>0 then Label149.Caption := Format('(%.1f) km/h', [z/FSGear9.Value]) else Label201.Caption:='';
     if FSGearR.Value<>0 then Label150.Caption := Format('(%.1f) km/h', [z/FSGearR.Value]) else Label150.Caption:='';
   end;
 
@@ -1046,8 +1046,6 @@ begin
     FSGear5.Value       := GetValue(105,89,2).Rel;
     FSGear6.Value       := GetValue(105,90,2).Rel;
     FSGear7.Value       := GetValue(105,91,2).Rel;
-    FSGear8.Value       := GetValue(105,111,2).Rel;
-    FSGear9.Value       := GetValue(105,112,2).Rel;
     FSGearR.Value       := GetValue(105,92,2).Rel;
     FSGearF.Value       := GetValue(105,37,2).Rel;
 
