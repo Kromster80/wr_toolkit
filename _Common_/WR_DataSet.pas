@@ -35,7 +35,7 @@ type
 type
   TDataSet = class
   private
-    Header: array [1..33]of char;
+    Header: array [1..33]of AnsiChar;
     DSqty:integer;
 
     TB:array of record
@@ -129,7 +129,7 @@ function TDataSet.LoadDS(FileName:string):boolean;
 var
   IgnoreTyp:boolean;
   f:file;
-  c: array [1..32768]of char;
+  c: array [1..32768] of AnsiChar;
   ErrS:string;
   iDS,iTB,iCO:integer;
   i:integer;
@@ -141,7 +141,7 @@ var
     if Len=0 then exit;
     blockread(f,c,Len+1);
     c[Len+1]:=#0;
-    Result:=StrPas(@c);
+    Result:=StrPas(PAnsiChar(@c[1]));
   end;
 
 begin
@@ -156,7 +156,8 @@ begin
   setlength(CO,DSqty+1);
   setlength(Value,DSqty+1);
 
-  for iDS:=1 to DSqty do begin
+  for iDS:=1 to DSqty do
+  begin
   blockread(f,c,33);
   TB[iDS].Entries:=int2(c[9],c[10]);
   TB[iDS].Index:=int2(c[17],c[18]);
@@ -166,13 +167,16 @@ begin
   setlength(CO[iDS],TB[iDS].Entries+1);
   setlength(Value[iDS],TB[iDS].Entries+1);
 
-  for iTB:=1 to TB[iDS].Entries do begin
+  for iTB:=1 to TB[iDS].Entries do
+  begin
     blockread(f,c,4);
-    if c[1]+c[2]+c[3]+c[4]<>'NDCO' then begin
+    if c[1]+c[2]+c[3]+c[4]<>'NDCO' then
+    begin
       blockread(f,c,4);
       TB[iDS].Cond:=int2(c[1],c[2]);
       setlength(TB[iDS].CondText,TB[iDS].Cond+1);
-        for i:=1 to TB[iDS].Cond do begin
+        for i:=1 to TB[iDS].Cond do
+        begin
           blockread(f,c,4); //length of entry
           TB[iDS].CondText[i]:=ReadString(int2(c[1],c[2]));
         end;
@@ -199,7 +203,8 @@ begin
 
   setlength(Value[iDS,iTB],CO[iDS,iTB].Entries+100);//optimistic way to avoid common length mismatches
 
-    for iCO:=1 to CO[iDS,iTB].Entries do begin
+    for iCO:=1 to CO[iDS,iTB].Entries do
+    begin
     Value[iDS,iTB,iCO] := DSValue(0,0,0,''); //reset
     blockread(f,Value[iDS,iTB,iCO].Typ,1);
     case Value[iDS,iTB,iCO].Typ of
@@ -211,7 +216,8 @@ begin
           end;
       else begin
             blockread(f,c,4);
-            if not IgnoreTyp then begin
+            if not IgnoreTyp then
+            begin
               ErrS := 'Unknown Typ='+inttostr(ord(c[1]))+#10+inttostr(iDS)+':'+inttostr(iTB)+':'+inttostr(iCO);
               MsgRes:=MessageBox(HWND(nil),@(ErrS)[1],'Error',MB_ABORTRETRYIGNORE or MB_DEFBUTTON3);
               if MsgRes=IDABORT then begin closefile(f); exit; end;

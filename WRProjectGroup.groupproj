@@ -15,6 +15,9 @@
         <Projects Include="WR2 STKit\STKit2.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="WR EditCar\WR_EditCar.dproj">
+            <Dependencies/>
+        </Projects>
         <Projects Include="WR2 Manager\WR2Man.dproj">
             <Dependencies/>
         </Projects>
@@ -65,6 +68,15 @@
     <Target Name="STKit2:Make">
         <MSBuild Projects="WR2 STKit\STKit2.dproj" Targets="Make"/>
     </Target>
+    <Target Name="WR_EditCar">
+        <MSBuild Projects="WR EditCar\WR_EditCar.dproj"/>
+    </Target>
+    <Target Name="WR_EditCar:Clean">
+        <MSBuild Projects="WR EditCar\WR_EditCar.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="WR_EditCar:Make">
+        <MSBuild Projects="WR EditCar\WR_EditCar.dproj" Targets="Make"/>
+    </Target>
     <Target Name="WR2Man">
         <MSBuild Projects="WR2 Manager\WR2Man.dproj"/>
     </Target>
@@ -84,13 +96,13 @@
         <MSBuild Projects="WR2 MissionMaker\WR2MissionMaker.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="AFC11NMan;WR_PTXTool;MTkit2;STKit2;WR2Man;WR2MissionMaker"/>
+        <CallTarget Targets="AFC11NMan;WR_PTXTool;MTkit2;STKit2;WR_EditCar;WR2Man;WR2MissionMaker"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="AFC11NMan:Clean;WR_PTXTool:Clean;MTkit2:Clean;STKit2:Clean;WR2Man:Clean;WR2MissionMaker:Clean"/>
+        <CallTarget Targets="AFC11NMan:Clean;WR_PTXTool:Clean;MTkit2:Clean;STKit2:Clean;WR_EditCar:Clean;WR2Man:Clean;WR2MissionMaker:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="AFC11NMan:Make;WR_PTXTool:Make;MTkit2:Make;STKit2:Make;WR2Man:Make;WR2MissionMaker:Make"/>
+        <CallTarget Targets="AFC11NMan:Make;WR_PTXTool:Make;MTkit2:Make;STKit2:Make;WR_EditCar:Make;WR2Man:Make;WR2MissionMaker:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
