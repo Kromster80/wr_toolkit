@@ -955,50 +955,64 @@ B:=B mod 65521;
 Adler32CRC:=B+A*65536; //reverse order for smaller numbers
 end;
 
+
 function RandomS(Range_Both_Directions:integer):integer; overload;
 begin
 Result:=Random(Range_Both_Directions*2+1)-Range_Both_Directions;
 end;
+
 
 function RandomS(Range_Both_Directions:single):single; overload;
 begin
 Result:=Random(round(Range_Both_Directions*20000)+1)/10000-Range_Both_Directions;
 end;
 
+
 procedure WriteLangFile(Sender:TForm; FileName:string; EraseWritten:boolean);
-var ft:textfile; i,k:integer; capt:string;
+var
+  ft:textfile;
+  i,k:integer;
+  capt:string;
 begin
-AssignFile(ft,FileName); rewrite(ft);
+  AssignFile(ft,FileName); rewrite(ft);
 
-for i:=0 to Sender.ComponentCount-1 do begin
+  for i:=0 to Sender.ComponentCount-1 do
+  begin
+    if(IsPublishedProp(Sender.Components[i],'Caption')) then
+    begin
+      capt:=GetStrProp(Sender.Components[i],'Caption');
+      if capt<>'' then
+      begin
+        writeln(ft,capt+'<=>'+uppercase(capt));
+        if EraseWritten then SetStrProp(Sender.Components[i],'Caption','*');
+      end;
+    end;
 
-  if(IsPublishedProp(Sender.Components[i],'Caption')) then begin
-  capt:=GetStrProp(Sender.Components[i],'Caption');
-    if capt<>'' then begin
-    writeln(ft,capt+'<=>'+uppercase(capt));
-    if EraseWritten then SetStrProp(Sender.Components[i],'Caption','*');
+    if Sender.Components[i] is TRadioGroup then
+    begin
+      writeln(ft,'//List');
+      for k:=0 to TRadioGroup(Sender.Components[i]).Items.Count-1 do
+      begin
+        capt:=TRadioGroup(Sender.Components[i]).Items[k];
+        writeln(ft,capt+'<=>'+uppercase(capt));
+        if EraseWritten then TRadioGroup(Sender.Components[i]).Items[k]:='*';
+      end;
+    writeln(ft,'//EndList');
     end;
   end;
 
-  if Sender.Components[i] is TRadioGroup then begin
-  writeln(ft,'//List');
-    for k:=0 to TRadioGroup(Sender.Components[i]).Items.Count-1 do begin
-    capt:=TRadioGroup(Sender.Components[i]).Items[k];
-    writeln(ft,capt+'<=>'+uppercase(capt));
-    if EraseWritten then TRadioGroup(Sender.Components[i]).Items[k]:='*';
-    end;
-  writeln(ft,'//EndList');
-  end;
-
-end;
-
-closefile(ft);
+  closefile(ft);
 end;
 
 procedure ReadLangFile(Sender:TForm; FileName:string; EraseWritten:boolean);
-var ft:textfile; i,k,row:integer; capt,eng,rus,ErrS:string; IsList:boolean;
+var
+  ft:textfile;
+  i,k,row:integer;
+  capt,eng,rus,ErrS:string;
+  IsList:boolean;
 begin
-  if not fileexists(FileName) then begin
+  if not fileexists(FileName) then
+  begin
     ErrS := 'Can''t find input file '+FileName;
     MessageBox(Sender.Handle,@(ErrS)[1],'Error',MB_OK);
     exit;
@@ -1011,11 +1025,13 @@ begin
   repeat
     inc(row);
     readln(ft,capt);
-    if capt='//List' then begin
+    if capt='//List' then
+    begin
       IsList:=true;
       readln(ft,capt);
     end;
-    if capt='//EndList' then begin
+    if capt='//EndList' then
+    begin
       IsList:=false;
       readln(ft,capt);
     end;
@@ -1023,7 +1039,8 @@ begin
     k:=1;
     repeat inc(k) until((k+1>length(capt))or(capt[k-1]+capt[k]+capt[k+1]='<=>'));
 
-    if k+1>length(capt) then begin
+    if k+1>length(capt) then
+    begin
       ErrS := 'Error on line '+inttostr(row)+'. ';
       MessageBox(Sender.Handle,@(ErrS)[1],'Error',MB_OK);
       //exit;
@@ -1032,22 +1049,26 @@ begin
     eng:=decs(capt,length(capt)-k+2,0); //+2 means '<=' thing
     rus:=decs(capt,-k-1,0);             //-1 means '>' thing
 
-    for i:=0 to Sender.ComponentCount-1 do begin
-
-      if(IsPublishedProp(Sender.Components[i],'Caption')) then begin
-      capt:=GetStrProp(Sender.Components[i],'Caption');
-      if capt=eng then SetStrProp(Sender.Components[i],'Caption',rus);
+    for i:=0 to Sender.ComponentCount-1 do
+    begin
+      if(IsPublishedProp(Sender.Components[i],'Caption')) then
+      begin
+        capt:=GetStrProp(Sender.Components[i],'Caption');
+        if capt=eng then SetStrProp(Sender.Components[i],'Caption',rus);
       end;
 
       if IsList then
-      if Sender.Components[i] is TRadioGroup then begin
-        for k:=0 to TRadioGroup(Sender.Components[i]).Items.Count-1 do begin
-        capt:=TRadioGroup(Sender.Components[i]).Items[k];
-        if capt=eng then TRadioGroup(Sender.Components[i]).Items[k]:=rus;
+      if Sender.Components[i] is TRadioGroup then
+      begin
+        for k:=0 to TRadioGroup(Sender.Components[i]).Items.Count-1 do
+        begin
+          capt:=TRadioGroup(Sender.Components[i]).Items[k];
+          if capt=eng then TRadioGroup(Sender.Components[i]).Items[k]:=rus;
         end;
       end;
     end;
   until(eof(ft));
+
   closefile(ft);
 end;
 
@@ -1061,6 +1082,7 @@ begin
   // Result:=Result and FileExists(aOpenDialog.FileName); //Already should be enabled in OpenDialog options
 end;
 
+
 function RunSaveDialog(aSaveDialog: TSaveDialog; aFileName, FilePath, Filter: string; const FileExt: string = ''): Boolean;
 begin
   aSaveDialog.FileName := ExtractFileName(FilePath + aFileName);
@@ -1071,6 +1093,7 @@ begin
   Result := aSaveDialog.Execute; // Returns "false" if user pressed "Cancel"
 end;
 
+
 function RunOpenDialog2(aOpenDialog: TOpenDialog; aPath, aFilter: string): Boolean;
 begin
   aOpenDialog.FileName := '';
@@ -1078,6 +1101,7 @@ begin
   aOpenDialog.Filter := aFilter;
   Result := aOpenDialog.Execute;
 end;
+
 
 function RunSaveDialog2(aSaveDialog: TSaveDialog; aFileName, aFilter: string): Boolean;
 begin

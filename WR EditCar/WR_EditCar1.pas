@@ -376,8 +376,6 @@ const
   MaxFields3DCarsDB = 80; //EditCar.car capacity
 
 var
-  Form1: TForm1;
-
   ImportDS:TDataSet; //This DS might be accessed a lot while user chooses a car to import, hence it's practical to read it once and keep in memory
 
   ExeDir,CarName:string;
@@ -490,7 +488,7 @@ var s:string;
 begin
   s := CarName;
   if length(s) > 32 then s := '...' + RightStr(s, 32);
-  Form1.Caption := s+'  -  ' + Edit1.Text; //path - carname
+  Caption := s+'  -  ' + Edit1.Text; //path - carname
   Application.Title := Edit1.Text;
 end;
 
@@ -521,7 +519,7 @@ end;
 
 procedure TForm1.FSChangeLink(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  FSChange(Form1);
+  FSChange(nil);
 end;
 
 
@@ -616,16 +614,18 @@ end;
 
 //We enable all controls and then disable ones that aren't usable by current EditingFormat
 procedure TForm1.RGFormatClick(Sender: TObject);
-var i:integer;
+var
+  i: integer;
 begin
   LockControls := true;
   FSChange(nil);
 
-  for i:=0 to Form1.ComponentCount-1 do
-  //Components with Tag=888 are protected from enabling
-  if TComponent(Form1.Components[i]).Tag<>888 then begin
-    if Form1.Components[i] is TControl then TControl(Form1.Components[i]).Enabled := true;
-    if Form1.Components[i] is TLabel then   TLabel(Form1.Components[i]).Enabled   := true;
+  for i:=0 to ComponentCount-1 do
+  // Components with Tag=888 are protected from enabling
+  if TComponent(Components[i]).Tag<>888 then
+  begin
+    if Components[i] is TControl then TControl(Components[i]).Enabled := true;
+    if Components[i] is TLabel then   TLabel(Components[i]).Enabled   := true;
   end;
 
   case RGFormat.ItemIndex of
@@ -891,7 +891,6 @@ begin
 end;
 
 
-
 procedure TForm1.Button1Click(Sender: TObject);
 begin
   //WriteLangFile(Form1,'Lang.txt',true);
@@ -900,7 +899,7 @@ end;
 
 procedure TForm1.BitBtn2Click(Sender: TObject);
 begin
-  ReadLangFile(Form1,ExeDir+'Lang'+TBitBtn(Sender).Caption+'.txt',true);
+  ReadLangFile(Self, ExeDir+'Lang'+TBitBtn(Sender).Caption+'.txt', true);
   BitBtn2.Enabled:=false;
   BitBtn3.Enabled:=false;
   BitBtn4.Enabled:=false;
@@ -912,7 +911,6 @@ procedure TForm1.Button2Click(Sender: TObject);
 begin
   UpdateControls;
 end;
-
 
 
 procedure TForm1.UpdateValueList;

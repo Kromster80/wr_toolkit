@@ -1,5 +1,4 @@
 program WR_EditCar;
-
 uses
   Forms,
   WR_EditCar1 in 'WR_EditCar1.pas' {Form1},
@@ -9,11 +8,13 @@ uses
 
 {$R *.res}
 
+var
+  Form1: TForm1;
+
 begin
   Application.Initialize;
   Application.Title := 'MBWR\WR2 EditCar';
   Application.CreateForm(TForm1, Form1);
   Application.CreateForm(TAboutForm, AboutForm);
   Application.Run;
-
-  end.
+end.
