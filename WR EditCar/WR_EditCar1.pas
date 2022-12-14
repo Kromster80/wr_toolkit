@@ -365,7 +365,8 @@ type
   end;
 
 
-type TEditingFormat = (fmtMBWR, fmtWR2, fmtAFC11N, fmtAFC11CT, fmtAFC11BW, fmtFVR, fmtAFC11HN);
+type
+  TEditingFormat = (fmtMBWR, fmtWR2, fmtAFC11N, fmtAFC11CT, fmtAFC11BW, fmtFVR, fmtAFC11HN);
 
 const
   TOOL_NAME = 'EditCar';
@@ -392,6 +393,9 @@ var
   CarFmt:TEditingFormat;
 
 implementation
+
+{$R *.dfm}
+
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
@@ -456,7 +460,8 @@ begin
   fDataSet.LoadDS(aCarFile);
 
   //Special fix for Sound SampleRate
-  if fDataSet.GetValueType(105,74,2)<>1 then begin
+  if fDataSet.GetValueType(105,74,2)<>1 then
+  begin
     fDataSet.SetValueType(105,74,2,1); //Integer in all WR cars
     fDataSet.SetValue(105,74,2,round(fDataSet.GetValue(105,74,2).Rel));
   end;
@@ -530,7 +535,7 @@ begin
     UpdateCaption;
 
   //Fill in max speeds for gears
-  if (SrpmMax.Value<>0)and(STireFR.Value<>0)and(FSGearF.Value<>0) then
+  if (SrpmMax.Value <> 0) and (STireFR.Value <> 0) and (FSGearF.Value <> 0) then
   begin
     z := STireFR.Value/25.4/168*SrpmMax.Value/FSGearF.Value*1.625;
     if FSGear1.Value<>0 then Label143.Caption := Format('(%.1f) km/h', [z/FSGear1.Value]) else Label143.Caption:='';
@@ -544,7 +549,8 @@ begin
   end;
 
   //Fill in standard Tire sizes
-  if (STireFW.Text<>'')and(STireRW.Text<>'')and(STireFW.Value<>0)and(STireRW.Value<>0) then begin
+  if (STireFW.Text<>'')and(STireRW.Text<>'')and(STireFW.Value<>0)and(STireRW.Value<>0) then
+  begin
     TireFrontSize.Caption := STireFW.Text+'/'+
       inttostr(round((STireFR.Value-STireFD.Value*12.7)/STireFW.Value*100))+' R'+STireFD.Text;
     TireRearSize.Caption := STireRW.Text+'/'+
@@ -576,7 +582,8 @@ begin
 
   Chart1.Title.Text.Strings[0] := Format('Torque/RPM (HP) - %d/%d (%.0f)',
                                   [v, u*SNMStep.Value, v*u*SNMStep.Value/7023.5]);
-  if (ssLeft in Shift) then begin
+  if (ssLeft in Shift) then
+  begin
     fDataSet.SetValue(2,51+u,2,v+0.0);
     LineSerieHP.YValue[u] := v;
     //LineSerieHP.SetYValue(u,v);
@@ -678,19 +685,20 @@ begin
   Label114.Enabled      := CarFmt in [fmtWR2, fmtAFC11N]; //Default Menu Color
   SColor.Enabled        := CarFmt in [fmtWR2, fmtAFC11N]; //Default Menu Color
 
-
-if RGFormat.ItemIndex=3 then begin //Ferrari Virtual Race
-  //Appearance
-  Label42.Enabled:=false;
-  SSrate.Enabled:=false;
-  Label54.Enabled:=false;
-  SLautstarke.Enabled:=false;
-  Label33.Enabled:=false;
-  Label29.Enabled:=false;
-  SappBR1.Enabled:=false;
-  SappBR2.Enabled:=false;
-  SappBR3.Enabled:=false;
-end;
+  //Ferrari Virtual Race
+  if RGFormat.ItemIndex=3 then
+  begin
+    //Appearance
+    Label42.Enabled:=false;
+    SSrate.Enabled:=false;
+    Label54.Enabled:=false;
+    SLautstarke.Enabled:=false;
+    Label33.Enabled:=false;
+    Label29.Enabled:=false;
+    SappBR1.Enabled:=false;
+    SappBR2.Enabled:=false;
+    SappBR3.Enabled:=false;
+  end;
 
   LockControls := false;
 //FSChange(nil);
@@ -744,7 +752,8 @@ begin
   CarID := Integer(LBModel.Items.Objects[LBModel.ItemIndex]) + 1;
 
   //Let's sketch it for MBWR first, then we'll see how it goes
-  if ImportDS.Version = dsvMBWR then begin
+  if ImportDS.Version = dsvMBWR then
+  begin
 
     for i:=0 to fDataSet.TBCount(105) do
       fDataSet.SetValue(105,i,2, 777888999);
@@ -804,7 +813,8 @@ begin
 
 
   //Sketch it for AFC11BW
-  if ImportDS.Version = dsvAFC11BW then begin
+  if ImportDS.Version = dsvAFC11BW then
+  begin
 
     fDataSet.SetValue(105,0,2, ImportDS.GetValue(23,0,CarID)); //Kommentar
     fDataSet.SetValue(105,1,2, 0); //Index
@@ -929,7 +939,8 @@ var
   k:integer;
 begin
   LockControls := true;
-  with fDataSet do begin
+  with fDataSet do
+  begin
     //Identity - Name
     Edit1.Text            := GetValue(103,2,2).Str;        //Main Folder
     Edit8.Text            := GetValue(103,3,2).Str;        //Cabrio Folder
@@ -1104,7 +1115,8 @@ var
   k:integer;
 begin
   if LockControls then exit;
-  with fDataSet do begin
+  with fDataSet do
+  begin
     //Identity - Name
     SetValue(103,2,2,Edit1.Text);         //Main Folder
     SetValue(103,3,2,Edit8.Text);         //Cabrio Folder
@@ -1268,15 +1280,7 @@ begin
     SetValue(103,48,2,SDrwZ.Value/100);
     SetValue(103,49,2,SDrwW.Value/180*pi);
   end;
-
 end;
 
 
-{$R *.dfm}
-
-
-initialization
-
 end.
-
-
