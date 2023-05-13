@@ -1,5 +1,5 @@
 ------------------------------------------------------
-PTX Tool 2.8
+PTX Tool 2.9
 ------------------------------------------------------
 
 Description:
@@ -11,7 +11,7 @@ DDS/2DB export almost there.
 How to use:
 Click on image file in filelist.
 Right-click on preview images to display popup menu.
-Import/Export images. Should be BMP or TGA(24/32bit) with dimensions equal to 2^n (8,16,32...2048). Image and Mask must have same dimensions.
+Import/Export images. Should be BMP or TGA(24/32bit) with dimensions equal to 2^n (8,16,32...4096). Image and Mask must have same dimensions.
 Define maximum number of MipMap levels if necessary. By default MipMaps computed till size of 4x4 pixels and you don't need to change it.
 Save PTX.
 
@@ -22,6 +22,7 @@ You can use fewer MipMap levels to get sharper picture in game.
 You can use uncompressed PTX images to get better image quality in game.
 
 Changelog:
+v2.9    2023.05.13  Added support for 4096px images
 v2.8    2022.11.04  Added check for TGA file type and warning if it is not uncompressed RGB
 v2.7    2022.09.01  Fixed missing DLL error on opening PTX files associated with PTXTool in Explorer
 v2.6    2022.08.02  Restored Import BMP Image function

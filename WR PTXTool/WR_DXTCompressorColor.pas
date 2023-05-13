@@ -194,7 +194,6 @@ var
   I, K: Integer;
   rms: array [1..16, 1..16] of Integer;
   leastRMS: Integer;
-  idxColorMin, idxColorMax: Integer;
   rmsPair1, rmsPair2: Integer;
   wipColor: array [1..16] of TRGBColor;
   L: Integer;

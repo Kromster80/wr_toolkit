@@ -3,10 +3,13 @@ interface
 uses
   Windows, ExtCtrls, Graphics, SysUtils, Classes, Math, kromUtils, Controls, Forms, WR_DXTCompressorAlpha, WR_DXTCompressorColor;
 
+const
+  MAX_IMAGE_SIZE = 4096;
+
 type
   TRefreshMode = (cmRGB, cmA, cmRGBA);
 
-  TRGBABuffer = array [1..2049, 1..2049, 1..4] of Byte;
+  TRGBABuffer = array [1..MAX_IMAGE_SIZE+1, 1..MAX_IMAGE_SIZE+1, 1..4] of Byte;
 
   TDisplayImage = class
   private
@@ -82,7 +85,6 @@ uses
 
 const
   RGB_GREY = 128*65793;
-  MAX_IMAGE_SIZE = 2048;
 
 
 { TDisplayImage }
@@ -220,7 +222,7 @@ begin
   or ((MakePOT(aHeight) <> aHeight) and (not AllowNonPOT))
   or (aWidth < 4) or (aHeight < 4) or (aWidth > MAX_IMAGE_SIZE) or (aHeight > MAX_IMAGE_SIZE) then
   begin
-    MessageBox(0, 'Image size must be 4,8,16,32...2048 pixels', 'Error', MB_OK);
+    MessageBox(0, 'Image size must be 4,8,16,32...4096 pixels', 'Error', MB_OK);
     Exit(False);
   end;
 end;
@@ -608,7 +610,7 @@ begin
   blockread(f,c,52);
 
   {if (int2(c[17],c[18])>MAX_IMAGE_SIZE)or(int2(c[13],c[14])>MAX_IMAGE_SIZE) then begin
-    MessageBox(0,'Big images (2048+) are not supported','Error',MB_OK);
+    MessageBox(0,'Big images (4096+) are not supported','Error',MB_OK);
     closefile(f);
     exit;
   end;  }
