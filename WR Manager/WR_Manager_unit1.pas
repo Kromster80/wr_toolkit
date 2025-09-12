@@ -310,7 +310,7 @@ for id:=1 to aqty do begin
 Form3.Shape1.Width:=round(321*(id/aqty));
 Form3.Shape1.Repaint;
 Form3.Label1.Caption:=addon[id];
-Form3.Label1.Repaint;   
+Form3.Label1.Repaint;
 //end;
 if installed[id] then s:=RootDir+'\WR-EditCars\'+addon[id]+'\EditCar.car'
              else s:=RootDir+'\WR-EditCars\bak\'+addon[id]+'\EditCar.car';
@@ -321,105 +321,120 @@ end;
 
 procedure TForm1.ScanCAR(carfile:string);
 begin
-AssignFile(f,carfile); FileMode:=0; reset(f,1); FileMode:=2; //read-only
+  AssignFile(f,carfile); FileMode:=0; reset(f,1); FileMode:=2; //read-only
 
-blockread(f,c,33); s:='';
-DSqty:=ord(c[9]);
-for i:=1 to DSqty do begin
-blockread(f,c,33);
-TBqty:=ord(c[9])+ord(c[10])*256;
-if c[10]=#1 then
-s:=s;
+  blockread(f,c,33); s:='';
+  DSqty:=ord(c[9]);
+  for i:=1 to DSqty do
+  begin
+    blockread(f,c,33);
+    TBqty:=ord(c[9])+ord(c[10])*256;
+    if c[10]=#1 then
+      s:=s;
 
-j:=ord(c[30]);
-if j<>0 then blockread(f,c,j+1);
-DSname[i]:=StrPas(@c);
+    j:=ord(c[30]);
+    if j<>0 then blockread(f,c,j+1);
+    DSname[i]:=StrPas(@c);
 
-for k:=1 to TBqty do begin
-if k=76 then
-s:=s;
-blockread(f,c,12);//28
-COqty:=ord(c[9])+ord(c[10])*256;
-if c[1]<>'N' then begin
-j:=ord(c[5]);       //Cond
-for m:=1 to j do begin
-if m=1 then blockread(f,c,ord(c[9])+1);
-if m>1 then begin blockread(f,c,4); blockread(f,c,ord(c[1])+1); end;
-end;
-blockread(f,c,12);//28
-COqty:=ord(c[9])+ord(c[10])*256;
-end;
-blockread(f,c,16);
-j:=ord(c[13]);
-if j<>0 then begin blockread(f,c,j+1); TBname[k]:=StrPas(@c); end else TBname[k]:=''; //VAlb
-blockread(f,c,13);
-j:=ord(c[10]);
-if j<>0 then blockread(f,c,j+1);                //VASM (file path)
-blockread(f,c,8);
-j:=ord(c[5]);
-if j<>0 then blockread(f,c,j+1);               //DB name
-blockread(f,c,8);
-j:=ord(c[5]);
-if j<>0 then blockread(f,c,j+1);               //SC...
-blockread(f,c,8);
-j:=ord(c[5]);
-if j<>0 then blockread(f,c,j+1);               //IC...
+    for k:=1 to TBqty do
+    begin
+      if k=76 then
+      s:=s;
+      blockread(f,c,12);//28
+      COqty:=ord(c[9])+ord(c[10])*256;
+      if c[1]<>'N' then
+      begin
+        j:=ord(c[5]);       //Cond
+        for m:=1 to j do
+        begin
+          if m=1 then blockread(f,c,ord(c[9])+1);
+          if m>1 then
+          begin
+            blockread(f,c,4);
+            blockread(f,c,ord(c[1])+1);
+          end;
+        end;
+        blockread(f,c,12);//28
+        COqty:=ord(c[9])+ord(c[10])*256;
+      end;
 
-for j:=1 to COqty do begin
-blockread(f,c,5);
-h:=ord(c[2])+ord(c[3])*256; s:='';
-  if (c[1]=#16)and(h<>0) then begin
-  blockread(f,c,h+1);
-  for ii:=1 to h do s:=s+c[ii];
-  end;
-    if (DSname[i]='Edit_3DCarsDB')and(j=2)and(TBname[k]='ClassName') then
-    modelname[id]:=s;
-    if (DSname[i]='Edit_CarsDB')and(j=2)and(TBname[k]='CarName') then begin
-    origcarname[id]:=s;
-    carname[id]:=s;
-    for ii:=1 to 32 do begin s2[ii]:=''; s3[ii]:=''; end;
-s:=modelname[id];
-if s<>'' then begin
-   kk:=1; ii:=1;
-   repeat
-     repeat //Splitting to words
-     s2[kk]:=s2[kk]+s[ii]; inc(ii);
-     until((ii>length(s))or(s[ii]=#32));
-   inc(kk); inc(ii);
-   until(ii>length(s));
-end;
-s:=carname[id];
-if s<>'' then begin
-   kk:=1; ii:=1;
-     repeat
-       repeat //Splitting to words
-       s3[kk]:=s3[kk]+s[ii]; inc(ii);
-       until((ii>length(s))or(s[ii]=#32));
-     inc(kk); inc(ii);
-     until(ii>length(s));
-end;
-   kk:=1; s:=''; //Writing non-unique words as carname
-   repeat ii:=1; incl:=true;
-     repeat
-     if s3[kk]=s2[ii] then incl:=false;
-     inc(ii);
-     until(s2[ii]='');
-   if incl then s:=s+s3[kk]+' ';
-   inc(kk);
-   until(s3[kk]='');
-   if s<>'' then if s[length(s)]=' ' then setlength(s,length(s)-1); //remove last #32
-   carname[id]:=s;
-   end;
+      blockread(f,c,16);
+      j:=ord(c[13]);
+      if j<>0 then begin blockread(f,c,j+1); TBname[k]:=StrPas(@c); end else TBname[k]:=''; //VAlb
+      blockread(f,c,13);
+      j:=ord(c[10]);
+      if j<>0 then blockread(f,c,j+1);                //VASM (file path)
+      blockread(f,c,8);
+      j:=ord(c[5]);
+      if j<>0 then blockread(f,c,j+1);               //DB name
+      blockread(f,c,8);
+      j:=ord(c[5]);
+      if j<>0 then blockread(f,c,j+1);               //SC...
+      blockread(f,c,8);
+      j:=ord(c[5]);
+      if j<>0 then blockread(f,c,j+1);               //IC...
 
-   if (DSname[i]='Edit_CarsDB')and(j=2)and(TBname[k]='RaceClass') then begin
-   rclass[id]:=h;
-   closefile(f); exit; //SpeedUp
-   end;
-end;
+      for j:=1 to COqty do
+      begin
+        blockread(f,c,5);
+        h:=ord(c[2])+ord(c[3])*256; s:='';
+        if (c[1]=#16)and(h<>0) then
+        begin
+          blockread(f,c,h+1);
+          for ii:=1 to h do s:=s+c[ii];
+        end;
 
-end;
-end; //1..DSqty
-closefile(f);
+        if (DSname[i]='Edit_3DCarsDB')and(j=2)and(TBname[k]='ClassName') then
+        modelname[id]:=s;
+        if (DSname[i]='Edit_CarsDB')and(j=2)and(TBname[k]='CarName') then
+        begin
+          origcarname[id]:=s;
+          carname[id]:=s;
+          for ii:=1 to 32 do begin s2[ii]:=''; s3[ii]:=''; end;
+          s:=modelname[id];
+          if s<>'' then
+          begin
+            kk:=1; ii:=1;
+            repeat
+              repeat //Splitting to words
+                s2[kk]:=s2[kk]+s[ii]; inc(ii);
+              until((ii>length(s))or(s[ii]=#32));
+            inc(kk); inc(ii);
+            until(ii>length(s));
+          end;
+          s:=carname[id];
+          if s<>'' then
+          begin
+            kk:=1; ii:=1;
+            repeat
+              repeat //Splitting to words
+                s3[kk]:=s3[kk]+s[ii]; inc(ii);
+              until((ii>length(s))or(s[ii]=#32));
+              inc(kk); inc(ii);
+            until(ii>length(s));
+          end;
+          kk:=1; s:=''; //Writing non-unique words as carname
+          repeat ii:=1; incl:=true;
+            repeat
+              if s3[kk]=s2[ii] then incl:=false;
+              inc(ii);
+            until(s2[ii]='');
+            if incl then s:=s+s3[kk]+' ';
+            inc(kk);
+          until(s3[kk]='');
+          if s<>'' then if s[length(s)]=' ' then setlength(s,length(s)-1); //remove last #32
+          carname[id]:=s;
+        end;
+
+        if (DSname[i]='Edit_CarsDB')and(j=2)and(TBname[k]='RaceClass') then
+        begin
+          rclass[id]:=h;
+          closefile(f); exit; //SpeedUp
+        end;
+      end;
+    end;
+  end; //1..DSqty
+  closefile(f);
 end;
 
 procedure TForm1.Scan4Prof();
