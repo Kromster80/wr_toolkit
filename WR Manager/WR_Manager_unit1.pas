@@ -109,12 +109,12 @@ const
 var
   Form1: TForm1;
   SearchRec: TSearchRec;
-RootDir:string;
-f,g:file;
-ft,gt:textfile;
-NR,SendID:integer; //NumRead
-fw,fh:integer;
-s:string;
+  RootDir:string;
+  f,g:file;
+  ft,gt:textfile;
+  NR,SendID:integer; //NumRead
+  fw,fh:integer;
+  s:string;
 
 nodeqty,scnqty:integer;
 mauth,mconv,misc: array [1..256]of string;
@@ -682,85 +682,105 @@ end;
 
 procedure TForm1.RefreshCarQty();
 begin
-Checkedqty:=0;
-for i:=1 to aqty do if installed[i] then inc(Checkedqty);
-Label1.Caption:='Add-on Cars ('+inttostr(Checkedqty)+'/'+inttostr(aqty)+' Selected)';
-if CheckedQty>30 then Label1.Font.Color:=160 else Label1.Font.Color:=0;
+  Checkedqty:=0;
+  for i:=1 to aqty do
+    if installed[i] then
+      Inc(Checkedqty);
+
+  Label1.Caption:='Add-on Cars ('+inttostr(Checkedqty)+'/'+inttostr(aqty)+' Selected)';
+  if CheckedQty>30 then
+    Label1.Font.Color:=160
+  else
+    Label1.Font.Color:=0;
 end;
 
 procedure TForm1.RefreshScnQty();
 begin
-Checkedqty_S:=0;
-for i:=1 to ScnQty do if installed_S[i] then inc(Checkedqty_S);
-Label6.Caption:='Add-on Sceneries ('+inttostr(Checkedqty_S)+'/'+inttostr(ScnQty)+' Selected)';
-//if CheckedQty>30 then Label1.Font.Color:=160 else Label1.Font.Color:=0;
+  Checkedqty_S:=0;
+  for i:=1 to ScnQty do
+    if installed_S[i] then
+      Inc(Checkedqty_S);
+  Label6.Caption:='Add-on Sceneries ('+inttostr(Checkedqty_S)+'/'+inttostr(ScnQty)+' Selected)';
+  //if CheckedQty>30 then Label1.Font.Color:=160 else Label1.Font.Color:=0;
 end;
 
 
 procedure TForm1.BAboutClick(Sender: TObject);
 begin
-AboutForm.Show('Version 0.5', 'Install and manage MBWR add-on cars and tracks.', 'MBWRMan');
-{AboutForm.LTitle.Caption:='MBWR Manager by Krom';
-AboutForm.LVersi.Caption:=;
-AboutForm.LDescr.Caption:=;}
+  AboutForm.Show('Version 0.5', 'Install and manage MBWR add-on cars and tracks.', 'MBWRMan');
+  {AboutForm.LTitle.Caption:='MBWR Manager by Krom';
+  AboutForm.LVersi.Caption:=;
+  AboutForm.LDescr.Caption:=;}
 end;
 
 procedure TForm1.AddFav1(Sender: TObject);
 begin
-CLBox1ClickCheck(nil); //apply cos list "slow"
-with sender as TButton do
-SendID:=strtoint(Name[6]);    //Bmemo*
-Form2.Show;
-Form2.GetSender(SendID);
+  CLBox1ClickCheck(nil); //apply cos list "slow"
+  with sender as TButton do
+    SendID:=strtoint(Name[6]);    //Bmemo*
+  Form2.Show;
+  Form2.GetSender(SendID);
 end;
 
 procedure TForm1.AddFav2(Sender: TObject);
 begin
-favqty[SendID]:=0;
-for i:=1 to aqty do
-  if installed[i] then begin
-  inc(favqty[SendID]);
-  fav[SendID,favqty[SendID]]:=addon[i];
-  end;
+  favqty[SendID]:=0;
+  for i:=1 to aqty do
+    if installed[i] then
+    begin
+      inc(favqty[SendID]);
+      fav[SendID,favqty[SendID]]:=addon[i];
+    end;
 end;
 
 procedure TForm1.SetFav(Sender: TObject);
 begin
-with sender as TButton do SendID:=strtoint(name[8]);   //BChoose*
-for i:=1 to aqty do installed[i]:=false;
+  with sender as TButton do SendID:=strtoint(name[8]);   //BChoose*
+  for i:=1 to aqty do installed[i]:=false;
 
-for i:=1 to aqty do
-for k:=1 to favqty[SendID] do
-if uppercase(fav[SendID,k])=uppercase(addon[i]) then installed[i]:=true;
+  for i:=1 to aqty do
+    for k:=1 to favqty[SendID] do
+      if uppercase(fav[SendID,k])=uppercase(addon[i]) then
+        installed[i]:=true;
 
-RefreshCarList(); //a bit slower but simplier
+  RefreshCarList(); //a bit slower but simplier
 end;
 
 procedure TForm1.CLBox1ClickCheck(Sender: TObject);
 begin
-for id:=1 to aqty do begin
-s:=inttostr(rclass[id]); for i:=2 downto length(s) do s:='0'+s;
-case RGDisplay.ItemIndex of
-0: s:=modelname[id]+' '+carname[id];
-1: s:=s+'. '+modelname[id]+' '+carname[id];
-2: s:=modelname[id]+' '+carname[id]+' ('+addon[id]+')';
-3: s:=s+'. '+modelname[id]+' '+carname[id]+' ('+addon[id]+')';
-4: s:=addon[id]+' ('+modelname[id]+' '+carname[id]+')';
-5: s:=addon[id];
-end;
-   k:=0;
-   repeat inc(k);
-   until((s=CLBox1.Items[k-1])or(k=aqty));
-   if s=CLBox1.Items[k-1] then installed[id]:=CLBox1.Checked[k-1];
+  for id:=1 to aqty do
+  begin
+    s:=inttostr(rclass[id]);
+    for i:=2 downto length(s) do
+      s:='0'+s;
 
-   if (CLBox1.ItemIndex>=0)and(CLBox1.Items[CLBox1.ItemIndex]=s) then begin
-   Label3.Caption:=modelname[id];
-   Label4.Caption:=origcarname[id];
-   Label5.Caption:=addon[id];
-   Label11.Caption:=inttostr(rclass[id]);
-   end;
-end;
-RefreshCarQty();
+    case RGDisplay.ItemIndex of
+      0: s:=modelname[id]+' '+carname[id];
+      1: s:=s+'. '+modelname[id]+' '+carname[id];
+      2: s:=modelname[id]+' '+carname[id]+' ('+addon[id]+')';
+      3: s:=s+'. '+modelname[id]+' '+carname[id]+' ('+addon[id]+')';
+      4: s:=addon[id]+' ('+modelname[id]+' '+carname[id]+')';
+      5: s:=addon[id];
+    end;
+
+    k:=0;
+    repeat
+      inc(k);
+    until (s=CLBox1.Items[k-1]) or (k=aqty);
+
+    if s=CLBox1.Items[k-1] then
+      installed[id]:=CLBox1.Checked[k-1];
+
+    if (CLBox1.ItemIndex>=0)and(CLBox1.Items[CLBox1.ItemIndex]=s) then
+    begin
+      Label3.Caption:=modelname[id];
+      Label4.Caption:=origcarname[id];
+      Label5.Caption:=addon[id];
+      Label11.Caption:=inttostr(rclass[id]);
+    end;
+  end;
+
+  RefreshCarQty();
 end;
 
 procedure TForm1.SBSaveClick(Sender: TObject);
@@ -1288,40 +1308,53 @@ end;
 
 procedure TForm1.AllorNone(Sender: TObject);
 begin
-if sender=BAll then if PageControl1.TabIndex=0 then
-for i:=1 to aqty do begin
-installed[i]:=true; CLBox1.Checked[i-1]:=true;
-end else //PageControl1.TabIndex=1
-for i:=1 to ScnQty do begin
-installed_S[i]:=true; CLBox3.Checked[i-1]:=true;
-end;
-if sender=BNone then if PageControl1.TabIndex=0 then
-for i:=1 to aqty do begin
-installed[i]:=false; CLBox1.Checked[i-1]:=false;
-end else //PageControl1.TabIndex=1
-for i:=1 to ScnQty do begin
-installed_S[i]:=false; CLBox3.Checked[i-1]:=false;
-end;
-RefreshCarQty();
-RefreshScnQty();
+  if sender=BAll then
+    if PageControl1.TabIndex=0 then
+      for i:=1 to aqty do
+      begin
+        installed[i]:=true;
+        CLBox1.Checked[i-1]:=true;
+      end else //PageControl1.TabIndex=1
+      for i:=1 to ScnQty do
+      begin
+        installed_S[i]:=true;
+        CLBox3.Checked[i-1]:=true;
+      end;
+
+  if sender=BNone then
+    if PageControl1.TabIndex=0 then
+      for i:=1 to aqty do
+      begin
+        installed[i]:=false;
+        CLBox1.Checked[i-1]:=false;
+      end else //PageControl1.TabIndex=1
+      for i:=1 to ScnQty do
+      begin
+        installed_S[i]:=false;
+        CLBox3.Checked[i-1]:=false;
+      end;
+
+  RefreshCarQty();
+  RefreshScnQty();
 end;
 
 procedure TForm1.FormResize(Sender: TObject);
 begin
-if Form1.Width<=620 then Form1.Width:=620;  //MinSize
-if Form1.Height<=450 then Form1.Height:=450;//MinSize
-PageControl1.Width:=Form1.Width-(620-476);
-PageControl1.Height:=Form1.Height-(450-423);
-CLBox1.Width:=PageControl1.Width-(476-313); //alert size
-CLBox1.Height:=PageControl1.Height-(423-377);
-CLBox3.Width:=PageControl1.Width-(476-313); //alert size
-CLBox3.Height:=PageControl1.Height-(423-377);
-if CLBox1.Width<=500 then CLBox1.Columns:=0 else //not maximized
-CLBox1.Columns:=CLBox1.Width div 250;
-if CLBox3.Width<=400 then CLBox3.Columns:=0 else //not maximized
-CLBox3.Columns:=CLBox3.Width div 200;
-fw:=Form1.Width;
-fh:=Form1.Height;
+  if Form1.Width<=620 then Form1.Width:=620;  //MinSize
+  if Form1.Height<=450 then Form1.Height:=450;//MinSize
+
+  PageControl1.Width:=Form1.Width-(620-476);
+  PageControl1.Height:=Form1.Height-(450-423);
+  CLBox1.Width:=PageControl1.Width-(476-313); //alert size
+  CLBox1.Height:=PageControl1.Height-(423-377);
+  CLBox3.Width:=PageControl1.Width-(476-313); //alert size
+  CLBox3.Height:=PageControl1.Height-(423-377);
+  if CLBox1.Width<=500 then CLBox1.Columns:=0 else //not maximized
+  CLBox1.Columns:=CLBox1.Width div 250;
+  if CLBox3.Width<=400 then CLBox3.Columns:=0 else //not maximized
+  CLBox3.Columns:=CLBox3.Width div 200;
+  fw:=Form1.Width;
+  fh:=Form1.Height;
 end;
 
 procedure TForm1.CLBox1DblClick(Sender: TObject);
@@ -1349,63 +1382,78 @@ end;
 
 procedure TForm1.Revert(Sender: TObject);
 begin
-for id:=1 to aqty do begin
-s:=inttostr(rclass[id]); for i:=2 downto length(s) do s:='0'+s;
-case RGDisplay.ItemIndex of
-0: s:=modelname[id]+' '+carname[id];
-1: s:=s+'. '+modelname[id]+' '+carname[id];
-2: s:=modelname[id]+' '+carname[id]+' ('+addon[id]+')';
-3: s:=s+'. '+modelname[id]+' '+carname[id]+' ('+addon[id]+')';
-4: s:=addon[id]+' ('+modelname[id]+' '+carname[id]+')';
-5: s:=addon[id];
-end;
-   k:=0;
-   repeat inc(k);
-   until((s=CLBox1.Items[k-1])or(k=aqty));
-   if s=CLBox1.Items[k-1] then
-     if location[id]='bak' then begin installed[k]:=false; CLBox1.Checked[k-1]:=false;
-     end else if location[id]='std' then begin
-     installed[k]:=true; CLBox1.Checked[k-1]:=true; end;
+  for id:=1 to aqty do
+  begin
+    s:=inttostr(rclass[id]);
+    for i:=2 downto length(s) do
+      s:='0'+s;
 
-end;
-RefreshCarQty();
+    case RGDisplay.ItemIndex of
+      0: s:=modelname[id]+' '+carname[id];
+      1: s:=s+'. '+modelname[id]+' '+carname[id];
+      2: s:=modelname[id]+' '+carname[id]+' ('+addon[id]+')';
+      3: s:=s+'. '+modelname[id]+' '+carname[id]+' ('+addon[id]+')';
+      4: s:=addon[id]+' ('+modelname[id]+' '+carname[id]+')';
+      5: s:=addon[id];
+    end;
+
+    k:=0;
+    repeat
+      inc(k);
+    until (s=CLBox1.Items[k-1]) or (k=aqty);
+
+    if s=CLBox1.Items[k-1] then
+      if location[id]='bak' then
+      begin
+        installed[k]:=false; CLBox1.Checked[k-1]:=false;
+      end else
+      if location[id]='std' then
+      begin
+        installed[k]:=true;
+        CLBox1.Checked[k-1]:=true;
+      end;
+  end;
+
+  RefreshCarQty();
 end;
 
 procedure TForm1.SB_MBWRClick(Sender: TObject);
 begin
-SBSave.Click();
-Form1.Close;
-ChDir(RootDir);
-ShellExecute(handle, 'open', 'WR_Starter.exe', NiL, Nil, SW_SHOWNORMAL);
+  SBSave.Click();
+  Form1.Close;
+  ChDir(RootDir);
+  ShellExecute(handle, 'open', 'WR_Starter.exe', NiL, Nil, SW_SHOWNORMAL);
 end;
 
 procedure TForm1.SB_MBWRMPClick(Sender: TObject);
 begin
-SBSave.Click();
-Form1.Close;
-ChDir(RootDir);
-ShellExecute(handle, 'open', 'WR_Multiplayer_Lounge.exe', NiL, Nil, SW_SHOWNORMAL);
+  SBSave.Click();
+  Form1.Close;
+  ChDir(RootDir);
+  ShellExecute(handle, 'open', 'WR_Multiplayer_Lounge.exe', NiL, Nil, SW_SHOWNORMAL);
 end;
 
 procedure TForm1.GetTrackInfo(Sender: TObject);
 begin
-if (CLBox3.ItemIndex=-1)or(LBox1.ItemIndex=-1) then exit;
+  if (CLBox3.ItemIndex=-1)or(LBox1.ItemIndex=-1) then Exit;
 
-for i:=1 to ScnQty do begin
-  case RGDisplay2.ItemIndex of
-  0: s:=scningame[i];
-  1: s:=scningame[i]+' ('+scnname[i]+')';
+  for i:=1 to ScnQty do
+  begin
+    case RGDisplay2.ItemIndex of
+      0: s:=scningame[i];
+      1: s:=scningame[i]+' ('+scnname[i]+')';
+    end;
+    if s=CLBox3.Items[CLBox3.ItemIndex] then
+      id:=i;
   end;
-if s=CLBox3.Items[CLBox3.ItemIndex] then id:=i;
-end;
 
-id2:=LBox1.ItemIndex+1;
-Label15.Caption:='Length: '+floattostr(round(trklen[id,id2]*10)/10)+' km';
-if trkstage[id,id2]=1 then CheckBox2.Checked:=true else CheckBox2.Checked:=false;
-if trkchk[id,id2]=1 then CheckBox3.Checked:=true else CheckBox3.Checked:=false;
-if trkoffr[id,id2]=1 then CheckBox4.Checked:=true else CheckBox4.Checked:=false;
-Label18.Caption:='Pavement: '+Strasse[trksurf[id,id2]];
-Label19.Caption:='Terrain: '+Gelaende[trkshape[id,id2]];
+  id2:=LBox1.ItemIndex+1;
+  Label15.Caption:='Length: '+floattostr(round(trklen[id,id2]*10)/10)+' km';
+  if trkstage[id,id2]=1 then CheckBox2.Checked:=true else CheckBox2.Checked:=false;
+  if trkchk[id,id2]=1 then CheckBox3.Checked:=true else CheckBox3.Checked:=false;
+  if trkoffr[id,id2]=1 then CheckBox4.Checked:=true else CheckBox4.Checked:=false;
+  Label18.Caption:='Pavement: '+Strasse[trksurf[id,id2]];
+  Label19.Caption:='Terrain: '+Gelaende[trkshape[id,id2]];
 end;
 
 procedure TForm1.RGDisplay2Click(Sender: TObject);
@@ -1483,23 +1531,28 @@ end;
 
 procedure TForm1.Button2Click(Sender: TObject);
 begin
-if CLBox3.ItemIndex=-1 then exit;
-Form4.Show;
-Form4.Memo1.Clear;
-for id:=1 to ScnQty do begin
-  case RGDisplay2.ItemIndex of
-  0: s:=scningame[id];
-  1: s:=scningame[id]+' ('+scnname[id]+')';
+  if CLBox3.ItemIndex=-1 then exit;
+
+  Form4.Show;
+  Form4.Memo1.Clear;
+  for id:=1 to ScnQty do
+  begin
+    case RGDisplay2.ItemIndex of
+      0: s:=scningame[id];
+      1: s:=scningame[id]+' ('+scnname[id]+')';
+    end;
+    if s=CLBox3.Items[CLBox3.ItemIndex] then
+    begin
+      Form4.Memo1.Lines.Add(misc[id]);
+      Exit;
+    end;
   end;
-if s=CLBox3.Items[CLBox3.ItemIndex] then begin
-Form4.Memo1.Lines.Add(misc[id]); exit; end;
-end;
 end;                                      
 
 procedure TForm1.Button1Click(Sender: TObject);
 begin
-ChDir(RootDir);
-ShellExecute(handle, 'open', 'WR_Setup.exe', NiL, Nil, SW_SHOWNORMAL);
+  ChDir(RootDir);
+  ShellExecute(handle, 'open', 'WR_Setup.exe', NiL, Nil, SW_SHOWNORMAL);
 end;
 
 end.
